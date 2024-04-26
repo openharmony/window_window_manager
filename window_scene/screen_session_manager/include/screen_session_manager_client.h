@@ -54,7 +54,7 @@ public:
     uint32_t GetCurvedCompressionArea();
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
     void SetScreenPrivacyState(bool hasPrivate);
-    void SetScreenIdPrivacyState(DisplayId id, bool hasPrivate);
+    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate);
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
