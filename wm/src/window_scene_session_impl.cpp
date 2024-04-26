@@ -452,8 +452,8 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     auto dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     WindowType windowType = property_->GetWindowType();
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
-    if ((WindowHelper::IsSystemWindow(windowType) && !isDecorDialog) ||
-        (WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled())) {
+    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
+    if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin) && !isDecorDialog) {
         hostSession_->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
