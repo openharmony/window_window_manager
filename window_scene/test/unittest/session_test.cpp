@@ -845,7 +845,7 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
-    NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId)
+    NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
     scensessionchangeCallBack->OnSessionEvent_ = onSessionEvent_;
     result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
@@ -3075,7 +3075,7 @@ HWTEST_F(WindowSessionTest, NeedCheckContextTransparent, Function | SmallTest | 
     ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
     NotifyContextTransparentFunc func = [](){};
     session_->SetContextTransparentFunc(func);
-    ASSERT_NE(session_->NeedCheckContextTransparent(), true);
+    ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
 
 /**
