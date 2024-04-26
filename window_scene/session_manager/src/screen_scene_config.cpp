@@ -162,7 +162,7 @@ bool ScreenSceneConfig::LoadConfigXml()
             (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
             (xmlNodeMap_[ROTATION_POLICY] == nodeName)) {
             ReadStringConfigInfo(curNodePtr);
-        } else if (xmlNodeMap_[HALL_SWITCH_APP]) == nodeName {
+        } else if (xmlNodeMap_[HALL_SWITCH_APP] == nodeName) {
             ReadStringListConfigInfo(curNodePtr, nodeName);
         } else {
             WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
