@@ -223,6 +223,8 @@ napi_value OrientationInit(napi_env env)
         static_cast<int32_t>(ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED)));
     napi_set_named_property(env, objValue, "USER_ROTATION_LANDSCAPE_INVERTED", CreateJsValue(env,
         static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED)));
+    napi_set_named_property(env, objValue, "FOLLOW_DESKTOP", CreateJsValue(env,
+        static_cast<int32_t>(ApiOrientation::FOLLOW_DESKTOP)));
     return objValue;
 }
 

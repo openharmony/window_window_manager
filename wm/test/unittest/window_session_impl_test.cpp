@@ -782,6 +782,10 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     Orientation ret5 = window->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 
+    window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    Orientation ret6 = window->GetRequestedOrientation();
+    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
@@ -822,6 +826,11 @@ HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | 
     window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
     Orientation ret5 = window->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+
+    window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    Orientation ret6 = window->GetRequestedOrientation();
+    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 end";
 }
 
