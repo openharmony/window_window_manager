@@ -76,10 +76,9 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t VIRTUAL_SCREEN_ID_START = 1000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
-const static constexpr uint32_t screenRotationOffSet =
-    system::GetIntParameter<uint32_t>("const.window.foldscreen_rotation.offset", 0);
-const static constexpr int32_t ROTATION_90 = 1;
-const static constexpr int32_t ROTATION_270 = 3;
+const static int32_t screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+const static int32_t ROTATION_90 = 1;
+const static int32_t ROTATION_270 = 3;
 } // namespace
 
 // based on the bundle_util

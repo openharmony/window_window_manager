@@ -39,7 +39,7 @@ public:
     void OnProcessCreated(const AppExecFwk::ProcessData &processData) override {};
     void OnProcessDied(const AppExecFwk::ProcessData &processData) override {};
     void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
-    sptr<IRemoteObject> ApplicationStateObserver::AsObject() override { return nullptr; };
+    sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
 
 private:

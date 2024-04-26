@@ -50,12 +50,10 @@ DualDisplayPolicy::DualDisplayPolicy(std::recursive_mutex& displayInfoMutex,
 void DualDisplayPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
 {
     WLOGI("ChangeScreenDisplayMode displayMode = %{public}d", displayMode);
-    sptr<ScreenSession> screenSession = nullptr;
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
     if (displayMode == FoldDisplayMode::SUB) {
         screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
-    } else {
-        screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
-    }
+    } 
     if (screenSession == nullptr) {
         WLOGE("ChangeScreenDisplayMode default screenSession is null");
         return;
@@ -268,11 +266,10 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(); 
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
-
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
     SendPropertyChangeResult(screenSession, onScreenId, reason);
@@ -286,13 +283,13 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
     #endif
     // on main screen
     auto taskScreenOnMain = [=] {
-        WLOGFI("ChangeScreenDisplayMode: on screenId: %{public}d", SCREEN_ID_MAIN);
+        WLOGFI("ChangeScreenDisplayMode: on screenId: 0");
         screenId_ = SCREEN_ID_MAIN;
         if (PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(); 
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
@@ -300,7 +297,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
 
     auto taskScreenOnSub = [=] {
-        WLOGFI("ChangeScreenDisplayMode: on screenId: %{public}d", SCREEN_ID_SUB);
+        WLOGFI("ChangeScreenDisplayMode: on screenId: 1");
         screenId_ = SCREEN_ID_SUB;
         PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
     };
@@ -325,9 +322,6 @@ void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSessio
 {
     WLOGFI("ChangeScreenDisplayModeToFullOnBootAnimation");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    if (screenProperty_ == nullptr) {
-        return;
-    }
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND;
     if (screenId == SCREEN_ID_SUB) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;

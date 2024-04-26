@@ -142,13 +142,11 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
 {
     applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-    std::vector<std::string> bundleNameList;
-    bundleNameList.push_back(NO_HALL_SWITCH_APP);
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
     } else {
         auto flag = static_cast<int32_t>(
-            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, bundleNameList));
+            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, packageNames_));
         if (flag != ERR_OK) {
             WLOGFE("Register app debug listener failed.");
         } else {
@@ -156,7 +154,6 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
         }
     }
 }
-
 
 ApplicationStateObserver::ApplicationStateObserver() {}
 
