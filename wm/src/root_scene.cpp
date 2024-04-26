@@ -139,7 +139,8 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     }
     // Arkui is not adapted to multi-display, which constantly refreshes the internal screen dpi.
     // Currently, the system is temporarily isolated and needs to be formally rectified in the future
-    if (rect.width_ == LEM_SUB_WIDTH && rect.LEM_SUB_HEIGHT == 340 && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    if (rect.width_ == LEM_SUB_WIDTH && rect.height_ == LEM_SUB_HEIGHT
+        && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         return;
     }
     Ace::ViewportConfig config;

@@ -211,6 +211,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (type == WindowType::WINDOW_TYPE_DIALOG && GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "SystemSession ProcessPointDownSession");
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }

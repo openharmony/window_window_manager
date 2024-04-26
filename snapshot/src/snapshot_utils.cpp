@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "snapshot_utils.h"
-
 #include <cerrno>
 #include <climits>
 #include <cstdio>
@@ -23,15 +21,17 @@
 #include <getopt.h>
 #include <hitrace_meter.h>
 #include <image_type.h>
-#include "image_packer.h"
 #include <iostream>
 #include <ostream>
 #include <csetjmp>
 #include <pixel_map.h>
-#include "jpeglib.h"
 #include <securec.h>
 #include <string>
 #include <sys/time.h>
+
+#include "snapshot_utils.h"
+#include "image_packer.h"
+#include "jpeglib.h"
 
 using namespace OHOS::Rosen;
 

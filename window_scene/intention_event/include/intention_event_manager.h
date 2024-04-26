@@ -50,7 +50,7 @@ private:
     void DispatchKeyEventCallback(
         int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const;
     void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
-    bool CheckPointerEvent(const std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
+    bool UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     void ProcessEnterLeaveEventAsync();
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     Ace::UIContent* uiContent_ = nullptr;

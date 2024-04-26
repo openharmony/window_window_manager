@@ -168,15 +168,17 @@ public:
 
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
+    FocusChangeReason GetFocusChangeReason() const;
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
-    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true) override;
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
-    WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
+    WSError SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -264,7 +266,7 @@ public:
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
     void PreloadInLakeApp(const std::string& bundleName);
-    void AddWindowDragHotArea(int32_t type, WSRect& area);
+    void AddWindowDragHotArea(uint32_t type, WSRect& area);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     WSError UpdateConfig(const SessionInfo& sessionInfo, AppExecFwk::Configuration config, bool informAllAPP);
@@ -313,6 +315,7 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     WSError SwitchFreeMultiWindow(bool enable);
     const SystemSessionConfig& GetSystemSessionConfig() const;
+    void UpdateLastDownEventDeviceId(int32_t deviceId);
     int32_t GetCustomDecorHeight(int32_t persistentId);
 
 protected:
@@ -321,6 +324,7 @@ protected:
 
 private:
     bool isKeyboardPanelEnabled_ = false;
+    int32_t lastDownEventDeviceId_ { -1 };
     void Init();
     void InitScheduleUtils();
     void RegisterAppListener();
@@ -355,16 +359,17 @@ private:
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
-    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true);
+    WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
-    WSError RequestSessionUnfocus(int32_t persistentId);
+    WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestFocusBasicCheck(int32_t persistentId);
     WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(sptr<SceneSession>& nextSession);
+    WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
@@ -498,6 +503,7 @@ private:
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
+    FocusChangeReason changeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;

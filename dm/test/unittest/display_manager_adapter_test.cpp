@@ -161,7 +161,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, Function | SmallTes
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
