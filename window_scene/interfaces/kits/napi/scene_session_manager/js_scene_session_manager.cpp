@@ -1562,7 +1562,6 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
     }
 
     SessionInfo sessionInfo;
-    AAFwk::Want want;
     if (errCode == WSErrorCode::WS_OK) {
         napi_value nativeObj = argv[0];
         if (nativeObj == nullptr) {
@@ -1570,8 +1569,6 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else if (!ConvertSessionInfoFromJs(env, nativeObj, sessionInfo)) {
             WLOGFE("[NAPI]Failed to get session info from js object");
-            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        } else if (!OHOS::AppExecFwk::UnwrapWant(env, argv[1], want)) {
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         }
     }
@@ -1582,7 +1579,10 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
         return NapiGetUndefined(env);
     }
 
-    sessionInfo.want = std::make_shared<AAFwk::Want>(want);
+    AAFwk::Want want;
+    if (OHOS::AppExecFwk::UnwrapWant(env, argv[1], want)) {
+        sessionInfo.want = std::make_shared<AAFwk::Want>(want);
+    }
 
     WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s, %{public}s, %{public}s], errCode = %{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),

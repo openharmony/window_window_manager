@@ -3247,11 +3247,12 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTes
 HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, Function | SmallTest | Level3)
 {
     int ret = 0;
-    AAFwk::Want want;
-    want.SetElementName("", "bundleName", "abilityName", "moduleName");
-    AAFwk::WantParams wantParams;
-    want.SetParams(wantParams);
     SessionInfo info;
+    ssm_->StartAbilityBySpecified(info);
+    
+    AAFwk::Want want;
+    want.SetParams(wantParams);
+    info.want = want;
     ssm_->StartAbilityBySpecified(info);
     ASSERT_EQ(ret, 0);
 }
