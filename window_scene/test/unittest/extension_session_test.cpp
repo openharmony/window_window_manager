@@ -435,6 +435,39 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | S
 }
 
 /**
+ * @tc.name: TransferKeyEventAsync
+ * @tc.desc: TransferKeyEventAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    info.bundleName_ = "SetBrightness1";
+    ExtensionSession extensionSession(info);
+    ASSERT_NE(extensionSession, nullptr);
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
+    extensionSession.windowEventChannel_ = mockEventChannel;
+    extensionSession.channelListener_ = new WindowEventChannelListener();
+    EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync)
+        .WillOnce([](const std::shared_ptr<MMI::KeyEvent> &keyEvent,
+                     bool isPreImeEvent,
+                     const sptr<IRemoteObject> &listener) {
+            auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
+            channelListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
+            return WSError::WS_OK;
+        });
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    bool isPreImeEvent = false;
+    WSError result = extensionSession.TransferKeyEventAsync(keyEvent, isPreImeEvent);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
