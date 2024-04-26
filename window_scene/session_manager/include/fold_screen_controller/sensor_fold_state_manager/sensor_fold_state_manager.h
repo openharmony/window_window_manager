@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H
-#define OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H
+#ifndef OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
+#define OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
 
 #include <mutex>
 #include <refbase.h>
@@ -39,8 +39,8 @@ protected:
     std::recursive_mutex mutex_;
 
 private:
-    void ReportNotifyFoldStatusChange(int32_t currentStatue, int32_t nextStatus, float postureAngle);
+    void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
     FoldStatus mState_ = FoldStatus::UNKNOWN;
 };
 } // namespace OHOS::Rosen
-#endif //OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H
+#endif //OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H

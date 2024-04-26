@@ -33,10 +33,10 @@ void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldS
 
 void SensorFoldStateManager::HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
-void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, int hall, sptr<FoldScreenPolicy> foldScreenPolicy)
+void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    FoldStatus nextState = TransferAngleToScreenState(angle, hall);
     if (nextState == FoldStatus::UNKNOWN) {
         if (mState_ == FoldStatus::UNKNOWN) {
             mState_ = nextState;
