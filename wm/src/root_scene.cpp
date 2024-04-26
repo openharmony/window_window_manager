@@ -37,6 +37,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+const uint32_t LEM_SUB_WIDTH = 340;
+const uint32_t LEM_SUB_HEIGHT = 340;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -135,9 +137,9 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
         WLOGFE("uiContent_ is nullptr!");
         return;
     }
-    // Arkui is not adapted to multi-display, which constantly refreshes the internal screen dpi. 
+    // Arkui is not adapted to multi-display, which constantly refreshes the internal screen dpi.
     // Currently, the system is temporarily isolated and needs to be formally rectified in the future
-    if (rect.width_ == 340 && rect.height_ == 340 && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    if (rect.width_ == LEM_SUB_WIDTH && rect.LEM_SUB_HEIGHT == 340 && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         return;
     }
     Ace::ViewportConfig config;

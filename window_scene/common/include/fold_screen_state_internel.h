@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     const static std::string foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
-    const static std::string SINGLE_DISPLAY = "1"; 
+    const static std::string SINGLE_DISPLAY = "1";
     const static std::string DUAL_DISPLAY = "2";
 }
 class FoldScreenStateInternel {

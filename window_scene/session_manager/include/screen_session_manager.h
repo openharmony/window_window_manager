@@ -253,6 +253,7 @@ private:
     void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
+    void ConfigureDpi();
     void ConfigureWaterfallDisplayCompressionParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);

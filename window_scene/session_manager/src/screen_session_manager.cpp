@@ -249,24 +249,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
     auto enableConfig = ScreenSceneConfig::GetEnableConfig();
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
-    if (numbersConfig.count("dpi") != 0) {
-        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
-        WLOGFI("densityDpi = %u", densityDpi);
-        if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
-            isDensityDpiLoad_ = true;
-            defaultDpi = densityDpi;
-            cachedSettingDpi_ = defaultDpi;
-            densityDpi_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
-        }
-    }
-    if (numbersConfig.count("subDpi") != 0) {
-        uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
-        WLOGFI("subDensityDpi = %u", subDensityDpi);
-        if (subDensityDpi >= DOT_PER_INCH_MINIMUM_VALUE && subDensityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
-            isDensityDpiLoad_ = true;
-            subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
-        }
-    }
+    ConfigureDpi();
     if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
         uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
         WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
@@ -299,6 +282,29 @@ void ScreenSessionManager::ConfigureScreenScene()
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
         WLOGFD("orientation = %d", orientation);
+    }
+}
+
+void ScreenSessionManager::ConfigureDpi()
+{
+    auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
+    if (numbersConfig.count("dpi") != 0) {
+        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
+        WLOGFI("densityDpi = %u", densityDpi);
+        if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            isDensityDpiLoad_ = true;
+            defaultDpi = densityDpi;
+            cachedSettingDpi_ = defaultDpi;
+            densityDpi_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
+        }
+    }
+    if (numbersConfig.count("subDpi") != 0) {
+        uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
+        WLOGFI("subDensityDpi = %u", subDensityDpi);
+        if (subDensityDpi >= DOT_PER_INCH_MINIMUM_VALUE && subDensityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            isDensityDpiLoad_ = true;
+            subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
+        }
     }
 }
 
@@ -885,7 +891,8 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     }
     property.SetRefreshRate(screenRefreshRate);
 
-    if (foldScreenController_ != nullptr && screenId == 0 && (screenRotation == ROTATION_90 || screenRotation == ROTATION_270)) {
+    if (foldScreenController_ != nullptr && screenId == 0
+        && (screenRotation == ROTATION_90 || screenRotation == ROTATION_270)) {
         screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
         property.SetBounds(screenBounds);
     }
