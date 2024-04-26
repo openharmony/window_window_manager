@@ -2843,16 +2843,29 @@ HWTEST_F(SceneSessionManagerTest, SetFocusedSessionId, Function | SmallTest | Le
 */
 HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Level3)
 {
+    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
+    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
     int32_t focusedSession_ = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession_, 10086);
+
     int32_t persistentId_ = INVALID_SESSION_ID;
     WMError result01 = ssm_->RequestFocusStatus(persistentId_, true);
     EXPECT_EQ(result01, WMError::WM_OK);
+    reasonResult = ssm_->GetFocusChangeReason();
+    EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
+
     persistentId_ = 10000;
-    WMError result02 = ssm_->RequestFocusStatus(persistentId_, true);
+    reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
+    WMError result02 = ssm_->RequestFocusStatus(persistentId_, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
-    WMError result03 = ssm_->RequestFocusStatus(persistentId_, false);
+    reasonResult = ssm_->GetFocusChangeReason();
+    EXPECT_EQ(reasonResult, FocusChangeReason::SCB_SESSION_REQUEST);
+
+    reasonInput = FocusChangeReason::SPLIT_SCREEN;
+    WMError result03 = ssm_->RequestFocusStatus(persistentId_, false, true, reasonInput);
     EXPECT_EQ(result03, WMError::WM_OK);
+    reasonResult = ssm_->GetFocusChangeReason();
+    EXPECT_EQ(reasonResult, FocusChangeReason::SPLIT_SCREEN);
 }
 
 /**

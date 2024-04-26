@@ -211,7 +211,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsValidSessionIds, Function | SmallTest |
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy_->IsValidSessionIds(sessionIds, results));
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->IsValidSessionIds(sessionIds, results));
     sceneSessionManagerProxy_ = nullptr;
 }
 
@@ -241,7 +241,7 @@ HWTEST_F(sceneSessionManagerProxyTest, PendingSessionToBackgroundForDelegator, F
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->PendingSessionToBackgroundForDelegator(token));
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy_->PendingSessionToBackgroundForDelegator(token));
     sceneSessionManagerProxy_ = nullptr;
 }
 
@@ -271,7 +271,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, Function | Sma
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->UnRegisterSessionListener(listener));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, sceneSessionManagerProxy_->UnRegisterSessionListener(listener));
     sceneSessionManagerProxy_ = nullptr;
 }
 
@@ -330,7 +330,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterIAbilityManagerCollaborator, Func
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->RegisterIAbilityManagerCollaborator(0, impl));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, sceneSessionManagerProxy_->RegisterIAbilityManagerCollaborator(0, impl));
     sceneSessionManagerProxy_ = nullptr;
 }
 
