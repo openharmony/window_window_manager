@@ -223,7 +223,7 @@ HWTEST_F(WindowManagerLiteTest, GetTopNMainWindowInfos, Function | SmallTest | L
 
     int32_t topN = 3;
 
-    EXPECT_CALL(m->Mock(), GetTopNMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(infosResult),
+    EXPECT_CALL(m->Mock(), GetTopNMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
         Return(WMError::WM_OK)));
 
     WindowManagerLite::GetInstance().GetTopNMainWindowInfos(topN, topNInfo);
