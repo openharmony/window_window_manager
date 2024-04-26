@@ -37,7 +37,7 @@ public:
 
 private:
     void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId, int32_t onScreenId);
-    void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId);
+    void ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId);
     void ChangeScreenDisplayModeToCoordination();
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);

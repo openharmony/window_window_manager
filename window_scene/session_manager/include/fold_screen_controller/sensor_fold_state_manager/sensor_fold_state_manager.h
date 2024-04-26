@@ -28,9 +28,9 @@ public:
     SensorFoldStateManager();
     virtual ~SensorFoldStateManager();
 
-    void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
-    void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
-    void RegisterApplicationStateObserver();
+    virtual void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
+    virtual void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
+    virtual void RegisterApplicationStateObserver();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);
 
 protected:

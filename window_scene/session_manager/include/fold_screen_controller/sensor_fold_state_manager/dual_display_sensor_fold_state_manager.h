@@ -22,7 +22,7 @@
 
 #include "dm_common.h"
 #include "fold_screen_controller/fold_screen_policy.h"
-#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h",
+#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "iapplication_state_observer.h"
 
 namespace OHOS {
@@ -32,8 +32,7 @@ using OHOS::AppExecFwk::IApplicationStateObserver;
 class ApplicationStateObserver : public IApplicationStateObserver {
 public:
     ApplicationStateObserver();
-    virtual ~ApplicationStateObserver = default;
-    sptr<IRemoteObject> AsObeject() override;
+    virtual ~ApplicationStateObserver() = default;
     void OnForegroundApplicationChanged(const AppStateData &appStateData) override;
     void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
     void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
@@ -44,7 +43,7 @@ public:
 
 private:
     std::string foregroundBundleName_ {""};
-}
+};
 
 class DualDisplaySensorFoldStateManager : public SensorFoldStateManager {
 public:
@@ -56,7 +55,7 @@ public:
     void RegisterApplicationStateObserver() override;
 
 private:
-    FoldStatus GetNextState(float angle, int hall);
+    FoldStatus GetNextFoldState(float angle, int hall);
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;

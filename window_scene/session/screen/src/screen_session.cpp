@@ -28,7 +28,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION, "ScreenSession" };
 const static constexpr uint32_t screenRotationOffSet =
-    system::GetParameter<uint32_t>("const.window.foldscreen.type", 0);
+    system::GetIntParameter<uint32_t>("const.window.foldscreen_rotation.offset", 0);
 const static constexpr int32_t ROTATION_90 = 1;
 const static constexpr int32_t ROTATION_270 = 3;
 }
@@ -606,7 +606,7 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN &&
-        (screenRotation == ROTATION_90 || screenRotationOffSet == ROTATION_270)) {
+        (screenRotationOffSet == ROTATION_90 || screenRotationOffSet == ROTATION_270)) {
         isVerticalScreen = info->width_ > info->height_;
     }
     switch (orientation) {
@@ -637,7 +637,7 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
-        && (screenRotation == ROTATION_90 || screenRotation == ROTATION_270)) {
+        && (screenRotationOffSet == ROTATION_90 || screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
