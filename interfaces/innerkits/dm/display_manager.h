@@ -554,7 +554,6 @@ private:
 
     class Impl;
     std::recursive_mutex mutex_;
-    bool destroyed_ = false;
     sptr<Impl> pImpl_;
 };
 } // namespace OHOS::Rosen
