@@ -457,7 +457,8 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr && g_screenRotationOffSet == ROTATION_270) {
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
+        && g_screenRotationOffSet == ROTATION_270) {
         // fold phone need fix 90 degree by remainder 360 degree
         int foldRotation = (rotation + 90) % 360;
         updateToInputManagerCallback_(static_cast<float>(foldRotation));
