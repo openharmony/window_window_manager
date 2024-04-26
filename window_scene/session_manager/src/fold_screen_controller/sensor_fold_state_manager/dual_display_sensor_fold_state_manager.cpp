@@ -175,9 +175,4 @@ std::string ApplicationStateObserver::GetForegroundApp()
 {
     return foregroundBundleName_;
 }
-
-sptr<IRemoteObject> ApplicationStateObserver::AsObject()
-{
-    return nullptr;
-}
 } // namespace OHOS::Rosen
