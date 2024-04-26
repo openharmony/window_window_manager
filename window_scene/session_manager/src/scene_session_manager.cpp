@@ -8265,7 +8265,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         }
 
         if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !IsSessionVisible(session)) {
-            WLOGFD("GetTopNMainWindowInfos: not main window %{public}d", session->GetWinowType());
+            WLOGFD("GetTopNMainWindowInfos: not main window %{public}d", session->GetWindowType());
             return false;
         }
 
