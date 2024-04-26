@@ -40,12 +40,12 @@ static constexpr unsigned int HILOG_DOMAIN_DMS_SCREEN_SHOT = 0xD004289;
 #define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
 #define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
 
-#define _W_FUNC __func__
+#define C_W_FUNC __func__
 
-#define WLOGFD(fmt, ...) WLOGD("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
-#define WLOGFI(fmt, ...) WLOGI("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
-#define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
-#define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
+#define WLOGFD(fmt, ...) WLOGD("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
+#define WLOGFI(fmt, ...) WLOGI("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
+#define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
+#define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
 
 enum class WmsLogTag : uint8_t {
     DEFAULT = 0,               // C04200
@@ -99,10 +99,12 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
-#define TLOGD(tag, fmt, ...) PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
-#define TLOGI(tag, fmt, ...) PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
-#define TLOGW(tag, fmt, ...) PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
-#define TLOGE(tag, fmt, ...) PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, _W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGD(tag, fmt, ...) \
+PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGI(tag, fmt, ...) PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGW(tag, fmt, ...) PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
+#define TLOGE(tag, fmt, ...) \
+PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
 
 } // namespace OHOS
 }
