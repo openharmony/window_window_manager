@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include "dm_common.h"
-#include "fold_screen_controller/dual_device_policy.h"
+#include "fold_screen_controller/dual_display_policy.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
@@ -75,7 +75,7 @@ void DualDisplayPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
                 break;
             }
             case FoldDisplayMode::MAIN: {
-                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
+                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
                 break;
             }
             case FoldDisplayMode::COORDINATION: {
@@ -161,7 +161,7 @@ void DualDisplayPolicy::TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMo
             break;
         }
         case FoldDisplayMode::MAIN: {
-            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
+            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
             break;
         }
         case FoldDisplayMode::UNKNOWN: {
@@ -193,11 +193,11 @@ FoldDisplayMode DualDisplayPolicy::GetModeMatchStatus()
             break;
         }
         case FoldStatus::FOLDED: {
-            displayMode = FoldDisplayMode::MAIN;
+            displayMode = FoldDisplayMode::SUB;
             break;
         }
         case FoldStatus::HALF_FOLD: {
-            displayMode = FoldDisplayMode::FULL;
+            displayMode = FoldDisplayMode::MAIN;
             break;
         }
         default: {
@@ -235,7 +235,8 @@ void DualDisplayPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t o
     }
 }
 
-void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId, int32_ onScreenId)
+void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId,
+    int32_ onScreenId)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);
