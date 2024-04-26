@@ -548,13 +548,10 @@ HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone01, Function | SmallTest | 
  */
 HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone02, Function | SmallTest | Level1)
 {
-    moveDragController->rectExceptCorner_.posX_ = 5;
-    moveDragController->rectExceptCorner_.width_ = 0;
-    moveDragController->rectExceptCorner_.posY_ = 5;
-    moveDragController->rectExceptCorner_.height_ = 0;
+    WSRect winRect = { 5, 5, 0, 0 };
     int32_t startPointPosX = 1; 
     int32_t startPointPosY = 1;
-    bool res = moveDragController->IsPointInDragHotZone(startPointPosX, startPointPosY, 0, moveDragController->rectExceptCorner_);
+    bool res = moveDragController->IsPointInDragHotZone(startPointPosX, startPointPosY, 0, winRect);
     ASSERT_EQ(res, true);
 }
 
