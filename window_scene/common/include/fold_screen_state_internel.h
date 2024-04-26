@@ -39,7 +39,7 @@ public:
         if (!IsValidFoldType(foldScreenFlag)) {
             return false;
         }
-        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',')
+        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',');
         return foldTypes[0] == DUAL_DISPLAY;
     }
 
@@ -48,7 +48,7 @@ public:
         if (!IsValidFoldType(foldScreenFlag)) {
             return false;
         }
-        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',')
+        std::vector<std::string> foldTypes = StringSplit(foldScreenFlag, ',');
         return foldTypes[0] == SINGLE_DISPLAY;
     }
 
