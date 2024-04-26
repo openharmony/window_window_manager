@@ -3286,7 +3286,7 @@ HWTEST_F(WindowSessionTest, SetPendingSessionActivationEventListener, Function |
 
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetPendingSessionActivationEventListener(callback);
-    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info){
+    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info) {
         resultValue = 2;
     };
     session_->SetTerminateSessionListener(callback1);
