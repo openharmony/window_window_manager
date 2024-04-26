@@ -206,22 +206,26 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_TWO) {
-        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid: %{public}zu", argc);
-        return NapiThrowInvalidParam(env);
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid args count, need 2 args but received: %{public}zu", argc);
+        return NapiThrowInvalidParam(env, "Invalid args count, 2 args is needed.");
     }
     int32_t width = 0;
+    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], width) || width <= 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to uint32_t or parameter is invalid");
-        return NapiThrowInvalidParam(env);
+        errMsg = "Failed to convert parameter to int or width <= 0";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[1], height) || height <= 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to uint32_t or parameter is invalid");
-        return NapiThrowInvalidParam(env);
+        errMsg = "Failed to convert parameter to int or height <= 0";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
     }
     if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "OnUpdateContentSize error, controller is nullptr");
-        return NapiThrowInvalidParam(env);
+        errMsg = "OnUpdateContentSize error, controller is nullptr";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);
     pipController_->UpdateContentSize(width, height);
