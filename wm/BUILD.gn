@@ -97,6 +97,7 @@ ohos_static_library("libwm_static") {
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
@@ -241,6 +242,7 @@ ohos_shared_library("libwm") {
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",

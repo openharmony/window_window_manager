@@ -27,7 +27,6 @@ config("dm_napi_common_config") {
 config("dm_napi_common_public_config") {
   include_dirs = [
     ".",
-    "../../../../../../../third_party/node/src",
     "../../../innerkits/dm",
   ]
 }
@@ -54,6 +53,7 @@ ohos_static_library("dm_napi_common") {
 
   deps = [
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 
@@ -64,6 +64,7 @@ ohos_static_library("dm_napi_common") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   subsystem_name = "window"

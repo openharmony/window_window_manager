@@ -62,6 +62,7 @@ ohos_shared_library("window_native_kit") {
 
   deps = [
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 
@@ -118,6 +119,7 @@ ohos_shared_library("window_napi") {
     ":window_native_kit",
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 
@@ -159,6 +161,7 @@ ohos_shared_library("windowstage_kit") {
   deps = [
     ":window_native_kit",
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 
