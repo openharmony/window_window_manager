@@ -111,6 +111,7 @@ private:
     wptr<JsWindowListener> weakRef_  = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
+    RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;
 };
 }  // namespace Rosen
 }  // namespace OHOS
