@@ -2208,7 +2208,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
     }
 }
 
-void ScreenSessionManagerProxy::SetScreenIdPrivacyState(DisplayId id, bool hasPrivate)
+void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
 {
     MessageParcel data;
     MessageParcel reply;

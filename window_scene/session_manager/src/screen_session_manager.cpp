@@ -3117,17 +3117,17 @@ void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
     NotifyPrivateSessionStateChanged(hasPrivate);
 }
 
-void ScreenSessionManager::SetScreenIdPrivacyState(DisplayId id, bool hasPrivate)
+void ScreenSessionManager::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("SetScreenIdPrivacyState permission denied!");
+        WLOGFE("SetPrivacyStateByDisplayId permission denied!");
         return;
     }
-    WLOGFI("SetScreenIdPrivacyState enter, hasPrivate: %{public}d", hasPrivate);
+    WLOGFI("SetPrivacyStateByDisplayId enter, hasPrivate: %{public}d", hasPrivate);
     std::vector<ScreenId> screenIds = GetAllScreenIds();
     auto iter = std::find(screenIds.begin(), screenIds.end(), id);
     if (iter == screenIds.end()) {
-        WLOGFE("SetScreenIdPrivacyState invalid displayId");
+        WLOGFE("SetPrivacyStateByDisplayId invalid displayId");
         return;
     }
     auto screenSession = GetScreenSession(id);
