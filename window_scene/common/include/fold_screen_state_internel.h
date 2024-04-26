@@ -70,7 +70,7 @@ public:
         return elems;
     }
 
-    static bool IsValidFoldType(const std:string& foldTypeStr)
+    static bool IsValidFoldType(const std::string& foldTypeStr)
     {
         std::regex reg("^([0-9],){3}[0-9]{1}$");
         return std::regex_match(foldTypeStr, reg);

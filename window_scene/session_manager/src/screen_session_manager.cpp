@@ -77,7 +77,7 @@ constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t VIRTUAL_SCREEN_ID_START = 1000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
 const static constexpr uint32_t screenRotationOffSet =
-    system::GetParameter<uint32_t>("const.window.foldscreen.type", 3);
+    system::GetParameter<uint32_t>("const.window.foldscreen.type", 0);
 const static constexpr int32_t ROTATION_90 = 1;
 const static constexpr int32_t ROTATION_270 = 3;
 } // namespace

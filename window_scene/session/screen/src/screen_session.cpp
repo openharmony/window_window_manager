@@ -28,7 +28,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION, "ScreenSession" };
 const static constexpr uint32_t screenRotationOffSet =
-    system::GetParameter<uint32_t>("const.window.foldscreen.type", 3);
+    system::GetParameter<uint32_t>("const.window.foldscreen.type", 0);
 const static constexpr int32_t ROTATION_90 = 1;
 const static constexpr int32_t ROTATION_270 = 3;
 }
