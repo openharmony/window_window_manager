@@ -246,8 +246,8 @@ ohos_shared_library("screen_session_manager") {
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_manager",
-    "ability_runtime:dataobs_manager",
     "ability_runtime:app_manager",
+    "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "data_share:datashare_common",
