@@ -124,6 +124,22 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
 
     ASSERT_EQ(WSError::WS_OK, scbSystemSession_->UpdateFocus(!isFocused));
 }
+
+/**
+ * @tc.name: UpdateWindowMode
+ * @tc.desc: check func UpdateWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, UpdateWindowMode, Function | SmallTest | Level1)
+{
+    scbSystemSession_->PresentFocusIfPointDown();
+    scbSystemSession_->PresentFoucusIfNeed(2);
+    ASSERT_EQ(WSError::WS_OK, scbSystemSession_->SetSystemSceneBlockingFocus(true));
+    WSRect rect = {0, 0, 0, 0};
+    scbSystemSession_->UpdatePointerArea(rect);
+    auto ret = scbSystemSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+}
 }
 }
 }
