@@ -480,6 +480,144 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
 }
+
+/**
+ * @tc.name: updatedragtype01
+ * @tc.desc: test function : updatedragtype
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, updatedragtype01, Function | SmallTest | Level1)
+{
+    moveDragController->rectExceptCorner_.posX_ = 2;
+    moveDragController->rectExceptCorner_.width_ = 2;
+    moveDragController->rectExceptCorner_.posY_ = 0;
+    moveDragController->rectExceptCorner_.height_ = 0;
+    moveDragController->updatedragtype(3, 3);
+    ASSERT_EQ(moveDragController->dragType_, DragType::DRAG_BOTTOM_OR_TOP);
+}
+
+/**
+ * @tc.name: updatedragtype02
+ * @tc.desc: test function : updatedragtype
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, updatedragtype02, Function | SmallTest | Level1)
+{
+    moveDragController->rectExceptCorner_.posX_ = 0;
+    moveDragController->rectExceptCorner_.width_ = 0;
+    moveDragController->rectExceptCorner_.posY_ = 2;
+    moveDragController->rectExceptCorner_.height_ = 2;
+    moveDragController->updatedragtype(3, 3);
+    ASSERT_EQ(moveDragController->dragType_, DragType::DRAG_LEFT_OR_RIGHT);
+}
+
+/**
+ * @tc.name: updatedragtype03
+ * @tc.desc: test function : updatedragtype
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, updatedragtype03, Function | SmallTest | Level1)
+{
+    moveDragController->rectExceptCorner_.posX_ = 1;
+    moveDragController->rectExceptCorner_.width_ = 0;
+    moveDragController->rectExceptCorner_.posY_ = 1;
+    moveDragController->rectExceptCorner_.height_ = 0;
+    moveDragController->updatedragtype(1, 1);
+    ASSERT_EQ(moveDragController->dragType_, DragType::DRAG_LEFT_TOP_CORNER);
+}
+
+/**
+ * @tc.name: IsPointInDragHotZone01
+ * @tc.desc: test function : IsPointInDragHotZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone01, Function | SmallTest | Level1)
+{
+    WSRectT winRect = { 5, 5, 0, 0 };
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    int32_t startPointPosX = 1; 
+    int32_t startPointPosY = 1;
+    bool res = moveDragController->IsPointInDragHotZone(startPointPosX, startPointPosY, sourceType, winRect);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: IsPointInDragHotZone02
+ * @tc.desc: test function : IsPointInDragHotZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone02, Function | SmallTest | Level1)
+{
+    moveDragController->rectExceptCorner_.posX_ = 5;
+    moveDragController->rectExceptCorner_.width_ = 0;
+    moveDragController->rectExceptCorner_.posY_ = 5;
+    moveDragController->rectExceptCorner_.height_ = 0;
+    int32_t startPointPosX = 1; 
+    int32_t startPointPosY = 1;
+    bool res = moveDragController->IsPointInDragHotZone(startPointPosX, startPointPosY, 0, rectExceptCorner_);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: CalculateStartRectExceptHotZone
+ * @tc.desc: test function : CalculateStartRectExceptHotZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalculateStartRectExceptHotZone, Function | SmallTest | Level1)
+{
+    float vpr = 1.0f; 
+    WSRectT winRect;
+    winRect.posX_ = 0;
+    winRect.posY_ = 0;
+    winRect.width_ = 0;
+    winRect.height_ = 0;
+    moveDragController->CalculateStartRectExceptHotZone(vpr, winRect);
+
+    EXPECT_EQ(moveDragController->rectExceptFrame_.posX_, 5);
+    EXPECT_EQ(moveDragController->rectExceptFrame_.posY_, 5);
+    EXPECT_EQ(moveDragController->rectExceptFrame_.width_, 10);
+    EXPECT_EQ(moveDragController->rectExceptFrame_.height_, 10);
+
+    EXPECT_EQ(moveDragController->rectExceptCorner_.posX_, 5);
+    EXPECT_EQ(moveDragController->rectExceptCorner_.posY_, 5);
+    EXPECT_EQ(moveDragController->rectExceptCorner_.width_, 10);
+    EXPECT_EQ(moveDragController->rectExceptCorner_.height_, 10);
+}
+
+/**
+ * @tc.name: ClacFirstMoveTargetRect
+ * @tc.desc: test function : ClacFirstMoveTargetRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ClacFirstMoveTargetRect, Function | SmallTest | Level1)
+{
+    int res = 0;
+    WSRectT windowRect = { 0, 0, 0, 0 };
+    moveDragController->ClacFirstMoveTargetRect(windowRect);
+    res++;
+    moveDragController->moveTempProperty_.pointerId_ == 0;
+    moveDragController->ClacFirstMoveTargetRect(windowRect);
+    ASSERT_EQ(res, 1);
+}
+
+/**
+ * @tc.name: CheckDragEventLegal
+ * @tc.desc: test function : CheckDragEventLegal
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    moveDragController->isStartMove_ = true;
+    bool res01 = moveDragController->CheckDragEventLegal(nullptr, nullptr);
+    bool res02 = moveDragController->CheckDragEventLegal(pointerEvent, property);
+    ASSERT_EQ(res01, false);
+    ASSERT_EQ(res02, false);
+    moveDragController->isStartMove_ = false;
+}
 }
 }
 }
