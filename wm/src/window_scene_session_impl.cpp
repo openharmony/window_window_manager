@@ -1271,11 +1271,6 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
