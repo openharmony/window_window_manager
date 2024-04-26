@@ -49,19 +49,24 @@ using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplaySensorFoldStateManager"};
-    static float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.fold.folded_threshold", 85));
-    static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.fold.half_folded_min_threshold", 85)); // 100
-    static float INWARD_FOLDED_LOWER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.fold.low_threshold", 10)); // 10.0f;
-    static float INWARD_FOLDED_UPPER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.fold.upper_threshold", 20)); //20.0f
-    static float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.fold.expand_threshold", 145)); //130.0f;
-    static float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>("const.half_folded_max_threshold", 135)); //120.0f;
-
+    static float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.fold.folded_threshold", 85));
+    static float INWARD_FOLDED_LOWER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.fold.low_threshold", 10));
+    static float INWARD_FOLDED_UPPER_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.fold.upper_threshold", 20));
+    static float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.fold.expand_threshold", 145));
+    static float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.half_folded_max_threshold", 135));
+    static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+        ("const.fold.half_folded_min_threshold", 85));
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ANGLE_MIN_VAL = 0.0F;
 } // namespace
 
-DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager() 
+DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
 {
     auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
     if (stringListConfig.count("hallSwitchApp") != 0) {
@@ -71,7 +76,8 @@ DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
 
 DualDisplaySensorFoldStateManager::~DualDisplaySensorFoldStateManager() {}
 
-void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy)
+void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (std::islessequal(angle, INWARD_FOLDED_THRESHOLD) && hall == HALL_THRESHOLD) {
@@ -95,7 +101,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
         && PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         if (std::count(packageNames_.begin(), packageNames_.end(), applicationStateObserver_->GetForegroundApp())) {
             isHallSwitchApp_ = false;
-            return;  
+            return;
         }
     }
     if (hall == HALL_THRESHOLD) {
@@ -117,12 +123,14 @@ FoldStatus DualDisplaySensorFoldStateManager::GetNextFoldState(float angle, int 
         return FoldStatus::FOLDED;
     }
     if (isHallSwitchApp_) {
-        if (std::isgreaterequal(angle, INWARD_FOLDED_UPPER_THRESHOLD) && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
+        if (std::isgreaterequal(angle, INWARD_FOLDED_UPPER_THRESHOLD)
+            && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
             isHallSwitchApp_ = true;
             return FoldStatus::HALF_FOLD;
         }
     } else {
-        if (std::isgreaterequal(angle, INWARD_HALF_FOLDED_MIN_THRESHOLD) && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
+        if (std::isgreaterequal(angle, INWARD_HALF_FOLDED_MIN_THRESHOLD)
+            && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
             isHallSwitchApp_ = true;
             return FoldStatus::HALF_FOLD;
         }
@@ -139,7 +147,8 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
     } else {
-        auto flag = static_cast<int32_t>(appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, bundleNameList));
+        auto flag = static_cast<int32_t>(
+            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, bundleNameList));
         if (flag != ERR_OK) {
             WLOGFE("Register app debug listener failed.");
         } else {
@@ -156,7 +165,7 @@ void ApplicationStateObserver::OnForegroundApplicationChanged(const AppStateData
     if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND)) {
         foregroundBundleName_ = appStateData.bundleName;
     }
-    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_BACKGROUND) 
+    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_BACKGROUND)
         && foregroundBundleName_.compare(appStateData.bundleName) == 0) {
         foregroundBundleName_ = "" ;
     }

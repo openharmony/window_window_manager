@@ -231,7 +231,6 @@ void DualDisplayDevicePolicy::ReportFoldDisplayModeChange(FoldDisplayMode displa
         "DISPLAY_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_DISPLAY_MODE", mode);
-
     if (ret != 0) {
         WLOGE("ReportFoldDisplayModeChange Write HiSysEvent error, ret: %{public}d", ret);
     }
@@ -246,7 +245,6 @@ void DualDisplayDevicePolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "POWER_OFF_SCREEN", offScreen,
         "POWER_ON_SCREEN", onScreen);
-
     if (ret != 0) {
         WLOGE("ReportFoldStatusChangeBegin Write HiSysEvent error, ret: %{public}d", ret);
     }

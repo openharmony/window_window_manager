@@ -66,7 +66,7 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
     float postureAngle)
 {
     WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
-            currentStatus, nextStatus, postureAngle);
+        currentStatus, nextStatus, postureAngle);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "NOTIFY_FOLD_STATE_CHANGE",
@@ -74,7 +74,6 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "CURRENT_FOLD_STATUS", currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", postureAngle);
-
     if (ret != 0) {
         WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
     }
@@ -88,4 +87,4 @@ void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
 
 void SensorFoldStateManager::RegisterApplicationStateObserver() {}
 
-}//namespace OHOS::Rosen
+} // namespace OHOS::Rosen

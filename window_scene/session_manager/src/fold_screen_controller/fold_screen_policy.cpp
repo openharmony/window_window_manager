@@ -54,7 +54,8 @@ void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
     globalFoldStatus_ = foldStatus;
 }
 
-void FoldScreenPolicy::ClearState() {
+void FoldScreenPolicy::ClearState()
+{
     currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     currentFoldStatus_ = FoldStatus::UNKNOWN;
 }
