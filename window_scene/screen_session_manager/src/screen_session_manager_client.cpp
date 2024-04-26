@@ -320,6 +320,28 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
     WLOGFD("End calling the SetScreenPrivacyState() of screenSessionManager_");
 }
 
+void ScreenSessionManagerClient::SetScreenIdPrivacyState(DisplayId id, bool hasPrivate)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    WLOGFD("Begin calling the SetScreenIdPrivacyState() of screenSessionManager_, hasPrivate: %{public}d", hasPrivate);
+    screenSessionManager_->SetScreenIdPrivacyState(id, hasPrivate);
+    WLOGFD("End calling the SetScreenIdPrivacyState() of screenSessionManager_");
+}
+
+void ScreenSessionManagerClient::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    WLOGFD("Begin calling the SetScreenPrivacyWindowList() of screenSessionManager_, id: %{public}" PRIu64, id);
+    screenSessionManager_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    WLOGFD("End calling the SetScreenPrivacyWindowList() of screenSessionManager_");
+}
+
 void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
 {
     if (!screenSessionManager_) {

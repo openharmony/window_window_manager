@@ -147,6 +147,8 @@ public:
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
+    virtual void SetScreenIdPrivacyState(DisplayId id, bool hasPrivate) {}
+    virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override

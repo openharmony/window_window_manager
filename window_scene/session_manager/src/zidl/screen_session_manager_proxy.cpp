@@ -2192,7 +2192,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -2202,6 +2202,54 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetScreenIdPrivacyState(DisplayId id, bool hasPrivate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
+    if (!data.WriteBool(hasPrivate)) {
+        WLOGFE("Write hasPrivate failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
+    if (!data.WriteStringVector(privacyWindowList)) {
+        WLOGFE("Write privacyWindowList failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
