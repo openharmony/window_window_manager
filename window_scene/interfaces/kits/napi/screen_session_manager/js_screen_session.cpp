@@ -195,6 +195,7 @@ void JsScreenSession::RegisterScreenChangeListener()
     }
 
     screenSession_->RegisterScreenChangeListener(this);
+    WLOGFI("register screen change listener success.");
 }
 
 napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
@@ -206,7 +207,7 @@ napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info in
 
 napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
-    WLOGD("On register callback.");
+    WLOGI("On register callback.");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -247,7 +248,7 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
 
 void JsScreenSession::CallJsCallback(const std::string& callbackType)
 {
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
         WLOGFE("Callback is unregistered!");
         return;
@@ -279,6 +280,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
                 napi_value argv[] = {};
                 napi_call_function(env, NapiGetUndefined(env), method, 0, argv, nullptr);
             }
+            WLOGI("The js callback has been executed: %{public}s.", callbackType.c_str());
         });
 
     napi_ref callback = nullptr;
