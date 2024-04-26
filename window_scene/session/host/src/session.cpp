@@ -73,7 +73,6 @@ std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
-    std::unique_lock<std::shared_mutex> lock(propertyMutex_);
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     if (!g_mainHandler) {
@@ -2010,7 +2009,6 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    std::unique_lock<std::shared_mutex> lock(propertyMutex_);
     property_ = property;
     NotifySessionInfoChange();
     if (property_ == nullptr) {
@@ -2031,7 +2029,6 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 
 sptr<WindowSessionProperty> Session::GetSessionProperty() const
 {
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
