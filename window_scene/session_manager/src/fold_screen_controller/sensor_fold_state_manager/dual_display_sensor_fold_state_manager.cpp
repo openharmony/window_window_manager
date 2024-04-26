@@ -49,13 +49,13 @@ using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplaySensorFoldStateManager"};
-    static float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    const float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.folded_threshold", 85));
-    static float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    const float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.expand_threshold", 145));
-    static float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    const float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.half_folded_max_threshold", 135));
-    static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.half_folded_min_threshold", 85));
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
