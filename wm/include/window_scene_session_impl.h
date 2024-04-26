@@ -25,7 +25,7 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_SES
     {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED,                         Orientation::UNSPECIFIED},
     {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE,                           Orientation::HORIZONTAL},
     {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT,                            Orientation::VERTICAL},
-    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT,                        Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT,                        Orientation::FOLLOWRECENT},
     {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED,                  Orientation::REVERSE_HORIZONTAL},
     {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED,                   Orientation::REVERSE_VERTICAL},
     {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION,                       Orientation::SENSOR},
@@ -37,6 +37,8 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_SES
     {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
         Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
     {OHOS::AppExecFwk::DisplayOrientation::LOCKED,                              Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED,           Orientation::AUTO_ROTATION_UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP,                      Orientation::FOLLOW_DESKTOP},
 };
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
