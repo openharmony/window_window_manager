@@ -438,14 +438,14 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
     std::vector<TopNMainWindowInfo> topNInfos;
     WMError errCode = GetTopNMainWindowInfos(topN, topNInfos);
 
-    reply.WriteInt32(topNInfo.size());
+    reply.WriteInt32(topNInfos.size());
     for (auto& it : topNInfos) {
         if (!reply.WriteParcelable(&it)) {
             WLOGFE("HandleGetTopNMainWinodowInfo write topNinfo fail");
             return ERR_INVALID_DATA;
         }
 
-        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, topNinfo %{public}d", it.pid, it.bundleName.c_str());
+        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid, it.bundleName.c_str());
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
