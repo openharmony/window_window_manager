@@ -2332,15 +2332,17 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     bool isPc = g_deviceType == "2in1";
     bool isPhone = g_deviceType == "phone";
     if (!isPc && !isPhone) {
-        WLOGFI("Window state detect not support: device type not support, persistentId:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
+            "persistentId:%{public}d", persistentId_);
         return false;
     }
     if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
-        WLOGFI("Window state detect not support: Screen is locked, persistentId:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: Screen is locked, "
+            "persistentId:%{public}d", persistentId_);
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType())) {
-        WLOGFI("Window state detect not support: Only support mainwindow, "
+        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support mainwindow, "
             "persistentId:%{public}d", persistentId_);
         return false;
     }
@@ -2404,7 +2406,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         auto session = weakThis.promote();
         if (session == nullptr) {
             if (isAttach) {
-                WLOGFE("Window attach state and session"
+                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session"
                     "state mismatch, session is nullptr, attach:%{public}d", isAttach);
             }
             return;
@@ -2412,7 +2414,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         // Skip state detect when screen locked.
         if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
             if (!session->IsStateMatch(isAttach)) {
-                WLOGFE("Window attach state and session state mismatch, "
+                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session state mismatch, "
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
