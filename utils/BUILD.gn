@@ -166,7 +166,7 @@ ohos_shared_library("libwmutil") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
-  public_deps = [ ":libwmutil_base" ]
+  deps = [ ":libwmutil_base" ]
 
   external_deps = [
     "ability_base:want",

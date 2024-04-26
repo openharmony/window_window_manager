@@ -93,6 +93,7 @@ ohos_shared_library("extensionwindow_napi") {
   include_dirs = [ "extension_window" ]
   deps = [
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
     "../window_runtime:window_native_kit",
   ]

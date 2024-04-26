@@ -970,6 +970,7 @@ ohos_static_library("ws_unittest_common") {
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
@@ -987,6 +988,7 @@ ohos_static_library("ws_unittest_common") {
   public_deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
   ]
 
   external_deps = [

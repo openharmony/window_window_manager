@@ -43,6 +43,7 @@ ohos_shared_library("screen_napi") {
   deps = [
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
   ]
 
   external_deps = [

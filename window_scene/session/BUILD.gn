@@ -67,6 +67,7 @@ ohos_shared_library("scene_session") {
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
@@ -148,7 +149,10 @@ ohos_shared_library("screen_session") {
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+  ]
 
   external_deps = [
     "c_utils:utils",

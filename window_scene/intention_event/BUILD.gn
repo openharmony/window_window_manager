@@ -32,6 +32,7 @@ ohos_shared_library("libintention_event") {
 
   deps = [
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "../common:window_scene_common",
     "../session:scene_session",
     "../session_manager:scene_session_manager",
