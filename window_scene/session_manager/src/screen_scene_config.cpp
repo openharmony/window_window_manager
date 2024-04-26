@@ -283,7 +283,7 @@ const std::map<std::string, std::string>& ScreenSceneConfig::GetStringConfig()
     return stringConfig_;
 }
 
-const std::map<std::string, std::string>& ScreenSceneConfig::GetStringListConfig()
+const std::map<std::string, std::vector<std::string>>& ScreenSceneConfig::GetStringListConfig()
 {
     return stringListConfig_;
 }
