@@ -1020,7 +1020,12 @@ void WindowSceneSessionImpl::DestroySubWindow()
                 continue;
             }
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", (*iter)->GetPersistentId());
-            (*iter)->Destroy(false);
+            auto ret = (*iter)->Destroy(false);
+            if (ret != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy sub window failed. persistentId: %{public}d",
+                    (*iter)->GetPersistentId());
+                subWindows.erase(iter);
+            }
         }
         mainIter->second.clear();
         subWindowSessionMap_.erase(mainIter);
