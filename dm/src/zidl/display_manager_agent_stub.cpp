@@ -70,6 +70,9 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_PRIVATE_WINDOW: {
             return ProcPrivateWindow(data);
         }
+        case TRANS_ID_ON_PRIVATE_WINDOW_LIST: {
+            return ProcPrivateWindowList(data);
+        }
         case TRANS_ID_ON_FOLD_STATUS_CHANGED: {
             return ProcFoldStatusChanged(data);
         }
@@ -222,6 +225,15 @@ int32_t DisplayManagerAgentStub::ProcPrivateWindow(MessageParcel& data)
 {
     bool hasPrivate = data.ReadBool();
     NotifyPrivateWindowStateChanged(hasPrivate);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcPrivateWindowList(MessageParcel& data)
+{
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+    std::vector<std::string> privacyWindowList;
+    data.ReadStringVector(&privacyWindowList);
+    NotifyPrivateStateWindowListChanged(displayId, privacyWindowList);
     return 0;
 }
 

@@ -3117,6 +3117,61 @@ void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
     NotifyPrivateSessionStateChanged(hasPrivate);
 }
 
+void ScreenSessionManager::SetScreenIdPrivacyState(DisplayId id, bool hasPrivate)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenIdPrivacyState permission denied!");
+        return;
+    }
+    WLOGFI("SetScreenIdPrivacyState enter, hasPrivate: %{public}d", hasPrivate);
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
+        WLOGFE("SetScreenIdPrivacyState invalid displayId");
+        return;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get id: %{public}" PRIu64" screen now", id);
+        return;
+    }
+    screenSession->SetPrivateSessionForeground(hasPrivate);
+    NotifyPrivateSessionStateChanged(hasPrivate);
+}
+
+void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenPrivacyWindowList permission denied!");
+        return;
+    }
+    WLOGFI("SetScreenPrivacyWindowList enter");
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
+        WLOGFE("SetScreenPrivacyWindowList invalid displayId");
+        return;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get id: %{public}" PRIu64" screen now", id);
+        return;
+    }
+    NotifyPrivateWindowListChanged(id, privacyWindowList);
+}
+
+void ScreenSessionManager::NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList)
+{
+    WLOGI("Notify displayid: %{public}" PRIu64" PrivateWindowListChanged", id);
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
+    }
+}
+
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {

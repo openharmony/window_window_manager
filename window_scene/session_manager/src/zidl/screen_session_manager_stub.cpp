@@ -647,6 +647,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetScreenPrivacyState(hasPrivate);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            auto hasPrivate = data.ReadBool();
+            SetScreenIdPrivacyState(displayId, hasPrivate);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            std::vector<std::string> privacyWindowList;
+            data.ReadStringVector(&privacyWindowList);
+            SetScreenPrivacyWindowList(displayId, privacyWindowList);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_RESIZE_VIRTUAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t width = data.ReadUint32();
