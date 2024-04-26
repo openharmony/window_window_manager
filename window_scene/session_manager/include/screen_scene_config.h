@@ -60,7 +60,7 @@ private:
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
     static void ReadStringConfigInfo(const xmlNodePtr& currNode);
-    static void ReadStringListConfigInfo(const xmlNodePtr& currNode);
+    static void ReadStringListConfigInfo(const xmlNodePtr& currNode, std::string name);
     static std::string GetConfigPath(const std::string& configFileName);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);

@@ -48,7 +48,7 @@ config("session_manager_public_config") {
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
 
-    "${ability_runtime_inner_api_path}/app_manager/include"
+    "${ability_runtime_inner_api_path}/app_manager/include",
   ]
 }
 
@@ -210,8 +210,8 @@ ohos_shared_library("screen_session_manager") {
     "src/fold_screen_controller/fold_screen_policy.cpp",
     "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
     "src/fold_screen_controller/fold_screen_state_machine.cpp",
-    "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+    "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_rotation_property.cpp",
