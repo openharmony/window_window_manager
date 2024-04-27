@@ -100,24 +100,8 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
+        globalDisplayMode_ = displayMode;
     }
-}
-
-FoldDisplayMode DualDisplayDevicePolicy::GetScreenDisplayMode()
-{
-    std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-    return currentDisplayMode_;
-}
-
-FoldStatus DualDisplayDevicePolicy::GetFoldStatus()
-{
-    return currentFoldStatus_;
-}
-
-void DualDisplayDevicePolicy::SetFoldStatus(FoldStatus foldStatus)
-{
-    WLOGI("SetFoldStatus FoldStatus: %{public}d", foldStatus);
-    currentFoldStatus_ = foldStatus;
 }
 
 void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)

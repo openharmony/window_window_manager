@@ -33,6 +33,7 @@ public:
     static const std::map<std::string, bool>& GetEnableConfig();
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static const std::map<std::string, std::string>& GetStringConfig();
+    static const std::map<std::string, std::vector<std::string>>& GetStringListConfig();
     static void DumpConfig();
     static std::vector<DMRect> GetCutoutBoundaryRect(uint64_t displayId);
     static std::vector<DMRect> GetSubCutoutBoundaryRect();
@@ -48,6 +49,7 @@ private:
     static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> intNumbersConfig_;
     static std::map<std::string, std::string> stringConfig_;
+    static std::map<std::string, std::vector<std::string>> stringListConfig_;
     static std::map<uint64_t, std::vector<DMRect>> cutoutBoundaryRectMap_;
     static std::vector<DMRect> subCutoutBoundaryRect_;
     static bool isWaterfallDisplay_;
@@ -58,6 +60,7 @@ private:
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
     static void ReadStringConfigInfo(const xmlNodePtr& currNode);
+    static void ReadStringListConfigInfo(const xmlNodePtr& currNode, std::string name);
     static std::string GetConfigPath(const std::string& configFileName);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);
