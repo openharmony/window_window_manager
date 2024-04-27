@@ -37,6 +37,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSI
 constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 enum XmlNodeElement {
     DPI = 0,
+    SUB_DPI,
     IS_WATERFALL_DISPLAY,
     CURVED_SCREEN_BOUNDARY,
     CURVED_AREA_IN_LANDSCAPE,
@@ -46,12 +47,15 @@ enum XmlNodeElement {
     DEFAULT_DISPLAY_CUTOUT_PATH,
     SUB_DISPLAY_CUTOUT_PATH,
     ROTATION_POLICY,
+    HALL_SWITCH_APP,
+    PACKAGE_NAME,
 };
 }
 
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
+std::map<std::string, std::vector<std::string>> ScreenSceneConfig::stringListConfig_;
 std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
@@ -59,6 +63,7 @@ bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
 std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {DPI, "dpi"},
+    {SUB_DPI, "subDpi"},
     {IS_WATERFALL_DISPLAY, "isWaterfallDisplay"},
     {CURVED_SCREEN_BOUNDARY, "curvedScreenBoundary"},
     {CURVED_AREA_IN_LANDSCAPE, "waterfallAreaCompressionSizeWhenHorzontal"},
@@ -68,6 +73,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {DEFAULT_DISPLAY_CUTOUT_PATH, "defaultDisplayCutoutPath"},
     {SUB_DISPLAY_CUTOUT_PATH, "subDisplayCutoutPath"},
     {ROTATION_POLICY, "rotationPolicy"},
+    {HALL_SWITCH_APP, "hallSwitchApp"},
+    {PACKAGE_NAME, "packageName"},
 };
 
 
@@ -145,6 +152,7 @@ bool ScreenSceneConfig::LoadConfigXml()
             (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName)) {
             ReadEnableConfigInfo(curNodePtr);
         } else if ((xmlNodeMap_[DPI] == nodeName) ||
+            (xmlNodeMap_[SUB_DPI] == nodeName) ||
             (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
             (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
             (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
@@ -154,6 +162,8 @@ bool ScreenSceneConfig::LoadConfigXml()
             (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
             (xmlNodeMap_[ROTATION_POLICY] == nodeName)) {
             ReadStringConfigInfo(curNodePtr);
+        } else if (xmlNodeMap_[HALL_SWITCH_APP] == nodeName) {
+            ReadStringListConfigInfo(curNodePtr, nodeName);
         } else {
             WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
         }
@@ -235,6 +245,29 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std::string name)
+{
+    xmlChar* rootContext = xmlNodeGetContent(rootNode);
+    if (rootNode == nullptr || rootNode->name == nullptr) {
+        WLOGFE("[SsConfig] get root element failed!");
+        xmlFree(rootContext);
+        return;
+    }
+    std::vector<std::string> stringVec;
+    for (xmlNodePtr curNodePtr = rootNode->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
+        if (!IsValidNode(*curNodePtr)) {
+            WLOGFE("SsConfig]: invalid node!");
+            continue;
+        }
+        xmlChar* context = xmlNodeGetContent(curNodePtr);
+        std::string str = reinterpret_cast<const char*>(context);
+        stringVec.emplace_back(str);
+        xmlFree(context);
+    }
+    stringListConfig_[name] = stringVec;
+    xmlFree(rootContext);
+}
+
 const std::map<std::string, bool>& ScreenSceneConfig::GetEnableConfig()
 {
     return enableConfig_;
@@ -248,6 +281,11 @@ const std::map<std::string, std::vector<int>>& ScreenSceneConfig::GetIntNumbersC
 const std::map<std::string, std::string>& ScreenSceneConfig::GetStringConfig()
 {
     return stringConfig_;
+}
+
+const std::map<std::string, std::vector<std::string>>& ScreenSceneConfig::GetStringListConfig()
+{
+    return stringListConfig_;
 }
 
 void ScreenSceneConfig::DumpConfig()

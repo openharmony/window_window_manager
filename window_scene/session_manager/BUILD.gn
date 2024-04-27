@@ -47,6 +47,8 @@ config("session_manager_public_config") {
 
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
+
+    "${ability_runtime_inner_api_path}/app_manager/include",
   ]
 }
 
@@ -204,10 +206,14 @@ ohos_shared_library("screen_session_manager") {
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager/src/zidl/screen_session_manager_client_proxy.cpp",
     "src/fold_screen_controller/dual_display_device_policy.cpp",
+    "src/fold_screen_controller/dual_display_policy.cpp",
     "src/fold_screen_controller/fold_screen_controller.cpp",
     "src/fold_screen_controller/fold_screen_policy.cpp",
     "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
     "src/fold_screen_controller/fold_screen_state_machine.cpp",
+    "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+    "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
+    "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
@@ -242,6 +248,7 @@ ohos_shared_library("screen_session_manager") {
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "config_policy:configpolicy_util",
