@@ -16,12 +16,16 @@
 #ifndef OHOS_JS_DISPLAY_LISTENER_H
 #define OHOS_JS_DISPLAY_LISTENER_H
 
+#include <event_handler.h>
 #include <mutex>
+
+#include "display_manager.h"
 #include "dm_common.h"
+#include "hitrace_meter.h"
+#include "process_options.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "refbase.h"
-#include "display_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,7 +37,7 @@ class JsDisplayListener : public DisplayManager::IDisplayListener,
                           public DisplayManager::IDisplayModeListener,
                           public DisplayManager::IAvailableAreaListener {
 public:
-    explicit JsDisplayListener(napi_env env) : env_(env) {}
+    explicit JsDisplayListener(napi_env env);
     ~JsDisplayListener() override = default;
     void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
@@ -54,6 +58,8 @@ private:
     std::mutex mtx_;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
     napi_value CreateDisplayIdArray(napi_env env, const std::vector<DisplayId>& data);
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    wptr<JsDisplayListener> weakRef_ = nullptr;
 };
 const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";
