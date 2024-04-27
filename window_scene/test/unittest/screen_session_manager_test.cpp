@@ -103,6 +103,9 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin, Function | SmallTest | Level3)
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 
@@ -168,6 +171,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll, Function | SmallTest | 
 
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_SWITCH;
     ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
 
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
