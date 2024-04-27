@@ -535,7 +535,7 @@ HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone01, Function | SmallTest | 
 {
     WSRect winRect = { 10, 10, 10, 10 };
     int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
-    int32_t startPointPosX = 1; 
+    int32_t startPointPosX = 1;
     int32_t startPointPosY = 1;
     bool res = moveDragController->IsPointInDragHotZone(startPointPosX, startPointPosY, sourceType, winRect);
     ASSERT_EQ(res, false);
@@ -562,7 +562,7 @@ HWTEST_F(MoveDragControllerTest, IsPointInDragHotZone02, Function | SmallTest | 
  */
 HWTEST_F(MoveDragControllerTest, CalculateStartRectExceptHotZone, Function | SmallTest | Level1)
 {
-    float vpr = 1.0f; 
+    float vpr = 1.0f;
     WSRect winRect;
     winRect.posX_ = 100;
     winRect.posY_ = 100;
