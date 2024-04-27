@@ -650,7 +650,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
             auto hasPrivate = data.ReadBool();
-            SetScreenIdPrivacyState(displayId, hasPrivate);
+            SetPrivacyStateByDisplayId(displayId, hasPrivate);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST: {
