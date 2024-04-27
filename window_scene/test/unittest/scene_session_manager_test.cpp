@@ -2835,11 +2835,11 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken, Function | SmallTest 
 }
 
 /**
- * @tc.name: UpdateParentSessionForDialog
+ * @tc.name: UpdateParentSessionForDialog001
  * @tc.desc: SceneSesionManager update parent session for dialog
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, Function | SmallTest | Level3)
 {
     SessionInfo dialogInfo;
     dialogInfo.abilityName_ = "DialogWindows";
