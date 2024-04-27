@@ -24,6 +24,12 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DISPLAY_RUNTIME, "JsDisplayListener"};
 }
 
+JsDisplayListener::JsDisplayListener(napi_env env)
+    : env_(env), weakRef_(wptr<JsDisplayListener> (this))
+{
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+}
+
 void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
     WLOGD("JsDisplayListener::AddCallback is called");
@@ -282,18 +288,25 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
         WLOGE("OnDisplayModeChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, displayMode] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, displayMode)};
-            CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
+    auto task = [self = weakRef_, displayMode, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDisplayModeChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("[NAPI]this listener or eng is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
+        napi_value argv[] = {CreateJsValue(eng, displayMode)};
+        thisListener->CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
+    };
+    if (!handler_) {
+        WLOGFE("get main event handler failed!");
+        return;
+    }
+    handler_->PostTask(task, "JsDisplayListener::OnDisplayModeChanged", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
