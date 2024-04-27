@@ -827,5 +827,35 @@ void WindowSessionProperty::SetCollaboratorType(int32_t collaboratorType)
 {
     collaboratorType_ = collaboratorType;
 }
+
+void WindowSessionProperty::SetUserWindowLimits(const WindowLimits& windowUserLimits)
+{
+    userLimits_ = windowUserLimits;
+}
+
+WindowLimits WindowSessionProperty::GetUserWindowLimits() const
+{
+    return userLimits_;
+}
+
+void WindowSessionProperty::SetConfigWindowLimitsVP(const WindowLimits& windowConfigLimitsVP)
+{
+    configLimitsVP_ = windowConfigLimitsVP;
+}
+
+WindowLimits WindowSessionProperty::GetConfigWindowLimitsVP() const
+{
+    return configLimitsVP_;
+}
+
+void WindowSessionProperty::SetLastLimitsVpr(float vpr)
+{
+    lastVpr_ = vpr;
+}
+
+float WindowSessionProperty::GetLastLimitsVpr() const
+{
+    return lastVpr_;
+}
 } // namespace Rosen
 } // namespace OHOS

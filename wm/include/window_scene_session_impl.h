@@ -147,6 +147,7 @@ public:
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void UpdateDensity() override;
 
 protected:
     void DestroySubWindow();
@@ -158,7 +159,8 @@ protected:
     bool isSessionMainWindow(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
-    void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
+    void LimitWindowSize(uint32_t& width, uint32_t& height);
+    void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
     void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
     WMError NotifyWindowSessionProperty();
     WMError NotifyWindowNeedAvoid(bool status = false);
@@ -190,8 +192,10 @@ private:
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
-    void calculateNewLimitsBySystemLimits(WindowLimits& newLimits, const WindowLimits& customizedLimits);
-    void calculateNewLimitsByRatio(WindowLimits& newLimits, const WindowLimits& customizedLimits);
+    void CalculateNewLimitsByLimits(
+        WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
+    void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
+    bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;

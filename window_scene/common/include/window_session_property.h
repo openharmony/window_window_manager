@@ -63,6 +63,9 @@ public:
     void SetMaximizeMode(MaximizeMode mode);
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
+    void SetUserWindowLimits(const WindowLimits& windowLimits);
+    void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
+    void SetLastLimitsVpr(float vpr);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetKeyboardSessionGravity(SessionGravity gravity_, uint32_t percent);
     void SetDecorEnable(bool isDecorEnable);
@@ -112,6 +115,9 @@ public:
     MaximizeMode GetMaximizeMode() const;
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
+    WindowLimits GetUserWindowLimits() const;
+    WindowLimits GetConfigWindowLimitsVP() const;
+    float GetLastLimitsVpr() const;
     uint32_t GetModeSupportInfo() const;
     std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
     void GetSessionGravity(SessionGravity& gravity, uint32_t& percent);
@@ -184,6 +190,9 @@ private:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
+    WindowLimits userLimits_;
+    WindowLimits configLimitsVP_;
+    float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_;
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
