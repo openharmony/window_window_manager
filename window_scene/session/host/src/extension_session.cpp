@@ -260,11 +260,6 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
 
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
     std::shared_ptr<WSError> retCode = std::make_shared<WSError>(WSError::WS_OK);
-    bool isAllocedNullptr = (isConsumedPromise == nullptr) || (retCode == nullptr);
-    if (isAllocedNullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Created isConsumedPromise or retCode is nullptr.");
-        return WSError::WS_ERROR_NULLPTR;
-    }
     channelListener_->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
     auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, channelListener_);
     // if UiExtension was died, return transferKeyEvent before wait for timeout.
