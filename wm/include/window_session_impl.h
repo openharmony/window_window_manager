@@ -171,7 +171,6 @@ public:
     void NotifyForegroundFailed(WMError ret);
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
-    void UpdateWindowSizeLimits();
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     WSError NotifyCloseExistPipWindow() override;
