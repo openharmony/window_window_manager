@@ -235,7 +235,7 @@ public:
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
-    void SetScreenIdPrivacyState(DisplayId id, bool hasPrivate) override;
+    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
