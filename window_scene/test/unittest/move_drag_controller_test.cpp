@@ -615,6 +615,47 @@ HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Lev
     ASSERT_EQ(res02, false);
     moveDragController->isStartMove_ = false;
 }
+
+/**
+ * @tc.name: HandleMouseStyle
+ * @tc.desc: test function : HandleMouseStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, HandleMouseStyle, Function | SmallTest | Level1)
+{
+    int res = 0;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    WSRect winRect;
+    res++;
+    moveDragController->HandleMouseStyle(nullptr, winRect);
+    ASSERT_EQ(res, 1);
+
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    moveDragController->HandleMouseStyle(pointerEvent, winRect);
+    ASSERT_EQ(res, 1);
+
+    moveDragController->mouseStyleID_ = MMI::MOUSE_ICON::NORTH_SOUTH;
+    moveDragController->isStartDrag_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    moveDragController->HandleMouseStyle(pointerEvent, winRect);
+    ASSERT_EQ(res, 1);
+}
+
+/**
+ * @tc.name: UpdateMoveTempProperty
+ * @tc.desc: test function : UpdateMoveTempProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, UpdateMoveTempProperty, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
+    auto res = moveDragController->UpdateMoveTempProperty(pointerEvent);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
 }
 }
 }
