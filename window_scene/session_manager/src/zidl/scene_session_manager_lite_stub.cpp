@@ -449,7 +449,8 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
             return ERR_INVALID_DATA;
         }
 
-        TLOGI(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid_, it.bundleName_.c_str());
+        TLOGI(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s",
+            it.pid_, it.bundleName_.c_str());
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
