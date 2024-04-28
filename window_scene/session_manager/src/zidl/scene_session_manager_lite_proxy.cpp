@@ -801,7 +801,6 @@ WMError SceneSessionManagerLiteProxy::GetTopNMainWindowInfos(int32_t topNum, std
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    MAX_TOPN_INFO_SIZE
     if ((topNum <= 0) || (topNum >= MAX_TOPN_INFO_SIZE)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
