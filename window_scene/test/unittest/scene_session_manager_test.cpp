@@ -3253,6 +3253,25 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTes
 }
 
 /**
+ * @tc.name: StartAbilityBySpecified
+ * @tc.desc: SceneSesionManager start ability by specified
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    SessionInfo info;
+    ssm_->StartAbilityBySpecified(info);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    AAFwk::WantParams wantParams;
+    want->SetParams(wantParams);
+    info.want = want;
+    ssm_->StartAbilityBySpecified(info);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: FindMainWindowWithToken
  * @tc.desc: SceneSesionManager find main window with token
  * @tc.type: FUNC
