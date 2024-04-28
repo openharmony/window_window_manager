@@ -32,10 +32,12 @@ class SceneSessionDirtyManager;
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
-    void FlushDisplayInfoToMMI();
+    void FlushDisplayInfoToMMI(const bool forceFlush = false);
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
+    void SetUserBackground(bool userBackground);
+    bool IsUserBackground();
 
 protected:
     SceneInputManager() = default;
@@ -56,6 +58,7 @@ private:
     std::vector<MMI::DisplayInfo> lastDisplayInfos_;
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
+    std::atomic<bool> isUserBackground_ = false;
 };
 }//Rosen
 }//OHOS
