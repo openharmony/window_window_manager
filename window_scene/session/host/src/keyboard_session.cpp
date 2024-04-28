@@ -248,6 +248,26 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->GetSessionProperty()->SetKeyboardLayoutParams(params);
         }
 
+        if (session->GetSessionProperty()) {
+            session->GetSessionProperty()->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_),
+                                                                     0);
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onAdjustKeyboardLayout_) {
+            session->sessionChangeCallback_->onAdjustKeyboardLayout_(params);
+        }
+
+        if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+            session->SetWindowAnimationFlag(false);
+            if (session->IsSessionForeground()) {
+                session->RestoreCallingSession();
+            }
+        } else {
+            session->SetWindowAnimationFlag(true);
+            if (session->IsSessionForeground() && !session->isKeyboardPanelEnabled_) {
+                session->RaiseCallingSession();
+            }
+        }
+
         return WSError::WS_OK;
     };
     PostTask(task, "AdjustKeyboardLayout");

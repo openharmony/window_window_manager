@@ -67,6 +67,7 @@ using HandleSecureSessionShouldHideCallback = std::function<WSError(const sptr<S
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
+using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -105,6 +106,7 @@ public:
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
+        NotifyKeyboardLayoutAdjustFunc onAdjustKeyboardLayout_;
     };
 
     // func for change window scene pattern property

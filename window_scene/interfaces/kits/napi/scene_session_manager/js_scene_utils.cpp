@@ -929,7 +929,8 @@ napi_value CreateJsSessionProcessMode(napi_env env)
     return objValue;
 }
 
-napi_value CreateJsSessionRect(napi_env env, const WSRect& rect)
+template<typename T>
+napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
     WLOGFD("CreateJsSessionRect.");
     napi_value objValue = nullptr;
@@ -1001,6 +1002,27 @@ static napi_value CreateJsSystemBarPropertyObject(
     napi_set_named_property(
         env, objValue, "settingFlag", CreateJsValue(env, static_cast<uint32_t>(property.settingFlag_)));
 
+    return objValue;
+}
+
+napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "LandscapeKeyboardRect",
+        CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
+    napi_set_named_property(env, objValue, "PortraitKeyboardRect",
+        CreateJsSessionRect(env, params.PortraitKeyboardRect_));
+    napi_set_named_property(env, objValue, "LandscapePanelRect",
+        CreateJsSessionRect(env, params.LandscapePanelRect_));
+    napi_set_named_property(env, objValue, "PortraitPanelRect",
+        CreateJsSessionRect(env, params.PortraitPanelRect_));
+    
     return objValue;
 }
 

@@ -62,6 +62,7 @@ const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
+const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 constexpr int SCALE_ARG_COUNT = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
@@ -217,6 +218,7 @@ void JsSceneSession::InitListenerFuncs()
         { LANDSCAPE_MULTI_WINDOW_CB,             &JsSceneSession::ProcessLandscapeMultiWindowRegister },
         { CONTEXT_TRANSPARENT_CB,                &JsSceneSession::ProcessContextTransparentRegister },
         { KEYBOARD_GRAVITY_CHANGE_CB,            &JsSceneSession::ProcessKeyboardGravityChangeRegister },
+        { ADJUST_KEYBOARD_LAYOUT_CB,             &JsSceneSession::ProcessAdjustKeyboardLayoutRegister },
     };
 }
 
@@ -380,6 +382,44 @@ void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
     };
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
         std::to_string(static_cast<int>(gravity)));
+}
+
+void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onAdjustKeyboardLayout_ = std::bind(&JsSceneSession::OnAdjustKeyboardLayout,
+                                                               this, std::placeholders::_1);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
+}
+
+void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
+{
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(ADJUST_KEYBOARD_LAYOUT_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    auto task = [params, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout jsCallBack is nullptr");
+            return;
+        }
+        napi_value keyboardLayoutParamsObj = CreateJsKeyboardLayoutParams(env, params);
+        if (keyboardLayoutParamsObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout this keyboard layout params obj is nullptr");
+        }
+        napi_value argv[] = {keyboardLayoutParamsObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnAdjustKeyboardLayout");
 }
 
 void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
