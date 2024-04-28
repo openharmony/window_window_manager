@@ -1631,6 +1631,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
+    
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     } else {

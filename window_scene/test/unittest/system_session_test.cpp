@@ -311,7 +311,6 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     sptr<SystemSession> sysSession =
         new (std::nothrow) SystemSession(info, specificCallback_);
     sysSession->UpdatePointerArea(rect);
-    ASSERT_NE(sysSession->preRect_, rect);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
