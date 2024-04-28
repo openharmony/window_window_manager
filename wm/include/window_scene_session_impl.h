@@ -37,6 +37,8 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_SES
     {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
         Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
     {OHOS::AppExecFwk::DisplayOrientation::LOCKED,                              Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED,           Orientation::AUTO_ROTATION_UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP,                      Orientation::FOLLOW_DESKTOP},
 };
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
