@@ -3261,6 +3261,157 @@ HWTEST_F(WindowSessionTest, GetAttachState001, Function | SmallTest | Level2)
     session_->handler_->RemoveTask(taskName);
 }
 
+/**
+ * @tc.name: UpdateSizeChangeReason
+ * @tc.desc: UpdateSizeChangeReason UpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateSizeChangeReason, Function | SmallTest | Level2)
+{
+    SizeChangeReason reason = SizeChangeReason{1};
+    ASSERT_EQ(session_->UpdateSizeChangeReason(reason), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetPendingSessionActivationEventListener
+ * @tc.desc: SetPendingSessionActivationEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetPendingSessionActivationEventListener, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyPendingSessionActivationFunc callback = [&resultValue](const SessionInfo& info) {
+        resultValue = 1;
+    };
+
+    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    session_->SetPendingSessionActivationEventListener(callback);
+    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info) {
+        resultValue = 2;
+    };
+    session_->SetTerminateSessionListener(callback1);
+    LifeCycleTaskType taskType = LifeCycleTaskType{0};
+    session_->RemoveLifeCycleTask(taskType);
+    ASSERT_EQ(resultValue, 0);
+}
+
+/**
+ * @tc.name: SetSessionIcon
+ * @tc.desc: SetSessionIcon UpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionIcon, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> icon;
+    session_->SetSessionIcon(icon);
+    ASSERT_EQ(session_->Clear(), WSError::WS_OK);
+    session_->SetSessionSnapshotListener(nullptr);
+    ASSERT_EQ(session_->PendingSessionToForeground(), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetRaiseToAppTopForPointDownFunc
+ * @tc.desc: SetRaiseToAppTopForPointDownFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetRaiseToAppTopForPointDownFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetRaiseToAppTopForPointDownFunc(nullptr);
+    session_->RaiseToAppTopForPointDown();
+    session_->HandlePointDownDialog();
+    session_->ClearDialogVector();
+
+    session_->SetBufferAvailableChangeListener(nullptr);
+    session_->UnregisterSessionChangeListeners();
+    session_->SetSessionStateChangeNotifyManagerListener(nullptr);
+    session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
+    session_->NotifyFocusStatus(true);
+
+    session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
+    session_->SetNotifyUIRequestFocusFunc(nullptr);
+    session_->SetNotifyUILostFocusFunc(nullptr);
+    session_->UnregisterSessionChangeListeners();
+    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+}
+
+/**
+ * @tc.name: NotifyCloseExistPipWindow
+ * @tc.desc: check func NotifyCloseExistPipWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyCloseExistPipWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    ManagerState key = ManagerState{0};
+    session_->GetStateFromManager(key);
+    session_->NotifyUILostFocus();
+    session_->SetSystemSceneBlockingFocus(true);
+    session_->GetBlockingFocus();
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_CALL(*(mockSessionStage), NotifyCloseExistPipWindow()).Times(1).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WSError::WS_OK, session_->NotifyCloseExistPipWindow());
+    session_->sessionStage_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyCloseExistPipWindow());
+}
+
+/**
+ * @tc.name: SetSystemConfig
+ * @tc.desc: SetSystemConfig Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSystemConfig, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SystemSessionConfig systemConfig;
+    session_->SetSystemConfig(systemConfig);
+    float snapshotScale = 0.5;
+    session_->SetSnapshotScale(snapshotScale);
+    session_->ProcessBackEvent();
+    session_->NotifyOccupiedAreaChangeInfo(nullptr);
+    session_->UpdateMaximizeMode(true);
+    ASSERT_EQ(session_->GetZOrder(), 0);
+
+    session_->SetUINodeId(0);
+    session_->GetUINodeId();
+    session_->SetShowRecent(true);
+    session_->GetShowRecent();
+    session_->SetBufferAvailable(true);
+
+    session_->SetNeedSnapshot(true);
+    session_->SetFloatingScale(0.5);
+    ASSERT_EQ(session_->GetFloatingScale(), 0.5f);
+    session_->SetScale(50, 100, 50, 100);
+    session_->GetScaleX();
+    session_->GetScaleY();
+    session_->GetPivotX();
+    session_->GetPivotY();
+    session_->SetSCBKeepKeyboard(true);
+    session_->GetSCBKeepKeyboardFlag();
+    ASSERT_EQ(WSError::WS_OK, session_->MarkProcessed(11));
+}
+
+/**
+ * @tc.name: SetOffset
+ * @tc.desc: SetOffset Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetOffset, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetOffset(50, 100);
+    session_->GetOffsetX();
+    session_->GetOffsetY();
+    WSRectF bounds;
+    session_->SetBounds(bounds);
+    session_->GetBounds();
+    session_->TransferAccessibilityHoverEvent(50, 100, 50, 50, 500);
+    session_->UpdateTitleInTargetPos(true, 100);
+    session_->SetNotifySystemSessionPointerEventFunc(nullptr);
+    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
+    ASSERT_EQ(session_->GetBufferAvailable(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
