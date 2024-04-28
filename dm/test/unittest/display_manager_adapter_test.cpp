@@ -411,7 +411,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
