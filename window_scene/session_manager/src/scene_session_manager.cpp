@@ -8243,10 +8243,10 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     return height;
 }
 
-WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos permission denied!");
+        TLOGE(WmsLogTag::WMS_MAIN, "GetMainWindowInfos permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
@@ -8254,7 +8254,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    TLOGD(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos topNum: %{public}d", topNum);
+    TLOGD(WmsLogTag::WMS_MAIN, "GetMainWindowInfos topNum: %{public}d", topNum);
     auto func = [this, &topNum, &topNInfo](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
@@ -8265,16 +8265,16 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         }
 
         if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !IsSessionVisible(session)) {
-            TLOGD(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: not main window %{public}d", session->GetWindowType());
+            TLOGD(WmsLogTag::WMS_MAIN, "GetMainWindowInfos: not main window %{public}d", session->GetWindowType());
             return false;
         }
 
-        TopNMainWindowInfo info;
+        MainWindowInfo info;
         info.pid_ = session->GetCallingPid();
         info.bundleName_ = session->GetSessionInfo().bundleName_;
         topNInfo.push_back(info);
         topNum--;
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d,\
+        TLOGE(WmsLogTag::WMS_MAIN, "GetMainWindowInfos: topnNum: %{public}d, pid: %{public}d,\
             bundleName: %{public}s", topNum, info.pid_, info.bundleName_.c_str());
         return false;
     };
