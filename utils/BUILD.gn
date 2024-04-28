@@ -46,6 +46,7 @@ ohos_static_library("libwmutil_static") {
     "src/display_change_info.cpp",
     "src/display_info.cpp",
     "src/dms_reporter.cpp",
+    "src/js_err_utils.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
@@ -92,6 +93,7 @@ ohos_static_library("libwmutil_static") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
@@ -116,6 +118,7 @@ ohos_shared_library("libwmutil_base") {
     "src/cutout_info.cpp",
     "src/display_change_info.cpp",
     "src/display_info.cpp",
+    "src/js_err_utils.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/screenshot_info.cpp",
@@ -134,6 +137,7 @@ ohos_shared_library("libwmutil_base") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -145,6 +149,7 @@ ohos_shared_library("libwmutil_base") {
 ohos_shared_library("libwmutil") {
   sources = [
     "src/dms_reporter.cpp",
+    "src/js_err_utils.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
@@ -185,6 +190,7 @@ ohos_shared_library("libwmutil") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
