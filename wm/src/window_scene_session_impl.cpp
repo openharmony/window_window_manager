@@ -2799,6 +2799,19 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
             surfaceNode_->SetFrameGravity(Gravity::RIGHT);
         } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
             surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            ret = SetLayoutFullScreenByApiVersion(true);
+            if (ret != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+                    static_cast<int32_t>(ret), GetWindowId());
+            }
+            SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+            statusProperty.enable_ = false;
+            ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+            if (ret != WMError::WM_OK) {
+                WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+                    static_cast<int32_t>(ret), GetWindowId());
+            }
         }
     }
     return static_cast<WSError>(ret);

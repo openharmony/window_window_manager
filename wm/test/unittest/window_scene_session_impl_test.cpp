@@ -1859,6 +1859,36 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateWindowMode01, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: UpdateWindowMode02
+ * @tc.desc: UpdateWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateWindowMode02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
+              windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    windowscenesession->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
+              windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
+              windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    windowscenesession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_OK,
+              windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+}
+
+/**
  * @tc.name: RemoveWindowFlag01
  * @tc.desc: RemoveWindowFlag
  * @tc.type: FUNC
