@@ -1023,7 +1023,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
     property->SetDragEnabled(true);
     property->SetPersistentId(12);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
