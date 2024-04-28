@@ -202,7 +202,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent2, Function | MediumTest | Level
     EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
     EXPECT_NE(nullptr, sceneSession);
-    auto func = [&](std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) {
+    auto func = [](std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) {
         return true;
     };
     sceneSession->SetNotifySystemSessionKeyEventFunc(func);
@@ -213,7 +213,6 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent2, Function | MediumTest | Level
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
     EXPECT_EQ(MMI::KeyEvent::KEYCODE_FN, keyEvent->GetKeyCode());
     inputEventListener_->OnInputEvent(keyEvent);
-
 }
 
 /**
@@ -236,9 +235,9 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent3, Function | MediumTest | Level
     info.isSystem_ = true;
     sptr<SceneSession::SpecificSessionCallback> callback =
         new SceneSession::SpecificSessionCallback();
-    EXPECT_EQ(nullptr, callback);
+    EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
-    EXPECT_EQ(nullptr, sceneSession);
+    EXPECT_NE(nullptr, sceneSession);
     sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
     SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession));
     EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
@@ -257,7 +256,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent4, Function | MediumTest | Level
 {
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
         std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);;
-    EXPECT_NE(nullptr, inputEventListener->uiContent_);
+    EXPECT_EQ(nullptr, inputEventListener->uiContent_);
     std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
     inputEventListener->OnInputEvent(axisEvent);
     axisEvent = MMI::AxisEvent::Create();
