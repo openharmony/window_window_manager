@@ -462,11 +462,10 @@ WMError WindowManagerLite::RegisterWindowModeChangedListener(const sptr<IWindowM
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    WMError ret = WMError::WM_OK;
     if (pImpl_->windowModeListenerAgent_ == nullptr) {
         pImpl_->windowModeListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
     }
-    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE, pImpl_->windowModeListenerAgent_);
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
@@ -515,11 +514,10 @@ WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICamer
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    WMError ret = WMError::WM_OK;
     if (pImpl_->cameraWindowChangedListenerAgent_ == nullptr) {
         pImpl_->cameraWindowChangedListenerAgent_ = new WindowManagerAgentLite();
     }
-    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW, pImpl_->cameraWindowChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "RegisterWindowManagerAgent failed!");
