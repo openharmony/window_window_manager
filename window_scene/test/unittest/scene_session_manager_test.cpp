@@ -3929,7 +3929,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterEmptySceneSessionList, Func
 {
     std::vector<sptr<SceneSession>> sceneSessionList;
 
-    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionCovered(sceneSessionList);
     ASSERT_EQ(sceneSessionList.size(), 0);
 }
 
@@ -3953,7 +3953,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterOneWindow, Function | Small
     std::vector<sptr<SceneSession>> sceneSessionList;
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
-    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionCovered(sceneSessionList);
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
     ASSERT_EQ(accessibilityInfo.size(), 1);
 }
@@ -3984,7 +3984,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowNotCovered, Functi
     std::vector<sptr<SceneSession>> sceneSessionList;
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
-    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionCovered(sceneSessionList);
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
     ASSERT_EQ(accessibilityInfo.size(), 2);
 }
@@ -4017,7 +4017,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
     std::vector<sptr<SceneSession>> sceneSessionList;
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
-    ssm_->FilterSceneSessionForAccessibility(sceneSessionList);
+    ssm_->FilterSceneSessionCovered(sceneSessionList);
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
     ASSERT_EQ(accessibilityInfo.size(), 1);
 }
