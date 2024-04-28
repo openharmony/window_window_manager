@@ -42,6 +42,7 @@ class DisplayManager::Impl : public RefBase {
 public:
     Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
+    
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
