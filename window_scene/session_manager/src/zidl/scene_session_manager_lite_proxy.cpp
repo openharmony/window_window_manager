@@ -28,6 +28,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteProxy"};
+constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
 WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
@@ -798,6 +799,11 @@ WMError SceneSessionManagerLiteProxy::GetTopNMainWindowInfos(int32_t topNum, std
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    MAX_TOPN_INFO_SIZE
+    if ((topNum <= 0) || (topNum >= MAX_TOPN_INFO_SIZE)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteInt32(topNum)) {
