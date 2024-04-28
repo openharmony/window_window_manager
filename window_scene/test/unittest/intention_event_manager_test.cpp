@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#define private public
+#define PRIVATE PUBLIC
 #include "intention_event/include/intention_event_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
-#undef private
+#undef PRIVATE
 
 using namespace testing;
 using namespace testing::ext;
