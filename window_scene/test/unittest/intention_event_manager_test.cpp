@@ -15,11 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#define PRIVATE PUBLIC
 #include "intention_event/include/intention_event_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
-#undef PRIVATE
 
 using namespace testing;
 using namespace testing::ext;
@@ -179,7 +177,6 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent1, Function | MediumTest | Level
     SceneSessionManager::GetInstance().SetFocusedSessionId(2);
     EXPECT_EQ(2, SceneSessionManager::GetInstance().GetFocusedSessionId());
     inputEventListener_->OnInputEvent(keyEvent);
-
 }
 
 /**
