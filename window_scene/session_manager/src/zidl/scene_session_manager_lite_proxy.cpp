@@ -790,9 +790,9 @@ WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+WMError SceneSessionManagerLiteProxy::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos %{public}d", topNum);
+    TLOGI(WmsLogTag::WMS_MAIN, "get main info in %{public}d", topNum);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -806,19 +806,19 @@ WMError SceneSessionManagerLiteProxy::GetTopNMainWindowInfos(int32_t topNum, std
     }
 
     if (!data.WriteInt32(topNum)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos topNum write fail");
+        TLOGE(WmsLogTag::WMS_MAIN, "topNum write fail");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (Remote()->SendRequest(static_cast<int32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
                               data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos send request fail");
+        TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     WMError error = static_cast<WMError>(GetParcelableInfos(reply, topNInfo));
     if (error != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos");
+        TLOGE(WmsLogTag::WMS_MAIN, "get info error");
         return error;
     }
 
