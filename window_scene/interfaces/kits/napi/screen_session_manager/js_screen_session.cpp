@@ -419,9 +419,9 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     PowerStateChangeReason reason)
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    WLOGD("[UL_POWER]Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("Callback %{public}s is unregistered!", callbackType.c_str());
+        WLOGFW("[UL_POWER]Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -431,17 +431,17 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
         [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason](
             napi_env env, NapiAsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
-                WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+                WLOGFE("[UL_POWER]Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
             }
             auto method = jsCallbackRef->GetNapiValue();
             if (method == nullptr) {
-                WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+                WLOGFE("[UL_POWER]Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
             }
             auto screenSession = screenSessionWeak.promote();
             if (screenSession == nullptr) {
-                WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+                WLOGFE("[UL_POWER]Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                 return;
             }
             napi_value displayPowerEvent = CreateJsValue(env, static_cast<int32_t>(event));
