@@ -156,7 +156,7 @@ public:
      * @param topNInfo the top num window infos
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo);
+    WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 private:
     WindowManagerLite();
     ~WindowManagerLite();
