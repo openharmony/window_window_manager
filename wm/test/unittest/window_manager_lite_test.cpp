@@ -196,26 +196,26 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetTopNMainWindowInfos
+ * @tc.name: GetMainWindowInfos
  * @tc.desc: get top main window info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetTopNMainWindowInfos, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    std::vector<TopNMainWindowInfo> topNInfo;
-    std::vector<TopNMainWindowInfo> topNInfoResult;
-    TopNMainWindowInfo info1;
-    info1.pid = 1900;
-    info1.bundleName = "calendar";
+    std::vector<MainWindowInfo> topNInfo;
+    std::vector<MainWindowInfo> topNInfoResult;
+    MainWindowInfo info1;
+    info1.pid_ = 1900;
+    info1.bundleName_ = "calendar";
 
-    TopNMainWindowInfo info2;
-    info1.pid = 1901;
-    info1.bundleName = "settings";
+    MainWindowInfo info2;
+    info1.pid_ = 1901;
+    info1.bundleName_ = "settings";
 
-    TopNMainWindowInfo info3;
-    info1.pid = 1902;
-    info1.bundleName = "photos";
+    MainWindowInfo info3;
+    info1.pid_ = 1902;
+    info1.bundleName_ = "photos";
 
     topNInfoResult.push_back(info1);
     topNInfoResult.push_back(info2);
@@ -223,16 +223,16 @@ HWTEST_F(WindowManagerLiteTest, GetTopNMainWindowInfos, Function | SmallTest | L
 
     int32_t topN = 3;
 
-    EXPECT_CALL(m->Mock(), GetTopNMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
+    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
         Return(WMError::WM_OK)));
 
-    WindowManagerLite::GetInstance().GetTopNMainWindowInfos(topN, topNInfo);
+    WindowManagerLite::GetInstance().GetMainWindowInfos(topN, topNInfo);
 
     auto it1 = topNInfo.begin();
     auto it2 = topNInfoResult.begin();
     for (; it1 != topNInfo.end() && it2 != topNInfoResult.end(); it1++, it2++) {
-        ASSERT_EQ(it1->pid, it2->pid);
-        ASSERT_EQ(it1->bundleName, it2->bundleName);
+        ASSERT_EQ(it1->pid_, it2->pid_);
+        ASSERT_EQ(it1->bundleName_, it2->bundleName_);
     }
 }
 }
