@@ -1524,11 +1524,6 @@ void Session::PresentFocusIfPointDown()
     NotifyClick();
 }
 
-bool Session::IfNotNeedAvoidKeyBoardForSplit()
-{
-    return false;
-}
-
 void Session::HandlePointDownDialog()
 {
     auto dialogVec = GetDialogVector();

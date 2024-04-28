@@ -180,21 +180,6 @@ bool MainSession::IsTopmost() const
     return GetSessionProperty()->IsTopmost();
 }
 
-bool MainSession::IfNotNeedAvoidKeyBoardForSplit()
-{
-    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
-            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
-        return false;
-    }
-    if (Session::GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return false;
-    }
-    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
-        return false;
-    }
-    return true;
-}
-
 void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
