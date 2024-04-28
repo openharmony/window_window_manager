@@ -8250,7 +8250,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
-    if (!topNInfo.empty() || (topNum <= 0)) {topn
+    if (!topNInfo.empty() || (topNum <= 0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
