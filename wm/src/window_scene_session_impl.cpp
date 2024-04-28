@@ -3127,7 +3127,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
 {
     const Rect& windowRect = GetRequestRect();
     uint32_t maskHeight = windowMask.size();
-    if (maskHeight <= 0) {
+    if (maskHeight == 0) {
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
@@ -3163,7 +3163,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         }
     }
     std::unique_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
-    delete[] data;
+    free(data);
     return mask;
 }
 
