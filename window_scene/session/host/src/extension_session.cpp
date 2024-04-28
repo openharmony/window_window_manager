@@ -289,6 +289,24 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
     return ret;
 }
 
+WSError ExtensionSession::TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent)
+{
+    if (windowEventChannel_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    TLOGI(WmsLogTag::WMS_EVENT, "In with isPreImeEvent(%{public}d), id:%{public}d", isPreImeEvent, keyEvent->GetId());
+    channelListener_->ResetTransferKeyEventForConsumedParams();
+    auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, channelListener_);
+    TLOGI(WmsLogTag::WMS_EVENT, "ret is %{public}d in id:%{public}d.", ret, keyEvent->GetId());
+    return ret;
+}
+
 sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExtensionSessionEventCallback()
 {
     if (extSessionEventCallback_ == nullptr) {
