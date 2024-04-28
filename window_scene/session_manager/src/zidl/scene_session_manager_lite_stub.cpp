@@ -86,7 +86,7 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
         &SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
-        &SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo),
+        &SceneSessionManagerLiteStub::HandleGetMainWinodowInfo),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -428,28 +428,28 @@ int SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(MessageParcel &da
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetTopNMainWinodowInfo lite");
+    TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetMainWinodowInfo lite");
     int32_t topN = 0;
     if (!data.ReadInt32(topN)) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed to read topN");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
-    std::vector<TopNMainWindowInfo> topNInfos;
-    WMError errCode = GetTopNMainWindowInfos(topN, topNInfos);
+    TLOGD(WmsLogTag::WMS_MAIN, "topN :%{public}d", topN);
+    std::vector<MainWindowInfo> topNInfos;
+    WMError errCode = GetMainWindowInfos(topN, topNInfos);
     if ((topNInfos.size() <= 0) || (topNInfos.size() >= MAX_TOPN_INFO_SIZE)) {
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(topNInfos.size());
     for (auto& it : topNInfos) {
         if (!reply.WriteParcelable(&it)) {
-            TLOGE(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo write topNinfo fail");
+            TLOGE(WmsLogTag::WMS_MAIN, "write topNinfo fail");
             return ERR_INVALID_DATA;
         }
 
-        TLOGI(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s",
+        TLOGI(WmsLogTag::WMS_MAIN, "pid %{public}d, name %{public}s",
             it.pid_, it.bundleName_.c_str());
     }
 
