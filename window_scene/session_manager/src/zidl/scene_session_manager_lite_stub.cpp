@@ -430,13 +430,13 @@ int SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(MessageParcel &da
 
 int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGI("run HandleGetTopNMainWinodowInfo lite");
+    TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetTopNMainWinodowInfo lite");
     int32_t topN = 0;
     if (!data.ReadInt32(topN)) {
-        WLOGFE("failed to read topN");
+        TLOGE(WmsLogTag::WMS_MAIN, "failed to read topN");
         return ERR_INVALID_DATA;
     }
-    WLOGFD("HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
+    TLOGD(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
     std::vector<TopNMainWindowInfo> topNInfos;
     WMError errCode = GetTopNMainWindowInfos(topN, topNInfos);
     if ((topNInfos.size() <= 0) || (topNInfos.size() >= MAX_TOPN_INFO_SIZE)) {
@@ -445,11 +445,11 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
     reply.WriteInt32(topNInfos.size());
     for (auto& it : topNInfos) {
         if (!reply.WriteParcelable(&it)) {
-            WLOGFE("HandleGetTopNMainWinodowInfo write topNinfo fail");
+            TLOGE(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo write topNinfo fail");
             return ERR_INVALID_DATA;
         }
 
-        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid_, it.bundleName_.c_str());
+        TLOGI(WmsLogTag::WMS_MAIN, "HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid_, it.bundleName_.c_str());
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
