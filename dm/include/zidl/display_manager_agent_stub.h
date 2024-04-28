@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 
-
 #include <cstdint>
 #include <iremote_stub.h>
 #include <message_option.h>

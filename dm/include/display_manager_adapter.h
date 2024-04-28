@@ -80,15 +80,10 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     virtual bool IsFoldable();
     virtual bool IsCaptured();
-
     virtual FoldStatus GetFoldStatus();
-
     virtual FoldDisplayMode GetFoldDisplayMode();
-
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
-
     virtual void SetFoldStatusLocked(bool locked);
-
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -124,7 +119,6 @@ public:
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
     virtual DMError SetScreenRotationLocked(bool isLocked);
     virtual DMError IsScreenRotationLocked(bool& isLocked);
-
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
     virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut);
@@ -132,7 +126,6 @@ public:
     virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
     virtual DMError SetScreenColorTransform(ScreenId screenId);
-
     virtual DMError GetPixelFormat(ScreenId screenId, GraphicPixelFormat& pixelFormat);
     virtual DMError SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat);
     virtual DMError GetSupportedHDRFormats(ScreenId screenId, std::vector<ScreenHDRFormat>& hdrFormats);
@@ -143,10 +136,8 @@ public:
     virtual DMError SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace);
     virtual DMError GetSupportedHDRFormats(ScreenId screenId, std::vector<uint32_t>& hdrFormats);
     virtual DMError GetSupportedColorSpaces(ScreenId screenId, std::vector<uint32_t>& colorSpaces);
-
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
-
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
