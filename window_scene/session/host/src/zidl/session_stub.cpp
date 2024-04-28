@@ -103,6 +103,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetCallingSessionId),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
         &SessionStub::HandleSetCustomDecorHeight),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
+        &SessionStub::HandleAdjustKeyboardLayout),
 
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -657,6 +659,15 @@ int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& 
     TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
     int32_t height = data.ReadInt32();
     SetCustomDecorHeight(height);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleAdjustKeyboardLayout!");
+    sptr<KeyboardLayoutParams> keyboardLayoutParams = data.ReadParcelable<KeyboardLayoutParams>();
+    WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

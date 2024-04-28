@@ -104,6 +104,7 @@ public:
     }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
+    virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

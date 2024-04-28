@@ -79,7 +79,7 @@ public:
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
-
+    WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

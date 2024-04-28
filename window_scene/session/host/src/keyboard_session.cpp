@@ -231,6 +231,29 @@ uint32_t KeyboardSession::GetCallingSessionId()
     return GetSessionProperty()->GetCallingSessionId();
 }
 
+WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
+{
+    auto task = [weakThis = wptr(this), params]() -> WSError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
+            "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
+            "PortraitPanelRect: %{public}s", session->GetPersistentId(), static_cast<uint32_t>(params.gravity_),
+            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+            params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
+        if (session->GetSessionProperty()) {
+            session->GetSessionProperty()->SetKeyboardLayoutParams(params);
+        }
+
+        return WSError::WS_OK;
+    };
+    PostTask(task, "AdjustKeyboardLayout");
+    return WSError::WS_OK;
+}
+
 sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistentId)
 {
     if (keyboardCallback_ == nullptr || keyboardCallback_->onGetSceneSession_ == nullptr) {

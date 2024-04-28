@@ -360,6 +360,15 @@ void WindowSessionProperty::SetKeyboardSessionGravity(SessionGravity gravity, ui
     sessionGravitySizePercent_ = percent;
 }
 
+void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
+{
+    keyboardLayoutParams_.gravity_ = params.gravity_;
+    keyboardLayoutParams_.LandscapeKeyboardRect_ = params.LandscapeKeyboardRect_;
+    keyboardLayoutParams_.PortraitKeyboardRect_ = params.PortraitKeyboardRect_;
+    keyboardLayoutParams_.LandscapePanelRect_ = params.LandscapePanelRect_;
+    keyboardLayoutParams_.PortraitPanelRect_ = params.PortraitPanelRect_;
+}
+
 void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
 {
     gravity = sessionGravity_;
@@ -640,7 +649,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
-        MarshallingWindowMask(parcel);
+        MarshallingWindowMask(parcel) &&
+        parcel.WriteParcelable(&keyboardLayoutParams_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -695,6 +705,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
     UnmarshallingWindowMask(parcel, property);
+    sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
+    property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     return property;
 }
 

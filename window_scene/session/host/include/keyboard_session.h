@@ -63,6 +63,7 @@ private:
     void RelayoutKeyBoard();
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
+    WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
 };
