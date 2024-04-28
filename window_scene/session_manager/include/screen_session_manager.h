@@ -258,6 +258,7 @@ private:
     void ConfigureScreenScene();
     void ConfigureDpi();
     void ConfigureWaterfallDisplayCompressionParams();
+    void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void RegisterRefreshRateChangeListener();

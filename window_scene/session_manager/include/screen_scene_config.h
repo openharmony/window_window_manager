@@ -62,6 +62,7 @@ private:
     static void ReadStringConfigInfo(const xmlNodePtr& currNode);
     static void ReadStringListConfigInfo(const xmlNodePtr& currNode, std::string name);
     static std::string GetConfigPath(const std::string& configFileName);
+    static void ParseNodeConfig(const xmlNodePtr& currNode);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);
     static bool IsNumber(std::string str);

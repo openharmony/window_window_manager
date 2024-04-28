@@ -680,7 +680,20 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
         WLOGFE("DisplayManager::GetSnapshotByPicker failed!");
         return nullptr;
     }
-    return screenShot;
+    WLOGFI("snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
+        rect.left, rect.top, rect.width, rect.height);
+    // create crop pixel map
+    Media::InitializationOptions opt;
+    opt.size.width = rect.width;
+    opt.size.height = rect.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media pixel map create failed");
+        return nullptr;
+    }
+    return pixelMap;
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
