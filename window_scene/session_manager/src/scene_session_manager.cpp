@@ -5701,6 +5701,9 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
         AAFwk::Want want;
         want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
+        if (sessionInfo.want != nullptr) {
+            want.SetParams(sessionInfo.want->GetParams());
+        }
         AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
     };
 
