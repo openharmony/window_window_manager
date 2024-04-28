@@ -40,6 +40,7 @@
 #include "display_change_listener.h"
 #include "app_debug_listener_interface.h"
 #include "app_mgr_client.h"
+#include "include/core/SkRegion.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -462,11 +463,11 @@ private:
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void ReportWindowProfileInfos();
+    std::shared_ptr<SkRegion> GetDisplayRegion(DisplayId displayId);
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
-    bool IsCovered(const sptr<SceneSession>& session, const std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
-    void FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
+    void FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList);
     void NotifyAllAccessibilityInfo();
 
     sptr<RootSceneSession> rootSceneSession_;

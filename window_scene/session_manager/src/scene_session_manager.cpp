@@ -47,6 +47,8 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "screen_manager.h"
 #include "screen.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkRegion.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -8019,6 +8021,24 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return WSError::WS_OK;
 }
 
+std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displayId)
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get display object failed of display: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    int32_t displayWidth = display->GetWidth();
+    int32_t displayHeight = display->GetHeight();
+    if (displayWidth == 0 || displayHeight == 0) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+
+    SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
+    return std::make_shared<SkRegion>(rect);
+}
+
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -8048,52 +8068,63 @@ void SceneSessionManager::FillAccessibilityInfo(std::vector<sptr<SceneSession>>&
     }
 }
 
-bool SceneSessionManager::IsCovered(const sptr<SceneSession>& sceneSession,
-                                    const std::vector<sptr<SceneSession>>& sceneSessionList)
+void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "invalid parameter, scene session is nullptr.");
-        return true;
+    std::sort(sceneSessionList.begin(), sceneSessionList.end(), [](sptr<SceneSession> a, sptr<SceneSession> b) {
+        return a->GetZOrder() > b->GetZOrder();
+    });
+    std::vector<sptr<SceneSession>> result;
+    std::unordered_map<DisplayId, std::shared_ptr<SkRegion>> unaccountedSpaceMap;
+    for (const auto& sceneSession : sceneSessionList) {
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "invalid scene session");
+            continue;
+        }
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "get property of session: %{public}d", sceneSession->GetPersistentId());
+            continue;
+        }
+        std::shared_ptr<SkRegion> unaccountedSpace = nullptr;
+        auto displayId = sessionProperty->GetDisplayId();
+        if (unaccountedSpaceMap.find(displayId) != unaccountedSpaceMap.end()) {
+            unaccountedSpace = unaccountedSpaceMap[displayId];
+        } else {
+            unaccountedSpace = GetDisplayRegion(displayId);
+            if (unaccountedSpace == nullptr) {
+                TLOGE(WmsLogTag::WMS_MAIN, "get display region of display: %{public}" PRIu64, displayId);
+                continue;
+            }
+            unaccountedSpaceMap[displayId] = unaccountedSpace;
+        }
+        WSRect wsRect = sceneSession->GetSessionRect();
+        SkIRect windowBounds {.fLeft = wsRect.posX_, .fTop = wsRect.posY_,
+                              .fRight = wsRect.posX_ + wsRect.width_, .fBottom = wsRect.posY_ + wsRect.height_};
+        SkRegion windowRegion(windowBounds);
+        if (unaccountedSpace->quickReject(windowRegion)) {
+            TLOGD(WmsLogTag::WMS_MAIN, "quick reject: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
+                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
+            continue;
+        }
+        if (!unaccountedSpace->intersects(windowRegion)) {
+            TLOGD(WmsLogTag::WMS_MAIN, "no intersects: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
+                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
+            continue;
+        }
+        result.push_back(sceneSession);
+        unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
+        if (unaccountedSpace->isEmpty()) {
+            break;
+        }
     }
-
-    WSRect windowWSRect = sceneSession->GetSessionRect();
-    Rect windowRect = {windowWSRect.posX_, windowWSRect.posY_,
-                       windowWSRect.width_, windowWSRect.height_};
-    for (const auto& item : sceneSessionList) {
-        if (item == nullptr) {
-            continue;
-        }
-        if (item->GetWindowId() == sceneSession->GetWindowId()) {
-            continue;
-        }
-        if (sceneSession->GetZOrder() > item->GetZOrder()) {
-            continue;
-        }
-        WSRect itemWSRect = item->GetSessionRect();
-        Rect itemRect = {itemWSRect.posX_, itemWSRect.posY_, itemWSRect.width_, itemWSRect.height_};
-        if (windowRect.IsInsideOf(itemRect) && sceneSession->GetZOrder() < item->GetZOrder()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void SceneSessionManager::FilterSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
-{
-    for (auto it = sceneSessionList.begin(); it != sceneSessionList.end();) {
-        if (IsCovered(it->GetRefPtr(), sceneSessionList)) {
-            it = sceneSessionList.erase(it);
-            continue;
-        }
-        it++;
-    }
+    sceneSessionList = result;
 }
 
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     std::vector<sptr<SceneSession>> sceneSessionList;
     GetAllSceneSessionForAccessibility(sceneSessionList);
-    FilterSceneSessionForAccessibility(sceneSessionList);
+    FilterSceneSessionCovered(sceneSessionList);
 
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
