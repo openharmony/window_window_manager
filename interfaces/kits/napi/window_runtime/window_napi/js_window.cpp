@@ -1629,6 +1629,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
         WLOGFE("Window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    sptr<Window> windowToken = windowToken_;
     constexpr size_t argcMin = 2;
     constexpr size_t argcMax = 3;
     size_t argc = 4;
@@ -1655,13 +1656,13 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
         parameter = argv[cbIndex - 1];
     }
 
-    WmErrorCode ret = registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW,
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken, cbType, CaseType::CASE_WINDOW,
         env, callback, parameter);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
     WLOGI("Register end, window [%{public}u, %{public}s], type = %{public}s",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str());
+        windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
 
