@@ -106,20 +106,20 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
         const std::string& windowName = windowNode->GetWindowName().size() <= WINDOW_NAME_MAX_LENGTH ?
             windowNode->GetWindowName() : windowNode->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
-        oss << std::left << std::setw(21) << windowName
-            << std::left << std::setw(10) << windowNode->GetDisplayId()
-            << std::left << std::setw(8) << windowNode->GetCallingPid()
-            << std::left << std::setw(6) << windowNode->GetWindowId()
-            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType())
-            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode())
-            << std::left << std::setw(5) << windowNode->GetWindowFlags()
-            << std::left << std::setw(5) << --zOrder
-            << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->GetRequestedOrientation())
+        oss << std::left << std::setw(21) << windowName // 21 is width
+            << std::left << std::setw(10) << windowNode->GetDisplayId() // 10 is width
+            << std::left << std::setw(8) << windowNode->GetCallingPid() // 8 is width
+            << std::left << std::setw(6) << windowNode->GetWindowId() // 6 is width
+            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType()) // 5 is width
+            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode()) // 5 is width
+            << std::left << std::setw(5) << windowNode->GetWindowFlags() // 5 is width
+            << std::left << std::setw(5) << --zOrder // 5 is width
+            << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->GetRequestedOrientation()) // 12 is width
             << "[ "
-            << std::left << std::setw(5) << rect.posX_
-            << std::left << std::setw(5) << rect.posY_
-            << std::left << std::setw(5) << rect.width_
-            << std::left << std::setw(5) << rect.height_
+            << std::left << std::setw(5) << rect.posX_ // 5 is width
+            << std::left << std::setw(5) << rect.posY_ // 5 is width
+            << std::left << std::setw(5) << rect.width_ // 5 is width
+            << std::left << std::setw(5) << rect.height_ // 5 is width
             << "]"
             << std::endl;
     }
