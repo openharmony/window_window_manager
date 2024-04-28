@@ -404,11 +404,11 @@ struct PointInfo {
 struct TopNMainWindowInfo : public Parcelable {
     virtual bool Marshalling(Parcel &parcel) const override
     {
-        if (!parcel.WriteInt32(pid)) {
+        if (!parcel.WriteInt32(pid_)) {
             return false;
         }
 
-        if (!parcel.WriteString(bundleName)) {
+        if (!parcel.WriteString(bundleName_)) {
             return false;
         }
 
@@ -418,13 +418,13 @@ struct TopNMainWindowInfo : public Parcelable {
     static TopNMainWindowInfo* Unmarshalling(Parcel& parcel)
     {
         TopNMainWindowInfo* topNMainWindowInfo = new TopNMainWindowInfo;
-        topNMainWindowInfo->pid = parcel.ReadInt32();
-        topNMainWindowInfo->bundleName = parcel.ReadString();
+        topNMainWindowInfo->pid_ = parcel.ReadInt32();
+        topNMainWindowInfo->bundleName_ = parcel.ReadString();
         return topNMainWindowInfo;
     }
 
-    int32_t pid;
-    std::string bundleName;
+    int32_t pid_ = 0;
+    std::string bundleName_ = "";
 };
 
 namespace {
