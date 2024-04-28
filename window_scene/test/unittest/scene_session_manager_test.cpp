@@ -2396,33 +2396,43 @@ HWTEST_F(SceneSessionManagerTest, ProcessBackEvent, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: CleanUserMap
- * @tc.desc: SceneSesionManager clear user map
+ * @tc.name: InitUserInfo
+ * @tc.desc: SceneSesionManager init user info
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, CleanUserMap, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, InitUserInfo, Function | SmallTest | Level3)
 {
-    int ret = 0;
-    ssm_->CleanUserMap();
-    ASSERT_EQ(ret, 0);
+    int32_t newUserId = 10086;
+    std::string fileDir;
+    WSError result01 = ssm_->InitUserInfo(newUserId, fileDir);
+    ASSERT_EQ(result01, WSError::WS_DO_NOTHING);
+    fileDir = "newFileDir";
+    WSError result02 = ssm_->InitUserInfo(newUserId, fileDir);
+    ASSERT_EQ(result02, WSError::WS_OK);
 }
 
 /**
- * @tc.name: SwitchUser
- * @tc.desc: SceneSesionManager switch user
+ * @tc.name: HandleSwitchingToAnotherUser
+ * @tc.desc: SceneSesionManager handle switching to another user
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleSwitchingToAnotherUser, Function | SmallTest | Level3)
 {
-    int32_t oldUserId = 10086;
-    int32_t newUserId = 10086;
-    std::string fileDir;
-    WSError result01 = ssm_->SwitchUser(oldUserId, newUserId, fileDir);
-    ASSERT_EQ(result01, WSError::WS_DO_NOTHING);
-    fileDir = "newFileDir";
-    oldUserId = ssm_->GetCurrentUserId();
-    WSError result02 = ssm_->SwitchUser(oldUserId, newUserId, fileDir);
-    ASSERT_EQ(result02, WSError::WS_OK);
+    int ret = 0;
+    ssm_->HandleSwitchingToAnotherUser();
+    ASSERT_EQ(ret, 0);
+}
+ 
+/**
+ * @tc.name: NotifySwitchingToCurrentUser
+ * @tc.desc: SceneSesionManager notify switching to current user
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySwitchingToCurrentUser, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->NotifySwitchingToCurrentUser();
+    ASSERT_EQ(ret, 0);
 }
 
 /**

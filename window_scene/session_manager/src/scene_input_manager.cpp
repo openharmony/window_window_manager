@@ -371,10 +371,25 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
 }
 
-void SceneInputManager::FlushDisplayInfoToMMI()
+void SceneInputManager::SetUserBackground(bool userBackground)
 {
-    auto task = [this]() {
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
+    isUserBackground_ = userBackground;
+}
+
+bool SceneInputManager::IsUserBackground()
+{
+    return isUserBackground_;
+}
+
+void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
+{
+    auto task = [this, forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
+        if (isUserBackground_) {
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
+            return;
+        }
         if (sceneSessionDirty_ == nullptr) {
             return;
         }
@@ -382,7 +397,7 @@ void SceneInputManager::FlushDisplayInfoToMMI()
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
         std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
-        if (!CheckNeedUpdate(displayInfos, windowInfoList)) {
+        if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
         PrintWindowInfo(windowInfoList);
