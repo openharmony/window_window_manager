@@ -687,11 +687,6 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.minWidth_ = static_cast<uint32_t>(customizedLimits.minWidth_ * virtualPixelRatio);
         customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
-    if (customizedLimits.maxWidth_ < customizedLimits.minWidth_ ||
-        customizedLimits.maxHeight_ < customizedLimits.minHeight_) {
-        virtualPixelRatio = 0.0f;
-        return;
-    }
     newLimits = systemLimits;
 
     // calculate new limit size
@@ -845,8 +840,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
     auto displayInfo = display->GetDisplayInfo();
     float density = GetVirtualPixelRatio(displayInfo);
-    if (MathHelper::NearZero(virtualPixelRatio_ - density) ||
-        MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
+    if (!MathHelper::NearZero(virtualPixelRatio_ - density) ||
+        !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
         UpdateDensity();
     }
 
@@ -1295,7 +1290,7 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height, vpr);
 
-    if (MathHelper::NearZero(vpr) || MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr)) {
+    if (!MathHelper::NearZero(vpr) || !MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr)) {
         UpdateWindowSizeLimits();
     }
     UpdateFloatingWindowSizeBySizeLimits(width, height);
