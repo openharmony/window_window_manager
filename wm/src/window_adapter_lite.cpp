@@ -145,7 +145,7 @@ WMError WindowAdapterLite::GetWindowBackHomeStatus(bool &isBackHome)
 WMError WindowAdapterLite::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    WLOGFD("get top main window info");
+    TLOGD(WmsLogTag::WMS_MAIN, "get top main window info");
     return windowManagerServiceProxy_->GetTopNMainWindowInfos(topNum, topNInfo);
 }
 } // namespace Rosen
