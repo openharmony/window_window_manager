@@ -204,8 +204,8 @@ WMError SceneSessionManagerLite::GetWindowBackHomeStatus(bool &isBackHome)
     return SceneSessionManager::GetInstance().GetWindowBackHomeStatus(isBackHome);
 }
 
-WMError SceneSessionManagerLite::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
+WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
-    return SceneSessionManager::GetInstance().GetTopNMainWindowInfos(topNum, topNInfo);
+    return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 } // namespace OHOS::Rosen
