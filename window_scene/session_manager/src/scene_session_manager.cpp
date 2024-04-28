@@ -2788,7 +2788,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str())) {
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA)) {
         WLOGFW("Add resource %{private}s failed.", loadPath.c_str());
     }
     return resourceMgr;
