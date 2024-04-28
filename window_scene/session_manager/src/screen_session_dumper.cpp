@@ -65,6 +65,7 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     const std::string STATUS_FOLD_HALF = "-z";
     const std::string STATUS_EXPAND = "-y";
     const std::string STATUS_FOLD = "-p";
+    const std::string ARG_DUMP_FOLD_STATUS = "-f";
     if (params_.empty() || params_[0] == ARG_DUMP_HELP) { //help command
         ShowHelpInfo();
     }
@@ -75,6 +76,8 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     }
     if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
         ShowAllScreenInfo();
+    } else if (!params_.empty() && params_[0] == ARG_DUMP_FOLD_STATUS) { // dump fold status command
+        DumpFoldStatus();
     } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
         params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
         ShowNotifyFoldStatusChangedInfo();
@@ -109,7 +112,9 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append(" -y                             ")
         .append("|switch to expand status\n")
         .append(" -p                             ")
-        .append("|switch to fold status\n");
+        .append("|switch to fold status\n")
+        .append(" -f                             ")
+        .append("|get to fold status\n");
 }
 
 void ScreenSessionDumper::ShowAllScreenInfo()
@@ -119,12 +124,41 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         std::ostringstream oss;
         oss << "---------------- Screen ID: " << screenId << " ----------------" << std::endl;
         dumpInfo_.append(oss.str());
+        DumpFoldStatus();
         DumpScreenSessionById(screenId);
         DumpRsInfoById(screenId);
         DumpCutoutInfoById(screenId);
         DumpScreenInfoById(screenId);
         DumpScreenPropertyById(screenId);
     }
+}
+
+void ScreenSessionDumper::DumpFoldStatus()
+{
+    std::ostringstream oss;
+    auto foldStatus = ScreenSessionManager::GetInstance().GetFoldStatus();
+    std::string status = "";
+    switch (foldStatus) {
+        case FoldStatus::EXPAND: {
+            status = "EXPAND";
+            break;
+        }
+        case FoldStatus::FOLDED: {
+            status = "FOLDED";
+            break;
+        }
+        case FoldStatus::HALF_FOLD: {
+            status = "HALF_FOLD";
+            break;
+        }
+        default: {
+            status = "UNKNOWN";
+            break;
+        }
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "FoldStatus: "
+        << status << std::endl;
+    dumpInfo_.append(oss.str());
 }
 
 void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)

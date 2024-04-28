@@ -41,6 +41,7 @@ public:
 private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
+    void DumpFoldStatus();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
