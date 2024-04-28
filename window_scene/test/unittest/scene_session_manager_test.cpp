@@ -3972,25 +3972,25 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
 }
 
 /**
- * @tc.name: GetTopNMainWindowInfos
+ * @tc.name: GetMainWindowInfos
  * @tc.desc: SceneSesionManager get topN main window infos;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, GetTopNMainWindowInfos, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Level3)
 {
     int32_t topNum = 1024;
-    std::vector<TopNMainWindowInfo> topNInfos;
-    auto result = ssm_->GetTopNMainWindowInfos(topNum, topNInfos);
+    std::vector<MainWindowInfo> topNInfos;
+    auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 
     topNum = 0;
-    result = ssm_->GetTopNMainWindowInfos(topNum, topNInfos);
+    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 
     topNum = 1000;
-    TopNMainWindowInfo info;
+    MainWindowInfo info;
     topNInfos.push_back(info);
-    result = ssm_->GetTopNMainWindowInfos(topNum, topNInfos);
+    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
