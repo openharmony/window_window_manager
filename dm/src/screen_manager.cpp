@@ -25,7 +25,6 @@
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 
-
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "ScreenManager"};
