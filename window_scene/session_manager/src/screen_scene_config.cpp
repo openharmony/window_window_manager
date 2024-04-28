@@ -49,6 +49,8 @@ enum XmlNodeElement {
     ROTATION_POLICY,
     HALL_SWITCH_APP,
     PACKAGE_NAME,
+    SCREEN_SNAPSHOT_BUNDLE_NAME,
+    SCREEN_SNAPSHOT_ABILITY_NAME
 };
 }
 
@@ -75,6 +77,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {ROTATION_POLICY, "rotationPolicy"},
     {HALL_SWITCH_APP, "hallSwitchApp"},
     {PACKAGE_NAME, "packageName"},
+    {SCREEN_SNAPSHOT_BUNDLE_NAME, "screenSnapshotBundleName"},
+    {SCREEN_SNAPSHOT_ABILITY_NAME, "screenSnapshotAbilityName"},
 };
 
 
@@ -132,7 +136,6 @@ bool ScreenSceneConfig::LoadConfigXml()
         WLOGFE("[SsConfig] load xml error!");
         return false;
     }
-
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
@@ -140,36 +143,44 @@ bool ScreenSceneConfig::LoadConfigXml()
         xmlFreeDoc(docPtr);
         return false;
     }
-
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
             WLOGFE("SsConfig]: invalid node!");
             continue;
         }
-
-        std::string nodeName(reinterpret_cast<const char*>(curNodePtr->name));
-        if ((xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
-            (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName)) {
-            ReadEnableConfigInfo(curNodePtr);
-        } else if ((xmlNodeMap_[DPI] == nodeName) ||
-            (xmlNodeMap_[SUB_DPI] == nodeName) ||
-            (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
-            (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
-            (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
-            (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName)) {
-            ReadIntNumbersConfigInfo(curNodePtr);
-        } else if ((xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
-            (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
-            (xmlNodeMap_[ROTATION_POLICY] == nodeName)) {
-            ReadStringConfigInfo(curNodePtr);
-        } else if (xmlNodeMap_[HALL_SWITCH_APP] == nodeName) {
-            ReadStringListConfigInfo(curNodePtr, nodeName);
-        } else {
-            WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
-        }
+        ParseNodeConfig(curNodePtr);
     }
     xmlFreeDoc(docPtr);
     return true;
+}
+
+void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
+{
+    std::string nodeName(reinterpret_cast<const char*>(currNode->name));
+    bool enableConfigCheck = (xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
+        (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName);
+    bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
+        (xmlNodeMap_[SUB_DPI] == nodeName) ||
+        (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
+        (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
+        (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
+        (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName);
+    bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
+        (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
+        (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
+        (xmlNodeMap_[SCREEN_SNAPSHOT_BUNDLE_NAME] == nodeName) ||
+        (xmlNodeMap_[SCREEN_SNAPSHOT_ABILITY_NAME] == nodeName);
+    if (enableConfigCheck) {
+        ReadEnableConfigInfo(currNode);
+    } else if (numberConfigCheck) {
+        ReadIntNumbersConfigInfo(currNode);
+    } else if (stringConfigCheck) {
+        ReadStringConfigInfo(currNode);
+    } else if (xmlNodeMap_[HALL_SWITCH_APP] == nodeName) {
+        ReadStringListConfigInfo(currNode, nodeName);
+    } else {
+        WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
+    }
 }
 
 bool ScreenSceneConfig::IsValidNode(const xmlNode& currNode)
