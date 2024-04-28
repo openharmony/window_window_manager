@@ -148,6 +148,7 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void UpdateDensity() override;
+    WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
 protected:
     void DestroySubWindow();
