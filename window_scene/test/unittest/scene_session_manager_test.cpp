@@ -3287,6 +3287,38 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateParentSessionForDialog001
+ * @tc.desc: SceneSesionManager update parent session for dialog
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, Function | SmallTest | Level3)
+{
+    SessionInfo dialogInfo;
+    dialogInfo.abilityName_ = "DialogWindows";
+    dialogInfo.bundleName_ = "DialogWindows";
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentWindows";
+    parentInfo.bundleName_ = "ParentWindows";
+
+    int32_t persistentId = 1005;
+    sptr<SceneSession> parentSession = new (std::nothrow) MainSession(parentInfo, nullptr);
+    EXPECT_NE(parentSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, parentSession });
+
+    sptr<SceneSession> dialogSession = new (std::nothrow) SystemSession(dialogInfo, nullptr);
+    EXPECT_NE(dialogSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetParentPersistentId(persistentId);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+
+    WSError result = ssm_->UpdateParentSessionForDialog(dialogSession, property);
+    EXPECT_EQ(dialogSession->GetParentPersistentId(), persistentId);
+    EXPECT_NE(dialogSession->GetParentSession(), nullptr);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: MoveSessionsToBackground
  * @tc.desc: SceneSesionManager move sessions to background
  * @tc.type: FUNC
