@@ -28,7 +28,7 @@ extern "C" {
  * @param keyEvent multimodal keyEvent
  * @since 12
  */
-typedef bool (*KeyEventFilter)(Input_KeyEvent* keyEvent);
+typedef bool (*OH_NativeWindowManager_KeyEventFilter)(Input_KeyEvent* keyEvent);
 
 /**
  * @brief Registers a filter callback for the window, the callback is called when the
@@ -40,8 +40,8 @@ typedef bool (*KeyEventFilter)(Input_KeyEvent* keyEvent);
  * @return Returns the status code of the execution.
  * @since 12
  */
-OH_WMErrCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
-    KeyEventFilter keyEventFilter);
+WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
+    OH_NativeWindowManager_KeyEventFilter keyEventFilter);
 
 /**
  * @brief clear callback for the window
@@ -50,7 +50,7 @@ OH_WMErrCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
  * @return Returns the status code of the execution.
  * @since 12
  */
-OH_WMErrCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId);
+WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId);
 
 #ifdef __cplusplus
 }
