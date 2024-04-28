@@ -2332,17 +2332,17 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     bool isPc = g_deviceType == "2in1";
     bool isPhone = g_deviceType == "phone";
     if (!isPc && !isPhone) {
-        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
+        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
             "persistentId:%{public}d", persistentId_);
         return false;
     }
     if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
-        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: Screen is locked, "
+        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Screen is locked, "
             "persistentId:%{public}d", persistentId_);
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType())) {
-        TLOGD(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support mainwindow, "
+        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support mainwindow, "
             "persistentId:%{public}d", persistentId_);
         return false;
     }
