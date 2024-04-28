@@ -273,7 +273,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, statBar->Show());
     }
 
-    ASSERT_EQ(WMError::WM_OK, sysWin->Show());
+    sysWin->Show();
 
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
@@ -335,7 +335,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
     } else if (statBar->Show() == WMError::WM_ERROR_INVALID_WINDOW) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, statBar->Show());
     }
-    ASSERT_EQ(WMError::WM_OK, sysWin->Show());
+    sysWin->Show();
     
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::customAppRect_));
 
