@@ -23,7 +23,9 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteStub"};
 constexpr uint32_t MAX_VECTOR_SIZE = 100;
+constexpr uint32_t MAX_TOPN_INFO_SIZE = 200;
 }
+
 
 const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLiteStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL),
@@ -437,7 +439,9 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
     WLOGFD("HandleGetTopNMainWinodowInfo topN :%{public}d", topN);
     std::vector<TopNMainWindowInfo> topNInfos;
     WMError errCode = GetTopNMainWindowInfos(topN, topNInfos);
-
+    if ((topNInfos.size() <= 0) || (topNInfos.size() >= MAX_TOPN_INFO_SIZE)) {
+        return ERR_INVALID_DATA;
+    }
     reply.WriteInt32(topNInfos.size());
     for (auto& it : topNInfos) {
         if (!reply.WriteParcelable(&it)) {
@@ -445,7 +449,7 @@ int SceneSessionManagerLiteStub::HandleGetTopNMainWinodowInfo(MessageParcel &dat
             return ERR_INVALID_DATA;
         }
 
-        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid, it.bundleName.c_str());
+        WLOGFD("HandleGetTopNMainWinodowInfo pid %{public}d, name %{public}s", it.pid_, it.bundleName_.c_str());
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
