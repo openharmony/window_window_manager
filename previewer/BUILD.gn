@@ -112,6 +112,7 @@ if (!ispreview) {
       "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
       "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
       "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
+      "../utils/src/js_err_utils.cpp",
 
       # mock
       "mock/js_transition_controller.cpp",
