@@ -8246,7 +8246,7 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
 WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<TopNMainWindowInfo>& topNInfo)
 {
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
-        WLOGFE("GetTopNMainWindowInfos permission denied!");
+        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
@@ -8254,7 +8254,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    WLOGFD("GetTopNMainWindowInfos topNum: %{public}d", topNum);
+    TLOGD(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos topNum: %{public}d", topNum);
     auto func = [this, &topNum, &topNInfo](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
@@ -8265,7 +8265,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         }
 
         if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !IsSessionVisible(session)) {
-            WLOGFD("GetTopNMainWindowInfos: not main window %{public}d", session->GetWindowType());
+            TLOGD(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: not main window %{public}d", session->GetWindowType());
             return false;
         }
 
@@ -8274,7 +8274,7 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         info.bundleName_ = session->GetSessionInfo().bundleName_;
         topNInfo.push_back(info);
         topNum--;
-        WLOGFD("GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d, bundleName: %{public}s",
+        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d, bundleName: %{public}s",
             topNum, info.pid_, info.bundleName_.c_str());
         return false;
     };
