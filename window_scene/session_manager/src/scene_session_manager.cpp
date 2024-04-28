@@ -8274,8 +8274,8 @@ WMError SceneSessionManager::GetTopNMainWindowInfos(int32_t topNum, std::vector<
         info.bundleName_ = session->GetSessionInfo().bundleName_;
         topNInfo.push_back(info);
         topNum--;
-        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d, bundleName: %{public}s",
-            topNum, info.pid_, info.bundleName_.c_str());
+        TLOGE(WmsLogTag::WMS_MAIN, "GetTopNMainWindowInfos: topnNum: %{public}d, pid: %{public}d,\
+            bundleName: %{public}s", topNum, info.pid_, info.bundleName_.c_str());
         return false;
     };
     TraverseSessionTree(func, true);
