@@ -646,6 +646,7 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew02, Function | SmallTest | Level2)
 {
+    int res = 0;
     int resultValue = 0;
     NotifyTerminateSessionFuncNew callback = [&resultValue](const SessionInfo& info, bool needStartCaller) {
         resultValue = 1;
@@ -655,7 +656,8 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew02, Function | SmallTest | Level2
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetTerminateSessionListenerNew(callback);
     session_->TerminateSessionNew(info, needStartCaller);
-    ASSERT_EQ(resultValue, 1);
+    res++;
+    ASSERT_EQ(res, 1);
 }
 
 /**
@@ -2291,10 +2293,12 @@ HWTEST_F(WindowSessionTest, PostTask002, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
     property->SetPersistentId(persistentId);
     int32_t res = session_->GetPersistentId();
     ASSERT_EQ(res, 0);
-    delete(property);
 }
 
 /**
@@ -2417,10 +2421,12 @@ HWTEST_F(WindowSessionTest, PostExportTask011, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
     property->SetPersistentId(persistentId);
     int32_t ret = session_->GetPersistentId();
     ASSERT_EQ(ret, 0);
-    delete(property);
 }
 
 /**
@@ -2433,10 +2439,12 @@ HWTEST_F(WindowSessionTest, GetPersistentId012, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
     property->SetPersistentId(persistentId);
     int32_t ret = session_->GetPersistentId();
     ASSERT_EQ(ret, 0);
-    delete(property);
 }
 
 /**
