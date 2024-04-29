@@ -1026,7 +1026,6 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         usleep(SLEEP_10_MS);
     }
     lastWakeUpReason_ = reason;
-
     if (!notifyLockOrNot_) {
         return true;
     }
@@ -1069,6 +1068,9 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
+        return true;
+    }
+    if (!notifyLockOrNot_) {
         return true;
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
