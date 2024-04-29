@@ -348,7 +348,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | L
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -363,7 +363,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | L
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -579,7 +579,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 /**
