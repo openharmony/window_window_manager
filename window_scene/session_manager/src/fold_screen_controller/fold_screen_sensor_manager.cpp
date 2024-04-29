@@ -40,7 +40,7 @@ static void SensorHallDataCallback(SensorEvent *event)
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "FoldScreenSensorManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "FoldScreenSensorManager"};
     constexpr float ANGLE_MIN_VAL = 0.0F;
     constexpr float ANGLE_MAX_VAL = 180.0F;
     constexpr int32_t SENSOR_SUCCESS = 0;
