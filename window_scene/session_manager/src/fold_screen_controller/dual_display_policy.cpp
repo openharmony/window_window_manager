@@ -29,7 +29,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DualDisplayPolicy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DualDisplayPolicy"};
     const ScreenId SCREEN_ID_MAIN = 0;
     const ScreenId SCREEN_ID_SUB = 5;
     #ifdef TP_FEATURE_ENABLE
