@@ -86,7 +86,7 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
         screenSession_->SetScreenSceneDpiChangeListener(func);
         DestroyScreenSceneFunc destroyFunc = [screenScene = screenScene_]() {
             if (screenScene) {
-                screenScene->Destory();
+                screenScene->Destroy();
             }
         };
         screenSession_->SetScreenSceneDestroyListener(destroyFunc);
