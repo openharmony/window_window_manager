@@ -113,10 +113,12 @@ void SceneSessionManagerTest::TearDownTestCase()
 
 void SceneSessionManagerTest::SetUp()
 {
+    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest::TearDown()
 {
+    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)
@@ -3078,10 +3080,98 @@ HWTEST_F(SceneSessionManagerTest, UpdatePrivateStateAndNotify, Function | SmallT
     sptr<SceneSession> scensession = nullptr;
     ssm_->RegisterSessionStateChangeNotifyManagerFunc(scensession);
     scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
     ssm_->RegisterSessionStateChangeNotifyManagerFunc(scensession);
     ssm_->UpdatePrivateStateAndNotify(persistentId);
-    int result = ssm_->GetSceneSessionPrivacyModeCount();
-    EXPECT_EQ(result, 0);
+    auto displayId = scensession->GetSessionProperty()->GetDisplayId();
+    std::vector<string> privacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+}
+
+/**
+ * @tc.name: GerPrivacyBundleListOneWindow
+ * @tc.desc: get privacy bundle list when one window exist only.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListOneWindow, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "privacy.test";
+    sessionInfo.abilityName_ = "privacyAbilityName";
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sceneSession->GetSessionProperty()->displayId_ = 0;
+    sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<std::string> privacyBundleList;
+    sceneSession->GetSessionProperty()->isPrivacyMode_ = false;
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+
+    sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+
+    sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList.at(0), sessionInfo.bundleName_);
+
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+}
+
+/**
+ * @tc.name: GerPrivacyBundleListTwoWindow
+ * @tc.desc: get privacy bundle list when two windows exist.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfoFirst;
+    sessionInfoFirst.bundleName_ = "privacy.test.first";
+    sessionInfoFirst.abilityName_ = "privacyAbilityName";
+    sptr<SceneSession> sceneSessionFirst = ssm_->CreateSceneSession(sessionInfoFirst, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSessionFirst->GetPersistentId(), sceneSessionFirst});
+
+    SessionInfo sessionInfoSecond;
+    sessionInfoSecond.bundleName_ = "privacy.test.second";
+    sessionInfoSecond.abilityName_ = "privacyAbilityName";
+    sptr<SceneSession> sceneSessionSecond = ssm_->CreateSceneSession(sessionInfoSecond, nullptr);
+    ASSERT_NE(sceneSessionSecond, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSessionSecond->GetPersistentId(), sceneSessionSecond});
+
+    sceneSessionFirst->GetSessionProperty()->displayId_ = 0;
+    sceneSessionFirst->GetSessionProperty()->isPrivacyMode_ = true;
+    sceneSessionFirst->state_ = SessionState::STATE_FOREGROUND;
+
+    sceneSessionSecond->GetSessionProperty()->displayId_ = 0;
+    sceneSessionSecond->GetSessionProperty()->isPrivacyMode_ = true;
+    sceneSessionSecond->state_ = SessionState::STATE_FOREGROUND;
+
+    std::vector<std::string> privacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 2);
+
+    sceneSessionSecond->GetSessionProperty()->displayId_ = 1;
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 1);
+
+    privacyBundleList.clear();
+    ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 1);
 }
 
 /**
@@ -3789,6 +3879,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillTwoSceneSessionListToNotifyLi
 
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 2);
 }
 
 /**
@@ -3808,11 +3899,15 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillEmptyBundleName, Function | S
 
     std::vector<sptr<SceneSession>> sceneSessionList;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
-    ASSERT_EQ(sceneSessionList.size(), 4);
+    ASSERT_EQ(sceneSessionList.size(), 1);
 
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
-    ASSERT_NE(accessibilityInfo.size(), 1);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, "");
+    ASSERT_EQ(sceneSessionList.at(0)->GetSessionInfo().bundleName_, "");
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, sceneSessionList.at(0)->GetSessionInfo().bundleName_);
 }
 
 /**
@@ -3833,11 +3928,15 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillBundleName, Function | SmallT
 
     std::vector<sptr<SceneSession>> sceneSessionList;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
-    ASSERT_EQ(sceneSessionList.size(), 5);
+    ASSERT_EQ(sceneSessionList.size(), 1);
 
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
-    ASSERT_NE(accessibilityInfo.size(), 1);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, "accessibilityNotifyTesterBundleName");
+    ASSERT_EQ(sceneSessionList.at(0)->GetSessionInfo().bundleName_, "accessibilityNotifyTesterBundleName");
+    ASSERT_EQ(accessibilityInfo.at(0)->bundleName_, sceneSessionList.at(0)->GetSessionInfo().bundleName_);
 }
 
 /**
@@ -3892,9 +3991,20 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillOneHotAreas, Function | Small
 
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
-    ASSERT_EQ(accessibilityInfo.size(), 7);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
 
     ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), sceneSessionList.at(0)->GetTouchHotAreas().size());
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), 1);
+
+    ASSERT_EQ(rect.posX_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).posX_);
+    ASSERT_EQ(rect.posY_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).posY_);
+    ASSERT_EQ(rect.width_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).width_);
+    ASSERT_EQ(rect.height_, sceneSessionList.at(0)->GetTouchHotAreas().at(0).height_);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posX_, rect.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posY_, rect.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).width_, rect.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).height_, rect.height_);
 }
 
 /**
@@ -3925,9 +4035,20 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillTwoHotAreas, Function | Small
 
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
-    ASSERT_EQ(accessibilityInfo.size(), 8);
+    ASSERT_EQ(accessibilityInfo.size(), 1);
 
     ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), sceneSessionList.at(0)->GetTouchHotAreas().size());
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.size(), 2);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posX_, rectFitst.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).posY_, rectFitst.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).width_, rectFitst.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(0).height_, rectFitst.height_);
+
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).posX_, rectSecond.posX_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).posY_, rectSecond.posY_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).width_, rectSecond.width_);
+    ASSERT_EQ(accessibilityInfo.at(0)->touchHotAreas_.at(1).height_, rectSecond.height_);
 }
 
 /**

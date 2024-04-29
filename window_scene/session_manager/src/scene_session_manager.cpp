@@ -4598,30 +4598,58 @@ void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
-    int counts = GetSceneSessionPrivacyModeCount();
-    bool hasPrivateWindow = (counts != 0);
-    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "update privacy state failed, scene is nullptr, wid = %{public}u.", persistentId);
+        return;
+    }
+
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get session property failed, wid = %{public}u.", persistentId);
+        return;
+    }
+    auto displayId = sessionProperty->GetDisplayId();
+    std::vector<std::string> privacyBundleList;
+    GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !privacyBundleList.empty());
+    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, privacyBundleList);
 }
 
-int SceneSessionManager::GetSceneSessionPrivacyModeCount()
+void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
+    std::vector<std::string>& privacyBundles)
 {
-    auto countFunc = [](const std::pair<int32_t, sptr<SceneSession>>& sessionPair) -> bool {
-        sptr<SceneSession> sceneSession = sessionPair.second;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& item : sceneSessionMap_) {
+        sptr<SceneSession> sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "scene session is nullptr, wid = %{public}d.", item.first);
+            continue;
+        }
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "scene session property is nullptr, wid = %{public}d.", item.first);
+            continue;
+        }
+        auto currentDisplayId = sessionProperty->GetDisplayId();
+        if (displayId != currentDisplayId) {
+            continue;
+        }
         bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
         if (isForeground && sceneSession->GetParentSession() != nullptr) {
             isForeground = isForeground &&
-                            (sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
-                                sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE);
+                (sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE);
         }
-        bool isPrivate = sceneSession->GetSessionProperty() != nullptr &&
-            (sceneSession->GetSessionProperty()->GetPrivacyMode() ||
-             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag);
+        bool isPrivate = sessionProperty->GetPrivacyMode() ||
+            sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
-        return (isForeground || IsSystemWindowVisible) && isPrivate;
-    };
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    return std::count_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), countFunc);
+        if ((isForeground || IsSystemWindowVisible) && isPrivate) {
+            privacyBundles.push_back(sceneSession->GetSessionInfo().bundleName_);
+        }
+    }
 }
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
