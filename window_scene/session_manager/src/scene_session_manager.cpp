@@ -1945,7 +1945,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
                 UpdatePrivateStateAndNotify(parentId);
             }
         } else {
-            HandleSCBExtWaterMarkchange(persistentId, false);
+            HandleSCBExtWaterMarkChange(persistentId, false);
             HandleSecureExtSessionShouldHide(persistentId, false);
         }
         remoteExtSessionMap_.erase(iter);
@@ -7830,7 +7830,7 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::HandleSCBExtWaterMarkchange(int32_t persistentId, bool isWaterMarkEnable)
+WSError SceneSessionManager::HandleSCBExtWaterMarkChange(int32_t persistentId, bool isWaterMarkEnable)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "check watermark for scb uiext");
     if (isWaterMarkEnable) {
@@ -7842,11 +7842,11 @@ WSError SceneSessionManager::HandleSCBExtWaterMarkchange(int32_t persistentId, b
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
+void SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
     ExtensionWindowFlags actions)
 {
     if (actions.waterMarkFlag) {
-        HandleSCBExtWaterMarkchange(persistentId, flags.waterMarkFlag);
+        HandleSCBExtWaterMarkChange(persistentId, flags.waterMarkFlag);
     }
     if (actions.hideNonSecureWindowsFlag) {
         HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
