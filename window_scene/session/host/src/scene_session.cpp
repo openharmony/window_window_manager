@@ -915,9 +915,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             inputMethod->GetSessionState() != SessionState::STATE_ACTIVE) {
             continue;
         }
-        SessionGravity gravity;
-        uint32_t percent = 0;
-        inputMethod->GetSessionProperty()->GetSessionGravity(gravity, percent);
+        SessionGravity gravity = inputMethod->GetKeyboardGravity();
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             continue;
         }

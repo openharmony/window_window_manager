@@ -133,6 +133,7 @@ public:
     bool GetExtensionFlag() const;
     sptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
+    KeyboardLayoutParams GetKeyboardLayoutParams() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);

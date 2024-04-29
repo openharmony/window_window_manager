@@ -3284,6 +3284,7 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
         params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
         params.PortraitPanelRect_.ToString().c_str());
     if (property_ != nullptr) {
+        property_->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
         property_->SetKeyboardLayoutParams(params);
     }
     if (hostSession_ != nullptr) {
