@@ -540,11 +540,15 @@ void JsSceneSessionManager::ProcessSwitchingToAnotherUserRegister()
 void JsSceneSessionManager::OnSwitchingToAnotherUser()
 {
     TLOGD(WmsLogTag::WMS_MULTI_USER, "[NAPI]OnSwitchingToAnotherUser");
-    auto iter = jsCbMap_.find(SWITCH_TO_ANOTHER_USER_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(SWITCH_TO_ANOTHER_USER_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
     }
-    auto jsCallBack = iter->second;
     auto task = [this, jsCallBack, env = env_]() {
         napi_value argv[] = {};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
