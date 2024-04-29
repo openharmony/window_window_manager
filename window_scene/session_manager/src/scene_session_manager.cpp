@@ -1174,7 +1174,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
             .abilityName_ = "SCBKeyboardPanel",
             .isSystem_ = true,
             .windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL),
-            .isSystemInput_ = true,
+            .isSystemInput_ = false,
             .screenId_ = static_cast<uint64_t>(displayId)
         };
         panelSession = RequestSceneSession(panelInfo, nullptr);
