@@ -26,6 +26,7 @@ group("unittest") {
     ":ws_extension_session_test",
     ":ws_fold_screen_controller_test",
     ":ws_fold_screen_state_machine_test",
+    ":ws_intention_event_manager_test",
     ":ws_keyboard_session_test",
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
@@ -959,6 +960,26 @@ ohos_unittest("ws_setting_observer_test") {
     "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_intention_event_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "intention_event_manager_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+  ]
+
+  external_deps = [
+    "ability_runtime:mission_info",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "input:libmmi-client",
   ]
 }
 
