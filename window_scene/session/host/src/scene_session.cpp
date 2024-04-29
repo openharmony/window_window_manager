@@ -161,17 +161,26 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 
 WSError SceneSession::Background()
 {
-    auto task = [weakThis = wptr(this)]() {
+    return BackgroundTask(true);
+}
+
+WSError SceneSession::BackgroundTask(const bool isSaveSnapShot)
+{
+    auto task = [weakThis = wptr(this), isSaveSnapShot]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        auto state = session->GetSessionState();
+        if (state == SessionState::STATE_BACKGROUND) {
+            return WSError::WS_OK;
+        }
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapShot) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
                 const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);

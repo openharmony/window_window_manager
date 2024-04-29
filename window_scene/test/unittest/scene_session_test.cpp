@@ -134,6 +134,51 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: BackgroundTask01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, BackgroundTask01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask01";
+    info.bundleName_ = "BackgroundTask01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    int resultValue = 0;
+    sptr<SceneSession> scensession;
+
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->isActive_ = true;
+    auto result = scensession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    scensession->isActive_ = true;
+    result = scensession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
+                                                            sptr<WindowSessionProperty> property) -> sptr<SceneSession>
+    {
+        sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback_);
+        EXPECT_NE(scensessionreturn, nullptr);
+        resultValue = 1;
+        return scensessionreturn;
+    };
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    scensession->UpdateSessionState(SessionState::STATE_CONNECT);
+    scensession->isActive_ = true;
+    result = scensession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    scensession->UpdateSessionState(SessionState::STATE_CONNECT);
+    scensession->isActive_ = true;
+    result = scensession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetGlobalMaximizeMode01
  * @tc.desc: SetGlobalMaximizeMode
  * @tc.type: FUNC
@@ -1282,6 +1327,34 @@ HWTEST_F(SceneSessionTest, Background02, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     scensession->isActive_ = true;
     auto result = scensession->Background();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: BackgroundTask02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, BackgroundTask02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    scensession->SetSessionProperty(property);
+    scensession->isActive_ = true;
+    auto result = scensession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    scensession->isActive_ = true;
+    result = scensession->BackgroundTask(false);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
