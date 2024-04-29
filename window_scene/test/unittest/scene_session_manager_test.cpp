@@ -3717,19 +3717,19 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureExtSessionShouldHide, Function | S
 }
 
 /**
- * @tc.name: HandleSCBExtWaterMarkchange
+ * @tc.name: HandleSCBExtWaterMarkChange
  * @tc.desc: SceneSesionManager handle scb uiextension water mark change
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, HandleSCBExtWaterMarkchange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleSCBExtWaterMarkChange, Function | SmallTest | Level3)
 {
     int32_t persistentId = 12345;
     EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
-    auto ret = ssm_->HandleSCBExtWaterMarkchange(persistentId, true);
+    auto ret = ssm_->HandleSCBExtWaterMarkChange(persistentId, true);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(ssm_->waterMarkSessionSet_.size(), 1);
     EXPECT_EQ(*ssm_->waterMarkSessionSet_.begin(), persistentId);
-    ret = ssm_->HandleSCBExtWaterMarkchange(persistentId, false);
+    ret = ssm_->HandleSCBExtWaterMarkChange(persistentId, false);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
     ssm_->waterMarkSessionSet_.clear();
@@ -3750,7 +3750,7 @@ HWTEST_F(SceneSessionManagerTest, HandleSpecialExtWindowFlagChange, Function | S
     EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
     EXPECT_EQ(ssm_->waterMarkSessionSet_.size(), 1);
     EXPECT_EQ(*ssm_->waterMarkSessionSet_.begin(), persistentId);
-    ret = ssm_->HandleSCBExtWaterMarkchange(persistentId, 0, 3);
+    ssm_->HandleSpecialExtWindowFlagChange(persistentId, 0, 3);
     EXPECT_TRUE(ssm_->secureSessionSet_.empty());
     EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
     ssm_->secureSessionSet_.clear();
