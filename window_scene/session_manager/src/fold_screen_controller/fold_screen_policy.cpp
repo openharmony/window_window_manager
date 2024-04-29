@@ -18,7 +18,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "FoldScreenPolicy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "FoldScreenPolicy"};
 } // namespace
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
