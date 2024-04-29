@@ -17,9 +17,11 @@
 
 #include <libxml/globals.h>
 #include <libxml/xmlstring.h>
-#include "screen_scene_config.h"
-#include "xml_config_base.h"
+
 #include "window_manager_hilog.h"
+#include "xml_config_base.h"
+#include "screen_scene_config.h"
+#include "screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -326,8 +328,17 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, Function | SmallTest | Level3)
 {
+    bool isFoldableMachine = false;
+    if (ScreenSessionManager::GetInstance().IsFoldable() &&
+        ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED) {
+        isFoldableMachine = true;
+    }
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
-    ASSERT_TRUE(result.size() > 0);
+    if (isFoldableMachine) {
+        ASSERT_TRUE(result.size() > 0);
+    } else {
+        ASSERT_TRUE(result.size() == 0);
+    }
 }
 
 /**
