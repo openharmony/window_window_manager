@@ -2645,79 +2645,45 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::CleanUserMap()
+WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string &fileDir)
 {
-    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    WLOGFI("CleanUserMap in size = %{public}zu", sceneSessionMap_.size());
-    auto iter = sceneSessionMap_.begin();
-    while (iter != sceneSessionMap_.end()) {
-        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_ &&
-            iter->second->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            iter = sceneSessionMap_.erase(iter);
-        } else {
-            iter++;
-        }
-    }
-    WLOGFI("CleanUserMap out size = %{public}zu", sceneSessionMap_.size());
-
-    WLOGFI("Clean systemTopSceneSessionMap in size = %{public}zu", systemTopSceneSessionMap_.size());
-    iter = systemTopSceneSessionMap_.begin();
-    while (iter != systemTopSceneSessionMap_.end()) {
-        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
-            iter = systemTopSceneSessionMap_.erase(iter);
-        } else {
-            iter++;
-        }
-    }
-    WLOGFI("Clean systemTopSceneSessionMap out size = %{public}zu", systemTopSceneSessionMap_.size());
-    WLOGFI("Clean nonSystemFloatSceneSessionMap in size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
-    iter = nonSystemFloatSceneSessionMap_.begin();
-    while (iter != nonSystemFloatSceneSessionMap_.end()) {
-        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
-            iter = nonSystemFloatSceneSessionMap_.erase(iter);
-        } else {
-            iter++;
-        }
-    }
-    WLOGFI("Clean nonSystemFloatSceneSessionMap out size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
-}
-
-WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
-{
-    if (oldUserId != currentUserId_ || oldUserId == newUserId || fileDir.empty()) {
-        WLOGFE("SwitchUser params invalid");
+    if (userId == DEFAULT_USERID || fileDir.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "params invalid");
         return WSError::WS_DO_NOTHING;
     }
-    WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
-        oldUserId, newUserId, fileDir.c_str());
-    auto task = [this, newUserId, &fileDir]() {
+    TLOGI(WmsLogTag::WMS_MAIN, "userId : %{public}d, path : %{public}s", userId, fileDir.c_str());
+    auto task = [this, userId, &fileDir]() {
         ScenePersistence::CreateSnapshotDir(fileDir);
         ScenePersistence::CreateUpdatedIconDir(fileDir);
-        currentUserId_ = newUserId;
-        {
-            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            for (const auto &item : sceneSessionMap_) {
-                auto scnSession = item.second;
-                auto persistentId = scnSession->GetPersistentId();
-                scnSession->SetActive(false);
-                scnSession->Background();
-                if (persistentId == brightnessSessionId_) {
-                    UpdateBrightness(focusedSessionId_);
-                }
-                auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
-                if (!scnSessionInfo) {
-                    return WSError::WS_ERROR_NULLPTR;
-                }
-                TLOGI(WmsLogTag::WMS_MAIN, "begin MinimizeUIAbility newUserId : %{public}d persistentId: %{public}d",
-                    newUserId, persistentId);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
-            }
-        }
-        CleanUserMap();
+        currentUserId_ = userId;
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task, "SwitchUser");
-    return WSError::WS_OK;
+    return taskScheduler_->PostSyncTask(task, "InitUserInfo");
+}
+
+void SceneSessionManager::HandleSwitchingToAnotherUser()
+{
+    auto task = [this]() {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Handle switching to another user");
+        SceneInputManager::GetInstance().SetUserBackground(true);
+        if (switchingToAnotherUserFunc_ != nullptr) {
+            switchingToAnotherUserFunc_();
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "HandleSwitchingToAnotherUser");
+}
+
+void SceneSessionManager::NotifySwitchingToCurrentUser()
+{
+    auto task = [this]() {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Notify switching to current user");
+        SceneInputManager::GetInstance().SetUserBackground(false);
+        // notify screenSessionManager to recover current user
+        FlushWindowInfoToMMI(true);
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "NotifySwitchingToCurrentUser");
 }
 
 sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
@@ -4308,6 +4274,12 @@ void SceneSessionManager::SetCallingSessionIdSessionListenser(const ProcessCalli
 {
     WLOGFD("SetCallingSessionIdSessionListenser");
     callingSessionIdChangeFunc_ = func;
+}
+
+void SceneSessionManager::SetSwitchingToAnotherUserListener(const ProcessSwitchingToAnotherUserFunc& func)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Set switching to another user listener");
+    switchingToAnotherUserFunc_ = func;
 }
 
 void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func)
@@ -7678,11 +7650,15 @@ void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo
     DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 
-void SceneSessionManager::FlushWindowInfoToMMI()
+void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
-    auto task = []()-> WSError {
+    if (SceneInputManager::GetInstance().IsUserBackground()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+        return;
+    }
+    auto task = [forceFlush]()-> WSError {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
         return WSError::WS_OK;
     };
     return taskScheduler_->PostAsyncTask(task);

@@ -86,6 +86,7 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
+using ProcessSwitchingToAnotherUserFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -157,6 +158,7 @@ public:
     void SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
+    void SetSwitchingToAnotherUserListener(const ProcessSwitchingToAnotherUserFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -184,7 +186,9 @@ public:
     bool IsScreenLocked() const;
     WSError RaiseWindowToTop(int32_t persistentId) override;
 
-    WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
+    WSError InitUserInfo(int32_t userId, std::string &fileDir);
+    void HandleSwitchingToAnotherUser();
+    void NotifySwitchingToCurrentUser();
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
@@ -293,7 +297,7 @@ public:
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
-    void FlushWindowInfoToMMI();
+    void FlushWindowInfoToMMI(const bool forceFlush = false);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
         int32_t parentId) override;
@@ -450,7 +454,6 @@ private:
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
-    void CleanUserMap();
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
@@ -501,6 +504,7 @@ private:
     NotifySCBAfterUpdateFocusFunc notifySCBAfterFocusedFunc_;
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
     ProcessCallingSessionIdChangeFunc callingSessionIdChangeFunc_;
+    ProcessSwitchingToAnotherUserFunc switchingToAnotherUserFunc_ = nullptr;
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
