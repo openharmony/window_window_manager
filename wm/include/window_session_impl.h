@@ -287,7 +287,6 @@ protected:
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
-    virtual bool IfNotNeedAvoidKeyBoardForSplit();
     WSError SwitchFreeMultiWindow(bool enable) override;
 private:
     //Trans between colorGamut and colorSpace

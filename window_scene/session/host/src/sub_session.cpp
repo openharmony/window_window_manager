@@ -177,22 +177,6 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
     return true;
 }
 
-bool SubSession::IfNotNeedAvoidKeyBoardForSplit()
-{
-    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
-            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
-        return false;
-    }
-    if (GetParentSession() != nullptr &&
-            GetParentSession()->GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return false;
-    }
-    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
-        return false;
-    }
-    return true;
-}
-
 void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
