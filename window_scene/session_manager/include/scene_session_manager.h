@@ -488,6 +488,7 @@ private:
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> secureSessionSet_;
+    std::set<int32_t> waterMarkSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
@@ -614,6 +615,7 @@ private:
         bool shouldHide);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
+    WSError HandleSCBExtWaterMarkchange(int32_t persistentId, bool isWaterMarkEnable);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);

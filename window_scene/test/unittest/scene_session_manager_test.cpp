@@ -3717,6 +3717,25 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureExtSessionShouldHide, Function | S
 }
 
 /**
+ * @tc.name: HandleSCBExtWaterMarkchange
+ * @tc.desc: SceneSesionManager handle scb uiextension water mark change
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleSCBExtWaterMarkchange, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 12345;
+    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
+    auto ret = ssm_->HandleSCBExtWaterMarkchange(persistentId, true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ssm_->waterMarkSessionSet_.size(), 1);
+    EXPECT_EQ(*ssm_->waterMarkSessionSet_.begin(), persistentId);
+    ret = ssm_->HandleSCBExtWaterMarkchange(persistentId, false);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
+    ssm_->waterMarkSessionSet_.clear();
+}
+
+/**
  * @tc.name: ClearUnrecoveredSessions
  * @tc.desc: test func ClearUnrecoveredSessions
  * @tc.type: FUNC
