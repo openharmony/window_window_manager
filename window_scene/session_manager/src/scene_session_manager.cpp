@@ -6631,11 +6631,7 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
         WindowType type = sceneSession->GetWindowType();
-        SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-        uint32_t percent = 0;
-        if (sceneSession->GetSessionProperty() != nullptr) {
-            sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
-        }
+        SessionGravity gravity = sceneSession->GetKeyboardGravity();
         if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
             type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
             (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&

@@ -360,6 +360,12 @@ void WindowSessionProperty::SetKeyboardSessionGravity(SessionGravity gravity, ui
     sessionGravitySizePercent_ = percent;
 }
 
+void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
+{
+    gravity = sessionGravity_;
+    percent = sessionGravitySizePercent_;
+}
+
 void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
 {
     keyboardLayoutParams_.gravity_ = params.gravity_;
@@ -369,10 +375,9 @@ void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& 
     keyboardLayoutParams_.PortraitPanelRect_ = params.PortraitPanelRect_;
 }
 
-void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
+KeyboardLayoutParams WindowSessionProperty::GetKeyboardLayoutParams() const
 {
-    gravity = sessionGravity_;
-    percent = sessionGravitySizePercent_;
+    return keyboardLayoutParams_;
 }
 
 void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)

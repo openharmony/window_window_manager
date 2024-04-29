@@ -666,6 +666,10 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleAdjustKeyboardLayout!");
     sptr<KeyboardLayoutParams> keyboardLayoutParams = data.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardLayoutParams is nullptr.");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
