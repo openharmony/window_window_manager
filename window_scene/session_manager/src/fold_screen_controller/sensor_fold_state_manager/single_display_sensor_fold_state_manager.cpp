@@ -82,7 +82,6 @@ FoldStatus SingleDisplaySensorFoldStateManager::GetNextFoldState(float angle, in
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
         if (hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
-            globalAngle = DEFAULT_POSTURE;
         } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
             hall == HALL_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
