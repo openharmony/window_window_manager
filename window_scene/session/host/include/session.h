@@ -527,7 +527,6 @@ protected:
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     mutable std::shared_mutex parentSessionMutex_;
-    mutable std::shared_mutex propertyMutex_;
     sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
 
