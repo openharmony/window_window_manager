@@ -772,6 +772,10 @@ DMError ScreenSessionManager::GetDensityInCurResolution(ScreenId screenId, float
 DMError ScreenSessionManager::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
     WLOGFI("GetScreenColorGamut::ScreenId: %{public}" PRIu64 "", screenId);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetScreenColorGamut permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("GetScreenColorGamut screenId invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -786,6 +790,10 @@ DMError ScreenSessionManager::GetScreenColorGamut(ScreenId screenId, ScreenColor
 DMError ScreenSessionManager::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
     WLOGFI("SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenColorGamut permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("SetScreenColorGamut screenId invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -800,6 +808,10 @@ DMError ScreenSessionManager::SetScreenColorGamut(ScreenId screenId, int32_t col
 DMError ScreenSessionManager::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
 {
     WLOGFI("GetScreenGamutMap::ScreenId: %{public}" PRIu64 "", screenId);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetScreenGamutMap permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("GetScreenGamutMap screenId invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -815,6 +827,10 @@ DMError ScreenSessionManager::SetScreenGamutMap(ScreenId screenId, ScreenGamutMa
 {
     WLOGFI("SetScreenGamutMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenGamutMap permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("SetScreenGamutMap screenId invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -829,6 +845,10 @@ DMError ScreenSessionManager::SetScreenGamutMap(ScreenId screenId, ScreenGamutMa
 DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
 {
     WLOGFI("SetScreenColorTransform::ScreenId: %{public}" PRIu64 "", screenId);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetScreenColorTransform permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("SetScreenColorTransform screenId invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -1462,6 +1482,10 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 
 ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetScreenPower permission denied!");
+        return ScreenPowerState::INVALID_STATE;
+    }
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
     WLOGFI("GetScreenPower:%{public}u, screenId:%{public}" PRIu64".", state, screenId);
     return state;
