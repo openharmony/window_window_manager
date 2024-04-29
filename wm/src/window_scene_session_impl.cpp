@@ -3188,26 +3188,6 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 }
 
-bool WindowSceneSessionImpl::IfNotNeedAvoidKeyBoardForSplit()
-{
-    if (DisplayManager::GetInstance().IsFoldable() &&
-            DisplayManager::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
-        return false;
-    }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType()) &&
-            property_->GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return false;
-    }
-    if (WindowHelper::IsSubWindow(property_->GetWindowType()) && FindWindowById(GetParentId()) != nullptr &&
-            FindWindowById(GetParentId())->GetMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return false;
-    }
-    if (!IsFocused() || GetRect().posY_ == 0) {
-        return false;
-    }
-    return true;
-}
-
 WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     const sptr<IKeyboardPanelInfoChangeListener>& listener)
 {

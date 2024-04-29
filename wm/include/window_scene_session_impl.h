@@ -173,7 +173,6 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
-    virtual bool IfNotNeedAvoidKeyBoardForSplit() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
