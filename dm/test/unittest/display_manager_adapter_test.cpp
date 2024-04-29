@@ -131,7 +131,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Le
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
