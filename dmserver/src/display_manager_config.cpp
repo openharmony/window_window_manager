@@ -41,13 +41,13 @@ std::vector<std::string> DisplayManagerConfig::Split(std::string str, std::strin
 {
     std::vector<std::string> result;
     str += pattern;
-    int32_t length = static_cast<int32_t>(str.size());
-    for (int32_t i = 0; i < length; i++) {
-        int32_t position = static_cast<int32_t>(str.find(pattern, i));
+    size_t length = str.size();
+    for (size_t i = 0; i < length; i++) {
+        size_t position = str.find(pattern, i);
         if (position < length) {
             std::string tmp = str.substr(i, position - i);
             result.push_back(tmp);
-            i = position + static_cast<int32_t>(pattern.size()) - 1;
+            i = position + pattern.size() - 1;
         }
     }
     return result;
