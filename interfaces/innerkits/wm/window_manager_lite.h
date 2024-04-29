@@ -149,6 +149,14 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetWindowBackHomeStatus(bool &isBackHome) const;
+    /**
+     * @brief Get top num main window info.
+     *
+     * @param topNum the num of top window
+     * @param topNInfo the top num window infos
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 private:
     WindowManagerLite();
     ~WindowManagerLite();

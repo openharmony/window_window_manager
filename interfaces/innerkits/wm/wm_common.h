@@ -398,6 +398,37 @@ struct PointInfo {
     int32_t y;
 };
 
+/**
+ * @struct MainWindowInfo.
+ *
+ * @brief topN main window info.
+ */
+struct MainWindowInfo : public Parcelable {
+    virtual bool Marshalling(Parcel &parcel) const override
+    {
+        if (!parcel.WriteInt32(pid_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(bundleName_)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    static MainWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowInfo* mainWindowInfo = new MainWindowInfo;
+        mainWindowInfo->pid_ = parcel.ReadInt32();
+        mainWindowInfo->bundleName_ = parcel.ReadString();
+        return mainWindowInfo;
+    }
+
+    int32_t pid_ = 0;
+    std::string bundleName_ = "";
+};
+
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;

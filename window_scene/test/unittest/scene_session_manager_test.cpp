@@ -4022,6 +4022,29 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
     ASSERT_EQ(accessibilityInfo.size(), 1);
 }
 
+/**
+ * @tc.name: GetMainWindowInfos
+ * @tc.desc: SceneSesionManager get topN main window infos;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Level3)
+{
+    int32_t topNum = 1024;
+    std::vector<MainWindowInfo> topNInfos;
+    auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    topNum = 0;
+    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    topNum = 1000;
+    MainWindowInfo info;
+    topNInfos.push_back(info);
+    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

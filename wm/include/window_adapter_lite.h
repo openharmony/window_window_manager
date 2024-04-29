@@ -43,6 +43,7 @@ public:
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
     virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
+    virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
