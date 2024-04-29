@@ -539,7 +539,7 @@ void JsSceneSessionManager::ProcessSwitchingToAnotherUserRegister()
 
 void JsSceneSessionManager::OnSwitchingToAnotherUser()
 {
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "[NAPI]OnSwitchingToAnotherUser");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "[NAPI]On switching to another user");
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
