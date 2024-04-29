@@ -266,7 +266,7 @@ public:
     void NotifyRecoveringFinished();
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
-    int GetSceneSessionPrivacyModeCount();
+    void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::vector<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
