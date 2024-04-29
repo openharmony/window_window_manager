@@ -38,7 +38,6 @@ namespace {
     constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-    constexpr float DEFAULT_POSTURE = 5.0F;
 } // namespace
 
 SingleDisplaySensorFoldStateManager::SingleDisplaySensorFoldStateManager() {}
