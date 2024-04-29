@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_anomaly_detection_test",
     ":ws_distributed_client_test",
     ":ws_dual_display_device_policy_test",
     ":ws_event_stage_test",
@@ -77,6 +78,22 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_anomaly_detection_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anomaly_detection_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
