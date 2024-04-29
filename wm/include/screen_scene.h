@@ -78,7 +78,7 @@ public:
         return uiContent_.get();
     }
 
-    void Destroy();
+    WMError Destroy() override;
 
 private:
     std::mutex mutex_;
