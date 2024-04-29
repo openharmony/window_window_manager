@@ -17,6 +17,7 @@
 #include "mock_window_adapter_lite.h"
 #include "singleton_mocker.h"
 #include "window_manager_lite.cpp"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -192,6 +193,47 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
     auto ret8 = WindowManagerLite::GetInstance().UnregisterWindowModeChangedListener(listener3);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret7);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret8);
+}
+
+/**
+ * @tc.name: GetMainWindowInfos
+ * @tc.desc: get top main window info
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<MainWindowInfo> topNInfo;
+    std::vector<MainWindowInfo> topNInfoResult;
+    MainWindowInfo info1;
+    info1.pid_ = 1900;
+    info1.bundleName_ = "calendar";
+
+    MainWindowInfo info2;
+    info1.pid_ = 1901;
+    info1.bundleName_ = "settings";
+
+    MainWindowInfo info3;
+    info1.pid_ = 1902;
+    info1.bundleName_ = "photos";
+
+    topNInfoResult.push_back(info1);
+    topNInfoResult.push_back(info2);
+    topNInfoResult.push_back(info3);
+
+    int32_t topN = 3;
+
+    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
+        Return(WMError::WM_OK)));
+
+    WindowManagerLite::GetInstance().GetMainWindowInfos(topN, topNInfo);
+
+    auto it1 = topNInfo.begin();
+    auto it2 = topNInfoResult.begin();
+    for (; it1 != topNInfo.end() && it2 != topNInfoResult.end(); it1++, it2++) {
+        ASSERT_EQ(it1->pid_, it2->pid_);
+        ASSERT_EQ(it1->bundleName_, it2->bundleName_);
+    }
 }
 }
 }
