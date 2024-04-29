@@ -1562,6 +1562,9 @@ WSError Session::HandleSubWindowClick(int32_t action)
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
+    } else if (parentSession_) {
+        // sub window is forbidden to raise to top after click, but its parent should raise
+        parentSession_->NotifyClick();
     }
     return WSError::WS_OK;
 }
