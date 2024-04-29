@@ -46,12 +46,12 @@ ScreenScene::~ScreenScene()
     Destroy();
 }
 
-void ScreenScene::Destroy()
+WMError ScreenScene::Destroy()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_) {
         TLOGD(WmsLogTag::DMS, "Destroy uiContent_ is nullptr!");
-        return;
+        return WMError::WM_OK;
     }
     std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
     uiContent_ = nullptr;
@@ -66,6 +66,7 @@ void ScreenScene::Destroy()
     } else {
         task();
     }
+    return WMError::WM_OK;
 }
 
 void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
