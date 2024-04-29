@@ -38,6 +38,7 @@ namespace {
     constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
     constexpr int32_t HALL_THRESHOLD = 1;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+    constexpr float DEFAULT_POSTURE = 5.0F;
 } // namespace
 
 SingleDisplaySensorFoldStateManager::SingleDisplaySensorFoldStateManager() {}
@@ -61,7 +62,7 @@ void SingleDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall
 
 void SingleDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDevice(float angle, int hall)
 {
-    if (hall == HALL_FOLDED_THRESHOLD || !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    if (hall == HALL_FOLDED_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = SMALLER_BOUNDARY_FLAG;
     } else if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = LARGER_BOUNDARY_FLAG;
@@ -81,6 +82,7 @@ FoldStatus SingleDisplaySensorFoldStateManager::GetNextFoldState(float angle, in
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
         if (hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
+            globalAngle = DEFAULT_POSTURE;
         } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
             hall == HALL_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
