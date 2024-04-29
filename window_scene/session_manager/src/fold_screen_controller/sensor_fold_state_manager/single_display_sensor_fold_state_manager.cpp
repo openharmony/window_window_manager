@@ -61,7 +61,7 @@ void SingleDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall
 
 void SingleDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDevice(float angle, int hall)
 {
-    if (hall == HALL_FOLDED_THRESHOLD || !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    if (hall == HALL_FOLDED_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = SMALLER_BOUNDARY_FLAG;
     } else if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = LARGER_BOUNDARY_FLAG;
