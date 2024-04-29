@@ -7842,6 +7842,17 @@ WSError SceneSessionManager::HandleSCBExtWaterMarkchange(int32_t persistentId, b
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
+    ExtensionWindowFlags actions)
+{
+    if (actions.waterMarkFlag) {
+        HandleSCBExtWaterMarkchange(persistentId, flags.waterMarkFlag);
+    }
+    if (actions.hideNonSecureWindowsFlag) {
+        HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+    }
+}
+
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
@@ -7899,12 +7910,7 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
         if (sceneSession == nullptr) {
             TLOGD(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags: Parent session with persistentId %{public}d not found",
                 parentId);
-            if (actions.waterMarkFlag) {
-                HandleSCBExtWaterMarkchange(persistentId, flags.waterwaterMarkFlag);
-            }
-            if (actions.hideNonSecureWindowsFlag) {
-                HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
-            }
+            HandleSpecialExtWindowFlagChange(persistentId, flags, actions);
             return WSError::WS_OK;
         }
 

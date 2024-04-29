@@ -616,6 +616,7 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
     WSError HandleSCBExtWaterMarkchange(int32_t persistentId, bool isWaterMarkEnable);
+    WSError HandleSpecialExtWindowFlagChange(int32_t persistentId, uint32_t extWindowFlags, uint32_t extWindowActions);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
