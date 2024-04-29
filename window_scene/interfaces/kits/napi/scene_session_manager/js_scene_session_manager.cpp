@@ -550,6 +550,10 @@ void JsSceneSessionManager::OnSwitchingToAnotherUser()
         jsCallBack = iter->second;
     }
     auto task = [this, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value argv[] = {};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
