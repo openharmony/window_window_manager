@@ -169,8 +169,8 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     }
 }
 
-bool IntentionEventManager::InputEventListener::UpdatePointerEvent(
-    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+bool IntentionEventManager::InputEventListener::CheckPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
@@ -186,23 +186,13 @@ bool IntentionEventManager::InputEventListener::UpdatePointerEvent(
         pointerEvent->MarkProcessed();
         return false;
     }
-    auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    if (dispatchTimes > 0) {
-        MMI::PointerEvent::PointerItem pointerItem;
-        auto pointerId = pointerEvent->GetPointerId();
-        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
-            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-        }
-    }
     return true;
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
-    if (!UpdatePointerEvent(pointerEvent)) {
+    if (!CheckPointerEvent(pointerEvent)) {
         return;
     }
     LogPointInfo(pointerEvent);
@@ -214,11 +204,14 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         pointerEvent->MarkProcessed();
         return;
     }
-    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
-            sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
-            SceneSessionManager::GetInstance().UpdateLastDownEventDeviceId(pointerEvent->GetDeviceId());
+    auto dispatchTimes = pointerEvent->GetDispatchTimes();
+    if (dispatchTimes > 0) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        auto pointerId = pointerEvent->GetPointerId();
+        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
         }
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {

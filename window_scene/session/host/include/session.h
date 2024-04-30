@@ -571,6 +571,7 @@ private:
     std::function<void()> windowModeCallback_;
     std::function<bool()> isScreenLockedCallback_;
 
+    mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
     mutable std::shared_mutex uiRequestFocusMutex_;

@@ -946,7 +946,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get display manager");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get display");
         return;
     }
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();

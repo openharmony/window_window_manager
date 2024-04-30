@@ -48,7 +48,8 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration() &&
+                ScreenSessionManager::GetInstance().GetNotifyLockOrNot()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                 ScreenSessionManager::GetInstance().BlockScreenOnByCV();
@@ -60,7 +61,8 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration() &&
+                ScreenSessionManager::GetInstance().GetNotifyLockOrNot()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                 WaitScreenOffNotify(state);
