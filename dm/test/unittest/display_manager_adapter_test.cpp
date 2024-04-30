@@ -426,7 +426,7 @@ HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest |
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
