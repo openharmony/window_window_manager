@@ -58,6 +58,10 @@ private:
     void CalcBuiltInDisplayWaterfallRects();
     void CalcBuiltInDisplayWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth);
     void TransferBoundingRectsByRotation(DisplayId displayId, std::vector<DMRect>& boundingRects);
+    void CurrentRotation90(std::vector<DMRect> resultVec, std::vector<DMRect> displayBoundingRects,
+        uint32_t displayHeight);
+    void CurrentRotation180(std::vector<DMRect> resultVec, std::vector<DMRect> displayBoundingRects,
+        uint32_t displayHeight, uint32_t displayWidth);
     DMRect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
 
     // Raw data
