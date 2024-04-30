@@ -149,8 +149,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetCallingWindowWindowStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
         &SceneSessionManagerStub::HandleGetCallingWindowRect),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
-        &SceneSessionManagerStub::HandleGetWindowBackHomeStatus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MOD_TYPE),
+        &SceneSessionManagerStub::HandleGetWindowModStatus),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -933,12 +933,12 @@ int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowBackHomeStatus(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetWindowModStatus(MessageParcel &data, MessageParcel &reply)
 {
-    bool isBackHome = false;
-    WMError errCode = GetWindowBackHomeStatus(isBackHome);
-    WLOGFI("run HandleGetWindowBackHomeStatus, isBackHome:%{public}d!", isBackHome);
-    if (!reply.WriteBool(isBackHome)) {
+    WindowModeType windowMod = Rosen::WindowModeType::WINDOW_MODE_OTHER;
+    WMError errCode = GetWindowModStatus(windowMod);
+    WLOGFI("run HandleGetWindowModStatus, windowMod:%{public}d!", static_cast<int32_t>(windowMod));
+    if (!reply.WriteUint32(static_cast<int32_t>(windowMod))) {
         WLOGE("Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
