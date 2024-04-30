@@ -67,8 +67,7 @@ public:
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
-        TRANS_ID_GET_WINDOW_BACK_HOME_STATUS,
-        TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
+        TRANS_ID_GET_WINDOW_MOD_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
