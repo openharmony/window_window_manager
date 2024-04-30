@@ -890,6 +890,16 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     WMError res4 = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res4);
 }
+
+HWTEST_F(WindowManagerTest, GetWindowModStatus01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.clear();
+    WindowModeType windowMod;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetWindowModStatus(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModStatus(windowMod));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
