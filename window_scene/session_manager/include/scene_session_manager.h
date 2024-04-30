@@ -312,7 +312,7 @@ public:
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
-    WMError GetWindowModStatus(WindowModeType &windowMod) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
 
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);

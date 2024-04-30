@@ -87,7 +87,7 @@ public:
     WMError SetAspectRatio(uint32_t windowId, float ratio);
     void FlushWindowInfo(uint32_t windowId);
     void SetDragFrameGravity(int32_t dragGravity);
-    WMError GetWindowModStatus(WindowModeType &windowMod) const;
+    WMError GetWindowModeType(WindowModeType& windowModeType) const;
 
 private:
     uint32_t GenWindowId();

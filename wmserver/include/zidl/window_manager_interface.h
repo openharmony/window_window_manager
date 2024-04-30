@@ -214,7 +214,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError GetWindowModStatus(WindowModeType &windowMod)
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType)
     {
         return WMError::WM_OK;
     };

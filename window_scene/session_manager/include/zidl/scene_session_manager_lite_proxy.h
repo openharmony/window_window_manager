@@ -59,7 +59,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
-    WMError GetWindowModStatus(WindowModeType &windowMod) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
 
 private:

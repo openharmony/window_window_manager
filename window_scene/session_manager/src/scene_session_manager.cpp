@@ -8228,13 +8228,13 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetWindowModStatus(WindowModeType &windowMod)
+WMError SceneSessionManager::GetWindowModeType(WindowModeType& windowModeType)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetWindowModStatus permission denied!");
+        WLOGFE("GetWindowModeType permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    windowMod = GetWindowModType();
+    windowModeType = GetWindowModType();
     return WMError::WM_OK;
 }
 

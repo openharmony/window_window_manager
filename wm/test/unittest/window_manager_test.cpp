@@ -891,14 +891,14 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res4);
 }
 
-HWTEST_F(WindowManagerTest, GetWindowModStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     infos.clear();
-    WindowModeType windowMod;
+    WindowModeType windowModeType;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetWindowModStatus(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModStatus(windowMod));
+    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
 }
 }
 } // namespace Rosen

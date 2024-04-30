@@ -769,7 +769,7 @@ WMError SceneSessionManagerLiteProxy::GetVisibilityWindowInfo(std::vector<sptr<W
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::GetWindowModStatus(WindowModeType &windowMod)
+WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowModeType)
 {
     WLOGFI("get Window mod status proxy");
     MessageParcel data;
@@ -781,12 +781,12 @@ WMError SceneSessionManagerLiteProxy::GetWindowModStatus(WindowModeType &windowM
     MessageParcel reply;
     MessageOption option;
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MOD_TYPE), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE), data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    windowMod = static_cast<WindowModeType>(reply.ReadUint32());
+    windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
 }
 
