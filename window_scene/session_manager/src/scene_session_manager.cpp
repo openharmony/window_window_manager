@@ -1944,6 +1944,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             if (oldFlags.privacyModeFlag) {
                 UpdatePrivateStateAndNotify(parentId);
             }
+        } else {
+            HandleSCBExtWaterMarkChange(persistentId, false);
+            HandleSecureExtSessionShouldHide(persistentId, false);
         }
         remoteExtSessionMap_.erase(iter);
     };
@@ -4997,6 +5000,10 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
                 break;
             }
         }
+        if (waterMarkSessionSet_.size() != 0) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "CheckAndNotifyWaterMarkChangedResult scb uiext has water mark");
+            currentWaterMarkShowState = true;
+        }
     }
     if (lastWaterMarkShowState_ != currentWaterMarkShowState) {
         lastWaterMarkShowState_ = currentWaterMarkShowState;
@@ -7815,6 +7822,29 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::HandleSCBExtWaterMarkChange(int32_t persistentId, bool isWaterMarkEnable)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "check watermark for scb uiext");
+    if (isWaterMarkEnable) {
+        waterMarkSessionSet_.insert(persistentId);
+    } else {
+        waterMarkSessionSet_.erase(persistentId);
+    }
+    CheckAndNotifyWaterMarkChangedResult();
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
+    ExtensionWindowFlags actions)
+{
+    if (actions.waterMarkFlag) {
+        HandleSCBExtWaterMarkChange(persistentId, flags.waterMarkFlag);
+    }
+    if (actions.hideNonSecureWindowsFlag) {
+        HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+    }
+}
+
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
@@ -7872,7 +7902,8 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
         if (sceneSession == nullptr) {
             TLOGD(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags: Parent session with persistentId %{public}d not found",
                 parentId);
-            return HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+            HandleSpecialExtWindowFlagChange(persistentId, flags, actions);
+            return WSError::WS_OK;
         }
 
         auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
