@@ -588,7 +588,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SET_CLIENT: {
             auto remoteObject = data.ReadRemoteObject();
             auto clientProxy = iface_cast<IScreenSessionManagerClient>(remoteObject);
-            if (!clientProxy) {
+            if (clientProxy == nullptr) {
                 WLOGFE("clientProxy is null");
                 break;
             }

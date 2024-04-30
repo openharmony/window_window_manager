@@ -1174,8 +1174,8 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
             .abilityName_ = "SCBKeyboardPanel",
             .isSystem_ = true,
             .windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL),
+            .screenId_ = static_cast<uint64_t>(displayId),
             .isSystemInput_ = false,
-            .screenId_ = static_cast<uint64_t>(displayId)
         };
         panelSession = RequestSceneSession(panelInfo, nullptr);
         if (panelSession == nullptr) {
@@ -1302,7 +1302,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
 {
     sptr<DisplayChangeInfo> info = new (std::nothrow) DisplayChangeInfo();
-    if (!info) {
+    if (info == nullptr) {
         WLOGFE("new info failed");
         return;
     }
@@ -1407,7 +1407,7 @@ WSError SceneSessionManager::UpdateConfig(const SessionInfo& sessionInfo, AppExe
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    if (!abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is nullptr");
         return nullptr;
     }
