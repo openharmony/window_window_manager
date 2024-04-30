@@ -1133,7 +1133,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
 
     auto ret = DestroyInner(needNotifyServer);
-    if (ret != WMError::WM_OK) {
+    if (ret != WMError::WM_OK && ret != WMError::WM_ERROR_NULLPTR) { //nullptr means no session in server
         WLOGFW("[WMSLife] Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
     }
