@@ -51,7 +51,6 @@ public:
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowModeChange(WindowModeType type);
-    void NotifyWindowBackHomeStatus(bool isBackHome);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
@@ -860,9 +859,9 @@ void WindowManager::UpdateWindowModeTypeInfo(WindowModeType type) const
 }
 
 
-WMError WindowManager::GetWindowModStatus(WindowModeType &windowMod) const
+WMError WindowManager::GetWindowModeType(WindowModeType& windowModeType) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowModStatus(windowMod);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowModeType(windowModeType);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window mod status failed");
     }

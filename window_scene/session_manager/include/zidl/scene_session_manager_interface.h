@@ -104,7 +104,7 @@ public:
         TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK,
         TRANS_ID_GET_WINDOW_STATUS,
         TRANS_ID_GET_WINDOW_RECT,
-        TRANS_ID_GET_WINDOW_MOD_TYPE,
+        TRANS_ID_GET_WINDOW_MODE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -236,7 +236,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError GetWindowModStatus(WindowModeType &windowMod) override { return WMError::WM_OK; }
+    WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

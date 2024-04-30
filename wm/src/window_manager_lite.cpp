@@ -424,9 +424,9 @@ void WindowManagerLite::UpdateWindowModeTypeInfo(WindowModeType type) const
     pImpl_->NotifyWindowModeChange(type);
 }
 
-WMError WindowManagerLite::GetWindowModStatus(WindowModeType &windowMod) const
+WMError WindowManagerLite::GetWindowModeType(WindowModeType& windowModeType) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapterLite>().GetWindowModStatus(windowMod);
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().GetWindowModeType(windowModeType);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window visibility info failed");
     }

@@ -149,8 +149,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetCallingWindowWindowStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
         &SceneSessionManagerStub::HandleGetCallingWindowRect),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MOD_TYPE),
-        &SceneSessionManagerStub::HandleGetWindowModStatus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
+        &SceneSessionManagerStub::HandleGetWindowModeType),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -933,12 +933,12 @@ int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowModStatus(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel &data, MessageParcel &reply)
 {
-    WindowModeType windowMod = Rosen::WindowModeType::WINDOW_MODE_OTHER;
-    WMError errCode = GetWindowModStatus(windowMod);
-    WLOGFI("run HandleGetWindowModStatus, windowMod:%{public}d!", static_cast<int32_t>(windowMod));
-    if (!reply.WriteUint32(static_cast<int32_t>(windowMod))) {
+    WindowModeType windowModeType = Rosen::WindowModeType::WINDOW_MODE_OTHER;
+    WMError errCode = GetWindowModeType(windowModeType);
+    WLOGFI("run HandleGetWindowModeType, windowModeType:%{public}d!", static_cast<int32_t>(windowModeType));
+    if (!reply.WriteUint32(static_cast<int32_t>(windowModeType))) {
         WLOGE("Failed to WriteBool");
         return ERR_INVALID_DATA;
     }

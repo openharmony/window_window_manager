@@ -1698,20 +1698,20 @@ WMError SceneSessionManagerProxy::GetCallingWindowRect(int32_t persistentId, Rec
     return ret;
 }
 
-WMError SceneSessionManagerProxy::GetWindowModStatus(WindowModeType &windowMod)
+WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeType)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetWindowModStatus Write interfaceToken failed");
+        WLOGFE("GetWindowModeType Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MOD_TYPE), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MODE_TYPE), data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    windowMod = static_cast<WindowModeType>(reply.ReadUint32());
+    windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

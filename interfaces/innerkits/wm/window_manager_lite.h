@@ -135,7 +135,7 @@ public:
      * @param void
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetWindowModStatus(WindowModeType &windowMod) const;
+    WMError GetWindowModeType(WindowModeType& windowModeType) const;
     /**
      * @brief Get top num main window info.
      *

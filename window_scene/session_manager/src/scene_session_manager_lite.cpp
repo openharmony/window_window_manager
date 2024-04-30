@@ -199,9 +199,9 @@ WSError SceneSessionManagerLite::UpdateWindowMode(int32_t persistentId, int32_t 
     return SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
 }
 
-WMError SceneSessionManagerLite::GetWindowModStatus(WindowModeType &windowMod)
+WMError SceneSessionManagerLite::GetWindowModeType(WindowModeType& windowModeType)
 {
-    return SceneSessionManager::GetInstance().GetWindowModStatus(windowMod);
+    return SceneSessionManager::GetInstance().GetWindowModeType(windowModeType);
 }
 
 WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
