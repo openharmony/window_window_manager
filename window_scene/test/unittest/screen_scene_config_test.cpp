@@ -306,7 +306,11 @@ HWTEST_F(ScreenSceneConfigTest, GetStringConfig, Function | SmallTest | Level1)
 HWTEST_F(ScreenSceneConfigTest, GetCurvedScreenBoundaryConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetCurvedScreenBoundaryConfig();
-    ASSERT_NE(0, result.size());
+    if (ScreenSessionManager::GetInstance().GetCurvedCompressionArea() == 0) {
+        ASSERT_EQ(0, result.size());
+    } else {
+        ASSERT_NE(0, result.size());
+    }
 }
 
 /**

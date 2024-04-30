@@ -181,7 +181,7 @@ public:
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
-    WSError SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
+    WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -320,7 +320,6 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     WSError SwitchFreeMultiWindow(bool enable);
     const SystemSessionConfig& GetSystemSessionConfig() const;
-    void UpdateLastDownEventDeviceId(int32_t deviceId);
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
@@ -330,7 +329,6 @@ protected:
 
 private:
     bool isKeyboardPanelEnabled_ = false;
-    int32_t lastDownEventDeviceId_ { -1 };
     void Init();
     void InitScheduleUtils();
     void RegisterAppListener();
@@ -488,6 +486,7 @@ private:
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> secureSessionSet_;
+    std::set<int32_t> waterMarkSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
@@ -614,6 +613,9 @@ private:
         bool shouldHide);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
+    WSError HandleSCBExtWaterMarkChange(int32_t persistentId, bool isWaterMarkEnable);
+    void HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
+        ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessSplitFloating();
     void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);

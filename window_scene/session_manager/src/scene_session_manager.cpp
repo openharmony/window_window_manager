@@ -1944,6 +1944,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             if (oldFlags.privacyModeFlag) {
                 UpdatePrivateStateAndNotify(parentId);
             }
+        } else {
+            HandleSCBExtWaterMarkChange(persistentId, false);
+            HandleSecureExtSessionShouldHide(persistentId, false);
         }
         remoteExtSessionMap_.erase(iter);
     };
@@ -4536,14 +4539,7 @@ static void FillSecCompEnhanceData(const std::shared_ptr<MMI::PointerEvent>& poi
 }
 #endif // SECURITY_COMPONENT_MANAGER_ENABLE
 
-void SceneSessionManager::UpdateLastDownEventDeviceId(int32_t deviceId)
-{
-    lastDownEventDeviceId_ = deviceId;
-    TLOGD(WmsLogTag::WMS_EVENT, "deviceId:%{public}d", lastDownEventDeviceId_);
-    return;
-}
-
-WSError SceneSessionManager::SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
+WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex)
 {
     if (!pointerEvent) {
         WLOGFE("pointerEvent is null");
@@ -4557,9 +4553,8 @@ WSError SceneSessionManager::SendTouchEvent(std::shared_ptr<MMI::PointerEvent>& 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "PointerId:%{public}d,action:%{public}d,deviceId:%{public}d",
-        pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), lastDownEventDeviceId_);
-    pointerEvent->SetDeviceId(lastDownEventDeviceId_);
+    WLOGFI("[EventDispatch] SendTouchEvent PointerId = %{public}d, action = %{public}d",
+        pointerEvent->GetPointerId(), pointerEvent->GetPointerAction());
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
     return WSError::WS_OK;
 }
@@ -5004,6 +4999,10 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
                 currentWaterMarkShowState = true;
                 break;
             }
+        }
+        if (waterMarkSessionSet_.size() != 0) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "CheckAndNotifyWaterMarkChangedResult scb uiext has water mark");
+            currentWaterMarkShowState = true;
         }
     }
     if (lastWaterMarkShowState_ != currentWaterMarkShowState) {
@@ -7823,6 +7822,29 @@ WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistent
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::HandleSCBExtWaterMarkChange(int32_t persistentId, bool isWaterMarkEnable)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "check watermark for scb uiext");
+    if (isWaterMarkEnable) {
+        waterMarkSessionSet_.insert(persistentId);
+    } else {
+        waterMarkSessionSet_.erase(persistentId);
+    }
+    CheckAndNotifyWaterMarkChangedResult();
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
+    ExtensionWindowFlags actions)
+{
+    if (actions.waterMarkFlag) {
+        HandleSCBExtWaterMarkChange(persistentId, flags.waterMarkFlag);
+    }
+    if (actions.hideNonSecureWindowsFlag) {
+        HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+    }
+}
+
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
@@ -7880,7 +7902,8 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
         if (sceneSession == nullptr) {
             TLOGD(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags: Parent session with persistentId %{public}d not found",
                 parentId);
-            return HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+            HandleSpecialExtWindowFlagChange(persistentId, flags, actions);
+            return WSError::WS_OK;
         }
 
         auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
