@@ -352,7 +352,7 @@ public:
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
     /**
-     * @brief Get if window mod status.
+     * @brief Get window mod status.
      *
      * @param void
      * @return WM_OK means get success, others means get failed.
