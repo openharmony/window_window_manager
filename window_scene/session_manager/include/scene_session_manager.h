@@ -312,7 +312,7 @@ public:
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetWindowModStatus(WindowModeType &windowMod) override;
 
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -615,16 +615,15 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
-    void ProcessSplitFloating();
-    void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
+    void ProcessWindowModeType();
+    WindowModeType GetWindowModType();
+    void NotifyRSSWindowModeTypeUpdate();
     void CacVisibleWindowNum();
     bool IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
         const std::vector<VisibleWindowNumInfo>& currentInfo);
     bool IsKeyboardForeground();
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
-    void ProcessBackHomeStatus();
-    bool IsBackHomeStatus();
     void DeleteStateDetectTask();
 };
 } // namespace OHOS::Rosen
