@@ -2294,6 +2294,7 @@ uint32_t Session::GetUINodeId() const
 
 void Session::SetShowRecent(bool showRecent)
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "in recents: %{public}d, id: %{public}d", showRecent, persistentId_);
     bool isAttach = GetAttachState();
     if (!IsSupportDetectWindow(isAttach) ||
         !ShouldCreateDetectTaskInRecent(showRecent, showRecent_, isAttach)) {
