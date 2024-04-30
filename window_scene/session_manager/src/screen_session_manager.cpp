@@ -575,6 +575,10 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
     WLOGFI("GetAllDisplayIds enter");
     std::vector<DisplayId> res;
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetAllDisplayIds permission denied!");
+        return res;
+    }
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
@@ -714,6 +718,10 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
 {
     WLOGI("SetResolution ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
         screenId, width, height, virtualPixelRatio);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetResolution permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("SetResolution: invalid screenId");
         return DMError::DM_ERROR_NULLPTR;
@@ -759,6 +767,10 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
 
 DMError ScreenSessionManager::GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetDensityInCurResolution permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         WLOGFE("GetDensityInCurResolution: Get ScreenSession failed");
@@ -1449,12 +1461,20 @@ std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
 
 DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("GetDisplayState permission denied!");
+        return DisplayState::UNKNOWN;
+    }
     return sessionDisplayPowerController_->GetDisplayState(displayId);
 }
 
 void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 {
     WLOGFI("[UL_POWER]NotifyDisplayEvent receive keyguardDrawnDone");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("NotifyDisplayEvent permission denied!");
+        return;
+    }
     sessionDisplayPowerController_->NotifyDisplayEvent(event);
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
         keyguardDrawnDone_ = true;
@@ -3508,6 +3528,10 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
 
 void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetFoldDisplayMode permission denied!");
+        return;
+    }
     if (!g_foldScreenFlag) {
         return;
     }
@@ -3946,6 +3970,10 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 
 int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SetFoldDisplayMode permission denied!");
+        return -1;
+    }
     if (modeParam.empty()) {
         return -1;
     }
