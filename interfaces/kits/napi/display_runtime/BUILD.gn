@@ -54,7 +54,6 @@ ohos_shared_library("display_napi") {
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",
