@@ -22,10 +22,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorFoldStateManager"};
-} // namespace
-
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
 
@@ -44,7 +40,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         return;
     }
     if (mState_ != nextState) {
-        WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
         ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
         mState_ = nextState;
         if (foldScreenPolicy != nullptr) {
@@ -65,7 +61,8 @@ FoldStatus SensorFoldStateManager::GetCurrentState()
 void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
     float postureAngle)
 {
-    WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
+    TLOGI(WmsLogTag::DMS,
+        "ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
         currentStatus, nextStatus, postureAngle);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -75,7 +72,7 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", postureAngle);
     if (ret != 0) {
-        WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 

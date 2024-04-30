@@ -48,7 +48,6 @@ namespace OHOS::Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DualDisplaySensorFoldStateManager"};
     const float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.folded_threshold", 85));
     const float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
@@ -141,14 +140,14 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
     applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient_ == nullptr) {
-        WLOGFE("appMgrClient_ is nullptr.");
+        TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
     } else {
         auto flag = static_cast<int32_t>(
             appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, packageNames_));
         if (flag != ERR_OK) {
-            WLOGFE("Register app debug listener failed.");
+            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
         } else {
-            WLOGFI("Register app debug listener success.");
+            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
         }
     }
 }
