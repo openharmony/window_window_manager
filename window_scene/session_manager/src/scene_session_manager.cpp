@@ -4757,21 +4757,26 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionBackground(sceneSession);
             }
-            ProcessBackHomeStatus();
             break;
         default:
             break;
     }
-    ProcessSplitFloating();
+    ProcessWindowModeType();
 }
 
-void SceneSessionManager::ProcessSplitFloating()
+void SceneSessionManager::ProcessWindowModeType()
 {
     if (isScreenLocked_) {
         return;
     }
+    NotifyRSSWindowModeTypeUpdate();
+}
+
+WindowModeType SceneSessionManager::GetWindowModType()
+{
     bool inSplit = false;
     bool inFloating = false;
+    bool fullScreen = false;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
@@ -4787,14 +4792,11 @@ void SceneSessionManager::ProcessSplitFloating()
             if (mode == WindowMode::WINDOW_MODE_FLOATING) {
                 inFloating = true;
             }
+            fullScreen = WindowHelper::IsFullScreenWindow(mode);
         }
     }
-    NotifyRSSWindowModeTypeUpdate(inSplit, inFloating);
-}
 
-void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating)
-{
-    WindowModeType type;
+    WindowModeType type = WindowModeType::WINDOW_MODE_OTHER;
     if (inSplit) {
         if (inFloating) {
             type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
@@ -4804,10 +4806,18 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFlo
     } else {
         if (inFloating) {
             type = WindowModeType::WINDOW_MODE_FLOATING;
+        } else if (fullScreen) {
+            type = WindowModeType::WINDOW_MODE_FULLSCREEN;
         } else {
             type = WindowModeType::WINDOW_MODE_OTHER;
         }
     }
+    return type;
+}
+
+void SceneSessionManager::NotifyRSSWindowModeTypeUpdate()
+{
+    WindowModeType type = GetWindowModType();
     if (lastWindowModeType_ == type) {
         return;
     }
@@ -4815,36 +4825,6 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFlo
     TLOGI(WmsLogTag::WMS_MAIN, "Notify RSS Window Mode Type Update, type : %{public}d",
         static_cast<uint8_t>(type));
     SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(type);
-}
-
-void SceneSessionManager::ProcessBackHomeStatus()
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "ProcessBackHomeStatus");
-    if (IsBackHomeStatus()) {
-        SessionManagerAgentController::GetInstance().UpdateWindowBackHomeStatus(true);
-        TLOGI(WmsLogTag::WMS_MAIN, "ProcessBackHomeStatus go back home status");
-    }
-}
-
-bool SceneSessionManager::IsBackHomeStatus()
-{
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto &item : sceneSessionMap_) {
-        auto sceneSession = item.second;
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "IsBackHomeStatus, sceneSession is null");
-            continue;
-        }
-        auto mode = sceneSession->GetWindowMode();
-        auto state = sceneSession->GetSessionState();
-        if ((WindowHelper::IsMainWindow(sceneSession->GetWindowType())) &&
-            (WindowHelper::IsFullScreenWindow(mode) || WindowHelper::IsSplitWindowMode(mode)) &&
-            (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE)) {
-            return false;
-        }
-    }
-    TLOGI(WmsLogTag::WMS_MAIN, "IsBackHomeStatus, true");
-    return true;
 }
 
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
@@ -8246,6 +8226,16 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
     rect = {sessionRect.posX_, sessionRect.posY_, sessionRect.width_, sessionRect.height_};
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Get Rect persistentId: %{public}d, x: %{public}d, y: %{public}d, "
         "height: %{public}u, width: %{public}u", persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetWindowModStatus(WindowModeType &windowMod)
+{
+    if (!SessionPermission::IsSACalling()) {
+        WLOGFE("GetWindowModStatus permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    windowMod = GetWindowModType();
     return WMError::WM_OK;
 }
 
