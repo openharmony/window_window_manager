@@ -40,7 +40,7 @@ JsExtensionWindow::JsExtensionWindow(
 
 JsExtensionWindow::JsExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
     sptr<AAFwk::SessionInfo> sessionInfo)
-    : extensionWindow_(extensionWindow), sessionInfo_(sessionInfo),
+    : extensionWindow_(extensionWindow), hostWindowId_(-1), sessionInfo_(sessionInfo),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
 
