@@ -1251,7 +1251,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
         auto windowModeCallback = [this]() {
-            ProcessSplitFloating();
+            ProcessWindowModeType();
         };
         auto isScreenLockedCallback = [this]() {
             return IsScreenLocked();
@@ -3138,7 +3138,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
         case WSPropertyChangeAction::ACTION_UPDATE_MODE: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
-                ProcessSplitFloating();
+                ProcessWindowModeType();
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
@@ -4507,7 +4507,6 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
-    ProcessBackHomeStatus();
     return sceneSession->UpdateWindowMode(mode);
 }
 
@@ -8245,17 +8244,6 @@ void SceneSessionManager::CheckSceneZOrder()
         AnomalyDetection::SceneZOrderCheckProcess();
     };
     taskScheduler_->PostAsyncTask(task, "CheckSceneZOrder");
-}
-
-WMError SceneSessionManager::GetWindowBackHomeStatus(bool &isBackHome)
-{
-    if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetWindowBackHomeStatus permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    isBackHome = IsBackHomeStatus();
-    WLOGFI("Get back home status success, isBackHome: %{public}d", isBackHome);
-    return WMError::WM_OK;
 }
 
 int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
