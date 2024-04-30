@@ -51,7 +51,6 @@ public:
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowModeChange(WindowModeType type);
-    void NotifyWindowBackHomeStatus(bool isBackHome);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
