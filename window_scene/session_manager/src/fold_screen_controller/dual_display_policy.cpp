@@ -252,9 +252,9 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
     auto taskScreenOff = [=] {
         WLOGFI("ChangeScreenDisplayMode: off screenId: %{public}d", offScreenId);
         screenId_ = offScreenId;
-        ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-            PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
+        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
+        PowerMgr::PowerMgrClient::GetInstance().SuspendDevice();
+        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
 
@@ -262,10 +262,9 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
         WLOGFI("ChangeScreenDisplayMode: on screenId: %{public}d", onScreenId);
         screenId_ = onScreenId;
         if (PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
@@ -285,10 +284,9 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
         WLOGFI("ChangeScreenDisplayMode: on screenId: 0");
         screenId_ = SCREEN_ID_MAIN;
         if (PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
