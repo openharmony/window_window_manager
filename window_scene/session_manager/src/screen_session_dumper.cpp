@@ -24,7 +24,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionDumper" };
 }
 
 ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16string>& args)
@@ -37,13 +36,13 @@ ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16strin
         params_.emplace_back(arg);
         info += arg;
     }
-    WLOGFI("input args: [%{public}s]", info.c_str());
+    TLOGI(WmsLogTag::DMS, "input args: [%{public}s]", info.c_str());
 }
 
 void ScreenSessionDumper::OutputDumpInfo()
 {
     if (fd_ < 0) {
-        WLOGFE("invalid fd: %{public}d", fd_);
+        TLOGE(WmsLogTag::DMS, "invalid fd: %{public}d", fd_);
         return;
     }
 
@@ -51,7 +50,7 @@ void ScreenSessionDumper::OutputDumpInfo()
     UniqueFd ufd = UniqueFd(fd_); // auto free
     int ret = dprintf(ufd.Get(), "%s\n", dumpInfo_.c_str());
     if (ret < 0) {
-        WLOGFE("dprintf error. ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "dprintf error. ret: %{public}d", ret);
         return;
     }
     dumpInfo_.clear();
@@ -71,7 +70,7 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     }
 
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
-        WLOGFE("dump permission denied!");
+        TLOGE(WmsLogTag::DMS, "dump permission denied!");
         return;
     }
     if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
@@ -167,7 +166,7 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
     oss << "[SCREEN SESSION]" << std::endl;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
     if (screenSession == nullptr) {
-        WLOGFE("screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "Name: "
@@ -199,7 +198,7 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
     oss << "[RS INFO]" << std::endl;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
     if (screenSession == nullptr) {
-        WLOGFE("screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     std::vector<ScreenColorGamut> colorGamuts;
@@ -275,7 +274,7 @@ void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
     oss << "[CUTOUT INFO]" << std::endl;
     sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfo(id);
     if (cutoutInfo == nullptr) {
-        WLOGFE("cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_L<X,Y,W,H>: "
@@ -314,7 +313,7 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
     oss << "[SCREEN INFO]" << std::endl;
     auto screenInfo = ScreenSessionManager::GetInstance().GetScreenInfoById(id);
     if (screenInfo == nullptr) {
-        WLOGFE("screenInfo nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "VirtualWidth: "
@@ -391,7 +390,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
 
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
-    WLOGFI("params_: [%{public}s]", params_[0].c_str());
+    TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", params_[0].c_str());
     int errCode = ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(params_[0]);
     if (errCode != 0) {
         ShowIllegalArgsInfo();
