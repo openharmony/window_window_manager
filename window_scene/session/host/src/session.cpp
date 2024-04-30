@@ -2007,9 +2007,13 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    property_ = property;
+    {
+        std::unique_lock<std::shared_mutex> lock(propertyMutex_);
+        property_ = property;
+    }
+    auto sessionProperty = GetSessionProperty();
     NotifySessionInfoChange();
-    if (property_ == nullptr) {
+    if (sessionProperty == nullptr) {
         return WSError::WS_OK;
     }
 
@@ -2021,12 +2025,13 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         }
         session->NotifySessionInfoChange();
     };
-    property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    sessionProperty->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 
 sptr<WindowSessionProperty> Session::GetSessionProperty() const
 {
+    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
