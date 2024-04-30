@@ -73,9 +73,5 @@ void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
     SingletonContainer::Get<WindowManager>().NotifyGestureNavigationEnabledResult(enable);
 }
 
-void WindowManagerAgent::UpdateWindowBackHomeStatus(bool isBackHome)
-{
-    SingletonContainer::Get<WindowManager>().UpdateWindowBackHomeStatus(isBackHome);
-}
 } // namespace Rosen
 } // namespace OHOS
