@@ -304,25 +304,25 @@ HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, Function | MediumT
 }
 
 /**
- * @tc.name: UpdatePointerEvent
- * @tc.desc: UpdatePointerEvent Test
+ * @tc.name: CheckPointerEvent
+ * @tc.desc: CheckPointerEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, UpdatePointerEvent, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, Function | MediumTest | Level2)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
         std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
     EXPECT_NE(nullptr, inputEventListener);
-    EXPECT_EQ(false, inputEventListener->UpdatePointerEvent(pointerEvent));
+    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
     pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_EQ(false, inputEventListener->UpdatePointerEvent(pointerEvent));
+    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
     SceneSessionManager::GetInstance().SetEnableInputEvent(false);
-    EXPECT_EQ(false, inputEventListener_->UpdatePointerEvent(pointerEvent));
+    EXPECT_EQ(false, inputEventListener_->CheckPointerEvent(pointerEvent));
     SceneSessionManager::GetInstance().SetEnableInputEvent(true);
     pointerEvent->SetDispatchTimes(10);
     EXPECT_EQ(10, pointerEvent->GetDispatchTimes());
-    EXPECT_EQ(true, inputEventListener_->UpdatePointerEvent(pointerEvent));
+    EXPECT_EQ(true, inputEventListener_->CheckPointerEvent(pointerEvent));
 }
 
 /**
@@ -344,7 +344,6 @@ HWTEST_F(IntentionEventManagerTest, UpdateLastMouseEvent, Function | MediumTest 
     pointerEvent->SetSourceType(MMI::PointerEvent::POINTER_ACTION_DOWN);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
     inputEventListener_->UpdateLastMouseEvent(pointerEvent);
-    ProcessEnterLeaveEventAsync
 }
 
 /**
@@ -374,8 +373,8 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
     inputEventListener_->UpdateLastMouseEvent(pointerEvent);
 
-    SceneSession::GetEnterWindow().ClearEnterWindow();
-    EXPECT_EQ(nullptr, SceneSession::GetEnterWindow().GetEnterWindow());
+    SceneSession::ClearEnterWindow();
+    EXPECT_EQ(nullptr, SceneSession::GetEnterWindow().promote());
     inputEventListener_->ProcessEnterLeaveEventAsync();
 
     SessionInfo info;
@@ -392,10 +391,10 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     sceneSession->TransferPointerEvent(pointerEvent, true);
-    EXPECT_NE(nullptr, SceneSession::GetEnterWindow().GetEnterWindow());
+    EXPECT_NE(nullptr, SceneSession::GetEnterWindow().promote());
     inputEventListener_->ProcessEnterLeaveEventAsync();
 
-    SceneSession::GetEnterWindow().ClearEnterWindow();
+    SceneSession::ClearEnterWindow();
     info.persistentId_ = 2024;
     sceneSession = new SceneSession(info, callback);
     EXPECT_EQ(2024, sceneSession->GetPersistentId());
@@ -404,6 +403,7 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener2 =
         std::make_shared<IntentionEventManager::InputEventListener>(nullptr, eventHandler_);
     inputEventListener2->ProcessEnterLeaveEventAsync();
+}
 }
 }
 }
