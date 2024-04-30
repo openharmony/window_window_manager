@@ -13,88 +13,105 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
-#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_PROXY_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_PROXY_H
 
-#include <map>
-#include <iremote_stub.h>
+#include <iremote_proxy.h>
 
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
-class SceneSessionManagerStub;
-using SceneSessionManagerStubFunc = int (SceneSessionManagerStub::*)(MessageParcel &data, MessageParcel &reply);
-
-class SceneSessionManagerStub : public IRemoteStub<ISceneSessionManager> {
+class SceneSessionManagerProxy : public IRemoteProxy<ISceneSessionManager> {
 public:
-    SceneSessionManagerStub() = default;
-    virtual ~SceneSessionManagerStub() = default;
+    explicit SceneSessionManagerProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<ISceneSessionManager>(impl) {}
+    virtual ~SceneSessionManagerProxy() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        SystemSessionConfig& systemConfig, sptr<IRemoteObject> token = nullptr) override;
+    WSError RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) override;
+    WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr) override;
+    WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) override;
+    WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+        const sptr<IRemoteObject>& callback) override;
+    WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
+    WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
+    WSError RaiseWindowToTop(int32_t persistentId) override;
+
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError SetGestureNavigaionEnabled(bool enable) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
+    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
+    WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
+    void UnregisterSessionListener() override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
+
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                            std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
+    WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
+        SessionInfoBean& sessionInfo) override;
+
+    WSError DumpSessionAll(std::vector<std::string> &infos) override;
+    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
+    WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
+    WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
+    void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
+    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
+    WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) override;
+    WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
+    WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                               SessionSnapshot& snapshot, bool isLowResolution) override;
+    WSError LockSession(int32_t persistentId) override;
+    WSError UnlockSession(int32_t persistentId) override;
+    WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
+    WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
+    WSError ClearSession(int32_t persistentId) override;
+    WSError ClearAllSessions() override;
+    WSError RegisterIAbilityManagerCollaborator(int32_t type,
+        const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
+    WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
+    WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
+    WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+        int32_t parentId) override;
+    WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions) override;
+    WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
+    WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
+    WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError GetWindowModStatus(WindowModeType &windowMod) override;
 
 private:
-    static const std::map<uint32_t, SceneSessionManagerStubFunc> stubFuncMap_;
-
-    int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
-    int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
-    int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
-    int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
-    int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
-    int HandleRecoverAndReconnectSceneSession(MessageParcel &data, MessageParcel &reply);
-    int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
-    int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data, MessageParcel& reply);
-    int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
-    int HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
-    int HandleUnRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
-    int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
-    int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
-
-    int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
-    int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
-
-    int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
-    int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
-    int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
-    int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
-    int HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply);
-    int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
-    int HandleClearSession(MessageParcel &data, MessageParcel &reply);
-    int HandleClearAllSessions(MessageParcel &data, MessageParcel &reply);
-    int HandleLockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleUnlockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply);
-    int HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply);
-    int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
-    int HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
-    int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
-    int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
-    int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
-    int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
-    int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
-    int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
-    int HandleGetWindowModStatus(MessageParcel& data, MessageParcel& reply);
+    template<typename T>
+    WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);
+    static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_PROXY_H
