@@ -2043,6 +2043,22 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
     }
 }
 
+void ScreenSessionManagerProxy::SwitchUser()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SWITCH_USER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 ScreenProperty ScreenSessionManagerProxy::GetScreenProperty(ScreenId screenId)
 {
     MessageParcel data;

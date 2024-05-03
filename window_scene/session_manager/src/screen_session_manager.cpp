@@ -33,6 +33,7 @@
 
 #include "dm_common.h"
 #include "fold_screen_state_internel.h"
+#include "pipeline/rs_node_map.h"
 #include "scene_board_judgement.h"
 #include "session_permission.h"
 #include "screen_scene_config.h"
@@ -3772,17 +3773,121 @@ bool ScreenSessionManager::GetNotifyLockOrNot()
     return notifyLockOrNot_;
 }
 
-void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
+void ScreenSessionManager::SwitchUser()
 {
-    if (!client) {
-        WLOGFI("SetClient client is null");
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("permission denied");
         return;
     }
     auto userId = GetUserIdByCallingUid();
-    WLOGFI("SetClient userId= %{public}d", userId);
+    WLOGFI("switch userId:%{public}d, currentId:%{public}d", userId, currentUserId_);
+    {
+        std::lock_guard<std::mutex> lock(currentUserIdMutex_);
+        if (userId == currentUserId_) {
+            WLOGFI("switch user not change");
+            return;
+        }
+        if (clientProxy_ != nullptr) {
+            clientProxy_->SwitchUserCallback();
+            RemoveAllDisplayNodeChildrenInner(currentUserId_);
+        }
+        currentUserId_ = userId;
+        auto it = clientProxyMap_.find(currentUserId_);
+        if (it != clientProxyMap_.end()) {
+            clientProxy_ = it->second;
+        }
+    }
+    RecoverAllDisplayNodeChildrenInner();
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(currentUserId_,
+        static_cast<int32_t>(defaultScreenId_), false);
+}
+
+void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("permission denied");
+        return;
+    }
+    if (!client) {
+        WLOGFE("SetClient client is null");
+        return;
+    }
+    auto userId = GetUserIdByCallingUid();
+    WLOGFI("set client userId:%{public}d", userId);
+    {
+        std::lock_guard<std::mutex> lock(currentUserIdMutex_);
+        if (clientProxy_ != nullptr && userId != currentUserId_) {
+            clientProxy_->SwitchUserCallback();
+            RemoveAllDisplayNodeChildrenInner(currentUserId_);
+        }
+        currentUserId_ = userId;
+        clientProxy_ = client;
+        clientProxyMap_[currentUserId_] = client;
+    }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, DEFAULT_SCREEN_ID, true);
-    clientProxy_ = client;
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
+    SetClientInner();
+}
+
+void ScreenSessionManager::RemoveAllDisplayNodeChildrenInner(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
+    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap;
+    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(userId);
+    if (userDisplayNodeIter != userDisplayNodeChildrenMap_.end()) {
+        userDisplayNodeChildrenMap_.erase(userDisplayNodeIter);
+    }
+    for (const auto& iter : screenSessionMap_) {
+        auto displayNode = GetDisplayNode(iter.first);
+        if (displayNode == nullptr) {
+            WLOGFE("display node is null");
+            continue;
+        }
+        auto nodeChildren = displayNode->GetChildren();
+        std::vector<std::shared_ptr<RSBaseNode>> childrenList;
+        for (auto child : nodeChildren) {
+            auto childNode = RSNodeMap::Instance().GetNode(child);
+            if (childNode != nullptr) {
+                childrenList.push_back(childNode);
+                displayNode->RemoveChild(childNode);
+            }
+        }
+        displayNodeChildrenMap.emplace(iter.first, childrenList);
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    userDisplayNodeChildrenMap_.emplace(userId, displayNodeChildrenMap);
+    WLOGFI("RemoveAllDisplayNodeChildrenInner end");
+}
+
+void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
+{
+    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
+    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(currentUserId_);
+    if (userDisplayNodeIter == userDisplayNodeChildrenMap_.end()) {
+        return;
+    }
+    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap = userDisplayNodeIter->second;
+    for (const auto& iter : displayNodeChildrenMap) {
+        auto displayNode = GetDisplayNode(iter.first);
+        if (displayNode == nullptr) {
+            continue;
+        }
+        for (auto child : iter.second) {
+            displayNode->AddChild(child);
+        }
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    WLOGFI("RecoverAllDisplayNodeChildrenInner end");
+}
+
+void ScreenSessionManager::SetClientInner()
+{
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         if (!iter.second) {
