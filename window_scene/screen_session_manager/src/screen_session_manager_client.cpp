@@ -200,6 +200,11 @@ void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDispl
     displayChangeListener_ = listener;
 }
 
+void ScreenSessionManagerClient::RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func)
+{
+    switchingToAnotherUserFunc_ = func;
+}
+
 void ScreenSessionManagerClient::OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -358,6 +363,23 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+void ScreenSessionManagerClient::SwitchUserCallback()
+{
+    if (switchingToAnotherUserFunc_ != nullptr) {
+        WLOGFE("switch to another user");
+        switchingToAnotherUserFunc_();
+    }
+}
+
+void ScreenSessionManagerClient::SwitchingCurrentUser()
+{
+    if (screenSessionManager_ == nullptr) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->SwitchUser();
 }
 
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()

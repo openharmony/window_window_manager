@@ -2683,6 +2683,7 @@ void SceneSessionManager::NotifySwitchingToCurrentUser()
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Notify switching to current user");
         SceneInputManager::GetInstance().SetUserBackground(false);
         // notify screenSessionManager to recover current user
+        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         FlushWindowInfoToMMI(true);
         return WSError::WS_OK;
     };
