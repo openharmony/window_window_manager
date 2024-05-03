@@ -229,7 +229,7 @@ public:
 
     void SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session);
     void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
-
+    void SwitchUser() override;
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
@@ -273,6 +273,10 @@ private:
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+
+    void SetClientInner();
+    void RecoverAllDisplayNodeChildrenInner();
+    void RemoveAllDisplayNodeChildrenInner(int32_t userId);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -323,6 +327,13 @@ private:
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+
+    int32_t currentUserId_ { 0 };
+    mutable std::mutex currentUserIdMutex_;
+    mutable std::mutex displayNodeChildrenMapMutex_;
+    std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
+    std::map<int32_t, std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>>> userDisplayNodeChildrenMap_;
+
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
