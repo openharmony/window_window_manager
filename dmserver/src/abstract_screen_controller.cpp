@@ -484,6 +484,9 @@ void AbstractScreenController::RemoveDefaultScreenFromGroupLocked(sptr<AbstractS
 sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<AbstractScreen> screen)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screen == nullptr) {
+        return nullptr;
+    }
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
