@@ -87,8 +87,8 @@ HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
 HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
-    sessionManager.wmsConnectionChangedFunc_=nullptr;
-    sessionManager.OnWMSConnectionChangedCallback(0,0,true);
+    sessionManager.wmsConnectionChangedFunc_ = nullptr;
+    sessionManager.OnWMSConnectionChangedCallback(0, 0, true);
 
     int32_t userId = 2;
     int32_t screenId = 0;
@@ -104,11 +104,11 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sessionManager.OnUserSwitch();
     sessionManager.Clear();
 
-    sessionManager.isWMSConnected_=true;
-    sessionManager.currentWMSUserId_=SYSTEM_USERID;
+    sessionManager.isWMSConnected_ = true;
+    sessionManager.currentWMSUserId_ = SYSTEM_USERID;
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
-    auto ret=sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK,ret);
+    auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 /**
  * @tc.name: OnWMSConnectionChangedCallback
@@ -120,14 +120,14 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback1, Function | SmallTe
     SessionManager sessionManager;
     sessionManager.OnFoundationDied();
     FoundationDeathRecipient foundationDeathRecipient;
-    wptr<IRemoteObject> wptrDeath =nullptr;
+    wptr<IRemoteObject> wptrDeath = nullptr;
     foundationDeathRecipient.OnRemoteDied(wptrDeath);
 
     SSMDeathRecipient sSMDeathRecipient;
     sSMDeathRecipient.OnRemoteDied(wptrDeath);
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
-    auto ret=sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK,ret);
+    auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 }
