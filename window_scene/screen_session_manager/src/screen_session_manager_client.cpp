@@ -38,6 +38,7 @@ ScreenSessionManagerClient& ScreenSessionManagerClient::GetInstance()
 void ScreenSessionManagerClient::ConnectToServer()
 {
     if (screenSessionManager_) {
+        WLOGFI("Success to get screen session manager proxy");
         return;
     }
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -139,7 +140,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        WLOGFD("Error found screen session with id: %{public}" PRIu64, screenId);
+        WLOGFE("Error found screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
@@ -304,8 +305,8 @@ ScreenProperty ScreenSessionManagerClient::GetPhyScreenProperty(ScreenId screenI
     return screenSessionManager_->GetPhyScreenProperty(screenId);
 }
 
-__attribute__((no_sanitize("cfi")))
-void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+__attribute__((no_sanitize("cfi"))) void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(
+    const sptr<DisplayChangeInfo>& info)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
