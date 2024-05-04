@@ -883,7 +883,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     if (property_ == nullptr || hostSession_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Window hide failed, because of nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "Window hide failed, because of nullptr, property: %{public}d, id: %{public}d",
+            property_ == nullptr, GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
 
