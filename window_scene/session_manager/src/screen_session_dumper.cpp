@@ -204,12 +204,12 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
     }
     std::vector<ScreenColorGamut> colorGamuts;
     DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
-    if (ret == DMError::DM_OK) {
+    if (ret == DMError::DM_OK && colorGamuts.size() > 0) {
         oss << std::left << std::setw(LINE_WIDTH) << "SupportedColorGamuts: ";
-        for (uint32_t i = 0; i < colorGamuts.size() -1 ; i++) {
+        for (uint32_t i = 0; i < colorGamuts.size() - 1; i++) {
             oss << static_cast<int32_t>(colorGamuts[i]) << ", ";
         }
-        oss << static_cast<int32_t>(colorGamuts[colorGamuts.size() -1]) << std::endl;
+        oss << static_cast<int32_t>(colorGamuts[colorGamuts.size() - 1]) << std::endl;
     }
     ScreenColorGamut colorGamut;
     ret = screenSession->GetScreenColorGamut(colorGamut);
@@ -238,12 +238,12 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
     std::ostringstream oss;
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError ret = screenSession->GetSupportedHDRFormats(hdrFormats);
-    if (ret == DMError::DM_OK) {
+    if (ret == DMError::DM_OK && hdrFormats.size() > 0) {
         oss << std::left << std::setw(LINE_WIDTH) << "SupportedScreenHDRFormat: ";
-        for (uint32_t i = 0; i < hdrFormats.size() -1 ; i++) {
+        for (uint32_t i = 0; i < hdrFormats.size() - 1; i++) {
             oss << static_cast<int32_t>(hdrFormats[i]) << ", ";
         }
-        oss << static_cast<int32_t>(hdrFormats[hdrFormats.size() -1]) << std::endl;
+        oss << static_cast<int32_t>(hdrFormats[hdrFormats.size() - 1]) << std::endl;
     }
     ScreenHDRFormat hdrFormat;
     ret = screenSession->GetScreenHDRFormat(hdrFormat);
@@ -253,12 +253,12 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
     }
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     ret = screenSession->GetSupportedColorSpaces(colorSpaces);
-    if (ret == DMError::DM_OK) {
+    if (ret == DMError::DM_OK && colorSpaces.size() > 0) {
         oss << std::left << std::setw(LINE_WIDTH) << "SupportedColorSpaces: ";
-        for (uint32_t i = 0; i < colorSpaces.size() -1 ; i++) {
+        for (uint32_t i = 0; i < colorSpaces.size() - 1; i++) {
             oss << static_cast<int32_t>(colorSpaces[i]) << ", ";
         }
-        oss << static_cast<int32_t>(colorSpaces[colorSpaces.size() -1]) << std::endl;
+        oss << static_cast<int32_t>(colorSpaces[colorSpaces.size() - 1]) << std::endl;
     }
     GraphicCM_ColorSpaceType colorSpace;
     ret = screenSession->GetScreenColorSpace(colorSpace);
