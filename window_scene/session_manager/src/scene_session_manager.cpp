@@ -6690,7 +6690,6 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
         return;
     }
     AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    sceneSession->SetIsDisplayStatusBarTemporarily(false);
     if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
         sceneSession->GetSessionRect().height_)) {
         return;
