@@ -384,6 +384,8 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << screenProperty.GetAvailableArea().posY_ << ", "
         << screenProperty.GetAvailableArea().width_ << ", "
         << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DefaultDeviceRotationOffset "
+        << screenProperty.GetDefaultDeviceRotationOffset() << std::endl;
     dumpInfo_.append(oss.str());
 }
 

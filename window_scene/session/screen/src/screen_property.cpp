@@ -307,4 +307,14 @@ Orientation ScreenProperty::GetScreenRequestedOrientation() const
 {
     return screenRequestedOrientation_;
 }
+
+void ScreenProperty::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
+{
+    defaultDeviceRotationOffset_ = defaultRotationOffset;
+}
+
+uint32_t ScreenProperty::GetDefaultDeviceRotationOffset() const
+{
+    return defaultDeviceRotationOffset_;
+}
 } // namespace OHOS::Rosen
