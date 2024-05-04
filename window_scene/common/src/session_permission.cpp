@@ -127,7 +127,7 @@ bool SessionPermission::VerifyCallingPermission(const std::string& permissionNam
     return true;
 }
 
-bool SessionPermission::VerifyCallingPermission(const unit32_t callerToken, const std::string& permissionName)
+bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName)
 {
     WLOGFI("VerifyCallingPermission permission %{public}s, callingTokenID:%{public}u",
         permissionName.c_str(), callerToken);
