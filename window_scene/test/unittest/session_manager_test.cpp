@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include "session_manager.h"
-//#include "session_manager_service_recover_proxy.h"
 
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
@@ -64,15 +63,15 @@ namespace {
  */
 HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
 {
-    uint32_t code = static_cast<uint32_t>(
-        OHOS::Rosen::ISessionManagerServiceRecoverListener::SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
+    uint32_t code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
+        SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     IPCObjectStub iPCObjectStub;
     iPCObjectStub.OnRemoteRequest(code, data, reply, option);
-    code = static_cast<uint32_t>(
-        OHOS::Rosen::ISessionManagerServiceRecoverListener::SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
+    code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
+        SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
     auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     code = 10;
     iPCObjectStub.OnRemoteRequest(code, data, reply, option);
