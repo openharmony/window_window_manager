@@ -2137,8 +2137,28 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+        if (!isPC && (session->GetAbilityInfo() != nullptr) && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            if (!(session->GetForegroundInteractiveStatus())) {
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
+                    session->GetForegroundInteractiveStatus());
+                return WSError::WS_ERROR_INVALID_OPERATION;
+            }
+            auto callingTokenId = abilitySessionInfo->callingTokenId;
+            auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
+                callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
+                SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
+                "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
+            auto sessionState = session->GetSessionState();
+            if (sessionState != SessionState::STATE_ACTIVE &&
+                !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
+                    startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
+                    sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
+                return WSError::WS_ERROR_INVALID_OPERATION;
+            }
+        }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
-
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
