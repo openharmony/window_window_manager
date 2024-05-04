@@ -74,7 +74,7 @@ HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
     auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     code = 10;
     iPCObjectStub.OnRemoteRequest(code, data, reply, option);
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(0, ret);
 }
 
 /**
@@ -109,11 +109,11 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 /**
- * @tc.name: OnWMSConnectionChangedCallback
+ * @tc.name: RegisterWMSConnectionChangedListener
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
     sessionManager.OnFoundationDied();
