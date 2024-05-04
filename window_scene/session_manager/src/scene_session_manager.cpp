@@ -5546,21 +5546,23 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
+WSError SceneSessionManager::TerminateSessionNew(
+    const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker)
 {
     if (info == nullptr) {
         TLOGI(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, needStartCaller=%{public}d",
-        info->want.GetElement().GetBundleName().c_str(), needStartCaller);
-    auto task = [this, info, needStartCaller]() {
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "bundleName=%{public}s, needStartCaller=%{public}d, isFromBroker=%{public}d",
+        info->want.GetElement().GetBundleName().c_str(), needStartCaller, isFromBroker);
+    auto task = [this, info, needStartCaller, isFromBroker]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
+        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
         return errCode;
     };
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");

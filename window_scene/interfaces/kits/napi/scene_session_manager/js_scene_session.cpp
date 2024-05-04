@@ -656,8 +656,8 @@ void JsSceneSession::ProcessTerminateSessionRegister()
 void JsSceneSession::ProcessTerminateSessionRegisterNew()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "begin");
-    NotifyTerminateSessionFuncNew func = [this](const SessionInfo& info, bool needStartCaller) {
-        this->TerminateSessionNew(info, needStartCaller);
+    NotifyTerminateSessionFuncNew func = [this](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+        this->TerminateSessionNew(info, needStartCaller, isFromBroker);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1906,7 +1906,7 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
     taskScheduler_->PostMainThreadTask(task, "TerminateSession name:" + info.abilityName_);
 }
 
-void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller)
+void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
@@ -1918,6 +1918,9 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
             return;
         }
         jsCallBack = iter->second;
+    }
+    if (isFromBroker == true) {
+        needStartCaller = true;
     }
     auto task = [needStartCaller, jsCallBack, env = env_]() {
         if (!jsCallBack) {

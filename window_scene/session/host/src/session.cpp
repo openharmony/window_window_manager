@@ -1185,13 +1185,14 @@ void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
     PostTask(std::move(lifeCycleTask->task), lifeCycleTask->name);
 }
 
-WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
+WSError Session::TerminateSessionNew(
+    const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller, bool isFromBroker)
 {
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    auto task = [this, abilitySessionInfo, needStartCaller]() {
+    auto task = [this, abilitySessionInfo, needStartCaller, isFromBroker]() {
         isTerminating = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
@@ -1204,10 +1205,11 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
             sessionInfo_.resultCode = abilitySessionInfo->resultCode;
         }
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller);
+            terminateSessionFuncNew_(info, needStartCaller, isFromBroker);
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
-            GetPersistentId(), needStartCaller);
+        TLOGI(WmsLogTag::WMS_LIFE,
+            "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d, isFromBroker: %{public}d",
+            GetPersistentId(), needStartCaller, isFromBroker);
     };
     PostLifeCycleTask(task, "TerminateSessionNew", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
@@ -1291,7 +1293,7 @@ WSError Session::Clear()
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, false);
+            terminateSessionFuncNew_(info, false, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);

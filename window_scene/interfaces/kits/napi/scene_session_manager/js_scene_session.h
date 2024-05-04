@@ -143,7 +143,7 @@ private:
     void OnSessionTopmostChange(bool topmost);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string &label);
     void UpdateSessionIcon(const std::string &iconPath);
