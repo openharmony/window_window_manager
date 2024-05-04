@@ -2145,9 +2145,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
             auto callingTokenId = abilitySessionInfo->callingTokenId;
-            auto startAbilityBackground = SessionPermission::VerifyCallingPermission(
+            auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
-                SessionPermission::VerifyCallingPermission(callingTokenId,
+                SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
                 "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
             auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::SessionState::STATE_ACTIVE &&
