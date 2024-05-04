@@ -257,8 +257,8 @@ void ScreenSessionManager::ConfigureScreenScene()
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
     ConfigureDpi();
     if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
-        uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
-        WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
+        defaultDeviceRotationOffset_ = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
+        WLOGFD("defaultDeviceRotationOffset = %{public}u", defaultDeviceRotationOffset_);
     }
     if (enableConfig.count("isWaterfallDisplay") != 0) {
         bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
@@ -945,6 +945,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         property.UpdateVirtualPixelRatio(screenBounds);
     }
     property.SetRefreshRate(screenRefreshRate);
+    property.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
 
     if (foldScreenController_ != nullptr && screenId == 0
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
