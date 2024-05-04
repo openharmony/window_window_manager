@@ -2152,7 +2152,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \ 
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
                     startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
                     sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
                 return WSError::WS_ERROR_INVALID_OPERATION;
