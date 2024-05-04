@@ -6587,7 +6587,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
             !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-                sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
+                sceneSession->GetSessionRect().height_)) {
             continue;
         }
         ret = UpdateSessionAvoidAreaIfNeed(
@@ -6692,7 +6692,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     sceneSession->SetIsDisplayStatusBarTemporarily(false);
     if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-        sceneSession->GetSessionRect().posY_ + sceneSession->GetSessionRect().height_)) {
+        sceneSession->GetSessionRect().height_)) {
         return;
     }
     WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
