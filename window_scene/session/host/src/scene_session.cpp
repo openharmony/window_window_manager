@@ -2145,15 +2145,15 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
             auto callingTokenId = abilitySessionInfo->callingTokenId;
-            auto startAbilityBackground = SessionPermission::VerifyCallingPermission(callingTokenId,                        
-                "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
+            auto startAbilityBackground = SessionPermission::VerifyCallingPermission(
+                callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyCallingPermission(callingTokenId,
                 "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
             auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d," + 
-                    " startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \ 
+                    startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
                     sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
