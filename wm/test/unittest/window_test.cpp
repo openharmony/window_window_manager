@@ -2588,6 +2588,44 @@ HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
     windowTitleButtonRectChangedListener.OnWindowTitleButtonRectChanged(titleButtonRect);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: Test04
+ * @tc.desc: Test04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test04, Function | SmallTest | Level2)
+{
+    ExtensionWindowFlags flags;
+    ASSERT_EQ(flags.bitData, 0);
+    ExtensionWindowFlags flags1(7);
+    ASSERT_EQ(flags1.bitData, 7);
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(0));
+    sptr<IKeyboardPanelInfoChangeListener> listener = new IKeyboardPanelInfoChangeListener();
+    KeyboardPanelInfo keyboardPanelInfo;
+    listener->OnKeyboardPanelInfoChanged(keyboardPanelInfo);
+    window->TriggerBindModalUIExtension();
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWaterMarkFlag(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetGrayScale(0));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test05
+ * @tc.desc: Test05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto mainWinId = 0;
+    auto window1 = window->GetTopWindowWithId(mainWinId);
+    ASSERT_EQ(nullptr, window1);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
