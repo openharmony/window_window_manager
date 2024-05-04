@@ -86,11 +86,11 @@ HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | 
 }
 
 /**
- * @tc.name: VerifyCallingPermission
- * @tc.desc: test function : VerifyCallingPermission1
+ * @tc.name: VerifyPermissionByCallerToken
+ * @tc.desc: test function : VerifyPermissionByCallerToken
  * @tc.type: FUNC
 */
-HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, Function | SmallTest | Level1)
 {
     const uint32_t callerToken = 1000;
     const std::string *permissionNode = new string;
