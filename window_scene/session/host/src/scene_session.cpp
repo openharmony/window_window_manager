@@ -2150,7 +2150,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
                 "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
             auto sessionState = session->GetSessionState();
-            if (sessionState != SessionState::SessionState::STATE_ACTIVE &&
+            if (sessionState != SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
                     startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
