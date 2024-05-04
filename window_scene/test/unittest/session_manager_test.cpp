@@ -36,7 +36,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    
 };
 
 void SessionManagerTest::SetUpTestCase()
