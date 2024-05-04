@@ -829,20 +829,17 @@ void AbstractScreenController::SetScreenRotateAnimation(
     sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter, bool withAnimation)
 {
     sptr<SupportedScreenModes> abstractScreenModes = screen->GetActiveScreenMode();
-    float w = 0;
-    float h = 0;
-    float x = 0;
-    float y = 0;
+    struct ScreenRect srect = {0, 0, 0, 0};
     if (abstractScreenModes != nullptr) {
-        h = abstractScreenModes->height_;
-        w = abstractScreenModes->width_;
+        srect.h = abstractScreenModes->height_;
+        srect.w = abstractScreenModes->width_;
     }
     if (!IsVertical(rotationAfter)) {
-        std::swap(w, h);
-        x = (h - w) / 2; // 2: used to calculate offset to center display node
-        y = (w - h) / 2; // 2: used to calculate offset to center display node
+        std::swap(srect.w, srect.h);
+        srect.x = (srect.h - srect.w) / 2; // 2: used to calculate offset to center display node
+        srect.y = (srect.w - srect.h) / 2; // 2: used to calculate offset to center display node
     }
-    auto displayNode = GetRSDisplayNodeByScreenId(screenId);
+    const std::shared_ptr<RSDisplayNode>& displayNode = GetRSDisplayNodeByScreenId(screenId);
     if (displayNode == nullptr) {
         return;
     }
@@ -859,22 +856,20 @@ void AbstractScreenController::SetScreenRotateAnimation(
         WLOGFD("[FixOrientation] display rotate with animation %{public}u", rotationAfter);
         std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
         static const RSAnimationTimingProtocol timingProtocol(600); // animation time
-        static const RSAnimationTimingCurve curve =
-            RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+        static const RSAnimationTimingCurve curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
     #ifdef SOC_PERF_ENABLE
         // Increase frequency to improve windowRotation perf
         // 10027 means "gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10027, "");
     #endif
-        RSNode::Animate(timingProtocol, curve, [weakNode, x, y, w, h, rotationAfter]() {
+        RSNode::Animate(timingProtocol, curve, [weakNode, srect, rotationAfter, this]() {
             auto displayNode = weakNode.lock();
             if (displayNode == nullptr) {
                 WLOGFE("error, cannot get DisplayNode");
                 return;
             }
-            displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
-            displayNode->SetFrame(x, y, w, h);
-            displayNode->SetBounds(x, y, w, h);
+            SetDisplayNode(rotationAfter, displayNode, srect);
         }, []() {
     #ifdef SOC_PERF_ENABLE
             // ClosePerf in finishCallBack
@@ -883,10 +878,16 @@ void AbstractScreenController::SetScreenRotateAnimation(
         });
     } else {
         WLOGFD("[FixOrientation] display rotate without animation %{public}u", rotationAfter);
-        displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
-        displayNode->SetFrame(x, y, w, h);
-        displayNode->SetBounds(x, y, w, h);
+        SetDisplayNode(rotationAfter, displayNode, srect);
     }
+}
+
+void AbstractScreenController::SetDisplayNode(Rotation rotationAfter,
+    const std::shared_ptr<RSDisplayNode>& displayNode, struct ScreenRect srect)
+{
+    displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
+    displayNode->SetFrame(srect.x, srect.y, srect.w, srect.h);
+    displayNode->SetBounds(srect.x, srect.y, srect.w, srect.h);
 }
 
 void AbstractScreenController::OpenRotationSyncTransaction()
