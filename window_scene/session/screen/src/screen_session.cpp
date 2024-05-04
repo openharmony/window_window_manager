@@ -1175,6 +1175,9 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->width_ = width;
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
+        displayNode_->SetFrame(0, 0, width, height);
+        displayNode_->SetBounds(0, 0, width, height);
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 
