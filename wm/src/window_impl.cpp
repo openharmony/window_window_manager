@@ -2906,9 +2906,8 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         newStyleID = (GetRect().width_ > GetRect().height_) ?
             MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
-        // when receive up event, set default style
         if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-            newStyleID = MMI::MOUSE_ICON::DEFAULT;
+            newStyleID = MMI::MOUSE_ICON::DEFAULT; // when receive up event, set default style
         }
     }
     WLOGD("winId : %{public}u, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "

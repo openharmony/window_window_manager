@@ -235,8 +235,8 @@ void Region::RegionOpLocal(Region& r1, Region& r2, Region& res, Region::OP op)
     std::vector<int> indexAt;
     MakeEnumerate(xs, indexOf, indexAt);
     sort(events.begin(), events.end(), EventSortByY);
-
-    Node rootNode { 0, static_cast<int>(indexOf.size() - 1) };
+    size_t indexOfSize = indexOf.size() > 0 ? (indexOf.size() - 1) : 0;
+    Node rootNode { 0, static_cast<int>(indexOfSize) };
 
     std::vector<Range> ranges;
     Rects r;
