@@ -780,19 +780,6 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
     }
 }
 
-void SetSessionFocusedOnShow(const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession)
-{
-    if (sessionInfo == nullptr || sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "sessionInfo or sceneSession is null");
-        return;
-    }
-    auto focusedOnShow = true;
-    if (sessionInfo->want != nullptr) {
-        focusedOnShow = sessionInfo->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
-    }
-    sceneSession->SetFocusedOnShow(focusedOnShow);
-}
-
 napi_value GetWindowRectIntValue(napi_env env, int val)
 {
     if (val != INVALID_VAL) {
