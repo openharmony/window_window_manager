@@ -774,7 +774,6 @@ WSError SceneSession::RaiseAppMainWindowToTop()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->NotifyRequestFocusStatusNotifyManager(true, true);
-        session->NotifyClick();
         return WSError::WS_OK;
     };
     PostTask(task, "RaiseAppMainWindowToTop");

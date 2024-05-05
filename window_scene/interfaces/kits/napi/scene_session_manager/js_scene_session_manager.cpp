@@ -126,6 +126,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "addWindowDragHotArea", moduleName, JsSceneSessionManager::AddWindowDragHotArea);
     BindNativeFunction(env, exportObj, "preloadInLakeApp", moduleName, JsSceneSessionManager::PreloadInLakeApp);
     BindNativeFunction(env, exportObj, "requestFocusStatus", moduleName, JsSceneSessionManager::RequestFocusStatus);
+    BindNativeFunction(env, exportObj, "resetFocusedOnShow", moduleName, JsSceneSessionManager::ResetFocusedOnShow);
     BindNativeFunction(env, exportObj, "requestAllAppSessionUnfocus", moduleName,
         JsSceneSessionManager::RequestAllAppSessionUnfocus);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
@@ -774,6 +775,13 @@ napi_value JsSceneSessionManager::RequestFocusStatus(napi_env env, napi_callback
     TLOGD(WmsLogTag::WMS_FOCUS, "RequestFocusStatus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRequestFocusStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::ResetFocusedOnShow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "ResetFocusedOnShow");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnResetFocusedOnShow(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
@@ -2068,6 +2076,28 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         byForeground: %{public}d, reason: %{public}d", persistentId, isFocused, byForeground, reason);
 
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnResetFocusedOnShow(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().ResetFocusedOnShow(persistentId);
     return NapiGetUndefined(env);
 }
 

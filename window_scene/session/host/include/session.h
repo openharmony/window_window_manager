@@ -193,6 +193,8 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
+    void SetFocusedOnShow(bool focusedOnShow);
+    bool IsFocusedOnShow() const;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
@@ -578,6 +580,7 @@ private:
     mutable std::shared_mutex uiRequestFocusMutex_;
     mutable std::shared_mutex uiLostFocusMutex_;
 
+    bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
     WSRect preRect_;
