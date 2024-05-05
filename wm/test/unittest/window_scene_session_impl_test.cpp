@@ -3130,6 +3130,11 @@ HWTEST_F(WindowSceneSessionImplTest, Test01, Function | SmallTest | Level3)
     AvoidArea avoidArea;
     AvoidArea avoidArea1;
     ASSERT_EQ((avoidArea != avoidArea1), false);
+    ASSERT_EQ((titleButtonRect == titleButtonRect1), true);
+    ASSERT_EQ((titleButtonRect != titleButtonRect1), false);
+    Transform transform;
+    Transform transform1;
+    ASSERT_EQ((transform != transform1), false);
 }
 
 /**
