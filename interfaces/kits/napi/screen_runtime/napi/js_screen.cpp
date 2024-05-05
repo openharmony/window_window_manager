@@ -91,24 +91,26 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
     Orientation orientation = Orientation::UNSPECIFIED;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
+    std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("OnSetOrientation Params not match, info argc: %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
-    } else {
-        if (!ConvertFromJsValue(env, argv[0], orientation)) {
-            paramValidFlag = false;
-            WLOGFE("Failed to convert parameter to orientation");
-        }
+    } else if (!ConvertFromJsValue(env, argv[0], orientation)) {
+        paramValidFlag = false;
+        WLOGFE("Failed to convert parameter to orientation");
+        errMsg = "Failed to convert parameter to orientation";
     }
     if (!paramValidFlag) {
         WLOGE("OnSetOrientation paramValidFlag error");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
     if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
         WLOGE("Orientation param error! orientation value must from enum Orientation");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        errMsg = "orientation value must from enum Orientation";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
 
@@ -153,19 +155,22 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
     uint32_t modeId = 0;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
+    std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("OnSetScreenActiveMode Params not match %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
         if (!ConvertFromJsValue(env, argv[0], modeId)) {
             WLOGFE("Failed to convert parameter to modeId");
+            errMsg = "Failed to convert parameter to modeId";
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
         WLOGFE("OnSetScreenActiveMode paramValidFlag error");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
 
@@ -207,20 +212,23 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
     bool paramValidFlag = true;
     uint32_t densityDpi = 0;
     size_t argc = 4;
+    std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("OnSetDensityDpi Params not match %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
         if (!ConvertFromJsValue(env, argv[0], densityDpi)) {
             WLOGFE("Failed to convert parameter to densityDpi");
+            errMsg = "Failed to convert parameter to densityDpi";
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
         WLOGFE("OnSetDensityDpi paramValidFlag error");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
 
