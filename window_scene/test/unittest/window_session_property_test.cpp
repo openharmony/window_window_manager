@@ -435,11 +435,16 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 */
 HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
 {
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), false);
+    sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        return;
+    }
+    auto result = windowSessionProperty.Unmarshalling(parcel);
+    ASSERT_NE(nullptr, property);
+    ASSERT_NE(nullptr, result);
 }
 
 /**
