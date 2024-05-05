@@ -771,7 +771,7 @@ WMError SceneSessionManagerLiteProxy::GetVisibilityWindowInfo(std::vector<sptr<W
 
 WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowModeType)
 {
-    WLOGFI("get Window mod status proxy");
+    WLOGFI("get Window mode type proxy");
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
