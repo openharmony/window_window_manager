@@ -286,7 +286,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     }
     sceneSession->SetSessionInfo(info);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [this, sessionInfo, sceneSession]() {
+    auto task = [this, sessionInfo, &sceneSession]() {
         SetSessionFocusedOnShow(sessionInfo, sceneSession);
         PendingSessionActivationInner(sessionInfo);
     };
