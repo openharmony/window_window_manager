@@ -24,92 +24,118 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
-    WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override {
+    WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override
+    {
         return WSError::WS_OK;
     }
-    WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override {
+    WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override
+    {
         return WSError::WS_OK;
     }
-    WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override {
+    WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override
+    {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override {
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override
+    {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override {
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override
+    {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override {
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override
+    {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override {
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override
+    {
         return WSError::WS_OK;
     }
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override {
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    {
         return WSError::WS_OK;
     }
-    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override {
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override
+    {
         return WSError::WS_OK;
     }
     WSError GetSessionInfos(const std::string& deviceId,
-                                    int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) override {
-                                        return WSError::WS_OK;
+        int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) override
+    {
+        return WSError::WS_OK;
     }
-    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override {
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override
+    {
         return WSError::WS_OK;
     }
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
-        SessionInfoBean& sessionInfo) override {
-            return WSError::WS_OK;
+        SessionInfoBean& sessionInfo) override
+    {
+        return WSError::WS_OK;
     }
-    WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) override {
+    WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) override
+    {
         return WSError::WS_OK;
     }
     WSError TerminateSessionNew(
-        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override {
-            return WSError::WS_OK;
+        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override
+    {
+        return WSError::WS_OK;
     }
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                                       SessionSnapshot& snapshot, bool isLowResolution) override {
-                                          return WSError::WS_OK;
-    }
-    WSError ClearSession(int32_t persistentId) override {
+        SessionSnapshot& snapshot, bool isLowResolution) override
+    {
         return WSError::WS_OK;
     }
-    WSError ClearAllSessions() override {
+    WSError ClearSession(int32_t persistentId) override
+    {
         return WSError::WS_OK;
     }
-    WSError LockSession(int32_t sessionId) override {
+    WSError ClearAllSessions() override
+    {
         return WSError::WS_OK;
     }
-    WSError UnlockSession(int32_t sessionId) override {
+    WSError LockSession(int32_t sessionId) override
+    {
         return WSError::WS_OK;
     }
-    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) override {
+    WSError UnlockSession(int32_t sessionId) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) override
+    {
         return WSError::WS_OK;
     }
     WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
-        std::vector<std::int32_t>& result) override {
-            return WSError::WS_OK;
+        std::vector<std::int32_t>& result) override
+    {
+        return WSError::WS_OK;
     }
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent) override {
-            return WMError::WM_OK;
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override
+    {
+        return WMError::WM_OK;
     }
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent) override {
-            return WMError::WM_OK;
-    }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {
-
-    }
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override {
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override
+    {
         return WMError::WM_OK;
     }
-    WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override {
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
+    {
+    }
+    WMError CheckWindowId(int32_t windowId, int32_t &pid) override
+    {
         return WMError::WM_OK;
     }
-    sptr<IRemoteObject> AsObject() override {
+    WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override
+    {
+        return WMError::WM_OK;
+    }
+    sptr<IRemoteObject> AsObject() override
+    {
         return nullptr;
     }
 };
@@ -159,6 +185,10 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_INVALID_STATE, res);
+    data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
+    EXPECT_EQ(-1, res);
 }
 
 }
