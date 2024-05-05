@@ -863,7 +863,7 @@ WMError WindowManager::GetWindowModeType(WindowModeType& windowModeType) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowModeType(windowModeType);
     if (ret != WMError::WM_OK) {
-        WLOGFE("get window mod status failed");
+        WLOGFE("get window mode type failed");
     }
     return ret;
 }
