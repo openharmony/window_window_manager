@@ -126,6 +126,8 @@ private:
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
+    sptr<SceneSession> GenSceneSession(SessionInfo& info);
+    void SetSessionFocusedOnShow(const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
