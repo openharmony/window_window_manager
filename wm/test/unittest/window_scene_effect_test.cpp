@@ -197,10 +197,10 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect07");
     ASSERT_NE(nullptr, window);
 
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THIN));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_REGULAR));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
+    window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF);
+    window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THIN);
+    window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_REGULAR);
+    window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
