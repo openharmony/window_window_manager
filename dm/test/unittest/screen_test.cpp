@@ -408,6 +408,20 @@ HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
     res = screen_->SetDensityDpiSystem(100);
     ASSERT_EQ(DMError::DM_OK, res);
 }
+
+/**
+ * @tc.name: GetDensityInCurResolution
+ * @tc.desc: GetDensityInCurResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetDensityInCurResolution, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDensityInCurResolution(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    float virtualPixelRatio;
+    auto res = screen_->GetDensityInCurResolution(virtualPixelRatio);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
