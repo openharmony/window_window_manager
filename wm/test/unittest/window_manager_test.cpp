@@ -901,7 +901,7 @@ HWTEST_F(WindowManagerTest, Test02, Function | SmallTest | Level2)
     sptr<IFocusChangedListener> listener = nullptr;
     WMError res = WindowManager::GetInstance().UnregisterFocusChangedListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
-    sptr<IFocusChangedListener> listener1 = nullptr;
+    sptr<IWindowBackHomeListener> listener1 = nullptr;
     WMError res1 = WindowManager::GetInstance().RegisterWindowBackHomeListener(listener1);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res1);
     sptr<IWindowBackHomeListener> listener2 = nullptr;
@@ -913,7 +913,6 @@ HWTEST_F(WindowManagerTest, Test02, Function | SmallTest | Level2)
     sptr<IDrawingContentChangedListener> listener3 = nullptr;
     WMError res4 = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener3);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res4);
-    sptr<IWindowBackHomeListener> listener3 = nullptr;
     WMError res5 = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener3);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res5);
 }
