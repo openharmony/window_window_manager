@@ -38,6 +38,7 @@ group("unittest") {
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
     ":ws_scene_session_dirty_manager_test",
+    ":ws_scene_session_manager_lite_stub_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
@@ -998,6 +999,19 @@ ohos_unittest("ws_intention_event_manager_test") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_lite_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_lite_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
