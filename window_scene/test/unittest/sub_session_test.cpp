@@ -247,7 +247,6 @@ HWTEST_F(SubSessionTest, Hide, Function | SmallTest | Level1)
 
     WSRect rect;
     subSession_->UpdatePointerArea(rect);
-    subSession_->IfNotNeedAvoidKeyBoardForSplit();
     subSession_->RectCheck(50, 100);
     ASSERT_EQ(WSError::WS_OK, subSession_->ProcessPointDownSession(50, 100));
 }
