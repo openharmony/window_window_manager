@@ -23,8 +23,8 @@ namespace OHOS {
 namespace Rosen {
 class MockSessionManagerServiceProxy : public IRemoteProxy<IMockSessionManagerInterface> {
 public:
-    explicit MockSessionManagerServiceProxy(const sptr<IRemoteObject>& impl) :
-        IRemoteProxy<IMockSessionManagerInterface>(impl) {};
+    explicit MockSessionManagerServiceProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IMockSessionManagerInterface>(impl) {}
     ~MockSessionManagerServiceProxy() {};
     sptr<IRemoteObject> GetSessionManagerService() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;

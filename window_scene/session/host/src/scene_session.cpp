@@ -1644,7 +1644,7 @@ int32_t SceneSession::GetParentPersistentId() const
     return INVALID_SESSION_ID;
 }
 
-const std::string& SceneSession::GetWindowNameAllType() const
+std::string SceneSession::GetWindowNameAllType() const
 {
     if (GetSessionInfo().isSystem_) {
         return GetSessionInfo().abilityName_;
@@ -2180,7 +2180,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         if (info.want != nullptr) {
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
             info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
-            info.screenId_ = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1);
+            info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
             TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
         }
 
