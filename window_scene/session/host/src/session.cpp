@@ -89,6 +89,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
             WLOGFE("Failed to insert area:%{public}d", area);
         }
     }
+
+    if (info.want != nullptr) {
+        auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+        TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
+        SetFocusedOnShow(focusedOnShow);
+    }
 }
 
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
@@ -478,6 +484,21 @@ WSError Session::SetTouchable(bool touchable)
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
+}
+
+void Session::SetFocusedOnShow(bool focusedOnShow)
+{
+    if (focusedOnShow == focusedOnShow_) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow, GetPersistentId());
+    focusedOnShow_ = focusedOnShow;
+}
+
+bool Session::IsFocusedOnShow() const
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
+    return focusedOnShow_;
 }
 
 bool Session::GetTouchable() const
