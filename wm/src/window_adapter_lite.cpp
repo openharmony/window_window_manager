@@ -138,7 +138,7 @@ void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 WMError WindowAdapterLite::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    WLOGFD("get window mod status");
+    WLOGFD("get window mode type");
     return windowManagerServiceProxy_->GetWindowModeType(windowModeType);
 }
 

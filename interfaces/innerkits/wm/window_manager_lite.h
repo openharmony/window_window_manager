@@ -130,7 +130,7 @@ public:
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 
     /**
-     * @brief Get window mod status.
+     * @brief Get window mode type.
      *
      * @param void
      * @return WM_OK means get success, others means get failed.

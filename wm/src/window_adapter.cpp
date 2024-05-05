@@ -651,7 +651,7 @@ WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
 WMError WindowAdapter::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    WLOGFD("get window mod status");
+    WLOGFD("get window mode type");
     return windowManagerServiceProxy_->GetWindowModeType(windowModeType);
 }
 } // namespace Rosen
