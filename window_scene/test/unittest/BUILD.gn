@@ -58,6 +58,7 @@ group("unittest") {
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
+    ":ws_session_manager_test",
     ":ws_session_permission_test",
     ":ws_session_proxy_mock_test",
     ":ws_session_proxy_test",
