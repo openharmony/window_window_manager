@@ -291,7 +291,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         WLOGFE("WriteInterfaceToken or other param failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if(!data.WriteBool(abilitySessionInfo->hasContinuousTask)) {
+    if (!data.WriteBool(abilitySessionInfo->hasContinuousTask)) {
         WLOGFE("Write hasContinuousTask failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
