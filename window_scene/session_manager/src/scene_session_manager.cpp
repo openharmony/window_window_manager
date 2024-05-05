@@ -1177,6 +1177,13 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
             .screenId_ = static_cast<uint64_t>(displayId),
             .isSystemInput_ = false,
         };
+        static bool is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+        if (is2in1) {
+            panelInfo.isSystemInput_ = true;
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
+        } else {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
+        }
         panelSession = RequestSceneSession(panelInfo, nullptr);
         if (panelSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "PanelSession is nullptr");
