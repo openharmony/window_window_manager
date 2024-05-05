@@ -1826,6 +1826,20 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
+void JsSceneSession::SetSessionFocusedOnShow(
+    const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession)
+{
+    if (sessionInfo == nullptr || sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionInfo or sceneSession is null");
+        return;
+    }
+    auto focusedOnShow = true;
+    if (sessionInfo->want != nullptr) {
+        focusedOnShow = sessionInfo->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+    }
+    sceneSession->SetFocusedOnShow(focusedOnShow);
+}
+
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
