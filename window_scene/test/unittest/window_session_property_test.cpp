@@ -429,6 +429,20 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 }
 
 /**
+ * @tc.name: Unmarshalling
+ * @tc.desc: Unmarshalling test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), false);
+}
+
+/**
  * @tc.name: CopyFrom
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
