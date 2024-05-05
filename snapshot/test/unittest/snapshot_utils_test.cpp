@@ -210,6 +210,7 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
+    ASSERT_NE(nullptr, pixelMap);
     int fd = open(defaultFile_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fd == -1) {
         return;

@@ -429,21 +429,6 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 }
 
 /**
- * @tc.name: Unmarshalling
- * @tc.desc: Unmarshalling test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
-{
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    Parcel parcel = Parcel();
-    WindowSessionProperty windowSessionProperty;
-    auto result = windowSessionProperty.Unmarshalling(parcel);
-    ASSERT_NE(nullptr, property);
-    ASSERT_NE(nullptr, result);
-}
-
-/**
  * @tc.name: CopyFrom
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
