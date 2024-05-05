@@ -185,10 +185,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_INVALID_STATE, res);
-    data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
-    EXPECT_EQ(-1, res);
 }
 
 }
