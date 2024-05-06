@@ -20,23 +20,19 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSettingHelper" };
-}
-
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (dpiObserver_) {
-        WLOGFD("setting dpi observer is already registered");
+        TLOGD(WmsLogTag::DMS, "setting dpi observer is already registered");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
     ErrCode ret = provider.RegisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        WLOGFW("register setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "register setting dpi observer failed, ret=%{public}d", ret);
         dpiObserver_ = nullptr;
     }
 }
@@ -44,13 +40,13 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
 void ScreenSettingHelper::UnregisterSettingDpiObserver()
 {
     if (dpiObserver_ == nullptr) {
-        WLOGFD("dpiObserver_ is nullptr, no need to unregister");
+        TLOGD(WmsLogTag::DMS, "dpiObserver_ is nullptr, no need to unregister");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.UnregisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        WLOGFW("unregister setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "unregister setting dpi observer failed, ret=%{public}d", ret);
     }
     dpiObserver_ = nullptr;
 }
@@ -61,7 +57,7 @@ bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
     int32_t value;
     ErrCode ret = provider.GetIntValue(key, value);
     if (ret != ERR_OK) {
-        WLOGFW("get setting dpi failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed, ret=%{public}d", ret);
         return false;
     }
     dpi = static_cast<uint32_t>(value);

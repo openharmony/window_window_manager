@@ -33,7 +33,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER, "ScreenSceneConfig"};
 constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 enum XmlNodeElement {
     DPI = 0,
@@ -117,7 +116,7 @@ std::string ScreenSceneConfig::GetConfigPath(const std::string& configFileName)
     char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
     char tmpPath[PATH_MAX + 1] = { 0 };
     if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
-        WLOGFI("[SsConfig] can not get customization config file");
+        TLOGI(WmsLogTag::DMS, "[SsConfig] can not get customization config file");
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
@@ -131,21 +130,21 @@ bool ScreenSceneConfig::LoadConfigXml()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     }
-    WLOGFI("[SsConfig] filePath: %{public}s", configFilePath.c_str());
+    TLOGI(WmsLogTag::DMS, "[SsConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
-        WLOGFE("[SsConfig] load xml error!");
+        TLOGE(WmsLogTag::DMS, "[SsConfig] load xml error!");
         return false;
     }
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        WLOGFE("[SsConfig] get root element failed!");
+        TLOGE(WmsLogTag::DMS, "[SsConfig] get root element failed!");
         xmlFreeDoc(docPtr);
         return false;
     }
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            WLOGFE("SsConfig]: invalid node!");
+            TLOGE(WmsLogTag::DMS, "SsConfig]: invalid node!");
             continue;
         }
         ParseNodeConfig(curNodePtr);
@@ -179,7 +178,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     } else if (xmlNodeMap_[HALL_SWITCH_APP] == nodeName) {
         ReadStringListConfigInfo(currNode, nodeName);
     } else {
-        WLOGFI("xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
+        TLOGI(WmsLogTag::DMS, "xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
     }
 }
 
@@ -195,7 +194,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -208,7 +207,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!IsNumber(num)) {
-            WLOGFE("[SsConfig] read number error: nodeName:(%{public}s)", currNode->name);
+            TLOGE(WmsLogTag::DMS, "[SsConfig] read number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
@@ -224,7 +223,7 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (enable == nullptr) {
-        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -246,7 +245,7 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -260,14 +259,14 @@ void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std
 {
     xmlChar* rootContext = xmlNodeGetContent(rootNode);
     if (rootNode == nullptr || rootNode->name == nullptr) {
-        WLOGFE("[SsConfig] get root element failed!");
+        TLOGE(WmsLogTag::DMS, "[SsConfig] get root element failed!");
         xmlFree(rootContext);
         return;
     }
     std::vector<std::string> stringVec;
     for (xmlNodePtr curNodePtr = rootNode->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            WLOGFE("SsConfig]: invalid node!");
+            TLOGE(WmsLogTag::DMS, "SsConfig]: invalid node!");
             continue;
         }
         xmlChar* context = xmlNodeGetContent(curNodePtr);
@@ -302,16 +301,17 @@ const std::map<std::string, std::vector<std::string>>& ScreenSceneConfig::GetStr
 void ScreenSceneConfig::DumpConfig()
 {
     for (auto& enable : enableConfig_) {
-        WLOGFI("[SsConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
+        TLOGI(WmsLogTag::DMS, "[SsConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
     }
     for (auto& numbers : intNumbersConfig_) {
-        WLOGFI("[SsConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
+        TLOGI(WmsLogTag::DMS, "[SsConfig] Numbers: %{public}s %{public}zu",
+            numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
-            WLOGFI("[SsConfig] Num: %{public}d", num);
+            TLOGI(WmsLogTag::DMS, "[SsConfig] Num: %{public}d", num);
         }
     }
     for (auto& string : stringConfig_) {
-        WLOGFI("[SsConfig] String: %{public}s", string.first.c_str());
+        TLOGI(WmsLogTag::DMS, "[SsConfig] String: %{public}s", string.first.c_str());
     }
 }
 
@@ -332,25 +332,26 @@ DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
     DMRect emptyRect = { 0, 0, 0, 0 };
     SkPath skCutoutSvgPath;
     if (!SkParsePath::FromSVGString(svgPath.c_str(), &skCutoutSvgPath)) {
-        WLOGFE("Parse svg string path failed.");
+        TLOGE(WmsLogTag::DMS, "Parse svg string path failed.");
         return emptyRect;
     }
     SkRect skRect = skCutoutSvgPath.computeTightBounds();
     if (skRect.isEmpty()) {
-        WLOGFW("Get empty skRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skRect");
         return emptyRect;
     }
     SkIRect skiRect = skRect.roundOut();
     if (skiRect.isEmpty()) {
-        WLOGFW("Get empty skiRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skiRect");
         return emptyRect;
     }
     int32_t left = static_cast<int32_t>(skiRect.left());
     int32_t top = static_cast<int32_t>(skiRect.top());
     uint32_t width = static_cast<uint32_t>(skiRect.width());
     uint32_t height = static_cast<uint32_t>(skiRect.height());
-    WLOGFI("calc cutout boundary rect - left: [%{public}d top: %{public}d width: %{public}u height: %{public}u]", left,
-        top, width, height);
+    TLOGI(WmsLogTag::DMS,
+        "calc cutout boundary rect - left: [%{public}d top: %{public}d width: %{public}u height: %{public}u]",
+        left, top, width, height);
     DMRect cutoutMinOuterRect = {
         .posX_ = left,
         .posY_ = top,
@@ -383,7 +384,7 @@ void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
     if (intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]].size() > 0) {
         curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]][0]);
     } else {
-        WLOGFW("waterfallAreaCompressionSizeWhenHorzontal value is not exist");
+        TLOGW(WmsLogTag::DMS, "waterfallAreaCompressionSizeWhenHorzontal value is not exist");
     }
 }
 
@@ -395,7 +396,7 @@ std::vector<int> ScreenSceneConfig::GetCurvedScreenBoundaryConfig()
 uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
 {
     if (!isWaterfallDisplay_ || !isScreenCompressionEnableInLandscape_) {
-        WLOGFW("not waterfall screen or waterfall compression is not enabled");
+        TLOGW(WmsLogTag::DMS, "not waterfall screen or waterfall compression is not enabled");
         return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
     }
     return curvedAreaInLandscape_;
