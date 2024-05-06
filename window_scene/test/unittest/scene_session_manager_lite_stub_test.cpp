@@ -185,6 +185,69 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_INVALID_STATE, res);
+    data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
+    EXPECT_EQ(IPC_STUB_UNKNOWN_TRANS_ERR, res);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionIcon
+ * @tc.desc: test function : HandleSetSessionIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionIcon, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleIsValidSessionIds
+ * @tc.desc: test function : HandleIsValidSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleIsValidSessionIds(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackgroundForDelegator
+ * @tc.desc: test function : HandlePendingSessionToBackgroundForDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundForDelegator, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 }
