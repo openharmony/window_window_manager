@@ -593,6 +593,7 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
+    bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
