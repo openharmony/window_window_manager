@@ -261,6 +261,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         .width = mainScreenWidth,
         .height = mainScreenHeight,
         .focusWindowId = focusId,
+        .currentUserId = currentUserId_,
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
     for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
@@ -382,6 +383,13 @@ void SceneInputManager::SetUserBackground(bool userBackground)
 bool SceneInputManager::IsUserBackground()
 {
     return isUserBackground_;
+}
+
+void SceneInputManager::SetCurrentUserId(int32_t userId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Current userId = %{public}d", userId);
+    currentUserId_ = userId;
+    MMI::InputManager::GetInstance()->SetCurrentUser(userId);
 }
 
 void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)

@@ -38,6 +38,7 @@ public:
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
     void SetUserBackground(bool userBackground);
     bool IsUserBackground();
+    void SetCurrentUserId(int32_t userId);
 
 protected:
     SceneInputManager() = default;
@@ -58,6 +59,7 @@ private:
     std::vector<MMI::DisplayInfo> lastDisplayInfos_;
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
+    int32_t currentUserId_ { -1 };
     std::atomic<bool> isUserBackground_ = false;
 };
 }//Rosen
