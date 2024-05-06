@@ -214,7 +214,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError GetWindowBackHomeStatus(bool &isBackHome)
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType)
     {
         return WMError::WM_OK;
     };

@@ -124,7 +124,7 @@ public:
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
-    virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
