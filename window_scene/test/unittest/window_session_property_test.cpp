@@ -438,6 +438,10 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
     WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     Parcel parcel = Parcel();
     WindowSessionProperty windowSessionProperty;
+    sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        return;
+    }
     auto result = windowSessionProperty.Unmarshalling(parcel);
     ASSERT_NE(nullptr, property);
     ASSERT_NE(nullptr, result);

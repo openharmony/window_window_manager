@@ -56,6 +56,7 @@ private:
     void NotifyScreenChange(const sptr<ScreenInfo>& screenInfo);
     void NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos);
     bool UpdateScreenInfoLocked(sptr<ScreenInfo>);
+    std::string GetScreenInfoSrting(sptr<ScreenInfo> screenInfo);
 
     bool isAllListenersRemoved() const;
 
@@ -644,13 +645,30 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
     }
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end() && iter->second != nullptr) {
-        WLOGFD("get screen in screen map");
+        WLOGFD("Screen Info Updated: %{public}s",
+            GetScreenInfoSrting(screenInfo).c_str());
         iter->second->UpdateScreenInfo(screenInfo);
         return true;
     }
     sptr<Screen> screen = new Screen(screenInfo);
     screenMap_[screenId] = screen;
     return true;
+}
+
+std::string ScreenManager::Impl::GetScreenInfoSrting(sptr<ScreenInfo> screenInfo)
+{
+    if (screenInfo == nullptr) {
+        WLOGFE("screenInfo nullptr.");
+        return "";
+    }
+    std::ostringstream oss;
+    oss <<  "Screen ID: " << screenInfo->GetScreenId() << ", ";
+    oss <<  "Name: " << screenInfo->GetName() << ", ";
+    oss <<  "VirtualWidth: " << screenInfo->GetVirtualWidth() << ", ";
+    oss <<  "VirtualHeight: " << screenInfo->GetVirtualHeight() << ", ";
+    oss <<  "VirtualPixelRatio: " << screenInfo->GetVirtualPixelRatio() << ", ";
+    oss <<  "Rotation: " << static_cast<int32_t>(screenInfo->GetRotation());
+    return oss.str();
 }
 
 bool ScreenManager::Impl::isAllListenersRemoved() const

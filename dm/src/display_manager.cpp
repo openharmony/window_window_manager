@@ -106,6 +106,7 @@ private:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyAvailableAreaChanged(DMRect rect);
     void Clear();
+    std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
@@ -1650,7 +1651,8 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
     }
     auto iter = displayMap_.find(displayId);
     if (iter != displayMap_.end() && iter->second != nullptr) {
-        WLOGFD("get screen in screen map");
+        WLOGFD("display Info Updated: %{public}s",
+            GetDisplayInfoSrting(displayInfo).c_str());
         iter->second->UpdateDisplayInfo(displayInfo);
         return true;
     }
@@ -1661,6 +1663,23 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
     }
     displayMap_[displayId] = display;
     return true;
+}
+
+std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo nullptr.");
+        return "";
+    }
+    std::ostringstream oss;
+    oss <<  "Display ID: " << displayInfo->GetDisplayId() << ", ";
+    oss <<  "Name: " << displayInfo->GetName() << ", ";
+    oss <<  "RefreshRate: " << displayInfo->GetRefreshRate() << ", ";
+    oss <<  "VirtualPixelRatio: " << displayInfo->GetVirtualPixelRatio() << ", ";
+    oss <<  "DensityInCurResolution: " << displayInfo->GetDensityInCurResolution() << ", ";
+    oss <<  "DefaultVirtualPixelRatio: " << displayInfo->GetDefaultVirtualPixelRatio() << ", ";
+    oss <<  "Rotation: " << static_cast<int32_t>(displayInfo->GetRotation());
+    return oss.str();
 }
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)

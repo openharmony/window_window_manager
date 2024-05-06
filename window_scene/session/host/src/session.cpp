@@ -89,6 +89,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
             WLOGFE("Failed to insert area:%{public}d", area);
         }
     }
+
+    if (info.want != nullptr) {
+        auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+        TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
+        SetFocusedOnShow(focusedOnShow);
+    }
 }
 
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
@@ -478,6 +484,21 @@ WSError Session::SetTouchable(bool touchable)
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
+}
+
+void Session::SetFocusedOnShow(bool focusedOnShow)
+{
+    if (focusedOnShow == focusedOnShow_) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow, GetPersistentId());
+    focusedOnShow_ = focusedOnShow;
+}
+
+bool Session::IsFocusedOnShow() const
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
+    return focusedOnShow_;
 }
 
 bool Session::GetTouchable() const
@@ -1185,13 +1206,14 @@ void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
     PostTask(std::move(lifeCycleTask->task), lifeCycleTask->name);
 }
 
-WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
+WSError Session::TerminateSessionNew(
+    const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller, bool isFromBroker)
 {
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    auto task = [this, abilitySessionInfo, needStartCaller]() {
+    auto task = [this, abilitySessionInfo, needStartCaller, isFromBroker]() {
         isTerminating = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
@@ -1204,10 +1226,11 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
             sessionInfo_.resultCode = abilitySessionInfo->resultCode;
         }
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller);
+            terminateSessionFuncNew_(info, needStartCaller, isFromBroker);
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d",
-            GetPersistentId(), needStartCaller);
+        TLOGI(WmsLogTag::WMS_LIFE,
+            "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d, isFromBroker: %{public}d",
+            GetPersistentId(), needStartCaller, isFromBroker);
     };
     PostLifeCycleTask(task, "TerminateSessionNew", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
@@ -1291,7 +1314,7 @@ WSError Session::Clear()
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, false);
+            terminateSessionFuncNew_(info, false, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -2007,9 +2030,13 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    property_ = property;
+    {
+        std::unique_lock<std::shared_mutex> lock(propertyMutex_);
+        property_ = property;
+    }
+    auto sessionProperty = GetSessionProperty();
     NotifySessionInfoChange();
-    if (property_ == nullptr) {
+    if (sessionProperty == nullptr) {
         return WSError::WS_OK;
     }
 
@@ -2021,12 +2048,13 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         }
         session->NotifySessionInfoChange();
     };
-    property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    sessionProperty->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 
 sptr<WindowSessionProperty> Session::GetSessionProperty() const
 {
+    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
@@ -2289,6 +2317,7 @@ uint32_t Session::GetUINodeId() const
 
 void Session::SetShowRecent(bool showRecent)
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "in recents: %{public}d, id: %{public}d", showRecent, persistentId_);
     bool isAttach = GetAttachState();
     if (!IsSupportDetectWindow(isAttach) ||
         !ShouldCreateDetectTaskInRecent(showRecent, showRecent_, isAttach)) {

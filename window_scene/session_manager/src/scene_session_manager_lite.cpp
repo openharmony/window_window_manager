@@ -93,10 +93,11 @@ WSError SceneSessionManagerLite::UnRegisterSessionListener(const sptr<ISessionLi
     return SceneSessionManager::GetInstance().UnRegisterSessionListener(listener);
 }
 
-WSError SceneSessionManagerLite::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
+WSError SceneSessionManagerLite::TerminateSessionNew(
+    const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker)
 {
     WLOGFD("run TerminateSessionNew");
-    return SceneSessionManager::GetInstance().TerminateSessionNew(info, needStartCaller);
+    return SceneSessionManager::GetInstance().TerminateSessionNew(info, needStartCaller, isFromBroker);
 }
 
 WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,

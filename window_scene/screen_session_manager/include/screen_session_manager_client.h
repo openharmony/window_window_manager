@@ -74,6 +74,10 @@ public:
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
 
+    void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
+    void SwitchingCurrentUser();
+    void SwitchUserCallback() override;
+
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
@@ -95,6 +99,7 @@ private:
 
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
+    std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;
 

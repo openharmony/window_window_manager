@@ -15,11 +15,11 @@
 
 #include "session/screen/include/screen_session.h"
 
-#include "window_manager_hilog.h"
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "fold_screen_state_internel.h"
 #include <parameters.h>
@@ -220,6 +220,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetHdrFormats(hdrFormats_);
     displayInfo->SetColorSpaces(colorSpaces_);
     displayInfo->SetDisplayState(property_.GetDisplayState());
+    displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     return displayInfo;
 }
 
@@ -1175,6 +1176,9 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->width_ = width;
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
+        displayNode_->SetFrame(0, 0, width, height);
+        displayNode_->SetBounds(0, 0, width, height);
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 

@@ -286,10 +286,25 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     }
     sceneSession->SetSessionInfo(info);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [this, sessionInfo]() {
+    auto task = [this, sessionInfo, &sceneSession]() {
+        SetSessionFocusedOnShow(sessionInfo, sceneSession);
         PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+}
+
+void JsRootSceneSession::SetSessionFocusedOnShow(
+    const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession)
+{
+    if (sessionInfo == nullptr || sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionInfo or sceneSession is null");
+        return;
+    }
+    auto focusedOnShow = true;
+    if (sessionInfo->want != nullptr) {
+        focusedOnShow = sessionInfo->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+    }
+    sceneSession->SetFocusedOnShow(focusedOnShow);
 }
 
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)

@@ -336,6 +336,7 @@ bool SessionProxy::WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk:
         !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
+        !data.WriteBool(abilitySessionInfo->hasContinuousTask) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
     }

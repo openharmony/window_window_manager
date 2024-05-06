@@ -38,6 +38,7 @@ ScreenSessionManagerClient& ScreenSessionManagerClient::GetInstance()
 void ScreenSessionManagerClient::ConnectToServer()
 {
     if (screenSessionManager_) {
+        WLOGFI("Success to get screen session manager proxy");
         return;
     }
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -139,7 +140,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        WLOGFD("Error found screen session with id: %{public}" PRIu64, screenId);
+        WLOGFE("Error found screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
@@ -198,6 +199,11 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
 {
     displayChangeListener_ = listener;
+}
+
+void ScreenSessionManagerClient::RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func)
+{
+    switchingToAnotherUserFunc_ = func;
 }
 
 void ScreenSessionManagerClient::OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -299,8 +305,8 @@ ScreenProperty ScreenSessionManagerClient::GetPhyScreenProperty(ScreenId screenI
     return screenSessionManager_->GetPhyScreenProperty(screenId);
 }
 
-__attribute__((no_sanitize("cfi")))
-void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
+__attribute__((no_sanitize("cfi"))) void ScreenSessionManagerClient::NotifyDisplayChangeInfoChanged(
+    const sptr<DisplayChangeInfo>& info)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
@@ -358,6 +364,23 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+void ScreenSessionManagerClient::SwitchUserCallback()
+{
+    if (switchingToAnotherUserFunc_ != nullptr) {
+        WLOGFE("switch to another user");
+        switchingToAnotherUserFunc_();
+    }
+}
+
+void ScreenSessionManagerClient::SwitchingCurrentUser()
+{
+    if (screenSessionManager_ == nullptr) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->SwitchUser();
 }
 
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()
