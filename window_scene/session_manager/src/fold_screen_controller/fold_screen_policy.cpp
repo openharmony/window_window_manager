@@ -17,9 +17,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "FoldScreenPolicy"};
-} // namespace
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
@@ -49,7 +46,7 @@ FoldStatus FoldScreenPolicy::GetFoldStatus()
 
 void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
 {
-    WLOGI("SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
     globalFoldStatus_ = foldStatus;
 }
