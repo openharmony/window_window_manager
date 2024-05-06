@@ -319,6 +319,7 @@ private:
     bool IsMovableWindowType();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
+    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;

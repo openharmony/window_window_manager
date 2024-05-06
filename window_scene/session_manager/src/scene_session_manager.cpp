@@ -2013,16 +2013,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
 
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        if (!CheckPiPPriority(property->GetPiPTemplateInfo())) {
-            TLOGI(WmsLogTag::WMS_PIP, "skip create pip window by priority");
-            return WSError::WS_DO_NOTHING;
-        }
-        auto parentSession = GetSceneSession(property->GetParentPersistentId());
-        if (parentSession != nullptr && parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
-            TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as parent window disconnected");
-            return WSError::WS_DO_NOTHING;
-        }
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !isEnablePiPCreate(property)) {
+        WLOGFE("pip window is not enable to create.");
+        return WSError::WS_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name: %{public}s, type: %{public}d",
         property->GetWindowName().c_str(), property->GetWindowType());
@@ -2094,6 +2087,25 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
             TLOGE(WmsLogTag::WMS_PIP, "create pip window failed, reason: low priority.");
             return false;
         }
+    }
+    return true;
+}
+
+bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& property)
+{
+    Rect pipRect = property->GetRequestRect();
+    if (pipRect.width_ == 0 || pipRect.height_ == 0) {
+        TLOGI(WmsLogTag::WMS_PIP, "pip rect is invalid.");
+        return false;
+    }
+    if (!CheckPiPPriority(property->GetPiPTemplateInfo())) {
+        TLOGI(WmsLogTag::WMS_PIP, "skip create pip window by priority");
+        return false;
+    }
+    auto parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession != nullptr && parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
+        TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as parent window disconnected");
+        return false;
     }
     return true;
 }
