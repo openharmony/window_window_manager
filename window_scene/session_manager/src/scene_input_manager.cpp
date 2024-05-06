@@ -322,6 +322,8 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
     int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusId != lastFocusId_) {
         lastFocusId_ = focusId;
+        lastDisplayInfos_ = displayInfos;
+        lastWindowInfoList_ = windowInfoList;
         return true;
     }
 
