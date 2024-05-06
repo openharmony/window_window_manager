@@ -55,7 +55,7 @@ const std::string DLP_INDEX = "ohos.dlp.params.index";
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
-std::mutex SceneSession::windowDragHotAreaMutex_;
+std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint32_t, WSRect> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 
