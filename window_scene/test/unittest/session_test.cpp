@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <pthread.h>
 #include <regex>
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
