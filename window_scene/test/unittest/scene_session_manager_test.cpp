@@ -4002,7 +4002,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillFilterBundleName, Function | 
 
     std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
     ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
-    ASSERT_NE(accessibilityInfo.size(), 1);
+    ASSERT_EQ(accessibilityInfo.size(), 0);
 }
 
 /**
