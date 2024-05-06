@@ -36,8 +36,8 @@ public:
     void UpdateForPhyScreenPropertyChange() override;
 
 private:
-    void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId, int32_t onScreenId);
-    void ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId);
+    void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, ScreenId offScreenId, ScreenId onScreenId);
+    void ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId);
     void ChangeScreenDisplayModeToCoordination();
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
