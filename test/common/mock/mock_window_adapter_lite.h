@@ -29,6 +29,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent));
     MOCK_METHOD2(UnregisterWindowManagerAgent, WMError(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent));
+    MOCK_METHOD1(GetWindowModeType, WMError(WindowModeType& windowModeType));
     MOCK_METHOD2(GetMainWindowInfos, WMError(int32_t topNum,
         std::vector<MainWindowInfo>& topNInfo));
 };

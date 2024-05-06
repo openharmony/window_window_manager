@@ -61,7 +61,7 @@ public:
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
 
 protected:

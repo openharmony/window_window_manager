@@ -648,11 +648,11 @@ WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
     return static_cast<WMError>(windowManagerServiceProxy_->GetCallingWindowRect(persistentId, rect));
 }
 
-WMError WindowAdapter::GetWindowBackHomeStatus(bool &isBackHome)
+WMError WindowAdapter::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    WLOGFD("get back home status");
-    return windowManagerServiceProxy_->GetWindowBackHomeStatus(isBackHome);
+    WLOGFD("get window mode type");
+    return windowManagerServiceProxy_->GetWindowModeType(windowModeType);
 }
 } // namespace Rosen
 } // namespace OHOS

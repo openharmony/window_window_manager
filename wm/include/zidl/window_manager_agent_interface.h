@@ -52,8 +52,7 @@ public:
         TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM,
         TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS,
-        TRANS_ID_UPDATE_WINDOW_MODE_TYPE,
-        TRANS_ID_UPDATE_WINDOW_BACK_HOME_STATUS,
+        TRANS_ID_UPDATE_WINDOW_MODE_TYPE
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -69,7 +68,6 @@ public:
     virtual void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) = 0;
     virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;
     virtual void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
-    virtual void UpdateWindowBackHomeStatus(bool isBackHome) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

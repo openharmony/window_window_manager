@@ -42,7 +42,7 @@ public:
     virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
-    virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
 private:
