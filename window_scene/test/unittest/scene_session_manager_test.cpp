@@ -71,7 +71,7 @@ public:
     void TearDown() override;
 
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
-
+    int32_t GetTaskCount(sptr<SceneSession> session);
     static bool gestureNavigationEnabled_;
     static bool statusBarEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
