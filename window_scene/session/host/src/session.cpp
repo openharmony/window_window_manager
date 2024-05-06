@@ -2650,6 +2650,9 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     if (!IsSessionValid()) {
+        if (state_ == SessionState::STATE_DISCONNECT) {
+            systemConfig_.freeMultiWindowEnable_ = enable;
+        }
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->SwitchFreeMultiWindow(enable);
