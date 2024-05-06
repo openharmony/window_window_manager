@@ -17,6 +17,7 @@
 #include "display_manager.h"
 #include "display_manager_proxy.h"
 #include "window.h"
+#include "dm_common.h"
 
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
@@ -791,6 +792,18 @@ HWTEST_F(DisplayManagerTest, IsCaptured01, Function | SmallTest | Level1)
 {
     auto ret = DisplayManager::GetInstance().IsCaptured();
     ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: isinsideof
+ * @tc.desc: isinside0f fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, isinsideof, Function | SmallTest | Level1)
+{
+    DMRect rect = {2, 2, 2, 2};
+    DMRect rect1 = {2, 2, 2, 2};
+    ASSERT_EQ(rect.IsInsideOf(rect1), true);
 }
 }
 } // namespace Rosen
