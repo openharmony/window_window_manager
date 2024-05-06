@@ -75,7 +75,6 @@ const ScreenId DEFAULT_SCREEN_ID = 0;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
-constexpr int32_t VIRTUAL_SCREEN_ID_START = 1000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
@@ -886,7 +885,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     sptr<ScreenSession> session = nullptr;
     ScreenId defScreenId = GetDefaultScreenId();
-    if (phyMirrorEnable && screenId >= VIRTUAL_SCREEN_ID_START) {
+    if (phyMirrorEnable && screenId != SCREEN_ID_MAIN && SCREEN_ID_MAIN != SCREEN_ID_FULL) {
         NodeId nodeId = 0;
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto sIt = screenSessionMap_.find(defScreenId);
@@ -937,17 +936,16 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
     if (isDensityDpiLoad_) {
-        if (screenId == SCREEN_ID_FULL) {
-            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
-            property.SetVirtualPixelRatio(densityDpi_);
-            property.SetDefaultDensity(densityDpi_);
-            property.SetDensityInCurResolution(densityDpi_);
-        }
         if (screenId == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
             property.SetVirtualPixelRatio(subDensityDpi_);
             property.SetDefaultDensity(subDensityDpi_);
             property.SetDensityInCurResolution(subDensityDpi_);
+        } else {
+            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
+            property.SetVirtualPixelRatio(densityDpi_);
+            property.SetDefaultDensity(densityDpi_);
+            property.SetDensityInCurResolution(densityDpi_);
         }
     } else {
         property.UpdateVirtualPixelRatio(screenBounds);
