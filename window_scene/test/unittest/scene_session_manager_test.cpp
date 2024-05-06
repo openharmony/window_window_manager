@@ -3621,7 +3621,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLocked001, Function | SmallTest | Lev
     auto task = [](){};
     int64_t delayTime = 3000;
     sceneSession->handler_->PostTask(task, taskName, delayTime);
-    int32_t beforeTaskNum = GetTaskCount();
+    int32_t beforeTaskNum = GetTaskCount(sceneSession);
     ssm_->SetScreenLocked(true);
     ASSERT_EQ(beforeTaskNum - 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
