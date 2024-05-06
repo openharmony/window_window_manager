@@ -620,7 +620,7 @@ private:
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
     void ProcessWindowModeType();
-    WindowModeType GetWindowModType();
+    WindowModeType CheckWindowModeType();
     void NotifyRSSWindowModeTypeUpdate();
     void CacVisibleWindowNum();
     bool IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
