@@ -187,6 +187,70 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
     DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: GetPhysicalWidth
+ * @tc.desc: test GetPhysicalWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
+{
+    auto physicalwidth = defaultDisplay_->GetPhysicalWidth();
+    ASSERT_EQ(physicalwidth, 0);
+}
+
+/**
+ * @tc.name: GetPhysicalHeight
+ * @tc.desc: test GetPhysicalHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetPhysicalHeight, Function | SmallTest | Level1)
+{
+    auto physicalheight = defaultDisplay_->GetPhysicalHeight();
+    ASSERT_EQ(physicalheight, 0);
+}
+
+/**
+ * @tc.name: GetAvailableArea
+ * @tc.desc: test GetAvailableArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetAvailableArea, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetAvailableArea(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    DMRect area;
+    auto res = defaultDisplay_ ->GetAvailableArea(area);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetSupportedHDRFormats
+ * @tc.desc: test GetSupportedHDRFormats
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    std::vector<uint32_t> hdrFormats;
+    auto res = defaultDisplay_ ->GetSupportedHDRFormats(hdrFormats);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: GetSupportedColorSpaces
+ * @tc.desc: test GetSupportedColorSpaces
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    std::vector<uint32_t> colorSpaces;
+    auto res = defaultDisplay_ -> GetSupportedColorSpaces(colorSpaces);
+    ASSERT_EQ(DMError::DM_OK, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
