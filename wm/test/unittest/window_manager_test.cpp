@@ -899,6 +899,7 @@ HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
+}
 /**
  * @tc.name: Test02
  * @tc.desc: Test02
