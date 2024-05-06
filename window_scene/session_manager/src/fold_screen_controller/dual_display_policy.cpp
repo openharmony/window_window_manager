@@ -233,8 +233,8 @@ void DualDisplayPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t o
     }
 }
 
-void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId,
-    int32_t onScreenId)
+void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, ScreenId offScreenId,
+    ScreenId onScreenId)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);
@@ -318,7 +318,7 @@ void DualDisplayPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSessi
         DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
-void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId)
+void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
