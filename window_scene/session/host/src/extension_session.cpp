@@ -224,6 +224,19 @@ void ExtensionSession::NotifyAsyncOn()
     }
 }
 
+WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
+}
+
 void ExtensionSession::TriggerBindModalUIExtension()
 {
     if (isFirstTriggerBindModal_ && extSessionEventCallback_ != nullptr &&

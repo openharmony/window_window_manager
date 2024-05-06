@@ -381,6 +381,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleNotifyDensityFollowHost
+ * @tc.desc: test function : HandleNotifyDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyDensityFollowHost(data, reply));
+}
+
+/**
  * @tc.name: HandleSetPipActionEvent
  * @tc.desc: test function : HandleSetPipActionEvent
  * @tc.type: FUNC
