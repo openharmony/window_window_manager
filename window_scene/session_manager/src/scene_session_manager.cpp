@@ -4797,7 +4797,7 @@ void SceneSessionManager::ProcessWindowModeType()
     NotifyRSSWindowModeTypeUpdate();
 }
 
-WindowModeType SceneSessionManager::GetWindowModType()
+WindowModeType SceneSessionManager::CheckWindowModeType()
 {
     bool inSplit = false;
     bool inFloating = false;
@@ -4817,7 +4817,9 @@ WindowModeType SceneSessionManager::GetWindowModType()
             if (mode == WindowMode::WINDOW_MODE_FLOATING) {
                 inFloating = true;
             }
-            fullScreen = WindowHelper::IsFullScreenWindow(mode);
+            if (WindowHelper::IsFullScreenWindow(mode)) {
+                fullScreen = true;
+            }
         }
     }
 
@@ -4842,7 +4844,7 @@ WindowModeType SceneSessionManager::GetWindowModType()
 
 void SceneSessionManager::NotifyRSSWindowModeTypeUpdate()
 {
-    WindowModeType type = GetWindowModType();
+    WindowModeType type = CheckWindowModeType();
     if (lastWindowModeType_ == type) {
         return;
     }
@@ -8289,7 +8291,7 @@ WMError SceneSessionManager::GetWindowModeType(WindowModeType& windowModeType)
         WLOGFE("GetWindowModeType permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    windowModeType = GetWindowModType();
+    windowModeType = CheckWindowModeType();
     return WMError::WM_OK;
 }
 
