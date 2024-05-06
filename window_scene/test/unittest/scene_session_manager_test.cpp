@@ -71,7 +71,7 @@ public:
     void TearDown() override;
 
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
-    int32_t GetTaskCount(sptr<SceneSession> session);
+    int32_t GetTaskCount(sptr<SceneSession>& session);
     static bool gestureNavigationEnabled_;
     static bool statusBarEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
@@ -129,7 +129,7 @@ void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sce
     sceneSession->foregroundInteractiveStatus_.store(true);
 }
 
-int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession> session)
+int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession>& session)
 {
     std::string dumpInfo = session->handler_->GetEventRunner()->GetEventQueue()->DumpCurrentQueueSize();
     std::regex pattern("\\d+");
