@@ -292,9 +292,9 @@ bool NapiIsCallable(napi_env env, napi_value value)
     return result;
 }
 
-napi_value NapiThrowError(napi_env env, DmErrorCode errCode)
+napi_value NapiThrowError(napi_env env, DmErrorCode errCode, std::string msg = "")
 {
-    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), msg));
     return NapiGetUndefined(env);
 }
 
@@ -305,22 +305,26 @@ napi_value OnRegisterScreenManagerCallback(napi_env env, napi_callback_info info
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        WLOGFE("Params not match");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Invalid args count, need 2 args!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, 2 args is needed.");
     }
     std::string cbType;
+    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        WLOGFE("Failed to convert parameter to callbackType");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Failed to convert parameter to eventType");
+        errMsg = "Failed to convert parameter to eventType";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     napi_value value = argv[INDEX_ONE];
     if (value == nullptr) {
         WLOGI("JsScreenManager::OnRegisterScreenManagerCallback argv[1] is nullptr");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        errMsg = "OnRegisterScreenManagerCallback error, argv[1] is nullptr";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     if (!NapiIsCallable(env, value)) {
         WLOGI("JsScreenManager::OnRegisterScreenManagerCallback argv[1] is not callable");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        errMsg = "OnRegisterScreenManagerCallback error, argv[1] is not callable";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);
     DmErrorCode ret = RegisterScreenListenerWithType(env, cbType, value);
@@ -338,13 +342,15 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        WLOGFE("Params not match");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
     std::string cbType;
+    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        WLOGFE("Failed to convert parameter to callbackType");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Failed to convert parameter to eventType");
+        errMsg = "Failed to convert parameter to eventType";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);
     if (argc == ARGC_ONE) {
@@ -375,16 +381,16 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need 2 args at least!");
     }
 
     int64_t mainScreenId;
     if (!ConvertFromJsValue(env, argv[0], mainScreenId)) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
     }
     napi_value array = argv[INDEX_ONE];
     if (array == nullptr) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get mirrorScreen, is nullptr");
     }
     uint32_t size = 0;
     napi_get_array_length(env, array, &size);
@@ -394,7 +400,7 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
         napi_value value = nullptr;
         napi_get_element(env, array, i, &value);
         if (!ConvertFromJsValue(env, value, screenId)) {
-            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
@@ -429,14 +435,14 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        WLOGFE("Params not match");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
 
     napi_value array = argv[0];
     if (array == nullptr) {
-        WLOGFE("Failed to get options");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Failed to get options, options is nullptr");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get options, options is nullptr");
     }
     uint32_t size = 0;
     napi_get_array_length(env, array, &size);
@@ -448,7 +454,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
         int32_t res = GetExpandOptionFromJs(env, object, expandOption);
         if (res == -1) {
             WLOGE("expandoption param %{public}d error!", i);
-            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "expandoption param error!");
         }
         options.emplace_back(expandOption);
     }
@@ -484,17 +490,19 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
 
     napi_value array = argv[0];
     if (array == nullptr) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Failed to get mirrorScreen, mirrorScreen is nullptr");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get mirrorScreen, is nullptr");
     }
     uint32_t size = 0;
     napi_get_array_length(env, array, &size);
     if (size > MAX_SCREENS_NUM) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "size of mirrorScreen is greater than 1000");
     }
     std::vector<ScreenId> screenIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -502,7 +510,7 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
         napi_value value = nullptr;
         napi_get_element(env, array, i, &value);
         if (!ConvertFromJsValue(env, value, screenId)) {
-            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
@@ -535,18 +543,18 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        WLOGFE("Params not match");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        WLOGFE("Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
 
     napi_value array = argv[0];
     if (array == nullptr) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get expandScreen, is nullptr");
     }
     uint32_t size = 0;
     napi_get_array_length(env, array, &size);
     if (size > MAX_SCREENS_NUM) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "size of expandScreen is greater than 1000");
     }
     std::vector<ScreenId> screenIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -554,7 +562,7 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
         napi_value value = nullptr;
         napi_get_element(env, array, i, &value);
         if (!ConvertFromJsValue(env, value, screenId)) {
-            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
@@ -615,22 +623,25 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
     size_t argc = 4;
+    std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
         napi_value object = argv[0];
         if (object == nullptr) {
             WLOGFE("Failed to convert parameter to VirtualScreenOption.");
+            errMsg = "Failed to get options, options is nullptr";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         } else {
             errCode = GetVirtualScreenOptionFromJs(env, object, option);
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     NapiAsyncTask::CompleteCallback complete =
         [option](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -722,21 +733,24 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
     WLOGI("JsScreenManager::OnDestroyVirtualScreen is called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     int64_t screenId = -1LL;
+    std::string errMsg = "";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
         if (!ConvertFromJsValue(env, argv[0], screenId)) {
             WLOGFE("Failed to convert parameter to screen id.");
+            errMsg = "Failed to convert parameter to screen id.";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || screenId == -1LL) {
         WLOGFE("JsScreenManager::OnDestroyVirtualScreen failed, Invalidate params.");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     NapiAsyncTask::CompleteCallback complete =
         [screenId](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -769,24 +783,26 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
     int64_t screenId = -1LL;
     sptr<Surface> surface;
     size_t argc = 4;
+    std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need 2 args at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
         if (!ConvertFromJsValue(env, argv[0], screenId)) {
-            WLOGFE("Failed to convert parameter to screen id.");
+            errMsg = "Failed to convert parameter to screen id.";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
         if (!GetSurfaceFromJs(env, argv[1], surface)) {
-            WLOGFE("Failed to convert parameter to surface");
+            errMsg = "Failed to convert parameter.";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || surface == nullptr) {
         WLOGFE("JsScreenManager::OnSetVirtualScreenSurface failed, Invalidate params.");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     NapiAsyncTask::CompleteCallback complete =
         [screenId, surface](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -848,10 +864,12 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
     WLOGI("JsScreenManager::OnSetScreenRotationLocked is called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     size_t argc = 4;
+    std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     bool isLocked = false;
@@ -859,6 +877,7 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
             WLOGFE("[NAPI]Failed to convert parameter to isLocked");
+            errMsg = "Failed to convert parameter to isLocked.";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         } else {
             napi_get_value_bool(env, nativeVal, &isLocked);
@@ -866,7 +885,7 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
         WLOGFE("JsScreenManager::OnSetScreenRotationLocked failed, Invalidate params.");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
 
     NapiAsyncTask::CompleteCallback complete =

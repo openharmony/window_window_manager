@@ -49,20 +49,6 @@ int32_t GetMMITouchType(int32_t aceType)
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
     }
 }
-
-int32_t GetMMISourceType(int32_t sourceType)
-{
-    switch (sourceType) {
-        case 1:
-            return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
-        case NUMBER_2:
-            return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
-        case NUMBER_3:
-            return MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD;
-        default:
-            return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-    }
-}
 } // namespace
 
 napi_value NapiGetUndefined(napi_env env)
@@ -571,7 +557,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("[NAPI]Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(GetMMISourceType(sourceType));
+    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("[NAPI]Failed to convert parameter to timestamp");
@@ -789,6 +775,8 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_HEIGHT, INVALID_VAL)));
         napi_set_named_property(env, objValue, "withAnimation",
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
+        napi_set_named_property(env, objValue, "focusedOnShow",
+            CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true)));
     }
 }
 

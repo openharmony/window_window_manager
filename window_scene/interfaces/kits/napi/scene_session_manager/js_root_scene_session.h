@@ -40,6 +40,7 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
+    void SetSessionFocusedOnShow(const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession);
 
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;

@@ -126,6 +126,8 @@ private:
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
+    sptr<SceneSession> GenSceneSession(SessionInfo& info);
+    void SetSessionFocusedOnShow(const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
@@ -143,7 +145,7 @@ private:
     void OnSessionTopmostChange(bool topmost);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string &label);
     void UpdateSessionIcon(const std::string &iconPath);

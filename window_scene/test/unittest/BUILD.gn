@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_anomaly_detection_test",
     ":ws_distributed_client_test",
     ":ws_dual_display_device_policy_test",
     ":ws_event_stage_test",
@@ -37,6 +38,7 @@ group("unittest") {
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
     ":ws_scene_session_dirty_manager_test",
+    ":ws_scene_session_manager_lite_stub_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
@@ -57,6 +59,7 @@ group("unittest") {
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
+    ":ws_session_manager_test",
     ":ws_session_permission_test",
     ":ws_session_proxy_mock_test",
     ":ws_session_proxy_test",
@@ -77,6 +80,22 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_anomaly_detection_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anomaly_detection_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
@@ -980,6 +999,19 @@ ohos_unittest("ws_intention_event_manager_test") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_lite_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_lite_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

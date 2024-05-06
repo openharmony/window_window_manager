@@ -420,6 +420,35 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
     bool ret2 = option->GetOnlySupportSceneBoard();
     ASSERT_EQ(true, ret2);
 }
+
+/**
+ * @tc.name: SetDialogDecorEnable
+ * @tc.desc: SetDialogDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDialogDecorEnable, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    ASSERT_EQ(true, option->GetDialogDecorEnable());
+    option->SetDialogDecorEnable(false);
+    ASSERT_EQ(false, option->GetDialogDecorEnable());
+}
+
+/**
+ * @tc.name: SetDialogTitle
+ * @tc.desc: SetDialogTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDialogTitle, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogTitle("Test");
+    std::string ret = option->GetDialogTitle();
+    ASSERT_EQ(true, ret == "Test");
+}
 }
 } // namespace Rosen
 } // namespace OHOS

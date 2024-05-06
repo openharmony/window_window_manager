@@ -235,5 +235,103 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
         ASSERT_EQ(it1->bundleName_, it2->bundleName_);
     }
 }
+
+/**
+ * @tc.name: Test02
+ * @tc.desc: Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, Test02, Function | SmallTest | Level2)
+{
+    WindowChecker windowChecker;
+    auto ret1 = windowChecker.CheckWindowId(-1);
+    ASSERT_EQ(-1, ret1);
+}
+
+/**
+ * @tc.name: Test03
+ * @tc.desc: Test03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, Test03, Function | SmallTest | Level2)
+{
+    KeyboardPanelInfo keyboardPanelInfo;
+    Parcel parcel;
+    ASSERT_EQ(true, keyboardPanelInfo.Marshalling(parcel));
+    sptr<IWindowBackHomeListener> listener1 = nullptr;
+    auto ret1 = WindowManagerLite::GetInstance().RegisterWindowBackHomeListener(listener1);
+    auto ret2 = WindowManagerLite::GetInstance().UnregisterWindowBackHomeListener(listener1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret2);
+    bool isBackHome = true;
+    auto ret3 = WindowManagerLite::GetInstance().GetWindowBackHomeStatus(isBackHome);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret3);
+}
+
+/**
+ * @tc.name: TestUpdateFocusChangeInfo
+ * @tc.desc: TestUpdateFocusChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest | Level2)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
+    sptr<FocusChangeInfo> focusChangeInfo1 = new FocusChangeInfo();
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, true);
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, false);
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    WindowManagerLite::GetInstance().UpdateWindowVisibilityInfo(infos);
+    std::vector<sptr<WindowDrawingContentInfo>> infos1;
+    WindowManagerLite::GetInstance().UpdateWindowDrawingContentInfo(infos1);
+    WindowManagerLite lite;
+    lite.destroyed_ = true;
+    lite.OnRemoteDied();
+    lite.destroyed_ = false;
+    lite.OnRemoteDied();
+    ASSERT_EQ(nullptr, lite.pImpl_->focusChangedListenerAgent_);
+    ASSERT_EQ(nullptr, lite.pImpl_->windowUpdateListenerAgent_);
+    ASSERT_EQ(nullptr, lite.pImpl_->windowDrawingContentListenerAgent_);
+}
+
+/**
+ * @tc.name: UpdateWindowModeTypeInfo
+ * @tc.desc: UpdateWindowModeTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UpdateWindowModeTypeInfo, Function | SmallTest | Level2)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    WindowManagerLite::GetInstance().UpdateWindowModeTypeInfo(WindowModeType::WINDOW_MODE_SPLIT_FLOATING);
+    WindowManagerLite::GetInstance().UpdateWindowBackHomeStatus(true);
+    bool isBackHome = false;
+    auto ret = WindowManagerLite::GetInstance().GetWindowBackHomeStatus(isBackHome);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: Test04
+ * @tc.desc: Test04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
+{
+    WindowManagerLite lite;
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    focusChangeInfo = new FocusChangeInfo();
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    lite.pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
+    lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
+    lite.pImpl_->NotifyWindowModeChange(WindowModeType::WINDOW_MODE_SPLIT);
+    lite.pImpl_->NotifyWindowBackHomeStatus(true);
+    WindowChecker windowChecker;
+    auto ret = windowChecker.CheckWindowId(-1);
+    ASSERT_EQ(-1, ret);
+}
 }
 }

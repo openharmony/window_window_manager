@@ -229,7 +229,7 @@ public:
 
     void SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session);
     void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
-
+    void SwitchUser() override;
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
@@ -273,6 +273,10 @@ private:
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+
+    void SetClientInner();
+    void RecoverAllDisplayNodeChildrenInner();
+    void RemoveAllDisplayNodeChildrenInner(int32_t userId);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -323,6 +327,13 @@ private:
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+
+    int32_t currentUserId_ { 0 };
+    mutable std::mutex currentUserIdMutex_;
+    mutable std::mutex displayNodeChildrenMapMutex_;
+    std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
+    std::map<int32_t, std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>>> userDisplayNodeChildrenMap_;
+
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
@@ -354,7 +365,9 @@ private:
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
+ 
     uint32_t defaultDpi {0};
+    uint32_t defaultDeviceRotationOffset_ { 0 };
 
     bool isMultiScreenCollaboration_ = false;
     bool screenPrivacyStates = false;
@@ -380,7 +393,7 @@ private:
     mutable std::recursive_mutex phyScreenPropMapMutex_;
     static void BootFinishedCallback(const char *key, const char *value, void *context);
     std::function<void()> foldScreenPowerInit_ = nullptr;
-    bool notifyLockOrNot_ = true;
+    std::atomic<bool> notifyLockOrNot_ = true;
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();

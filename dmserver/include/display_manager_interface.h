@@ -129,6 +129,7 @@ public:
         TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE,
         TRANS_ID_DEVICE_IS_CAPTURE,
         TRANS_ID_GET_SNAPSHOT_BY_PICKER,
+        TRANS_ID_SWITCH_USER,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;

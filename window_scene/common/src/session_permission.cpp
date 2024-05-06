@@ -127,6 +127,20 @@ bool SessionPermission::VerifyCallingPermission(const std::string& permissionNam
     return true;
 }
 
+bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName)
+{
+    WLOGFI("VerifyCallingPermission permission %{public}s, callingTokenID:%{public}u",
+        permissionName.c_str(), callerToken);
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        WLOGFE("permission %{public}s: PERMISSION_DENIED, CallingTokenID:%{public}u, ret:%{public}d",
+            permissionName.c_str(), callerToken, ret);
+        return false;
+    }
+    WLOGFI("verify AccessToken success");
+    return true;
+}
+
 bool SessionPermission::VerifySessionPermission()
 {
     if (IsSACalling()) {

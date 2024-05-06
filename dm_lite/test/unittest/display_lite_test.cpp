@@ -244,6 +244,22 @@ HWTEST_F(DisplayTestLite, GetCutoutInfo, Function | SmallTest | Level1)
     ASSERT_EQ(info, nullptr);
     GTEST_LOG_(INFO) << "DisplayLite::GetCutoutInfo end";
 }
+
+/**
+ * @tc.name: GetRotation
+ * @tc.desc: UpdateDisplayInfo with nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueI5K0JP
+ */
+HWTEST_F(DisplayTestLite, GetRotation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DisplayLite::GetRotation start";
+    sptr<DisplayInfo> displayInfo = nullptr;
+    sptr<DisplayLite> display = new DisplayLite("", displayInfo);
+    Rotation res = display->GetRotation();
+    ASSERT_EQ(res, Rotation::ROTATION_0);
+    GTEST_LOG_(INFO) << "DisplayLite::GetRotation end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

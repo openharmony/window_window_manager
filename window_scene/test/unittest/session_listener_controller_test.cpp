@@ -375,6 +375,9 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | Sm
 HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> remote;
+    if (slController == nullptr) {
+        return;
+    }
     slController->OnListenerDied(remote);
     EXPECT_EQ(nullptr, remote);
 

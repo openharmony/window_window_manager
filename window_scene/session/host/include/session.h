@@ -59,7 +59,8 @@ using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusab
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
-using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
+using NotifyTerminateSessionFuncNew =
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
@@ -192,6 +193,8 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
+    void SetFocusedOnShow(bool focusedOnShow);
+    bool IsFocusedOnShow() const;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
@@ -223,7 +226,7 @@ public:
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
-    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
     void SetSessionExceptionListener(const NotifySessionExceptionFunc& func, bool fromJsScene);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
@@ -570,11 +573,13 @@ private:
     std::function<void()> windowModeCallback_;
     std::function<bool()> isScreenLockedCallback_;
 
+    mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
     mutable std::shared_mutex uiRequestFocusMutex_;
     mutable std::shared_mutex uiLostFocusMutex_;
 
+    bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
     WSRect preRect_;

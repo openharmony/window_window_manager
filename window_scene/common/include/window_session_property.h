@@ -195,7 +195,7 @@ private:
     WindowLimits userLimits_;
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
-    PiPTemplateInfo pipTemplateInfo_;
+    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t sessionGravitySizePercent_ = 0;
