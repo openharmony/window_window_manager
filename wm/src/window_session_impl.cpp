@@ -1393,7 +1393,8 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+    titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
+        static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
     titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
     titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
     titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
@@ -1432,7 +1433,8 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     }
     uiContent_->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
         TitleButtonRect titleButtonRect;
-        titleButtonRect.posX_ = decorRect.width_ - titleButtonLeftRect.width_ - titleButtonLeftRect.posX_;
+        titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
+            static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
         titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
         titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
         titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
