@@ -2691,7 +2691,6 @@ void SceneSessionManager::NotifySwitchingToCurrentUser()
     auto task = [this]() {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Notify switching to current user: %{public}d", currentUserId_);
         SceneInputManager::GetInstance().SetUserBackground(false);
-        SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         // notify screenSessionManager to recover current user
         ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         FlushWindowInfoToMMI(true);
