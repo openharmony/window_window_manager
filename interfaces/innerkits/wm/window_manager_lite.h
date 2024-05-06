@@ -136,6 +136,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetWindowModeType(WindowModeType& windowModeType) const;
+
     /**
      * @brief Get top num main window info.
      *
