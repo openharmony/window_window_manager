@@ -648,7 +648,7 @@ void SceneSession::UpdateSessionRectInner(sptr<SceneSession> session, const WSRe
         if (needUpdateInputMethod) {
             newReason = SizeChangeReason::UNDEFINED;
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Input rect has totally changed, need to modify reason, id: %{public}d",
-                  session->GetPersistentId());
+                session->GetPersistentId());
         } else if (rect.width_ > 0 && rect.height_ > 0) {
             newWinRect.width_ = rect.width_;
             newWinRect.height_ = rect.height_;
@@ -664,6 +664,9 @@ void SceneSession::UpdateSessionRectInner(sptr<SceneSession> session, const WSRe
         session->SetSessionRect(rect);
         session->NotifySessionRectChange(rect, reason);
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
+        "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
+        newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
@@ -679,9 +682,6 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         UpdateSessionRectInner(session, rect, reason);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
-            "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
-            newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));
