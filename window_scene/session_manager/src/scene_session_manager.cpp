@@ -414,7 +414,7 @@ void SceneSessionManager::ConfigFreeMultiWindow()
         }
         item = freeMultiWindowConfig["maxMainFloatingWindowNumber"];
         if (GetSingleIntItem(item, param) && (param > 0)) {
-            systemConfig_.freeMultiWindowConfig_.maxMainFloatingWindowNumber_ = param;
+            systemConfig_.freeMultiWindowConfig_.maxMainFloatingWindowNumber_ = static_cast<uint32_t>(param);
         }
     }
 }
