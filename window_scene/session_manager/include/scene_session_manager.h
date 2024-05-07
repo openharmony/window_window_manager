@@ -314,7 +314,7 @@ public:
     int32_t ReclaimPurgeableCleanMem();
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
 
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -593,6 +593,7 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
+    bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
@@ -619,16 +620,15 @@ private:
     void HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
-    void ProcessSplitFloating();
-    void NotifyRSSWindowModeTypeUpdate(bool inSplit, bool inFloating);
+    void ProcessWindowModeType();
+    WindowModeType CheckWindowModeType();
+    void NotifyRSSWindowModeTypeUpdate();
     void CacVisibleWindowNum();
     bool IsVectorSame(const std::vector<VisibleWindowNumInfo>& lastInfo,
         const std::vector<VisibleWindowNumInfo>& currentInfo);
     bool IsKeyboardForeground();
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
-    void ProcessBackHomeStatus();
-    bool IsBackHomeStatus();
     void DeleteStateDetectTask();
 };
 } // namespace OHOS::Rosen

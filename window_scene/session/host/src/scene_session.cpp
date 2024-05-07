@@ -627,52 +627,60 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
+{
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    SizeChangeReason newReason = reason;
+    if (reason == SizeChangeReason::MOVE) {
+        newWinRect.posX_ = rect.posX_;
+        newWinRect.posY_ = rect.posY_;
+        newRequestRect.posX_ = rect.posX_;
+        newRequestRect.posY_ = rect.posY_;
+        if (!WindowHelper::IsMainWindow(GetWindowType())) {
+            SetSessionRect(newWinRect);
+        }
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, reason);
+    } else if (reason == SizeChangeReason::RESIZE) {
+        bool needUpdateInputMethod = UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+        if (needUpdateInputMethod) {
+            newReason = SizeChangeReason::UNDEFINED;
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "Input rect has totally changed, need to modify reason, id: %{public}d",
+                GetPersistentId());
+        } else if (rect.width_ > 0 && rect.height_ > 0) {
+            newWinRect.width_ = rect.width_;
+            newWinRect.height_ = rect.height_;
+            newRequestRect.width_ = rect.width_;
+            newRequestRect.height_ = rect.height_;
+        }
+        if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            SetSessionRect(newWinRect);
+        }
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, newReason);
+    } else {
+        SetSessionRect(rect);
+        NotifySessionRectChange(rect, reason);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
+        "newRequestRect: %{public}s, newWinRect: %{public}s", GetPersistentId(), reason,
+        newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
+}
+
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
+    if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
+        GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        return WSError::WS_DO_NOTHING;
+    }
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        auto newWinRect = session->winRect_;
-        auto newRequestRect = session->GetSessionRequestRect();
-        SizeChangeReason newReason = reason;
-        if (reason == SizeChangeReason::MOVE) {
-            newWinRect.posX_ = rect.posX_;
-            newWinRect.posY_ = rect.posY_;
-            newRequestRect.posX_ = rect.posX_;
-            newRequestRect.posY_ = rect.posY_;
-            if (!WindowHelper::IsMainWindow(session->GetWindowType())) {
-                session->SetSessionRect(newWinRect);
-            }
-            session->SetSessionRequestRect(newRequestRect);
-            session->NotifySessionRectChange(newRequestRect, reason);
-        } else if (reason == SizeChangeReason::RESIZE) {
-            bool needUpdateInputMethod = session->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-            if (needUpdateInputMethod) {
-                newReason = SizeChangeReason::UNDEFINED;
-                TLOGD(WmsLogTag::WMS_KEYBOARD, "Input rect has totally changed, need to modify reason, id: %{public}d",
-                    session->GetPersistentId());
-            } else if (rect.width_ > 0 && rect.height_ > 0) {
-                newWinRect.width_ = rect.width_;
-                newWinRect.height_ = rect.height_;
-                newRequestRect.width_ = rect.width_;
-                newRequestRect.height_ = rect.height_;
-            }
-            if (session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-                session->SetSessionRect(newWinRect);
-            }
-            session->SetSessionRequestRect(newRequestRect);
-            session->NotifySessionRectChange(newRequestRect, newReason);
-        } else {
-            session->SetSessionRect(rect);
-            session->NotifySessionRectChange(rect, reason);
-        }
-
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
-            "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
-            newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
+        session->UpdateSessionRectInner(rect, reason);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));

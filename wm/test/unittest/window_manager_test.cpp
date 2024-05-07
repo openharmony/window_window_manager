@@ -891,30 +891,14 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res4);
 }
 
-/**
- * @tc.name: Test02
- * @tc.desc: Test02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, Test02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
 {
-    sptr<IFocusChangedListener> listener = nullptr;
-    WMError res = WindowManager::GetInstance().UnregisterFocusChangedListener(listener);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
-    sptr<IWindowBackHomeListener> listener1 = nullptr;
-    WMError res1 = WindowManager::GetInstance().RegisterWindowBackHomeListener(listener1);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res1);
-    sptr<IWindowBackHomeListener> listener2 = nullptr;
-    WMError res2 = WindowManager::GetInstance().UnregisterWindowBackHomeListener(listener2);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res2);
-    bool isBackHome = true;
-    WMError res3 = WindowManager::GetInstance().GetWindowBackHomeStatus(isBackHome);
-    ASSERT_EQ(WMError::WM_OK, res3);
-    sptr<IDrawingContentChangedListener> listener3 = nullptr;
-    WMError res4 = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener3);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res4);
-    WMError res5 = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener3);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res5);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.clear();
+    WindowModeType windowModeType;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
 }
 }
 } // namespace Rosen

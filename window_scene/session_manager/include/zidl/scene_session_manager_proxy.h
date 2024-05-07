@@ -106,7 +106,7 @@ public:
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
 
 private:
     template<typename T>

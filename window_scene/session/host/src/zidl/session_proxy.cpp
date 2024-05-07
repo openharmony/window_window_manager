@@ -291,6 +291,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         WLOGFE("WriteInterfaceToken or other param failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(abilitySessionInfo->hasContinuousTask)) {
+        WLOGFE("Write hasContinuousTask failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (abilitySessionInfo->callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
             WLOGFE("Write callerToken info failed");
@@ -336,7 +340,6 @@ bool SessionProxy::WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk:
         !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
-        !data.WriteBool(abilitySessionInfo->hasContinuousTask) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
     }

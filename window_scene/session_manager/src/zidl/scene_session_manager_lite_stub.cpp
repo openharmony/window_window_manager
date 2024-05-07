@@ -83,8 +83,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
                    &SceneSessionManagerLiteStub::HandleCheckWindowId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
                    &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS),
-        &SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
+        &SceneSessionManagerLiteStub::HandleGetWindowModeType),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
         &SceneSessionManagerLiteStub::HandleGetMainWinodowInfo),
 };
@@ -416,12 +416,12 @@ int SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(MessageParcel& da
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerLiteStub::HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply)
 {
-    bool isBackHome = false;
-    WMError errCode = GetWindowBackHomeStatus(isBackHome);
-    WLOGFI("run HandleGetWindowBackHomeStatus, isBackHome:%{public}d!", isBackHome);
-    if (!reply.WriteBool(isBackHome)) {
+    WindowModeType windowModeType = Rosen::WindowModeType::WINDOW_MODE_OTHER;
+    WMError errCode = GetWindowModeType(windowModeType);
+    WLOGFI("run HandleGetWindowModeType, windowModeType:%{public}d!", static_cast<int32_t>(windowModeType));
+    if (!reply.WriteUint32(static_cast<int32_t>(windowModeType))) {
         WLOGE("Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
