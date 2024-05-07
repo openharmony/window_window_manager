@@ -1947,13 +1947,6 @@ void Session::NotifyUILostFocus()
     }
 }
 
-void Session::RegisterWindowModeChangedCallback(const std::function<void()>& callback)
-{
-    if (callback != nullptr) {
-        windowModeCallback_ = callback;
-    }
-}
-
 void Session::PresentFoucusIfNeed(int32_t pointerAction)
 {
     WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
