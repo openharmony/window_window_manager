@@ -578,10 +578,6 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
     TLOGI(WmsLogTag::DMS, "GetAllDisplayIds enter");
     std::vector<DisplayId> res;
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "GetAllDisplayIds permission denied!");
-        return res;
-    }
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
