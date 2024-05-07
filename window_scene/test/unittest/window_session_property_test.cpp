@@ -601,6 +601,19 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
     property->SetIsLayoutFullScreen(true);
     ASSERT_EQ(property->IsLayoutFullScreen(), true);
 }
+
+/**
+ * @tc.name: GetWindowname
+ * @tc.desc: SetDragEnabled and GetDragEnabled to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowname, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetDragEnabled(), true);
+    property->SetDragEnabled(false);
+    ASSERT_EQ(property->GetDragEnabled(), false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
