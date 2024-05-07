@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
@@ -70,7 +71,7 @@ public:
     void TearDown() override;
 
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
-
+    int32_t GetTaskCount(sptr<SceneSession>& session);
     static bool gestureNavigationEnabled_;
     static bool statusBarEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
@@ -128,6 +129,19 @@ void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sce
     sceneSession->systemTouchable_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->foregroundInteractiveStatus_.store(true);
+}
+
+int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession>& session)
+{
+    std::string dumpInfo = session->handler_->GetEventRunner()->GetEventQueue()->DumpCurrentQueueSize();
+    std::regex pattern("\\d+");
+    std::smatch matches;
+    int32_t taskNum = 0;
+    while (std::regex_search(dumpInfo, matches, pattern)) {
+        taskNum += std::stoi(matches.str());
+        dumpInfo = matches.suffix();
+    }
+    return taskNum;
 }
 
 namespace {
@@ -3820,11 +3834,11 @@ HWTEST_F(SceneSessionManagerTest, UpdateExtWindowFlags, Function | SmallTest | L
 }
 
 /**
- * @tc.name: SetScreenLoacked001
- * @tc.desc: SetScreenLoacked001
+ * @tc.name: SetScreenLocked001
+ * @tc.desc: SetScreenLocked001
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SetScreenLoacked001, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetScreenLocked001, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
@@ -3841,14 +3855,9 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLoacked001, Function | SmallTest | Le
     auto task = [](){};
     int64_t delayTime = 3000;
     sceneSession->handler_->PostTask(task, taskName, delayTime);
-
+    int32_t beforeTaskNum = GetTaskCount(sceneSession);
     ssm_->SetScreenLocked(true);
-    std::shared_ptr<AppExecFwk::EventHandler> owner(sceneSession->handler_);
-    auto filter = [owner, &taskName](const AppExecFwk::InnerEvent::Pointer &p) {
-        return (p->HasTask()) && (p->GetOwner() == owner) && (p->GetTaskName() == taskName);
-    };
-    bool hasEvent = sceneSession->handler_->GetEventRunner()->GetEventQueue()->HasInnerEvent(filter);
-    ASSERT_EQ(false, hasEvent);
+    ASSERT_EQ(beforeTaskNum - 1, GetTaskCount(sceneSession));
     ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, sceneSession->detectTaskInfo_.taskWindowMode);
 }
