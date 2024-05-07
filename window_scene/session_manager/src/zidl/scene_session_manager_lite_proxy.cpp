@@ -773,9 +773,9 @@ WMError SceneSessionManagerLiteProxy::GetVisibilityWindowInfo(std::vector<sptr<W
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
+WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowModeType)
 {
-    WLOGFI("get Window back home proxy");
+    WLOGFI("get Window mode type proxy");
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
@@ -785,12 +785,12 @@ WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
     MessageParcel reply;
     MessageOption option;
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE), data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    isBackHome = reply.ReadBool();
+    windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
 }
 

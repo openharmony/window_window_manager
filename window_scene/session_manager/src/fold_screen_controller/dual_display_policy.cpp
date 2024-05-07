@@ -233,8 +233,8 @@ void DualDisplayPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t o
     }
 }
 
-void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, int32_t offScreenId,
-    int32_t onScreenId)
+void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, ScreenId offScreenId,
+    ScreenId onScreenId)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);
@@ -252,7 +252,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_SUB);
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     auto taskScreenOff = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}d", offScreenId);
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
         PowerMgr::PowerMgrClient::GetInstance().SuspendDevice();
@@ -261,7 +261,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
 
     auto taskScreenOn = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}d", onScreenId);
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
         screenId_ = onScreenId;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
@@ -318,7 +318,7 @@ void DualDisplayPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSessi
         DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
-void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, int32_t screenId)
+void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);

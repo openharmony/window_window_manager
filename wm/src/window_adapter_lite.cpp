@@ -135,11 +135,11 @@ void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     return windowManagerServiceProxy_->GetFocusWindowInfo(focusInfo);
 }
 
-WMError WindowAdapterLite::GetWindowBackHomeStatus(bool &isBackHome)
+WMError WindowAdapterLite::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    WLOGFD("get back home status");
-    return windowManagerServiceProxy_->GetWindowBackHomeStatus(isBackHome);
+    WLOGFD("get window mode type");
+    return windowManagerServiceProxy_->GetWindowModeType(windowModeType);
 }
 
 WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)

@@ -2626,6 +2626,25 @@ HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, window1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: Test06
+ * @tc.desc: Test06
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test06, Function | SmallTest | Level2)
+{
+    KeyboardLayoutParams param;
+    KeyboardLayoutParams param1;
+    ASSERT_EQ(true, (param == param1));
+    ASSERT_EQ(false, (param != param1));
+    ASSERT_EQ(true, param.isEmpty());
+    Parcel parcel;
+    Rect rect = {0, 0, 0, 0};
+    ASSERT_EQ(false, KeyboardLayoutParams::ReadParcel(parcel, rect));
+    parcel.WriteUint32(0);
+    ASSERT_EQ(nullptr, KeyboardLayoutParams::Unmarshalling(parcel));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

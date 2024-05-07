@@ -128,27 +128,15 @@ public:
    * @return WM_OK means unregister success, others means unregister failed.
    */
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
+
     /**
-     * @brief Register window back to home listener.
-     *
-     * @param listener IWindowBackHomeListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    WMError RegisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
-    /**
-     * @brief Unregister window window back to home listener.
-     *
-     * @param listener IWindowBackHomeListener.
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    WMError UnregisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener);
-    /**
-     * @brief Get if window is back home.
+     * @brief Get window mode type.
      *
      * @param void
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetWindowBackHomeStatus(bool &isBackHome) const;
+    WMError GetWindowModeType(WindowModeType& windowModeType) const;
+
     /**
      * @brief Get top num main window info.
      *
@@ -174,7 +162,6 @@ private:
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
-    void UpdateWindowBackHomeStatus(bool isBackHome) const;
     void OnRemoteDied();
 };
 } // namespace Rosen
