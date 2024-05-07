@@ -3981,6 +3981,31 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillBundleName, Function | SmallT
 }
 
 /**
+ * @tc.name: AccessibilityFillFilterBundleName
+ * @tc.desc: SceneSesionManager fill filter bundle name to accessibilityInfo;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AccessibilityFillFilterBundleName, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SCBGestureTopBar";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SetVisibleForAccessibility(sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityInfo;
+    ssm_->FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
+    ASSERT_EQ(accessibilityInfo.size(), 0);
+}
+
+/**
  * @tc.name: AccessibilityFillEmptyHotAreas
  * @tc.desc: SceneSesionManager fill empty hot areas to accessibilityInfo;
  * @tc.type: FUNC
