@@ -520,7 +520,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
         RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
@@ -533,7 +532,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             }
             window->rotationAnimationCount_--;
             if (window->rotationAnimationCount_ == 0) {
-                RSSystemProperties::SetDrawTextAsBitmap(false);
                 RSInterfaces::GetInstance().DisableCacheForRotation();
                 window->NotifyRotationAnimationEnd();
             }
