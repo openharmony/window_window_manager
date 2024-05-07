@@ -24,6 +24,7 @@
 #include "display_info.h"
 #include "parameters.h"
 #include "anr_handler.h"
+#include "hitrace_meter.h"
 #include "session_permission.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -433,6 +434,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         return;
     }
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowExtensionSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
             return;
