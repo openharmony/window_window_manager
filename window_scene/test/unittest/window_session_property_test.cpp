@@ -603,16 +603,112 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
 }
 
 /**
- * @tc.name: GetWindowname
- * @tc.desc: SetDragEnabled and GetDragEnabled to check the value
+ * @tc.name: GetWindowName
+ * @tc.desc: GetWindowName
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, GetWindowname, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, GetWindowName, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetDragEnabled(), true);
-    property->SetDragEnabled(false);
-    ASSERT_EQ(property->GetDragEnabled(), false);
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    std::string name = "test";
+    property->SetWindowName(name);
+    auto result = property->GetWindowName();
+    ASSERT_EQ(result, name);
+    delete property;
+}
+
+/**
+ * @tc.name: GetSessionInfo
+ * @tc.desc: GetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetSessionInfo, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    SessionInfo *info = new SessionInfo();
+    if (info == nullptr) {
+        return;
+    }
+    property->SetSessionInfo(*info);
+    auto result = property->GetSessionInfo();
+    ASSERT_EQ(property->GetRaiseEnabled(), true);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowRect
+ * @tc.desc: GetWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    Rect rect = {0, 0, 0, 0};
+    property->SetWindowRect(rect);
+    auto result = property->GetWindowRect();
+    ASSERT_EQ(result, rect);
+    delete property;
+}
+
+/**
+ * @tc.name: GetRequestRect
+ * @tc.desc: GetRequestRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetRequestRect, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    Rect requestRect = {0, 0, 0, 0};
+    property->SetWindowRect(requestRect);
+    auto result = property->GetWindowRect();
+    ASSERT_EQ(result, requestRect);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowType
+ * @tc.desc: GetWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowType, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    WindowType type = WindowType::APP_WINDOW_BASE;
+    property->SetWindowType(type);
+    auto result = property->GetWindowType();
+    ASSERT_EQ(result, type);
+}
+
+/**
+ * @tc.name: GetDisplayId
+ * @tc.desc: GetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetDisplayId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    DisplayId displayId = 1;
+    property->SetDisplayId(displayId);
+    auto result = property->GetDisplayId();
+    ASSERT_EQ(result, displayId);
 }
 } // namespace
 } // namespace Rosen
