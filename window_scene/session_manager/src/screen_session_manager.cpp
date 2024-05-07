@@ -885,7 +885,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
     sptr<ScreenSession> session = nullptr;
     ScreenId defScreenId = GetDefaultScreenId();
-    if (phyMirrorEnable && screenId != SCREEN_ID_MAIN && SCREEN_ID_MAIN != SCREEN_ID_FULL) {
+    TLOGI(WmsLogTag::DMS, "GetScreenSessionInner: screenId:%{public}" PRIu64 "", screenId);
+    if (phyMirrorEnable && screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL) {
         NodeId nodeId = 0;
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto sIt = screenSessionMap_.find(defScreenId);
