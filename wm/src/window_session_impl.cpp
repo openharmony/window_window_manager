@@ -883,8 +883,8 @@ std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std
     begin = file.tellg();
     file.seekg(0, std::ios::end);
     end = file.tellg();
-    size_t len = static_cast<uint32_t>(end - begin);
-    WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
+    int len = end - begin;
+    WLOGFD("abc file: %{public}s, size: %{public}d", abcPath.c_str(), len);
 
     if (len <= 0) {
         WLOGFE("abc file size is 0");

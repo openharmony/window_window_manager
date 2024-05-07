@@ -533,7 +533,7 @@ void KeyboardSession::RelayoutKeyBoard()
         requestRect.posX_ = 0;
         if (percent != 0) {
             // 100: for calc percent.
-            requestRect.height_ = static_cast<uint32_t>(screenHeight * percent / 100u);
+            requestRect.height_ = static_cast<uint32_t>(screenHeight) * percent / 100u;
         }
     }
     requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
