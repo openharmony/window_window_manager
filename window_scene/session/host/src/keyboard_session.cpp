@@ -492,7 +492,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
     }
     uint32_t curSessionId = GetSessionProperty()->GetCallingSessionId();
     // When calling window id changes, restore the old calling session, raise the new calling session.
-    if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId) {
+    if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingSession curId: %{public}d, newId: %{public}d",
             curSessionId, callingSessionId);
         RestoreCallingSession();
