@@ -1002,13 +1002,13 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         return nullptr;
     }
 
-    napi_set_named_property(env, objValue, "LandscapeKeyboardRect",
+    napi_set_named_property(env, objValue, "landscapeKeyboardRect",
         CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
-    napi_set_named_property(env, objValue, "PortraitKeyboardRect",
+    napi_set_named_property(env, objValue, "portraitKeyboardRect",
         CreateJsSessionRect(env, params.PortraitKeyboardRect_));
-    napi_set_named_property(env, objValue, "LandscapePanelRect",
+    napi_set_named_property(env, objValue, "landscapePanelRect",
         CreateJsSessionRect(env, params.LandscapePanelRect_));
-    napi_set_named_property(env, objValue, "PortraitPanelRect",
+    napi_set_named_property(env, objValue, "portraitPanelRect",
         CreateJsSessionRect(env, params.PortraitPanelRect_));
     
     return objValue;
