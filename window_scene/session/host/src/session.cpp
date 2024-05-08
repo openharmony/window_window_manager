@@ -1765,18 +1765,26 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
-    sessionStateChangeFunc_ = func;
-    auto changedState = GetSessionState();
-    if (changedState == SessionState::STATE_ACTIVE) {
-        changedState = SessionState::STATE_FOREGROUND;
-    } else if (changedState == SessionState::STATE_INACTIVE) {
-        changedState = SessionState::STATE_BACKGROUND;
-    } else if (changedState == SessionState::STATE_DISCONNECT) {
-        return;
-    }
-    NotifySessionStateChange(changedState);
-    WLOGFD("SetSessionStateChangeListenser, id: %{public}d, state_: %{public}d, changedState: %{public}d",
-        GetPersistentId(), GetSessionState(), changedState);
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is null");
+            return;
+        }
+        session->sessionStateChangeFunc_ = func;
+        auto changedState = session->GetSessionState(); // read and write state should in one thread
+        if (changedState == SessionState::STATE_ACTIVE) {
+            changedState = SessionState::STATE_FOREGROUND;
+        } else if (changedState == SessionState::STATE_INACTIVE) {
+            changedState = SessionState::STATE_BACKGROUND;
+        } else if (changedState == SessionState::STATE_DISCONNECT) {
+            return;
+        }
+        session->NotifySessionStateChange(changedState);
+        TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
+            session->GetPersistentId(), session->GetSessionState(), changedState);
+    };
+    PostTask(task, "SetSessionStateChangeListenser");
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
