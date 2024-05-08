@@ -833,7 +833,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     }
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
-    uint32_t windowDragHotAreaType = SceneSession::GetHotAreaType(WINDOW_HOT_AREA_TYPE_UNDEFINED,
+    uint32_t windowDragHotAreaType = SceneSession::GetWindowDragHotAreaType(WINDOW_HOT_AREA_TYPE_UNDEFINED,
         pointerDisplayX, pointerDisplayY);
     if (windowDragHotAreaType_ != windowDragHotAreaType) {
         WLOGFI("the pointerEvent is window drag hot area, old type is: %{public}d, new type is: %{public}d",
