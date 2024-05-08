@@ -1262,13 +1262,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.screenId_);
         }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
-        auto windowModeCallback = [this]() {
-            ProcessWindowModeType();
-        };
         auto isScreenLockedCallback = [this]() {
             return IsScreenLocked();
         };
-        sceneSession->RegisterWindowModeChangedCallback(windowModeCallback);
         sceneSession->RegisterIsScreenLockedCallback(isScreenLockedCallback);
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
