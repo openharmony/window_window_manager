@@ -1019,7 +1019,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
-    WLOGFD("set topmost");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "set topmost");
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (!isPC) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
