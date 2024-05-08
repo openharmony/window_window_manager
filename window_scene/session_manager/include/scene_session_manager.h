@@ -473,6 +473,7 @@ private:
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
     void FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList);
     void NotifyAllAccessibilityInfo();
+    void removeFailRecoveredSession();
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
@@ -489,6 +490,7 @@ private:
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> secureSessionSet_;
     std::set<int32_t> waterMarkSessionSet_;
+    std::set<int32_t> failRecoveredPersistentIdSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;

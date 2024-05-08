@@ -266,8 +266,12 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (const auto& it : sessionRecoverCallbackFuncMap_) {
-        WLOGFD("[WMSRecover] Session recover callback, persistentId = %{public}" PRId32, it.first);
-        it.second();
+        auto ret = it.second();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32 " is error",
+                it.first);
+            return;
+        }
     }
 }
 
