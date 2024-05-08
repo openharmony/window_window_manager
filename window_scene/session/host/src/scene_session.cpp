@@ -318,10 +318,9 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
-static uint32_t GetHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY) {
+static uint32_t SceneSession::GetHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY) {
     std::shared_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
-    std::map<uint32_t, WSRect> areaMap = windowDragHotAreaMap_;
-    for (auto it = areaMap.begin(); it != areaMap.end(); ++it) {
+    for (auto it = windowDragHotAreaMap_.begin(); it != windowDragHotAreaMap_.end(); ++it) {
         uint32_t key = it->first;
         WSRect rect = it->second;
         if (rect.IsInRegion(pointerX, pointerY)) {
@@ -331,7 +330,7 @@ static uint32_t GetHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY
     return type;
 }
 
-static void AddOrUpdateWindowDragHotArea(uint32_t type, WSRect& area) {
+static void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area) {
     std::unique_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
     auto const result = windowDragHotAreaMap_.insert({type, area});
     if (!result.second) {

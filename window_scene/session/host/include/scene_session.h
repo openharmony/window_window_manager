@@ -262,7 +262,7 @@ public:
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static uint32_t GetHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint32_t type, WSRect& area);
+    static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
