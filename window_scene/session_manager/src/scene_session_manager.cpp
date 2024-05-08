@@ -7326,11 +7326,7 @@ void SceneSessionManager::AddWindowDragHotArea(uint32_t type, WSRect& area)
 {
     WLOGFI("run AddWindowDragHotArea, type: %{public}d,posX: %{public}d,posY: %{public}d,width: %{public}d,"
         "height: %{public}d", type, area.posX_, area.posY_, area.width_, area.height_);
-    std::unique_lock<std::shared_mutex> lock(SceneSession::windowDragHotAreaMutex_);
-    auto const result = SceneSession::windowDragHotAreaMap_.insert({type, area});
-    if (!result.second) {
-        result.first->second = area;
-    }
+    SceneSession::AddOrUpdateWindowDragHotArea(type, area);
 }
 
 WSError SceneSessionManager::UpdateMaximizeMode(int32_t persistentId, bool isMaximize)
