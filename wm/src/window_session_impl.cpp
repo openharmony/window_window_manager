@@ -147,6 +147,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
 
+    isIgnoreSafeArea_ = (WindowHelper::IsSubWindow(optionWindowType)) ? true : false;
+
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPC && WindowHelper::IsSubWindow(optionWindowType)) {
         WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
