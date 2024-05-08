@@ -261,7 +261,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
+    static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
@@ -342,6 +343,8 @@ private:
     bool forceHideState_ = false;
     int32_t customDecorHeight_ = 0;
     WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
+    static std::shared_mutex windowDragHotAreaMutex_;
+    static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

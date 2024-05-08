@@ -831,17 +831,10 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
         WLOGFW("invalid pointerEvent");
         return;
     }
-    uint32_t windowDragHotAreaType = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
-    std::map<uint32_t, WSRect> areaMap = SceneSession::windowDragHotAreaMap_;
-    for (auto it = areaMap.begin(); it != areaMap.end(); ++it) {
-        uint32_t key = it->first;
-        WSRect rect = it->second;
-        if (rect.IsInRegion(pointerDisplayX, pointerDisplayY)) {
-            windowDragHotAreaType |= key;
-        }
-    }
+    uint32_t windowDragHotAreaType = SceneSession::GetWindowDragHotAreaType(WINDOW_HOT_AREA_TYPE_UNDEFINED,
+        pointerDisplayX, pointerDisplayY);
     if (windowDragHotAreaType_ != windowDragHotAreaType) {
         WLOGFI("the pointerEvent is window drag hot area, old type is: %{public}d, new type is: %{public}d",
             windowDragHotAreaType_, windowDragHotAreaType);
