@@ -55,6 +55,7 @@ const std::string DLP_INDEX = "ohos.dlp.params.index";
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
+std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint32_t, WSRect> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 
@@ -315,6 +316,28 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     };
     PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<int>(event)));
     return WSError::WS_OK;
+}
+
+uint32_t SceneSession::GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY)
+{
+    std::shared_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
+    for (auto it = windowDragHotAreaMap_.begin(); it != windowDragHotAreaMap_.end(); ++it) {
+        uint32_t key = it->first;
+        WSRect rect = it->second;
+        if (rect.IsInRegion(pointerX, pointerY)) {
+            type |= key;
+        }
+    }
+    return type;
+}
+
+void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area)
+{
+    std::unique_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
+    auto const result = windowDragHotAreaMap_.insert({type, area});
+    if (!result.second) {
+        result.first->second = area;
+    }
 }
 
 void SceneSession::SetSessionEventParam(SessionEventParam param)
