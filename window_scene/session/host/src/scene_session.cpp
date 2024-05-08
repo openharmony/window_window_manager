@@ -1174,7 +1174,8 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     WLOGFI("id: %{public}d, type: %{public}d, pos: [%{public}d, %{public}d]", id, GetWindowType(), posX, posY);
 
     // notify touch outside
-    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_) {
+    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
+        sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
         specificCallback_->onSessionTouchOutside_(id);
     }
 
