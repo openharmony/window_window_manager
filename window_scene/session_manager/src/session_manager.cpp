@@ -88,8 +88,8 @@ SessionManager::~SessionManager()
     if (mockSessionManagerServiceProxy_ != nullptr) {
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
-        mockSessionManagerServiceProxy_ = nullptr;
         IPCSkeleton::SetCallingIdentity(identity);
+        mockSessionManagerServiceProxy_ = nullptr;
     }
 }
 

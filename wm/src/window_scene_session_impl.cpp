@@ -567,17 +567,18 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         auto promoteThis = weakThis.promote();
         if (promoteThis == nullptr) {
             WLOGFW("[WMSRecover] promoteThis is nullptr");
-            return;
+            return WMError::WM_ERROR_NULLPTR;
         }
         if (promoteThis->state_ == WindowState::STATE_DESTROYED) {
             WLOGFW("[WMSRecover] windowState is STATE_DESTROYED, no need to recover");
-            return;
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
 
         WLOGFD("[WMSRecover] Recover session over, ret = %{public}d", ret);
+        return ret;
     };
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
 }

@@ -40,6 +40,7 @@
 #include "session_manager_service_interface.h"
 #include "scene_session_manager_interface.h"
 #include "screen_session_manager_lite.h"
+#include "common/include/session_permission.h"
 
 #define PATH_LEN 1024
 #define O_RDWR   02
@@ -293,6 +294,10 @@ void MockSessionManagerService::RemoveSessionManagerServiceByUserId(int32_t user
 
 void MockSessionManagerService::NotifySceneBoardAvailable()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
+        return;
+    }
     int32_t userId = GetUserIdByCallingUid();
     if (userId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
