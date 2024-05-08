@@ -58,8 +58,6 @@ WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
 FoldScreenSensorManager::FoldScreenSensorManager()
 {
-    RegisterPostureCallback();
-    RegisterHallCallback();
 }
 
 void FoldScreenSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy)
