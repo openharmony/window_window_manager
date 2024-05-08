@@ -3147,51 +3147,85 @@ HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerInputMethodFl
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RegisterSessionRecoverListenerInputMethodFloat start";
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    int ret = 0;
     window->RegisterSessionRecoverListener(false);
-    ASSERT_EQ(ret, 0);
 }
  
 /**
- * @tc.name: RegisterSessionRecoverListenerNonDefaultCollaboratorType
+ * @tc.name: RegisterSessionRecoverListenerNonDefaultCollaboratorType01
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerNonDefaultCollaboratorType,
+HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerNonDefaultCollaboratorType01,
     Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RegisterSessionRecoverListenerNonDefaultCollaboratorType start";
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    int ret = 0;
-    window->RegisterSessionRecoverListener(false);
-    ASSERT_EQ(ret, 0);
+    window->RegisterSessionRecoverListener(false); // false is main window
 }
- 
+
 /**
- * @tc.name: RegisterSessionRecoverListenerSuccess
+ * @tc.name: RegisterSessionRecoverListenerNonDefaultCollaboratorType02
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerSuccess, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerNonDefaultCollaboratorType02,
+    Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RegisterSessionRecoverListenerNonDefaultCollaboratorType start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
+    window->RegisterSessionRecoverListener(true); // true is sub window
+}
+
+/**
+ * @tc.name: RegisterSessionRecoverListenerSuccess01
+ * @tc.desc: Register session recover listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerSuccess01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RegisterSessionRecoverListenerSuccess start";
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    int ret = 0;
-    window->RegisterSessionRecoverListener(false);
-    ASSERT_EQ(ret, 0);
+    window->RegisterSessionRecoverListener(false); // false is main window
+}
+
+/**
+ * @tc.name: RegisterSessionRecoverListenerSuccess02
+ * @tc.desc: Register session recover listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerSuccess02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RegisterSessionRecoverListenerSuccess start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->RegisterSessionRecoverListener(true); // true is sub window
 }
 }
 } // namespace Rosen
