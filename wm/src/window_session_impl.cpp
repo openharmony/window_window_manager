@@ -808,7 +808,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "interrupt set uicontent because window is invalid! window state: %{public}d",
             state_);
