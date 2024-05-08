@@ -399,6 +399,7 @@ private:
     void SetDpiFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void RegisterApplicationStateObserver();
+    void SetPostureAndHallSensorEnabled();
 };
 } // namespace OHOS::Rosen
 
