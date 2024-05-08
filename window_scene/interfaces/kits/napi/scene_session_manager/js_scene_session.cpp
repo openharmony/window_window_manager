@@ -1712,8 +1712,8 @@ void JsSceneSession::OnContextTransparent()
 
 void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
 {
-    WLOGI("[NAPI]ChangeSessionVisibilityWithStatusBar: bundleName %{public}s, moduleName %{public}s, \
-        abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d",
+    WLOGI("[NAPI]: bundleName %{public}s, moduleName %{public}s, "
+        "abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
         info.appIndex_, info.reuse, visible);
     auto session = weakSession_.promote();
@@ -1809,8 +1809,8 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
-        appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
+        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
@@ -1867,6 +1867,8 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
             return;
         }
         napi_value argv[] = {jsSessionInfo};
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id:%{public}d",
+            sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };

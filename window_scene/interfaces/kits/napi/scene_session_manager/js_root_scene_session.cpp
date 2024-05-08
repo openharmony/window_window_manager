@@ -243,8 +243,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
-        appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
+        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
@@ -259,13 +259,13 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         if (isNeedBackToOther) {
             int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
             if (realCallerSessionId == sceneSession->GetPersistentId()) {
-                TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, need back to self caller.");
+                TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
                 auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
                 if (scnSession != nullptr) {
                     realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
                 }
             }
-            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]need to back to other session: %{public}d.", realCallerSessionId);
+            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
             info.callerPersistentId_ = realCallerSessionId;
         } else {
             info.callerPersistentId_ = 0;
