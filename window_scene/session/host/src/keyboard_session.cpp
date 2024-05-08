@@ -529,7 +529,7 @@ void KeyboardSession::RelayoutKeyBoard()
 
     auto requestRect = GetSessionProperty()->GetRequestRect();
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
-        requestRect.width_ = static_cast<uint32_t>(screenWidth);
+        requestRect.width_ = screenWidth;
         requestRect.posX_ = 0;
         if (percent != 0) {
             // 100: for calc percent.
