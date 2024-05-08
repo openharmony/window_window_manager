@@ -981,6 +981,9 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         // sensor may earlier than screen connect, when physical screen property changed, update
         foldScreenController_->UpdateForPhyScreenPropertyChange();
         /* folder screen outer screenId is 5 */
+        if (screenId == SCREEN_ID_MAIN) {
+            SetPostureAndHallSensorEnabled();
+        }
         if (screenId == SCREEN_ID_MAIN && !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             return nullptr;
         }
@@ -1666,6 +1669,19 @@ void ScreenSessionManager::SetSensorSubscriptionEnabled()
     }
     ScreenSensorConnector::SubscribeRotationSensor();
     TLOGI(WmsLogTag::DMS, "subscribe rotation sensor successful");
+}
+
+void ScreenSessionManager::SetPostureAndHallSensorEnabled()
+{
+#ifdef SENSOR_ENABLE
+    if (!g_foldScreenFlag) {
+        TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
+        return;
+    }
+    FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+    FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+    TLOGI(WmsLogTag::DMS, "subscribe Posture and Hall sensor successful");
+#endif
 }
 
 bool ScreenSessionManager::SetRotationFromWindow(Rotation targetRotation)

@@ -39,6 +39,8 @@ public:
 
     void RegisterApplicationStateObserver();
 
+    void RegisterHallCallback();
+
     void UnRegisterPostureCallback();
 
     void UnRegisterHallCallback();
@@ -68,8 +70,6 @@ private:
     SensorUser postureUser;
 
     SensorUser hallUser;
-
-    void RegisterHallCallback();
 
     void notifyFoldAngleChanged(float foldAngle);
 
