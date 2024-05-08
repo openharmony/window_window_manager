@@ -155,9 +155,9 @@ HWTEST_F(SceneSessionTest, BackgroundTask01, Function | SmallTest | Level2)
     auto result = sceneSession->BackgroundTask();
     ASSERT_EQ(result, WSError::WS_OK);
     sceneSession->isActive_ = true;
-    result = ->BackgroundTask(false);
+    result = sceneSession->BackgroundTask(false);
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ = 
+    specificCallback->onCreate_ =
         [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
