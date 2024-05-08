@@ -23,7 +23,7 @@
 
 using namespace OHOS::Rosen;
 
-KeyEventFilterFunc convert2Func(KeyEventFilter filter)
+KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
 {
     std::function<bool(OHOS::MMI::KeyEvent&)> func = [filter](OHOS::MMI::KeyEvent& keyEvent) {
         Input_KeyEvent *input = OH_Input_CreateKeyEvent();
@@ -35,27 +35,28 @@ KeyEventFilterFunc convert2Func(KeyEventFilter filter)
     return func ;
 }
 
-OH_WMErrCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId, KeyEventFilter filter)
+WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
+    OH_NativeWindowManager_KeyEventFilter filter)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "register keyEventCallback, windowId:%{public}d", windowId);
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
-        return OH_WMErrCode::WS_INVAILD_WINID;
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = mainWindow->SetKeyEventFilter(convert2Func(filter));
 
-    return res == WMError::WM_OK ? OH_WMErrCode::WS_OK : OH_WMErrCode::WS_ERR;
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
 }
 
-OH_WMErrCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId)
+WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "clear keyEventCallback, windowId:%{public}d", windowId);
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
-        return OH_WMErrCode::WS_INVAILD_WINID;
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = mainWindow->ClearKeyEventFilter();
-    return res == WMError::WM_OK ? OH_WMErrCode::WS_OK : OH_WMErrCode::WS_ERR;
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
 }
