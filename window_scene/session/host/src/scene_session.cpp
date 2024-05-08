@@ -450,8 +450,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::MOVE || !session->rectChangeListenerRegistered_)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, rect:%{public}s, \
-                preRect: %{public}s",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, rect:%{public}s, "
+                "preRect: %{public}s",
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
             session->isDirty_ = true;
@@ -1121,7 +1121,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
             isInRegion = rect.IsInRegion(displayX, displayY);
         }
         if (!isInRegion) {
-            WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:" \
+            WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:"
                 "[%{public}d, %{public}d, %{public}d, %{public}d]",
                 displayX, displayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
             return WSError::WS_ERROR_INVALID_TYPE;
@@ -2160,8 +2160,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
-                    startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state:%{public}d, "
+                    "startAbilityBackground:%{public}u, hasContinuousTask:%{public}u",
                     sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
@@ -2192,14 +2192,12 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
         }
 
-        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName %{public}s, moduleName:%{public}s, \
-            abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s",
+        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName:%{public}s, moduleName:%{public}s, "
+            "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
+            "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
+            "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
             info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-            info.sessionAffinity.c_str());
-        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: callState:%{public}d, want persistentId: %{public}d, "
-            "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64
-            ", windowMode: %{public}d, caller persistentId: %{public}d",
-            info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+            info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
             info.windowMode, info.callerPersistentId_);
         session->HandleCastScreenConnection(info, session);
         if (session->pendingSessionActivationFunc_) {

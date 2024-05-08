@@ -1247,7 +1247,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 
     auto task = [this, sessionInfo, property]() {
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
-            "appIndex: %{public}d, type %{public}u isSystem:%{public}u, isPersistentRecover: %{public}u",
+            "appIndex %{public}d, type %{public}u isSystem %{public}u, isPersistentRecover %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_,
             static_cast<uint32_t>(sessionInfo.isSystem_), static_cast<uint32_t>(sessionInfo.isPersistentRecover_));
@@ -1276,8 +1276,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             auto rootContext = rootSceneContextWeak_.lock();
             sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
         } else {
-            TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession, id: %{public}d, bundleName: %{public}s, \
-                moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
+            TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, bundleName: %{public}s, "
+                "moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
                 sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
         }
@@ -1295,7 +1295,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSession->SetSnapshotScale(snapshotScale_);
         UpdateParentSessionForDialog(sceneSession, property);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-            WLOGFD("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
+            WLOGFI("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
             PreHandleCollaborator(sceneSession);
         }
         {
@@ -1304,7 +1304,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
-        TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession, id: %{public}d, type: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, type: %{public}d",
             persistentId, sceneSession->GetWindowType());
         return sceneSession;
     };
@@ -1596,22 +1596,22 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSessionActivationInner: want info - \
-        abilityName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, uri: %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "want abilityName: %{public}s, bundleName: %{public}s, "
+        "moduleName: %{public}s, uri: %{public}s.",
         scnSessionInfo->want.GetElement().GetAbilityName().c_str(),
         scnSessionInfo->want.GetElement().GetBundleName().c_str(),
         scnSessionInfo->want.GetElement().GetModuleName().c_str(),
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     if (systemConfig_.backgroundswitch == false) {
-        TLOGI(WmsLogTag::WMS_MAIN, "begin StartUIAbility: %{public}d isSystem:%{public}u", persistentId,
+        TLOGI(WmsLogTag::WMS_MAIN, "begin call StartUIAbility: %{public}d isSystem: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
     } else {
-        TLOGD(WmsLogTag::WMS_MAIN, "RequestSceneSessionActivationInner: %{public}d", systemConfig_.backgroundswitch);
+        TLOGI(WmsLogTag::WMS_MAIN, "background switch: true");
         if (isNewActive || scnSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
             scnSession->GetSessionState() == SessionState::STATE_END) {
-            TLOGI(WmsLogTag::WMS_MAIN, "begin StartUIAbility: %{public}d isSystem:%{public}u", persistentId,
+            TLOGI(WmsLogTag::WMS_MAIN, "begin StartUIAbility: %{public}d isSystem: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
             errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         } else {
@@ -2052,8 +2052,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         NotifyCreateSpecificSession(newSession, property, type);
         session = newSession;
         AddClientDeathRecipient(sessionStage, newSession);
-        TLOGI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, \
-            parentId: %{public}d, type: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
+            "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
         return errCode;
     };
@@ -2915,17 +2915,17 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
 {
     auto sessionInfo = sceneSession->GetSessionInfo();
     if (sessionInfo.bundleName_.empty()) {
-        WLOGFE("FillSessionInfo bundleName_ is null");
+        WLOGFE("bundleName_ is empty");
         return;
     }
     if (sessionInfo.isSystem_) {
-        WLOGFD("FillSessionInfo systemScene!");
+        WLOGFD("is system scene!");
         return;
     }
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
-        WLOGFE("FillSessionInfo abilityInfo is nullptr!");
+        WLOGFE("abilityInfo is nullptr!");
         return;
     }
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
@@ -2935,8 +2935,8 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }
-    WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
-           " label:%{public}s iconPath:%{public}s collaboratorType:%{public}s",
+    WLOGFI("end: removeMissionAfterTerminate:%{public}d excludeFromMissions:%{public}d "
+           "label:%{public}s iconPath:%{public}s collaboratorType:%{public}s.",
            abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
            abilityInfo->label.c_str(), abilityInfo->iconPath.c_str(), abilityInfo->applicationInfo.codePath.c_str());
 }
@@ -2948,7 +2948,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     want.SetElementName("", bundleName, abilityName, moduleName);
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     if (abilityInfo == nullptr) {
-        WLOGFE("QueryAbilityInfoFromBMS abilityInfo is nullptr!");
+        WLOGFE("abilityInfo is nullptr!");
         return nullptr;
     }
     auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
@@ -3578,8 +3578,8 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 info.errorCode, info.persistentId_);
             if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT) ||
                 info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_FOREGROUND_TIMEOUT)) {
-                TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionClosed when ability load timeout \
-                    or foreground timeout, id: %{public}d", info.persistentId_);
+                TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionClosed when ability load timeout "
+                    "or foreground timeout, id: %{public}d", info.persistentId_);
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
         };
@@ -6680,8 +6680,8 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
 {
-    WLOGFI("NotifyAINavigationBarShowStatus: isVisible: %{public}u, " \
-        "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64"",
+    WLOGFI("isVisible: %{public}u, "
+        "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64,
         isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
     auto task = [this, isVisible, barArea, displayId]() {
         bool isNeedUpdate = false;
@@ -7130,7 +7130,7 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
-        WLOGFE("CheckIfReuseSession abilityInfo is nullptr!");
+        WLOGFE("abilityInfo is nullptr!");
         return BrokerStates::BROKER_UNKOWN;
     }
     sessionInfo.abilityInfo = abilityInfo;
@@ -7141,7 +7141,7 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         collaboratorType = CollaboratorType::OTHERS_TYPE;
     }
     if (!CheckCollaboratorType(collaboratorType)) {
-        WLOGFW("CheckIfReuseSession not collaborator!");
+        WLOGFW("checked not collaborator!");
         return BrokerStates::BROKER_UNKOWN;
     }
     BrokerStates resultValue = NotifyStartAbility(collaboratorType, sessionInfo);
@@ -7153,7 +7153,7 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
     } else {
         sessionInfo.reuse = false;
     }
-    WLOGFI("CheckIfReuseSession end, affinity %{public}s type %{public}d reuse %{public}d",
+    WLOGFI("end: affinity %{public}s type %{public}d reuse %{public}d",
         sessionInfo.sessionAffinity.c_str(), collaboratorType, sessionInfo.reuse);
     return resultValue;
 }
@@ -7161,13 +7161,13 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
-    WLOGFI("run NotifyStartAbility type %{public}d param id %{public}d", collaboratorType, persistentId);
+    WLOGFI("type %{public}d id %{public}d", collaboratorType, persistentId);
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator;
     {
         std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
         auto iter = collaboratorMap_.find(collaboratorType);
         if (iter == collaboratorMap_.end()) {
-            WLOGFI("Fail to found collaborator with type: %{public}d", collaboratorType);
+            WLOGFI("Fail to find collaborator with type: %{public}d", collaboratorType);
             return BrokerStates::BROKER_UNKOWN;
         }
         collaborator = iter->second;
@@ -7185,13 +7185,13 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
 
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
-            WLOGFI("NotifyStartAbility affinity exit %{public}s.", affinity.c_str());
+            WLOGFI("want affinity exit %{public}s.", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
             currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
-        WLOGFI("NotifyStartAbility ret: %{public}d", ret);
+        WLOGFI("collaborator ret: %{public}d", ret);
         if (ret == 0) {
             return BrokerStates::BROKER_STARTED;
         } else {
@@ -7203,7 +7203,6 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
 
 void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
-    WLOGFI("run NotifySessionCreate");
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
         return;
@@ -7234,7 +7233,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         std::string bundleName = sessionInfo.bundleName_;
         int64_t timestamp = containerStartAbilityTime;
         WindowInfoReporter::GetInstance().ReportContainerStartBegin(missionId, bundleName, timestamp);
-
+        WLOGFI("call NotifyMissionCreated");
         collaborator->NotifyMissionCreated(abilitySessionInfo);
     }
 }
@@ -7320,32 +7319,31 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
 
 void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
-    WLOGFI("run PreHandleCollaborator");
     if (sceneSession == nullptr) {
+        WLOGFI("sceneSession is null");
         return;
     }
     std::string sessionAffinity;
-    WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
+    WLOGFI("run NotifyStartAbility and NotifySessionCreate");
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sessionAffinity = sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     }
     if (sessionAffinity.empty()) {
-        WLOGFI("PreHandleCollaborator sessionAffinity: %{public}s", sessionAffinity.c_str());
+        WLOGFI("sessionAffinity is empty");
         BrokerStates notifyReturn = NotifyStartAbility(
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
-            WLOGFI("PreHandleCollaborator cant notify");
+            WLOGFI("notifyReturn not BROKER_STARTED!");
             return;
         }
-
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
-        WLOGFI("broker persistentId: %{public}d",
-            sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
         sceneSession->SetSessionInfoAffinity(sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY));
-        WLOGFI("affinity: %{public}s", sceneSession->GetSessionInfo().sessionAffinity.c_str());
+        WLOGFI("ANCO_SESSION_ID: %{public}d, want affinity: %{public}s.",
+            sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0),
+            sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
         WLOGFI("sceneSession->GetSessionInfo().want is nullptr");
     }
@@ -8184,13 +8182,13 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
     FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
 
     for (const auto& item : accessibilityInfo) {
-        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid = %{public}d, inWid = %{public}d, \
-            bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
+        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid = %{public}d, inWid = %{public}d, "
+            "bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
             item->wid_, item->innerWid_, item->bundleName_.c_str(),
             item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
         for (const auto& rect : item->touchHotAreas_) {
-            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d," \
-            "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d,y=%{public}d,"
+                "w=%{public}d,h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
     }
 
