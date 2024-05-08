@@ -53,10 +53,12 @@ ohos_shared_library("cj_display_ffi") {
       "hitrace:hitrace_meter",
       "napi:ace_napi",
       "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
     ]
   } else {
     defines += [ "PREVIEWER" ]
     sources = [ "display_runtime_mock.cpp" ]
+    external_deps = [ "napi:cj_bind_ffi" ]
   }
   relative_install_dir = "module"
   part_name = "window_manager"
