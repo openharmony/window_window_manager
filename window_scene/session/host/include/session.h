@@ -393,7 +393,6 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-    void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
@@ -570,7 +569,6 @@ private:
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
-    std::function<void()> windowModeCallback_;
     std::function<bool()> isScreenLockedCallback_;
 
     mutable std::shared_mutex propertyMutex_;
