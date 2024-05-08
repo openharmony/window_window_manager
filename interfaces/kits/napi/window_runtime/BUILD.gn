@@ -45,7 +45,7 @@ ohos_shared_library("window_native_kit") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -103,7 +103,7 @@ ohos_shared_library("window_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -148,7 +148,7 @@ ohos_shared_library("windowstage_kit") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [ "window_stage_napi/js_window_stage.cpp" ]
