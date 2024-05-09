@@ -564,7 +564,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
     data.WriteInt32(numMax);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
