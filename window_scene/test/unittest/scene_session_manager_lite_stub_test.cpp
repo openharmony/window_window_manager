@@ -308,7 +308,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, Function | Small
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
-
 }
 
 /**
@@ -560,7 +559,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
-     int32_t numMax = 100;
+    int32_t numMax = 100;
     data.WriteInt32(numMax);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
