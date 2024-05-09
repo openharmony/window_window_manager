@@ -101,6 +101,9 @@ private:
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
+    mutable std::mutex displayNodeChildrenMapMutex_;
+    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap_;
+
     sptr<IScreenSessionManager> screenSessionManager_;
 
     IScreenConnectionListener* screenConnectionListener_;
