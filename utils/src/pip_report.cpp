@@ -31,9 +31,11 @@ static std::map<std::string, int32_t> CONTROL_ACTION_MAP = {
     {"nextVideo", 1},
     {"previousVideo", 2},
     {"hangUp", 3},
-    {"microphoneStateChanged", 4},
-    {"cameraStateChanged", 5},
-    {"videoStateChanged", 6}
+    {"micStateChanged", 4},
+    {"videoStateChanged", 5},
+    {"voiceStateChanged", 6},
+    {"fastForward", 7},
+    {"fastBackward", 8}
 };
 constexpr char EVENT_KEY_SOURCE[] = "SOURCE";
 constexpr char EVENT_KEY_TEMPLATE_TYPE[] = "TEMPLATE_TYPE";
