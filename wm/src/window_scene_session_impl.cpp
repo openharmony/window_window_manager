@@ -1798,7 +1798,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizeLayoutOption option)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SetLayoutFullScreen(enableImmersiveMode_);
-    return SetFullScreen(true);
 }
 
 WMError WindowSceneSessionImpl::MaximizeFloating()
@@ -1817,7 +1816,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        SetFullScreen(true);
+        SetLayoutFullScreen(enableImmersiveMode_);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     } else {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FLOATING);
