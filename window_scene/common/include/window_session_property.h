@@ -160,6 +160,8 @@ public:
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
     int32_t GetCollaboratorType() const;
     void SetCollaboratorType(int32_t collaboratorType);
+    bool Write(Parcel& parcel, PropertyChangeAction action);
+    void Read(Parcel& parcel, PropertyChangeAction action);
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
