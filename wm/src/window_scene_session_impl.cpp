@@ -3179,8 +3179,8 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     }
     const uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
-    opts.size.width = static_cast<int>(maskWidth);
-    opts.size.height = static_cast<int>(maskHeight);
+    opts.size.width = static_cast<int32_t>(maskWidth);
+    opts.size.height = static_cast<int32_t>(maskHeight);
     uint32_t length = maskWidth * maskHeight * bgraChannel;
     uint8_t* data = static_cast<uint8_t*>(malloc(length));
     if (data == nullptr) {
