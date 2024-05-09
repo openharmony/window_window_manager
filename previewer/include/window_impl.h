@@ -217,6 +217,8 @@ public:
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    virtual WMError SetImmersiveModeEnabledState(bool enable) override;
+    virtual bool GetImmersiveModeEnabledState() const override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
