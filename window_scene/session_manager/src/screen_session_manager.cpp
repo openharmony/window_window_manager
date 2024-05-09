@@ -3827,7 +3827,6 @@ void ScreenSessionManager::SwitchUser()
         }
         if (clientProxy_ != nullptr) {
             clientProxy_->SwitchUserCallback();
-            RemoveAllDisplayNodeChildrenInner(currentUserId_);
         }
         currentUserId_ = userId;
         auto it = clientProxyMap_.find(currentUserId_);
@@ -3835,7 +3834,6 @@ void ScreenSessionManager::SwitchUser()
             clientProxy_ = it->second;
         }
     }
-    RecoverAllDisplayNodeChildrenInner();
     MockSessionManagerService::GetInstance().NotifyWMSConnected(currentUserId_,
         static_cast<int32_t>(defaultScreenId_), false);
 }
@@ -3856,7 +3854,6 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
         if (clientProxy_ != nullptr && userId != currentUserId_) {
             clientProxy_->SwitchUserCallback();
-            RemoveAllDisplayNodeChildrenInner(currentUserId_);
         }
         currentUserId_ = userId;
         clientProxy_ = client;
@@ -3875,6 +3872,8 @@ void ScreenSessionManager::RemoveAllDisplayNodeChildrenInner(int32_t userId)
     if (userDisplayNodeIter != userDisplayNodeChildrenMap_.end()) {
         userDisplayNodeChildrenMap_.erase(userDisplayNodeIter);
     }
+    TLOGI(WmsLogTag::DMS, "remove displayNode start");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode start");
     for (const auto& iter : screenSessionMap_) {
         auto displayNode = GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
@@ -3897,7 +3896,8 @@ void ScreenSessionManager::RemoveAllDisplayNodeChildrenInner(int32_t userId)
         transactionProxy->FlushImplicitTransaction();
     }
     userDisplayNodeChildrenMap_.emplace(userId, displayNodeChildrenMap);
-    TLOGI(WmsLogTag::DMS, "RemoveAllDisplayNodeChildrenInner end");
+    TLOGI(WmsLogTag::DMS, "remove displayNode end");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode end");
 }
 
 void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
@@ -3907,6 +3907,8 @@ void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
     if (userDisplayNodeIter == userDisplayNodeChildrenMap_.end()) {
         return;
     }
+    TLOGI(WmsLogTag::DMS, "recover displayNode start");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode start");
     std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap = userDisplayNodeIter->second;
     for (const auto& iter : displayNodeChildrenMap) {
         auto displayNode = GetDisplayNode(iter.first);
@@ -3921,7 +3923,8 @@ void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     }
-    TLOGI(WmsLogTag::DMS, "RecoverAllDisplayNodeChildrenInner end");
+    TLOGI(WmsLogTag::DMS, "recover displayNode end");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode end");
 }
 
 void ScreenSessionManager::SetClientInner()
