@@ -692,6 +692,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowType, Function | SmallTest | Level2
     property->SetWindowType(type);
     auto result = property->GetWindowType();
     ASSERT_EQ(result, type);
+    delete property;
 }
 
 /**
@@ -709,6 +710,112 @@ HWTEST_F(WindowSessionPropertyTest, GetDisplayId, Function | SmallTest | Level2)
     property->SetDisplayId(displayId);
     auto result = property->GetDisplayId();
     ASSERT_EQ(result, displayId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetPersistentId
+ * @tc.desc: GetPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetPersistentId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    int32_t persistentId = 1;
+    property->SetPersistentId(persistentId);
+    auto result = property->GetPersistentId();
+    ASSERT_EQ(result, persistentId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetParentPersistentId
+ * @tc.desc: GetParentPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetParentPersistentId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    int32_t persistentId = 1;
+    property->SetParentPersistentId(persistentId);
+    auto result = property->GetParentPersistentId();
+    ASSERT_EQ(result, persistentId);
+    delete property;
+}
+
+/**
+ * @tc.name: SetTurnScreenOn
+ * @tc.desc: SetTurnScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool turnScreenOn = false;
+    property->SetTurnScreenOn(turnScreenOn);
+    ASSERT_EQ(property->turnScreenOn_, turnScreenOn);
+    delete property;
+}
+
+/**
+ * @tc.name: SetKeepScreenOn
+ * @tc.desc: SetKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool keepScreenOn = false;
+    property->SetKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(property->keepScreenOn_, keepScreenOn);
+    delete property;
+}
+
+/**
+ * @tc.name: SetAccessTokenId
+ * @tc.desc: SetAccessTokenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAccessTokenId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    uint32_t accessTokenId = 1;
+    property->SetAccessTokenId(accessTokenId);
+    ASSERT_EQ(property->accessTokenId_, accessTokenId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowState
+ * @tc.desc: GetWindowState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowState, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    WindowState state = WindowState::STATE_INITIAL;
+    property->SetWindowState(state);
+    auto result = property->GetWindowState();
+    ASSERT_EQ(result, state);
+    delete property;
 }
 } // namespace
 } // namespace Rosen
