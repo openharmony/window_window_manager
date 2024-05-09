@@ -506,12 +506,14 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         pointerEvent->MarkProcessed();
     }
     if (isPointDown || isPointUp) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d windowId:%{public}u, pointId:%{public}d,"
-            "sourceType:%{public}d, pointPos: [%{public}d, %{public}d], "
-            "winRect: [%{public}d, %{public}d, %{public}u, "
-            "%{public}u] needNotifyEvent:%{public}d", pointerEvent->GetId(), GetWindowId(),
-            pointerEvent->GetPointerId(), sourceType, pointerItem.GetDisplayX(), pointerItem.GetDisplayY(),
-            rect.posX_, rect.posY_, rect.width_, rect.height_, needNotifyEvent);
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, windowId:%{public}u, pointId:%{public}d, "
+            "sourceType:%{public}d, pointPos:[%{public}d, %{public}d], "
+            "winRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
+            "needNotifyEvent:%{public}d",
+            pointerEvent->GetId(), GetWindowId(), pointerEvent->GetPointerId(),
+            sourceType, pointerItem.GetDisplayX(), pointerItem.GetDisplayY(),
+            rect.posX_, rect.posY_, rect.width_, rect.height_,
+            needNotifyEvent);
     }
 }
 
