@@ -588,6 +588,21 @@ void ScreenSession::SetScreenSceneDpi(float density)
     SetScreenSceneDpiCallback_(density);
 }
 
+void ScreenSession::SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func)
+{
+    destroyScreenSceneCallback_  = func;
+    WLOGFI("SetScreenSceneDestroyListener");
+}
+
+void ScreenSession::DestroyScreenScene()
+{
+    if (destroyScreenSceneCallback_  == nullptr) {
+        WLOGFI("destroyScreenSceneCallback_  is nullptr");
+        return;
+    }
+    destroyScreenSceneCallback_ ();
+}
+
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
 {
     property_.SetDensityInCurResolution(densityInCurResolution);

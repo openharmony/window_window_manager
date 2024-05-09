@@ -22,6 +22,9 @@
 #include "window.h"
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+namespace OHOS::AppExecFwk {
+class EventHandler;
+} // namespace OHOS::AppExecFwk
 
 namespace OHOS::Ace {
 class UIContent;
@@ -75,6 +78,8 @@ public:
         return uiContent_.get();
     }
 
+    WMError Destroy() override;
+
 private:
     std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -84,6 +89,7 @@ private:
     std::string name_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
