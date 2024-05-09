@@ -40,12 +40,15 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         return;
     }
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
-    TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d, Receive keyEvent, windowId:%{public}u",
-        keyEvent->GetId(), windowId);
+    static uint32_t eventId = 0;
+    TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, InputTracking id:%{public}d, Receive keyEvent,"
+        " windowId:%{public}u",
+        eventId++, keyEvent->GetId(), windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         keyEvent->MarkProcessed();
-        TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr InputTracking id:%{public}d windowId:%{public}u",
+            keyEvent->GetId(), windowId);
         return;
     }
     channel->HandleKeyEvent(keyEvent);
@@ -72,14 +75,17 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, Receive pointerEvent, "
-            "windowId:%{public}u action = %{public}d", pointerEvent->GetId(), windowId,
+        static uint32_t eventId = 0;
+        TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, id:%{public}d, Receive pointerEvent, "
+            "windowId:%{public}u action = %{public}d", eventId++, pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         if (windowId != invalidId) {
-            TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr");
+            TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr InputTracking id:%{public}d "
+                "windowId:%{public}u",
+                pointerEvent->GetId(), windowId);
         }
         pointerEvent->MarkProcessed();
         return;
