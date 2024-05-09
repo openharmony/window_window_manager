@@ -396,8 +396,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         WLOGFE("sceneSession is nullptr");
         return {};
     }
-
-    if (sceneSession->GetSessionProperty() == nullptr) {
+    sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
+    if (windowSessionProperty == nullptr) {
         WLOGFE("SceneSession` property is nullptr");
         return {};
     }
@@ -407,7 +407,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     auto pid = sceneSession->GetCallingPid();
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto displayId = windowSessionProperty->GetDisplayId();
     CalTramform(sceneSession, tranform);
     const unsigned int len = 9;
     std::vector<float> transformData(tranform.GetData(), tranform.GetData() + len);
@@ -415,17 +415,20 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     auto agentWindowId = sceneSession->GetWindowId();
     auto zOrder = sceneSession->GetZOrder();
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
-    auto windowMode = sceneSession->GetSessionProperty()->GetWindowMode();
-    auto maxMode = sceneSession->GetSessionProperty()->GetMaximizeMode();
+    auto windowMode = windowSessionProperty->GetWindowMode();
+    auto maxMode = windowSessionProperty->GetMaximizeMode();
+    WindowType windowType = windowSessionProperty->GetWindowType();
+    bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
+    bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
     if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        Rosen::WindowHelper::IsMainWindow(sceneSession->GetSessionProperty()->GetWindowType()) &&
+        (isMainWindow || isDecorDialog) &&
         maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) || (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    auto pixelMap = sceneSession->GetSessionProperty()->GetWindowMask().GetRefPtr();
+    auto pixelMap = windowSessionProperty->GetWindowMask().GetRefPtr();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -443,8 +446,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pixelMap = pixelMap,
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
-    auto property = sceneSession->GetSessionProperty();
-    if (property != nullptr && (property->GetWindowFlags() &
+    if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
         static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
         WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
