@@ -309,11 +309,12 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleUpdateProperty!");
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    WLOGFD("run HandleUpdateProperty, action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
+        property = new (std::nothrow) WindowSessionProperty();
+        property->Read(data, action);
     } else {
         WLOGFW("Property not exist!");
     }

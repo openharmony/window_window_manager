@@ -601,6 +601,39 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
     property->SetIsLayoutFullScreen(true);
     ASSERT_EQ(property->IsLayoutFullScreen(), true);
 }
+
+/**
+ * @tc.name: Read
+ * @tc.desc: Read test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    Parcel parcel = Parcel();
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE)
+    ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
+}
+
+/**
+ * @tc.name: Write
+ * @tc.desc: Write and Read to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    int32_t persistentId = 2;
+    property->SetPersistentId(persistentId);
+    property->SetFocusable(true);
+    Parcel parcel = Parcel();
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE)
+
+    WindowSessionProperty *newProperty = new (std::nothrow) WindowSessionProperty();
+    newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE)
+    ASSERT_EQ(property->GetPersistentId(), persistentId);
+    ASSERT_EQ(property->GetFocusable(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
