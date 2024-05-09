@@ -35,6 +35,7 @@
 
 namespace OHOS::Rosen {
 using SetScreenSceneDpiFunc = std::function<void(float density)>;
+using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
@@ -109,6 +110,9 @@ public:
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
+
+    void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
+    void DestroyScreenScene();
 
     std::string GetName();
     ScreenId GetScreenId();
@@ -212,6 +216,7 @@ private:
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
+    DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {

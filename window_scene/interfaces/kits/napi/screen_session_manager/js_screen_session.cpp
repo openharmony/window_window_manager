@@ -84,6 +84,12 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
             screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
         };
         screenSession_->SetScreenSceneDpiChangeListener(func);
+        DestroyScreenSceneFunc destroyFunc = [screenScene = screenScene_]() {
+            if (screenScene) {
+                screenScene->Destroy();
+            }
+        };
+        screenSession_->SetScreenSceneDestroyListener(destroyFunc);
     }
 }
 
