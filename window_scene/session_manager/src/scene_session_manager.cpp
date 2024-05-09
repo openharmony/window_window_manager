@@ -301,14 +301,14 @@ void SceneSessionManager::RegisterAppListener()
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient_ == nullptr) {
         WLOGFE("appMgrClient_ is nullptr.");
+    } else if (appAnrListener_ == nullptr) {
+        WLOGFE("appAnrListener_ is nullptr.");
     } else {
-        if (appAnrListener_ != nullptr) {
-            auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
-            if (flag != ERR_OK) {
-                WLOGFE("Register app debug listener failed.");
-            } else {
-                WLOGFI("Register app debug listener success.");
-            }
+        auto flag = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(appAnrListener_));
+        if (flag != ERR_OK) {
+            WLOGFE("Register app debug listener failed.");
+        } else {
+            WLOGFI("Register app debug listener success.");
         }
     }
 }
