@@ -96,6 +96,7 @@ ohos_shared_library("sms") {
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "../utils:libwmutil",
   ]
