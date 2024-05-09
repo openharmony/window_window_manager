@@ -293,7 +293,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfos, Function | Smal
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
-
 }
 
 /**
