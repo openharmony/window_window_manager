@@ -373,9 +373,6 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     window->SetSpecificBarProperty(windowType, systemBarProperty1);
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
-    window->SetImmersiveModeEnabledState(boolVal);
-
-    startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetLayoutFullScreen(boolVal);
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
@@ -512,6 +509,9 @@ void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data,
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetNeedRemoveWindowInputChannel(boolVal);
     window->SetRequestedOrientation(static_cast<Orientation>(data[0]));
+
+    startPos += GetObject(boolVal, data + startPos, size - startPos);
+    window->SetImmersiveModeEnabledState(boolVal);
 
     std::vector<OHOS::Rosen::Rect> rectVector;
     OHOS::Rosen::Rect rect;
