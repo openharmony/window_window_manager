@@ -1648,10 +1648,10 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
-    const bool isDelegator, const bool isToDesktop, const bool isSaveSnapShot)
+    const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isDelegator, isToDesktop, isSaveSnapShot]() {
+    auto task = [this, weakSceneSession, isDelegator, isToDesktop, isSaveSnapshot]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
@@ -1669,7 +1669,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             scnSession->SetSessionInfo(info);
         }
 
-        scnSession->BackgroundTask(isSaveSnapShot);
+        scnSession->BackgroundTask(isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;

@@ -1384,19 +1384,19 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
     }
 
     bool isToDesktop = false;
-    if (argc == ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+    if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
         ConvertFromJsValue(env, argv[ARGC_TWO], isToDesktop);
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isToDesktop: %{public}u", isToDesktop);
     }
 
-    bool isSaveSnapShot = true;
-    if (argc == ARGC_FOUR && GetType(env, argv[ARGC_THREE]) == napi_boolean) {
-        ConvertFromJsValue(env, argv[ARGC_THREE], isSaveSnapShot);
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isSaveSnapShot: %{public}u", isSaveSnapShot);
+    bool isSaveSnapshot = true;
+    if (argc >= ARGC_FOUR && GetType(env, argv[ARGC_THREE]) == napi_boolean) {
+        ConvertFromJsValue(env, argv[ARGC_THREE], isSaveSnapshot);
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isSaveSnapshot: %{public}u", isSaveSnapshot);
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop,
-        isSaveSnapShot);
+        isSaveSnapshot);
     return NapiGetUndefined(env);
 }
 

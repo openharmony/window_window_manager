@@ -165,9 +165,9 @@ WSError SceneSession::Background()
     return BackgroundTask(true);
 }
 
-WSError SceneSession::BackgroundTask(const bool isSaveSnapShot)
+WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 {
-    auto task = [weakThis = wptr(this), isSaveSnapShot]() {
+    auto task = [weakThis = wptr(this), isSaveSnapshot]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -181,7 +181,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapShot)
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapShot) {
+        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
             session->snapshot_ = session->Snapshot();
             if (session->scenePersistence_ && session->snapshot_) {
                 const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
