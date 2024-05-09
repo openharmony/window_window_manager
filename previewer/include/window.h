@@ -329,6 +329,10 @@ public:
     }
 
     virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
+
+    virtual bool GetImmersiveModeEnabledState() const { return true; }
 };
 }
 }

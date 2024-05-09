@@ -152,6 +152,8 @@ public:
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
+    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -214,6 +216,8 @@ private:
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);

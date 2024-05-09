@@ -373,6 +373,9 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     window->SetSpecificBarProperty(windowType, systemBarProperty1);
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
+    window->SetImmersiveModeEnabledState(boolVal);
+
+    startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetLayoutFullScreen(boolVal);
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
