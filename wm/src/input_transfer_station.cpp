@@ -128,6 +128,7 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             }
         }
         MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
         inputListener_ = listener;
     }
 }
