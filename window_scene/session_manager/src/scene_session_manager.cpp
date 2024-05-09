@@ -4845,7 +4845,11 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
         }
     } else {
         if (inFloating) {
-            type = WindowModeType::WINDOW_MODE_FLOATING;
+            if (fullScreen) {
+                type = WindowModeType::WINDOW_MODE_FULLSCREEN_FLOATING;
+            } else {
+                type = WindowModeType::WINDOW_MODE_FLOATING;
+            }
         } else if (fullScreen) {
             type = WindowModeType::WINDOW_MODE_FULLSCREEN;
         } else {
