@@ -49,7 +49,8 @@ enum XmlNodeElement {
     HALL_SWITCH_APP,
     PACKAGE_NAME,
     SCREEN_SNAPSHOT_BUNDLE_NAME,
-    SCREEN_SNAPSHOT_ABILITY_NAME
+    SCREEN_SNAPSHOT_ABILITY_NAME,
+    IS_RIGHT_POWER_BUTTON,
 };
 }
 
@@ -78,6 +79,7 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {PACKAGE_NAME, "packageName"},
     {SCREEN_SNAPSHOT_BUNDLE_NAME, "screenSnapshotBundleName"},
     {SCREEN_SNAPSHOT_ABILITY_NAME, "screenSnapshotAbilityName"},
+    {IS_RIGHT_POWER_BUTTON, "isRightPowerButton"},
 };
 
 
@@ -157,7 +159,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
 {
     std::string nodeName(reinterpret_cast<const char*>(currNode->name));
     bool enableConfigCheck = (xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
-        (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName);
+        (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) ||
+        (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName);
     bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
         (xmlNodeMap_[SUB_DPI] == nodeName) ||
         (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||

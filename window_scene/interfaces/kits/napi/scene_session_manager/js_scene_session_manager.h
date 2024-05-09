@@ -26,6 +26,7 @@
 #include "session/host/include/scene_session.h"
 #include "ability_info.h"
 #include "task_scheduler.h"
+#include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
@@ -105,7 +106,8 @@ private:
     napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
-    napi_value CreateAbilityInfos(napi_env env, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos);
+    napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos);
+    napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo);
     napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo);
     napi_value CreateWindowModes(napi_env env, const std::vector<AppExecFwk::SupportWindowMode>& windowModes);
     napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo);
