@@ -19,6 +19,7 @@
 #include <event_handler.h>
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "gtx_input_event_sender.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -91,6 +92,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         return;
     }
     channel->HandlePointerEvent(pointerEvent);
+    GtxInputEventSender::GetInstance().SetTouchEvent(channel->GetWindowRect(), pointerEvent);
 }
 
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
