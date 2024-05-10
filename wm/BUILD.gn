@@ -39,7 +39,7 @@ ohos_static_library("libwm_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
     integer_overflow = true
     ubsan = true
@@ -189,7 +189,7 @@ ohos_shared_library("libwm") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   include_dirs = [
@@ -427,7 +427,7 @@ ohos_shared_library("libwm_ndk") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
 
