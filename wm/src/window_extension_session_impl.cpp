@@ -656,8 +656,7 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d densityValue:%{public}f", isFollowHost, densityValue);
 
-    if (!isFollowHost && !isDensityFollowHost_)
-    {
+    if (!isFollowHost && !isDensityFollowHost_) {
         TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost is false and not change");
         return WSError::WS_OK;
     }
