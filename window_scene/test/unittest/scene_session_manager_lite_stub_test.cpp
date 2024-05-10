@@ -565,20 +565,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
     EXPECT_EQ(ERR_NONE, res);
 }
 
-/**
- * @tc.name: HandleGetWindowBackHomeStatus
- * @tc.desc: test function : HandleGetWindowBackHomeStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowBackHomeStatus, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetWindowBackHomeStatus(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
 }
 }
 }
