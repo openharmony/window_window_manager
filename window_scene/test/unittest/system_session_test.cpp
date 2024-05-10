@@ -301,7 +301,7 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Le
  */
 HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
 {
-    WSRect rect = { 0, 0, 0, 0 };
+    WSRect rect = { 1, 1, 1, 1 };
     SessionInfo info;
     info.abilityName_ = "UpdatePointerArea";
     info.bundleName_ = "UpdatePointerAreaBundleName";
@@ -311,10 +311,12 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     sptr<SystemSession> sysSession =
         new (std::nothrow) SystemSession(info, specificCallback_);
     sysSession->UpdatePointerArea(rect);
+    ASSERT_NE(sysSession->preRect_, rect);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetDecorEnable(true);
+    sysSession->property_ = property;
     sysSession->UpdatePointerArea(rect);
     ASSERT_EQ(sysSession->preRect_, rect);
 }
