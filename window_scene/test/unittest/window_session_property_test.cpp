@@ -429,25 +429,6 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 }
 
 /**
- * @tc.name: Unmarshalling
- * @tc.desc: Unmarshalling test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
-{
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    Parcel parcel = Parcel();
-    WindowSessionProperty windowSessionProperty;
-    sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
-    if (keyboardLayoutParams == nullptr) {
-        return;
-    }
-    auto result = windowSessionProperty.Unmarshalling(parcel);
-    ASSERT_NE(nullptr, property);
-    ASSERT_NE(nullptr, result);
-}
-
-/**
  * @tc.name: CopyFrom
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
@@ -600,6 +581,317 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
     ASSERT_EQ(property->IsLayoutFullScreen(), false);
     property->SetIsLayoutFullScreen(true);
     ASSERT_EQ(property->IsLayoutFullScreen(), true);
+}
+
+/**
+ * @tc.name: GetWindowName
+ * @tc.desc: GetWindowName
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowName, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    std::string name = "test";
+    property->SetWindowName(name);
+    auto result = property->GetWindowName();
+    ASSERT_EQ(result, name);
+    delete property;
+}
+
+/**
+ * @tc.name: GetSessionInfo
+ * @tc.desc: GetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetSessionInfo, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    SessionInfo *info = new SessionInfo();
+    if (info == nullptr) {
+        return;
+    }
+    property->SetSessionInfo(*info);
+    auto result = property->GetSessionInfo();
+    ASSERT_EQ(property->GetRaiseEnabled(), true);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowRect
+ * @tc.desc: GetWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    Rect rect = {0, 0, 0, 0};
+    property->SetWindowRect(rect);
+    auto result = property->GetWindowRect();
+    ASSERT_EQ(result, rect);
+    delete property;
+}
+
+/**
+ * @tc.name: GetRequestRect
+ * @tc.desc: GetRequestRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetRequestRect, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    Rect requestRect = {0, 0, 0, 0};
+    property->SetWindowRect(requestRect);
+    auto result = property->GetWindowRect();
+    ASSERT_EQ(result, requestRect);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowType
+ * @tc.desc: GetWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowType, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    WindowType type = WindowType::APP_WINDOW_BASE;
+    property->SetWindowType(type);
+    auto result = property->GetWindowType();
+    ASSERT_EQ(result, type);
+    delete property;
+}
+
+/**
+ * @tc.name: GetDisplayId
+ * @tc.desc: GetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetDisplayId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    DisplayId displayId = 1;
+    property->SetDisplayId(displayId);
+    auto result = property->GetDisplayId();
+    ASSERT_EQ(result, displayId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetPersistentId
+ * @tc.desc: GetPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetPersistentId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    int32_t persistentId = 1;
+    property->SetPersistentId(persistentId);
+    auto result = property->GetPersistentId();
+    ASSERT_EQ(result, persistentId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetParentPersistentId
+ * @tc.desc: GetParentPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetParentPersistentId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    int32_t persistentId = 1;
+    property->SetParentPersistentId(persistentId);
+    auto result = property->GetParentPersistentId();
+    ASSERT_EQ(result, persistentId);
+    delete property;
+}
+
+/**
+ * @tc.name: SetTurnScreenOn
+ * @tc.desc: SetTurnScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool turnScreenOn = false;
+    property->SetTurnScreenOn(turnScreenOn);
+    ASSERT_EQ(property->turnScreenOn_, turnScreenOn);
+    delete property;
+}
+
+/**
+ * @tc.name: SetKeepScreenOn
+ * @tc.desc: SetKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool keepScreenOn = false;
+    property->SetKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(property->keepScreenOn_, keepScreenOn);
+    delete property;
+}
+
+/**
+ * @tc.name: SetAccessTokenId
+ * @tc.desc: SetAccessTokenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAccessTokenId, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    uint32_t accessTokenId = 1;
+    property->SetAccessTokenId(accessTokenId);
+    ASSERT_EQ(property->accessTokenId_, accessTokenId);
+    delete property;
+}
+
+/**
+ * @tc.name: GetWindowState
+ * @tc.desc: GetWindowState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowState, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    WindowState state = WindowState::STATE_INITIAL;
+    property->SetWindowState(state);
+    auto result = property->GetWindowState();
+    ASSERT_EQ(result, state);
+    delete property;
+}
+
+/**
+ * @tc.name: SetSystemPrivacyMode02
+ * @tc.desc: SetSystemPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode02, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool isSystemPrivate = false;
+    property->SetSystemPrivacyMode(isSystemPrivate);
+    ASSERT_EQ(property->isSystemPrivacyMode_, isSystemPrivate);
+    delete property;
+}
+
+/**
+ * @tc.name: SetTokenState02
+ * @tc.desc: SetTokenState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool hasToken = false;
+    property->SetTokenState(hasToken);
+    ASSERT_EQ(property->tokenState_, hasToken);
+    delete property;
+}
+
+/**
+ * @tc.name: MarshallingTouchHotAreas
+ * @tc.desc: MarshallingTouchHotAreas test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    for (int i = 0; i < 13; i++) {
+        struct Rect rect[i];
+        property->touchHotAreas_.push_back(rect[i]);
+    }
+    bool result = property->MarshallingTouchHotAreas(parcel);
+    ASSERT_EQ(result, false);
+    delete property;
+}
+
+/**
+ * @tc.name: UnmarshallingPiPTemplateInfo02
+ * @tc.desc: UnmarshallingPiPTemplateInfo test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    property->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), false);
+    delete property;
+}
+
+/**
+ * @tc.name: MarshallingPiPTemplateInfo
+ * @tc.desc: MarshallingPiPTemplateInfo test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    property->type_ = WindowType::WINDOW_TYPE_PIP;
+    for (int i = 0; i < 10; i++) {
+        property->pipTemplateInfo_.controlGroup.push_back(i);
+    }
+    bool result = property->MarshallingPiPTemplateInfo(parcel);
+    ASSERT_EQ(result, false);
+    delete property;
 }
 } // namespace
 } // namespace Rosen
