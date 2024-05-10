@@ -520,9 +520,9 @@ sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
-    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     GetDefaultScreenId();
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     if (screenSession) {
         return screenSession->ConvertToDisplayInfo();
     } else {
