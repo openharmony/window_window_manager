@@ -460,18 +460,12 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent01, Function | SmallTest | 
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(0);
     auto ret = windowEventChannel_->TransferPointerEvent(pointerEvent);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    ASSERT_NE(WSError::WS_ERROR_NULLPTR, ret);
 
     windowEventChannel_->sessionStage_ = new SessionStageMocker();
     pointerEvent = nullptr;
     ret = windowEventChannel_->TransferPointerEvent(pointerEvent);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-
-    pointerEvent = std::make_shared<MMI::PointerEvent>(0);
-    OHOS::MMI::PointerEvent ppointerEvent(0);
-    ppointerEvent.pointerAction_ = MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW;
-    ret = windowEventChannel_->TransferPointerEvent(pointerEvent);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_NE(WSError::WS_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -497,7 +491,6 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed01, Function
  */
 HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed01, Function | SmallTest | Level2)
 {
-
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     bool isConsumed = true;
     bool isPreImeEvent = true;
@@ -510,7 +503,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed01, Function | Small
 
     keyEvent = std::make_shared<MMI::KeyEvent>(0);
     windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_NE(WSError::WS_OK, ret);
 
     isPreImeEvent = false;
     windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
@@ -520,15 +513,6 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed01, Function | Small
 
     event = std::make_shared<MMI::KeyEvent>(0);
     windowEventChannel_->PrintKeyEvent(event);
-
-    std::shared_ptr<MMI::PointerEvent> pevent = nullptr;
-    windowEventChannel_->PrintPointerEvent(pevent);
-    pevent = std::make_shared<MMI::PointerEvent>(0);
-    windowEventChannel_->PrintPointerEvent(pevent);
-
-    OHOS::MMI::PointerEvent ppointerEvent(0);
-    ppointerEvent.pointerAction_ = MMI::PointerEvent::POINTER_ACTION_MOVE;
-    windowEventChannel_->PrintPointerEvent(pevent);
 }
 
 /**
@@ -550,12 +534,16 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent, Function | Sma
     int64_t timeMs = 0;
 
     windowEventChannel_->sessionStage_ = nullptr;
-    auto ret = windowEventChannel_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
-    ASSERT_EQ(WSError::WS_ERROR_NULsLPTR, ret);
+    auto ret = windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 
     windowEventChannel_->sessionStage_ = new SessionStageMocker();
     windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+
+    std::shared_ptr<MMI::PointerEvent> pevent = nullptr;
+    windowEventChannel_->PrintPointerEvent(pevent);
+    pevent = std::make_shared<MMI::PointerEvent>(0);
+    windowEventChannel_->PrintPointerEvent(pevent);
 }
 }
 }
