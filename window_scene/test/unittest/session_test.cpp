@@ -3420,8 +3420,8 @@ HWTEST_F(WindowSessionTest, SetOffset, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, ResetSessionConnectState, Function | SmallTest | Level2)
 {
-    session->ResetSessionConnectState();
-    ASSERT_EQ(session->state_, SessionState::STATE_DISCONNECT);
+    session_->ResetSessionConnectState();
+    ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
 }
 }
 } // namespace Rosen
