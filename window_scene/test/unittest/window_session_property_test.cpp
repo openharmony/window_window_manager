@@ -611,7 +611,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     Parcel parcel = Parcel();
-    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE)
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -627,12 +627,12 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->SetPersistentId(persistentId);
     property->SetFocusable(true);
     Parcel parcel = Parcel();
-    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE)
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
 
     WindowSessionProperty *newProperty = new (std::nothrow) WindowSessionProperty();
-    newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE)
-    ASSERT_EQ(property->GetPersistentId(), persistentId);
-    ASSERT_EQ(property->GetFocusable(), true);
+    newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
+    ASSERT_EQ(newProperty->GetFocusable(), true);
 }
 } // namespace
 } // namespace Rosen

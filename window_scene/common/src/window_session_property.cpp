@@ -914,7 +914,7 @@ void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
             SetForceHide(parcel.ReadBool());
             break;
         case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
-            UnmarshallingWindowMask(parcel, this)
+            UnmarshallingWindowMask(parcel, this);
             break;
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
             SetTopmost(parcel.ReadBool());
