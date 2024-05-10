@@ -656,6 +656,12 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d densityValue:%{public}f", isFollowHost, densityValue);
 
+    if (!isFollowHost && !isDensityFollowHost_)
+    {
+        TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost is false and not change");
+        return WSError::WS_OK;
+    }
+
     if (isFollowHost) {
         if (std::islessequal(densityValue, 0.0f)) {
             TLOGE(WmsLogTag::WMS_UIEXT, "densityValue is invalid");
@@ -667,12 +673,8 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
             return WSError::WS_OK;
         }
         hostDensityValue_ = densityValue;
-    } else {
-        if (isDensityFollowHost_ == isFollowHost) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost not change");
-            return WSError::WS_OK;
-        }
     }
+
     isDensityFollowHost_ = isFollowHost;
 
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
