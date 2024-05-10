@@ -28,10 +28,8 @@ public:
     void ReportPiPStartWindow(int32_t source, int32_t templateType, int32_t isSuccess, const std::string &errorReason);
     void ReportPiPStopWindow(int32_t source, int32_t templateType, int32_t isSuccess, const std::string &errorReason);
     void ReportPiPActionEvent(int32_t templateType, const std::string &actionEvent);
-    void ReportPiPResize(int32_t scaleLevel, int32_t windowWidth, int32_t windowHeight);
     void ReportPiPRatio(int32_t windowWidth, int32_t windowHeight);
     void ReportPiPRestore();
-    void ReportPiPMove();
 private:
     std::string packageName_;
 };

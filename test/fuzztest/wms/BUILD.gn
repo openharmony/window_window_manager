@@ -20,6 +20,11 @@ group("fuzztest") {
     "windowagent_fuzzer:fuzztest",
     "windowipc_fuzzer:fuzztest",
     "windowmanager_fuzzer:fuzztest",
+    "windowmanageragentstubbar_fuzzer:fuzztest",
+    "windowmanageragentstubfoucs_fuzzer:fuzztest",
+    "windowmanageragentstubstate_fuzzer:fuzztest",
+    "windowmanageragentstubstatus_fuzzer:fuzztest",
+    "windowmanageragentstubtype_fuzzer:fuzztest",
     "windowscene_fuzzer:fuzztest",
     "windowutilmath_fuzzer:fuzztest",
   ]
