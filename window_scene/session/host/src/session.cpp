@@ -1006,8 +1006,7 @@ WSError Session::ResetSessionConnectState()
     TLOGI(WmsLogTag::WMS_LIFE,
         "ResetSessionState, id: %{public}d, state: %{public}u",
         GetPersistentId(), GetSessionState());
-    UpdateSessionState(SessionState::STATE_BACKGROUND);
-    UpdateSessionState(SessionState::STATE_DISCONNECT);
+    SetSessionState(SessionState::STATE_DISCONNECT);
     return WSError::WS_OK;
 }
 
