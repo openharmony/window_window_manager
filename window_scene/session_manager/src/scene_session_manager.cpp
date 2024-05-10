@@ -1426,6 +1426,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     auto sessionInfo = scnSession->GetSessionInfo();
     sptr<ISession> iSession(scnSession);
     abilitySessionInfo->sessionToken = iSession->AsObject();
+    abilitySessionInfo->identityToken = std::to_string(std::chrono::time_point_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now()).time_since_epoch().count());
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->sessionName = SessionUtils::ConvertSessionName(sessionInfo.bundleName_,
         sessionInfo.abilityName_, sessionInfo.moduleName_, sessionInfo.appIndex_);
@@ -1561,7 +1563,8 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& scnSession)
 
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo)
 {
-    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo);
+    bool isColdStart = false;
+    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart);
 }
 
 int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& scnSession, bool visibility)
@@ -1603,17 +1606,18 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetModuleName().c_str(),
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
+    bool isColdStart = false;
     if (systemConfig_.backgroundswitch == false) {
         TLOGI(WmsLogTag::WMS_MAIN, "begin call StartUIAbility: %{public}d isSystem: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "background switch: true");
         if (isNewActive || scnSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
             scnSession->GetSessionState() == SessionState::STATE_END) {
             TLOGI(WmsLogTag::WMS_MAIN, "begin StartUIAbility: %{public}d isSystem: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
         } else {
             scnSession->NotifySessionForeground(1, true);
         }
@@ -1632,6 +1636,10 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
         }
+    }
+    if (isColdStart) {
+        scnSession->SetClientIdentityToken(scnSessionInfo->identityToken);
+        scnSession->ResetSessionConnectState();
     }
     return WSError::WS_OK;
 }

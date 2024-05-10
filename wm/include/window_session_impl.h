@@ -63,7 +63,7 @@ public:
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "");
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
@@ -288,6 +288,7 @@ protected:
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    std::string identityToken_ = { "" };
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
