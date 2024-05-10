@@ -261,12 +261,12 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 {
     if (property_ == nullptr) {
-        WLOGE("[WMSRecover] property_ is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "property_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto persistentId = property_->GetPersistentId();
 
-    WLOGI("[WMSRecover] RecoverAndConnectSpecificSession windowName = %{public}s, windowMode = %{public}u, "
+    TLOGI(WmsLogTag::WMS_RECOVER, "windowName = %{public}s, windowMode = %{public}u, "
         "windowType = %{public}u, persistentId = %{public}d, windowState = %{public}d", GetWindowName().c_str(),
         property_->GetWindowMode(), property_->GetWindowType(), persistentId, state_);
 
@@ -283,10 +283,10 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
     const WindowType type = GetType();
     if (WindowHelper::IsSubWindow(type)) { // sub window
-        WLOGFD("[WMSRecover] SubWindow");
+        TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            WLOGFE("[WMSRecover] parentSession is null");
+            TLOGE(WmsLogTag::WMS_RECOVER, "parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }
     }
@@ -294,12 +294,13 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
     if (session == nullptr) {
-        WLOGFE("[WMSRecover] Recover failed, session is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     hostSession_ = session;
 
-    WLOGFI("[WMSRecover] RecoverAndConnectSpecificSession over, windowName = %{public}s, persistentId = %{public}d",
+    TLOGI(WmsLogTag::WMS_RECOVER,
+        "over, windowName = %{public}s, persistentId = %{public}d",
         GetWindowName().c_str(), GetPersistentId());
     return WMError::WM_OK;
 }
@@ -316,13 +317,13 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
         info.bundleName_ = property_->GetSessionInfo().bundleName_;
     } else {
-        WLOGE("[WMSRecover] property_ or context_ or abilityContext is null, recovered session failed");
+        TLOGE(WmsLogTag::WMS_RECOVER, "property_ or context_ or abilityContext is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
     property_->SetSessionInfo(info);
     property_->SetWindowState(state_);
-    WLOGI(
-        "[WMSRecover] Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
+    TLOGI(WmsLogTag::WMS_RECOVER,
+        "Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, persistentId=%{public}d, windowState=%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
         GetPersistentId(), state_);
@@ -334,11 +335,11 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
     if (session == nullptr) {
-        WLOGE("[WMSRecover] session is null, recovered session failed");
+        TLOGE(WmsLogTag::WMS_RECOVER, "session is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
     RecoverSessionListener();
-    WLOGI("[WMSRecover] Recover and reconnect sceneSession successful");
+    TLOGI(WmsLogTag::WMS_RECOVER, "Recover and reconnect sceneSession successful");
     hostSession_ = session;
     return static_cast<WMError>(ret);
 }
@@ -551,11 +552,11 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
 {
-    WLOGFD("[WMSRecover] persistentId = %{public}d, isSpecificSession = %{public}s",
+    TLOGD(WmsLogTag::WMS_RECOVER, "persistentId = %{public}d, isSpecificSession = %{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
 
     if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        WLOGFI("[WMSRecover] input method window does not need to recover");
+        TLOGI(WmsLogTag::WMS_RECOVER, "input method window does not need to recover");
         return;
     }
     if (property_ != nullptr && property_->GetCollaboratorType() != CollaboratorType::DEFAULT_TYPE) {
@@ -568,18 +569,18 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
     auto callbackFunc = [weakThis, isSpecificSession] {
         auto promoteThis = weakThis.promote();
         if (promoteThis == nullptr) {
-            WLOGFW("[WMSRecover] promoteThis is nullptr");
+            TLOGW(WmsLogTag::WMS_RECOVER, "promoteThis is nullptr");
             return WMError::WM_ERROR_NULLPTR;
         }
         if (promoteThis->state_ == WindowState::STATE_DESTROYED) {
-            WLOGFW("[WMSRecover] windowState is STATE_DESTROYED, no need to recover");
+            TLOGW(WmsLogTag::WMS_RECOVER, "windowState is STATE_DESTROYED, no need to recover");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
 
-        WLOGFD("[WMSRecover] Recover session over, ret = %{public}d", ret);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Recover session over, ret = %{public}d", ret);
         return ret;
     };
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);

@@ -234,7 +234,7 @@ bool WindowAdapter::InitWMSProxy()
 void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc)
 {
-    WLOGFI("[WMSRecover] RegisterSessionRecoverCallbackFunc persistentId = %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_RECOVER, "RegisterSessionRecoverCallbackFunc persistentId = %{public}d", persistentId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
@@ -258,7 +258,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 {
     ClearWindowAdapter();
     if (!InitSSMProxy()) {
-        WLOGFE("[WMSRecover] InitSSMProxy failed");
+        TLOGE(WmsLogTag::WMS_RECOVER, "InitSSMProxy failed");
         return;
     }
 
@@ -266,6 +266,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (const auto& it : sessionRecoverCallbackFuncMap_) {
+        TLOGD(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32, it.first);
         auto ret = it.second();
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32 " is error",
