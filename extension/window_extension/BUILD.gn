@@ -35,7 +35,7 @@ ohos_shared_library("libwindow_extension") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -94,7 +94,7 @@ ohos_shared_library("window_extension_module") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [ "src/window_extension_module_loader.cpp" ]

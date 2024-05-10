@@ -485,6 +485,7 @@ struct AppWindowSceneConfig {
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+    bool isRightPowerButton_ = true;
 };
 
 struct SessionEventParam {

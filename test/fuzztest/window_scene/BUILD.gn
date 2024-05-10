@@ -17,6 +17,9 @@ group("fuzztest") {
   deps = [
     "scenesessionmanager_fuzzer:fuzztest",
     "screensessionmanager_fuzzer:fuzztest",
+    "screensessionmgrstubagent_fuzzer:fuzztest",
+    "screensessionmgrstubstate_fuzzer:fuzztest",
+    "screensessionmgrstubwake_fuzzer:fuzztest",
     "sessioninterface_fuzzer:fuzztest",
   ]
 }

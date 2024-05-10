@@ -33,7 +33,7 @@ ohos_shared_library("libwindow_extension_client") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   install_enable = true

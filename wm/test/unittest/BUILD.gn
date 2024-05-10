@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":wm_extension_window_impl_test",
+    ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
     ":wm_pattern_detach_callback_proxy_test",
     ":wm_pattern_detach_callback_test",
@@ -153,6 +154,19 @@ ohos_unittest("wm_window_effect_test") {
   module_out_path = module_out_path
 
   sources = [ "window_effect_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_gtx_input_event_sender_test") {
+  module_out_path = module_out_path
+
+  sources = [ "gtx_input_event_sender_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
