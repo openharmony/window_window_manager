@@ -183,7 +183,7 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         return false;
     }
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily");
+        TLOGW(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily, eventId is %{public}d", pointerEvent->GetId());
         pointerEvent->MarkProcessed();
         return false;
     }

@@ -237,11 +237,11 @@ void SessionManager::RegisterSMSRecoverListener()
 {
     if (!isRecoverListenerRegistered_) {
         if (!mockSessionManagerServiceProxy_) {
-            WLOGFE("[WMSRecover] mockSessionManagerServiceProxy_ is null");
+            TLOGE(WmsLogTag::WMS_RECOVER, "mockSessionManagerServiceProxy_ is null");
             return;
         }
         isRecoverListenerRegistered_ = true;
-        WLOGFI("[WMSRecover] Register recover listener");
+        TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener");
         smsRecoverListener_ = new SessionManagerServiceRecoverListener();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
@@ -264,9 +264,9 @@ void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerServ
     
     {
         std::lock_guard<std::recursive_mutex> lock(recoverMutex_);
-        WLOGFI("[WMSRecover] Run recover");
+        TLOGI(WmsLogTag::WMS_RECOVER, "Run recover");
         if (windowManagerRecoverFunc_ != nullptr) {
-            WLOGFD("[WMSRecover] windowManagerRecover");
+            TLOGD(WmsLogTag::WMS_RECOVER, "windowManagerRecover");
             windowManagerRecoverFunc_();
         }
     }
