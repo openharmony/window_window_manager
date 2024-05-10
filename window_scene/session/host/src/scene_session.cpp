@@ -92,10 +92,13 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
-        if ((!identityToken.empty() && !session->clientIdentityToken_.empty()) && identityToken != session->clientIdentityToken_) {
+        if ((!identityToken.empty() && !session->clientIdentityToken_.empty()) &&
+            identityToken != session->clientIdentityToken_) {
             TLOGW(WmsLogTag::WMS_LIFE,
-                "Identity Token vaildate failed, clientIdentityToken_: %{public}s, identityToken: %{public}s, bundleName: %{public}s",
-                session->clientIdentityToken_.c_str(), identityToken.c_str(), session->GetSessionInfo().bundleName_.c_str());
+                "Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+                "identityToken: %{public}s, bundleName: %{public}s",
+                session->clientIdentityToken_.c_str(), identityToken.c_str(),
+                session->GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
         session->connectedClientPid_ = pid;
@@ -141,8 +144,8 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != 0 && callingPid != connectedClientPid_) {
             TLOGW(WmsLogTag::WMS_LIFE,
-            "Foreground failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-            connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Foreground failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
@@ -187,8 +190,8 @@ WSError SceneSession::Background(bool isFromClient)
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != 0 && callingPid != connectedClientPid_) {
             TLOGW(WmsLogTag::WMS_LIFE,
-            "Background failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-            connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Background failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
@@ -256,8 +259,8 @@ WSError SceneSession::Disconnect(bool isFromClient)
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != 0 && callingPid != connectedClientPid_) {
             TLOGW(WmsLogTag::WMS_LIFE,
-            "Disconnect failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-            connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Disconnect failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
