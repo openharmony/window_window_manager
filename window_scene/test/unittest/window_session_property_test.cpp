@@ -429,25 +429,6 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 }
 
 /**
- * @tc.name: Unmarshalling
- * @tc.desc: Unmarshalling test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
-{
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    Parcel parcel = Parcel();
-    WindowSessionProperty windowSessionProperty;
-    sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
-    if (keyboardLayoutParams == nullptr) {
-        return;
-    }
-    auto result = windowSessionProperty.Unmarshalling(parcel);
-    ASSERT_NE(nullptr, property);
-    ASSERT_NE(nullptr, result);
-}
-
-/**
  * @tc.name: CopyFrom
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
@@ -815,6 +796,101 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowState, Function | SmallTest | Level
     property->SetWindowState(state);
     auto result = property->GetWindowState();
     ASSERT_EQ(result, state);
+    delete property;
+}
+
+/**
+ * @tc.name: SetSystemPrivacyMode02
+ * @tc.desc: SetSystemPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode02, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool isSystemPrivate = false;
+    property->SetSystemPrivacyMode(isSystemPrivate);
+    ASSERT_EQ(property->isSystemPrivacyMode_, isSystemPrivate);
+    delete property;
+}
+
+/**
+ * @tc.name: SetTokenState02
+ * @tc.desc: SetTokenState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool hasToken = false;
+    property->SetTokenState(hasToken);
+    ASSERT_EQ(property->tokenState_, hasToken);
+    delete property;
+}
+
+/**
+ * @tc.name: MarshallingTouchHotAreas
+ * @tc.desc: MarshallingTouchHotAreas test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    for (int i = 0; i < 13; i++) {
+        struct Rect rect[i];
+        property->touchHotAreas_.push_back(rect[i]);
+    }
+    bool result = property->MarshallingTouchHotAreas(parcel);
+    ASSERT_EQ(result, false);
+    delete property;
+}
+
+/**
+ * @tc.name: UnmarshallingPiPTemplateInfo02
+ * @tc.desc: UnmarshallingPiPTemplateInfo test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    property->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), false);
+    delete property;
+}
+
+/**
+ * @tc.name: MarshallingPiPTemplateInfo
+ * @tc.desc: MarshallingPiPTemplateInfo test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    property->type_ = WindowType::WINDOW_TYPE_PIP;
+    for (int i = 0; i < 10; i++) {
+        property->pipTemplateInfo_.controlGroup.push_back(i);
+    }
+    bool result = property->MarshallingPiPTemplateInfo(parcel);
+    ASSERT_EQ(result, false);
     delete property;
 }
 } // namespace
