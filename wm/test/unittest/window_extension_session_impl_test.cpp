@@ -590,13 +590,13 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
 */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowExtensionSessionImpl> window = new (std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
 
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    displayInfo->SetVirtualPixelRatio(3.25);
+    displayInfo->SetVirtualPixelRatio(3.25f);
     window->isDensityFollowHost_ = true;
     window->hostDensityValue_ = 2.0f;
     ASSERT_EQ(window->hostDensityValue_, window->GetVirtualPixelRatio(displayInfo));
@@ -609,7 +609,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | Smal
 */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowExtensionSessionImpl> window = new (std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
@@ -629,7 +629,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | Smal
 */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowExtensionSessionImpl> window = new (std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
