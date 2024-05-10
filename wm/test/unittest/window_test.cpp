@@ -2290,7 +2290,8 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     uint32_t rate = 120;
-    window->FlushFrameRate(rate);
+    bool isAnimatorStopped = true;
+    window->FlushFrameRate(rate, isAnimatorStopped);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 

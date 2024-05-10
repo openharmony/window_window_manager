@@ -2562,14 +2562,14 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
     return vsyncStation_->GetVSyncPeriod();
 }
 
-void WindowSessionImpl::FlushFrameRate(uint32_t rate)
+void WindowSessionImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate);
+    vsyncStation_->FlushFrameRate(rate, isAnimatorStopped);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
