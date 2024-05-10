@@ -1003,7 +1003,9 @@ WSError Session::Background(bool isFromClient)
 
 WSError Session::ResetSessionConnectState()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "ResetSessionState, id: %{public}d, state: %{public}u", GetPersistentId(), GetSessionState());
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "ResetSessionState, id: %{public}d, state: %{public}u",
+        GetPersistentId(), GetSessionState());
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     return WSError::WS_OK;

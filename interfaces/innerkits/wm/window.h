@@ -486,7 +486,8 @@ public:
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode, const std::string& identityToken = "");
+        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
+        const std::string& identityToken = "");
 
     /**
      * @brief create pip window with session

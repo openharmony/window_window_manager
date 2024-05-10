@@ -161,7 +161,8 @@ HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
     DisplayId displayId = 1;
     sptr<IWindowLifeCycle> listener = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
+        scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
 }
 
 

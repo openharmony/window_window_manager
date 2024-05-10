@@ -166,7 +166,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = new WindowSessionProperty();
     }
-    const WSError& errCode = Foreground(property);
+    bool isFromClient = data.ReadBool();
+    const WSError& errCode = Foreground(property, isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -174,7 +175,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    const WSError& errCode = Background();
+    bool isFromClient = data.ReadBool();
+    const WSError& errCode = Background(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

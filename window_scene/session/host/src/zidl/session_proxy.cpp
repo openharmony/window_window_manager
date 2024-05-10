@@ -54,6 +54,10 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFr
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteBool(isFromClient)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
         data, reply, option) != ERR_NONE) {
@@ -73,6 +77,11 @@ WSError SessionProxy::Background(bool isFromClient)
         WLOGFE("[WMSCom] WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(isFromClient)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
         data, reply, option) != ERR_NONE) {
