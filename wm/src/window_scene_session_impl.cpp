@@ -3243,11 +3243,6 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     const sptr<IKeyboardPanelInfoChangeListener>& listener)
 {
-    if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Listeners_ not registered by inputMethod id: %{public}d",
-            GetPersistentId());
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     std::lock_guard<std::mutex> lockListener(keyboardPanelInfoChangeListenerMutex_);
     if (keyboardPanelInfoChangeListeners_ == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Register keyboard Panel info change listener id: %{public}d",
