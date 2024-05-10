@@ -80,12 +80,12 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
     return 0;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate)
+void VsyncStation::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
         WLOGD("VsyncStation::FlushFrameRate %{public}d, linkerID = %{public}" PRIu64, rate, frameRateLinker_->GetId());
         FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
-        frameRateLinker_->UpdateFrameRateRange(range);
+        frameRateLinker_->UpdateFrameRateRange(range, isAnimatorStopped);
     }
 }
 
@@ -96,8 +96,8 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             WLOGI("VsyncStation::FlushFrameRateImme %{public}d, linkerID = %{public}" PRIu64,
                 range.preferred_, frameRateLinker_->GetId());
-            frameRateLinker_->UpdateFrameRateRange(range);
-            frameRateLinker_->UpdateFrameRateRangeImme(range);
+            frameRateLinker_->UpdateFrameRateRange(range, true);
+            frameRateLinker_->UpdateFrameRateRangeImme(range, true);
         }
         frameRateLinker_->SetEnable(enabled);
     }

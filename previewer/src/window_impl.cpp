@@ -640,7 +640,7 @@ int64_t WindowImpl::GetVSyncPeriod()
     return 0;
 }
 
-void WindowImpl::FlushFrameRate(uint32_t rate)
+void WindowImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     return;
 }
