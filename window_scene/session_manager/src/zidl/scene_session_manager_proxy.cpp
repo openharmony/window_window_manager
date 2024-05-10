@@ -264,7 +264,7 @@ WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSession
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (property) {
-        if (!data.WriteBool(true) || !property->Write(date, action)) {
+        if (!data.WriteBool(true) || !property->Write(data, action)) {
             WLOGFE("Write property failed");
             return WMError::WM_ERROR_IPC_FAILED;
         }
