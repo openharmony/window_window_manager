@@ -81,8 +81,6 @@ WSError SessionProxy::Background(bool isFromClient)
         TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
-
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("[WMSCom] SendRequest failed");
