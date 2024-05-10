@@ -558,10 +558,13 @@ WSError SceneSession::NotifyClientToUpdateRectTask(
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
             const auto& keyboardSession = session->GetKeyboardSession();
             FixKeyboardPositionByKeyboardPanel(session, keyboardSession);
-            ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, session->reason_, rsTransaction);
+            if (keyboardSession != nullptr) {
+                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, session->reason_, rsTransaction);
+            }
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             FixKeyboardPositionByKeyboardPanel(session->GetKeyboardPanelSession(), session);
+            return WSError::WS_OK;
         }
     }
 
@@ -2126,6 +2129,12 @@ void SceneSession::SetSystemTouchable(bool touchable)
 {
     Session::SetSystemTouchable(touchable);
     NotifyAccessibilityVisibilityChange();
+    if (isKeyboardPanelEnabled_ && GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        const auto& keyboardPanel = GetKeyboardPanelSession();
+        if (keyboardPanel != nullptr) {
+            keyboardPanel->SetSystemTouchable(touchable);
+        }
+    }
 }
 
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
