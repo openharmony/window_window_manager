@@ -610,9 +610,12 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
 HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    Parcel parcel = Parcel();
-    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
-    ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
+    if (property != nullptr) {
+        Parcel parcel = Parcel();
+        property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+        ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
+        delete property;
+    }
 }
 
 /**
@@ -622,17 +625,21 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    int32_t persistentId = 2;
-    property->SetPersistentId(persistentId);
-    property->SetFocusable(true);
-    Parcel parcel = Parcel();
-    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-
+    WindowSessionProperty *oldProperty = new (std::nothrow) WindowSessionProperty();
     WindowSessionProperty *newProperty = new (std::nothrow) WindowSessionProperty();
-    newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-    ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
-    ASSERT_EQ(newProperty->GetFocusable(), true);
+    if ((oldProperty != nullptr) && (newProperty != nullptr)) {
+        int32_t persistentId = 2;
+        oldProperty->SetPersistentId(persistentId);
+        oldProperty->SetFocusable(true);
+        Parcel parcel = Parcel();
+        oldProperty->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+
+        newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
+        ASSERT_EQ(newProperty->GetFocusable(), true);
+        delete oldProperty;
+        delete newProperty;
+    }
 }
 } // namespace
 } // namespace Rosen
