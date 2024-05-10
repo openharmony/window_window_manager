@@ -36,7 +36,7 @@ public:
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
-            WLOGFE("[WMSRecover] InterfaceToken check failed");
+            TLOGE(WmsLogTag::WMS_RECOVER, "InterfaceToken check failed");
             return -1;
         }
         auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
@@ -54,7 +54,7 @@ public:
                 break;
             }
             default:
-                WLOGFW("[WMSRecover] unknown transaction code %{public}d", code);
+                TLOGW(WmsLogTag::WMS_RECOVER, "unknown transaction code %{public}d", code);
                 return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
         return 0;
@@ -85,7 +85,7 @@ public:
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        WLOGFI("[WMSRecover] RegisterSessionListener");
+        TLOGI(WmsLogTag::WMS_RECOVER, "called");
         auto ret = SceneSessionManagerLiteProxy::RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -95,7 +95,7 @@ public:
     }
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        WLOGFI("[WMSRecover] UnRegisterSessionListener");
+        TLOGI(WmsLogTag::WMS_RECOVER, "called");
         auto ret = SceneSessionManagerLiteProxy::UnRegisterSessionListener(listener);
         SessionManagerLite::GetInstance().DeleteSessionListener(listener);
         return ret;
@@ -163,7 +163,7 @@ void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& liste
             return (item && item->AsObject() == listener->AsObject());
         });
     if (it != sessionListeners_.end()) {
-        WLOGFW("[WMSRecover] listener was already added, do not add again");
+        TLOGW(WmsLogTag::WMS_RECOVER, "listener was already added, do not add again");
         return;
     }
     sessionListeners_.emplace_back(listener);
@@ -200,16 +200,16 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
 void SessionManagerLite::ReregisterSessionListener() const
 {
     if (sceneSessionManagerLiteProxy_ == nullptr) {
-        WLOGFE("[WMSRecover] sceneSessionManagerLiteProxy_ is null");
+        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy_ is null");
         return;
     }
 
-    WLOGFI("[WMSRecover] RecoverSessionListeners, listener count = %{public}" PRIu64,
+    TLOGI(WmsLogTag::WMS_RECOVER, "RecoverSessionListeners, listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
-            WLOGFW("[WMSRecover] RegisterSessionListener failed, ret = %{public}" PRId32, ret);
+            TLOGW(WmsLogTag::WMS_RECOVER, "RegisterSessionListener failed, ret = %{public}" PRId32, ret);
         }
     }
 }

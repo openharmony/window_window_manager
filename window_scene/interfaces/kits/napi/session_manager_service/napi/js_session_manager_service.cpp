@@ -60,7 +60,7 @@ public:
 private:
     napi_value OnInitSessionManagerService(napi_env env, napi_callback_info info)
     {
-        WLOGI("[WMSRecover] JsSessionManagerService: OnInitSessionManagerService is called");
+        TLOGI(WmsLogTag::WMS_SCB, "called");
         if (SessionManagerService::GetInstance() != nullptr) {
             SessionManagerService::GetInstance()->Init();
         }
@@ -69,7 +69,7 @@ private:
 
     napi_value OnNotifySceneBoardAvailable(napi_env env, napi_callback_info info)
     {
-        WLOGI("[WMSRecover] JsSessionManagerService: OnNotifySceneBoardAvailable is called");
+        TLOGI(WmsLogTag::WMS_RECOVER, "called");
         if (SessionManagerService::GetInstance() != nullptr) {
             SessionManagerService::GetInstance()->NotifySceneBoardAvailable();
         }
