@@ -448,6 +448,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
 }
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
