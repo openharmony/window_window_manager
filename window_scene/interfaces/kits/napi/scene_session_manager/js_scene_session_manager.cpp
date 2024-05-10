@@ -1010,13 +1010,13 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     auto errCode = std::make_shared<int32_t>(static_cast<int32_t>(WSErrorCode::WS_OK));
-    auto abilityInfos = std::make_shared<std::vector<AppExecFwk::AbilityInfo>>();
-    auto execute = [obj = this, want, userId, infos = abilityInfos, errCode] () {
+    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
+    auto execute = [obj = this, want, userId, infos = scbAbilityInfos, errCode] () {
         auto code = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetAllAbilityInfos(want, userId, *infos));
         *errCode = static_cast<int32_t>(code);
     };
-    auto complete = [obj = this, errCode, infos = abilityInfos]
+    auto complete = [obj = this, errCode, infos = scbAbilityInfos]
         (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*errCode != static_cast<int32_t>(WSErrorCode::WS_OK)) {
             std::string errMsg = "invalid params can not get All AbilityInfos!";
@@ -1034,15 +1034,28 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
 }
 
 napi_value JsSceneSessionManager::CreateAbilityInfos(napi_env env,
-    const std::vector<AppExecFwk::AbilityInfo>& abilityInfos)
+    const std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, abilityInfos.size(), &arrayValue);
+    napi_create_array_with_length(env, scbAbilityInfos.size(), &arrayValue);
     auto index = 0;
-    for (const auto& abilityInfo : abilityInfos) {
-        napi_set_element(env, arrayValue, index++, CreateAbilityItemInfo(env, abilityInfo));
+    for (const auto& scbAbilityInfo : scbAbilityInfos) {
+        napi_set_element(env, arrayValue, index++, CreateSCBAbilityInfo(env, scbAbilityInfo));
     }
     return arrayValue;
+}
+
+napi_value JsSceneSessionManager::CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("CreateObject failed");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "abilityItemInfo", CreateAbilityItemInfo(env, scbAbilityInfo.abilityInfo_));
+    napi_set_named_property(env, objValue, "sdkVersion", CreateJsValue(env, scbAbilityInfo.sdkVersion_));
+    return objValue;
 }
 
 napi_value JsSceneSessionManager::CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
