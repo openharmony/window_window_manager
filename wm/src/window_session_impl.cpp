@@ -335,7 +335,7 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
 }
 
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
     return WMError::WM_OK;
 }
@@ -354,7 +354,8 @@ WMError WindowSessionImpl::Connect()
         property_->SetTokenState(true);
     }
     auto ret = hostSession_->Connect(
-        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
+        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_,
+        token, -1, -1, identityToken_);
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
     return static_cast<WMError>(ret);

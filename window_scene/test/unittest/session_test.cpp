@@ -3412,6 +3412,17 @@ HWTEST_F(WindowSessionTest, SetOffset, Function | SmallTest | Level2)
     session_->SetNotifySystemSessionKeyEventFunc(nullptr);
     ASSERT_EQ(session_->GetBufferAvailable(), false);
 }
+
+/**
+ * @tc.name: ResetSessionConnectState
+ * @tc.desc: ResetSessionConnectState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, ResetSessionConnectState, Function | SmallTest | Level2)
+{
+    session->ResetSessionConnectState();
+    ASSERT_EQ(session->state_, SessionState::STATE_DISCONNECT);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

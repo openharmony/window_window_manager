@@ -237,8 +237,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     } else {
         WLOGI("accept token is nullptr");
     }
+    std::string identityToken = data.ReadString();
     SystemSessionConfig systemConfig;
-    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token,
+        -1, -1, identityToken);
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());

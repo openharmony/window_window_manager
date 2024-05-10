@@ -105,6 +105,36 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: CreateWindowAndDestroy01
+ * @tc.desc: Create window and destroy window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy02, Function | SmallTest | Level2)
+{
+    std::string identityToken = "testToken";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("CreateWindow01");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, sessionm, identityToken));
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session, identityToken));
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session, identityToken));
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    // session is null
+    window = new WindowSessionImpl(option);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+
+    window = new WindowSessionImpl(option);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session, identityToken));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+}
+
+/**
  * @tc.name: Connect01
  * @tc.desc: Connect session
  * @tc.type: FUNC
