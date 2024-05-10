@@ -5526,7 +5526,7 @@ WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector
 }
 
 WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
-    std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+    std::vector<SCBAbilityInfo> &scbAbilityInfos)
 {
     if (bundleMgr_ == nullptr) {
         WLOGFE("bundleMgr_ is nullptr");
@@ -5560,11 +5560,11 @@ WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t
         WLOGFE("invalid want:%{public}s", want.ToString().c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    return GetAbilityInfosFromBundleInfo(bundleInfos, abilityInfos);
+    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
 }
 
 WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-    std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+    std::vector<SCBAbilityInfo> &scbAbilityInfos)
 {
     if (bundleInfos.empty()) {
         WLOGFE("bundleInfos is empty");
@@ -5572,13 +5572,19 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
     }
     for (auto bundleInfo: bundleInfos) {
         auto hapModulesList = bundleInfo.hapModuleInfos;
+        auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
         if (hapModulesList.empty()) {
             WLOGFD("hapModulesList is empty");
             continue;
         }
         for (auto hapModule: hapModulesList) {
             auto abilityInfoList = hapModule.abilityInfos;
-            abilityInfos.insert(abilityInfos.end(), abilityInfoList.begin(), abilityInfoList.end());
+            for (auto abilityInfo : abilityInfoList) {
+                SCBAbilityInfo scbAbilityInfo;
+                scbAbilityInfo.abilityInfo_ = abilityInfo;
+                scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfos.push_back(scbAbilityInfo);
+            }
         }
     }
     return WSError::WS_OK;

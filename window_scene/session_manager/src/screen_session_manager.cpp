@@ -282,6 +282,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
         deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
     }
+    if (enableConfig.count("isRightPowerButton") != 0) {
+        bool isRightPowerButton = static_cast<bool>(enableConfig["isRightPowerButton"]);
+        TLOGD(WmsLogTag::DMS, "isRightPowerButton = %d", isRightPowerButton);
+        deviceScreenConfig_.isRightPowerButton_ = isRightPowerButton;
+    }
     ConfigureWaterfallDisplayCompressionParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
