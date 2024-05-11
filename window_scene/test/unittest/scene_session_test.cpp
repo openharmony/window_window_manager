@@ -3597,8 +3597,10 @@ HWTEST_F(SceneSessionTest, SetTemporarilyShowWhenLocked, Function | SmallTest | 
     info.bundleName_ = "SetTemporarilyShowWhenLocked";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetTemporarilyShowWhenLocked(true);
     bool isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, false);
+    sceneSession->SetTemporarilyShowWhenLocked(true);
+    isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
     ASSERT_EQ(isTemporarilyShowWhenLocked, true);
     sceneSession->SetTemporarilyShowWhenLocked(false);
     isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
