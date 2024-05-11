@@ -3337,7 +3337,8 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
 bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u， GetImmersiveModeEnabledState = %{public}u", GetWindowId(), enableImmersiveMode_);
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u， GetImmersiveModeEnabledState = %{public}u",
+        GetWindowId(), enableImmersiveMode_);
     return enableImmersiveMode_;
 }
 } // namespace Rosen
