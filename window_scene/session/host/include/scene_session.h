@@ -120,14 +120,15 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1) override;
+        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError Foreground(sptr<WindowSessionProperty> property) override;
-    WSError Background() override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
+    WSError Background(bool isFromClient = false) override;
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
+    void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
     virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
     virtual void BindKeyboardSession(sptr<SceneSession> session) {};
@@ -207,6 +208,7 @@ public:
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     WSRect GetRestoringRectForKeyboard() const;
+    std::string GetClientIdentityToken() const;
 
     bool IsVisible() const;
     bool IsDecorEnable() const;
@@ -346,6 +348,7 @@ private:
     WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
+    std::string clientIdentityToken_ = { "" };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

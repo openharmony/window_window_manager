@@ -33,7 +33,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
 } // namespace
 
-WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
+WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -54,6 +54,10 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteBool(isFromClient)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
         data, reply, option) != ERR_NONE) {
@@ -64,7 +68,7 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Background()
+WSError SessionProxy::Background(bool isFromClient)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -73,7 +77,10 @@ WSError SessionProxy::Background()
         WLOGFE("[WMSCom] WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteBool(isFromClient)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("[WMSCom] SendRequest failed");
@@ -159,7 +166,8 @@ WSError SessionProxy::Disconnect(bool isFromClient)
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+    const std::string& identityToken)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -196,6 +204,10 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             WLOGFE("Write abilityToken failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
+    }
+    if (!data.WriteString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write identityToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT),
         data, reply, option) != ERR_NONE) {
