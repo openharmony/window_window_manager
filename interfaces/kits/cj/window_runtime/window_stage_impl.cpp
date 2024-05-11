@@ -35,6 +35,10 @@ void CreateCjSubWindowArrayObject(std::vector<sptr<Window>> &vec, RetStruct &ret
             continue;
         }
         sptr<CJWindowImpl> windowImpl = CreateCjWindowObject(window);
+        if (windowImpl == nullptr) {
+            TLOGE(WmsLogTag::WMS_DIALOG, "[createCjSubWindowArrayObject] windowImpl is nullptr");
+            continue;
+        }
         windowList[ret.len] = windowImpl->GetID();
         ret.len += 1;
     }
@@ -54,6 +58,10 @@ int32_t CJWindowStageImpl::GetMainWindow(int64_t &windowId)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto windowImpl = CreateCjWindowObject(window);
+    if (windowImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[getMainWindow] windowImpl is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
     windowId = windowImpl->GetID();
     return static_cast<int32_t>(WmErrorCode::WM_OK);
 }
@@ -74,6 +82,10 @@ int32_t CJWindowStageImpl::CreateSubWindow(std::string name, int64_t &windowId)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     sptr<CJWindowImpl> windowImpl = CreateCjWindowObject(window);
+    if (windowImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[createSubWindow] windowImpl is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
     windowId = windowImpl->GetID();
     TLOGI(WmsLogTag::WMS_DIALOG, "[createSubWindow] Create sub window %{public}s end", name.c_str());
     return static_cast<int32_t>(WmErrorCode::WM_OK);
