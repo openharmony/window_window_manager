@@ -2018,11 +2018,11 @@ MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
 
 WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    WLOGI("WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u", property_->GetWindowId(),
+    TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u", property_->GetWindowId(),
         static_cast<uint32_t>(enable));
     if (!IsWindowValid() ||
         !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const WindowType curWindowType = GetType();
