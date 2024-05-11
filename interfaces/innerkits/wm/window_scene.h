@@ -61,10 +61,12 @@ public:
      * @param listener the life cycle listener of the window
      * @param option the settings for window, such as WindowType, width, height, etc
      * @param iSession session token of window session
+     * @param identityToken identity token of sceneSession
      * @return the error code of window
      */
     WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
-        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession);
+        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession,
+        const std::string& identityToken = "");
 
     /**
      * Create a window instance based on the parameters windowName and option.

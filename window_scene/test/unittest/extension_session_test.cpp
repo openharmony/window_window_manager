@@ -217,6 +217,66 @@ HWTEST_F(ExtensionSessionTest, NotifyAsyncOn, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: NotifyDensityFollowHost01
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyDensityFollowHost01";
+    info.bundleName_ = "NotifyDensityFollowHost01";
+    ExtensionSession extensionSession(info);
+    extensionSession.state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    extensionSession.sessionStage_ = mockSessionStage;
+
+    bool isFollowHost = true;
+    float densityValue = 1.0f;
+    EXPECT_CALL(*mockSessionStage, NotifyDensityFollowHost(isFollowHost, densityValue));
+    WSError res = extensionSession.NotifyDensityFollowHost(isFollowHost, densityValue);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyDensityFollowHost02
+ * @tc.desc: session is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyDensityFollowHost02";
+    info.bundleName_ = "NotifyDensityFollowHost02";
+    ExtensionSession extensionSession(info);
+
+    bool isFollowHost = true;
+    float densityValue = 1.0f;
+    WSError res = extensionSession.NotifyDensityFollowHost(isFollowHost, densityValue);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, res);
+}
+
+/**
+ * @tc.name: NotifyDensityFollowHost03
+ * @tc.desc: sessionStage_ is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyDensityFollowHost03";
+    info.bundleName_ = "NotifyDensityFollowHost03";
+    ExtensionSession extensionSession(info);
+    extensionSession.state_ = SessionState::STATE_CONNECT;
+    extensionSession.sessionStage_ = nullptr;
+
+    bool isFollowHost = true;
+    float densityValue = 1.0f;
+    WSError res = extensionSession.NotifyDensityFollowHost(isFollowHost, densityValue);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
+/**
  * @tc.name: TriggerBindModalUIExtension
  * @tc.desc: test function : TriggerBindModalUIExtension
  * @tc.type: FUNC

@@ -27,7 +27,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
                                           "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
-const static uint32_t ERR_INVALID_DATA = -1;
+const static int32_t ERR_INVALID_DATA = -1;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,

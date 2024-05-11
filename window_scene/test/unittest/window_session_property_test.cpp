@@ -584,6 +584,46 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
 }
 
 /**
+ * @tc.name: Read
+ * @tc.desc: Read test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property != nullptr) {
+        Parcel parcel = Parcel();
+        property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+        ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
+        delete property;
+    }
+}
+
+/**
+ * @tc.name: Write
+ * @tc.desc: Write and Read to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *oldProperty = new (std::nothrow) WindowSessionProperty();
+    WindowSessionProperty *newProperty = new (std::nothrow) WindowSessionProperty();
+    if ((oldProperty != nullptr) && (newProperty != nullptr)) {
+        int32_t persistentId = 2;
+        oldProperty->SetPersistentId(persistentId);
+        oldProperty->SetFocusable(true);
+        Parcel parcel = Parcel();
+        oldProperty->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+
+        newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
+        ASSERT_EQ(newProperty->GetFocusable(), true);
+        delete oldProperty;
+        delete newProperty;
+    }
+}
+
+/**
  * @tc.name: GetWindowName
  * @tc.desc: GetWindowName
  * @tc.type: FUNC
