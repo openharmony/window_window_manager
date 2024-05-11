@@ -1779,7 +1779,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
-        SetFullScreen(true);
+        SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
 }
@@ -3315,7 +3315,7 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
 
 WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    WLOGFD("id: %{public}u, SetImmersiveModeEnabledState: %{public}u", GetWindowId(), enable);
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, SetImmersiveModeEnabledState: %{public}u", GetWindowId(), enable);
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -3337,7 +3337,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
 bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
 {
-    WLOGFD("id: %{public}u， GetImmersiveModeEnabledState = %{public}u", GetWindowId(), enableImmersiveMode_);
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u， GetImmersiveModeEnabledState = %{public}u", GetWindowId(), enableImmersiveMode_);
     return enableImmersiveMode_;
 }
 } // namespace Rosen
