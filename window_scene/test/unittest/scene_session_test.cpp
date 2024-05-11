@@ -974,9 +974,6 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->IsShowWhenLocked(), true);
     scensession->SetTemporarilyShowWhenLocked(true);
     ASSERT_EQ(scensession->IsShowWhenLocked(), true);
-    delete specificCallback_;
-    delete scensession;
-    delete property;
 }
 
 /**
@@ -3605,7 +3602,6 @@ HWTEST_F(SceneSessionTest, SetTemporarilyShowWhenLocked, Function | SmallTest | 
     sceneSession->SetTemporarilyShowWhenLocked(false);
     isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
     ASSERT_EQ(isTemporarilyShowWhenLocked, false);
-    delete sceneSession;
 }
 
 /**
@@ -3633,9 +3629,6 @@ HWTEST_F(SceneSessionTest, GetShowWhenLockedFlagValue, Function | SmallTest | Le
     scensession->property_ = property;
     property->SetWindowFlags(4);
     ASSERT_EQ(scensession->GetShowWhenLockedFlagValue(), true);
-    delete specificCallback_;
-    delete scensession;
-    delete property;
 }
 }
 }
