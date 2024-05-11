@@ -267,6 +267,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             }
             TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
             info.callerPersistentId_ = realCallerSessionId;
+            VerifyCallerToken(info);
         } else {
             info.callerPersistentId_ = 0;
         }
@@ -296,6 +297,17 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+}
+
+void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
+{
+    auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
+    if (callerSession != nullptr) {
+        bool isCalledRightlyByCallerId = info.callerToken_ == callerSession->GetAbilityToken();
+        TLOGI(WmsLogTag::WMS_SCB,
+            "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
+        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+    }
 }
 
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
