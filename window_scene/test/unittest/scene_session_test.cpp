@@ -3592,7 +3592,7 @@ HWTEST_F(SceneSessionTest, ResetSessionConnectState, Function | SmallTest | Leve
 
     sceneSession->ResetSessionConnectState();
     ASSERT_EQ(sceneSession->state_, SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(sceneSession->connectedClientPid_, 0);
+    ASSERT_EQ(sceneSession->GetCallingPid(), -1);
 }
 
 /**
