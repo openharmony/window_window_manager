@@ -2018,8 +2018,8 @@ MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
 
 WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u", property_->GetWindowId(),
-        static_cast<uint32_t>(enable));
+    TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(enable));
     if (!IsWindowValid() ||
         !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
