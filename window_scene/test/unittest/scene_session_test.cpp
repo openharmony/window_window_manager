@@ -962,12 +962,21 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(scensession->IsShowWhenLocked(), false);
     scensession->property_ = property;
-    property->SetWindowFlags(4);
+    scensession->SetTemporarilyShowWhenLocked(true);
     ASSERT_EQ(scensession->IsShowWhenLocked(), true);
+    property->SetWindowFlags(4);
+    scensession->SetTemporarilyShowWhenLocked(false);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
+    scensession->SetTemporarilyShowWhenLocked(true);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
+    delete specificCallback_;
+    delete scensession;
+    delete property;
 }
 
 /**
@@ -3574,6 +3583,57 @@ HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
     sceneSession->ClearExtWindowFlags();
     bool isRegister = true;
     sceneSession->UpdateRectChangeListenerRegistered(isRegister);
+}
+
+/**
+ * @tc.name: SetTemporarilyShowWhenLocked
+ * @tc.desc:  * @tc.name: SetTemporarilyShowWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTemporarilyShowWhenLocked, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTemporarilyShowWhenLocked";
+    info.bundleName_ = "SetTemporarilyShowWhenLocked";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetTemporarilyShowWhenLocked(true);
+    bool isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, true);
+    sceneSession->SetTemporarilyShowWhenLocked(false);
+    isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, false);
+    delete sceneSession;
+}
+
+/**
+ * @tc.name: GetShowWhenLockedFlagValue
+ * @tc.desc:  * @tc.name: GetShowWhenLockedFlagValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetShowWhenLockedFlagValue, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetShowWhenLockedFlagValue";
+    info.bundleName_ = "GetShowWhenLockedFlagValue";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(scensession->GetShowWhenLockedFlagValue(), false);
+    scensession->property_ = property;
+    property->SetWindowFlags(4);
+    ASSERT_EQ(scensession->GetShowWhenLockedFlagValue(), true);
+    delete specificCallback_;
+    delete scensession;
+    delete property;
 }
 }
 }
