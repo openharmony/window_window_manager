@@ -89,8 +89,8 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if ((!identityToken.empty() && !session->clientIdentityToken_.empty()) &&
-            identityToken != session->clientIdentityToken_) {
+        if ( SessionHelper::IsMainWindow(session->GetWindowType()) && !identityToken.empty() && 
+            !session->clientIdentityToken_.empty() && identityToken != session->clientIdentityToken_) {
             TLOGW(WmsLogTag::WMS_LIFE,
                 "Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
                 "identityToken: %{public}s, bundleName: %{public}s",
