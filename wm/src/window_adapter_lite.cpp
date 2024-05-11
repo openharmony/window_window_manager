@@ -40,6 +40,13 @@ WMError WindowAdapterLite::RegisterWindowManagerAgent(WindowManagerAgentType typ
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    {
+        std::unique_lock<std::shared_mutex> lock(windowManagerLiteAgentMapMutex_);
+        if (windowManagerLiteAgentMap_.find(type) == windowManagerLiteAgentMap_.end()) {
+            windowManagerLiteAgentMap_[type] = std::set<sptr<IWindowManagerAgent>>();
+        }
+        windowManagerLiteAgentMap_[type].insert(windowManagerAgent);
+    }
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
@@ -47,7 +54,39 @@ WMError WindowAdapterLite::UnregisterWindowManagerAgent(WindowManagerAgentType t
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    auto ret = windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    std::unique_lock<std::shared_mutex> lock(windowManagerLiteAgentMapMutex_);
+    if (windowManagerLiteAgentMap_.find(type) == windowManagerLiteAgentMap_.end()) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerAgentType = %{public}d not found", type);
+        return ret;
+    }
+
+    auto& agentSet = windowManagerLiteAgentMap_[type];
+    auto agent = std::find(agentSet.begin(), agentSet.end(), windowManagerAgent);
+    if (agent == agentSet.end()) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "Cannot find agent,  type = %{public}d", type);
+        return ret;
+    }
+    agentSet.erase(agent);
+    return ret;
+}
+
+void WindowAdapterLite::ReregisterWindowManagerLiteAgent()
+{
+    std::shared_lock<std::shared_mutex> lock(windowManagerLiteAgentMapMutex_);
+    if ((!windowManagerServiceProxy_) || (!windowManagerServiceProxy_->AsObject())) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "windowManagerServiceProxy_ is null");
+        return;
+    }
+    for (const auto& it : windowManagerLiteAgentMap_) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Window manager agent type = %{public}" PRIu32 ", size = %{public}" PRIu64,
+            it.first, static_cast<uint64_t>(it.second.size()));
+        for (auto& agent : it.second) {
+            if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                TLOGW(WmsLogTag::WMS_MULTI_USER, "Reregister window manager agent failed");
+            }
+        }
+    }
 }
 
 WMError WindowAdapterLite::CheckWindowId(int32_t windowId, int32_t &pid)
@@ -98,6 +137,7 @@ void WindowAdapterLite::OnUserSwitch()
     TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched lite");
     ClearWindowAdapter();
     InitSSMProxy();
+    ReregisterWindowManagerLiteAgent();
 }
 
 void WindowAdapterLite::ClearWindowAdapter()

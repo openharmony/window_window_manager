@@ -43,7 +43,8 @@ public:
     using UserSwitchCallbackFunc = std::function<void()>;
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
-    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
+    void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
     void ClearSessionManagerProxy();
     void Clear();
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
@@ -61,7 +62,7 @@ private:
     WMError InitMockSMSProxy();
     void InitSceneSessionManagerProxy();
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
-    void OnUserSwitch();
+    void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void RegisterSMSRecoverListener();
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
