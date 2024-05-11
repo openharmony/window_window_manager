@@ -89,9 +89,6 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (property) {
-            property->SetCollaboratorType(session->GetCollaboratorType());
-        }
         if ((!identityToken.empty() && !session->clientIdentityToken_.empty()) &&
             identityToken != session->clientIdentityToken_) {
             TLOGW(WmsLogTag::WMS_LIFE,
@@ -100,6 +97,9 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
                 session->clientIdentityToken_.c_str(), identityToken.c_str(),
                 session->GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
+        }
+        if (property) {
+            property->SetCollaboratorType(session->GetCollaboratorType());
         }
         auto ret = session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
@@ -1929,12 +1929,6 @@ bool SceneSession::IsAppSession() const
     return false;
 }
 
-void SceneSession::ResetSessionConnectState()
-{
-    Session::ResetSessionConnectState();
-    SetCallingPid(-1);
-}
-
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
@@ -2080,9 +2074,9 @@ std::string SceneSession::GetClientIdentityToken() const
     return clientIdentityToken_;
 }
 
-void SceneSession::SetClientIdentityToken(const std::string& iToken)
+void SceneSession::SetClientIdentityToken(const std::string& clientIdentityToken)
 {
-    clientIdentityToken_ = iToken;
+    clientIdentityToken_ = clientIdentityToken;
 }
 
 void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const

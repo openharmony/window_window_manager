@@ -3577,25 +3577,6 @@ HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ResetSessionConnectState
- * @tc.desc: ResetSessionConnectState
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ResetSessionConnectState, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ResetSessionConnectState";
-    info.bundleName_ = "ResetSessionConnectState";
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    sceneSession->ResetSessionConnectState();
-    ASSERT_EQ(sceneSession->state_, SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(sceneSession->GetCallingPid(), -1);
-}
-
-/**
  * @tc.name: SetClientIdentityToken
  * @tc.desc: SetClientIdentityToken
  * @tc.type: FUNC
