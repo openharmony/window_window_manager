@@ -137,7 +137,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isFromClient) {
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
@@ -183,7 +183,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
 
 WSError SceneSession::Background(bool isFromClient)
 {
-    if (isFromClient) {
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
@@ -252,7 +252,7 @@ void SceneSession::ClearSpecificSessionCbMap()
 
 WSError SceneSession::Disconnect(bool isFromClient)
 {
-    if (isFromClient) {
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
