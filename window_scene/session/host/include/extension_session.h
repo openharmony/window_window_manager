@@ -85,6 +85,7 @@ public:
     void NotifyRemoteReady() override;
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
+    WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue = 1.0f);
     void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,

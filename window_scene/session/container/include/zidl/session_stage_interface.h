@@ -83,6 +83,10 @@ public:
     {
         return -1;
     }
+    virtual WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos)
     {

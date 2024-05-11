@@ -654,6 +654,49 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     return WMError::WM_OK;
 }
 
+WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d densityValue:%{public}f", isFollowHost, densityValue);
+
+    if (!isFollowHost && !isDensityFollowHost_) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost is false and not change");
+        return WSError::WS_OK;
+    }
+
+    if (isFollowHost) {
+        if (std::islessequal(densityValue, 0.0f)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "densityValue is invalid");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        if (hostDensityValue_ != std::nullopt &&
+            std::abs(hostDensityValue_->load() - densityValue) < std::numeric_limits<float>::epsilon()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "densityValue not change");
+            return WSError::WS_OK;
+        }
+        hostDensityValue_ = densityValue;
+    }
+
+    isDensityFollowHost_ = isFollowHost;
+
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
+    return WSError::WS_OK;
+}
+
+float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+{
+    float vpr = 1.0f;
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is nullptr");
+        return vpr;
+    }
+    if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
+        vpr = hostDensityValue_->load();
+    } else {
+        vpr = displayInfo->GetVirtualPixelRatio();
+    }
+    return vpr;
+}
+
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
     if (state_ != WindowState::STATE_SHOWN) {
