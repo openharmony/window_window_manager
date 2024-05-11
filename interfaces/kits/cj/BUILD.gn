@@ -14,5 +14,8 @@
 import("//build/ohos.gni")
 
 group("ffi_packages") {
-  deps = [ "display_runtime:cj_display_ffi" ]
+  deps = [
+    "display_runtime:cj_display_ffi",
+    "window_runtime:cj_window_ffi",
+  ]
 }

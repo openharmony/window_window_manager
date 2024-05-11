@@ -117,7 +117,7 @@ private:
 };
 
 sptr<CJWindowImpl> CreateCjWindowObject(sptr<Window>& window);
-sptr<CJWindowImpl> FindCjWindowObject(std::string windowName);
+sptr<CJWindowImpl> FindCjWindowObject(const std::string& windowName);
 
 }
 }
