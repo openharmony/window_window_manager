@@ -128,8 +128,7 @@ public:
     WSError Background(bool isFromClient = false) override;
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
-    void ResetSessionConnectState();
-    void SetClientIdentityToken(const std::string& iToken);
+    void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
     virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
     virtual void BindKeyboardSession(sptr<SceneSession> session) {};

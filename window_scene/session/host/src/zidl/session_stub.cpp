@@ -167,7 +167,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         property = new WindowSessionProperty();
     }
     bool isFromClient = data.ReadBool();
-    const WSError& errCode = Foreground(property, isFromClient);
+    const WSError errCode = Foreground(property, isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -176,7 +176,7 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
     bool isFromClient = data.ReadBool();
-    const WSError& errCode = Background(isFromClient);
+    const WSError errCode = Background(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

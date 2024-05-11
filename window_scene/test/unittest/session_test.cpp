@@ -3423,6 +3423,7 @@ HWTEST_F(WindowSessionTest, ResetSessionConnectState, Function | SmallTest | Lev
     ASSERT_NE(session_, nullptr);
     session_->ResetSessionConnectState();
     ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
+    ASSERT_EQ(session_->GetCallingPid(), -1);
 }
 }
 } // namespace Rosen

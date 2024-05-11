@@ -1001,13 +1001,12 @@ WSError Session::Background(bool isFromClient)
     return WSError::WS_OK;
 }
 
-WSError Session::ResetSessionConnectState()
+void Session::ResetSessionConnectState()
 {
-    TLOGI(WmsLogTag::WMS_LIFE,
-        "ResetSessionState, id: %{public}d, state: %{public}u",
+    TLOGI(WmsLogTag::WMS_LIFE, "ResetSessionState, id: %{public}d, state: %{public}u",
         GetPersistentId(), GetSessionState());
     SetSessionState(SessionState::STATE_DISCONNECT);
-    return WSError::WS_OK;
+    SetCallingPid(-1);
 }
 
 WSError Session::Disconnect(bool isFromClient)
