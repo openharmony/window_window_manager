@@ -112,6 +112,10 @@ void CjWindowListener::AfterDestroyed()
 void CjWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[WindowListener] this changeInfo is nullptr");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowListener]OccupiedAreaChangeInfo, type: %{public}u, " \
         "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         static_cast<uint32_t>(info->type_),
