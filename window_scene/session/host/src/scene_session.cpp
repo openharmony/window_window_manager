@@ -101,7 +101,6 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
                 session->GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
-        session->connectedClientPid_ = pid;
         auto ret = session->Session::Connect(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
@@ -117,14 +116,12 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
     int32_t pid, int32_t uid)
 {
-    pid = (pid == -1) ? IPCSkeleton::GetCallingPid() : pid;
     return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->connectedClientPid_ = pid;
         return session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     });
 }
@@ -142,10 +139,10 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     }
     if (isFromClient) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != 0 && callingPid != connectedClientPid_) {
+        if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
-                "Foreground failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
@@ -188,10 +185,10 @@ WSError SceneSession::Background(bool isFromClient)
 {
     if (isFromClient) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != 0 && callingPid != connectedClientPid_) {
+        if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
-                "Background failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Background failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
@@ -257,10 +254,10 @@ WSError SceneSession::Disconnect(bool isFromClient)
 {
     if (isFromClient) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != 0 && callingPid != connectedClientPid_) {
+        if (callingPid != -1 && callingPid != GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_LIFE,
-                "Disconnect failed, connectedClientPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                connectedClientPid_, callingPid, GetSessionInfo().bundleName_.c_str());
+                "Disconnect failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
     }
@@ -1935,7 +1932,7 @@ bool SceneSession::IsAppSession() const
 void SceneSession::ResetSessionConnectState()
 {
     Session::ResetSessionConnectState();
-    connectedClientPid_ = 0;
+    SetCallingPid(-1);
 }
 
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)

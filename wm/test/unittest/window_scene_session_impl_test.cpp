@@ -96,6 +96,7 @@ namespace {
 HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("CreateWindow01");
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
 

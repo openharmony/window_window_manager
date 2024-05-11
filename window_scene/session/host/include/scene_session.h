@@ -350,7 +350,6 @@ private:
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::string clientIdentityToken_ = { "" };
-    int32_t connectedClientPid_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

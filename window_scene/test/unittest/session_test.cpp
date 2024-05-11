@@ -3420,6 +3420,7 @@ HWTEST_F(WindowSessionTest, SetOffset, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, ResetSessionConnectState, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     session_->ResetSessionConnectState();
     ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
 }
