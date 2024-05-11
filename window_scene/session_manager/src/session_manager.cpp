@@ -71,7 +71,8 @@ public:
         SessionManager::GetInstance().RecoverSessionManagerService(sms);
     }
 
-    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject> &sessionManagerService) override
+    void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject> &sessionManagerService) override
     {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "userId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
             screenId, isConnected);
