@@ -15,16 +15,16 @@
 #include "window_impl.h"
 #include <regex>
 #include <sstream>
+#include "permission.h"
+#include "ui_content.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "permission.h"
 #include "window_utils.h"
-#include "ui_content.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr Rect G_EMPTYRECT = {0, 0, 0, 0};
+constexpr Rect g_emptyRect = {0, 0, 0, 0};
 }
 static thread_local std::map<std::string, sptr<CJWindowImpl>> g_cjWindowMap;
 std::recursive_mutex g_mutex;
@@ -47,7 +47,7 @@ sptr<CJWindowImpl> CreateCjWindowObject(sptr<Window>& window)
         TLOGI(WmsLogTag::WMS_DIALOG, "Invalid input");
         return nullptr;
     }
-    std::string& windowName = window->GetWindowName();
+    const std::string& windowName = window->GetWindowName();
     sptr<CJWindowImpl> windowImpl = FindCjWindowObject(windowName);
     if (windowImpl != nullptr) {
         TLOGI(WmsLogTag::WMS_DIALOG, "FindCjWindowObject %{public}s", windowName.c_str());
@@ -240,7 +240,7 @@ CWindowProperties CJWindowImpl::GetWindowProperties(int32_t* errCode)
         *errCode = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return wp;
     }
-    Rect drawableRect = G_EMPTYRECT;
+    Rect drawableRect = g_emptyRect;
     auto uicontent = windowToken_->GetUIContent();
     if (uicontent == nullptr) {
         TLOGW(WmsLogTag::WMS_DIALOG, "uicontent is nullptr");
@@ -406,10 +406,10 @@ int32_t CJWindowImpl::GetWindowAvoidArea(uint32_t areaType, CAvoidArea* retPtr)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaByType(avoidAreaType, avoidArea));
     retPtr->visible = avoidAreaType == AvoidAreaType::TYPE_CUTOUT ? false : true;
     if (ret != WmErrorCode::WM_OK) {
-        retPtr->topRect = G_EMPTYRECT;
-        retPtr->leftRect = G_EMPTYRECT;
-        retPtr->rightRect = G_EMPTYRECT;
-        retPtr->bottomRect = G_EMPTYRECT;
+        retPtr->topRect = g_emptyRect;
+        retPtr->leftRect = g_emptyRect;
+        retPtr->rightRect = g_emptyRect;
+        retPtr->bottomRect = g_emptyRect;
     } else {
         retPtr->topRect = avoidArea.topRect_;
         retPtr->leftRect = avoidArea.leftRect_;
@@ -870,6 +870,250 @@ int32_t CJWindowImpl::Rotate(double x, double y, double z, double pivotX, double
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Rotate end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return static_cast<int32_t>(ret);
+}
+
+static bool IsScaleValid(double data)
+{
+    if (!MathHelper::GreatNotEqual(data, 0.0)) {
+        return false;
+    }
+    return true;
+}
+
+int32_t CJWindowImpl::Scale(double x, double y, double pivotX, double pivotY)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    if (!IsPivotValid(pivotX) || !IsPivotValid(pivotY) || !IsScaleValid(x) || !IsScaleValid(y)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, " PivotX or PivotY should between 0.0 ~ 1.0, scale should greater than 0.0");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    auto trans = windowToken_->GetTransform();
+    trans.pivotX_ = pivotX;
+    trans.pivotY_ = pivotY;
+    trans.scaleX_ = x;
+    trans.scaleY_ = y;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Scale end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowImpl::Opacity(double opacity)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    if (!IsPivotValid(opacity)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "opacity should greater than 0 or smaller than 1.0");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetAlpha(opacity));
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), opacity);
+    return static_cast<int32_t>(ret);
+}
+
+std::shared_ptr<Media::PixelMap> CJWindowImpl::Snapshot(int32_t* errCode)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        *errCode = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = windowToken_->Snapshot();
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "window snapshot get pixelmap is null");
+        *errCode = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
+        pixelMap->GetWidth(), pixelMap->GetHeight());
+    *errCode = 0;
+    return pixelMap;
+}
+
+static uint32_t GetColorFromJs(const std::string colorStr, uint32_t defaultColor, bool& flag)
+{
+    std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
+    if (!std::regex_match(colorStr, pattern)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Invalid color input");
+        return defaultColor;
+    }
+    std::string color = colorStr.substr(1);
+    if (color.length() == RGB_LENGTH) {
+        color = "FF" + color; // ARGB
+    }
+    flag = true;
+    std::stringstream ss;
+    uint32_t hexColor;
+    ss << std::hex << color;
+    ss >> hexColor;
+    TLOGI(WmsLogTag::WMS_DIALOG, "Origin %{public}s, process %{public}s, final %{public}x",
+        colorStr.c_str(), color.c_str(), hexColor);
+    return hexColor;
+}
+
+static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> weakToken)
+{
+    for (auto it : systemBarPropertyFlags) {
+        WindowType type = it.first;
+        SystemBarPropertyFlag flag = it.second;
+        auto property = weakToken->GetSystemBarPropertyByType(type);
+        if (flag.enableFlag == false) {
+            systemBarProperties[type].enable_ = property.enable_;
+        }
+        if (flag.backgroundColorFlag == false) {
+            systemBarProperties[type].backgroundColor_ = property.backgroundColor_;
+        }
+        if (flag.contentColorFlag == false) {
+            systemBarProperties[type].contentColor_ = property.contentColor_;
+        }
+    }
+
+    return;
+}
+
+void SetBarPropertyMap(
+    std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
+    CBarProperties cProperties,
+    sptr<Window> nativeWindow)
+{
+    auto statusProperty = nativeWindow->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = nativeWindow->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(cProperties.statusBarColor,
+        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        GetColorFromJs(cProperties.navigationBarColor, navProperty.backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+    if (!cProperties.statusBarContentColor.empty()) {
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =
+            GetColorFromJs(cProperties.statusBarContentColor, statusProperty.contentColor_,
+                propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag);
+    } else {
+        if (cProperties.isStatusBarLightIcon) {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
+    }
+    if (!cProperties.navigationBarContentColor.empty()) {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =
+            GetColorFromJs(cProperties.navigationBarContentColor, navProperty.contentColor_,
+                propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag);
+    } else {
+        if (cProperties.isNavigationBarLightIcon) {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
+    }
+}
+
+int32_t CJWindowImpl::SetWindowSystemBarProperties(CBarProperties cProperties)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::map<WindowType, SystemBarProperty> properties;
+    std::map<WindowType, SystemBarPropertyFlag> propertyFlags;
+    SetBarPropertyMap(properties, propertyFlags, cProperties, windowToken_);
+    UpdateSystemBarProperties(properties, propertyFlags, windowToken_);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSystemBarProperty(
+        WindowType::WINDOW_TYPE_STATUS_BAR, properties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+    if (ret != WmErrorCode::WM_OK) {
+        return static_cast<int32_t>(ret);
+    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            properties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowImpl::SetWindowSystemBarEnable(char** arr, uint32_t size)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    auto statusProperty = windowToken_->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = windowToken_->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    statusProperty.enable_ = false;
+    navProperty.enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    for (uint32_t i = 0; i < size; i++) {
+        std::string name = arr[i];
+        if (name.compare("status") == 0) {
+            systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
+        } else if (name.compare("navigation") == 0) {
+            systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
+        }
+    }
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
+    UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken_);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSystemBarProperty(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+    if (ret != WmErrorCode::WM_OK) {
+        return static_cast<int32_t>(ret);
+    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+        systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowImpl::OnRegisterWindowCallback(std::string type, int64_t funcId)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken_, type, CaseType::CASE_WINDOW, funcId);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Register failed, window [%{public}u, %{public}s] type: %{public}s",
+            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), type.c_str());
+    }
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowImpl::UnregisterWindowCallback(std::string type, int64_t funcId)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = registerManager_->UnregisterListener(windowToken_, type, CaseType::CASE_WINDOW, funcId);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Unregister failed, window [%{public}u, %{public}s] type: %{public}s",
+            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), type.c_str());
+    }
     return static_cast<int32_t>(ret);
 }
 }
