@@ -105,7 +105,7 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest |
 }
 
 /**
- * @tc.name: CreateWindowAndDestroy01
+ * @tc.name: CreateWindowAndDestroy02
  * @tc.desc: Create window and destroy window
  * @tc.type: FUNC
  */
@@ -113,6 +113,7 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy02, Function | SmallTest |
 {
     std::string identityToken = "testToken";
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("CreateWindow01");
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
 
