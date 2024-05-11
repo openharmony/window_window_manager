@@ -1,0 +1,99 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../../windowmanager_aafwk.gni")
+
+config("window_manager_ffi_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "window_impl",
+    "window_manager_impl",
+    "../../../innerkits/wm",
+    "../../../innerkits/dm",
+    "../../../../wm/include",
+    "../../../../utils/include",
+  ]
+}
+
+config("window_ffi_kit_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../../innerkits/wm",
+    "../../../../utils/include",
+    "../../../../wm/include",
+    "../../../../wmserver/include",
+  ]
+}
+
+ohos_shared_library("cj_window_ffi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  configs = [ "../../../../resources/config/build:coverage_flags" ]
+
+  if (!build_ohos_sdk) {
+    sources = [
+      "window_ffi.cpp",
+      "window_impl.cpp",
+      "window_listener.cpp",
+      "window_manager_impl.cpp",
+      "window_register_manager.cpp",
+      "window_stage_impl.cpp",
+    ]
+    deps = [
+      "../../../../dm:libdm",
+      "../../../../utils:libwmutil",
+      "../../../../utils:libwmutil_base",
+      "../../../../wm:libwm",
+    ]
+    external_deps = [
+      "ability_runtime:ability_context_native",
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:dialog_request_info",
+      "ability_runtime:extensionkit_native",
+      "ability_runtime:runtime",
+      "access_token:libaccesstoken_sdk",
+      "ace_engine:ace_uicontent",
+      "bundle_framework:appexecfwk_base",
+      "c_utils:utils",
+      "common_event_service:cesfwk_innerkits",
+      "eventhandler:libeventhandler",
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
+      "image_framework:cj_image_ffi",
+      "image_framework:image",
+      "image_framework:image_native",
+      "ipc:ipc_napi",
+      "ipc:ipc_single",
+      "napi:ace_napi",
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+  } else {
+    defines += [ "PREVIEWER" ]
+    sources = [ "window_mock.cpp" ]
+    external_deps = [ "napi:cj_bind_ffi" ]
+  }
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}

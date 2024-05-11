@@ -822,7 +822,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
-    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<IRemoteObject> token, int32_t pid, int32_t uid, const std::string& identityToken)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
@@ -901,7 +901,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground(sptr<WindowSessionProperty> property)
+WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -978,7 +978,7 @@ void Session::HandleDialogForeground()
     }
 }
 
-WSError Session::Background()
+WSError Session::Background(bool isFromClient)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
@@ -999,6 +999,14 @@ WSError Session::Background()
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
+}
+
+void Session::ResetSessionConnectState()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "ResetSessionState, id: %{public}d, state: %{public}u",
+        GetPersistentId(), GetSessionState());
+    SetSessionState(SessionState::STATE_DISCONNECT);
+    SetCallingPid(-1);
 }
 
 WSError Session::Disconnect(bool isFromClient)

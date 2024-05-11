@@ -122,7 +122,8 @@ ExtensionSession::~ExtensionSession()
 WSError ExtensionSession::Connect(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+    const std::string& identityToken)
 {
     // Get pid and uid before posting task.
     pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
@@ -222,6 +223,19 @@ void ExtensionSession::NotifyAsyncOn()
         extSessionEventCallback_->notifyAsyncOnFunc_ != nullptr) {
         extSessionEventCallback_->notifyAsyncOnFunc_();
     }
+}
+
+WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
 }
 
 void ExtensionSession::TriggerBindModalUIExtension()
@@ -340,7 +354,7 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
     return avoidArea;
 }
 
-WSError ExtensionSession::Background()
+WSError ExtensionSession::Background(bool isFromClient)
 {
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"",

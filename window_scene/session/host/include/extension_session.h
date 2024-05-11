@@ -70,7 +70,8 @@ public:
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid) override;
+        sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+        const std::string& identityToken = "") override;
 
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
 
@@ -85,13 +86,14 @@ public:
     void NotifyRemoteReady() override;
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
+    WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue = 1.0f);
     void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool& isTimeOut, bool isPreImeEvent = false);
     WSError TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
-    WSError Background() override;
+    WSError Background(bool isFromClient = false) override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;

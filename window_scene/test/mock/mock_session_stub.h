@@ -29,13 +29,13 @@ public:
     SessionStubMocker() {};
     ~SessionStubMocker() {};
 
-    MOCK_METHOD8(Connect, WSError(const sptr<ISessionStage>& sessionStage,
+    MOCK_METHOD9(Connect, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
-        int32_t pid, int32_t uid));
+        int32_t pid, int32_t uid, const std::string& identityToken));
 
-    MOCK_METHOD1(Foreground, WSError(sptr<WindowSessionProperty> property));
-    MOCK_METHOD0(Background, WSError(void));
+    MOCK_METHOD2(Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient));
+    MOCK_METHOD1(Background, WSError(bool isFromClient));
     MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
     MOCK_METHOD1(Show, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Hide, WSError(void));
