@@ -168,7 +168,8 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     uint32_t rate = 120;
-    rootScene.FlushFrameRate(rate);
+    bool isAnimatorStopped = true;
+    rootScene.FlushFrameRate(rate, isAnimatorStopped);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 }
