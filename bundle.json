@@ -374,6 +374,15 @@
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/cj/window_runtime:cj_window_ffi",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/cj/window_runtime"
+            }
           }
         ],
         "test": [
