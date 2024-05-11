@@ -380,7 +380,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
 }
 
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window Create failed, property is nullptr");
@@ -399,6 +399,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     SetDefaultDisplayIdIfNeed();
     hostSession_ = iSession;
     context_ = context;
+    identityToken_ = identityToken;
     AdjustWindowAnimationFlag();
     if (context && context->GetApplicationInfo() &&
         context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
@@ -864,7 +865,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
     UpdateTitleButtonVisibility();
     if (WindowHelper::IsMainWindow(type)) {
-        ret = static_cast<WMError>(hostSession_->Foreground(property_));
+        ret = static_cast<WMError>(hostSession_->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         ret = static_cast<WMError>(hostSession_->Show(property_));
     } else {
@@ -932,7 +933,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (res != WMError::WM_OK) {
             return res;
         }
-        res = static_cast<WMError>(hostSession_->Background());
+        res = static_cast<WMError>(hostSession_->Background(true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         res = static_cast<WMError>(hostSession_->Hide());
     } else {

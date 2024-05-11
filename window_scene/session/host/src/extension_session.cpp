@@ -122,7 +122,8 @@ ExtensionSession::~ExtensionSession()
 WSError ExtensionSession::Connect(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+    const std::string& identityToken)
 {
     // Get pid and uid before posting task.
     pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
@@ -353,7 +354,7 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
     return avoidArea;
 }
 
-WSError ExtensionSession::Background()
+WSError ExtensionSession::Background(bool isFromClient)
 {
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"",
