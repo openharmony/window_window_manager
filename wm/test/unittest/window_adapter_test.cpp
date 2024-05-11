@@ -235,6 +235,35 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallbac
     ASSERT_EQ(true, ret);
 }
 
+/**
+ * @tc.name: AddOrRemoveSecureSession
+ * @tc.desc: WindowAdapter/AddOrRemoveSecureSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, AddOrRemoveSecureSession, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 0;
+    WindowAdapter windowAdapter;
+    windowAdapter.AddOrRemoveSecureSession(persistentId, true);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UpdateExtWindowFlags
+ * @tc.desc: WindowAdapter/UpdateExtWindowFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UpdateExtWindowFlags, Function | SmallTest | Level2)
+{
+    int32_t parentId = 1234;
+    int32_t persistentId = 12345;
+    WindowAdapter windowAdapter;
+    windowAdapter.UpdateExtWindowFlags(parentId, persistentId, 7, 7);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
 }
 }
 }
