@@ -61,7 +61,7 @@ public:
      * @param listener the life cycle listener of the window
      * @param option the settings for window, such as WindowType, width, height, etc
      * @param iSession session token of window session
-     * @param identityToken sceneSession of token
+     * @param identityToken identity token of sceneSession
      * @return the error code of window
      */
     WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,

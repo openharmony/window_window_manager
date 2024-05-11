@@ -482,7 +482,7 @@ public:
      * @param context ability context
      * @param iSession session token of window session
      * @param errCode error code of create window
-     * @param identityToken sceneSession of token
+     * @param identityToken identity token of sceneSession
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
