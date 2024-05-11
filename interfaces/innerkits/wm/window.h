@@ -1035,7 +1035,7 @@ public:
      *
      * @param rate frame rate.
      */
-    virtual void FlushFrameRate(uint32_t rate) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
     /**
      * @brief Update Configuration.
      *
