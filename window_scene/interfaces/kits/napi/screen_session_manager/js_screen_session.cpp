@@ -82,7 +82,8 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
             Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
                 screenBounds.rect_.width_, screenBounds.rect_.height_ };
             screenScene_->SetDisplayDensity(density);
-            screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+            screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
+            OnScreenDensityChange();
         };
         screenSession_->SetScreenSceneDpiChangeListener(func);
         DestroyScreenSceneFunc destroyFunc = [screenScene = screenScene_]() {
