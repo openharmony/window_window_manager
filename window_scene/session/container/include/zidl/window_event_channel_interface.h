@@ -38,7 +38,8 @@ public:
         TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC,
     };
 
-    virtual void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) = 0;
+    virtual void OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
+                                               bool isConsumed, WSError retCode) = 0;
 };
 
 class IWindowEventChannel : public IRemoteBroker {
