@@ -895,7 +895,7 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
         WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_(session->GetShowWhenLockedFlagValue()());
+    sessionchangeCallback->OnShowWhenLocked_(session->GetShowWhenLockedFlagValue());
     WLOGFD("ProcessShowWhenLockedRegister success");
 }
 
