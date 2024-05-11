@@ -1663,6 +1663,7 @@ void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDes
 
 void WindowSessionImpl::ClearVsyncStation()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ != nullptr) {
         vsyncStation_.reset();
     }
