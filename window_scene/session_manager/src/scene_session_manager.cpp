@@ -2106,7 +2106,7 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
         return false;
     }
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
-    if (parentSession != nullptr && parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
+    if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as parent window disconnected");
         return false;
     }
