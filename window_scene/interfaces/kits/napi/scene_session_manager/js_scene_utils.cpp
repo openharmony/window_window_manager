@@ -721,6 +721,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
     napi_set_named_property(env, objValue, "requestOrientation",
         CreateJsValue(env, sessionInfo.requestOrientation_));
+    napi_set_named_property(env, objValue, "isCalledRightlyByCallerId",
+        CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));

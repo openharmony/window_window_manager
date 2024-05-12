@@ -45,6 +45,7 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+    void VerifyCallerToken(SessionInfo& info);
 };
 } // namespace OHOS::Rosen
 

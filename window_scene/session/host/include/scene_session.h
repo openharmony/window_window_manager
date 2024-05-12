@@ -216,6 +216,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     bool IsShowWhenLocked() const;
+    bool GetShowWhenLockedFlagValue() const;
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
@@ -268,6 +269,8 @@ public:
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetForceHideState(bool hideFlag);
     bool GetForceHideState() const;
+    bool IsTemporarilyShowWhenLocked() const;
+    void SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked);
     int32_t GetCustomDecorHeight() override
     {
         return customDecorHeight_;
@@ -348,6 +351,7 @@ private:
     WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
+    std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::string clientIdentityToken_ = { "" };
 };
 } // namespace OHOS::Rosen
