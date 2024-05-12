@@ -115,6 +115,19 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
 
     const char* moduleName = "JsSceneSession";
+    BindNativeMethod(env, objValue, moduleName);
+    napi_ref jsRef = nullptr;
+    napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
+    if (status != napi_ok) {
+        WLOGFE("do not get ref ");
+    }
+    jsSceneSessionMap_[session->GetPersistentId()] = jsRef;
+    BindNativeFunction(env, objValue, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
+    return objValue;
+}
+
+void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName)
+{
     BindNativeFunction(env, objValue, "on", moduleName, JsSceneSession::RegisterCallback);
     BindNativeFunction(env, objValue, "updateNativeVisibility", moduleName, JsSceneSession::UpdateNativeVisibility);
     BindNativeFunction(env, objValue, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
@@ -135,14 +148,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
-    napi_ref jsRef = nullptr;
-    napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
-    if (status != napi_ok) {
-        WLOGFE("do not get ref ");
-    }
-    jsSceneSessionMap_[session->GetPersistentId()] = jsRef;
-    BindNativeFunction(env, objValue, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
-    return objValue;
+    BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
+        JsSceneSession::SetTemporarilyShowWhenLocked);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -888,7 +895,7 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
         WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_(session->IsShowWhenLocked());
+    sessionchangeCallback->OnShowWhenLocked_(session->GetShowWhenLockedFlagValue());
     WLOGFD("ProcessShowWhenLockedRegister success");
 }
 
@@ -1087,6 +1094,13 @@ napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_
 {
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyDisplayStatusBarTemporarily(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetTemporarilyShowWhenLocked");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetTemporarilyShowWhenLocked(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1824,7 +1838,13 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     } else {
         sceneSession->SetFocusedOnShow(true);
     }
-
+    auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
+    if (callerSession != nullptr) {
+        bool isCalledRightlyByCallerId = info.callerToken_ == callerSession->GetAbilityToken();
+        TLOGI(WmsLogTag::WMS_SCB,
+            "isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
+        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+    }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
@@ -2669,5 +2689,34 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
 {
     return weakSession_.promote();
+}
+
+napi_value JsSceneSession::OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]argc is invalid : %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isTemporarilyShowWhenLocked = false;
+    if (!ConvertFromJsValue(env, argv[0], isTemporarilyShowWhenLocked)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] session_ is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetTemporarilyShowWhenLocked(isTemporarilyShowWhenLocked);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

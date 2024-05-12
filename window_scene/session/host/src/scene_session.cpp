@@ -835,7 +835,7 @@ void SceneSession::NotifyPropertyWhenConnect()
     }
     NotifySessionFocusableChange(property->GetFocusable());
     NotifySessionTouchableChange(property->GetTouchable());
-    OnShowWhenLocked(IsShowWhenLocked());
+    OnShowWhenLocked(GetShowWhenLockedFlagValue());
 }
 
 WSError SceneSession::RaiseAppMainWindowToTop()
@@ -885,6 +885,12 @@ WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 }
 
 bool SceneSession::IsShowWhenLocked() const
+{
+    return (GetSessionProperty()->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) || IsTemporarilyShowWhenLocked();
+}
+
+bool SceneSession::GetShowWhenLockedFlagValue() const
 {
     return GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
 }
@@ -2788,5 +2794,20 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked)
+{
+    if (isTemporarilyShowWhenLocked_.load() == isTemporarilyShowWhenLocked) {
+        return;
+    }
+    isTemporarilyShowWhenLocked_.store(isTemporarilyShowWhenLocked);
+    TLOGI(WmsLogTag::WMS_SCB, "SetTemporarilyShowWhenLocked successfully, target:%{public}u",
+        isTemporarilyShowWhenLocked);
+}
+
+bool SceneSession::IsTemporarilyShowWhenLocked() const
+{
+    return isTemporarilyShowWhenLocked_.load();
 }
 } // namespace OHOS::Rosen
