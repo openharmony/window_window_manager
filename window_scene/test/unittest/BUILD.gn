@@ -988,9 +988,9 @@ ohos_unittest("ws_intention_event_manager_test") {
   sources = [ "intention_event_manager_test.cpp" ]
 
   deps = [
-    "//foundation/arkui/napi:ace_napi",
     ":ws_unittest_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
+    "//foundation/arkui/napi:ace_napi",
   ]
 
   external_deps = [
