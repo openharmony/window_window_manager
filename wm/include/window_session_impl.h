@@ -388,6 +388,7 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
+    std::shared_mutex keyEventFilterMutex_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     KeyEventFilterFunc keyEventFilter_;
 };
