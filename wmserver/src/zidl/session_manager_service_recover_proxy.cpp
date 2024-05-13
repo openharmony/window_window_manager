@@ -46,7 +46,8 @@ void SessionManagerServiceRecoverProxy::OnSessionManagerServiceRecover(
     }
 }
 
-void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected)
+void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(
+    int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject>& sessionManagerService)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -65,6 +66,11 @@ void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(int32_t userId, i
     }
     if (!data.WriteBool(isConnected)) {
         WLOGFE("Write isConnected failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(sessionManagerService)) {
+        WLOGFE("WriteRemoteObject failed");
         return;
     }
 

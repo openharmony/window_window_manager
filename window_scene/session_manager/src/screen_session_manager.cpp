@@ -80,19 +80,19 @@ static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.typ
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const  int32_t ROTATION_270 = 3;
-} // namespace
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
     int32_t uid = IPCSkeleton::GetCallingUid();
-    WLOGFD("get calling uid(%{public}d)", uid);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "get calling uid(%{public}d)", uid);
     if (uid <= INVALID_UID) {
-        WLOGFE("uid is illegal: %{public}d", uid);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "uid is illegal: %{public}d", uid);
         return INVALID_USER_ID;
     }
     return uid / BASE_USER_RANGE;
 }
+} // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
 

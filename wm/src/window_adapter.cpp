@@ -298,6 +298,7 @@ void WindowAdapter::OnUserSwitch()
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched");
     ClearWindowAdapter();
+    windowManagerServiceProxy_ = nullptr;
     InitSSMProxy();
     ReregisterWindowManagerAgent();
 }
