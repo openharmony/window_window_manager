@@ -4127,7 +4127,8 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
 
     // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, true);
+    FocusChangeReason reason = FocusChangeReason::SCB_START_APP;
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, true, reason);
     if (specificCheckRet != WSError::WS_OK) {
         return specificCheckRet;
     }
@@ -4136,7 +4137,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     if (!IsSessionVisible(sceneSession)) {
         needBlockNotifyFocusStatusUntilForeground_ = true;
     }
-    ShiftFocus(sceneSession, FocusChangeReason::SCB_START_APP);
+    ShiftFocus(sceneSession, reason);
     return WSError::WS_OK;
 }
 
@@ -4172,7 +4173,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
             return WSError::WS_DO_NOTHING;
     }
     // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground);
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground, reason);
     if (specificCheckRet != WSError::WS_OK) {
         return specificCheckRet;
     }
@@ -4244,8 +4245,10 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground)
+WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
+    FocusChangeReason reason)
 {
+    TLOGI(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
     // dialog get focus
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
@@ -4257,6 +4260,24 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     // blocking-type session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (focusedSession) {
+        int requestSessionZOrder = sceneSession->GetZOrder();
+        int focusedSessionZOrder = focusedSession->GetZOrder();
+        TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
+            requestSessionZOrder, focusedSessionZOrder);
+            if (requestSessionZOrder < focusedSessionZOrder) {
+                auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder);
+                int topNearestBlockingZOrder = -1;
+                if (topNearestBlockingFocusSession) {
+                    topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
+                    TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
+                        topNearestBlockingZOrder:  %{public}d", requestSessionZOrder, focusedSessionZOrder,
+                        topNearestBlockingZOrder);
+                }
+                if (focusedSessionZOrder > topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder) {
+                    TLOGI(WmsLogTag::WMS_FOCUS, "focus pass through, needs to be intercepted");
+                    return WSError::WS_DO_NOTHING;
+                }
+            }
         if (focusedSession->IsTopmost() && sceneSession->IsAppSession()) {
             // return ok if focused session is topmost
             return WSError::WS_OK;
@@ -4309,6 +4330,26 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
         return false;
     };
     TraverseSessionTree(func, true);
+    return ret;
+}
+
+sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder) {
+    sptr<Session> ret = nullptr;
+    auto func = [this, &ret, zOrder](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            return false;
+        }
+        int sessionZOrder = session->GetZOrder();
+        if (sessionZOrder <= zOrder) {
+            return false;
+        }
+        if (IsSessionVisible(session) && session->GetBlockingFocus()) {
+            ret = session;
+            return true;
+        }
+        return false;
+    }
+    TraverseSessionTree(func,false);
     return ret;
 }
 
