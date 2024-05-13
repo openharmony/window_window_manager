@@ -463,6 +463,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     if (context_) {
         context_.reset();
     }
+    ClearVsyncStation();
     return WMError::WM_OK;
 }
 
@@ -1659,6 +1660,14 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
     notifyNativeFunc_ = std::move(func);
+}
+
+void WindowSessionImpl::ClearVsyncStation()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (vsyncStation_ != nullptr) {
+        vsyncStation_.reset();
+    }
 }
 
 void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)

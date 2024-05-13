@@ -400,6 +400,24 @@ HWTEST_F(WindowImplTest, RequestVsyncErr, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ClearVsync
+ * @tc.desc: Clear vsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, ClearVsync, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearVsync");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->ClearVsyncStation();
+    ASSERT_EQ(window->vsyncStation_, nullptr);
+    delete window;
+    delete option;
+}
+
+/**
  * @tc.name: InitWindowProperty
  * @tc.desc: InitWindowProperty Test
  * @tc.type: FUNC
