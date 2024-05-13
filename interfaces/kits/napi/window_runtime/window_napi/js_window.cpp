@@ -5820,15 +5820,10 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]OnGetImmersiveModeEnabledState is not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    wptr<Window> weakToken(windowToken_);
-    auto window = weakToken.promote();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    bool isEnabled = window->GetImmersiveModeEnabledState();
+
+    bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] get isImmersiveMode end, isEnabled = %{public}u",
-        window->GetWindowId(), window->GetWindowName().c_str(), isEnabled);
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
     return CreateJsValue(env, isEnabled);
 }
 
