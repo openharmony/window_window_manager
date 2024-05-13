@@ -825,6 +825,20 @@ napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowGrayScale(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]SetImmersiveModeEnabledState");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetImmersiveModeEnabledState(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]GetImmersiveModeEnabledState");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
 {
@@ -5759,6 +5773,60 @@ napi_value JsWindow::OnSetWindowGrayScale(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGW(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]OnSetImmersiveModeEnabledState is not allowed since invalid window type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enable = true;
+    napi_get_value_bool(env, nativeVal, &enable);
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]OnSetImmersiveModeEnabledState to %{public}d", static_cast<int32_t>(enable));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Window immersive mode set enabled failed, ret = %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] OnSetImmersiveModeEnabledState end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]OnGetImmersiveModeEnabledState is not allowed since invalid window type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
+    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] get isImmersiveMode end, isEnabled = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
+    return CreateJsValue(env, isEnabled);
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -5868,6 +5936,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
+    BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
+    BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
 }
 }  // namespace Rosen
 }  // namespace OHOS

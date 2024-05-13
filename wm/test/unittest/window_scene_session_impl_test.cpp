@@ -1515,6 +1515,51 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
 }
 
 /*
+ * @tc.name: SetImmersiveModeEnabledState
+ * @tc.desc: SetImmersiveModeEnabledState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetImmersiveModeEnabledState(false));
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetImmersiveModeEnabledState");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetImmersiveModeEnabledState(false));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
+    ASSERT_EQ(true, window->GetImmersiveModeEnabledState());
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(false));
+    ASSERT_EQ(false, window->GetImmersiveModeEnabledState());
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(false));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(true, window->GetImmersiveModeEnabledState());
+    ASSERT_EQ(WMError::WM_OK, window->MaximizeFloating());
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+}
+
+/*
  * @tc.name: SetLayoutFullScreen
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC

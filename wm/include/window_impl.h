@@ -203,6 +203,8 @@ public:
     virtual void StartMove() override;
     virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     virtual MaximizeMode GetGlobalMaximizeMode() const override;
+    virtual WMError SetImmersiveModeEnabledState(bool enable) override;
+    virtual bool GetImmersiveModeEnabledState() const override;
 
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
@@ -601,6 +603,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
+    static bool enableImmersiveMode_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState subWindowState_ {WindowState::STATE_INITIAL};
