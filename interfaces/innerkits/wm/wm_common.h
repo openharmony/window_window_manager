@@ -306,6 +306,12 @@ union ExtensionWindowFlags {
     ExtensionWindowFlags() : bitData(0) {}
     ExtensionWindowFlags(uint32_t bits) : bitData(bits) {}
     ~ExtensionWindowFlags() {}
+    void SetAllActive()
+    {
+        hideNonSecureWindowsFlag = true;
+        waterMarkFlag = true;
+        privacyModeFlag = true;
+    }
 };
 
 /**
