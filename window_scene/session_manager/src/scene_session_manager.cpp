@@ -6000,6 +6000,85 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
+static bool CheckUnreliableWindowType(WindowType windowType)
+{
+    if (windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        windowType == WindowType::WINDOW_TYPE_TOAST) {
+        return true;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "false, WindowType = %{public}d", windowType);
+    return false;
+}
+
+static void FillUnreliableWindowInfo(const sptr<SceneSession>& sceneSession,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    if (sceneSession == nullptr) {
+        TLOGW(WmsLogTag::DEFAULT, "null scene session.");
+        return;
+    }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
+        sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
+        sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
+        TLOGD(WmsLogTag::DEFAULT, "filter gesture window.");
+        return;
+    }
+    sptr<UnreliableWindowInfo> info = new (std::nothrow) UnreliableWindowInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "null info.");
+        return;
+    }
+    info->windowId_ = sceneSession->GetPersistentId();
+    WSRect windowRect = sceneSession->GetSessionRect();
+    info->windowRect_ = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ };
+    info->zOrder_ = sceneSession->GetZOrder();
+    info->floatingScale_ = sceneSession->GetFloatingScale();
+    info->scaleX_ = sceneSession->GetScaleX();
+    info->scaleY_ = sceneSession->GetScaleY();
+    infos.emplace_back(info);
+    TLOGD(WmsLogTag::WMS_MAIN, "wid = %{public}d", info->windowId_);
+}
+
+WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Called.");
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "only support for system service.");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, windowId, &infos]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [sessionId, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                TLOGW(WmsLogTag::DEFAULT, "null scene session");
+                continue;
+            }
+            if (sessionId == windowId) {
+                TLOGI(WmsLogTag::DEFAULT, "persistentId: %{public}d is parameter chosen", sessionId);
+                FillUnreliableWindowInfo(sceneSession, infos);
+                continue;
+            }
+            if (!sceneSession->GetVisible()) {
+                TLOGD(WmsLogTag::DEFAULT, "persistentId: %{public}d is not visible", sessionId);
+                continue;
+            }
+            TLOGD(WmsLogTag::DEFAULT, "name = %{public}s, isSystem = %{public}d, "
+                "persistentId = %{public}d, winType = %{public}d, state = %{public}d, visible = %{public}d",
+                sceneSession->GetWindowName().c_str(), sceneSession->GetSessionInfo().isSystem_, sessionId,
+                sceneSession->GetWindowType(), sceneSession->GetSessionState(), sceneSession->GetVisible());
+            if (CheckUnreliableWindowType(sceneSession->GetWindowType())) {
+                TLOGI(WmsLogTag::DEFAULT, "persistentId = %{public}d, "
+                    "WindowType = %{public}d", sessionId, sceneSession->GetWindowType());
+                FillUnreliableWindowInfo(sceneSession, infos);
+            }
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetUnreliableWindowInfo");
+}
+
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
     WLOGFD("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);

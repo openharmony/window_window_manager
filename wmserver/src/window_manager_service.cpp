@@ -1354,6 +1354,19 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<Access
     return PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
+WMError WindowManagerService::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("get unreliable window info permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, windowId, &infos]() {
+        return windowController_->GetUnreliableWindowInfo(windowId, infos);
+    };
+    return PostSyncTask(task, "GetUnreliableWindowInfo");
+}
+
 WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     auto task = [this, &infos]() {
