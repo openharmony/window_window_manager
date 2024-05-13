@@ -647,6 +647,24 @@ HWTEST_F(WindowSessionImplTest, RequestVsyncErr, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ClearVsync
+ * @tc.desc: Clear vsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, ClearVsync, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearVsync");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->ClearVsyncStation();
+    ASSERT_EQ(window->vsyncStation_, nullptr);
+    delete window;
+    delete option;
+}
+
+/**
  * @tc.name: SetFocusable
  * @tc.desc: SetFocusable
  * @tc.type: FUNC

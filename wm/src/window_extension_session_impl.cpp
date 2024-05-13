@@ -126,6 +126,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     if (context_) {
         context_.reset();
     }
+    ClearVsyncStation();
     return WMError::WM_OK;
 }
 

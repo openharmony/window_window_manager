@@ -531,6 +531,7 @@ private:
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
     void DestroySubWindow();
+    void ClearVsyncStation();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     static sptr<Window> FindWindowById(uint32_t WinId);

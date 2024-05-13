@@ -1390,6 +1390,14 @@ void WindowImpl::DestroySubWindow()
     }
 }
 
+void WindowImpl::ClearVsyncStation()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (vsyncStation_ != nullptr) {
+        vsyncStation_.reset();
+    }
+}
+
 WMError WindowImpl::Destroy()
 {
     return Destroy(true);
@@ -1432,6 +1440,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
     DestroySubWindow();
     DestroyFloatingWindow();
     DestroyDialogWindow();
+    ClearVsyncStation();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
