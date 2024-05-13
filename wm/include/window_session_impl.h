@@ -101,7 +101,6 @@ public:
     std::string GetContentInfo() override;
     Ace::UIContent* GetUIContent() const override;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
-    PiPTemplateInfo GetPiPTemplateInfo() const;
     void OnNewWant(const AAFwk::Want& want) override;
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
