@@ -1819,7 +1819,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         }
         int32_t persistentId = session->GetPersistentId();
         WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
-            sessionInfo_.bundleName_.c_str(), persistentId, visible);
+            session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
         session->isVisible_ = visible;
         if (session->specificCallback_ == nullptr) {
             WLOGFW("specific callback is null.");
