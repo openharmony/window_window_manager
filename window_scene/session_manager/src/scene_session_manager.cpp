@@ -4070,6 +4070,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         }
     };
     taskScheduler_->PostAsyncTask(task, "RequestFocusStatus" + std::to_string(persistentId));
+    changeReason_ = reason;
     return WMError::WM_OK;
 }
 
@@ -4369,7 +4370,6 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
 {
-    changeReason_ = reason;
     // unfocus
     int32_t focusedId = focusedSessionId_;
     auto focusedSession = GetSceneSession(focusedSessionId_);
