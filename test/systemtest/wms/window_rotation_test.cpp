@@ -49,7 +49,6 @@ public:
 };
 
 class WindowRotationTest : public testing::Test {
-static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -62,6 +61,7 @@ public:
 private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
     static constexpr long FUTURE_GET_RESULT_TIMEOUT = 1000;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void DisplayListener::OnCreate(DisplayId displayId)
@@ -211,9 +211,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
 HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (display == nullptr) {
-        return;
-    }
+    ASSERT_NE(display, nullptr);
     auto curDisplayOrientation = display->GetOrientation();
 
     fullInfo_.name  = "fullscreen.3";
@@ -249,9 +247,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
 HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (displayDefault == nullptr) {
-        return;
-    }
+    ASSERT_NE(displayDefault, nullptr);
     ScreenId defaultScreenId = displayDefault->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
@@ -294,9 +290,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
 HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (displayDefault == nullptr) {
-        return;
-    }
+    ASSERT_NE(displayDefault, nullptr);
     ScreenId defaultScreenId = displayDefault->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);

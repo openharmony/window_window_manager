@@ -146,7 +146,6 @@ WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, fl
 
 class WindowSessionTest : public testing::Test {
 public:
-    static constexpr int WAIT_SYNC_IN_NS = 500000;
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
@@ -163,6 +162,7 @@ public:
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void WindowSessionTest::SetUpTestCase()

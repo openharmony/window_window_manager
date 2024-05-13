@@ -23,13 +23,14 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SceneInputManagerTest : public testing::Test {
-static constexpr int WAIT_SYNC_IN_NS = 500000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     static sptr<SceneSessionManager> ssm_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 sptr<SceneSessionManager> SceneInputManagerTest::ssm_ = nullptr;
