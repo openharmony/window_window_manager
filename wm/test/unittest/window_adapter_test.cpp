@@ -208,6 +208,21 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: WindowAdapter/GetUnreliableWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WindowAdapter windowAdapter;
+    windowAdapter.GetUnreliableWindowInfo(windowId, infos);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
  * @tc.name: DestroyAndDisconnectSpecificSession
  * @tc.desc: WindowAdapter/DestroyAndDisconnectSpecificSession
  * @tc.type: FUNC
