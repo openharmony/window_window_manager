@@ -23,6 +23,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SceneInputManagerTest : public testing::Test {
+static constexpr int WAIT_SYNC_IN_NS = 500000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -49,6 +50,7 @@ void SceneInputManagerTest::SetUp()
 
 void SceneInputManagerTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {

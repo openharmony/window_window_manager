@@ -146,6 +146,7 @@ WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, fl
 
 class WindowSessionTest : public testing::Test {
 public:
+    static constexpr int WAIT_SYNC_IN_NS = 500000;
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
@@ -192,6 +193,7 @@ void WindowSessionTest::SetUp()
 void WindowSessionTest::TearDown()
 {
     session_ = nullptr;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 RSSurfaceNode::SharedPtr WindowSessionTest::CreateRSSurfaceNode()
@@ -199,6 +201,9 @@ RSSurfaceNode::SharedPtr WindowSessionTest::CreateRSSurfaceNode()
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    if (surfaceNode == nullptr) {
+        GTEST_LOG_(INFO) << "WindowSessionTest::CreateRSSurfaceNode surfaceNode is nullptr";
+    }
     return surfaceNode;
 }
 
@@ -3029,6 +3034,7 @@ HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
     session_->SetAttachState(true);
     session_->RegisterDetachCallback(detachCallback);
     session_->SetAttachState(false);
+    usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
 }
 

@@ -31,6 +31,8 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 void WindowEffectTest::SetUpTestCase()
 {
@@ -46,6 +48,7 @@ void WindowEffectTest::SetUp()
 
 void WindowEffectTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {

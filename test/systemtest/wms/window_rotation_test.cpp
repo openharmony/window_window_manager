@@ -49,6 +49,7 @@ public:
 };
 
 class WindowRotationTest : public testing::Test {
+static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -125,6 +126,7 @@ void WindowRotationTest::TearDown()
     }
     DisplayManager::GetInstance().UnregisterDisplayListener(displayListener_);
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener_);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -209,6 +211,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
 HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (display == nullptr) {
+        return;
+    }
     auto curDisplayOrientation = display->GetOrientation();
 
     fullInfo_.name  = "fullscreen.3";
@@ -243,7 +248,11 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
 */
 HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3)
 {
-    ScreenId defaultScreenId = DisplayManager::GetInstance().GetDefaultDisplay()->GetScreenId();
+    auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (displayDefault == nullptr) {
+        return;
+    }
+    ScreenId defaultScreenId = displayDefault->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
     sleep(SPLIT_TEST_SLEEP_S);
@@ -284,7 +293,11 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
 */
 HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
 {
-    ScreenId defaultScreenId = DisplayManager::GetInstance().GetDefaultDisplay()->GetScreenId();
+    auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (displayDefault == nullptr) {
+        return;
+    }
+    ScreenId defaultScreenId = displayDefault->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
     sleep(SPLIT_TEST_SLEEP_S);

@@ -29,6 +29,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SceneSessionManagerStubTest : public testing::Test {
+static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -52,6 +53,7 @@ void SceneSessionManagerStubTest::SetUp()
 
 void SceneSessionManagerStubTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
