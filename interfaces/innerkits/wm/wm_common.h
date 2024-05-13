@@ -337,6 +337,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_START,
     PIP_SHOW,
     PIP_RATIO_CHANGE,
+    UPDATE_DPI_SYNC,
     END,
 };
 
