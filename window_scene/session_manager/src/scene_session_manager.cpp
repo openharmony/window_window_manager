@@ -4273,7 +4273,8 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
                         topNearestBlockingZOrder:  %{public}d", requestSessionZOrder, focusedSessionZOrder,
                         topNearestBlockingZOrder);
                 }
-                if (focusedSessionZOrder > topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder) {
+                if (focusedSessionZOrder > topNearestBlockingZOrder 
+                    && requestSessionZOrder < topNearestBlockingZOrder) {
                     TLOGI(WmsLogTag::WMS_FOCUS, "focus pass through, needs to be intercepted");
                     return WSError::WS_DO_NOTHING;
                 }
@@ -4337,7 +4338,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
  * Find the session through the specific zOrder, it is located abve it, its' blockingFocus attribute is true,
  * and it is the closest;
  */
-sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder) {
+sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder)
+{
     sptr<Session> ret = nullptr;
     auto func = [this, &ret, zOrder](sptr<SceneSession> session) {
         if (session == nullptr) {
@@ -4353,7 +4355,7 @@ sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder)
         }
         return false;
     }
-    TraverseSessionTree(func,false);
+    TraverseSessionTree(func, false);
     return ret;
 }
 
