@@ -992,6 +992,8 @@ ohos_unittest("ws_intention_event_manager_test") {
     "${window_base_path}/window_scene/intention_event:libintention_event",
   ]
 
+  public_deps = [ "//foundation/arkui/napi:ace_napi" ]
+
   external_deps = [
     "ability_runtime:mission_info",
     "ace_engine:ace_uicontent",
@@ -1097,7 +1099,6 @@ ohos_static_library("ws_unittest_common") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
-    "//foundation/arkui/napi:ace_napi",
   ]
 
   external_deps = [
