@@ -990,7 +990,6 @@ ohos_unittest("ws_intention_event_manager_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
-    "//foundation/arkui/napi:ace_napi",
   ]
 
   external_deps = [
@@ -1089,6 +1088,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/wm:libwm",
+    "//foundation/arkui/napi:ace_napi",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libxml2:libxml2",
