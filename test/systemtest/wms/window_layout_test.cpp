@@ -243,18 +243,13 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
-    // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
     if (statBar == nullptr) {
         return;
     }
     activeWindows_.push_back(statBar);
-
-    // naviBar window
     sptr<Window> naviBar = Utils::CreateNavigationBarWindow();
     activeWindows_.push_back(naviBar);
-
-    // sys window
     Utils::TestWindowInfo info = {
         .name = "main6",
         .rect = Utils::customAppRect_,
@@ -266,15 +261,14 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> sysWin = Utils::CreateTestWindow(info);
+    ASSERT_NE(sysWin, nullptr);
     activeWindows_.push_back(sysWin);
     if (statBar->Show() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, statBar->Show());
     } else if (statBar->Show() == WMError::WM_ERROR_INVALID_WINDOW) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, statBar->Show());
     }
-
     sysWin->Show();
-
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
@@ -283,15 +277,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
     } else {
         ASSERT_FALSE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
-
     if (WMError::WM_OK == naviBar->Show()) {
         ASSERT_EQ(WMError::WM_OK, naviBar->Show());
     }
-   
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
-   
     if (WMError::WM_OK == statBar->Hide()) {
         ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     }
@@ -316,6 +307,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
 
     // naviBar window
     sptr<Window> naviBar = Utils::CreateNavigationBarWindow();
+    ASSERT_NE(naviBar, nullptr);
     activeWindows_.push_back(naviBar);
     // sys window
     Utils::TestWindowInfo info = {
@@ -329,6 +321,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> sysWin = Utils::CreateTestWindow(info);
+    ASSERT_NE(sysWin, nullptr);
     activeWindows_.push_back(sysWin);
     if (statBar->Show() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, statBar->Show());

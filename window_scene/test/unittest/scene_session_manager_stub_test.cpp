@@ -36,6 +36,8 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void SceneSessionManagerStubTest::SetUpTestCase()
@@ -53,6 +55,7 @@ void SceneSessionManagerStubTest::SetUp()
 
 void SceneSessionManagerStubTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {

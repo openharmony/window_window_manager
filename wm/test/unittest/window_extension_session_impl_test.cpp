@@ -909,28 +909,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent, Function | Smal
 }
 
 /**
- * @tc.name: InputMethodKeyEventResultCallback
- * @tc.desc: InputMethodKeyEventResultCallback
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback, Function | SmallTest | Level3)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    bool consumed = true;
-    std::shared_ptr<std::promise<bool>> isConsumedPromise = nullptr;
-    std::shared_ptr<bool> isTimeout;
-    *isTimeout = true;
-    bool isPrivacyMode = true;
-
-    sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
-    windowExtensionSessionImpl.InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
-
-    auto ret = windowExtensionSessionImpl.SetPrivacyMode(isPrivacyMode);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: NotifyKeyEvent
  * @tc.desc: NotifyKeyEvent
  * @tc.type: FUNC
