@@ -1970,8 +1970,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
                 UpdatePrivateStateAndNotify(parentId);
             }
         } else {
-            HandleSCBExtWaterMarkChange(persistentId, false);
-            HandleSecureExtSessionShouldHide(persistentId, false);
+            ExtensionWindowFlags actions;
+            actions.SetAllActive();
+            HandleSpecialExtWindowFlagsChange(persistentId, ExtensionWindowFlags(), actions);
         }
         remoteExtSessionMap_.erase(iter);
     };
@@ -1994,9 +1995,13 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
-                        property->IsFloatingWindowAppType() && !secureSessionSet_.empty()) ||
-                       (SessionHelper::IsSubWindow(property->GetWindowType()) &&
-                        secureSessionSet_.find(property->GetParentPersistentId()) != secureSessionSet_.end());
+                        property->IsFloatingWindowAppType() && shouldHideNonSecureFloatingWindows_.load());
+    if (SessionHelper::IsSubWindow(property->GetWindowType())) {
+        auto parentSession = GetSceneSession(property->GetParentPersistentId());
+        if (parentSession) {
+            shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
+        }
+    }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -5052,7 +5057,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
                 break;
             }
         }
-        if (waterMarkSessionSet_.size() != 0) {
+        if (combinedExtWindowFlags_.waterMarkFlag) {
             TLOGI(WmsLogTag::WMS_UIEXT, "CheckAndNotifyWaterMarkChangedResult scb uiext has water mark");
             currentWaterMarkShowState = true;
         }
@@ -5061,7 +5066,6 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
         lastWaterMarkShowState_ = currentWaterMarkShowState;
         NotifyWaterMarkFlagChangedResult(currentWaterMarkShowState);
     }
-    return;
 }
 
 WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
@@ -7798,27 +7802,54 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
 }
 
-void SceneSessionManager::AddSecureSession(int32_t persistentId, bool shouldHide,
-    size_t& sizeBefore, size_t& sizeAfter)
+void SceneSessionManager::CalculateCombinedExtWindowFlags()
 {
-    sizeBefore = secureSessionSet_.size();
-    if (shouldHide) {
-        secureSessionSet_.insert(persistentId);
-    } else {
-        secureSessionSet_.erase(persistentId);
+    // Only correct when each flag is true when active, and once a uiextension is active, the host is active
+    combinedExtWindowFlags_.bitData = 0;
+    for (const auto& iter: extWindowFlagsMap_) {
+        combinedExtWindowFlags_.bitData |= iter.second.bitData;
     }
-    sizeAfter = secureSessionSet_.size();
 }
 
-void SceneSessionManager::HideNonSecureFloatingWindows(size_t sizeBefore, size_t sizeAfter, bool shouldHide)
+void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags,
+    ExtensionWindowFlags actions)
 {
-    auto stateShouldChange = (sizeBefore == 0 && sizeAfter > 0) || (sizeBefore > 0 && sizeAfter == 0);
-    if (!stateShouldChange) {
+    auto iter = extWindowFlagsMap_.find(persistentId);
+    // Each flag is false when inactive, 0 means all flags are inactive
+    auto oldFlags = iter != extWindowFlagsMap_.end() ? iter->second : ExtensionWindowFlags();
+    ExtensionWindowFlags newFlags((flags.bitData & actions.bitData) | (oldFlags.bitData & ~actions.bitData));
+    if (newFlags.bitData == 0) {
+        extWindowFlagsMap_.erase(persistentId);
+    } else {
+        extWindowFlagsMap_[persistentId] = newFlags;
+    }
+    CalculateCombinedExtWindowFlags();
+}
+
+void SceneSessionManager::HideNonSecureFloatingWindows()
+{
+    bool shouldHide = false;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter: sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session && session->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag) {
+                shouldHide = true;
+                break;
+            }
+        }
+    }
+    if (combinedExtWindowFlags_.hideNonSecureWindowsFlag) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "SCB UIExtension hide non-secure windows");
+        shouldHide = true;
+    }
+    if (shouldHide == shouldHideNonSecureFloatingWindows_.load()) {
         return;
     }
 
+    shouldHideNonSecureFloatingWindows_.store(shouldHide);
     for (const auto& item: nonSystemFloatSceneSessionMap_) {
-        auto session = item.second;
+        auto& session = item.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
             TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
@@ -7827,25 +7858,22 @@ void SceneSessionManager::HideNonSecureFloatingWindows(size_t sizeBefore, size_t
     }
 }
 
-void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession,
-    size_t sizeBefore, size_t sizeAfter, bool shouldHide)
+void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession)
 {
     // don't let sub-window show when switching secure host window to background
-    if (!sceneSession->IsSessionForeground() || sizeBefore == sizeAfter) {
+    if (!sceneSession->IsSessionForeground()) {
         return;
     }
 
     auto subSessions = sceneSession->GetSubSession();
+    bool shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
     for (const auto& subSession: subSessions) {
-        if (subSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "sub session is nullptr");
-            continue;
+        if (subSession) {
+            subSession->NotifyForceHideChange(shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
+                "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),
+                shouldHide);
         }
-
-        subSession->NotifyForceHideChange(shouldHide);
-        TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-            "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),
-            shouldHide);
     }
 }
 
@@ -7856,47 +7884,20 @@ WSError SceneSessionManager::HandleSecureSessionShouldHide(const sptr<SceneSessi
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
-    auto persistentId = sceneSession->GetPersistentId();
-    auto shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
-    size_t sizeBefore = 0;
-    size_t sizeAfter = 0;
-    AddSecureSession(persistentId, shouldHide, sizeBefore, sizeAfter);
-    HideNonSecureFloatingWindows(sizeBefore, sizeAfter, shouldHide);
-    HideNonSecureSubWindows(sceneSession, sizeBefore, sizeAfter, shouldHide);
-
+    HideNonSecureFloatingWindows();
+    HideNonSecureSubWindows(sceneSession);
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::HandleSecureExtSessionShouldHide(int32_t persistentId, bool shouldHide)
-{
-    size_t sizeBefore = 0;
-    size_t sizeAfter = 0;
-    AddSecureSession(persistentId, shouldHide, sizeBefore, sizeAfter);
-    HideNonSecureFloatingWindows(sizeBefore, sizeAfter, shouldHide);
-
-    return WSError::WS_OK;
-}
-
-WSError SceneSessionManager::HandleSCBExtWaterMarkChange(int32_t persistentId, bool isWaterMarkEnable)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "check watermark for scb uiext");
-    if (isWaterMarkEnable) {
-        waterMarkSessionSet_.insert(persistentId);
-    } else {
-        waterMarkSessionSet_.erase(persistentId);
-    }
-    CheckAndNotifyWaterMarkChangedResult();
-    return WSError::WS_OK;
-}
-
-void SceneSessionManager::HandleSpecialExtWindowFlagChange(int32_t persistentId, ExtensionWindowFlags flags,
+void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags flags,
     ExtensionWindowFlags actions)
 {
+    UpdateSpecialExtWindowFlags(persistentId, flags, actions);
     if (actions.waterMarkFlag) {
-        HandleSCBExtWaterMarkChange(persistentId, flags.waterMarkFlag);
+        CheckAndNotifyWaterMarkChangedResult();
     }
     if (actions.hideNonSecureWindowsFlag) {
-        HandleSecureExtSessionShouldHide(persistentId, flags.hideNonSecureWindowsFlag);
+        HideNonSecureFloatingWindows();
     }
 }
 
@@ -7957,7 +7958,7 @@ WSError SceneSessionManager::UpdateExtWindowFlags(int32_t parentId, int32_t pers
         if (sceneSession == nullptr) {
             TLOGD(WmsLogTag::WMS_UIEXT, "UpdateExtWindowFlags: Parent session with persistentId %{public}d not found",
                 parentId);
-            HandleSpecialExtWindowFlagChange(persistentId, flags, actions);
+            HandleSpecialExtWindowFlagsChange(persistentId, flags, actions);
             return WSError::WS_OK;
         }
 
