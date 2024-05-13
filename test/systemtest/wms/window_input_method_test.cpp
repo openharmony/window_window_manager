@@ -1,4 +1,4 @@
-   /*
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
 {
     inputMethodWindowInfo_.name = "input_method.2";
     const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
-    if (inputMethodWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(inputMethodWindow, nullptr);
     inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
     inputMethodWindow->Show();
     if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {

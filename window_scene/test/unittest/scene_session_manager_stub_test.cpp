@@ -29,13 +29,14 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SceneSessionManagerStubTest : public testing::Test {
-static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void SceneSessionManagerStubTest::SetUpTestCase()

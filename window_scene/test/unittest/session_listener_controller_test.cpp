@@ -115,13 +115,14 @@ private:
 };
 
 class SessionListenerControllerTest : public testing::Test {
-static constexpr int WAIT_SYNC_IN_NS = 200000;
   public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<SessionListenerController> slController;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 
