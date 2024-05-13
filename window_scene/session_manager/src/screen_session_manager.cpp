@@ -768,10 +768,6 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
 
 DMError ScreenSessionManager::GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("GetDensityInCurResolution permission denied!");
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         WLOGFE("GetDensityInCurResolution: Get ScreenSession failed");
@@ -1446,10 +1442,6 @@ std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
 
 DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("GetDisplayState permission denied!");
-        return DisplayState::UNKNOWN;
-    }
     return sessionDisplayPowerController_->GetDisplayState(displayId);
 }
 
