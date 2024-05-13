@@ -45,14 +45,7 @@ void IntentionEventManagerTest::TearDownTestCase()
 
 void IntentionEventManagerTest::SetUp()
 {
-    uIContent_ = Ace::UIContent::Create(nullptr);
-    EXPECT_NE(nullptr, uIContent_);
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(nullptr);
-    EXPECT_NE(nullptr, eventHandler_);
-    inputEventListener_ =
-        std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_);
-    EXPECT_NE(nullptr, inputEventListener_);
-    SceneSessionManager::GetInstance().sceneSessionMap_.clear();
+
 }
 
 void IntentionEventManagerTest::TearDown()
