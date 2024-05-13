@@ -74,6 +74,7 @@ std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathR
 std::recursive_mutex WindowImpl::globalMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
+bool WindowImpl::enableImmersiveMode_ = true;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -872,6 +873,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
             }
         }
     }
+    enableImmersiveMode_ = status;
     return ret;
 }
 
@@ -2021,6 +2023,34 @@ WMError WindowImpl::SetGlobalMaximizeMode(MaximizeMode mode)
 MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
 {
     return SingletonContainer::Get<WindowAdapter>().GetMaximizeMode();
+}
+
+WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(enable));
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid window or fullscreen mode is not be supported, winId:%{public}u",
+            property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const WindowType curWindowType = GetType();
+    if (!WindowHelper::IsMainWindow(curWindowType) && !WindowHelper::IsSubWindow(curWindowType)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    enableImmersiveMode_ = enable;
+    const WindowMode mode = GetMode();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        return SetLayoutFullScreen(enableImmersiveMode_);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowImpl::GetImmersiveModeEnabledState() const
+{
+    return enableImmersiveMode_;
 }
 
 WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)

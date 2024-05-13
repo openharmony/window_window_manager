@@ -1975,6 +1975,20 @@ public:
      * @return WM_OK means set success, others means set failed
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set whether to enable immersive mode.
+     * @param enable the value true means to enable immersive mode, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the immersive mode is enabled or not.
+     *
+     * @return true means the immersive mode is enabled, and false means the opposite.
+     */
+    virtual bool GetImmersiveModeEnabledState() const { return true; }
 };
 }
 }

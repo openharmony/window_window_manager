@@ -425,6 +425,20 @@ HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetImmersiveModeEnabledState
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetImmersiveModeEnabledState, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetImmersiveModeEnabledState(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetLayoutFullScreen
  * @tc.desc: get
  * @tc.type: FUNC
