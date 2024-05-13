@@ -1838,7 +1838,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             WLOGFE("UpdateNativeVisibility property is null");
             return;
         }
-    }
+    };
     PostTask(task, "UpdateNativeVisibility");
 }
 
