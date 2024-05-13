@@ -24,6 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class WindowManagerAgentProxyTest : public testing::Test {
+static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -45,6 +46,7 @@ void WindowManagerAgentProxyTest::SetUp()
 
 void WindowManagerAgentProxyTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {

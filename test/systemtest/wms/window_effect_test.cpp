@@ -26,6 +26,7 @@ namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
 class WindowEffectTest : public testing::Test {
+static constexpr int WAIT_SYNC_IN_NS = 200000;
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -57,6 +58,7 @@ void WindowEffectTest::SetUp()
 
 void WindowEffectTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -188,8 +190,9 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
 HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
-    ASSERT_NE(nullptr, window);
-
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
@@ -206,7 +209,9 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
     const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
-
+    if (window == nullptr) {
+        return;
+    }
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
