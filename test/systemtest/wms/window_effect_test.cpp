@@ -32,6 +32,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     Utils::TestWindowInfo windowInfo_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void WindowEffectTest::SetUpTestCase()
@@ -57,6 +59,7 @@ void WindowEffectTest::SetUp()
 
 void WindowEffectTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -206,6 +209,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
     const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
+    ASSERT_NE(nullptr, window);
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
