@@ -1000,9 +1000,6 @@ ohos_unittest("ws_intention_event_manager_test") {
     "hilog:libhilog",
     "input:libmmi-client",
   ]
-
-  public_external_deps = [ "accessibility:accessibility_interface" ]
-
 }
 
 ohos_unittest("ws_scene_session_manager_lite_stub_test") {
