@@ -376,9 +376,11 @@ private:
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestFocusBasicCheck(int32_t persistentId);
-    WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground);
+    WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
+    sptr<SceneSession> GetTopNearestBlockingFocusSession(int zOrder);
     sptr<SceneSession> GetTopFocusableNonAppSession();
     WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
