@@ -2348,6 +2348,8 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     }
     // Only detecting cold start scenarios on PC
     if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support cold start on pc, "
+            "persistentId:%{public}d", persistentId_);
         RemoveWindowDetectTask();
         return false;
     }
