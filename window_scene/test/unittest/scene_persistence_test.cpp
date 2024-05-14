@@ -179,7 +179,6 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     EXPECT_EQ(result, nullptr);
 }
 
-//===========================================================
 /**
  * @tc.name: IsSavingSnapshot
  * @tc.desc: test function : IsSavingSnapshot
