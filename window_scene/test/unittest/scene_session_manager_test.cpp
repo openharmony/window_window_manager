@@ -4246,7 +4246,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
-    sprt<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(nullptr, sceneSessionManager);
 
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(false), WSError::WS_OK);
