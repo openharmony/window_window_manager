@@ -26,14 +26,18 @@ namespace OHOS::Rosen {
 class WindowEventChannelListener : public IRemoteStub<IWindowEventChannelListener> {
 public:
     explicit WindowEventChannelListener() = default;
-    void SetTransferKeyEventForConsumedParams(const std::shared_ptr<std::promise<bool>>& isConsumedPromise,
-        const std::shared_ptr<WSError>& retCode);
+    void SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
+        const std::shared_ptr<std::promise<bool>>& isConsumedPromise, const std::shared_ptr<WSError>& retCode);
     void ResetTransferKeyEventForConsumedParams();
-    void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override;
+    void ResetTransferKeyEventForConsumedParams(bool isConsumed, WSError retCode);
+    void OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
+                                       bool isConsumed, WSError retCode) override;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     std::mutex transferKeyEventForConsumedMutex_;
+    int32_t keyEventId_ = 0;
+    bool isPreImeEvent_ = false;
     std::shared_ptr<std::promise<bool>> isConsumedPromise_ = nullptr;
     std::shared_ptr<WSError> retCode_ = nullptr;
 };

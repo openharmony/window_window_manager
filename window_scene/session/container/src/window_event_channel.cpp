@@ -30,7 +30,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
 }
 
-void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode)
+void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
+    bool isConsumed, WSError retCode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -39,12 +40,18 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(bool isConsu
         TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
         return;
     }
-
+    if (!data.WriteInt32(keyEventId)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "keyEventId write failed.");
+        return;
+    }
+    if (!data.WriteBool(isPreImeEvent)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "isPreImeEvent write failed.");
+        return;
+    }
     if (!data.WriteBool(isConsumed)) {
         TLOGE(WmsLogTag::WMS_EVENT, "isConsumed write failed.");
         return;
     }
-
     if (!data.WriteInt32(static_cast<int32_t>(retCode))) {
         TLOGE(WmsLogTag::WMS_EVENT, "retCode write failed.");
         return;
@@ -140,9 +147,10 @@ WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
         return ret;
     }
 
-    TLOGD(WmsLogTag::WMS_EVENT, "finished with isConsumed:%{public}d ret:%{public}d",
-        isConsumed, ret);
-    channelListener->OnTransferKeyEventForConsumed(isConsumed, ret);
+    auto keyEventId = keyEvent->GetId();
+    TLOGD(WmsLogTag::WMS_EVENT, "finished with isConsumed:%{public}d ret:%{public}d at PreIme:%{public}d id:%{public}d",
+        isConsumed, ret, isPreImeEvent, keyEventId);
+    channelListener->OnTransferKeyEventForConsumed(keyEventId, isPreImeEvent, isConsumed, ret);
     return ret;
 }
 
