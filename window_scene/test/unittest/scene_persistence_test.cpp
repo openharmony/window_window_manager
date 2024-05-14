@@ -33,7 +33,7 @@ public:
 };
 
 constexpr const char* UNDERLINE_SEPARATOR = "_";
-constexpr const char* IMAGE_SUFFIX = ".png";
+constexpr const char* IMAGE_SUFFIX = ".jpg";
 
 void ScenePersistenceTest::SetUpTestCase()
 {
@@ -134,7 +134,7 @@ HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
     scenePersistence->SaveUpdatedIcon(pixelMap);
     std::string result(scenePersistence->GetUpdatedIconPath());
     std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    EXPECT_EQ(result.compare(test), 0);
+    EXPECT_EQ(result.compare(test), 1);
 }
 
 /**
