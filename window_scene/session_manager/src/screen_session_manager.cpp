@@ -57,6 +57,7 @@ const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const int32_t SLEEP_10_MS = 10 * 1000; // 10ms
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 const std::u16string DEFAULT_USTRING = u"error";
 const std::string DEFAULT_STRING = "error";
 const std::string ARG_DUMP_HELP = "-h";
@@ -103,6 +104,7 @@ ScreenSessionManager::ScreenSessionManager()
 {
     screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CONSTRUCTION, "Dms construct.");
     LoadScreenSceneXml();
+    screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
@@ -1196,13 +1198,26 @@ void ScreenSessionManager::BlockScreenOnByCV(void)
 void ScreenSessionManager::BlockScreenOffByCV(void)
 {
     if (gotScreenOffNotify_  == false) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ set");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ set, delay:%{public}d", screenOffDelay_);
         needScreenOffNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOffMutex_);
-        if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_SCREENOFF_MS)) == std::cv_status::timeout) {
+        if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(screenOffDelay_)) == std::cv_status::timeout) {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout");
         }
     }
+}
+
+int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
+{
+    if (delay < CV_WAIT_SCREENOFF_MS) {
+        screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
+    } else if (delay > CV_WAIT_SCREENOFF_MS_MAX) {
+        screenOffDelay_ = CV_WAIT_SCREENOFF_MS_MAX;
+    } else {
+        screenOffDelay_ = delay;
+    }
+    TLOGI(WmsLogTag::DMS, "SetScreenOffDelayTime, delay:%{public}d", delay);
+    return screenOffDelay_;
 }
 
 bool ScreenSessionManager::IsScreenLockSuspend(void)
