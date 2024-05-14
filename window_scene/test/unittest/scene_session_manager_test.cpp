@@ -4238,6 +4238,24 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
+/**
+ * @tc.name: TestNotifyEnterRecentTask
+ * @tc.desc: Test whether the enterRecent_ is set correctly;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
+
+    bool enterRecent = false;
+    ASSERT_EQ(NotifyEnterRecentTask(enterRecent), WSError::WS_OK);
+    ASSERT_EQ(enterRecent_, false);
+
+    enterRecent = true;
+    ASSERT_EQ(NotifyEnterRecentTask(enterRecent), WSError::WS_OK);
+    ASSERT_EQ(enterRecent_, true);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

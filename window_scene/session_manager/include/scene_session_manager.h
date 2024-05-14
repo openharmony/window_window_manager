@@ -330,6 +330,7 @@ public:
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
+    WSError NotifyEnterRecentTask(bool enterRecent);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -636,6 +637,8 @@ private:
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
+
+    bool enterRecent_ = false;
 };
 } // namespace OHOS::Rosen
 

@@ -6563,7 +6563,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
-    if (sceneSession == nullptr) {
+    if ((sceneSession == nullptr) || (enterRecent_)) {
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
@@ -8416,5 +8416,14 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     TraverseSessionTree(func, true);
 
     return WMError::WM_OK;
+}
+
+WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
+
+    enterRecent_ = enterRecent;
+
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
