@@ -4246,14 +4246,14 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
+    sprt<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    ASSERT_NE(nullptr, sceneSessionManager);
 
-    bool enterRecent = false;
-    ASSERT_EQ(NotifyEnterRecentTask(enterRecent), WSError::WS_OK);
-    ASSERT_EQ(enterRecent_, false);
+    ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(false), WSError::WS_OK);
+    ASSERT_EQ(sceneSessionManager->enterRecent_, false);
 
-    enterRecent = true;
-    ASSERT_EQ(NotifyEnterRecentTask(enterRecent), WSError::WS_OK);
-    ASSERT_EQ(enterRecent_, true);
+    ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
+    ASSERT_EQ(sceneSessionManager->enterRecent_, true);
 }
 
 }
