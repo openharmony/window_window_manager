@@ -361,6 +361,15 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
     screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 
+int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return 0;
+    }
+    return screenSessionManager_->SetScreenOffDelayTime(delay);
+}
+
 void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     if (!screenSessionManager_) {

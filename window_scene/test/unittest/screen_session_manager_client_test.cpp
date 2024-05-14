@@ -382,6 +382,18 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetScreenOffDelayTime
+ * @tc.desc: SetScreenOffDelayTime test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenOffDelayTime, Function | SmallTest | Level2)
+{
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    int32_t ret = screenSessionManagerClient_->SetScreenOffDelayTime(1);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: GetDeviceScreenConfig
  * @tc.desc: GetDeviceScreenConfig test
  * @tc.type: FUNC
