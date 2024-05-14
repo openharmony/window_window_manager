@@ -57,9 +57,9 @@ namespace {
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 std::recursive_mutex g_mutex;
-static int ctorCnt = 0;
-static int dtorCnt = 0;
-static int finalizerCnt = 0;
+static int g_ctorCnt = 0;
+static int g_dtorCnt = 0;
+static int g_finalizerCnt = 0;
 
 #ifdef SCENE_BOARD_ENABLE
 static bool g_isSceneEnabled = SceneBoardJudgement::IsSceneBoardEnabled();
@@ -80,12 +80,12 @@ JsWindow::JsWindow(const sptr<Window>& window)
         WLOGI("Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGI(" constructorCnt: %{public}d", ++ctorCnt);
+    WLOGI(" constructorCnt: %{public}d", ++g_ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGI(" deConstructorCnt:%{public}d", ++dtorCnt);
+    WLOGI(" deConstructorCnt:%{public}d", ++g_dtorCnt);
     windowToken_ = nullptr;
 }
 
@@ -99,7 +99,7 @@ std::string JsWindow::GetWindowName()
 
 void JsWindow::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("finalizerCnt:%{public}d", ++finalizerCnt);
+    WLOGI("g_finalizerCnt:%{public}d", ++g_finalizerCnt);
     auto jsWin = std::unique_ptr<JsWindow>(static_cast<JsWindow*>(data));
     if (jsWin == nullptr) {
         WLOGFE("jsWin is nullptr");
@@ -3649,7 +3649,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
                 napi_get_value_bool(env, argv[0], &raiseEnabled));
         }
     }
-    
+
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, raiseEnabled, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -5579,7 +5579,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    
+
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         WLOGFE("height should greater than 37 or smaller than 112");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
