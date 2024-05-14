@@ -53,7 +53,7 @@ struct WindowTitleVisibleFlags {
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
-    explicit WindowSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSessionImpl(const sptr<WindowOption> option);
     ~WindowSessionImpl();
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
