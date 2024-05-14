@@ -55,7 +55,6 @@ ohos_fuzztest("WindowExtensionClStubFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-
   deps += [
     # deps file
     ":WindowExtensionClStubFuzzTest",
