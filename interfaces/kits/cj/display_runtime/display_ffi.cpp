@@ -79,7 +79,7 @@ uint32_t FfiOHOSDisplayGetId(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetId start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetInfoId();
@@ -91,7 +91,7 @@ char* FfiOHOSGetDisplayName(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSGetDisplayName");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return nullptr;
     }
     auto ret = instance->GetName();
@@ -103,7 +103,7 @@ bool FfiOHOSDisplayGetAlive(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetAlive start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return false;
     }
     auto ret = instance->GetAlive();
@@ -115,7 +115,7 @@ uint32_t FfiOHOSDisplayGetState(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetState start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetState();
@@ -127,7 +127,7 @@ uint32_t FfiOHOSDisplayGetRefreshRate(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetRefreshRate start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetRefreshRate();
@@ -139,7 +139,7 @@ uint32_t FfiOHOSDisplayGetRotation(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetRotation start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetRotation();
@@ -151,7 +151,7 @@ uint32_t FfiOHOSDisplayGetOrientation(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetOrientation start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetOrientation();
@@ -163,7 +163,7 @@ int32_t FfiOHOSDisplayGetWidth(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetWidth start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetWidth();
@@ -175,7 +175,7 @@ int32_t FfiOHOSDisplayGetHeight(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetHeight start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetHeight();
@@ -187,7 +187,7 @@ float FfiOHOSDisplayGetDensityDPI(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetVirtualPixelRatio start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetDensityDPI();
@@ -199,7 +199,7 @@ float FfiOHOSDisplayGetVirtualPixelRatio(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetVirtualPixelRatio start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetVirtualPixelRatio();
@@ -211,7 +211,7 @@ float FfiOHOSDisplayGetXDPI(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetXDPI start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetXDPI();
@@ -223,7 +223,7 @@ float FfiOHOSDisplayGetYDPI(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetYDPI start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetYDPI();
@@ -235,7 +235,7 @@ RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id)
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetCutoutInfo start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
         return {DM_ERROR_SYSTEM_INNORMAL, 0, nullptr};
     }
     auto ret = instance->GetCutoutInfo();

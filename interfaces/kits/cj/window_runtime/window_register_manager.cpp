@@ -14,6 +14,7 @@
  */
 
 #include "window_register_manager.h"
+#include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -176,7 +177,7 @@ WmErrorCode CjWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (callbackObject == NONE_CALLBACK_OBJECT) {
-        TLOGE(WmsLogTag::WMS_SUB, "[WindowRegister]Invalid callback object %{public}lld", callbackObject);
+        TLOGE(WmsLogTag::WMS_SUB, "[WindowRegister]Invalid callback object %{public}" PRId64, callbackObject);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<CjWindowListener> windowManagerListener = new(std::nothrow) CjWindowListener(callbackObject);

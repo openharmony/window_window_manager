@@ -74,7 +74,7 @@ int32_t FfiOHOSWindowHide(int64_t id)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] Hide start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->Hide();
@@ -87,7 +87,7 @@ int32_t FfiOHOSWindowHideWithAnimation(int64_t id)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] HideWithAnimation start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->HideWithAnimation();
@@ -100,7 +100,7 @@ int32_t FfiOHOSWindowShowWindow(int64_t id)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] ShowWindow start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->ShowWindow();
@@ -113,7 +113,7 @@ int32_t FfiOHOSWindowShowWithAnimation(int64_t id)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] ShowWithAnimation start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->ShowWithAnimation();
@@ -126,7 +126,7 @@ int32_t FfiOHOSWindowDestroyWindow(int64_t id)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] DestroyWindow start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->DestroyWindow();
@@ -139,7 +139,7 @@ int32_t FfiOHOSWindowMoveWindowTo(int64_t id, int32_t x, int32_t y)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] MoveWindowTo start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->MoveWindowTo(x, y);
@@ -152,7 +152,7 @@ int32_t FfiOHOSWindowResize(int64_t id, uint32_t width, uint32_t height)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] Resize start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->Resize(width, height);
@@ -165,7 +165,7 @@ int32_t FfiOHOSWindowSetWindowMode(int64_t id, uint32_t mode)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowMode start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowMode(mode);
@@ -179,7 +179,7 @@ CWindowProperties FfiOHOSWindowGetWindowProperties(int64_t id, int32_t* errCode)
     CWindowProperties res;
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         *errCode = WM_ERROR_STATE_ABNORMALLY;
         return res;
     }
@@ -193,7 +193,7 @@ int32_t FfiOHOSWindowSetWindowLayoutFullScreen(int64_t id, bool isLayoutFullScre
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowLayoutFullScreen start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowLayoutFullScreen(isLayoutFullScreen);
@@ -206,7 +206,7 @@ int32_t FfiOHOSSetWindowBackgroundColor(int64_t id, const char* color)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowBackgroundColor start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t ret = instance->SetWindowBackgroundColor(color);
@@ -219,7 +219,7 @@ int32_t FfiOHOSWindowSetWindowBrightness(int64_t id, float brightness)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowBrightness start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowBrightness(brightness);
@@ -232,7 +232,7 @@ int32_t FfiOHOSWindowSetWindowFocusable(int64_t id, bool focusable)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowFocusable start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowFocusable(focusable);
@@ -245,7 +245,7 @@ int32_t FfiOHOSWindowSetWindowKeepScreenOn(int64_t id, bool keepScreenOn)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowKeepScreenOn start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowKeepScreenOn(keepScreenOn);
@@ -258,7 +258,7 @@ int32_t FfiOHOSWindowSetWindowPrivacyMode(int64_t id, bool isPrivacyMode)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowPrivacyMode start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowPrivacyMode(isPrivacyMode);
@@ -271,7 +271,7 @@ int32_t FfiOHOSWindowSetWindowTouchable(int64_t id, bool touchable)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowTouchable start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetWindowTouchable(touchable);
@@ -284,7 +284,7 @@ int32_t FfiOHOSWindowSetForbidSplitMove(int64_t id, bool isForbidSplitMove)
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetForbidSplitMove start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         return WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t res = instance->SetForbidSplitMove(isForbidSplitMove);
@@ -298,7 +298,7 @@ bool FfiOHOSWindowIsWindowSupportWideGamut(int64_t id, int32_t* errCode)
     bool res = false;
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         *errCode = WM_ERROR_STATE_ABNORMALLY;
         return res;
     }
@@ -313,7 +313,7 @@ bool FfiOHOSWindowIsWindowShowing(int64_t id, int32_t* errCode)
     bool res = false;
     auto instance = FFIData::GetData<CJWindowImpl>(id);
     if (instance == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}lld", id);
+        TLOGE(WmsLogTag::WMS_DIALOG, "[Window] instance not exist %{public}" PRId64, id);
         *errCode = WM_ERROR_STATE_ABNORMALLY;
         return res;
     }
