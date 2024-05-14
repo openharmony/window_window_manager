@@ -35,7 +35,7 @@ ohos_shared_library("cj_display_ffi") {
     ":display_config",
     "../../../../resources/config/build:coverage_flags",
   ]
-  if (product_name != "ohos-sdk") {
+  if (!build_ohos_sdk) {
     sources = [
       "cj_display_impl.cpp",
       "cj_display_manager.cpp",
