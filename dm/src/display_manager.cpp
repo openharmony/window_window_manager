@@ -700,13 +700,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
     const Media::Size &size, int rotation, DmErrorCode* errorCode)
 {
-    if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId invalid!");
-        return nullptr;
-    }
-
-    std::shared_ptr<Media::PixelMap> screenShot =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode);
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(displayId, errorCode);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
