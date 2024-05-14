@@ -178,6 +178,53 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     result = scenePersistence->GetLocalSnapshotPixelMap(0.8, 0.2);
     EXPECT_EQ(result, nullptr);
 }
+
+//===========================================================
+/**
+ * @tc.name: IsSavingSnapshot
+ * @tc.desc: test function : IsSavingSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, IsSavingSnapshot, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence);
+    bool result = scenePersistence->IsSavingSnapshot();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetSnapshotFilePath
+ * @tc.desc: test function : GetSnapshotFilePath
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, GetSnapshotFilePath, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence);
+    scenePersistence->RenameSnapshotFromOldPersistentId(0);
+    auto result = scenePersistence->GetSnapshotFilePath();
+    ASSERT_EQ(result, scenePersistence->snapshotPath_);
+}
+
+/**
+ * @tc.name: GetSnapshotFilePathFromAce
+ * @tc.desc: test function : GetSnapshotFilePathFromAce
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, GetSnapshotFilePathFromAce, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence);
+    auto result = scenePersistence->GetSnapshotFilePathFromAce();
+    ASSERT_EQ(result, scenePersistence->snapshotPath_);
+}
 }
 }
 }
