@@ -48,7 +48,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     parcel.WriteBuffer(data, size);
     parcel.RewindRead(0);
     sptr<IWindowExtensionCallback> componentCallback;
-    std::shared_ptr<WindowExtensionClientStubImpl> extensionStubClient = std::make_shared<WindowExtensionClientStubImpl>(componentCallback);
+    std::shared_ptr<WindowExtensionClientStubImpl> extensionStubClient =
+        std::make_shared<WindowExtensionClientStubImpl>(componentCallback);
     extensionStubClient->OnRemoteRequest(
         static_cast<uint32_t>(IWindowExtensionClient::TRANS_ID_ON_WINDOW_READY),
         parcel, reply, option);
