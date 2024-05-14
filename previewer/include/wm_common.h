@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -558,7 +558,7 @@ enum class WindowAnimation : uint32_t {
  *
  * @brief Area needed to avoid.
  */
-class AvoidArea : public Parcelable {
+class AvoidArea : virtual public RefBase {
 public:
     Rect topRect_ { 0, 0, 0, 0 };
     Rect leftRect_ { 0, 0, 0, 0 };
@@ -586,26 +586,6 @@ public:
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
             parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
-    }
-
-    static AvoidArea* Unmarshalling(Parcel& parcel)
-    {
-        AvoidArea *avoidArea = new(std::nothrow) AvoidArea();
-        if (avoidArea == nullptr) {
-            return nullptr;
-        }
-        if (ReadParcel(parcel, avoidArea->leftRect_) && ReadParcel(parcel, avoidArea->topRect_) &&
-            ReadParcel(parcel, avoidArea->rightRect_) && ReadParcel(parcel, avoidArea->bottomRect_)) {
-            return avoidArea;
-        }
-        delete avoidArea;
-        return nullptr;
-    }
-
-    virtual bool Marshalling(Parcel& parcel) const override
-    {
-        return (WriteParcel(parcel, leftRect_) && WriteParcel(parcel, topRect_) &&
-            WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
     }
 
     bool isEmptyAvoidArea() const
