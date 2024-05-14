@@ -40,7 +40,6 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyE
         TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
         return;
     }
-
     if (!data.WriteInt32(keyEventId)) {
         TLOGE(WmsLogTag::WMS_EVENT, "keyEventId write failed.");
         return;

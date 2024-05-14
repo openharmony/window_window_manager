@@ -41,6 +41,7 @@ void WindowEventChannelListener::ResetTransferKeyEventForConsumedParams()
     retCode_ = nullptr;
     isConsumedPromise_ = nullptr;
 }
+
 void WindowEventChannelListener::ResetTransferKeyEventForConsumedParams(bool isConsumed, WSError retCode)
 {
     std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
@@ -323,7 +324,7 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
         isConsumed = isConsumedFuture.get();
         ret = *retCode;
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d Timeout: %{public}d ret:%{public}d at PreIme:%{public}d "
+    TLOGI(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d Timeout:%{public}d ret:%{public}d at PreIme:%{public}d "
         "id:%{public}d.", isConsumed, isTimeout, ret, isPreImeEvent, keyEventId);
     return ret;
 }
