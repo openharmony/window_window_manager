@@ -23,13 +23,14 @@
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
+
 /**
  * @brief Enumerates type of window.
  */
 enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
-    WINDOW_TYPE_APP_MAIN_WINDOW = APP_MAIN_WINDOW_BASE,
+    WINDOW_TYPE_APP_MAIN_WINDOW = APP_WINDOW_BASE,
     APP_MAIN_WINDOW_END,
 
     APP_SUB_WINDOW_BASE = 1000,
@@ -90,31 +91,17 @@ enum class WindowType : uint32_t {
 };
 
 /**
- * @brief Enumerates mode of window.
+ * @brief Enumerates state of window.
  */
-enum class WindowMode : uint32_t {
-    WINDOW_MODE_UNDEFINED = 0,
-    WINDOW_MODE_FULLSCREEN = 1,
-    WINDOW_MODE_SPLIT_PRIMARY = 100,
-    WINDOW_MODE_SPLIT_SECONDARY,
-    WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
-};
-
-/**
- * @brief Enumerates mode supported of window.
- */
-enum WindowModeSupport : uint32_t {
-    WINDOW_MODE_SUPPORT_FULLSCREEN = 1 << 0,
-    WINDOW_MODE_SUPPORT_FLOATING = 1 << 1,
-    WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
-    WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
-    WINDOW_MODE_SUPPORT_PIP = 1 << 4,
-    WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
-                              WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                              WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
-                              WINDOW_MODE_SUPPORT_FLOATING |
-                              WINDOW_MODE_SUPPORT_PIP
+enum class WindowState : uint32_t {
+    STATE_INITIAL,
+    STATE_CREATED,
+    STATE_SHOWN,
+    STATE_HIDDEN,
+    STATE_FROZEN,
+    STATE_UNFROZEN,
+    STATE_DESTROYED,
+    STATE_BOTTOM = STATE_DESTROYED // Add state type after STATE_DESTROYED is not allowed.
 };
 
 /**
@@ -128,17 +115,43 @@ enum class WindowBlurStyle : uint32_t {
 };
 
 /**
- * @brief Enumerates state of window.
+ * @brief Enumerates mode supported of window.
  */
-enum class WindowState : uint32_t {
-    STATE_INITIAL,
-    STATE_CREATED,
-    STATE_SHOWN,
-    STATE_HIDDEN,
-    STATE_FROZEN,
-    STATE_UNFROZEN,
-    STATE_DESTROYED,
-    STATE_BOTTOM = STATE_DESTROYED, // Add state type after STATE_DESTROYED is not allowed
+enum WindowModeSupport : uint32_t {
+    WINDOW_MODE_SUPPORT_FULLSCREEN = 1 << 0,
+    WINDOW_MODE_SUPPORT_FLOATING = 1 << 1,
+    WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
+    WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
+    WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FLOATING |
+                              WINDOW_MODE_SUPPORT_FULLSCREEN |
+                              WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                              WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
+                              WINDOW_MODE_SUPPORT_PIP
+};
+
+/**
+ * @brief Enumerates mode of window.
+ */
+enum class WindowMode : uint32_t {
+    WINDOW_MODE_UNDEFINED = 0,
+    WINDOW_MODE_FULLSCREEN = 1,
+    WINDOW_MODE_SPLIT_PRIMARY = 100,
+    WINDOW_MODE_SPLIT_SECONDARY,
+    WINDOW_MODE_FLOATING,
+    WINDOW_MODE_PIP
+};
+
+/**
+ * @brief Enumerates status of window.
+ */
+enum class WindowStatus : uint32_t {
+    WINDOW_STATUS_UNDEFINED = 0,
+    WINDOW_STATUS_FULLSCREEN = 1,
+    WINDOW_STATUS_MAXMIZE,
+    WINDOW_STATUS_MINIMIZE,
+    WINDOW_STATUS_FLOATING,
+    WINDOW_STATUS_SPLITSCREEN
 };
 
 /**
@@ -162,9 +175,9 @@ enum class WMError : int32_t {
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
 
-    WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
+    WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system.
 
-    WM_ERROR_NEED_REPORT_BASE = 1000, // error code > 1000 means need report
+    WM_ERROR_NEED_REPORT_BASE = 1000, // error code > 1000 means need report.
     WM_ERROR_NULLPTR,
     WM_ERROR_INVALID_TYPE,
     WM_ERROR_INVALID_PARAM,
@@ -176,7 +189,7 @@ enum class WMError : int32_t {
     WM_ERROR_PIP_STATE_ABNORMALLY,
     WM_ERROR_PIP_CREATE_FAILED,
     WM_ERROR_PIP_INTERNAL_ERROR,
-    WM_ERROR_PIP_REPEAT_OPERATION,
+    WM_ERROR_PIP_REPEAT_OPERATION
 };
 
 /**
@@ -188,6 +201,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_NOT_SYSTEM_APP = 202,
     WM_ERROR_INVALID_PARAM = 401,
     WM_ERROR_DEVICE_NOT_SUPPORT = 801,
+
     WM_ERROR_REPEAT_OPERATION = 1300001,
     WM_ERROR_STATE_ABNORMALLY = 1300002,
     WM_ERROR_SYSTEM_ABNORMALLY = 1300003,
@@ -202,30 +216,31 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
     WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
-    WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
-};
-
-
-/**
- * @brief Enumerates status of window.
- */
-enum class WindowStatus : uint32_t {
-    WINDOW_STATUS_UNDEFINED = 0,
-    WINDOW_STATUS_FULLSCREEN = 1,
-    WINDOW_STATUS_MAXMIZE,
-    WINDOW_STATUS_MINIMIZE,
-    WINDOW_STATUS_FLOATING,
-    WINDOW_STATUS_SPLITSCREEN
+    WM_ERROR_PIP_REPEAT_OPERATION = 1300015
 };
 
 /**
- * @brief Enumerates setting flag of systemStatusBar
+ * @brief Enumerates setting flag of systemStatusBar.
  */
 enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
     ALL_SETTING = 0b11
+};
+
+/**
+ * @brief Enumerates flag of window.
+ */
+enum class WindowFlag : uint32_t {
+    WINDOW_FLAG_NEED_AVOID = 1,
+    WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
+    WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
+    WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
+    WINDOW_FLAG_WATER_MARK = 1 << 4,
+    WINDOW_FLAG_IS_MODAL = 1 << 5,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_END = 1 << 7
 };
 
 /**
@@ -256,20 +271,6 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
 };
 
 /**
- * @brief Enumerates flag of window.
- */
-enum class WindowFlag : uint32_t {
-    WINDOW_FLAG_NEED_AVOID = 1,
-    WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
-    WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
-    WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
-    WINDOW_FLAG_WATER_MARK = 1 << 4,
-    WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_END = 1 << 7,
-};
-
-/**
  * @brief Enumerates window size change reason.
  */
 enum class WindowSizeChangeReason : uint32_t {
@@ -292,7 +293,42 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_START,
     PIP_SHOW,
     PIP_RATIO_CHANGE,
-    END,
+    END
+};
+
+/**
+ * @brief Enumerates window gravity.
+ */
+enum class WindowGravity : uint32_t {
+    WINDOW_GRAVITY_FLOAT = 0,
+    WINDOW_GRAVITY_BOTTOM
+};
+
+/**
+ * @brief Enumerates window session type.
+ */
+enum class WindowSessionType : uint32_t {
+    SCENE_SESSION = 0,
+    EXTENSION_SESSION = 1
+};
+
+/**
+ * @brief Enumerates window tag.
+ */
+enum class WindowTag : uint32_t {
+    MAIN_WINDOW = 0,
+    SUB_WINDOW = 1,
+    SYSTEM_WINDOW = 2
+};
+
+/**
+ * @brief Enumerates drag event.
+ */
+enum class DragEvent : uint32_t {
+    DRAG_EVENT_IN  = 1,
+    DRAG_EVENT_OUT,
+    DRAG_EVENT_MOVE,
+    DRAG_EVENT_END
 };
 
 /**
@@ -305,61 +341,27 @@ enum class WindowLayoutMode : uint32_t {
     END,
 };
 
-/**
- * @brief Enumerates drag event.
- */
-enum class DragEvent : uint32_t {
-    DRAG_EVENT_IN  = 1,
-    DRAG_EVENT_OUT,
-    DRAG_EVENT_MOVE,
-    DRAG_EVENT_END,
-};
+namespace {
+    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 
-/**
- * @brief Enumerates window tag.
- */
-enum class WindowTag : uint32_t {
-    MAIN_WINDOW = 0,
-    SUB_WINDOW = 1,
-    SYSTEM_WINDOW = 2,
-};
-
-/**
- * @brief Enumerates window session type.
- */
-enum class WindowSessionType : uint32_t {
-    SCENE_SESSION = 0,
-    EXTENSION_SESSION = 1,
-};
-
-/**
- * @brief Enumerates window gravity.
- */
-enum class WindowGravity : uint32_t {
-    WINDOW_GRAVITY_FLOAT = 0,
-    WINDOW_GRAVITY_BOTTOM,
-};
+    constexpr uint32_t INVALID_WINDOW_ID = 0;
+    constexpr int32_t INVALID_PID = -1;
+    constexpr int32_t INVALID_UID = -1;
+}
 
 /**
  * @struct PointInfo.
  *
- * @brief point Info.
+ * @brief Point info.
  */
 struct PointInfo {
     int32_t x;
     int32_t y;
 };
-
-namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
-}
 
 /**
  * @class Transform
@@ -376,17 +378,17 @@ public:
 
     bool operator==(const Transform& right) const
     {
-        return NearZero(pivotX_ - right.pivotX_) &&
-            NearZero(pivotY_ - right.pivotY_) &&
-            NearZero(scaleX_ - right.scaleX_) &&
+        return NearZero(scaleX_ - right.scaleX_) &&
             NearZero(scaleY_ - right.scaleY_) &&
             NearZero(scaleZ_ - right.scaleZ_) &&
-            NearZero(rotationX_ - right.rotationX_) &&
-            NearZero(rotationY_ - right.rotationY_) &&
-            NearZero(rotationZ_ - right.rotationZ_) &&
+            NearZero(pivotX_ - right.pivotX_) &&
+            NearZero(pivotY_ - right.pivotY_) &&
             NearZero(translateX_ - right.translateX_) &&
             NearZero(translateY_ - right.translateY_) &&
-            NearZero(translateZ_ - right.translateZ_);
+            NearZero(translateZ_ - right.translateZ_) &&
+            NearZero(rotationX_ - right.rotationX_) &&
+            NearZero(rotationY_ - right.rotationY_) &&
+            NearZero(rotationZ_ - right.rotationZ_);
     }
 
     bool operator!=(const Transform& right) const
@@ -394,23 +396,23 @@ public:
         return !(*this == right);
     }
 
-    float pivotX_;
-    float pivotY_;
-    float scaleX_;
-    float scaleY_;
-    float scaleZ_;
-    float rotationX_;
-    float rotationY_;
-    float rotationZ_;
-    float translateX_;
-    float translateY_;
-    float translateZ_;
-
     static const Transform& Identity()
     {
         static Transform I;
         return I;
     }
+
+    float pivotX_;
+    float pivotY_;
+    float scaleX_;
+    float scaleY_;
+    float scaleZ_;
+    float translateX_;
+    float translateY_;
+    float translateZ_;
+    float rotationX_;
+    float rotationY_;
+    float rotationZ_;
 
     bool Marshalling(Parcel& parcel) const
     {
@@ -422,52 +424,23 @@ public:
 
     void Unmarshalling(Parcel& parcel)
     {
-        pivotX_ = parcel.ReadFloat();
-        pivotY_ = parcel.ReadFloat();
         scaleX_ = parcel.ReadFloat();
         scaleY_ = parcel.ReadFloat();
         scaleZ_ = parcel.ReadFloat();
-        rotationX_ = parcel.ReadFloat();
-        rotationY_ = parcel.ReadFloat();
-        rotationZ_ = parcel.ReadFloat();
+        pivotX_ = parcel.ReadFloat();
+        pivotY_ = parcel.ReadFloat();
         translateX_ = parcel.ReadFloat();
         translateY_ = parcel.ReadFloat();
         translateZ_ = parcel.ReadFloat();
+        rotationX_ = parcel.ReadFloat();
+        rotationY_ = parcel.ReadFloat();
+        rotationZ_ = parcel.ReadFloat();
     }
+
 private:
     static inline bool NearZero(float val)
     {
         return val < 0.001f && val > -0.001f;
-    }
-};
-
-/**
- * @struct SystemBarProperty
- *
- * @brief Property of system bar
- */
-struct SystemBarProperty {
-    bool enable_;
-    uint32_t backgroundColor_;
-    uint32_t contentColor_;
-    bool enableAnimation_;
-    SystemBarSettingFlag settingFlag_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
-                          enableAnimation_(false), settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
-    SystemBarProperty(bool enable, uint32_t background, uint32_t content)
-        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(false),
-          settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
-    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
-        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
-          settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
-    SystemBarProperty(bool enable, uint32_t background, uint32_t content,
-                      bool enableAnimation, SystemBarSettingFlag settingFlag)
-        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
-          settingFlag_(settingFlag) {}
-    bool operator == (const SystemBarProperty& a) const
-    {
-        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
-            enableAnimation_ == a.enableAnimation_);
     }
 };
 
@@ -477,10 +450,10 @@ struct SystemBarProperty {
  * @brief Window Rect
  */
 struct Rect {
-    int32_t posX_;
-    int32_t posY_;
     uint32_t width_;
     uint32_t height_;
+    int32_t posX_;
+    int32_t posY_;
 
     bool operator==(const Rect& a) const
     {
@@ -492,15 +465,46 @@ struct Rect {
         return !this->operator==(a);
     }
 
-    bool IsUninitializedRect() const
-    {
-        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
-    }
-
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+};
+
+/**
+ * @struct SystemBarProperty
+ *
+ * @brief Property of system bar
+ */
+struct SystemBarProperty {
+    bool enable_;
+    bool enableAnimation_;
+    uint32_t contentColor_;
+    uint32_t backgroundColor_;
+    SystemBarSettingFlag settingFlag_;
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
+                          enableAnimation_(false), settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content, bool enableAnimation)
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
+          settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content)
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(false),
+          settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content,
+                      bool enableAnimation, SystemBarSettingFlag settingFlag)
+        : enable_(enable), backgroundColor_(background), contentColor_(content), enableAnimation_(enableAnimation),
+          settingFlag_(settingFlag) {}
+
+    bool operator == (const SystemBarProperty& a) const
+    {
+        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
+            enableAnimation_ == a.enableAnimation_);
     }
 };
 
@@ -508,18 +512,11 @@ struct Rect {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_SYSTEM,           // area of SystemUI
-    TYPE_CUTOUT,           // cutout of screen
-    TYPE_SYSTEM_GESTURE,   // area for system gesture
-    TYPE_KEYBOARD,         // area for soft input keyboard
+    TYPE_SYSTEM,               // area of SystemUI
+    TYPE_CUTOUT,               // cutout of screen
+    TYPE_SYSTEM_GESTURE,       // area for system gesture
+    TYPE_KEYBOARD,             // area for soft input keyboard
     TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
-};
-
-/**
- * @brief Enumerates occupied area type.
- */
-enum class OccupiedAreaType : uint32_t {
-    TYPE_INPUT, // area of input window
 };
 
 /**
@@ -531,13 +528,10 @@ enum class ColorSpace : uint32_t {
 };
 
 /**
- * @brief Enumerates window animation.
+ * @brief Enumerates occupied area type.
  */
-enum class WindowAnimation : uint32_t {
-    NONE,
-    DEFAULT,
-    INPUTE,
-    CUSTOM,
+enum class OccupiedAreaType : uint32_t {
+    TYPE_INPUT, // area of input window
 };
 
 /**
@@ -546,7 +540,17 @@ enum class WindowAnimation : uint32_t {
 enum class MaximizeMode : uint32_t {
     MODE_AVOID_SYSTEM_BAR,
     MODE_FULL_FILL,
-    MODE_RECOVER,
+    MODE_RECOVER
+};
+
+/**
+ * @brief Enumerates window animation.
+ */
+enum class WindowAnimation : uint32_t {
+    NONE,
+    DEFAULT,
+    INPUTE,
+    CUSTOM
 };
 
 /**
@@ -556,14 +560,14 @@ enum class MaximizeMode : uint32_t {
  */
 class AvoidArea : public Parcelable {
 public:
-    Rect topRect_ { 0, 0, 0, 0 };
     Rect leftRect_ { 0, 0, 0, 0 };
+    Rect topRect_ { 0, 0, 0, 0 };
     Rect rightRect_ { 0, 0, 0, 0 };
     Rect bottomRect_ { 0, 0, 0, 0 };
 
     bool operator==(const AvoidArea& a) const
     {
-        return (leftRect_ == a.leftRect_ && topRect_ == a.topRect_ &&
+        return (topRect_ == a.topRect_ && leftRect_ == a.leftRect_ &&
             rightRect_ == a.rightRect_ && bottomRect_ == a.bottomRect_);
     }
 
@@ -572,10 +576,10 @@ public:
         return !this->operator==(a);
     }
 
-    bool isEmptyAvoidArea() const
+    static inline bool ReadParcel(Parcel& parcel, Rect& rect)
     {
-        return topRect_.IsUninitializedRect() && leftRect_.IsUninitializedRect() &&
-            rightRect_.IsUninitializedRect() && bottomRect_.IsUninitializedRect();
+        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
+            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
     }
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
@@ -584,15 +588,9 @@ public:
             parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
 
-    static inline bool ReadParcel(Parcel& parcel, Rect& rect)
-    {
-        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
-            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
-    }
-
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        return (WriteParcel(parcel, leftRect_) && WriteParcel(parcel, topRect_) &&
+        return (WriteParcel(parcel, topRect_) && WriteParcel(parcel, leftRect_) &&
             WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
     }
 
@@ -602,25 +600,19 @@ public:
         if (avoidArea == nullptr) {
             return nullptr;
         }
-        if (ReadParcel(parcel, avoidArea->leftRect_) && ReadParcel(parcel, avoidArea->topRect_) &&
+        if (ReadParcel(parcel, avoidArea->topRect_) && ReadParcel(parcel, avoidArea->leftRect_) &&
             ReadParcel(parcel, avoidArea->rightRect_) && ReadParcel(parcel, avoidArea->bottomRect_)) {
             return avoidArea;
         }
         delete avoidArea;
         return nullptr;
     }
-};
 
-/**
- * @brief Enumerates window update type.
- */
-enum class WindowUpdateType : int32_t {
-    WINDOW_UPDATE_ADDED = 1,
-    WINDOW_UPDATE_REMOVED,
-    WINDOW_UPDATE_FOCUSED,
-    WINDOW_UPDATE_BOUNDS,
-    WINDOW_UPDATE_ACTIVE,
-    WINDOW_UPDATE_PROPERTY,
+    bool isEmptyAvoidArea() const
+    {
+        return topRect_.IsUninitializedRect() && leftRect_.IsUninitializedRect() &&
+            rightRect_.IsUninitializedRect() && bottomRect_.IsUninitializedRect();
+    }
 };
 
 using OnCallback = std::function<void(int64_t)>;
@@ -634,13 +626,26 @@ struct VsyncCallback {
     OnCallback onCallback;
 };
 
+/**
+ * @brief Enumerates window update type.
+ */
+enum class WindowUpdateType : int32_t {
+    WINDOW_UPDATE_ADDED = 1,
+    WINDOW_UPDATE_REMOVED,
+    WINDOW_UPDATE_FOCUSED,
+    WINDOW_UPDATE_BOUNDS,
+    WINDOW_UPDATE_ACTIVE,
+    WINDOW_UPDATE_PROPERTY
+};
+
 struct WindowLimits {
     uint32_t maxWidth_;
-    uint32_t maxHeight_;
     uint32_t minWidth_;
+    uint32_t maxHeight_;
     uint32_t minHeight_;
     float maxRatio_;
     float minRatio_;
+
     WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
         minRatio_(0.0f) {}
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
@@ -649,7 +654,7 @@ struct WindowLimits {
 
     bool IsEmpty() const
     {
-        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+        return (maxHeight_ == 0 || minHeight_ == 0 || maxWidth_ == 0 || minWidth_ == 0);
     }
 };
 
@@ -659,10 +664,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
     uint32_t width_;
     uint32_t height_;
+    int32_t posX_;
+    int32_t posY_;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -674,15 +679,15 @@ struct TitleButtonRect {
         return !this->operator==(a);
     }
 
-    bool IsUninitializedRect() const
-    {
-        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
-    }
-
     bool IsInsideOf(const TitleButtonRect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
 };
 
@@ -691,10 +696,10 @@ struct TitleButtonRect {
  */
 class KeyboardAnimationConfig : public Parcelable {
 public:
-    std::string curveType_ = "";
-    std::vector<float> curveParams_ = {};
     uint32_t durationIn_ = 0;
     uint32_t durationOut_ = 0;
+    std::string curveType_ = "";
+    std::vector<float> curveParams_ = {};
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -703,7 +708,11 @@ public:
         }
 
         auto paramSize = curveParams_.size();
-        if (paramSize == 4) { // 4: param size
+        if (paramSize != 4) {
+            if (!parcel.WriteUint32(0)) {
+                return false;
+            }
+        } else { // 4: param size
             if (!parcel.WriteUint32(static_cast<uint32_t>(paramSize))) {
                 return false;
             }
@@ -711,10 +720,6 @@ public:
                 if (!parcel.WriteFloat(param)) {
                     return false;
                 }
-            }
-        } else {
-            if (!parcel.WriteUint32(0)) {
-                return false;
             }
         }
 
@@ -728,9 +733,9 @@ public:
     {
         KeyboardAnimationConfig* config = new KeyboardAnimationConfig;
         config->curveType_ = parcel.ReadString();
-        auto paramSize = parcel.ReadUint32();
-        if (paramSize == 4) { // 4: param size
-            for (uint32_t i = 0; i < paramSize; i++) {
+        auto parameterSize = parcel.ReadUint32();
+        if (parameterSize == 4) { // 4: param size
+            for (uint32_t i = 0; i < parameterSize; i++) {
                 config->curveParams_.push_back(parcel.ReadFloat());
             }
         }
@@ -740,18 +745,18 @@ public:
     }
 };
 
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
+};
+
 /**
  * maximize layout show type
  */
 enum ShowType : int32_t {
-    SHOW, // normally show
-    HIDE, // show when hover, but hide normally
+    SHOW,     // normally show
+    HIDE,     // show when hover, but hide normally
     FORBIDDEN // hide always
-};
-
-struct MaximizeLayoutOption {
-    ShowType decor = ShowType::HIDE;
-    ShowType dock = ShowType::HIDE;
 };
 }
 }

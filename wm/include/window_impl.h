@@ -105,7 +105,7 @@ class WindowImpl : public Window, AAFwk::PrepareTerminateCallbackStub {
     } while (0)
 
 public:
-    explicit WindowImpl(const sptr<WindowOption>& option);
+    explicit WindowImpl(const sptr<WindowOption> option);
     ~WindowImpl();
 
     static sptr<Window> Find(const std::string& id);
@@ -520,7 +520,7 @@ private:
             reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
             reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
     }
-    void InitWindowProperty(const sptr<WindowOption>& option);
+    void InitWindowProperty(const sptr<WindowOption> option);
     void ClearListenersById(uint32_t winId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
