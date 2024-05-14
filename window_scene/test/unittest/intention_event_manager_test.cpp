@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "intention_event/include/intention_event_manager.h"
+#include "mock_uicontent.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 
