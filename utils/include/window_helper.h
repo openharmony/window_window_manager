@@ -33,6 +33,11 @@ public:
         return (type >= WindowType::APP_MAIN_WINDOW_BASE && type < WindowType::APP_MAIN_WINDOW_END);
     }
 
+    static inline bool IsMainWindowAndNotShown(WindowType type, WindowState state)
+    {
+        return (IsMainWindow(type) && state != WindowState::STATE_SHOWN);
+    }
+
     static inline bool IsSubWindow(WindowType type)
     {
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
