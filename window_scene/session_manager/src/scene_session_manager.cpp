@@ -6532,7 +6532,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
                 sessionInfo.abilityName_, sessionInfo.moduleName_);
             std::string localDeviceId;
             if (GetLocalDeviceId(localDeviceId)) {
-                elementName.SetDeviceID(localDeviceId);
+                element.SetDeviceID(localDeviceId);
             }
             return WSError::WS_OK;
         }
