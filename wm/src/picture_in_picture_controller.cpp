@@ -263,7 +263,8 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
             pipOption_->GetPipTemplate(), FAILED, "window is null");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
+    if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED ||
+        curState_ == PiPWindowState::STATE_RESTORING) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(StopPipType::USER_STOP),
             pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
@@ -508,8 +509,10 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         }
     }
     if (handler_) {
+        curState_ = PiPWindowState::STATE_RESTORING;
         auto stopTask = [weakThis = wptr(this)]() {
             auto controller = weakThis.promote();
+            curState_ = PiPWindowState::STATE_UNDEFINED;
             if (!controller) {
                 TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
                 return;
