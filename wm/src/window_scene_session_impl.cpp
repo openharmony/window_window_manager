@@ -2220,7 +2220,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
 void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     WLOGD("notify scene ace update config");
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
@@ -2229,7 +2229,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         WLOGFE("[GetTopWin] Please create mainWindow First!");
         return nullptr;
@@ -2289,7 +2289,7 @@ sptr<Window> WindowSceneSessionImpl::GetMainWindowWithContext(const std::shared_
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mainWinId)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;

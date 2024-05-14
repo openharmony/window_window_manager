@@ -298,7 +298,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& name = property_->GetWindowName();
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     // check window name, same window names are forbidden
     if (windowSessionMap_.find(name) != windowSessionMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name.c_str());
@@ -695,7 +695,7 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
     if (context_.get() == nullptr) {
         return INVALID_SESSION_ID;
     }
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
             winPair.second.second->GetProperty() &&
@@ -2422,21 +2422,21 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::unique_lock<std::shared_mutex> lock(keyEventFilterMutex_);
     keyEventFilter_ = std::move(filter);
     return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::ClearKeyEventFilter()
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::unique_lock<std::shared_mutex> lock(keyEventFilterMutex_);
     keyEventFilter_ = nullptr;
     return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(keyEventFilterMutex_);
     if (keyEventFilter_ != nullptr) {
         bool isFilter = keyEventFilter_(*keyEvent.get());
         TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{public}d isFilter:%{public}d",
@@ -2598,7 +2598,7 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
 {
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     auto iter = windowSessionMap_.find(name);
     if (iter == windowSessionMap_.end()) {
         return nullptr;
@@ -2663,6 +2663,7 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 
 sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
 {
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
