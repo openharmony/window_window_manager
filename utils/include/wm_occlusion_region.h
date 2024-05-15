@@ -58,12 +58,12 @@ std::ostream& operator<<(std::ostream& os, const Rect& r);
 */
 class Event {
 public:
-    // Use different value to differentiate lhs and rhs ranges
+    // Use different value to differentiate lhs and rhs ranges.
     enum Type { OPEN = 1, CLOSE = -1, VOID_OPEN = 2, VOID_CLOSE = -2 };
     int y_ = 0;
+    Type type_ = Type::OPEN;
     int left_ = 0;
     int right_ = 0;
-    Type type_ = Type::OPEN;
 
     Event(int y, Type type, int l, int r) : y_(y), type_(type), left_(l), right_(r) {}
 };
@@ -260,14 +260,14 @@ private:
         std::vector<Rect> preRects;
         std::vector<Rect> curRects;
     };
-    // get ranges from segmentTree node according to logical operation type
-    void getRange(std::vector<Range>& ranges, Node& node, OP op);
     // update tmp rects and region according to current ranges
     void UpdateRects(Rects& r, std::vector<Range>& ranges, std::vector<int>& indexAt, Region& res);
+    // get ranges from segmentTree node according to logical operation type
+    void getRange(std::vector<Range>& ranges, Node& node, OP op);
 
 private:
-    Rect bound_;
     std::vector<Rect> rects_;
+    Rect bound_;
     static bool _s_so_loaded_;
 };
 std::ostream& operator<<(std::ostream& os, const Region& r);
