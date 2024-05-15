@@ -925,6 +925,14 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
+            if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
+                TLOGW(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
+                    static_cast<uint32_t>(weakWindow->GetType()), static_cast<uint32_t>(weakWindow->GetWindowState()),
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
+                return;
+            }
             WMError ret = weakWindow->Show(0, false);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
@@ -955,6 +963,14 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             if (g_isSceneEnabled && WindowHelper::IsMainWindow(weakWindow->GetType()) &&
                 weakWindow->GetWindowState() == WindowState::STATE_CREATED) {
                 WLOGFI("MainWindow is created but not show, can not show by napi, [%{public}u, %{public}s]",
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
+                return;
+            }
+            if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
+                TLOGW(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
+                    static_cast<uint32_t>(weakWindow->GetType()), static_cast<uint32_t>(weakWindow->GetWindowState()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
@@ -1051,6 +1067,13 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
+            if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
+                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                    static_cast<uint32_t>(weakWindow->GetType()),
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
+                return;
+            }
             WMError ret = weakWindow->Destroy();
             WLOGI("Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -1079,6 +1102,13 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
+                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                    static_cast<uint32_t>(weakWindow->GetType()),
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Destroy());
@@ -1118,6 +1148,13 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
+                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                    static_cast<uint32_t>(weakWindow->GetType()),
+                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+                task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Hide(0, false, false));
