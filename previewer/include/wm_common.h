@@ -407,12 +407,12 @@ public:
     float scaleX_;
     float scaleY_;
     float scaleZ_;
-    float translateX_;
-    float translateY_;
-    float translateZ_;
     float rotationX_;
     float rotationY_;
     float rotationZ_;
+    float translateX_;
+    float translateY_;
+    float translateZ_;
 
     bool Marshalling(Parcel& parcel) const
     {
@@ -480,13 +480,13 @@ struct Rect {
 /**
  * @struct SystemBarProperty
  *
- * @brief Property of system bar
+ * @brief Property of system bar.
  */
 struct SystemBarProperty {
     bool enable_;
-    bool enableAnimation_;
-    uint32_t contentColor_;
     uint32_t backgroundColor_;
+    uint32_t contentColor_;
+    bool enableAnimation_;
     SystemBarSettingFlag settingFlag_;
     SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE),
                           enableAnimation_(false), settingFlag_(SystemBarSettingFlag::DEFAULT_SETTING) {}
@@ -640,8 +640,8 @@ enum class WindowUpdateType : int32_t {
 
 struct WindowLimits {
     uint32_t maxWidth_;
-    uint32_t minWidth_;
     uint32_t maxHeight_;
+    uint32_t minWidth_;
     uint32_t minHeight_;
     float maxRatio_;
     float minRatio_;
@@ -707,12 +707,13 @@ public:
             return false;
         }
 
+        const uint32_t curveParamSize = 4; // 4: param size
         auto paramSize = curveParams_.size();
-        if (paramSize != 4) {
+        if (paramSize != curveParamSize) { 
             if (!parcel.WriteUint32(0)) {
                 return false;
             }
-        } else { // 4: param size
+        } else {
             if (!parcel.WriteUint32(static_cast<uint32_t>(paramSize))) {
                 return false;
             }
@@ -745,18 +746,18 @@ public:
     }
 };
 
-struct MaximizeLayoutOption {
-    ShowType decor = ShowType::HIDE;
-    ShowType dock = ShowType::HIDE;
-};
-
 /**
- * maximize layout show type
+ * Maximize layout show type
  */
 enum ShowType : int32_t {
     SHOW,     // normally show
     HIDE,     // show when hover, but hide normally
     FORBIDDEN // hide always
+};
+
+struct MaximizeLayoutOption {
+    ShowType decor = ShowType::HIDE;
+    ShowType dock = ShowType::HIDE;
 };
 }
 }
