@@ -1925,6 +1925,16 @@ HWTEST_F(SceneSessionManagerTest, CheckWindowId, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: OnSCBSystemSessionBufferAvailable
+ * @tc.desc: OnSCBSystemSessionBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
+{
+    ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
+}
+
+/**
  * @tc.name: CreateSceneSession
  * @tc.desc: CreateSceneSession
  * @tc.type: FUNC
@@ -2371,26 +2381,15 @@ HWTEST_F(SceneSessionManagerTest, InitUserInfo, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: HandleSwitchingToAnotherUser
- * @tc.desc: SceneSesionManager handle switching to another user
+ * @tc.name: NotifySwitchingUser
+ * @tc.desc: SceneSesionManager notify switching user
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, HandleSwitchingToAnotherUser, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, NotifySwitchingUser, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->HandleSwitchingToAnotherUser();
-    ASSERT_EQ(ret, 0);
-}
- 
-/**
- * @tc.name: NotifySwitchingToCurrentUser
- * @tc.desc: SceneSesionManager notify switching to current user
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySwitchingToCurrentUser, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    ssm_->NotifySwitchingToCurrentUser();
+    ssm_->NotifySwitchingUser(true);
+    ssm_->NotifySwitchingUser(false);
     ASSERT_EQ(ret, 0);
 }
 

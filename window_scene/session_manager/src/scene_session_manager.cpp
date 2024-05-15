@@ -260,8 +260,6 @@ void SceneSessionManager::Init()
     RegisterAppListener();
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
-    ScreenSessionManagerClient::GetInstance().RegisterSwitchingToAnotherUserFunction(
-        std::bind(&SceneSessionManager::HandleSwitchingToAnotherUser, this));
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -1206,6 +1204,14 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         panelSession->GetPersistentId(), keyboardSession->GetPersistentId());
 }
 
+void SceneSessionManager::OnSCBSystemSessionBufferAvailable(WindowType type)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "In");
+    if (type == WindowType::WINDOW_TYPE_KEYGUARD) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "On screen lock buffer available");
+    }
+}
+
 sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -1214,6 +1220,12 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     if (sessionInfo.isSystem_) {
         sceneSession = new (std::nothrow) SCBSystemSession(sessionInfo, specificCb);
         WLOGFI("[WMSSCB]Create SCBSystemSession, type: %{public}d", sessionInfo.windowType_);
+        if (sceneSession != nullptr &&
+            static_cast<OHOS::Rosen::WindowType>(sessionInfo.windowType_) == WindowType::WINDOW_TYPE_KEYGUARD) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Register screen lock buffer available");
+            sceneSession->RegisterBufferAvailableCallback(std::bind(
+                &SceneSessionManager::OnSCBSystemSessionBufferAvailable, this, WindowType::WINDOW_TYPE_KEYGUARD));
+        }
     } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         sceneSession = new (std::nothrow) MainSession(sessionInfo, specificCb);
         if (sceneSession != nullptr) {
@@ -2656,35 +2668,30 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string &fileDir)
         ScenePersistence::CreateSnapshotDir(fileDir);
         ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = userId;
+        SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "InitUserInfo");
 }
 
-void SceneSessionManager::HandleSwitchingToAnotherUser()
+void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
-    auto task = [this]() {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Handle switching to another user");
-        SceneInputManager::GetInstance().SetUserBackground(true);
-        if (switchingToAnotherUserFunc_ != nullptr) {
-            switchingToAnotherUserFunc_();
+    auto task = [this, isUserActive]() {
+        TLOGI(WmsLogTag::WMS_MULTI_USER,
+            "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
+            isUserActive, currentUserId_);
+        SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
+        if (isUserActive) { // switch to current user
+            SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+            // notify screenSessionManager to recover current user
+            ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
+            FlushWindowInfoToMMI(true);
+        } else { // switch to another user
+            SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task, "HandleSwitchingToAnotherUser");
-}
-
-void SceneSessionManager::NotifySwitchingToCurrentUser()
-{
-    auto task = [this]() {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Notify switching to current user: %{public}d", currentUserId_);
-        SceneInputManager::GetInstance().SetUserBackground(false);
-        // notify screenSessionManager to recover current user
-        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
-        FlushWindowInfoToMMI(true);
-        return WSError::WS_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "NotifySwitchingToCurrentUser");
+    taskScheduler_->PostSyncTask(task, "NotifySwitchingUser");
 }
 
 sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
@@ -4285,12 +4292,6 @@ void SceneSessionManager::SetCallingSessionIdSessionListenser(const ProcessCalli
 {
     WLOGFD("SetCallingSessionIdSessionListenser");
     callingSessionIdChangeFunc_ = func;
-}
-
-void SceneSessionManager::SetSwitchingToAnotherUserListener(const ProcessSwitchingToAnotherUserFunc& func)
-{
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "Set switching to another user listener");
-    switchingToAnotherUserFunc_ = func;
 }
 
 void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func)

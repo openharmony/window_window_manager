@@ -140,6 +140,16 @@ HWTEST_F(SCBSystemSessionTest, UpdateWindowMode, Function | SmallTest | Level1)
     auto ret = scbSystemSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 }
+
+/**
+ * @tc.name: RegisterBufferAvailableCallback
+ * @tc.desc: check func RegisterBufferAvailableCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, RegisterBufferAvailableCallback, Function | SmallTest | Level3)
+{
+    scbSystemSession_->RegisterBufferAvailableCallback([]() {});
+}
 }
 }
 }

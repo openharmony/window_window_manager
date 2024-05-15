@@ -39,6 +39,7 @@ constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
+constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
 {
@@ -273,7 +274,23 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
     }
     TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
-} 
+}
+
+void SceneInputManager::FlushEmptyInfoToMMI()
+{
+    auto task = [this]() {
+        TLOGI(WmsLogTag::WMS_EVENT, "Flush empty info to MMI");
+        MMI::DisplayGroupInfo displayGroupInfo = {
+            .width = 0,
+            .height = 0,
+            .focusWindowId = EMPTY_FOCUS_WINDOW_ID,
+            .currentUserId = currentUserId_};
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+    };
+    if (eventHandler_) {
+        eventHandler_->PostTask(task);
+    }
+}
 
 void SceneInputManager::NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession, const WindowUpdateType& type)
 {
