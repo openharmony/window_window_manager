@@ -388,8 +388,8 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
-    std::shared_mutex keyEventFilterMutex_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
+    std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
 };
 } // namespace Rosen
