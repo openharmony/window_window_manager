@@ -69,7 +69,7 @@ using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscap
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using SceneSessionFunc = WMError (SceneSession::*)(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -332,7 +332,7 @@ private:
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
-    WMError HandleUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
+    WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateKeepScreenOn(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
@@ -382,7 +382,8 @@ private:
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
-    WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
+    void SetWindowFlags(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
@@ -410,7 +411,7 @@ private:
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::string clientIdentityToken_ = { "" };
-    static const std::map<uint32_t, SceneSession> sessionFuncMap_;
+    static const std::map<uint32_t, SceneSessionFunc> sessionFuncMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

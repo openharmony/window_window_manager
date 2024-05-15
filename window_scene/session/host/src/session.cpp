@@ -1950,13 +1950,13 @@ bool Session::GetStateFromManager(const ManagerState key)
     }
 }
 
-bool Session::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
+void Session::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     TLOGD(WmsLogTag::DEFAULT, "NotifySessionChangeByActionNotifyManager id: %{public}d, action: %{public}d",
         GetPersistentId(), action);
-    if (sessionInfoChangeNotifyManagerFunc_) {
-        sessionInfoChangeNotifyManagerFunc_(sceneSession, property, action);
+    if (sessionChangeByActionNotifyManagerFunc_) {
+        sessionChangeByActionNotifyManagerFunc_(sceneSession, property, action);
     }
 }
 
