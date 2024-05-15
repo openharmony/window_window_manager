@@ -413,6 +413,7 @@ public:
     {
         return 0;
     };
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

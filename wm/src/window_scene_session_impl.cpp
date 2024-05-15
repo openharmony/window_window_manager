@@ -1323,6 +1323,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
 
     LimitWindowSize(width, height);
 
@@ -1447,17 +1451,6 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     uint32_t windowId = GetWindowId();
-    WindowMode mode = GetMode();
-    WindowType winType = GetType();
-    if (type != AvoidAreaType::TYPE_KEYBOARD && mode == WindowMode::WINDOW_MODE_FLOATING &&
-        (!WindowHelper::IsMainWindow(winType) ||
-        (system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
-        system::GetParameter("const.product.devicetype", "unknown") != "tablet"))) {
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "Id: %{public}d, avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
-            windowId, static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
-        return WMError::WM_OK;
-    }
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "hostSession_ is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -1500,6 +1493,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
     isIgnoreSafeArea_ = status;
+    isIgnoreSafeAreaNeedNotify_ = true;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         TLOGI(WmsLogTag::WMS_IMMS, "SetIgnoreViewSafeArea winId:%{public}u status:%{public}d",
@@ -1507,7 +1501,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
         }
-        isIgnoreSafeAreaNeedNotify_ = true;
     } else {
         TLOGI(WmsLogTag::WMS_IMMS, "SetWindowNeedAvoidFlag winId:%{public}u status:%{public}d",
             GetWindowId(), static_cast<int32_t>(status));
@@ -1541,26 +1534,29 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s status:%{public}d",
         GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
-    if (hostSession_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
+    if (WindowHelper::IsSystemWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
+        return WMError::WM_OK;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(true);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-    WindowMode mode = GetMode();
-    if (!((mode == WindowMode::WINDOW_MODE_FLOATING ||
-           mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-          WindowHelper::IsMainWindow(GetType()) &&
-          (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
+
+    if (WindowHelper::IsMainWindow(GetType()) &&
+        system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
+        system::GetParameter("const.product.devicetype", "unknown") != "tablet") {
+        if (hostSession_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "hostSession is null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
+
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
@@ -1573,8 +1569,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
 bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 {
-    WindowMode mode = GetMode();
-    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
+    WindowType winType = property_->GetWindowType();
+    if (WindowHelper::IsMainWindow(winType)) {
+        return (GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
+    }
+    if (WindowHelper::IsSubWindow(winType)) {
+        return (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
+    }
+    return false;
 }
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
@@ -1618,6 +1620,10 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "only main window support");
+        return WMError::WM_OK;
+    }
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowId:%{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1660,22 +1666,24 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     TLOGI(WmsLogTag::WMS_IMMS,
         "winId:%{public}u %{public}s status:%{public}d",
         GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
-    if (hostSession_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    if (WindowHelper::IsSystemWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
+        return WMError::WM_OK;
     }
 
-    WindowMode mode = GetMode();
     bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
         windowSystemConfig_.freeMultiWindowSupport_;
-    if (isSwitchFreeMultiWindow || !((mode == WindowMode::WINDOW_MODE_FLOATING ||
-           mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-           mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-           WindowHelper::IsMainWindow(GetType()) &&
-           (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-           system::GetParameter("const.product.devicetype", "unknown") == "tablet"))) {
+    if (isSwitchFreeMultiWindow || (WindowHelper::IsMainWindow(GetType()) &&
+        system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
+        system::GetParameter("const.product.devicetype", "unknown") != "tablet")) {
+        if (hostSession_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "hostSession is null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     };
@@ -1685,14 +1693,16 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
         TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), GetWindowId());
     }
-    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+
     UpdateDecorEnable(true);
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     statusProperty.enable_ = !status;
     ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), GetWindowId());
     }
+
     return ret;
 }
 
