@@ -333,7 +333,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTe
                      bool isPreImeEvent,
                      const sptr<IRemoteObject> &listener) {
             auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
-            channelListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
+            channelListener->OnTransferKeyEventForConsumed(keyEvent->GetId(), isPreImeEvent, true, WSError::WS_OK);
             return WSError::WS_OK;
         });
 
@@ -511,14 +511,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Lev
     sptr<WindowEventChannelMocker> mockEventChannel = new (std::nothrow) WindowEventChannelMocker(mockSessionStage);
     extensionSession.windowEventChannel_ = mockEventChannel;
     extensionSession.channelListener_ = new WindowEventChannelListener();
-    EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync)
-        .WillOnce([](const std::shared_ptr<MMI::KeyEvent> &keyEvent,
-                     bool isPreImeEvent,
-                     const sptr<IRemoteObject> &listener) {
-            auto channelListener = iface_cast<IWindowEventChannelListener>(listener);
-            channelListener->OnTransferKeyEventForConsumed(true, WSError::WS_OK);
-            return WSError::WS_OK;
-        });
+    EXPECT_CALL(*mockEventChannel, TransferKeyEventForConsumedAsync);
 
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);

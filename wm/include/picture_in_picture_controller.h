@@ -73,17 +73,45 @@ public:
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
 
+    class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
+    public:
+        PiPMainWindowListenerImpl(const sptr<Window> window);
+        void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
+            const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override {};
+        void OnModeChange(WindowMode mode, bool hasDeco = true) override;
+        WindowMode GetMode();
+        bool IsValid();
+    private:
+        void DelayReset();
+
+        WindowMode mode_;
+        bool isValid_ = true;
+        std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    };
+
     class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
     public:
-        PipMainWindowLifeCycleImpl(const std::string& navigationId)
+        PipMainWindowLifeCycleImpl(const std::string& navigationId, const sptr<Window> window)
         {
             navigationId_ = navigationId;
+            if (window != nullptr) {
+                window_ = window;
+                windowListener_ = new PiPMainWindowListenerImpl(window_);
+                window_->RegisterWindowChangeListener(windowListener_);
+            }
         };
-        ~PipMainWindowLifeCycleImpl() {};
+        ~PipMainWindowLifeCycleImpl()
+        {
+            if (window_ != nullptr && windowListener_ != nullptr) {
+                window_->UnregisterWindowChangeListener(windowListener_);
+            }
+        };
         void AfterBackground() override;
         void BackgroundFailed(int32_t type) override;
     private:
         std::string navigationId_ = "";
+        sptr<Window> window_;
+        sptr<PiPMainWindowListenerImpl> windowListener_;
     };
 
 private:
@@ -94,6 +122,7 @@ private:
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType);
     void UpdateXComponentPositionAndSize();
+    void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
     wptr<PictureInPictureController> weakRef_ = nullptr;

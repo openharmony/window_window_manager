@@ -65,6 +65,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    int32_t SetScreenOffDelayTime(int32_t delay);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);

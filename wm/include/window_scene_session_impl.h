@@ -200,7 +200,6 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type);
     bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;

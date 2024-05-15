@@ -1978,62 +1978,6 @@ HWTEST_F(SceneSessionManagerTest, CreateSceneSession, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: CheckAppIsInDisplay
- * @tc.desc: CheckAppIsInDisplay
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, CheckAppIsInDisplay, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    sptr<SceneSession> sceneSession;
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
-    SessionInfo info;
-    ret++;
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    ssm_->DestroySubSession(sceneSession);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    sceneSession->SetSessionProperty(property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    AppExecFwk::Configuration config;
-    ssm_->UpdateConfig(info, config, true);
-    ssm_->UpdateConfig(info, config, false);
-    ssm_->SetAbilitySessionInfo(sceneSession);
-    bool res = true;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->isPrepareTerminateEnable_ = true;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->isPrepareTerminateEnable_ = false;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->sceneSessionMap_.insert({1, nullptr});
-    ssm_->IsKeyboardForeground();
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->NotifyForegroundInteractiveStatus(sceneSession, true);
-    ssm_->NotifyForegroundInteractiveStatus(sceneSession, false);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->IsKeyboardForeground();
-    ssm_->IsKeyboardForeground();
-    ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->PrepareTerminate(1, res);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ssm_->sceneSessionMap_.erase(1);
-    abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    ssm_->StartUIAbilityBySCB(abilitySessionInfo);
-    ssm_->DestroySubSession(sceneSession);
-    ssm_->EraseSceneSessionMapById(2);
-    ASSERT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: RequestSceneSessionBackground
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
@@ -2042,7 +1986,6 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionBackground, Function | Smal
 {
     int ret = 0;
     sptr<SceneSession> sceneSession;
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
     ssm_->RequestSceneSessionActivation(sceneSession, true);
     SessionInfo info;
     ret++;

@@ -2297,6 +2297,27 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
     }
 }
 
+int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
+{
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return 0;
+    }
+    if (!data.WriteInt32(delay)) {
+        WLOGFE("Write delay failed");
+        return 0;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return 0;
+    }
+    return reply.ReadInt32();
+}
+
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     MessageOption option;
