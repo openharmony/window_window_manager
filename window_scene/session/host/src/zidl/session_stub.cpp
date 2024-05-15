@@ -71,8 +71,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNeedAvoid),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         &SessionStub::HandleGetAvoidAreaByType),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_PROPERTY),
-        &SessionStub::HandleSetSessionProperty),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
         &SessionStub::HandleSetAspectRatio),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
@@ -468,15 +466,6 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleSetSessionProperty!");
-    auto property = data.ReadStrongParcelable<WindowSessionProperty>();
-    auto errCode = SetSessionProperty(property);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

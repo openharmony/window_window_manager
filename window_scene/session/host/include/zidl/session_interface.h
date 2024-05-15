@@ -53,7 +53,6 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
-    virtual WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) { return WSError::WS_OK; }
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
