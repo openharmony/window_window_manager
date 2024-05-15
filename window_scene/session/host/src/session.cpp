@@ -1860,6 +1860,11 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
     getStateFromManagerFunc_ = func;
 }
 
+void Session::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
+{
+    sessionChangeByActionNotifyManagerFunc_ = func;
+}
+
 void Session::NotifySessionStateChange(const SessionState& state)
 {
     auto task = [weakThis = wptr(this), state]() {
@@ -1942,6 +1947,16 @@ bool Session::GetStateFromManager(const ManagerState key)
         break;
     default:
         return false;
+    }
+}
+
+bool Session::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+{
+    TLOGD(WmsLogTag::DEFAULT, "NotifySessionChangeByActionNotifyManager id: %{public}d, action: %{public}d",
+        GetPersistentId(), action);
+    if (sessionInfoChangeNotifyManagerFunc_) {
+        sessionInfoChangeNotifyManagerFunc_(sceneSession, property, action);
     }
 }
 
