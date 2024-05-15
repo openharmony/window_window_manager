@@ -65,7 +65,7 @@ namespace AncoConsts {
 }
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
-    int32_t sdkVersion_;
+    uint32_t sdkVersion_;
 };
 class SceneSession;
 class AccessibilityWindowInfo;
