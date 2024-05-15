@@ -17,7 +17,6 @@
 
 #include <context.h>
 #include <js_runtime_utils.h>
-#include "configuration.h"
 #include "interfaces/include/ws_common.h"
 #include "napi_common_want.h"
 #include "native_value.h"
@@ -136,8 +135,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateSessionDisplayId);
     BindNativeFunction(env, exportObj, "notifySwitchingToCurrentUser", moduleName,
         JsSceneSessionManager::NotifySwitchingToCurrentUser);
-    BindNativeFunction(env, exportObj, "updateConfig", moduleName,
-        JsSceneSessionManager::UpdateConfig);
     BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
         JsSceneSessionManager::NotifySessionRecoverStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
@@ -824,13 +821,6 @@ napi_value JsSceneSessionManager::NotifySwitchingToCurrentUser(napi_env env, nap
     TLOGI(WmsLogTag::WMS_MULTI_USER, "[NAPI]Notify switching to current user");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifySwitchingToCurrentUser(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::UpdateConfig(napi_env env, napi_callback_info info)
-{
-    WLOGI("[NAPI]UpdateConfig");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateConfig(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
@@ -2212,43 +2202,6 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
 napi_value JsSceneSessionManager::OnNotifySwitchingToCurrentUser(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().NotifySwitchingToCurrentUser();
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSessionManager::OnUpdateConfig(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SessionInfo sessionInfo;
-    AppExecFwk::Configuration config;
-    bool informAllApp = false;
-    napi_value nativeObj = argv[0];
-    if (!ConvertSessionInfoFromJs(env, nativeObj, sessionInfo)) {
-        WLOGFE("[NAPI]Failed to convert parameter to sessionInfo");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (!ConvertConfigurationFromJs(env, argv[1], config)) {
-        WLOGFE("[NAPI]Failed to convert parameter to config");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], informAllApp)) {
-        WLOGFE("[NAPI]Failed to convert parameter to informAllApp");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SceneSessionManager::GetInstance().UpdateConfig(sessionInfo, config, informAllApp);
     return NapiGetUndefined(env);
 }
 

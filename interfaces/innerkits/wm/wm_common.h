@@ -775,6 +775,7 @@ enum class PiPWindowState : uint32_t {
     STATE_STARTED = 2,
     STATE_STOPPING = 3,
     STATE_STOPPED = 4,
+    STATE_RESTORING = 5,
 };
 
 /**
