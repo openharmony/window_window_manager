@@ -4258,8 +4258,10 @@ DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()
 
 void ScreenSessionManager::RegisterApplicationStateObserver()
 {
+#ifdef SENSOR_ENABLE
     std::string identify = IPCSkeleton::ResetCallingIdentity();
     FoldScreenSensorManager::GetInstance().RegisterApplicationStateObserver();
     IPCSkeleton::SetCallingIdentity(identify);
+#endif
 }
 } // namespace OHOS::Rosen
