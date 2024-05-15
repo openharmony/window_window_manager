@@ -1208,4 +1208,40 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
+
+WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
+        TLOGE(WmsLogTag::DEFAULT, "Write PropertyChangeAction failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (property) {
+        if (!data.WriteBool(true) || !property->Write(data, action)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write property failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write property failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

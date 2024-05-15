@@ -105,7 +105,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetCustomDecorHeight),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
         &SessionStub::HandleAdjustKeyboardLayout),
-
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
+        &SessionStub::HandleUpdatePropertyByAction),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
@@ -676,6 +677,24 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_DATA;
     }
     WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
+{
+    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    TLOGD(WmsLogTag::DEFAULT, "run HandleUpdateProperty, action:%{public}u", action);
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
+    } else {
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
+    }
+    const WMError& ret = UpdateSessionPropertyByAction(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
