@@ -196,7 +196,6 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
 
     sptr<WindowSessionProperty> property = UnmarshallingDataTo<WindowSessionProperty>(data, size);
     proxy->Foreground(property);
-    proxy->SetSessionProperty(property);
     proxy->Background();
     proxy->RaiseToAppTop();
 
