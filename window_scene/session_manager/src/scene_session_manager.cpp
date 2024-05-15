@@ -3209,14 +3209,14 @@ void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSe
 {
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
+        TLOGI(WmsLogTag::DEFAULT, "UpdateHideNonSystemFloatingWindows, session property null");
         return;
     }
 
     bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
     bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
     if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
-        WLOGFI("property hideNonSystemFloatingWindows not change");
+        TLOGI(WmsLogTag::DEFAULT, "property hideNonSystemFloatingWindows not change");
         return;
     }
 
@@ -4706,9 +4706,10 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
     SessionChangeByActionNotifyManagerFunc func = [this](const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) {
         if ((sceneSession == nullptr) || (property == nullptr)) {
-            WLOGFE("sessionChangeByAction params is nullptr");
+            TLOGW(WmsLogTag::DEFAULT, "sessionChangeByAction params is nullptr");
             return;
         }
+        TLOGD(WmsLogTag::DEFAULT, "sessionChangeByAction callback, action: %{public}u", action);
         switch (action) {
             case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
                 return HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
@@ -4721,9 +4722,10 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
                 return NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
                 SetBrightness(sceneSession, property->GetBrightness());
+                break;
             case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
             case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
-                return UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
+                return UpdatePrivateStateAndNotify(property->GetPersistentId());
             case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
                 CheckAndNotifyWaterMarkChangedResult();
                 return NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
@@ -4738,7 +4740,7 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
                 if (sceneSession->GetSessionProperty() != nullptr) {
                     FlushWindowInfoToMMI();
                 }
-                break;        
+                break;
             default:
                 break;
         }
