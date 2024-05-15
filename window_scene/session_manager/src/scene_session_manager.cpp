@@ -1368,57 +1368,6 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
     }
 }
 
-bool SceneSessionManager::CheckAppIsInDisplay(const sptr<SceneSession>& scnSession, DisplayId displayId)
-{
-    if (!scnSession) {
-        WLOGFE("scenesession is null!");
-        return false;
-    }
-    if (!scnSession->IsAppSession()) {
-        WLOGFE("scenesession is not app");
-        return false;
-    }
-    if (!scnSession->GetSessionProperty()) {
-        WLOGFE("property is null");
-        return false;
-    }
-    return scnSession->GetSessionProperty()->GetDisplayId() == displayId;
-}
-
-WSError SceneSessionManager::UpdateConfig(const SessionInfo& sessionInfo, AppExecFwk::Configuration config,
-    bool informAllAPP)
-{
-    auto systemAbility = GetAppManager();
-    if (!systemAbility) {
-        WLOGFE("app manager is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    if (sessionInfo.screenId_ == defScreenId) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA,
-            AppExecFwk::ConfigurationInner::NEED_REMOVE_SET_BY_SA);
-    }
-    config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA,
-        AppExecFwk::ConfigurationInner::IS_SET_BY_SA);
-
-    auto task = [this, sessionInfo, config, informAllAPP, systemAbility]() -> WSError {
-        if (informAllAPP) {
-            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            for (auto iter : sceneSessionMap_) {
-                auto scnSession = iter.second;
-                if (CheckAppIsInDisplay(scnSession, sessionInfo.screenId_)) {
-                    systemAbility->UpdateConfigurationByBundleName(config, scnSession->GetSessionInfo().bundleName_);
-                }
-            }
-        } else {
-            systemAbility->UpdateConfigurationByBundleName(config, sessionInfo.bundleName_);
-        }
-        return WSError::WS_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "UpdateConfig");
-    return WSError::WS_OK;
-}
-
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
@@ -2753,23 +2702,6 @@ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
     }
 
     return iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
-}
-
-sptr<AppExecFwk::IAppMgr> SceneSessionManager::GetAppManager()
-{
-    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityMgr == nullptr) {
-        WLOGFE("Failed to get SystemAbilityManager.");
-        return nullptr;
-    }
-
-    auto appObject = systemAbilityMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
-    if (appObject == nullptr) {
-        WLOGFE("Failed to get AppManagerService.");
-        return nullptr;
-    }
-
-    return iface_cast<AppExecFwk::IAppMgr>(appObject);
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResourceManager(
