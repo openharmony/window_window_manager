@@ -1951,7 +1951,7 @@ bool Session::GetStateFromManager(const ManagerState key)
 }
 
 void Session::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+    const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     TLOGD(WmsLogTag::DEFAULT, "NotifySessionChangeByActionNotifyManager id: %{public}d, action: %{public}d",
         GetPersistentId(), action);
