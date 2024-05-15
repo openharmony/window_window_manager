@@ -417,6 +417,14 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
 
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
+    if (GetPersistentId() != 0 && rects != touchHotAreas_) {
+        std::string rectStr = "";
+        for (const auto& rect : rects) {
+            rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
+            " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+    }
     touchHotAreas_ = rects;
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
