@@ -1792,26 +1792,35 @@ std::string SceneSession::GetUpdatedIconPath() const
 
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
-    WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
-        sessionInfo_.bundleName_.c_str(), GetPersistentId(), visible);
-    isVisible_ = visible;
-    if (specificCallback_ == nullptr) {
-        WLOGFW("specific callback is null.");
-        return;
-    }
+    auto task = [weakThis = wptr(this), visible]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        int32_t persistentId = session->GetPersistentId();
+        WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
+            session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        session->isVisible_ = visible;
+        if (session->specificCallback_ == nullptr) {
+            WLOGFW("specific callback is null.");
+            return;
+        }
 
-    if (visible) {
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
-    } else {
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    }
-    NotifyAccessibilityVisibilityChange();
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    // update private state
-    if (!GetSessionProperty()) {
-        WLOGFE("UpdateNativeVisibility property is null");
-        return;
-    }
+        if (visible) {
+            session->specificCallback_->onWindowInfoUpdate_(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        } else {
+            session->specificCallback_->onWindowInfoUpdate_(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        }
+        session->NotifyAccessibilityVisibilityChange();
+        session->specificCallback_->onUpdateAvoidArea_(persistentId);
+        // update private state
+        if (!session->GetSessionProperty()) {
+            WLOGFE("UpdateNativeVisibility property is null");
+            return;
+        }
+    };
+    PostTask(task, "UpdateNativeVisibility");
 }
 
 bool SceneSession::IsVisible() const
