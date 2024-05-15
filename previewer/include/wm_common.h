@@ -709,7 +709,7 @@ public:
 
         const uint32_t curveParamSize = 4; // 4: param size
         auto paramSize = curveParams_.size();
-        if (paramSize != curveParamSize) { 
+        if (paramSize != curveParamSize) {
             if (!parcel.WriteUint32(0)) {
                 return false;
             }

@@ -206,7 +206,7 @@ std::map<std::string, XmlConfigBase::ConfigItem> WindowManagerConfig::ReadProper
     }
 
     propVal = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("name"));
-    if (propropValp != nullptr) {
+    if (propVal != nullptr) {
         property["name"].SetValue(std::string(reinterpret_cast<const char*>(propVal)));
         xmlFree(propVal);
     }
