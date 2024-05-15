@@ -2902,7 +2902,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "NotifyPrepareClosePiPWindow type: %{public}u", GetType());
+    TLOGI(WmsLogTag::WMS_PIP, "NotifyPrepareClosePiPWindow type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
         return WMError::WM_DO_NOTHING;
     }

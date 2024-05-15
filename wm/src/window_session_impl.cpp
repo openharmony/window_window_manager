@@ -2010,7 +2010,7 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
 
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "WindowSessionImpl::NotifyCloseExistPipWindow");
+    TLOGI(WmsLogTag::WMS_PIP, "WindowSessionImpl::NotifyCloseExistPipWindow");
     PictureInPictureManager::DoClose(true, true);
     return WSError::WS_OK;
 }
