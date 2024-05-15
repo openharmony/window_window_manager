@@ -329,14 +329,15 @@ public:
     const SystemSessionConfig& GetSystemSessionConfig() const;
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
-
     WSError NotifyEnterRecentTask(bool enterRecent);
+    
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
 
 private:
     bool isKeyboardPanelEnabled_ = false;
+    bool enterRecent_ = false;
     void Init();
     void InitScheduleUtils();
     void RegisterAppListener();
@@ -637,8 +638,6 @@ private:
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
-
-    bool enterRecent_ = false;
 };
 } // namespace OHOS::Rosen
 

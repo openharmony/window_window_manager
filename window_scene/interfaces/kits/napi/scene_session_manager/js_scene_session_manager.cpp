@@ -884,6 +884,13 @@ napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_ca
     return (me != nullptr) ? me->OnGetFreeMultiWindowConfig(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]NotifyEnterRecentTask");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
+}
+
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -2530,13 +2537,6 @@ napi_value JsSceneSessionManager::OnGetCustomDecorHeight(napi_env env, napi_call
     napi_value result = nullptr;
     napi_create_int32(env, customDecorHeight, &result);
     return result;
-}
-
-napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]NotifyEnterRecentTask");
-    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::OnNotifyEnterRecentTask(napi_env env, napi_callback_info info)
