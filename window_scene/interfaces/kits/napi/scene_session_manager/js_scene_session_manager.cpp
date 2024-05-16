@@ -151,6 +151,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getFreeMultiWindowConfig", moduleName,
         JsSceneSessionManager::GetFreeMultiWindowConfig);
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
+    BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
+        JsSceneSessionManager::NotifyEnterRecentTask);
     return NapiGetUndefined(env);
 }
 
@@ -870,6 +872,13 @@ napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_ca
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetFreeMultiWindowConfig(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]NotifyEnterRecentTask");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2481,5 +2490,30 @@ napi_value JsSceneSessionManager::OnGetCustomDecorHeight(napi_env env, napi_call
     napi_value result = nullptr;
     napi_create_int32(env, customDecorHeight, &result);
     return result;
+}
+
+napi_value JsSceneSessionManager::OnNotifyEnterRecentTask(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enterRecent = false;
+    if (!ConvertFromJsValue(env, argv[0], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enterRecent");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().NotifyEnterRecentTask(enterRecent);
+
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
