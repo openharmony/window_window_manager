@@ -337,7 +337,7 @@ protected:
 
 private:
     bool isKeyboardPanelEnabled_ = false;
-    std::atomic<bool> enterRecent_ = false;
+    std::atomic<bool> enterRecent { false };
     void Init();
     void InitScheduleUtils();
     void RegisterAppListener();

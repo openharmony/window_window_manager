@@ -6563,7 +6563,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
-    if ((sceneSession == nullptr) || (enterRecent_)) {
+    if ((sceneSession == nullptr) || (enterRecent_.load())) {
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
@@ -8422,7 +8422,9 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
 
-    enterRecent_ = enterRecent;
+    enterRecent_.store(enterRecent);
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
 
     return WSError::WS_OK;
 }
