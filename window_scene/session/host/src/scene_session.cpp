@@ -2721,7 +2721,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property)
 {
     if (sceneSession == nullptr) {
-        TLOGD(WmsLogTag::DEFAULT,"session is nullptr");
+        TLOGD(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
@@ -2733,7 +2733,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     if (((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
         (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) &&
         !property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT,"Set window flags permission denied");
+        TLOGE(WmsLogTag::DEFAULT, "Set window flags permission denied");
         return;
     }
     sessionProperty->SetWindowFlags(flags);
@@ -2741,7 +2741,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    TLOGI(WmsLogTag::DEFAULT,"SetWindowFlags end, flags: %{public}u", flags);
+    TLOGI(WmsLogTag::DEFAULT, "SetWindowFlags end, flags: %{public}u", flags);
 }
 
 WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
