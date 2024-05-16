@@ -4250,7 +4250,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     ASSERT_NE(nullptr, sceneSessionManager);
     
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
-    ASSERT_EQ(sceneSessionManager->enterRecent_, true);
+    ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
 
 }
