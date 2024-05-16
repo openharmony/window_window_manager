@@ -1119,6 +1119,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WmErrorCode", WindowErrorCodeInit(env));
     napi_set_named_property(env, exportObj, "WMError", WindowErrorInit(env));
     napi_set_named_property(env, exportObj, "WindowStatusType", WindowStatusTypeInit(env));
+    napi_set_named_property(env, exportObj, "RectChangeReason", RectChangeReasonInit(env));
     const char *moduleName = "JsWindowManager";
     BindNativeFunction(env, exportObj, "create", moduleName, JsWindowManager::Create);
     BindNativeFunction(env, exportObj, "createWindow", moduleName, JsWindowManager::CreateWindow);
