@@ -591,6 +591,12 @@ void WindowSessionImpl::UpdateDensity()
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
 
+WSError WindowSessionImpl::UpdateOrientation()
+{
+    TLOGD(WmsLogTag::DMS, "UpdateOrientation, wid: %{public}d", GetPersistentId());
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 {
     property_->SetDisplayId(displayId);
