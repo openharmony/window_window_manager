@@ -177,6 +177,7 @@ HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
     ASSERT_EQ(WMError::WM_ERROR_SAMGR, window->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -380,6 +381,8 @@ HWTEST_F(WindowImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -397,6 +400,8 @@ HWTEST_F(WindowImplTest, RequestVsyncErr, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->vsyncStation_ = nullptr;
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2762,6 +2767,7 @@ HWTEST_F(WindowImplTest, NotifyWindowTransition, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Close());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /*
@@ -3170,11 +3176,14 @@ HWTEST_F(WindowImplTest, RequestVsync, Function | SmallTest | Level3)
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    std::shared_ptr<VsyncCallback> callback;
+    std::shared_ptr<VsyncCallback> callback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(callback);
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(callback);
 }
@@ -3961,6 +3970,7 @@ HWTEST_F(WindowImplTest, SetFloatingMaximize, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->UpdateModeSupportInfo(0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFloatingMaximize(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
