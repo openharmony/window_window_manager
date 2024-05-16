@@ -2714,11 +2714,11 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateHideNonSystemFloatingWindows
+ * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: SceneSesionManager update hide non system floating windows
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -2728,7 +2728,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function |
     sptr<WindowSessionProperty> property = nullptr;
     ssm_->UpdateForceHideState(scensession, property, true);
     property = new WindowSessionProperty();
-    ssm_->UpdateHideNonSystemFloatingWindows(property, scensession);
+    ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     property->SetHideNonSystemFloatingWindows(true);
     ssm_->UpdateForceHideState(scensession, property, true);
     ssm_->UpdateForceHideState(scensession, property, false);
