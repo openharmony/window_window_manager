@@ -2409,9 +2409,9 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGE(WmsLogTag::DEFAULT, "the property is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", weakSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
-        return weakSession->HandleUpdatePropertyByAction(property, action, sceneSession);
+        return weakSession->HandleUpdatePropertyByAction(property, action, weakSession);
     };
     return PostSyncTask(task, "UpdateProperty");
 }
