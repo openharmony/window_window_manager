@@ -196,7 +196,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     void SetFocusedOnShow(bool focusedOnShow);
     bool IsFocusedOnShow() const;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
