@@ -2737,7 +2737,6 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
         return;
     }
     sessionProperty->SetWindowFlags(flags);
-    CheckAndNotifyWaterMarkChangedResult();
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
