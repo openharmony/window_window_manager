@@ -3165,7 +3165,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             return UpdatePropertyRaiseEnabled(property, sceneSession);
         }
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
-            UpdateHideNonSystemFloatingWindows(property, sceneSession);
+            HandleHideNonSystemFloatingWindows(property, sceneSession);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
@@ -3204,12 +3204,12 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
+void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "UpdateHideNonSystemFloatingWindows, session property null");
+        TLOGI(WmsLogTag::DEFAULT, "HandleHideNonSystemFloatingWindows, session property null");
         return;
     }
 
@@ -4735,7 +4735,7 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
                 }
                 return NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
-                return UpdateHideNonSystemFloatingWindows(property, sceneSession);
+                return HandleHideNonSystemFloatingWindows(property, sceneSession);
             case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
                 if (sceneSession->GetSessionProperty() != nullptr) {
                     FlushWindowInfoToMMI();
