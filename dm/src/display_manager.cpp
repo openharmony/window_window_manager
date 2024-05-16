@@ -700,13 +700,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
     const Media::Size &size, int rotation, DmErrorCode* errorCode)
 {
-    if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId invalid!");
-        return nullptr;
-    }
-
-    std::shared_ptr<Media::PixelMap> screenShot =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode);
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(displayId, errorCode);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -1174,6 +1168,10 @@ void DisplayManager::Impl::NotifyFoldAngleChanged(std::vector<float> foldAngles)
 
 DMError DisplayManager::RegisterFoldAngleListener(sptr<IFoldAngleListener> listener)
 {
+    if (!IsFoldable()) {
+        TLOGE(WmsLogTag::DMS, "Is not foldable machine");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (listener == nullptr) {
         WLOGFE("IFoldAngleListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
@@ -1203,6 +1201,10 @@ DMError DisplayManager::Impl::RegisterFoldAngleListener(sptr<IFoldAngleListener>
 
 DMError DisplayManager::UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener)
 {
+    if (!IsFoldable()) {
+        TLOGE(WmsLogTag::DMS, "Is not foldable machine");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (listener == nullptr) {
         WLOGFE("UnregisterFoldAngleListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
@@ -1312,6 +1314,10 @@ void DisplayManager::Impl::NotifyFoldStatusChanged(FoldStatus foldStatus)
 
 DMError DisplayManager::RegisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
+    if (!IsFoldable()) {
+        TLOGE(WmsLogTag::DMS, "Is not foldable machine");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (listener == nullptr) {
         WLOGFE("IFoldStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
@@ -1341,6 +1347,10 @@ DMError DisplayManager::Impl::RegisterFoldStatusListener(sptr<IFoldStatusListene
 
 DMError DisplayManager::UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
+    if (!IsFoldable()) {
+        TLOGE(WmsLogTag::DMS, "Is not foldable machine");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (listener == nullptr) {
         WLOGFE("UnregisterFoldStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
