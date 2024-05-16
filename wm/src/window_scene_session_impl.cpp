@@ -3203,13 +3203,13 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    sptr<Media::PixelMap> mask = sptr<Media::PixelMap>(HandleWindowMask(windowMask).release());
+    std::shared_ptr<Media::PixelMap> mask = HandleWindowMask(windowMask);
     if (mask == nullptr) {
         WLOGFE("Failed to create pixelMap of window mask");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    auto rsMask = RSMask::CreatePixelMapMask(std::make_shared<Media::PixelMap>(*mask));
+    auto rsMask = RSMask::CreatePixelMapMask(mask);
     surfaceNode_->SetCornerRadius(0.0f);
     surfaceNode_->SetShadowRadius(0.0f);
     surfaceNode_->SetAbilityBGAlpha(0);
