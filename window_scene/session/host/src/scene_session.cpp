@@ -2494,8 +2494,8 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
         return WMError::WM_OK;
     }
     // @todo if sceneSession is inactive, return
-        if (!sceneSession->IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
+    if (!sceneSession->IsSessionValid()) {
+        return WMError::WM_ERROR_INVALID_SESSION;
     }
     float brightness = property->GetBrightness();
     if (brightness == sceneSession->GetBrightness()) {
