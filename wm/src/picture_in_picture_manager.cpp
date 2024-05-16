@@ -134,7 +134,7 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
         autoStartController_->GetMainWindowId());
     if (mainWindow != nullptr) {
         mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl(
-            pipController->GetPiPNavigationId());
+            pipController->GetPiPNavigationId(), mainWindow);
         mainWindow->RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
     autoStartControllerMap_[handleId] = pipController;

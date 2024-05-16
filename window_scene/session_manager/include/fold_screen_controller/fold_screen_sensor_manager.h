@@ -67,9 +67,9 @@ private:
 
     FoldStatus mState_ = FoldStatus::UNKNOWN;
 
-    SensorUser postureUser;
+    SensorUser postureUser {};
 
-    SensorUser hallUser;
+    SensorUser hallUser {};
 
     void notifyFoldAngleChanged(float foldAngle);
 
