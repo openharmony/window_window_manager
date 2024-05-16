@@ -70,6 +70,8 @@ using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravit
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using SceneSessionFunc = WMError (SceneSession::*)(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -284,6 +286,7 @@ public:
     }
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
+    void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -384,6 +387,8 @@ private:
         const sptr<SceneSession>& sceneSession);
     void SetWindowFlags(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property);
+    void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     static wptr<SceneSession> enterSession_;
@@ -412,6 +417,7 @@ private:
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, SceneSessionFunc> sessionFuncMap_;
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

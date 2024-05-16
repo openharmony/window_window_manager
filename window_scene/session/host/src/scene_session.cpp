@@ -2410,10 +2410,15 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             return WMError::WM_DO_NOTHING;
         }
         TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", weakSession->GetPersistentId(), action);
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return weakSession->HandleUpdatePropertyByAction(property, action, weakSession);
     };
     return PostSyncTask(task, "UpdateProperty");
+}
+
+void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
+{
+    sessionChangeByActionNotifyManagerFunc_ = func;
 }
 
 WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -2741,6 +2746,16 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
     TLOGI(WmsLogTag::DEFAULT, "SetWindowFlags end, flags: %{public}u", flags);
+}
+
+void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+{
+    TLOGD(WmsLogTag::DEFAULT, "NotifySessionChangeByActionNotifyManager id: %{public}d, action: %{public}d",
+        GetPersistentId(), action);
+    if (sessionChangeByActionNotifyManagerFunc_) {
+        sessionChangeByActionNotifyManagerFunc_(sceneSession, property, action);
+    }
 }
 
 WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
