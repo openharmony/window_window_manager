@@ -50,7 +50,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
-constexpr const char* APP_TWIN_INDEX = "ohos.extra.param.key.appTwinIndex";
+constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
@@ -2203,8 +2203,8 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
         info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-        int32_t appTwinIndex = abilitySessionInfo->want.GetIntParam(APP_TWIN_INDEX, 0);
-        info.appIndex_ = appTwinIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appTwinIndex;
+        int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+        info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
         info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -2271,8 +2271,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
         info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-        int32_t appTwinIndex = abilitySessionInfo->want.GetIntParam(APP_TWIN_INDEX, 0);
-        info.appIndex_ = appTwinIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appTwinIndex;
+        int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+        info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
         info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
