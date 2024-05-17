@@ -283,6 +283,8 @@ public:
         customDecorHeight_ = height;
     }
 
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
