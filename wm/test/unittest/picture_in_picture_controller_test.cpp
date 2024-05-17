@@ -322,7 +322,7 @@ HWTEST_F(PictureInPictureControllerTest, StartMove, Function | SmallTest | Level
     GTEST_LOG_(INFO) << "TearDownCasecccccc";
 
     sptr<PictureInPictureController::PipMainWindowLifeCycleImpl> pipMainWindowLifeCycleImpl =
-        new PictureInPictureController::PipMainWindowLifeCycleImpl(navigationId);
+        new PictureInPictureController::PipMainWindowLifeCycleImpl(navigationId, mw);
     GTEST_LOG_(INFO) << "TearDownCasecccccc3";
 
     pipMainWindowLifeCycleImpl->AfterBackground();
@@ -374,6 +374,24 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
     auto ret1 = pipControl->IsPullPiPAndHandleNavigation();
     ASSERT_EQ(true, ret1);
+}
+
+/**
+ * @tc.name: UpdatePiPSourceRect
+ * @tc.desc: UpdatePiPSourceRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, UpdatePiPSourceRect, Function | SmallTest | Level2)
+{
+    sptr<IPiPLifeCycle> listener = nullptr;
+    sptr<IPiPActionObserver> listener1 = nullptr;
+    std::shared_ptr<XComponentController> xComponentController = nullptr;
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->SetXComponentController(xComponentController);
+    pipControl->UpdatePiPSourceRect();
+    ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
 }
 }
 }

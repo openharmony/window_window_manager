@@ -72,6 +72,7 @@ using HandleUpdatePropertyFunc = WMError (SceneSession::*)(const sptr<WindowSess
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
+using SystemSessionBufferAvailableCallback = std::function<void()>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -139,6 +140,7 @@ public:
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
+    virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
