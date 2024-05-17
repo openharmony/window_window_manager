@@ -4258,7 +4258,7 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>
     TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
         requestSessionZOrder, focusedSessionZOrder);
     if  (requestSessionZOrder < focusedSessionZOrder)  {
-        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder, 
+        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder,
             includingAppSession);
         uint32_t topNearestBlockingZOrder = 0;
         if  (topNearestBlockingFocusSession)  {
