@@ -4747,7 +4747,7 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
                 break;
             default:
                 break;
-        }   
+        }
     };
     if (sceneSession != nullptr) {
         sceneSession->SetSessionChangeByActionNotifyManagerListener(func);
