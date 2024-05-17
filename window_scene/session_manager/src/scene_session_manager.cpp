@@ -4706,46 +4706,48 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
 {
     SessionChangeByActionNotifyManagerFunc func = [this](const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) {
-        if (sceneSession != nullptr && property != nullptr) {
-            switch (action) {
-                case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-                    HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-                case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-                case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-                case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
-                case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
-                case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
-                    NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-                    SetBrightness(sceneSession, property->GetBrightness());
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
-                case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
-                    UpdatePrivateStateAndNotify(property->GetPersistentId());
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
-                    CheckAndNotifyWaterMarkChangedResult();
-                    NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_MODE:
-                    if (sceneSession->GetSessionProperty() != nullptr) {
-                        ProcessWindowModeType();
-                    }
-                    NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
-                    HandleHideNonSystemFloatingWindows(property, sceneSession);
-                    break;
-                case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
-                    FlushWindowInfoToMMI();
-                    break;
-                default:
-                    break;
+        if (sceneSession == nullptr || property == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "params is nullptr");
+            return;
+        }
+        switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
+                SetBrightness(sceneSession, property->GetBrightness());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
+            case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
+                UpdatePrivateStateAndNotify(property->GetPersistentId());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+                CheckAndNotifyWaterMarkChangedResult();
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_MODE:
+                if (sceneSession->GetSessionProperty() != nullptr) {
+                    ProcessWindowModeType();
                 }
-            }
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
+                HandleHideNonSystemFloatingWindows(property, sceneSession);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
+                FlushWindowInfoToMMI();
+                break;
+            default:
+                break;
+        }   
     };
     if (sceneSession != nullptr) {
         sceneSession->SetSessionChangeByActionNotifyManagerListener(func);
