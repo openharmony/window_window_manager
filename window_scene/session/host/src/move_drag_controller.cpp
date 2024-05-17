@@ -123,8 +123,8 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         0,
         windowRect.width_,
         windowRect.height_,
-    }
-    WLOGI("original rect [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.pwsX_, targetRect.posY_,
+    };
+    WLOGI("original rect [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_, targetRect.posY_,
         targetRect.width_, targetRect.height_);
     return targetRect;
 }
