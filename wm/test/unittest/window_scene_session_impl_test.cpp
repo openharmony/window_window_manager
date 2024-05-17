@@ -3296,6 +3296,24 @@ HWTEST_F(WindowSceneSessionImplTest, RegisterSessionRecoverListenerSuccess02, Fu
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
 }
+
+/**
+ * @tc.name: NotifyDisplayInfoChange
+ * @tc.desc: NotifyDisplayInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyDisplayInfoChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyDisplayInfoChange");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    int res = 0;
+    window->NotifyDisplayInfoChange();
+    ASSERT_EQ(res, 0);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
