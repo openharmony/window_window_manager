@@ -378,9 +378,11 @@ private:
     WSError RequestFocusBasicCheck(int32_t persistentId);
     WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
+        sptr<SceneSession>& focusedSession, bool includingAppSession);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
-    sptr<SceneSession> GetTopNearestBlockingFocusSession(int zOrder);
+    sptr<SceneSession> GetTopNearestBlockingFocusSession(int zOrder,  bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
     WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
