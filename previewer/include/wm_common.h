@@ -25,12 +25,12 @@ namespace Rosen {
 using DisplayId = uint64_t;
 
 /**
- * @brief Enumerates type of window.
+ * @brief Enumerates type of window
  */
 enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
-    WINDOW_TYPE_APP_MAIN_WINDOW = APP_WINDOW_BASE,
+    WINDOW_TYPE_APP_MAIN_WINDOW = APP_MAIN_WINDOW_BASE,
     APP_MAIN_WINDOW_END,
 
     APP_SUB_WINDOW_BASE = 1000,
@@ -414,6 +414,21 @@ public:
     float translateY_;
     float translateZ_;
 
+    void Unmarshalling(Parcel& parcel)
+    {
+        pivotX_ = parcel.ReadFloat();
+        pivotY_ = parcel.ReadFloat();
+        scaleX_ = parcel.ReadFloat();
+        scaleY_ = parcel.ReadFloat();
+        scaleZ_ = parcel.ReadFloat();
+        rotationX_ = parcel.ReadFloat();
+        rotationY_ = parcel.ReadFloat();
+        rotationZ_ = parcel.ReadFloat();
+        translateX_ = parcel.ReadFloat();
+        translateY_ = parcel.ReadFloat();
+        translateZ_ = parcel.ReadFloat();
+    }
+
     bool Marshalling(Parcel& parcel) const
     {
         return parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
@@ -422,38 +437,23 @@ public:
                parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
     }
 
-    void Unmarshalling(Parcel& parcel)
-    {
-        scaleX_ = parcel.ReadFloat();
-        scaleY_ = parcel.ReadFloat();
-        scaleZ_ = parcel.ReadFloat();
-        pivotX_ = parcel.ReadFloat();
-        pivotY_ = parcel.ReadFloat();
-        translateX_ = parcel.ReadFloat();
-        translateY_ = parcel.ReadFloat();
-        translateZ_ = parcel.ReadFloat();
-        rotationX_ = parcel.ReadFloat();
-        rotationY_ = parcel.ReadFloat();
-        rotationZ_ = parcel.ReadFloat();
-    }
-
 private:
     static inline bool NearZero(float val)
     {
-        return val < 0.001f && val > -0.001f;
+        return -0.001f < val && val < 0.001f;
     }
 };
 
 /**
  * @struct Rect
  *
- * @brief Window Rect
+ * @brief Window Rect.
  */
 struct Rect {
-    uint32_t width_;
-    uint32_t height_;
     int32_t posX_;
     int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
 
     bool operator==(const Rect& a) const
     {
@@ -560,8 +560,8 @@ enum class WindowAnimation : uint32_t {
  */
 class AvoidArea : public Parcelable {
 public:
-    Rect leftRect_ { 0, 0, 0, 0 };
     Rect topRect_ { 0, 0, 0, 0 };
+    Rect leftRect_ { 0, 0, 0, 0 };
     Rect rightRect_ { 0, 0, 0, 0 };
     Rect bottomRect_ { 0, 0, 0, 0 };
 
@@ -588,24 +588,24 @@ public:
             parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
 
-    virtual bool Marshalling(Parcel& parcel) const override
-    {
-        return (WriteParcel(parcel, topRect_) && WriteParcel(parcel, leftRect_) &&
-            WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
-    }
-
     static AvoidArea* Unmarshalling(Parcel& parcel)
     {
         AvoidArea *avoidArea = new(std::nothrow) AvoidArea();
         if (avoidArea == nullptr) {
             return nullptr;
         }
-        if (ReadParcel(parcel, avoidArea->topRect_) && ReadParcel(parcel, avoidArea->leftRect_) &&
+        if (ReadParcel(parcel, avoidArea->leftRect_) && ReadParcel(parcel, avoidArea->topRect_) &&
             ReadParcel(parcel, avoidArea->rightRect_) && ReadParcel(parcel, avoidArea->bottomRect_)) {
             return avoidArea;
         }
         delete avoidArea;
         return nullptr;
+    }
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return (WriteParcel(parcel, leftRect_) && WriteParcel(parcel, topRect_) &&
+            WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
     }
 
     bool isEmptyAvoidArea() const
@@ -664,10 +664,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    uint32_t width_;
-    uint32_t height_;
     int32_t posX_;
     int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -696,10 +696,10 @@ struct TitleButtonRect {
  */
 class KeyboardAnimationConfig : public Parcelable {
 public:
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
     std::string curveType_ = "";
     std::vector<float> curveParams_ = {};
+    uint32_t durationIn_ = 0;
+    uint32_t durationOut_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
