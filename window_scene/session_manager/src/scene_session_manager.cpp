@@ -4245,6 +4245,33 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
     return WSError::WS_OK;
 }
 
+bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
+    sptr<SceneSession>& focusedSession, bool includingAppSession)
+{
+    uint32_t requestSessionZOrder = sceneSession->GetZOrder();
+    uint32_t focusedSessionZOrder = focusedSession->GetZOrder();
+    TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
+            requestSessionZOrder, focusedSessionZOrder);
+    if (requestSessionZOrder < focusedSessionZOrder) {
+        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder, includingAppSession);
+        uint32_t topNearestBlockingZOrder = 0;
+        if (topNearestBlockingFocusSession) {
+            topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
+            TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
+                topNearestBlockingZOrder:  %{public}d", requestSessionZOrder, focusedSessionZOrder,
+                topNearestBlockingZOrder);
+        }
+    
+        if (focusedSessionZOrder >= topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "focus pass through, needs to be intercepted");
+            return true;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS,"not through");
+    return false;
+        
+}
+
 WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
     FocusChangeReason reason)
 {
@@ -4260,28 +4287,24 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     // blocking-type session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (focusedSession) {
-        int requestSessionZOrder = sceneSession->GetZOrder();
-        int focusedSessionZOrder = focusedSession->GetZOrder();
-        TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
-            requestSessionZOrder, focusedSessionZOrder);
-            if (requestSessionZOrder < focusedSessionZOrder) {
-                auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder);
-                int topNearestBlockingZOrder = -1;
-                if (topNearestBlockingFocusSession) {
-                    topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
-                    TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
-                        topNearestBlockingZOrder:  %{public}d", requestSessionZOrder, focusedSessionZOrder,
-                        topNearestBlockingZOrder);
-                }
-                if (focusedSessionZOrder > topNearestBlockingZOrder 
-                    && requestSessionZOrder < topNearestBlockingZOrder) {
-                    TLOGI(WmsLogTag::WMS_FOCUS, "focus pass through, needs to be intercepted");
-                    return WSError::WS_DO_NOTHING;
-                }
-            }
+       
         if (focusedSession->IsTopmost() && sceneSession->IsAppSession()) {
             // return ok if focused session is topmost
             return WSError::WS_OK;
+        }
+        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byforeGround: %{public}d",
+            reason, byforeGround);
+        if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession, focusedSession, true)) {
+            TLOGI(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
+            return WSError::WS_OK;
+        }
+        if ((reason == FocusChangeReason::SPLIT_SCREEN || reason == FocusChangeReason:: FLOATING_SCENE) &&
+            !byForeground) {
+            if(!CheckFocusIsDownThroughBlockingType(sceneSession, focusedSession, false)
+                && focusedSession->IsAppSession()) {
+                TLOGI(WmsLogTag::WMS_FOCUS, "in split or floting , ok");
+                return WSError::WS_OK;
+            }
         }
         bool isBlockingType = focusedSession->IsAppSession() ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
@@ -4349,7 +4372,9 @@ sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder)
         if (sessionZOrder <= zOrder) { // must be above the target session
             return false;
         }
-        if (IsSessionVisible(session) && session->GetBlockingFocus()) {
+        bool isBlockingType =(includingAppSession && focusedSession->IsAppSession()) ||
+            (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
+        if (IsSessionVisible(session) && isBlockingType)  {
             ret = session;
             return true;
         }
