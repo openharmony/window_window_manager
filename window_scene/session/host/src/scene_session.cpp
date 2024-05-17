@@ -63,7 +63,7 @@ std::mutex SceneSession::enterSessionMutex_;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint32_t, WSRect> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
-const std::map<uint32_t, SceneSessionFunc> SceneSession::sessionFuncMap_ {
+const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_ {
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
         &SceneSession::HandleActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
@@ -2400,29 +2400,26 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     property->SetSystemCalling(isSystemCalling);
     wptr<SceneSession> weak = this;
     auto task = [weak, property, action]() -> WMError {
-        auto weakSession = weak.promote();
-        if (weakSession == nullptr) {
+        auto sceneSession = weak.promote();
+        if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        if (property == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "the property is nullptr");
-            return WMError::WM_DO_NOTHING;
-        }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", weakSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
-        return weakSession->HandleUpdatePropertyByAction(property, action, weakSession);
+        return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     };
     return PostSyncTask(task, "UpdateProperty");
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
+    TLOGD(WmsLogTag::DEFAULT, "SetListener success");
     sessionChangeByActionNotifyManagerFunc_ = func;
 }
 
 WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
@@ -2432,12 +2429,12 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    const auto& func = sessionFuncMap_.find(static_cast<uint32_t>(action));
-    if (func == sessionFuncMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to find SceneSessionFunc handler!");
+    const auto funcIter = sessionFuncMap_.find(static_cast<uint32_t>(action));
+    if (funcIter == sessionFuncMap_.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to find HandleUpdatePropertyFunc handler!");
         return WMError::WM_DO_NOTHING;
     }
-    return (this->*(func->second))(property, sceneSession, action);
+    return (this->*(funcIter->second))(property, sceneSession, action);
 }
 
 WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -2450,7 +2447,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
             TLOGE(WmsLogTag::DEFAULT, "session is invalid");
             return;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Win: %{public}s, is turn on%{public}d",
+        TLOGD(WmsLogTag::DEFAULT, "Win: %{public}s, is turn on: %{public}d",
             sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
@@ -2498,12 +2495,11 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
         TLOGW(WmsLogTag::DEFAULT, "only app main window can set brightness");
         return WMError::WM_OK;
     }
-    // @todo if sceneSession is inactive, return
     if (!sceneSession->IsSessionValid()) {
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     float brightness = property->GetBrightness();
-    if (brightness == sceneSession->GetBrightness()) {
+    if (std::abs(brightness - sceneSession->GetBrightness()) < std::numeric_limits<float>::epsilon()) {
         TLOGD(WmsLogTag::DEFAULT, "Session brightness do not change: [%{public}f]", brightness);
         return WMError::WM_DO_NOTHING;
     }
@@ -2692,8 +2688,8 @@ WMError SceneSession::HandleActionUpdateWindowMask(const sptr<WindowSessionPrope
     if (sceneSession->GetSessionProperty() != nullptr) {
         sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
         sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
+        sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
     }
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
     return WMError::WM_OK;
 }
 
@@ -2731,12 +2727,13 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
         return;
     }
     uint32_t flags = property->GetWindowFlags();
     uint32_t oldFlags = sessionProperty->GetWindowFlags();
-    if (((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
-        (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) &&
+    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
+        (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK) &&
         !property->GetSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "Set window flags permission denied");
         return;
@@ -2751,11 +2748,13 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "NotifySessionChangeByActionNotifyManager id: %{public}d, action: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
         GetPersistentId(), action);
-    if (sessionChangeByActionNotifyManagerFunc_) {
-        sessionChangeByActionNotifyManagerFunc_(sceneSession, property, action);
+    if (sessionChangeByActionNotifyManagerFunc_ == nullptr) {
+        TLOGW(WmsLogTag::DEFAULT, "func is null");
+        return;
     }
+    sessionChangeByActionNotifyManagerFunc_(sceneSession, property, action);
 }
 
 WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)

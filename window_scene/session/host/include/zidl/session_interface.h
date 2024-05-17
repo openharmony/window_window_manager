@@ -106,10 +106,7 @@ public:
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
-        WSPropertyChangeAction action)
-    {
-        return WMError::WM_OK;
-    }
+        WSPropertyChangeAction action) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

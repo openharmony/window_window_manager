@@ -68,7 +68,7 @@ using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, b
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
-using SceneSessionFunc = WMError (SceneSession::*)(const sptr<WindowSessionProperty>& property,
+using HandleUpdatePropertyFunc = WMError (SceneSession::*)(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
@@ -333,8 +333,8 @@ private:
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
-    WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
-        const sptr<SceneSession>& sceneSession);
+    WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateKeepScreenOn(const sptr<WindowSessionProperty>& property,
@@ -416,7 +416,7 @@ private:
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::string clientIdentityToken_ = { "" };
-    static const std::map<uint32_t, SceneSessionFunc> sessionFuncMap_;
+    static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 };
 } // namespace OHOS::Rosen
