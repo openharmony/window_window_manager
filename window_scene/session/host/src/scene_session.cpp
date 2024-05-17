@@ -2440,7 +2440,7 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
     }
     const auto funcIter = sessionFuncMap_.find(static_cast<uint32_t>(action));
     if (funcIter == sessionFuncMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to find HandleUpdatePropertyFunc handler!");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
         return WMError::WM_DO_NOTHING;
     }
     return (this->*(funcIter->second))(property, sceneSession, action);
