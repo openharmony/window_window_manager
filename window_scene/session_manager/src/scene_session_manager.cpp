@@ -4364,7 +4364,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
  * Find the session through the specific zOrder, it is located abve it, its' blockingFocus attribute is true,
  * and it is the closest;
  */
-sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder, bool includingAppSession)
+sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder, bool includingAppSession)
 {
     sptr<Session> ret = nullptr;
     auto func = [this, &ret, zOrder, includingAppSession](sptr<SceneSession> session) {
@@ -4375,8 +4375,8 @@ sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder,
         if (sessionZOrder <= zOrder) { // must be above the target session
             return false;
         }
-        bool isBlockingType = (includingAppSession && focusedSession->IsAppSession()) ||
-            (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
+        bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
+            (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus());
         if (IsSessionVisible(session) && isBlockingType)  {
             ret = session;
             return true;
