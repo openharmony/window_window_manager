@@ -4253,12 +4253,13 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
 bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
     sptr<SceneSession>& focusedSession, bool includingAppSession)
 {
-    uint32_t requestSessionZOrder = sceneSession->GetZOrder();
+    uint32_t requestSessionZOrder = requestSceneSession->GetZOrder();
     uint32_t focusedSessionZOrder = focusedSession->GetZOrder();
     TLOGI(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
-            requestSessionZOrder, focusedSessionZOrder);
+        requestSessionZOrder, focusedSessionZOrder);
     if  (requestSessionZOrder < focusedSessionZOrder)  {
-        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder, includingAppSession);
+        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder, 
+            includingAppSession);
         uint32_t topNearestBlockingZOrder = 0;
         if  (topNearestBlockingFocusSession)  {
             topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
@@ -4295,12 +4296,12 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
             return WSError::WS_OK;
         }
         TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byforeGround: %{public}d",  reason,
-             byforeGround);
+            byforeGround);
         if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
             TLOGI(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
             return WSError::WS_DO_NOTHING;
         }
-        if ((reason == FocusChangeReason::SPLIT_SCREEN || reason == FocusChangeReason:: FLOATING_SCENE) &&
+        if ((reason == FocusChangeReason::SPLIT_SCREEN || reason == FocusChangeReason::FLOATING_SCENE) &&
             !byForeground)  {
             if (!CheckFocusIsDownThroughBlockingType(sceneSession, focusedSession, false)
                 && focusedSession->IsAppSession()) {
@@ -4374,7 +4375,7 @@ sptr<Session> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder,
         if (sessionZOrder <= zOrder) { // must be above the target session
             return false;
         }
-        bool isBlockingType =(includingAppSession && focusedSession->IsAppSession()) ||
+        bool isBlockingType = (includingAppSession && focusedSession->IsAppSession()) ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
         if (IsSessionVisible(session) && isBlockingType)  {
             ret = session;
