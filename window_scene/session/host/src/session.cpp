@@ -482,6 +482,10 @@ WSError Session::SetTouchable(bool touchable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (touchable !=  GetSessionProperty()->GetTouchable()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
+            static_cast<int>(touchable));
+    }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
 }
@@ -508,13 +512,19 @@ bool Session::GetTouchable() const
 
 void Session::SetForceTouchable(bool forceTouchable)
 {
+    if (forceTouchable != forceTouchable_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
+            static_cast<int>(forceTouchable));
+    }
     forceTouchable_ = forceTouchable;
 }
 
 void Session::SetSystemTouchable(bool touchable)
 {
-    WLOGFD("SetSystemTouchable id: %{public}d, systemtouchable: %{public}d, propertytouchable: %{public}d",
-        GetPersistentId(), touchable, GetTouchable());
+    if (touchable != systemTouchable_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
+            static_cast<int>(touchable));
+    }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
 }
@@ -1070,6 +1080,10 @@ void Session::NotifyForegroundInteractiveStatus(bool interactive)
 
 void Session::SetForegroundInteractiveStatus(bool interactive)
 {
+    if (interactive !=  foregroundInteractiveStatus_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d interactive:%{public}d", GetPersistentId(),
+            static_cast<int>(interactive));
+    }
     foregroundInteractiveStatus_.store(interactive);
     NotifySessionInfoChange();
 }
@@ -2720,7 +2734,16 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     if (property == nullptr) {
         return;
     }
-
+    std::vector<Rect> lastTouchHotAreas;
+    property->GetTouchHotAreas(lastTouchHotAreas);
+    if (touchHotAreas != lastTouchHotAreas) {
+        std::string rectStr = "";
+        for (const auto& rect : touchHotAreas) {
+            rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
+            " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+    }
     property->SetTouchHotAreas(touchHotAreas);
 }
 

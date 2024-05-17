@@ -54,7 +54,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
-constexpr const char* APP_TWIN_INDEX = "ohos.extra.param.key.appTwinIndex";
+constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
@@ -1848,26 +1848,35 @@ std::string SceneSession::GetUpdatedIconPath() const
 
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
-    WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
-        sessionInfo_.bundleName_.c_str(), GetPersistentId(), visible);
-    isVisible_ = visible;
-    if (specificCallback_ == nullptr) {
-        WLOGFW("specific callback is null.");
-        return;
-    }
+    auto task = [weakThis = wptr(this), visible]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        int32_t persistentId = session->GetPersistentId();
+        WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
+            session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        session->isVisible_ = visible;
+        if (session->specificCallback_ == nullptr) {
+            WLOGFW("specific callback is null.");
+            return;
+        }
 
-    if (visible) {
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
-    } else {
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    }
-    NotifyAccessibilityVisibilityChange();
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    // update private state
-    if (!GetSessionProperty()) {
-        WLOGFE("UpdateNativeVisibility property is null");
-        return;
-    }
+        if (visible) {
+            session->specificCallback_->onWindowInfoUpdate_(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        } else {
+            session->specificCallback_->onWindowInfoUpdate_(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        }
+        session->NotifyAccessibilityVisibilityChange();
+        session->specificCallback_->onUpdateAvoidArea_(persistentId);
+        // update private state
+        if (!session->GetSessionProperty()) {
+            WLOGFE("UpdateNativeVisibility property is null");
+            return;
+        }
+    };
+    PostTask(task, "UpdateNativeVisibility");
 }
 
 bool SceneSession::IsVisible() const
@@ -2250,8 +2259,8 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
         info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-        int32_t appTwinIndex = abilitySessionInfo->want.GetIntParam(APP_TWIN_INDEX, 0);
-        info.appIndex_ = appTwinIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appTwinIndex;
+        int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+        info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
         info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -2318,8 +2327,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
         info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-        int32_t appTwinIndex = abilitySessionInfo->want.GetIntParam(APP_TWIN_INDEX, 0);
-        info.appIndex_ = appTwinIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appTwinIndex;
+        int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+        info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
         info.persistentId_ = abilitySessionInfo->persistentId;
         info.callerPersistentId_ = session->GetPersistentId();
         info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
