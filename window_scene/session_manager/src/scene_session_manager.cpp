@@ -4366,7 +4366,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
  */
 sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder, bool includingAppSession)
 {
-    sptr<Session> ret = nullptr;
+    sptr<SceneSession> ret = nullptr;
     auto func = [this, &ret, zOrder, includingAppSession](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
