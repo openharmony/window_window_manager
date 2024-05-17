@@ -142,6 +142,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
+    BindNativeFunction(env, objValue, "setWindowLastRect", moduleName, JsSceneSession::SetWindowLastRect);
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
@@ -2600,6 +2601,64 @@ napi_value JsSceneSession::OnSetScale(napi_env env, napi_callback_info info)
     }
     session->SetScale(static_cast<float_t>(scaleX), static_cast<float_t>(scaleY), static_cast<float_t>(pivotX),
         static_cast<float_t>(pivotY));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::SetWindowLastRect(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]SetWindowLastRect");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetWindowLastRect(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnSetWindowLastRect(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < SCALE_ARG_COUNT) { // SCALE_ARG_COUNT: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t left = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], left)) {
+        WLOGFE("[NAPI]Failed to convert parameter to left");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t top = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], top)) {
+        WLOGFE("[NAPI]Failed to convert parameter to top");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t width = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], width)) {
+        WLOGFE("[NAPI]Failed to convert parameter to width");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t height = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], height)) {
+        WLOGFE("[NAPI]Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WSRect lastRect = { left, top, width, height };
+    session->SetLastSafeRect(lastRect);
     return NapiGetUndefined(env);
 }
 

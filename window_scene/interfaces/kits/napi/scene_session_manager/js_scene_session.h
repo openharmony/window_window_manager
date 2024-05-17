@@ -55,6 +55,7 @@ private:
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
+    static napi_value SetWindowLastRect(napi_env env, napi_callback_info info);
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
@@ -76,6 +77,7 @@ private:
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowLastRect(napi_env env, napi_callback_info info);
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);

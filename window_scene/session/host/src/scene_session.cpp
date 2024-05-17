@@ -343,13 +343,22 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             !session->moveDragController_->GetStartDragFlag()) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->moveDragController_->InitMoveDragProperty();
-            session->moveDragController_->SetStartMoveFlag(true);
-            session->moveDragController_->ClacFirstMoveTargetRect(session->winRect_);
+            if (session->IsMovableFullScreen()) {
+                WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
+                    session->lastSafeRect);
+                session->Session::UpdateRect(rect, session->reason_, nullptr);
+                session->moveDragController_->SetStartMoveFlag(true);
+                session->moveDragController_->ClacFirstMoveTargetRect(rect, true);
+            } else {
+                session->moveDragController_->SetStartMoveFlag(true);
+                session->moveDragController_->ClacFirstMoveTargetRect(session->winRect_, false);
+            }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
-            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
+            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
+                session->sessionEventParam_);
         }
         return WSError::WS_OK;
     };
@@ -1380,13 +1389,22 @@ bool SceneSession::IsMovableWindowType()
         return false;
     }
 
-    bool existFloating = WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FLOATING);
-
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        (property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && existFloating);
+        IsMovableFullScreen();
+}
+
+bool SceneSession::IsMovableFullScreen()
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        return false;
+    }
+    bool existFloating = WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(),
+        WindowMode::WINDOW_MODE_FLOATING);
+
+    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && existFloating;
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
