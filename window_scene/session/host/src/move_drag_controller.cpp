@@ -115,7 +115,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
     }
     if (originalRect.width_ == 0) {
         WLOGE("original rect witch is zero");
-        return;
+        return windowRect;
     }
     WSRect targetRect = {
         moveTempProperty_.lastDownPointerPosX_ -
