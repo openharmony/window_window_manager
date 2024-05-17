@@ -2586,7 +2586,7 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "UpdateProperty, action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;

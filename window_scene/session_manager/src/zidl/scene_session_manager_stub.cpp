@@ -310,7 +310,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    TLOGD(WmsLogTag::DEFAULT, "run HandleUpdateProperty, action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "run UpdateProperty, action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = new (std::nothrow) WindowSessionProperty();

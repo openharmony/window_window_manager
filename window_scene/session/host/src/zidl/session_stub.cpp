@@ -684,7 +684,7 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    TLOGD(WmsLogTag::DEFAULT, "run HandleUpdateProperty, action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "run UpdateProperty, action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = new (std::nothrow) WindowSessionProperty();
@@ -694,7 +694,7 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     } else {
         TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
     }
-    const WMError& ret = UpdateSessionPropertyByAction(property, action);
+    const WMError ret = UpdateSessionPropertyByAction(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
