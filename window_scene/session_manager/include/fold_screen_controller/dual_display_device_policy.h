@@ -39,6 +39,7 @@ private:
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModePower(bool isStartUp, ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();
@@ -48,6 +49,7 @@ private:
         ScreenPropertyChangeReason reason);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    bool isStartUp_ = true;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_DUAL_DISPLAY_DEVICE_POLICY_H
