@@ -605,8 +605,8 @@ HWTEST_F(MoveDragControllerTest, ClacFirstMoveTargetRect, Function | SmallTest |
 HWTEST_F(MoveDragControllerTest, ClacFirstMoveTargetRect001, Function | SmallTest | Level1)
 {
     WSRect windowRect = { 1, 2, 3, 4 };
-    moveDragController_->InitMoveDragProperty();
-    moveDragController_->SetStartMoveFlag(true);
+    moveDragController->InitMoveDragProperty();
+    moveDragController->SetStartMoveFlag(true);
     moveDragController->ClacFirstMoveTargetRect(windowRect, true);
     WSRect targetRect = moveDragController->GetTargetRect();
     ASSERT_EQ(targetRect.posX_, -1);
