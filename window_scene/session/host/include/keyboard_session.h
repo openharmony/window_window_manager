@@ -52,7 +52,6 @@ private:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     uint32_t GetCallingSessionId();
 
-    bool IsStatusBarVisible(const sptr<SceneSession>& session);
     int32_t GetStatusBarHeight();
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea);
