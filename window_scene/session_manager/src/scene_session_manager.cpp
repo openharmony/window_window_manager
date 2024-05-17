@@ -4382,7 +4382,7 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(int zO
             return true;
         }
         return false;
-    }
+    };
     TraverseSessionTree(func, false);
     return ret;
 }
