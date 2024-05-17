@@ -132,7 +132,7 @@ void DualDisplayDevicePolicy::SetOnBootAnimation(bool onBootAnimation)
     if (!onBootAnimation_) {
         TLOGI(WmsLogTag::DMS, "SetOnBootAnimation when boot animation finished, change display mode");
         RecoverWhenBootAnimationExit();
-        bool isStartUp_ = fasle;
+        isStartUp_ = fasle;
     }
 }
 
@@ -332,7 +332,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
 
 void DualDisplayDevicePolicy::ChangeScreenDisplayModePower(bool isStartUp, ScreenPowerStatus screenPowerStatus)
 {
-    if (isStartUp_) {
+    if (isStartUp) {
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPower(screenPowerStatus, PowerStateChangeReason::POWER_BUTTON);
         return;
