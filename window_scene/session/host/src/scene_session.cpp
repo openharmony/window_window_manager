@@ -2423,7 +2423,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
-    TLOGD(WmsLogTag::DEFAULT, "SetListener success");
+    TLOGD(WmsLogTag::DEFAULT, "setListener success");
     sessionChangeByActionNotifyManagerFunc_ = func;
 }
 
