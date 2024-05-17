@@ -58,6 +58,7 @@ public:
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
     void ClacFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating);
+    WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
     int32_t GetOriginalPointerPosY();
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
@@ -110,7 +111,6 @@ private:
     void CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis);
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
-    WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
     void ProcessSessionRectChange(const SizeChangeReason& reason);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
