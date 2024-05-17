@@ -292,37 +292,21 @@ int32_t KeyboardSession::GetFocusedSessionId()
     return keyboardCallback_->onGetFocusedSessionId_();
 }
 
-bool KeyboardSession::IsStatusBarVisible(const sptr<SceneSession>& statusBarSession)
-{
-    if (statusBarSession == nullptr) {
-        return false;
-    }
-    if (statusBarSession->IsVisible()) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Status Bar is at foreground, id: %{public}d",
-            statusBarSession->GetPersistentId());
-        return true;
-    }
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "Status Bar is at background, id: %{public}d", statusBarSession->GetPersistentId());
-    return false;
-}
-
 int32_t KeyboardSession::GetStatusBarHeight()
 {
     int32_t statusBarHeight = 0;
-    int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
         GetSessionProperty() == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback_ or session property is null, get statusBarHeight failed!");
         return statusBarHeight;
     }
 
     std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (const auto& statusBar : statusBarVector) {
-        if (statusBar == nullptr || !IsStatusBarVisible(statusBar)) {
-            continue;
+        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > statusBarHeight) {
+            statusBarHeight = statusBar->GetSessionRect().height_;
         }
-        height = statusBar->GetSessionRect().height_;
-        statusBarHeight = (statusBarHeight > height) ? statusBarHeight : height;
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Status Bar height: %{public}d", statusBarHeight);
     return statusBarHeight;
