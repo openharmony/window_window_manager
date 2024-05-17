@@ -18,6 +18,7 @@
 #include "window_manager_hilog.h"
 namespace OHOS {
 namespace {
+bool g_setWriteBoolErrorFlag = false;
 bool g_setWriteInt32ErrorFlag = false;
 bool g_setWriteInt64ErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
@@ -36,12 +37,18 @@ constexpr int32_t ERROR_SIZE = 1;
 namespace Rosen {
 void MockMessageParcel::ClearAllErrorFlag()
 {
+    g_setWriteBoolErrorFlag = false;
     g_setWriteInt32ErrorFlag = false;
     g_setWriteInt64ErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
+}
+
+void MockMessageParcel::SetWriteBoolErrorFlag(bool flag)
+{
+    g_setWriteBoolErrorFlag = flag;
 }
 
 void MockMessageParcel::SetWriteInt32ErrorFlag(bool flag)
@@ -102,6 +109,12 @@ bool Parcel::WriteString(const std::string& value)
     return true;
 }
 #endif
+
+bool Parcel::WriteBool(bool value)
+{
+    (void)value;
+    return !g_setWriteBoolErrorFlag;
+}
 
 bool Parcel::WriteInt32(int32_t value)
 {
