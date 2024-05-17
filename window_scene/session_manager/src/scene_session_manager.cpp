@@ -4295,8 +4295,8 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
             // return ok if focused session is topmost
             return WSError::WS_OK;
         }
-        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byforeGround: %{public}d",  reason,
-            byforeGround);
+        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byForeground: %{public}d",  reason,
+            byForeground);
         if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
             TLOGI(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
             return WSError::WS_DO_NOTHING;
