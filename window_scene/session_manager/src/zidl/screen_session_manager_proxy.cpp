@@ -1380,11 +1380,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(
         WLOGFW("SendRequest failed");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
-    if (pixelMap == nullptr) {
-        WLOGFW("SendRequest nullptr.");
-        return nullptr;
-    }
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>()); // need't to check nullptr
     *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     rect.left = reply.ReadInt32();
     rect.top = reply.ReadInt32();
