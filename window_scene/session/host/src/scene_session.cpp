@@ -495,8 +495,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
-            session->reason_ != SizeChangeReason::DRAG_END) {
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s!",
                 session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
