@@ -387,11 +387,11 @@ private:
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
     bool touchable_ { true };
-    bool subWindowDecorEnable_ = false;
-    bool onlySupportSceneBoard_ = false;
-    bool keepScreenOn_ = false;
-    bool turnScreenOn_ = false;
-    bool isMainHandlerAvailable_ = true;
+    bool subWindowDecorEnable_ = { false };
+    bool onlySupportSceneBoard_ = { false };
+    bool keepScreenOn_ = { false };
+    bool turnScreenOn_ = { false };
+    bool isMainHandlerAvailable_ = { true };
     DisplayId displayId_ { 0 };
     uint32_t parentId_ = INVALID_WINDOW_ID;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;
