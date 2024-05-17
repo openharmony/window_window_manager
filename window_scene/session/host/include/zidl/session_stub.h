@@ -52,7 +52,6 @@ private:
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
