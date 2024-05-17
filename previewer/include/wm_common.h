@@ -753,6 +753,12 @@ struct MaximizeLayoutOption {
     ShowType decor = ShowType::HIDE;
     ShowType dock = ShowType::HIDE;
 };
+
+enum class BackupAndRestoreType: int32_t {
+    NONE = 0,           // no backup and restore
+    CONTINUATION = 1,   // distribute
+    APP_RECOVERY = 2,   // app recovery
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
