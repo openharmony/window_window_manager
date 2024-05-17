@@ -748,26 +748,30 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage,
-        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByAbc(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    OHOS::Ace::UIContentErrorCode& aceRet)
 {
     {
         std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
@@ -785,7 +789,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         TLOGE(WmsLogTag::WMS_LIFE, "fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    switch (type) {
+    switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT:
             if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
@@ -795,8 +799,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
-        case WindowSetUIContentType::DISTRIBUTE:
-            aceRet = uiContent->Restore(this, contentInfo, storage);
+        case WindowSetUIContentType::RESTORE:
+            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
+                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -817,7 +822,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (IsWindowSessionInvalid()) {
@@ -826,7 +831,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, type, ability, aceRet);
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet);
     if (initUIContentRet != WMError::WM_OK) {
         return initUIContentRet;
     }
@@ -1195,15 +1200,21 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     return property_->GetRequestedOrientation();
 }
 
-std::string WindowSessionImpl::GetContentInfo()
+std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
+    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
+        WLOGFE("Invalid type %{public}d", type);
+        return "";
+    }
+
     std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
-    return uiContent_->GetContentInfo();
+    return uiContent_->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
+        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
 }
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
