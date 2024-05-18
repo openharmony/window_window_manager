@@ -2837,6 +2837,22 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
+{
+    uint32_t zOrder = 9999;
+    auto session = ssm_->GetTopNearestBlockingFocusSession(zOrder, true);
+    ASSERT_NE(session, nullptr);
+
+    session = ssm_->GetTopNearestBlockingFocusSession(zOrder, false);
+    ASSERT_NE(session, nullptr);
+}
+
+
+/**
  * @tc.name: RaiseWindowToTop
  * @tc.desc: SceneSesionManager raise window to top
  * @tc.type: FUNC
