@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_SESSION_STAGE_STUB_SIZE_FUZZER_H
-#define TEST_FUZZTEST_SESSION_STAGE_STUB_SIZE_FUZZER_H
+#ifndef TEST_FUZZTEST_SESSION_STAGE_STUB_UPDATE_FUZZER_H
+#define TEST_FUZZTEST_SESSION_STAGE_STUB_UPDATE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "sessionstagestubsize_fuzzer"
+#define FUZZ_PROJECT_NAME "sessionstagestubupdate_fuzzer"
 
 #endif
