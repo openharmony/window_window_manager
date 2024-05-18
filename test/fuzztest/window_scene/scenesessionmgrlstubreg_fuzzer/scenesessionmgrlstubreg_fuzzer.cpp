@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "scenesessionmgrlstubtoken_fuzzer.h"
+#include "scenesessionmgrlstubreg_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -51,7 +51,31 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
-            SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
+        parcel, reply, option);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID),
         parcel, reply, option);
     return true;
 }
