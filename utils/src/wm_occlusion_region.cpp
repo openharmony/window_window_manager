@@ -46,8 +46,13 @@ void Node::Update(int updateStart, int updateEnd, Event::Type type)
         if (left_ == nullptr) {
             left_ = new Node { start_, mid_ };
         }
-        left_->Update(updateStart, mid_ < updateEnd ? mid_ : updateEnd, type);
-        right_->Update(mid_ > updateStart ? mid_ : updateStart, updateEnd, type);
+
+        if (left_) {
+            left_->Update(updateStart, mid_ < updateEnd ? mid_ : updateEnd, type);
+        }
+        if (right_) {
+            right_->Update(mid_ > updateStart ? mid_ : updateStart, updateEnd, type);
+        }
     }
 }
 
