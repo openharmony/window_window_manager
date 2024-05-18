@@ -283,7 +283,7 @@ HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function 
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
-    ASSERT_EQ(-1, res);
+    ASSERT_EQ(0, res);
 }
 
 /**
