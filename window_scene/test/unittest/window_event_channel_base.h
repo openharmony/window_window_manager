@@ -53,7 +53,7 @@ public:
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
-    };
+    }
 };
 
 WSError TestWindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
