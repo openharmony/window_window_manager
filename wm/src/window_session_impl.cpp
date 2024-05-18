@@ -2649,12 +2649,12 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
-    WLOGFD("UpdateProperty, action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().UpdateSessionProperty(property_, action);
+    return hostSession_->UpdateSessionPropertyByAction(property_, action);
 }
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)

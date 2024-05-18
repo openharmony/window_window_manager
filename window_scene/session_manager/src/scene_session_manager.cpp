@@ -1350,6 +1350,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionInfoChangeNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
+    RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -3171,7 +3172,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             return UpdatePropertyRaiseEnabled(property, sceneSession);
         }
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
-            UpdateHideNonSystemFloatingWindows(property, sceneSession);
+            HandleHideNonSystemFloatingWindows(property, sceneSession);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
@@ -3210,24 +3211,19 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
+void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
-        return;
-    }
-
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
+        TLOGI(WmsLogTag::DEFAULT, "session property null");
         return;
     }
 
     bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
     bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
     if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
-        WLOGFI("property hideNonSystemFloatingWindows not change");
+        TLOGI(WmsLogTag::DEFAULT, "property hideNonSystemFloatingWindows not change");
         return;
     }
 
@@ -3238,7 +3234,6 @@ void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSe
             UpdateForceHideState(sceneSession, property, true);
         }
     }
-    propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
 }
 
 void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
@@ -3356,14 +3351,6 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
-    if (!sceneSession->IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (brightness == sceneSession->GetBrightness()) {
-        WLOGFD("Session brightness do not change: [%{public}f]", brightness);
-        return WSError::WS_DO_NOTHING;
-    }
-    sceneSession->SetBrightness(brightness);
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr) {
         bool setBrightnessRet = false;
@@ -4713,6 +4700,58 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     }
     sceneSession->SetGetStateFromManagerListener(func);
     WLOGFD("RegisterGetStateFromManagerFunc success");
+}
+
+void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    SessionChangeByActionNotifyManagerFunc func = [this](const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) {
+        if (sceneSession == nullptr || property == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "params is nullptr");
+            return;
+        }
+        switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
+                SetBrightness(sceneSession, property->GetBrightness());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
+            case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
+                UpdatePrivateStateAndNotify(property->GetPersistentId());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+                CheckAndNotifyWaterMarkChangedResult();
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_MODE:
+                if (sceneSession->GetSessionProperty() != nullptr) {
+                    ProcessWindowModeType();
+                }
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
+                HandleHideNonSystemFloatingWindows(property, sceneSession);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
+                FlushWindowInfoToMMI();
+                break;
+            default:
+                break;
+        }
+    };
+    if (sceneSession != nullptr) {
+        sceneSession->SetSessionChangeByActionNotifyManagerListener(func);
+    }
 }
 
 __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(

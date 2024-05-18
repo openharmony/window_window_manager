@@ -79,6 +79,8 @@ public:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

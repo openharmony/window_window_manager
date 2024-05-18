@@ -386,6 +386,7 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
@@ -427,7 +428,7 @@ private:
         const sptr<SceneSession>& sceneSession);
     WMError HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
-    void UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
+    void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
     void UpdateForceHideState(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property,
         bool add);
