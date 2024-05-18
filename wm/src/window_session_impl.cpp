@@ -120,7 +120,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                            \
     } while (0)
 
-WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
+WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption> option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
     property_ = new (std::nothrow) WindowSessionProperty();

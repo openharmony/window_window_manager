@@ -75,7 +75,7 @@ std::recursive_mutex WindowImpl::globalMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 bool WindowImpl::enableImmersiveMode_ = true;
-WindowImpl::WindowImpl(const sptr<WindowOption>& option)
+WindowImpl::WindowImpl(const sptr<WindowOption> option)
 {
     property_ = new (std::nothrow) WindowProperty();
     if (property_ == nullptr) {
@@ -114,8 +114,12 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
         ++g_constructorCnt, property_->GetWindowName().c_str());
 }
 
-void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
+void WindowImpl::InitWindowProperty(const sptr<WindowOption> option)
 {
+    if (option == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Init window property failed, option is nullptr.");
+        return;
+    }
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());

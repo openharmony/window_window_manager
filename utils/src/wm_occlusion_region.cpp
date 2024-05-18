@@ -28,6 +28,29 @@ std::ostream& operator<<(std::ostream& os, const Rect& r)
     return os;
 }
 
+void Node::Update(int updateStart, int updateEnd, Event::Type type)
+{
+    if (updateStart >= updateEnd) {
+        return;
+    }
+    if (updateStart == start_ && updateEnd == end_) {
+        if (type == Event::Type::CLOSE || type == Event::Type::OPEN) {
+            positive_count_ += type;
+        } else {
+            negative_count_ += type;
+        }
+    } else {
+        if (right_ == nullptr) {
+            right_ = new Node { mid_, end_ };
+        }
+        if (left_ == nullptr) {
+            left_ = new Node { start_, mid_ };
+        }
+        left_->Update(updateStart, mid_ < updateEnd ? mid_ : updateEnd, type);
+        right_->Update(mid_ > updateStart ? mid_ : updateStart, updateEnd, type);
+    }
+}
+
 bool EventSortByY(const Event& e1, const Event& e2)
 {
     if (e1.y_ == e2.y_) {
@@ -36,50 +59,12 @@ bool EventSortByY(const Event& e1, const Event& e2)
     return e1.y_ < e2.y_;
 }
 
-void Node::Update(int updateStart, int updateEnd, Event::Type type)
-{
-    if (updateStart >= updateEnd) {
-        return;
-    }
-    if (updateStart == start_ && updateEnd == end_) {
-        if (type == Event::Type::OPEN || type == Event::Type::CLOSE) {
-            positive_count_ += type;
-        } else {
-            negative_count_ += type;
-        }
-    } else {
-        if (left_ == nullptr) {
-            left_ = new Node { start_, mid_ };
-        }
-        if (right_ == nullptr) {
-            right_ = new Node { mid_, end_ };
-        }
-        left_->Update(updateStart, mid_ < updateEnd ? mid_ : updateEnd, type);
-        right_->Update(mid_ > updateStart ? mid_ : updateStart, updateEnd, type);
-    }
-}
-
-void Node::GetAndRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
-{
-    bool isPos = isParentNodePos || (positive_count_ > 0);
-    bool isNeg = isParentNodeNeg || (negative_count_ > 0);
-    if (isPos && isNeg) {
-        PushRange(res);
-    } else {
-        if (left_ != nullptr) {
-            left_->GetAndRange(res, isPos, isNeg);
-        }
-        if (right_ != nullptr) {
-            right_->GetAndRange(res, isPos, isNeg);
-        }
-    }
-}
-
 void Node::GetOrRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
 {
-    bool isPos = isParentNodePos || (positive_count_ > 0);
     bool isNeg = isParentNodeNeg || (negative_count_ > 0);
-    if (isPos || isNeg) {
+    bool isPos = isParentNodePos || (positive_count_ > 0);
+
+    if (isNeg || isPos) {
         PushRange(res);
     } else {
         if (left_ != nullptr) {
@@ -91,29 +76,29 @@ void Node::GetOrRange(std::vector<Range>& res, bool isParentNodePos = false, boo
     }
 }
 
-void Node::GetXOrRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
+void Node::GetAndRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
 {
-    bool isPos = isParentNodePos || (positive_count_ > 0);
     bool isNeg = isParentNodeNeg || (negative_count_ > 0);
-    if (((isPos && !isNeg) || (!isPos && isNeg)) && IsLeaf()) {
+    bool isPos = isParentNodePos || (positive_count_ > 0);
+
+    if (isNeg && isPos) {
         PushRange(res);
-    } else if (isPos && isNeg) {
-        return;
     } else {
         if (left_ != nullptr) {
-            left_->GetXOrRange(res, isPos, isNeg);
+            left_->GetAndRange(res, isPos, isNeg);
         }
         if (right_ != nullptr) {
-            right_->GetXOrRange(res, isPos, isNeg);
+            right_->GetAndRange(res, isPos, isNeg);
         }
     }
 }
 
 void Node::GetSubRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
 {
-    bool isPos = isParentNodePos || (positive_count_ > 0);
     bool isNeg = isParentNodeNeg || (negative_count_ > 0);
-    if (IsLeaf() && isPos && !isNeg) {
+    bool isPos = isParentNodePos || (positive_count_ > 0);
+
+    if (isPos && !isNeg && IsLeaf()) {
         PushRange(res);
     } else if (isNeg) {
         return;
@@ -127,16 +112,23 @@ void Node::GetSubRange(std::vector<Range>& res, bool isParentNodePos = false, bo
     }
 }
 
-void MakeEnumerate(std::set<int>& ys, std::map<int, int>& indexOf, std::vector<int>& indexAt)
+void Node::GetXOrRange(std::vector<Range>& res, bool isParentNodePos = false, bool isParentNodeNeg = false)
 {
-    auto it = ys.begin();
-    int index = 0;
-    while (it != ys.end()) {
-        indexOf[*it] = index++;
-        indexAt.push_back(*it);
-        ++it;
+    bool isNeg = isParentNodeNeg || (negative_count_ > 0);
+    bool isPos = isParentNodePos || (positive_count_ > 0);
+
+    if (((isPos && !isNeg) || (!isPos && isNeg)) && IsLeaf()) {
+        PushRange(res);
+    } else if (isNeg && isPos) {
+        return;
+    } else {
+        if (left_ != nullptr) {
+            left_->GetXOrRange(res, isPos, isNeg);
+        }
+        if (right_ != nullptr) {
+            right_->GetXOrRange(res, isPos, isNeg);
+        }
     }
-    return;
 }
 
 void Region::getRange(std::vector<Range>& ranges, Node& node, Region::OP op)
@@ -145,17 +137,29 @@ void Region::getRange(std::vector<Range>& ranges, Node& node, Region::OP op)
         case Region::OP::AND:
             node.GetAndRange(ranges);
             break;
+        case Region::OP::SUB:
+            node.GetSubRange(ranges);
+            break;
         case Region::OP::OR:
             node.GetOrRange(ranges);
             break;
         case Region::OP::XOR:
             node.GetXOrRange(ranges);
             break;
-        case Region::OP::SUB:
-            node.GetSubRange(ranges);
-            break;
         default:
             break;
+    }
+    return;
+}
+
+void MakeEnumerate(std::set<int>& ys, std::map<int, int>& indexOf, std::vector<int>& indexAt)
+{
+    int index = 0;
+    auto it = ys.begin();
+    while (it != ys.end()) {
+        indexOf[*it] = index++;
+        indexAt.push_back(*it);
+        ++it;
     }
     return;
 }
@@ -167,8 +171,8 @@ void Region::UpdateRects(Rects& r, std::vector<Range>& ranges, std::vector<int>&
     while (i < r.preRects.size() && j < ranges.size()) {
         if (r.preRects[i].left_ == indexAt[ranges[j].start_] && r.preRects[i].right_ == indexAt[ranges[j].end_]) {
             r.curRects.emplace_back(Rect { r.preRects[i].left_, r.preRects[i].top_, r.preRects[i].right_, r.curY });
-            i++;
             j++;
+            i++;
         } else if (r.preRects[i].right_ < indexAt[ranges[j].end_]) {
             res.GetRegionRects().push_back(r.preRects[i]);
             i++;
@@ -177,6 +181,7 @@ void Region::UpdateRects(Rects& r, std::vector<Range>& ranges, std::vector<int>&
             j++;
         }
     }
+
     for (; j < ranges.size(); j++) {
         r.curRects.emplace_back(Rect { indexAt[ranges[j].start_], r.preY, indexAt[ranges[j].end_], r.curY });
     }
@@ -193,17 +198,12 @@ void Region::MakeBound()
     if (rects_.size()) {
         bound_ = rects_[0];
         for (const auto& r : rects_) {
-            bound_.left_ = std::min(r.left_, bound_.left_);
             bound_.top_ = std::min(r.top_, bound_.top_);
+            bound_.left_ = std::min(r.left_, bound_.left_);
             bound_.right_ = std::max(r.right_, bound_.right_);
             bound_.bottom_ = std::max(r.bottom_, bound_.bottom_);
         }
     }
-}
-
-void Region::RegionOp(Region& r1, Region& r2, Region& res, Region::OP op)
-{
-    RegionOpLocal(r1, r2, res, op);
 }
 
 void Region::RegionOpLocal(Region& r1, Region& r2, Region& res, Region::OP op)
@@ -211,28 +211,28 @@ void Region::RegionOpLocal(Region& r1, Region& r2, Region& res, Region::OP op)
     r1.MakeBound();
     r2.MakeBound();
     res.GetRegionRects().clear();
-    std::vector<Event> events;
     std::set<int> xs;
+    std::vector<Event> events;
 
-    for (auto& r : r1.GetRegionRects()) {
-        events.emplace_back(Event { r.top_, Event::Type::OPEN, r.left_, r.right_ });
-        events.emplace_back(Event { r.bottom_, Event::Type::CLOSE, r.left_, r.right_ });
-        xs.insert(r.left_);
-        xs.insert(r.right_);
+    for (auto& rect : r1.GetRegionRects()) {
+        events.emplace_back(Event { rect.top_, Event::Type::OPEN, rect.left_, rect.right_ });
+        events.emplace_back(Event { rect.bottom_, Event::Type::CLOSE, rect.left_, rect.right_ });
+        xs.insert(rect.left_);
+        xs.insert(rect.right_);
     }
-    for (auto& r : r2.GetRegionRects()) {
-        events.emplace_back(Event { r.top_, Event::Type::VOID_OPEN, r.left_, r.right_ });
-        events.emplace_back(Event { r.bottom_, Event::Type::VOID_CLOSE, r.left_, r.right_ });
-        xs.insert(r.left_);
-        xs.insert(r.right_);
+    for (auto& rect : r2.GetRegionRects()) {
+        events.emplace_back(Event { rect.top_, Event::Type::VOID_OPEN, rect.left_, rect.right_ });
+        events.emplace_back(Event { rect.bottom_, Event::Type::VOID_CLOSE, rect.left_, rect.right_ });
+        xs.insert(rect.left_);
+        xs.insert(rect.right_);
     }
 
-    if (events.size() == 0) {
+    if (events.empty()) {
         return;
     }
 
-    std::map<int, int> indexOf;
     std::vector<int> indexAt;
+    std::map<int, int> indexOf;
     MakeEnumerate(xs, indexOf, indexAt);
     sort(events.begin(), events.end(), EventSortByY);
     size_t indexOfSize = indexOf.size() > 0 ? (indexOf.size() - 1) : 0;
@@ -240,20 +240,25 @@ void Region::RegionOpLocal(Region& r1, Region& r2, Region& res, Region::OP op)
 
     std::vector<Range> ranges;
     Rects r;
-    r.preY = events[0].y_;
     r.curY = events[0].y_;
-    for (auto& e : events) {
-        r.curY = e.y_;
+    r.preY = events[0].y_;
+    for (auto& event : events) {
+        r.curY = event.y_;
         ranges.clear();
         getRange(ranges, rootNode, op);
         if (r.curY > r.preY) {
             UpdateRects(r, ranges, indexAt, res);
         }
-        rootNode.Update(indexOf[e.left_], indexOf[e.right_], e.type_);
+        rootNode.Update(indexOf[event.left_], indexOf[event.right_], event.type_);
         r.preY = r.curY;
     }
     copy(r.preRects.begin(), r.preRects.end(), back_inserter(res.GetRegionRects()));
     res.MakeBound();
+}
+
+void Region::RegionOp(Region& r1, Region& r2, Region& res, Region::OP op)
+{
+    RegionOpLocal(r1, r2, res, op);
 }
 
 Region& Region::OperationSelf(Region& r, Region::OP op)
@@ -263,33 +268,6 @@ Region& Region::OperationSelf(Region& r, Region::OP op)
     return *this;
 }
 
-Region& Region::AndSelf(Region& r)
-{
-    return OperationSelf(r, Region::OP::AND);
-}
-
-Region& Region::OrSelf(Region& r)
-{
-    return OperationSelf(r, Region::OP::OR);
-}
-
-Region& Region::XOrSelf(Region& r)
-{
-    return OperationSelf(r, Region::OP::XOR);
-}
-
-Region& Region::SubSelf(Region& r)
-{
-    return OperationSelf(r, Region::OP::SUB);
-}
-
-Region Region::And(Region& r)
-{
-    Region res;
-    RegionOp(*this, r, res, Region::OP::AND);
-    return res;
-}
-
 Region Region::Or(Region& r)
 {
     Region res;
@@ -297,10 +275,10 @@ Region Region::Or(Region& r)
     return res;
 }
 
-Region Region::Xor(Region& r)
+Region Region::And(Region& r)
 {
     Region res;
-    RegionOp(*this, r, res, Region::OP::XOR);
+    RegionOp(*this, r, res, Region::OP::AND);
     return res;
 }
 
@@ -311,12 +289,39 @@ Region Region::Sub(Region& r)
     return res;
 }
 
+Region Region::Xor(Region& r)
+{
+    Region res;
+    RegionOp(*this, r, res, Region::OP::XOR);
+    return res;
+}
+
+Region& Region::OrSelf(Region& r)
+{
+    return OperationSelf(r, Region::OP::OR);
+}
+
+Region& Region::AndSelf(Region& r)
+{
+    return OperationSelf(r, Region::OP::AND);
+}
+
+Region& Region::SubSelf(Region& r)
+{
+    return OperationSelf(r, Region::OP::SUB);
+}
+
+Region& Region::XOrSelf(Region& r)
+{
+    return OperationSelf(r, Region::OP::XOR);
+}
+
 std::ostream& operator<<(std::ostream& os, const Region& r)
 {
     os << "{";
     os << r.GetSize() << ": ";
-    for (const Rect& rect : r.GetRegionRects()) {
-        os << rect;
+    for (const Rect& regionRect : r.GetRegionRects()) {
+        os << regionRect;
     }
     os << "}" << std::endl;
     return os;
