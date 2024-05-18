@@ -43,7 +43,7 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_SES
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
-    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSceneSessionImpl(const sptr<WindowOption> option);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;

@@ -79,7 +79,7 @@ uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 bool WindowSceneSessionImpl::enableImmersiveMode_ = true;
 
-WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
+WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption> option) : WindowSessionImpl(option)
 {
     WLOGFI("[WMSCom] Constructor");
 }

@@ -40,7 +40,7 @@ constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
 std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
-WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
+WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption> option) : WindowSessionImpl(option)
 {
 }
 
