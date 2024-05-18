@@ -2742,7 +2742,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     uint32_t flags = property->GetWindowFlags();
     uint32_t oldFlags = sessionProperty->GetWindowFlags();
     if (((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
-        (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) &&
+         (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) &&
         !property->GetSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "Set window flags permission denied");
         return;
@@ -2751,7 +2751,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    TLOGI(WmsLogTag::DEFAULT, "SetWindowFlags end, flags: %{public}u", flags);
+    TLOGI(WmsLogTag::DEFAULT, "flags: %{public}u", flags);
 }
 
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
