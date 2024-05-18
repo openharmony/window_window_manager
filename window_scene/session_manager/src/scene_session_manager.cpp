@@ -6577,6 +6577,10 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
             auto sessionInfo = sceneSession->GetSessionInfo();
             element = AppExecFwk::ElementName("", sessionInfo.bundleName_,
                 sessionInfo.abilityName_, sessionInfo.moduleName_);
+            std::string localDeviceId;
+            if (GetLocalDeviceId(localDeviceId)) {
+                element.SetDeviceID(localDeviceId);
+            }
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;
