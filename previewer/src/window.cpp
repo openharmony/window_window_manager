@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 
 sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return nullptr;
+    return WindowImpl::GetTopWindowWithId(mainWinId);
 }
 
 sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)

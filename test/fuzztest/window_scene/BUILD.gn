@@ -21,5 +21,6 @@ group("fuzztest") {
     "screensessionmgrstubstate_fuzzer:fuzztest",
     "screensessionmgrstubwake_fuzzer:fuzztest",
     "sessioninterface_fuzzer:fuzztest",
+    "windowextensionclstub_fuzzer:fuzztest",
   ]
 }

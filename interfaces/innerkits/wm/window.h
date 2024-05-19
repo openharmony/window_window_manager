@@ -482,10 +482,12 @@ public:
      * @param context ability context
      * @param iSession session token of window session
      * @param errCode error code of create window
+     * @param identityToken identity token of sceneSession
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode);
+        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
+        const std::string& identityToken = "");
 
     /**
      * @brief create pip window with session
@@ -1035,7 +1037,7 @@ public:
      *
      * @param rate frame rate.
      */
-    virtual void FlushFrameRate(uint32_t rate) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
     /**
      * @brief Update Configuration.
      *
@@ -1243,8 +1245,8 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
@@ -1283,7 +1285,10 @@ public:
      *
      * @return UI content info.
      */
-    virtual std::string GetContentInfo() { return std::string(); }
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
+    {
+        return std::string();
+    }
     /**
      * @brief Get ui content object.
      *
@@ -1880,7 +1885,7 @@ public:
      * @return Rect of window.
      */
     virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
-    
+
     /**
      * @brief Set Shaped Window Mask.
      *
@@ -1973,6 +1978,20 @@ public:
      * @return WM_OK means set success, others means set failed
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set whether to enable immersive mode.
+     * @param enable the value true means to enable immersive mode, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the immersive mode is enabled or not.
+     *
+     * @return true means the immersive mode is enabled, and false means the opposite.
+     */
+    virtual bool GetImmersiveModeEnabledState() const { return true; }
 };
 }
 }

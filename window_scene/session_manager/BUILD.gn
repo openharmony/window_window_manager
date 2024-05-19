@@ -61,7 +61,7 @@ ohos_shared_library("scene_session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -107,7 +107,6 @@ ohos_shared_library("scene_session_manager") {
     "input:libmmi-util",
   ]
   external_deps = [
-    "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_context_native",
@@ -197,7 +196,7 @@ ohos_shared_library("screen_session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -310,7 +309,7 @@ ohos_shared_library("session_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -328,6 +327,7 @@ ohos_shared_library("session_manager") {
     ":session_manager_lite",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/common:window_scene_common",
   ]
   public_external_deps = [
     "ability_runtime:session_handler",
@@ -361,7 +361,7 @@ ohos_shared_library("session_manager_lite") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    cfi_vcal_icall_only = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [

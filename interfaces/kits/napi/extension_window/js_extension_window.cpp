@@ -300,7 +300,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     if (isLoadedByName) {
         ret = windowImpl->SetUIContentByName(contextUrl, env, nativeStorage);
     } else {
-        ret = windowImpl->NapiSetUIContent(contextUrl, env, nativeStorage, false, parentToken);
+        ret = windowImpl->NapiSetUIContent(contextUrl, env, nativeStorage, BackupAndRestoreType::NONE, parentToken);
     }
     if (ret == WMError::WM_OK) {
         task.Resolve(env, NapiGetUndefined(env));
@@ -622,7 +622,7 @@ napi_value JsExtensionWindow::OnLoadContent(napi_env env, napi_callback_info inf
         napi_create_reference(env, storage, 1, &result);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
     }
-    
+
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
     NapiAsyncTask::CompleteCallback complete =
         [extwin = extensionWindow_, contentStorage, contextUrl, parentToken, isLoadedByName](

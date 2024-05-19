@@ -99,6 +99,8 @@ public:
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 void WindowImplTest::SetUpTestCase()
 {
@@ -114,6 +116,7 @@ void WindowImplTest::SetUp()
 
 void WindowImplTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 void WindowImplTest::CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect)
@@ -174,6 +177,7 @@ HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
     ASSERT_EQ(WMError::WM_ERROR_SAMGR, window->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -377,6 +381,8 @@ HWTEST_F(WindowImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -394,9 +400,29 @@ HWTEST_F(WindowImplTest, RequestVsyncErr, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->vsyncStation_ = nullptr;
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: ClearVsync
+ * @tc.desc: Clear vsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, ClearVsync, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearVsync");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->ClearVsyncStation();
+    ASSERT_EQ(window->vsyncStation_, nullptr);
+    delete window;
+    delete option;
 }
 
 /**
@@ -2159,7 +2185,7 @@ HWTEST_F(WindowImplTest, GetContentInfo, Function | SmallTest | Level3)
     ASSERT_EQ(std::string(""), window->GetContentInfo());
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, GetContentInfo()).Times(1).WillOnce(Return("info"));
+    EXPECT_CALL(*content, GetContentInfo(_)).Times(1).WillOnce(Return("info"));
     ASSERT_EQ(std::string("info"), window->GetContentInfo());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(*content, Destroy());
@@ -2281,6 +2307,67 @@ HWTEST_F(WindowImplTest, SetLayoutFullScreen, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/*
+ * @tc.name: SetImmersiveModeEnabledState
+ * @tc.desc: SetImmersiveModeEnabledState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetImmersiveModeEnabledState, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetImmersiveModeEnabledState");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowFlags(0));
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->UpdateModeSupportInfo(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetImmersiveModeEnabledState(true));
+    window->UpdateModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(true));
+
+    window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
+        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+        .WillOnce(Return(WMError::WM_OK))
+        .WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
+    ASSERT_EQ(true, window->GetImmersiveModeEnabledState());
+
+    window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
+        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+        .WillOnce(Return(WMError::WM_OK))
+        .WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(true));
+
+    window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
+        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+        .WillOnce(Return(WMError::WM_OK))
+        .WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(false));
+    ASSERT_EQ(false, window->GetImmersiveModeEnabledState());
+
+    window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
+        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+        .WillOnce(Return(WMError::WM_OK))
+        .WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(false));
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
 
 /*
  * @tc.name: SetFullScreen
@@ -2680,6 +2767,7 @@ HWTEST_F(WindowImplTest, NotifyWindowTransition, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Close());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /*
@@ -3088,11 +3176,14 @@ HWTEST_F(WindowImplTest, RequestVsync, Function | SmallTest | Level3)
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    std::shared_ptr<VsyncCallback> callback;
+    std::shared_ptr<VsyncCallback> callback = std::make_shared<VsyncCallback>();
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(callback);
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(callback);
 }
@@ -3879,6 +3970,7 @@ HWTEST_F(WindowImplTest, SetFloatingMaximize, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->UpdateModeSupportInfo(0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFloatingMaximize(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**

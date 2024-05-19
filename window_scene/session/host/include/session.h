@@ -120,16 +120,17 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1) override;
+        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError Foreground(sptr<WindowSessionProperty> property) override;
-    WSError Background() override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
+    WSError Background(bool isFromClient = false) override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
-
+    void ResetSessionConnectState();
+    
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
@@ -195,7 +196,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     void SetFocusedOnShow(bool focusedOnShow);
     bool IsFocusedOnShow() const;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
@@ -412,6 +413,7 @@ public:
     {
         return 0;
     };
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

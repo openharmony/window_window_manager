@@ -29,7 +29,8 @@ public:
     };
 
     virtual void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) = 0;
-    virtual void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) = 0;
+    virtual void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject>& sessionManagerService) = 0;
 };
 }
 }

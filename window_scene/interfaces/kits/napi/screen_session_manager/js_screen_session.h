@@ -53,6 +53,7 @@ private:
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
+    void OnScreenDensityChange();
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

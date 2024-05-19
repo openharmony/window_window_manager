@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #define OHOS_JS_WINDOW_REGISTER_MANAGER_H
 #include <map>
 #include <mutex>
+#include "js_window_listener.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
@@ -36,6 +37,18 @@ public:
         CaseType caseType, napi_env env, napi_value value, napi_value parameter = nullptr);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, napi_env env, napi_value value);
+
+private:
+    bool IsCallbackRegistered(napi_env env, std::string& type, napi_value jsListenerObject);
+    WmErrorCode ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool,
+        napi_env env, napi_value parameter);
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::mutex mtx_;
+    std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -211,14 +211,14 @@ int64_t RootScene::GetVSyncPeriod()
     return vsyncStation_->GetVSyncPeriod();
 }
 
-void RootScene::FlushFrameRate(uint32_t rate)
+void RootScene::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate);
+    vsyncStation_->FlushFrameRate(rate, isAnimatorStopped);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)

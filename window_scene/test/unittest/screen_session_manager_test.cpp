@@ -25,6 +25,10 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+const int32_t CV_WAIT_SCREENOFF_MS = 1500;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1262,6 +1266,30 @@ HWTEST_F(ScreenSessionManagerTest, GetPixelFormat, Function | SmallTest | Level3
     screenId = 1;
     res = ssm_->GetPixelFormat(screenId, format);
     EXPECT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetScreenOffDelayTime
+ * @tc.desc: SetScreenOffDelayTime test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenOffDelayTime, Function | SmallTest | Level3)
+{
+    int32_t delay = CV_WAIT_SCREENOFF_MS - 1;
+    int32_t ret = ssm_->SetScreenOffDelayTime(delay);
+    EXPECT_EQ(ret, CV_WAIT_SCREENOFF_MS);
+
+    delay = CV_WAIT_SCREENOFF_MS + 1;
+    ret = ssm_->SetScreenOffDelayTime(delay);
+    EXPECT_EQ(ret, delay);
+
+    delay = CV_WAIT_SCREENOFF_MS_MAX - 1;
+    ret = ssm_->SetScreenOffDelayTime(delay);
+    EXPECT_EQ(ret, delay);
+
+    delay = CV_WAIT_SCREENOFF_MS_MAX + 1;
+    ret = ssm_->SetScreenOffDelayTime(delay);
+    EXPECT_EQ(ret, CV_WAIT_SCREENOFF_MS_MAX);
 }
 
 /**

@@ -59,18 +59,19 @@ const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
-} // namespace
 
 inline int32_t GetUserIdByCallingUid()
 {
     int32_t uid = IPCSkeleton::GetCallingUid();
-    WLOGFD("get calling uid(%{public}d)", uid);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "get calling uid(%{public}d)", uid);
     if (uid <= INVALID_UID) {
-        WLOGFE("uid is illegal: %{public}d", uid);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "uid is illegal: %{public}d", uid);
         return INVALID_USER_ID;
     }
     return GetUserIdByUid(uid);
 }
+} // namespace
+
 
 class ClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
@@ -263,7 +264,8 @@ sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
         return nullptr;
     }
     if (clientUserId == SYSTEM_USERID) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService with %{public}d",
+            currentWMSUserId_);
         clientUserId = currentWMSUserId_;
     }
     return GetSessionManagerServiceByUserId(clientUserId);
@@ -335,7 +337,12 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
         smsRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
     if (clientUserId == SYSTEM_USERID && smsListener && currentWMSUserId_ > INVALID_USER_ID) {
-        smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true);
+        auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+        if (sessionManagerService == nullptr) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+            return;
+        }
+        smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
 }
 
@@ -502,8 +509,8 @@ void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t scree
 void MockSessionManagerService::NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
-    NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnected);
     NotifyWMSConnectionChangedToLiteClient(wmsUserId, screenId, isConnected);
+    NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnected);
 }
 
 void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
@@ -520,10 +527,15 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
         "wmsUserId = %{public}d, isConnected = %{public}d, remote process count = "
         "%{public}" PRIu64,
         wmsUserId, isConnected, static_cast<uint64_t>(smsRecoverListenerMap->size()));
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+        return;
+    }
     for (auto& iter : *smsRecoverListenerMap) {
         if (iter.second != nullptr) {
             TLOGI(WmsLogTag::WMS_MULTI_USER, "Call OnWMSConnectionChanged pid = %{public}d", iter.first);
-            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected);
+            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected, sessionManagerService);
         }
     }
 }
@@ -538,12 +550,17 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToLiteClient(
         return;
     }
     TLOGD(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+        return;
+    }
     for (auto& iter : *smsLiteRecoverListenerMap) {
         if (iter.second != nullptr) {
             TLOGI(WmsLogTag::WMS_MULTI_USER,
                 "Call OnWMSConnectionChanged Lite pid = %{public}d, ref count = %{public}d", iter.first,
                 iter.second->GetSptrRefCount());
-            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected);
+            iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected, sessionManagerService);
         }
     }
 }

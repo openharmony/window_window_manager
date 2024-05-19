@@ -89,8 +89,8 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
-    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) {
-        PostAsyncTask(task, "WindowManagerService:cacheGuard");
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+        PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
     });
     rsUiDirector_->Init(false);
 }
@@ -122,10 +122,10 @@ void WindowManagerService::OnStart()
     WLOGI("end");
 }
 
-void WindowManagerService::PostAsyncTask(Task task, const std::string& taskName)
+void WindowManagerService::PostAsyncTask(Task task, const std::string& taskName, uint32_t delay)
 {
     if (handler_) {
-        bool ret = handler_->PostTask(task, "wms:" + taskName, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        bool ret = handler_->PostTask(task, "wms:" + taskName, delay, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         if (!ret) {
             WLOGFE("EventHandler PostTask Failed");
         }

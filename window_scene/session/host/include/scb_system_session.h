@@ -24,6 +24,7 @@ class SCBSystemSession : public SceneSession {
 public:
     SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SCBSystemSession();
+    void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;

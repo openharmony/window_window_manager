@@ -603,6 +603,35 @@ void SessionStageProxy::NotifyTransformChange(const Transform& transform)
     }
 }
 
+WSError SessionStageProxy::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isFollowHost)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isFollowHost failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteFloat(densityValue)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write densityValue failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::NotifyDialogStateChange(bool isForeground)
 {
     MessageParcel data;

@@ -27,20 +27,20 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsTransitionController"};
 }
 
-static int jsTransCxtCtorCnt = 0;
-static int jsTransCxtDtorCnt = 0;
-static int jsTransCtrlCtorCnt = 0;
-static int jsTransCtrlDtorCnt = 0;
+static int g_jsTransCxtCtorCnt = 0;
+static int g_jsTransCxtDtorCnt = 0;
+static int g_jsTransCtrlCtorCnt = 0;
+static int g_jsTransCtrlDtorCnt = 0;
 
 JsTransitionContext::JsTransitionContext(sptr<Window> window, bool isShownTransContext)
     : windowToken_(window), isShownTransContext_(isShownTransContext)
 {
-    WLOGI("[NAPI] JsTransitionContext constructorCnt: %{public}d", ++jsTransCxtCtorCnt);
+    WLOGI("[NAPI] JsTransitionContext constructorCnt: %{public}d", ++g_jsTransCxtCtorCnt);
 }
 
 JsTransitionContext::~JsTransitionContext()
 {
-    WLOGI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++jsTransCxtDtorCnt);
+    WLOGI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++g_jsTransCxtDtorCnt);
 }
 
 void JsTransitionContext::Finalizer(napi_env env, void* data, void* hint)
@@ -135,12 +135,12 @@ JsTransitionController::JsTransitionController(napi_env env, std::shared_ptr<Nat
     sptr<Window> window)
     : env_(env), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
-    WLOGI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++jsTransCtrlCtorCnt);
+    WLOGI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++g_jsTransCtrlCtorCnt);
 }
 
 JsTransitionController::~JsTransitionController()
 {
-    WLOGI("[NAPI] ~JsTransitionController deConstructorCnt: %{public}d", ++jsTransCtrlDtorCnt);
+    WLOGI("[NAPI] ~JsTransitionController deConstructorCnt: %{public}d", ++g_jsTransCtrlDtorCnt);
 }
 
 void JsTransitionController::AnimationForShown()

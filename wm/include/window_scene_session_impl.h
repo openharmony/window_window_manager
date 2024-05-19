@@ -46,7 +46,7 @@ public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession) override;
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
@@ -151,6 +151,8 @@ public:
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void UpdateDensity() override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    virtual WMError SetImmersiveModeEnabledState(bool enable) override;
+    virtual bool GetImmersiveModeEnabledState() const override;
 
 protected:
     void DestroySubWindow();
@@ -180,6 +182,7 @@ private:
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
     static uint32_t maxFloatingWindowSize_;
+    static bool enableImmersiveMode_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void RegisterSessionRecoverListener(bool isSpecificSession);
@@ -197,7 +200,6 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type);
     bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;

@@ -1925,6 +1925,16 @@ HWTEST_F(SceneSessionManagerTest, CheckWindowId, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: OnSCBSystemSessionBufferAvailable
+ * @tc.desc: OnSCBSystemSessionBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
+{
+    ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
+}
+
+/**
  * @tc.name: CreateSceneSession
  * @tc.desc: CreateSceneSession
  * @tc.type: FUNC
@@ -1978,62 +1988,6 @@ HWTEST_F(SceneSessionManagerTest, CreateSceneSession, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: CheckAppIsInDisplay
- * @tc.desc: CheckAppIsInDisplay
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, CheckAppIsInDisplay, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    sptr<SceneSession> sceneSession;
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
-    SessionInfo info;
-    ret++;
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    ssm_->DestroySubSession(sceneSession);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    sceneSession->SetSessionProperty(property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
-    AppExecFwk::Configuration config;
-    ssm_->UpdateConfig(info, config, true);
-    ssm_->UpdateConfig(info, config, false);
-    ssm_->SetAbilitySessionInfo(sceneSession);
-    bool res = true;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->isPrepareTerminateEnable_ = true;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->isPrepareTerminateEnable_ = false;
-    ssm_->PrepareTerminate(1, res);
-    ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->sceneSessionMap_.insert({1, nullptr});
-    ssm_->IsKeyboardForeground();
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->NotifyForegroundInteractiveStatus(sceneSession, true);
-    ssm_->NotifyForegroundInteractiveStatus(sceneSession, false);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->IsKeyboardForeground();
-    ssm_->IsKeyboardForeground();
-    ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->PrepareTerminate(1, res);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ssm_->sceneSessionMap_.erase(1);
-    abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    ssm_->StartUIAbilityBySCB(abilitySessionInfo);
-    ssm_->DestroySubSession(sceneSession);
-    ssm_->EraseSceneSessionMapById(2);
-    ASSERT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: RequestSceneSessionBackground
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
@@ -2042,7 +1996,6 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionBackground, Function | Smal
 {
     int ret = 0;
     sptr<SceneSession> sceneSession;
-    ssm_->CheckAppIsInDisplay(sceneSession, 1);
     ssm_->RequestSceneSessionActivation(sceneSession, true);
     SessionInfo info;
     ret++;
@@ -2428,26 +2381,15 @@ HWTEST_F(SceneSessionManagerTest, InitUserInfo, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: HandleSwitchingToAnotherUser
- * @tc.desc: SceneSesionManager handle switching to another user
+ * @tc.name: NotifySwitchingUser
+ * @tc.desc: SceneSesionManager notify switching user
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, HandleSwitchingToAnotherUser, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, NotifySwitchingUser, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->HandleSwitchingToAnotherUser();
-    ASSERT_EQ(ret, 0);
-}
- 
-/**
- * @tc.name: NotifySwitchingToCurrentUser
- * @tc.desc: SceneSesionManager notify switching to current user
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySwitchingToCurrentUser, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    ssm_->NotifySwitchingToCurrentUser();
+    ssm_->NotifySwitchingUser(true);
+    ssm_->NotifySwitchingUser(false);
     ASSERT_EQ(ret, 0);
 }
 
@@ -2771,11 +2713,11 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateHideNonSystemFloatingWindows
+ * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: SceneSesionManager update hide non system floating windows
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -2785,7 +2727,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function |
     sptr<WindowSessionProperty> property = nullptr;
     ssm_->UpdateForceHideState(scensession, property, true);
     property = new WindowSessionProperty();
-    ssm_->UpdateHideNonSystemFloatingWindows(property, scensession);
+    ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     property->SetHideNonSystemFloatingWindows(true);
     ssm_->UpdateForceHideState(scensession, property, true);
     ssm_->UpdateForceHideState(scensession, property, false);
@@ -2893,6 +2835,22 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
     reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::SPLIT_SCREEN);
 }
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
+{
+    uint32_t zOrder = 9999;
+    auto session = ssm_->GetTopNearestBlockingFocusSession(zOrder, true);
+    ASSERT_NE(session, nullptr);
+
+    session = ssm_->GetTopNearestBlockingFocusSession(zOrder, false);
+    ASSERT_NE(session, nullptr);
+}
+
 
 /**
  * @tc.name: RaiseWindowToTop
@@ -3606,23 +3564,36 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTe
 }
 
 /**
- * @tc.name: AddSecureSession
- * @tc.desc: SceneSesionManager add secure session
+ * @tc.name: CalculateCombinedExtWindowFlags
+ * @tc.desc: SceneSesionManager calculate combined extension window flags
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, AddSecureSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, CalculateCombinedExtWindowFlags, Function | SmallTest | Level3)
+{
+    EXPECT_EQ(ssm_->combinedExtWindowFlags_.bitData, 0);
+    ssm_->UpdateSpecialExtWindowFlags(1234, ExtensionWindowFlags(3), ExtensionWindowFlags(3));
+    ssm_->UpdateSpecialExtWindowFlags(5678, ExtensionWindowFlags(4), ExtensionWindowFlags(4));
+    ssm_->CalculateCombinedExtWindowFlags();
+    EXPECT_EQ(ssm_->combinedExtWindowFlags_.bitData, 7);
+    ssm_->extWindowFlagsMap_.clear();
+}
+
+/**
+ * @tc.name: UpdateSpecialExtWindowFlags
+ * @tc.desc: SceneSesionManager update special extension window flags
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateSpecialExtWindowFlags, Function | SmallTest | Level3)
 {
     int32_t persistentId = 12345;
-    size_t sizeBefore = 0;
-    size_t sizeAfter = 0;
-    ssm_->AddSecureSession(persistentId, true, sizeBefore, sizeAfter);
-    EXPECT_EQ(sizeBefore, 0);
-    EXPECT_EQ(sizeAfter, 1);
-    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
-    ssm_->AddSecureSession(persistentId, false, sizeBefore, sizeAfter);
-    EXPECT_EQ(sizeBefore, 1);
-    EXPECT_EQ(sizeAfter, 0);
-    ssm_->secureSessionSet_.clear();
+    EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
+    ssm_->UpdateSpecialExtWindowFlags(persistentId, 3, 3);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.size(), 1);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.begin()->first, persistentId);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.begin()->second.bitData, 3);
+    ssm_->UpdateSpecialExtWindowFlags(persistentId, 0, 3);
+    EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
+    ssm_->extWindowFlagsMap_.clear();
 }
 
 /**
@@ -3639,16 +3610,26 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
 
-    ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
-    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureFloatingWindows(0, 0, true);
-    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureFloatingWindows(0, 1, true);
-    EXPECT_TRUE(sceneSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureFloatingWindows(1, 0, false);
-    EXPECT_FALSE(sceneSession->GetSessionProperty()->GetForceHide());
+    sptr<SceneSession> floatSession;
+    floatSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(floatSession, nullptr);
+    floatSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(floatSession->GetPersistentId(), floatSession));
+
+    EXPECT_FALSE(ssm_->shouldHideNonSecureFloatingWindows_.load());
+    EXPECT_FALSE(floatSession->GetSessionProperty()->GetForceHide());
+    sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->HideNonSecureFloatingWindows();
+    EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+    sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = false;
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->HideNonSecureFloatingWindows();
+    EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+    ssm_->shouldHideNonSecureFloatingWindows_.store(false);
+    ssm_->sceneSessionMap_.clear();
     ssm_->nonSystemFloatSceneSessionMap_.clear();
 }
 
@@ -3671,15 +3652,12 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureSubWindows, Function | SmallTest 
     sptr<SceneSession> subSession;
     subSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(subSession, nullptr);
-
     sceneSession->AddSubSession(subSession);
+
     EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureSubWindows(sceneSession, 0, 0, true);
-    EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureSubWindows(sceneSession, 0, 1, true);
+    sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->HideNonSecureSubWindows(sceneSession);
     EXPECT_TRUE(subSession->GetSessionProperty()->GetForceHide());
-    ssm_->HideNonSecureSubWindows(sceneSession, 1, 0, false);
-    EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
 }
 
 /**
@@ -3696,79 +3674,46 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | Smal
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+
+    sptr<SceneSession> subSession;
+    subSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(subSession, nullptr);
+    sceneSession->AddSubSession(subSession);
+
+    sptr<SceneSession> floatSession;
+    floatSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(floatSession, nullptr);
+    floatSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(floatSession->GetPersistentId(), floatSession));
+
     sceneSession->SetShouldHideNonSecureWindows(true);
     auto ret = ssm_->HandleSecureSessionShouldHide(sceneSession);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
-    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), sceneSession->persistentId_);
-    sceneSession->SetShouldHideNonSecureWindows(false);
-    ret = ssm_->HandleSecureSessionShouldHide(sceneSession);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
-    ssm_->secureSessionSet_.clear();
+    EXPECT_TRUE(subSession->GetSessionProperty()->GetForceHide());
+    EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+    EXPECT_TRUE(ssm_->shouldHideNonSecureFloatingWindows_.load());
+    ssm_->sceneSessionMap_.clear();
+    ssm_->nonSystemFloatSceneSessionMap_.clear();
 }
 
 /**
- * @tc.name: HandleSecureExtSessionShouldHide
- * @tc.desc: SceneSesionManager handle secure extension session should hide
+ * @tc.name: HandleSpecialExtWindowFlagsChange
+ * @tc.desc: SceneSesionManager handle special uiextension window flags change
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, HandleSecureExtSessionShouldHide, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleSpecialExtWindowFlagsChange, Function | SmallTest | Level3)
 {
     int32_t persistentId = 12345;
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
-    auto ret = ssm_->HandleSecureExtSessionShouldHide(persistentId, true);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
-    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
-    ret = ssm_->HandleSecureExtSessionShouldHide(persistentId, false);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
-    ssm_->secureSessionSet_.clear();
-}
-
-/**
- * @tc.name: HandleSCBExtWaterMarkChange
- * @tc.desc: SceneSesionManager handle scb uiextension water mark change
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, HandleSCBExtWaterMarkChange, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 12345;
-    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
-    auto ret = ssm_->HandleSCBExtWaterMarkChange(persistentId, true);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(ssm_->waterMarkSessionSet_.size(), 1);
-    EXPECT_EQ(*ssm_->waterMarkSessionSet_.begin(), persistentId);
-    ret = ssm_->HandleSCBExtWaterMarkChange(persistentId, false);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
-    ssm_->waterMarkSessionSet_.clear();
-}
-
-/**
- * @tc.name: HandleSpecialExtWindowFlagChange
- * @tc.desc: SceneSesionManager handle special uiextension window flag change
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, HandleSpecialExtWindowFlagChange, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 12345;
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
-    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
-    ssm_->HandleSpecialExtWindowFlagChange(persistentId, 3, 3);
-    EXPECT_EQ(ssm_->secureSessionSet_.size(), 1);
-    EXPECT_EQ(*ssm_->secureSessionSet_.begin(), persistentId);
-    EXPECT_EQ(ssm_->waterMarkSessionSet_.size(), 1);
-    EXPECT_EQ(*ssm_->waterMarkSessionSet_.begin(), persistentId);
-    ssm_->HandleSpecialExtWindowFlagChange(persistentId, 0, 3);
-    EXPECT_TRUE(ssm_->secureSessionSet_.empty());
-    EXPECT_TRUE(ssm_->waterMarkSessionSet_.empty());
-    ssm_->secureSessionSet_.clear();
-    ssm_->waterMarkSessionSet_.clear();
+    EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
+    ssm_->HandleSpecialExtWindowFlagsChange(persistentId, 3, 3);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.size(), 1);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.begin()->first, persistentId);
+    EXPECT_EQ(ssm_->extWindowFlagsMap_.begin()->second.bitData, 3);
+    ssm_->HandleSpecialExtWindowFlagsChange(persistentId, 0, 3);
+    EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
+    ssm_->extWindowFlagsMap_.clear();
 }
 
 /**
@@ -4249,6 +4194,21 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     topNInfos.push_back(info);
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: TestNotifyEnterRecentTask
+ * @tc.desc: Test whether the enterRecent_ is set correctly;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
+    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    ASSERT_NE(nullptr, sceneSessionManager);
+    
+    ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
+    ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
 
 }

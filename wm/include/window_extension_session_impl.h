@@ -29,7 +29,7 @@ public:
     ~WindowExtensionSessionImpl();
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession) override;
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
     WMError MoveTo(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
@@ -42,8 +42,8 @@ public:
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
     WMError SetPrivacyMode(bool isPrivacyMode) override;
-    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
@@ -81,6 +81,8 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
+    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
@@ -100,6 +102,8 @@ private:
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
 
+    std::atomic<bool> isDensityFollowHost_ { false };
+    std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;

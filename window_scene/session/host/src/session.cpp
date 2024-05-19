@@ -482,6 +482,10 @@ WSError Session::SetTouchable(bool touchable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (touchable !=  GetSessionProperty()->GetTouchable()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
+            static_cast<int>(touchable));
+    }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
 }
@@ -508,13 +512,19 @@ bool Session::GetTouchable() const
 
 void Session::SetForceTouchable(bool forceTouchable)
 {
+    if (forceTouchable != forceTouchable_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
+            static_cast<int>(forceTouchable));
+    }
     forceTouchable_ = forceTouchable;
 }
 
 void Session::SetSystemTouchable(bool touchable)
 {
-    WLOGFD("SetSystemTouchable id: %{public}d, systemtouchable: %{public}d, propertytouchable: %{public}d",
-        GetPersistentId(), touchable, GetTouchable());
+    if (touchable != systemTouchable_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
+            static_cast<int>(touchable));
+    }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
 }
@@ -822,7 +832,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
-    sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<IRemoteObject> token, int32_t pid, int32_t uid, const std::string& identityToken)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
@@ -879,14 +889,14 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     int32_t pid, int32_t uid)
 {
     if (property == nullptr) {
-        WLOGFE("[WMSRecover] property is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFI("[WMSRecover] Reconnect session with: persistentId=%{public}d, windowState=%{public}u"
+    TLOGI(WmsLogTag::WMS_RECOVER, "Reconnect session with: persistentId=%{public}d, windowState=%{public}u"
         " callingPid:%{public}d", property->GetPersistentId(),
         static_cast<uint32_t>(property->GetWindowState()), pid);
     if (sessionStage == nullptr || eventChannel == nullptr) {
-        WLOGFE("[WMSRecover] session stage or eventChannel is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
@@ -901,7 +911,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground(sptr<WindowSessionProperty> property)
+WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -978,7 +988,7 @@ void Session::HandleDialogForeground()
     }
 }
 
-WSError Session::Background()
+WSError Session::Background(bool isFromClient)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
@@ -999,6 +1009,14 @@ WSError Session::Background()
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
+}
+
+void Session::ResetSessionConnectState()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "ResetSessionState, id: %{public}d, state: %{public}u",
+        GetPersistentId(), GetSessionState());
+    SetSessionState(SessionState::STATE_DISCONNECT);
+    SetCallingPid(-1);
 }
 
 WSError Session::Disconnect(bool isFromClient)
@@ -1062,6 +1080,10 @@ void Session::NotifyForegroundInteractiveStatus(bool interactive)
 
 void Session::SetForegroundInteractiveStatus(bool interactive)
 {
+    if (interactive !=  foregroundInteractiveStatus_) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d interactive:%{public}d", GetPersistentId(),
+            static_cast<int>(interactive));
+    }
     foregroundInteractiveStatus_.store(interactive);
     NotifySessionInfoChange();
 }
@@ -2712,7 +2734,16 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     if (property == nullptr) {
         return;
     }
-
+    std::vector<Rect> lastTouchHotAreas;
+    property->GetTouchHotAreas(lastTouchHotAreas);
+    if (touchHotAreas != lastTouchHotAreas) {
+        std::string rectStr = "";
+        for (const auto& rect : touchHotAreas) {
+            rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
+            " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+    }
     property->SetTouchHotAreas(touchHotAreas);
 }
 

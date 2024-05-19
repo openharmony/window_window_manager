@@ -276,6 +276,7 @@ struct SessionInfo {
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
+    bool isCalledRightlyByCallerId_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -485,6 +486,7 @@ struct AppWindowSceneConfig {
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+    bool isRightPowerButton_ = true;
 };
 
 struct SessionEventParam {
