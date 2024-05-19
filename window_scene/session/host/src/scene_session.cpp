@@ -902,7 +902,8 @@ WSError SceneSession::RaiseAppMainWindowToTop()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->IsFocusedOnShow()) {
-            session->NotifyRequestFocusStatusNotifyManager(true, true);
+            FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+            session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
             session->NotifyClick();
         }
         return WSError::WS_OK;
