@@ -34,7 +34,8 @@ public:
         : IRemoteProxy<IWindowEventChannelListener>(impl) {}
     virtual ~WindowEventChannelListenerProxy() = default;
 
-    void OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode) override;
+    void OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
+                                       bool isConsumed, WSError retCode) override;
 
 private:
     static inline BrokerDelegator<WindowEventChannelListenerProxy> delegator_;

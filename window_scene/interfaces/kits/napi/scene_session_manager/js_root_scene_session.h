@@ -40,12 +40,12 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
-    void SetSessionFocusedOnShow(const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession);
 
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+    void VerifyCallerToken(SessionInfo& info);
 };
 } // namespace OHOS::Rosen
 

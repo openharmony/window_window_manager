@@ -35,9 +35,9 @@ public:
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1) = 0;
-    virtual WSError Foreground(sptr<WindowSessionProperty> property) = 0;
-    virtual WSError Background() = 0;
+        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") = 0;
+    virtual WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) = 0;
+    virtual WSError Background(bool isFromClient = false) = 0;
     virtual WSError Disconnect(bool isFromClient = false) = 0;
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
@@ -53,7 +53,6 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
-    virtual WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) { return WSError::WS_OK; }
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
@@ -105,6 +104,8 @@ public:
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
+    virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

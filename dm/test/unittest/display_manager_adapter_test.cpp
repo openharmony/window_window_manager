@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
+#include "display_manager.h"
+#include "screen_manager.h"
 #include "display_manager_proxy.h"
 #include "window_scene.h"
 #include "scene_board_judgement.h"
@@ -422,7 +424,9 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
  */
 HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest | Level2)
 {
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(0);
+    VirtualScreenOption defaultOption = {"virtualScreen01", 480, 320, 2.0, nullptr, 0};
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
     } else {

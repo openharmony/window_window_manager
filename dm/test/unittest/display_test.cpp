@@ -196,7 +196,7 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
 {
     auto physicalwidth = defaultDisplay_->GetPhysicalWidth();
-    ASSERT_EQ(physicalwidth, 0);
+    ASSERT_NE(physicalwidth, 0);
 }
 
 /**
@@ -207,7 +207,7 @@ HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetPhysicalHeight, Function | SmallTest | Level1)
 {
     auto physicalheight = defaultDisplay_->GetPhysicalHeight();
-    ASSERT_EQ(physicalheight, 0);
+    ASSERT_NE(physicalheight, 0);
 }
 
 /**

@@ -65,6 +65,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    int32_t SetScreenOffDelayTime(int32_t delay);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
@@ -100,6 +101,9 @@ private:
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
+
+    mutable std::mutex displayNodeChildrenMapMutex_;
+    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap_;
 
     sptr<IScreenSessionManager> screenSessionManager_;
 

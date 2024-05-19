@@ -389,6 +389,20 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
     }
 }
 
+void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    windowInfo.privacyMode = MMI::SecureFlag::DEFAULT_MODE;
+    sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
+    if (windowSessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowSessionProperty is nullptr");
+        return;
+    }
+    if (windowSessionProperty->GetPrivacyMode() || windowSessionProperty->GetSystemPrivacyMode()) {
+        windowInfo.privacyMode = MMI::SecureFlag::PRIVACY_MODE;
+    }
+}
+
 MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>& sceneSession,
     const SceneSessionDirtyManager::WindowAction& action) const
 {
@@ -451,6 +465,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
     }
+    UpdatePrivacyMode(sceneSession, windowInfo);
     return windowInfo;
 }
 

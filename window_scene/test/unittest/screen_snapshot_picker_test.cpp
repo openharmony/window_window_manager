@@ -56,7 +56,7 @@ namespace {
 HWTEST_F(ScreenSnapshotPickerTest, SnapshotPickerConnectExtension, Function | SmallTest | Level1)
 {
     auto ret = ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -69,7 +69,7 @@ HWTEST_F(ScreenSnapshotPickerTest, GetScreenSnapshotRect, Function | SmallTest |
     Media::Rect rect{};
     ScreenId screenId = SCREEN_ID_INVALID;
     auto ret = ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     ScreenSnapshotPicker::GetInstance().GetScreenSnapshotInfo(rect, screenId);
     EXPECT_EQ(rect.top, 0);
     EXPECT_EQ(rect.left, 0);

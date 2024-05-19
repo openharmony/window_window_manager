@@ -26,15 +26,15 @@ public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}
     virtual ~SessionProxy() = default;
 
-    WSError Foreground(sptr<WindowSessionProperty> property) override;
-    WSError Background() override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
+    WSError Background(bool isFromClient = false) override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1) override;
+        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
     WSError UpdateActiveStatus(bool isActive) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) override;
@@ -52,7 +52,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
@@ -80,6 +79,8 @@ public:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

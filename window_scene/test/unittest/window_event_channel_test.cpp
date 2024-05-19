@@ -246,7 +246,7 @@ HWTEST_F(WindowEventChannelTest, WindowEventChannelListenerProxyOnTransferKeyEve
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     WindowEventChannelListenerProxy listenerProxy(iRemoteObjectMocker);
-    listenerProxy.OnTransferKeyEventForConsumed(true, WSError::WS_OK);
+    listenerProxy.OnTransferKeyEventForConsumed(100, true, true, WSError::WS_OK);
 }
 
 /**

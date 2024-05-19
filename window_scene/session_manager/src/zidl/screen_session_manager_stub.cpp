@@ -27,7 +27,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
                                           "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
-const static uint32_t ERR_INVALID_DATA = -1;
+const static int32_t ERR_INVALID_DATA = -1;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -676,6 +676,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint32_t height = data.ReadUint32();
             DMRect area = {posX, posY, width, height};
             UpdateAvailableArea(screenId, area);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME: {
+            int32_t delay = data.ReadInt32();
+            int32_t ret = SetScreenOffDelayTime(delay);
+            reply.WriteInt32(ret);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {

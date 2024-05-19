@@ -132,6 +132,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override
     {
+        MainWindowInfo mainWindowInfo;
+        topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
     sptr<IRemoteObject> AsObject() override
@@ -185,6 +187,382 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_INVALID_STATE, res);
+    data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
+    EXPECT_EQ(IPC_STUB_UNKNOW_TRANS_ERR, res);
+    data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionIcon
+ * @tc.desc: test function : HandleSetSessionIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionIcon, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleIsValidSessionIds
+ * @tc.desc: test function : HandleIsValidSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleIsValidSessionIds(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackgroundForDelegator
+ * @tc.desc: test function : HandlePendingSessionToBackgroundForDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundForDelegator, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleRegisterSessionListener
+ * @tc.desc: test function : HandleRegisterSessionListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterSessionListener, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterSessionListener(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUnRegisterSessionListener
+ * @tc.desc: test function : HandleUnRegisterSessionListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegisterSessionListener, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfos
+ * @tc.desc: test function : HandleGetSessionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfos, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfo
+ * @tc.desc: test function : HandleGetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfoByContinueSessionId
+ * @tc.desc: test function : HandleGetSessionInfoByContinueSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfoByContinueSessionId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleTerminateSessionNew
+ * @tc.desc: test function : HandleTerminateSessionNew
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionNew, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleTerminateSessionNew(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionToken
+ * @tc.desc: test function : HandleGetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionElement
+ * @tc.desc: test function : HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState
+ * @tc.desc: test function : HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetSessionSnapshot
+ * @tc.desc: test function : HandleGetSessionSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleClearSession
+ * @tc.desc: test function : HandleClearSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearSession, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleClearSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleClearAllSessions
+ * @tc.desc: test function : HandleClearAllSessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearAllSessions, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleClearAllSessions(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleLockSession
+ * @tc.desc: test function : HandleLockSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSession, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleLockSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUnlockSession
+ * @tc.desc: test function : HandleUnlockSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSession, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleMoveSessionsToForeground
+ * @tc.desc: test function : HandleMoveSessionsToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleMoveSessionsToBackground
+ * @tc.desc: test function : HandleMoveSessionsToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToBackground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionInfo
+ * @tc.desc: test function : HandleGetFocusSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleCheckWindowId
+ * @tc.desc: test function : HandleCheckWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleCheckWindowId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t numMax = 100;
+    data.WriteInt32(numMax);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleCheckWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleRegisterWindowManagerAgent
+ * @tc.desc: test function : HandleRegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUnregisterWindowManagerAgent
+ * @tc.desc: test function : HandleUnregisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetVisibilityWindowInfo
+ * @tc.desc: test function : HandleGetVisibilityWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWinodowInfo
+ * @tc.desc: test function : HandleGetMainWinodowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t numMax = 100;
+    data.WriteInt32(numMax);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 }

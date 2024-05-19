@@ -267,9 +267,13 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             }
             TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
             info.callerPersistentId_ = realCallerSessionId;
+            VerifyCallerToken(info);
         } else {
             info.callerPersistentId_ = 0;
         }
+
+        auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+        sceneSession->SetFocusedOnShow(focusedOnShow);
 
         std::string continueSessionId = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
         if (!continueSessionId.empty()) {
@@ -283,28 +287,27 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]continue app with persistentId: %{public}d", info.persistentId_);
             SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
         }
+    } else {
+        sceneSession->SetFocusedOnShow(true);
     }
+
     sceneSession->SetSessionInfo(info);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [this, sessionInfo, &sceneSession]() {
-        SetSessionFocusedOnShow(sessionInfo, sceneSession);
+    auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
-void JsRootSceneSession::SetSessionFocusedOnShow(
-    const std::shared_ptr<SessionInfo>& sessionInfo, sptr<SceneSession>& sceneSession)
+void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
-    if (sessionInfo == nullptr || sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "sessionInfo or sceneSession is null");
-        return;
+    auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
+    if (callerSession != nullptr) {
+        bool isCalledRightlyByCallerId = info.callerToken_ == callerSession->GetAbilityToken();
+        TLOGI(WmsLogTag::WMS_SCB,
+            "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
+        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
     }
-    auto focusedOnShow = true;
-    if (sessionInfo->want != nullptr) {
-        focusedOnShow = sessionInfo->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
-    }
-    sceneSession->SetFocusedOnShow(focusedOnShow);
 }
 
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)

@@ -215,14 +215,14 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
 
 int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("[WMSRecover] run HandleCreateAndConnectSpecificSession!");
+    TLOGI(WmsLogTag::WMS_RECOVER, "run!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-        WLOGFE("[WMSRecover] Failed to read scene session stage object or event channel object!");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
 
@@ -309,13 +309,16 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleUpdateProperty!");
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
     }
     const WMError& ret = UpdateSessionProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));

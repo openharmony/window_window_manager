@@ -71,8 +71,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNeedAvoid),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         &SessionStub::HandleGetAvoidAreaByType),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_PROPERTY),
-        &SessionStub::HandleSetSessionProperty),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
         &SessionStub::HandleSetAspectRatio),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
@@ -105,7 +103,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetCustomDecorHeight),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
         &SessionStub::HandleAdjustKeyboardLayout),
-
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
+        &SessionStub::HandleUpdatePropertyByAction),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
@@ -166,7 +165,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = new WindowSessionProperty();
     }
-    const WSError& errCode = Foreground(property);
+    bool isFromClient = data.ReadBool();
+    const WSError errCode = Foreground(property, isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -174,7 +174,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    const WSError& errCode = Background();
+    bool isFromClient = data.ReadBool();
+    const WSError errCode = Background(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -237,8 +238,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     } else {
         WLOGI("accept token is nullptr");
     }
+    std::string identityToken = data.ReadString();
     SystemSessionConfig systemConfig;
-    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token,
+        -1, -1, identityToken);
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
@@ -467,15 +470,6 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleSetSessionProperty!");
-    auto property = data.ReadStrongParcelable<WindowSessionProperty>();
-    auto errCode = SetSessionProperty(property);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetAspectRatio!");
@@ -672,6 +666,24 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_DATA;
     }
     WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
+{
+    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
+    } else {
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
+    }
+    const WMError ret = UpdateSessionPropertyByAction(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

@@ -48,7 +48,8 @@ public:
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
-    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected);
+    void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
 
 protected:
     SessionManagerLite() = default;
@@ -58,7 +59,7 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
-    void OnUserSwitch();
+    void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void DeleteAllSessionListeners();
     void ReregisterSessionListener() const;
 

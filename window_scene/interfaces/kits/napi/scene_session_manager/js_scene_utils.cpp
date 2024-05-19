@@ -20,7 +20,6 @@
 #include <event_handler.h>
 #include <js_runtime_utils.h>
 
-#include "napi_common_util.h"
 #include "root_scene.h"
 #include "window_manager_hilog.h"
 #include "process_options.h"
@@ -318,44 +317,6 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     processOptions->processMode = static_cast<AAFwk::ProcessMode>(processMode);
     processOptions->startupVisibility = static_cast<AAFwk::StartupVisibility>(startupVisibility);
 
-    return true;
-}
-
-bool ConvertConfigurationFromJs(napi_env env, napi_value param, AppExecFwk::Configuration& config)
-{
-    if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
-        WLOGFE("params is invalid");
-        return false;
-    }
-    int32_t colorMode = -1;
-    if (AppExecFwk::UnwrapInt32ByPropertyName(env, param, "colorMode", colorMode)) {
-        if (colorMode != Global::Resource::DARK && colorMode != Global::Resource::LIGHT) {
-            WLOGFE("Set color mode unsupported value");
-            return false;
-        }
-    
-        std::string ret("no_color_mode");
-        switch (colorMode) {
-            case Global::Resource::ColorMode::DARK: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-                break;
-            }
-            case Global::Resource::ColorMode::LIGHT: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-                break;
-            }
-            case Global::Resource::ColorMode::COLOR_MODE_NOT_SET: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
-                break;
-            }
-            default:
-                break;
-        }
-        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ret)) {
-            WLOGFE("Set ColorMode [%{public}s] failed", ret.c_str());
-            return false;
-        }
-    }
     return true;
 }
 
@@ -721,6 +682,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
     napi_set_named_property(env, objValue, "requestOrientation",
         CreateJsValue(env, sessionInfo.requestOrientation_));
+    napi_set_named_property(env, objValue, "isCalledRightlyByCallerId",
+        CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));

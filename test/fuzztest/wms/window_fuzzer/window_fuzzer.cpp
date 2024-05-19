@@ -510,6 +510,9 @@ void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data,
     window->SetNeedRemoveWindowInputChannel(boolVal);
     window->SetRequestedOrientation(static_cast<Orientation>(data[0]));
 
+    startPos += GetObject(boolVal, data + startPos, size - startPos);
+    window->SetImmersiveModeEnabledState(boolVal);
+
     std::vector<OHOS::Rosen::Rect> rectVector;
     OHOS::Rosen::Rect rect;
     startPos += GetObject(rect, data + startPos, size - startPos);

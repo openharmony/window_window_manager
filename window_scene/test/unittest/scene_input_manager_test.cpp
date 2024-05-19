@@ -29,6 +29,8 @@ public:
     void SetUp() override;
     void TearDown() override;
     static sptr<SceneSessionManager> ssm_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 sptr<SceneSessionManager> SceneInputManagerTest::ssm_ = nullptr;
@@ -49,6 +51,7 @@ void SceneInputManagerTest::SetUp()
 
 void SceneInputManagerTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {

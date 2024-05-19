@@ -452,6 +452,39 @@ napi_value WindowStatusTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value RectChangeReasonInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "RectChangeReasonInit called");
+
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "UNDEFINED",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::UNDEFINED)));
+    napi_set_named_property(env, objValue, "MAXIMIZE",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::MAXIMIZE)));
+    napi_set_named_property(env, objValue, "RECOVER",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::RECOVER)));
+    napi_set_named_property(env, objValue, "MOVE",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::MOVE)));
+    napi_set_named_property(env, objValue, "DRAG",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::DRAG)));
+    napi_set_named_property(env, objValue, "DRAG_START",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::DRAG_START)));
+    napi_set_named_property(env, objValue, "DRAG_END",
+        CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::DRAG_END)));
+    return objValue;
+}
+
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
     napi_value objValue = nullptr;

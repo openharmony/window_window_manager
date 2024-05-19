@@ -44,7 +44,7 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(uint32_t rate);
+    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped);
     void SetFrameRateLinkerEnable(bool enabled);
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)

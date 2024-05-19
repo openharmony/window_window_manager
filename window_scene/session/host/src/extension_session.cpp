@@ -25,30 +25,55 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
 } // namespace
 
-void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(
+void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
     const std::shared_ptr<std::promise<bool>>& isConsumedPromise, const std::shared_ptr<WSError>& retCode)
 {
     std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
-    isConsumedPromise_ = isConsumedPromise;
+    keyEventId_ = keyEventId;
+    isPreImeEvent_ = isPreImeEvent;
     retCode_ = retCode;
+    isConsumedPromise_ = isConsumedPromise;
 }
 
 void WindowEventChannelListener::ResetTransferKeyEventForConsumedParams()
 {
     std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
-    isConsumedPromise_ = nullptr;
     retCode_ = nullptr;
+    isConsumedPromise_ = nullptr;
 }
 
-void WindowEventChannelListener::OnTransferKeyEventForConsumed(bool isConsumed, WSError retCode)
+void WindowEventChannelListener::ResetTransferKeyEventForConsumedParams(bool isConsumed, WSError retCode)
 {
     std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
-    if (isConsumedPromise_ == nullptr || retCode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Promise or ret is null in WindowEventChannelListener.");
+    if (retCode_ != nullptr) {
+        *retCode_ = retCode;
+        retCode_ = nullptr;
+    }
+    if (isConsumedPromise_ != nullptr) {
+        isConsumedPromise_->set_value(isConsumed);
+        isConsumedPromise_ = nullptr;
+    }
+}
+
+void WindowEventChannelListener::OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent, bool isConsumed,
+    WSError retCode)
+{
+    std::lock_guard<std::mutex> lock(transferKeyEventForConsumedMutex_);
+    if (keyEventId_ != keyEventId || isPreImeEvent_ != isPreImeEvent) {
+        TLOGW(WmsLogTag::WMS_EVENT, "The event has been processed at PreIme:%{public}d id:%{public}d.",
+            isPreImeEvent, keyEventId);
         return;
     }
-    isConsumedPromise_->set_value(isConsumed);
+    if (isConsumedPromise_ == nullptr || retCode_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_EVENT, "Promise or ret is null at PreIme:%{public}d id:%{public}d.",
+            isPreImeEvent, keyEventId);
+        return;
+    }
+
     *retCode_ = retCode;
+    retCode_ = nullptr;
+    isConsumedPromise_->set_value(isConsumed);
+    isConsumedPromise_ = nullptr;
 }
 
 int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -62,9 +87,11 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
     switch (msgId) {
         case WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC: {
+            int32_t keyEventId = data.ReadInt32();
+            bool isPreImeEvent = data.ReadBool();
             bool isConsumed = data.ReadBool();
             WSError retCode = static_cast<WSError>(data.ReadInt32());
-            OnTransferKeyEventForConsumed(isConsumed, retCode);
+            OnTransferKeyEventForConsumed(keyEventId, isPreImeEvent, isConsumed, retCode);
             break;
         }
         default:
@@ -92,7 +119,7 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         return;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "ChannelDeathRecipient OnRemoteDied");
-    listener_->OnTransferKeyEventForConsumed(false, WSError::WS_ERROR_IPC_FAILED);
+    listener_->ResetTransferKeyEventForConsumedParams(false, WSError::WS_ERROR_IPC_FAILED);
 }
 
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
@@ -122,7 +149,8 @@ ExtensionSession::~ExtensionSession()
 WSError ExtensionSession::Connect(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+    const std::string& identityToken)
 {
     // Get pid and uid before posting task.
     pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
@@ -224,6 +252,19 @@ void ExtensionSession::NotifyAsyncOn()
     }
 }
 
+WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
+}
+
 void ExtensionSession::TriggerBindModalUIExtension()
 {
     if (isFirstTriggerBindModal_ && extSessionEventCallback_ != nullptr &&
@@ -255,17 +296,17 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
         TLOGE(WmsLogTag::WMS_EVENT, "Created channelListener_ is nullptr.");
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "In with isConsumed(%{public}d) isTimeout(%{public}d) "
-        "isPreImeEvent(%{public}d), id:%{public}d", isConsumed, isTimeout, isPreImeEvent, keyEvent->GetId());
+    int32_t keyEventId = keyEvent->GetId();
+    TLOGI(WmsLogTag::WMS_EVENT, "In with isPreImeEvent:%{public}d, id:%{public}d", isPreImeEvent, keyEventId);
 
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
     std::shared_ptr<WSError> retCode = std::make_shared<WSError>(WSError::WS_OK);
-    channelListener_->SetTransferKeyEventForConsumedParams(isConsumedPromise, retCode);
+    channelListener_->SetTransferKeyEventForConsumedParams(keyEventId, isPreImeEvent, isConsumedPromise, retCode);
     auto ret = windowEventChannel_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, channelListener_);
     // if UiExtension was died, return transferKeyEvent before wait for timeout.
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_EVENT, "transfer keyEvent failed with %{public}d in id:%{public}d.",
-              ret, keyEvent->GetId());
+        TLOGE(WmsLogTag::WMS_EVENT, "transfer keyEvent failed with %{public}d at PreIme:%{public}d id:%{public}d.",
+            ret, isPreImeEvent, keyEventId);
         return ret;
     }
 
@@ -284,8 +325,8 @@ WSError ExtensionSession::TransferKeyEventForConsumed(const std::shared_ptr<MMI:
         isConsumed = isConsumedFuture.get();
         ret = *retCode;
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "isConsumed is %{public}d, Timeout is %{public}d, ret is %{public}d in id:%{public}d.",
-        isConsumed, isTimeout, ret, keyEvent->GetId());
+    TLOGI(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d Timeout:%{public}d ret:%{public}d at PreIme:%{public}d "
+        "id:%{public}d.", isConsumed, isTimeout, ret, isPreImeEvent, keyEventId);
     return ret;
 }
 
@@ -340,7 +381,7 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
     return avoidArea;
 }
 
-WSError ExtensionSession::Background()
+WSError ExtensionSession::Background(bool isFromClient)
 {
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"",
