@@ -143,7 +143,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
-    BindNativeFunction(env, objValue, "setWindowLastRect", moduleName, JsSceneSession::SetWindowLastRect);
+    BindNativeFunction(env, objValue, "setWindowLastSafeRect", moduleName, JsSceneSession::SetWindowLastSafeRect);
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
@@ -2696,14 +2696,14 @@ napi_value JsSceneSession::OnSetScale(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::SetWindowLastRect(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetWindowLastSafeRect(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetWindowLastRect");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetWindowLastSafeRect");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetWindowLastRect(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetWindowLastSafeRect(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::OnSetWindowLastRect(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetWindowLastSafeRect(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
