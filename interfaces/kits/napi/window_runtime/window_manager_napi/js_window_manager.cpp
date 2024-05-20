@@ -436,11 +436,11 @@ bool JsWindowManager::ParseRequiredConfigOption(napi_env env, napi_value jsObjec
             winType < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
             option.SetWindowType(JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(winType)));
         } else {
-            WLOGFE(WmsLogTag::DEFAULT, "Invalid winType");
+            TLOGE(WmsLogTag::DEFAULT, "Invalid winType");
             return false;
         }
     } else {
-        TLOGE("Failed to convert parameter to winType");
+        WLOGFE("Failed to convert parameter to winType");
         return false;
     }
     return true;
