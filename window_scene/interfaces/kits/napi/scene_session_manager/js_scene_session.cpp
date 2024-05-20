@@ -2614,9 +2614,9 @@ napi_value JsSceneSession::SetWindowLastRect(napi_env env, napi_callback_info in
 napi_value JsSceneSession::OnSetWindowLastRect(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    napi_value argv[argc] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < SCALE_ARG_COUNT) { // SCALE_ARG_COUNT: params num
+    if (argc < SCALE_ARG_COUNT) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));

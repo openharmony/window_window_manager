@@ -620,7 +620,7 @@ HWTEST_F(MoveDragControllerTest, ClacFirstMoveTargetRect001, Function | SmallTes
 HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, Function | SmallTest | Level1)
 {
     WSRect originalRect = { 1, 2, 3, 4 };
-    WSRect windowRect = { 1, 2, 3, 4 };
+    WSRect windowRect = { 5, 6, 7, 8 };
     WSRect rect = moveDragController->GetFullScreenToFloatingRect(originalRect, windowRect);
     ASSERT_EQ(originalRect.posX_, rect.posX_);
 }
