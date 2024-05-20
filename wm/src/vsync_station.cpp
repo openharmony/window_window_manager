@@ -133,9 +133,9 @@ void VsyncStation::RemoveCallback()
 {
     WLOGI("Remove Vsync callback");
     std::lock_guard<std::mutex> lock(mtx_);
-        if (destroyed_) {
-            return;
-        }
+    if (destroyed_) {
+        return;
+    }
     vsyncCallbacks_.clear();
 }
 
