@@ -15,7 +15,6 @@ group("fuzztest") {
   testonly = true
 
   deps = [
-    "scenesessionmanager_fuzzer:fuzztest",
     "screensessionmanager_fuzzer:fuzztest",
     "screensessionmgrstubagent_fuzzer:fuzztest",
     "screensessionmgrstubstate_fuzzer:fuzztest",
