@@ -3216,6 +3216,25 @@ WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
+{
+    auto task = [weakThis = wptr(this), isLayoutFullScreen]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange, isLayoutFullScreen: %{public}d",
+            isLayoutFullScreen);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_) {
+            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnLayoutFullScreenChange");
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetForceHideState(bool hideFlag)
 {
     forceHideState_ = hideFlag;
