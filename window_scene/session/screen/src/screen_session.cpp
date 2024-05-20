@@ -563,6 +563,19 @@ bool ScreenSession::IsScreenRotationLocked()
     return isScreenLocked_;
 }
 
+void ScreenSession::SetScreenEnableFromJs(bool isEnable)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "isEnable:%{public}u", static_cast<uint32_t>(isEnable));
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isScreenEnable_ = isEnable;
+}
+
+bool ScreenSession::IsScreenEnable()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return isScreenEnable_;
+}
+
 Orientation ScreenSession::GetScreenRequestedOrientation() const
 {
     return property_.GetScreenRequestedOrientation();

@@ -152,6 +152,8 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
+    void SetScreenEnableFromJs(bool isEnable);
+    bool IsScreenEnable();
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -183,6 +185,7 @@ public:
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
     bool isScreenLocked_ = true;
+    bool isScreenEnable_ = true;
 
     void Connect();
     void Disconnect();

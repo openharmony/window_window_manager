@@ -33,6 +33,7 @@ const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
+constexpr size_t ARGC_ONE = 1;
 } // namespace
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
@@ -56,6 +57,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
+    BindNativeFunction(env, objValue, "setScreenEnable", moduleName,
+        JsScreenSession::SetScreenEnable);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
     return objValue;
 }
@@ -192,6 +195,40 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
     }
     screenSession_->SetScreenRotationLockedFromJs(isLocked);
     WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSession::SetScreenEnable(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnSetScreenEnable(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnSetScreenEnable(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "napi called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGI(WmsLogTag::WMS_EVENT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    bool isEnable = true;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        TLOGI(WmsLogTag::WMS_EVENT, "ConvertNativeValueTo isEnable failed!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    napi_get_value_bool(env, nativeVal, &isEnable);
+    if (screenSession_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_EVENT, "Failed to register screen change listener, session is null!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    screenSession_->SetScreenEnableFromJs(isEnable);
     return NapiGetUndefined(env);
 }
 
