@@ -2698,7 +2698,7 @@ napi_value JsSceneSession::OnSetScale(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetWindowLastSafeRect(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetWindowLastSafeRect");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetWindowLastSafeRect(env, info) : nullptr;
 }
