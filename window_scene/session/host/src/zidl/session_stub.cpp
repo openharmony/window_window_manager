@@ -103,7 +103,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetCustomDecorHeight),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
         &SessionStub::HandleAdjustKeyboardLayout),
-
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
+        &SessionStub::HandleUpdatePropertyByAction),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
@@ -126,6 +127,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         &SessionStub::HandleUpdatePiPRect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE),
+        &SessionStub::HandleLayoutFullScreenChange),
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -268,6 +271,15 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     uint32_t eventId = data.ReadUint32();
     WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isLayoutFullScreen = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -665,6 +677,24 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_DATA;
     }
     WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
+{
+    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
+    } else {
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
+    }
+    const WMError ret = UpdateSessionPropertyByAction(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

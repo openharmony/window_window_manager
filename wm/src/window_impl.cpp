@@ -116,6 +116,10 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 
 void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
 {
+    if (option == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Init window property failed, option is nullptr.");
+        return;
+    }
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -545,26 +549,29 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage,
-        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability);
 }
 
 WMError WindowImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowImpl::SetUIContentByAbc(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     if (!IsWindowValid()) {
@@ -587,13 +594,14 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     }
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    switch (type) {
+    switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT:
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
-        case WindowSetUIContentType::DISTRIBUTE:
-            aceRet = uiContent->Restore(this, contentInfo, storage);
+        case WindowSetUIContentType::RESTORE:
+            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
+                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -682,14 +690,20 @@ Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
     return nullptr;
 }
 
-std::string WindowImpl::GetContentInfo()
+std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
+    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
+        WLOGFE("Invalid type %{public}d", type);
+        return "";
+    }
+
     if (uiContent_ == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo();
+    return uiContent_->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
+        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
@@ -2273,10 +2287,6 @@ WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAre
 
 WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("register touch outside listener permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(touchOutsideListeners_[GetWindowId()], listener);
@@ -2284,10 +2294,6 @@ WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListene
 
 WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("register touch outside listener permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(touchOutsideListeners_[GetWindowId()], listener);

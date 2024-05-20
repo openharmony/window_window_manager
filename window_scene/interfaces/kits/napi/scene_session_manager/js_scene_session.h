@@ -59,6 +59,7 @@ private:
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
+    static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -81,6 +82,7 @@ private:
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);
+    napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -128,6 +130,7 @@ private:
     void ProcessContextTransparentRegister();
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
+    void ProcessLayoutFullScreenChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -171,6 +174,7 @@ private:
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
+    void OnLayoutFullScreenChange(bool isLayoutFullScreen);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

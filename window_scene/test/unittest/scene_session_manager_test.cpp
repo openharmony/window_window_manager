@@ -2713,11 +2713,11 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateHideNonSystemFloatingWindows
+ * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: SceneSesionManager update hide non system floating windows
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -2727,7 +2727,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function |
     sptr<WindowSessionProperty> property = nullptr;
     ssm_->UpdateForceHideState(scensession, property, true);
     property = new WindowSessionProperty();
-    ssm_->UpdateHideNonSystemFloatingWindows(property, scensession);
+    ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     property->SetHideNonSystemFloatingWindows(true);
     ssm_->UpdateForceHideState(scensession, property, true);
     ssm_->UpdateForceHideState(scensession, property, false);
@@ -2835,6 +2835,22 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
     reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::SPLIT_SCREEN);
 }
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
+{
+    uint32_t zOrder = 9999;
+    auto session = ssm_->GetTopNearestBlockingFocusSession(zOrder, true);
+    ASSERT_NE(session, nullptr);
+
+    session = ssm_->GetTopNearestBlockingFocusSession(zOrder, false);
+    ASSERT_NE(session, nullptr);
+}
+
 
 /**
  * @tc.name: RaiseWindowToTop
