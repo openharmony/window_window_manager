@@ -2933,6 +2933,7 @@ HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
     session_->SetAttachState(false);
     usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
+    ASSERT_EQ(session_->isAttach_, false);
 }
 
 /**
