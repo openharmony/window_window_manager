@@ -440,7 +440,7 @@ bool JsWindowManager::ParseRequiredConfigOption(napi_env env, napi_value jsObjec
             return false;
         }
     } else {
-        WLOGFE("Failed to convert parameter to winType");
+        TLOGE("Failed to convert parameter to winType");
         return false;
     }
     return true;
