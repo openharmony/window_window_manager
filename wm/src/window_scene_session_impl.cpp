@@ -1544,6 +1544,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(true);
+    if (hostSession_ != nullptr) {
+        hostSession_->OnLayoutFullScreenChange(status);
+    }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
     if (WindowHelper::IsMainWindow(GetType()) &&

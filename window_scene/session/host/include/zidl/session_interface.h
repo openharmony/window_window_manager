@@ -45,6 +45,7 @@ public:
     // scene session
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }

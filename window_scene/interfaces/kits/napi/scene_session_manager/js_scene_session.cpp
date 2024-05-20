@@ -63,6 +63,7 @@ const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
+const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 constexpr int SCALE_ARG_COUNT = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
@@ -227,6 +228,7 @@ void JsSceneSession::InitListenerFuncs()
         { CONTEXT_TRANSPARENT_CB,                &JsSceneSession::ProcessContextTransparentRegister },
         { KEYBOARD_GRAVITY_CHANGE_CB,            &JsSceneSession::ProcessKeyboardGravityChangeRegister },
         { ADJUST_KEYBOARD_LAYOUT_CB,             &JsSceneSession::ProcessAdjustKeyboardLayoutRegister },
+        { LAYOUT_FULL_SCREEN_CB,                 &JsSceneSession::ProcessLayoutFullScreenChangeRegister },
     };
 }
 
@@ -402,6 +404,41 @@ void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
     sessionchangeCallback->onAdjustKeyboardLayout_ = std::bind(&JsSceneSession::OnAdjustKeyboardLayout,
                                                                this, std::placeholders::_1);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
+}
+
+void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onLayoutFullScreenChangeFunc_ = std::bind(&JsSceneSession::OnLayoutFullScreenChange,
+        this, std::placeholders::_1);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Register success");
+}
+
+void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
+{
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        auto iter = jsCbMap_.find(LAYOUT_FULL_SCREEN_CB);
+        if (iter == jsCbMap_.end()) {
+            return;
+        }
+        jsCallBack = iter->second;
+    }
+    auto task = [isLayoutFullScreen, jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange jsCallBack is nullptr");
+            return;
+        }
+        napi_value paramsObj = CreateJsValue(env, isLayoutFullScreen);
+        napi_value argv[] = {paramsObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnLayoutFullScreenChange");
 }
 
 void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
