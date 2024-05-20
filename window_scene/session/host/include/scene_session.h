@@ -73,6 +73,7 @@ using HandleUpdatePropertyFunc = WMError (SceneSession::*)(const sptr<WindowSess
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using SystemSessionBufferAvailableCallback = std::function<void()>;
+using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -112,6 +113,7 @@ public:
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
         NotifyKeyboardLayoutAdjustFunc onAdjustKeyboardLayout_;
+        NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
 
     // func for change window scene pattern property
@@ -144,6 +146,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
