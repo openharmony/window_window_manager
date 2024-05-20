@@ -1740,7 +1740,7 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
         auto iter = screenSessionMap_.find(currentScreenId);
         if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-            iter.second->PowerStatusChange(event, status, reason);
+            iter->second->PowerStatusChange(event, status, reason);
         }
         return true;
     }
