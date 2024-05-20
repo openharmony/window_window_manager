@@ -102,6 +102,7 @@ ohos_shared_library("scene_session_manager") {
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-util",
@@ -333,6 +334,7 @@ ohos_shared_library("session_manager") {
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-util",
