@@ -73,7 +73,7 @@ void VsyncStation::RemoveCallback()
     vsyncCallbacks_.clear();
 }
 
-void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
+void VsyncStation::VsyncCallbackInner(int64_t timestamp)
 {
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks;
     {
@@ -83,15 +83,15 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
         vsyncCallbacks_.clear();
     }
     for (const auto& callback: vsyncCallbacks) {
-        callback->onCallback(timestamp, frameCount);
+        callback->onCallback(timestamp);
     }
 }
 
-void VsyncStation::OnVsync(int64_t timestamp, int64_t frameCount, void* client)
+void VsyncStation::OnVsync(int64_t timestamp, void* client)
 {
     auto vsyncClient = static_cast<VsyncStation*>(client);
     if (vsyncClient) {
-        vsyncClient->VsyncCallbackInner(timestamp, frameCount);
+        vsyncClient->VsyncCallbackInner(timestamp);
     } else {
         WLOGFE("VsyncClient is null");
     }
