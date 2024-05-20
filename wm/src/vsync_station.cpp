@@ -133,6 +133,9 @@ void VsyncStation::RemoveCallback()
 {
     WLOGI("Remove Vsync callback");
     std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
     vsyncCallbacks_.clear();
 }
 
@@ -141,6 +144,9 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks;
     {
         std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
         hasRequestedVsync_ = false;
         vsyncCallbacks = vsyncCallbacks_;
         vsyncCallbacks_.clear();
