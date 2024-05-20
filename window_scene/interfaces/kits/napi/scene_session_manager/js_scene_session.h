@@ -128,6 +128,7 @@ private:
     void ProcessContextTransparentRegister();
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
+    void ProcessLayoutFullScreenChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -171,6 +172,7 @@ private:
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
+    void OnLayoutFullScreenChange(bool isLayoutFullScreen);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
