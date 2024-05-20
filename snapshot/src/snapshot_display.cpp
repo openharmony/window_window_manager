@@ -23,10 +23,20 @@
 
 #include "display_manager.h"
 #include "snapshot_utils.h"
+#include "parameters.h"
 
 using namespace OHOS;
 using namespace OHOS::Media;
 using namespace OHOS::Rosen;
+using OHOS::system::GetParameter;
+
+// developer mode
+static const std::string DEVELOPER_MODE_STATE_ON_DEFAULT = "false";
+static const std::string DEVELOPER_MODE_PARAMETER = "const.security.developermode.state";
+const std::string IS_DEVELOPER_MODE = GetParameter(DEVELOPER_MODE_PARAMETER, DEVELOPER_MODE_STATE_ON_DEFAULT);
+
+bool GetScreenshotByCmdArgments(CmdArgments& cmdArgments, sptr<Display> display,
+    std::shared_ptr<OHOS::Media::PixelMap>& pixelMap);
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +44,11 @@ int main(int argc, char *argv[])
     cmdArgments.fileName = "";
 
     if (!SnapShotUtils::ProcessArgs(argc, argv, cmdArgments)) {
+        return 0;
+    }
+
+    if (DEVELOPER_MODE_STATE_ON_DEFAULT == IS_DEVELOPER_MODE) {
+        std::cout << "current mode is not developer mode, just return." << std::endl;
         return 0;
     }
 
@@ -48,6 +63,29 @@ int main(int argc, char *argv[])
 
     // get PixelMap from DisplayManager API
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
+    if (GetScreenshotByCmdArgments(cmdArgments, display, pixelMap)) {
+        return -1;
+    }
+
+    bool ret = false;
+    if (pixelMap != nullptr) {
+        ret = SnapShotUtils::WriteToJpegWithPixelMap(cmdArgments.fileName, *pixelMap);
+    }
+    if (!ret) {
+        std::cout << "\nerror: snapshot display " << cmdArgments.displayId <<
+            ", write to " << cmdArgments.fileName << " as jpeg failed!" << std::endl;
+        return -1;
+    }
+
+    std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
+        cmdArgments.fileName << " as jpeg, width " << pixelMap->GetWidth() <<
+        ", height " << pixelMap->GetHeight() << std::endl;
+    return 0;
+}
+
+bool GetScreenshotByCmdArgments(CmdArgments& cmdArgments, sptr<Display> display,
+    std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
     if (!cmdArgments.isWidthSet && !cmdArgments.isHeightSet) {
         pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId); // default width & height
     } else {
@@ -62,26 +100,12 @@ int main(int argc, char *argv[])
         if (!SnapShotUtils::CheckWidthAndHeightValid(cmdArgments.width, cmdArgments.height)) {
             std::cout << "error: width " << cmdArgments.width << " height " <<
             cmdArgments.height << " invalid!" << std::endl;
-            return -1;
+            return true;
         }
         const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
         const Media::Size size = {cmdArgments.width, cmdArgments.height};
         constexpr int rotation = 0;
         pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId, rect, size, rotation);
     }
-
-    bool ret = false;
-    if (pixelMap != nullptr) {
-        ret = SnapShotUtils::WriteToJpegWithPixelMap(cmdArgments.fileName, *pixelMap);
-    }
-    if (!ret) {
-        std::cout << "\nerror: snapshot display " << cmdArgments.displayId <<
-            ", write to " << cmdArgments.fileName.c_str() << " as jpeg failed!" << std::endl;
-        return -1;
-    }
-
-    std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
-        cmdArgments.fileName.c_str() << " as jpeg, width " << pixelMap->GetWidth() <<
-        ", height " << pixelMap->GetHeight() << std::endl;
-    return 0;
+    return false;
 }
