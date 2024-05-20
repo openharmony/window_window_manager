@@ -1460,6 +1460,7 @@ bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return false;
     }
 
@@ -1473,6 +1474,7 @@ bool SceneSession::IsFullScreenMovable()
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return false;
     }
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && 
