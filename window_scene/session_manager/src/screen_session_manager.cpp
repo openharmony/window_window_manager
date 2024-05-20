@@ -1566,11 +1566,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             screenId);
         return;
     }
-    bool needNotifyAvoidArea = false;
-    if (screenSession->GetScreenProperty().GetBounds() == bounds &&
-        screenSession->GetScreenProperty().GetRotation() != static_cast<float>(rotation)) {
-        needNotifyAvoidArea = true;
-    }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
@@ -1579,11 +1574,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-    if (needNotifyAvoidArea) {
-        std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-        NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
-            emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    }
+
+    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
+        emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
