@@ -1847,13 +1847,11 @@ void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 {
     NotifyWindowAfterUnfocused();
     if (needNotifyUiContent) {
-        {
-            std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-            if (uiContent_ == nullptr) {
-                shouldReNotifyFocus_ = true;
-            }
+        if (uiContent_ == nullptr) {
+            shouldReNotifyFocus_ = true;
+        } else {
+            CALL_UI_CONTENT(UnFocus);
         }
-        CALL_UI_CONTENT(UnFocus);
     }
 }
 
