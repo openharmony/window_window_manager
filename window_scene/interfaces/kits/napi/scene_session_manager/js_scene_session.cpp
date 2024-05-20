@@ -63,7 +63,7 @@ const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
-constexpr int SCALE_ARG_COUNT = 4;
+constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
@@ -2555,10 +2555,10 @@ napi_value JsSceneSession::SetScale(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::OnSetScale(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < SCALE_ARG_COUNT) { // SCALE_ARG_COUNT: params num
+    if (argc < ARG_COUNT_4) { // ARG_COUNT_4: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2613,10 +2613,10 @@ napi_value JsSceneSession::SetWindowLastRect(napi_env env, napi_callback_info in
 
 napi_value JsSceneSession::OnSetWindowLastRect(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < SCALE_ARG_COUNT) {
+    if (argc < ARG_COUNT_4) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
