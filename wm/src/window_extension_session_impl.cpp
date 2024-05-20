@@ -354,8 +354,8 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
     DispatchKeyEventCallback(keyEvent, isConsumed);
 }
 
-WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo,
-    napi_env env, napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("WindowExtensionSessionImpl NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {

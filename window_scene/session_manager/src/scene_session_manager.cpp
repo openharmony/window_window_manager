@@ -1350,6 +1350,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionInfoChangeNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
+    RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -3171,7 +3172,7 @@ WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProper
             return UpdatePropertyRaiseEnabled(property, sceneSession);
         }
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
-            UpdateHideNonSystemFloatingWindows(property, sceneSession);
+            HandleHideNonSystemFloatingWindows(property, sceneSession);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
@@ -3210,24 +3211,19 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
+void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
-        return;
-    }
-
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
+        TLOGI(WmsLogTag::DEFAULT, "session property null");
         return;
     }
 
     bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
     bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
     if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
-        WLOGFI("property hideNonSystemFloatingWindows not change");
+        TLOGI(WmsLogTag::DEFAULT, "property hideNonSystemFloatingWindows not change");
         return;
     }
 
@@ -3238,7 +3234,6 @@ void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSe
             UpdateForceHideState(sceneSession, property, true);
         }
     }
-    propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
 }
 
 void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
@@ -3356,14 +3351,6 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
-    if (!sceneSession->IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (brightness == sceneSession->GetBrightness()) {
-        WLOGFD("Session brightness do not change: [%{public}f]", brightness);
-        return WSError::WS_DO_NOTHING;
-    }
-    sceneSession->SetBrightness(brightness);
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr) {
         bool setBrightnessRet = false;
@@ -4009,6 +3996,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         }
     };
     taskScheduler_->PostAsyncTask(task, "RequestFocusStatus" + std::to_string(persistentId));
+    changeReason_ = reason;
     return WMError::WM_OK;
 }
 
@@ -4065,7 +4053,8 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
 
     // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, true);
+    FocusChangeReason reason = FocusChangeReason::SCB_START_APP;
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, true, reason);
     if (specificCheckRet != WSError::WS_OK) {
         return specificCheckRet;
     }
@@ -4074,7 +4063,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     if (!IsSessionVisible(sceneSession)) {
         needBlockNotifyFocusStatusUntilForeground_ = true;
     }
-    ShiftFocus(sceneSession, FocusChangeReason::SCB_START_APP);
+    ShiftFocus(sceneSession, reason);
     return WSError::WS_OK;
 }
 
@@ -4110,7 +4099,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
             return WSError::WS_DO_NOTHING;
     }
     // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground);
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground, reason);
     if (specificCheckRet != WSError::WS_OK) {
         return specificCheckRet;
     }
@@ -4182,8 +4171,41 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground)
+/**
+ * When switching focus, check if the blockingType window has been  traversed downwards.
+ *
+ * @return true: traversed downwards, false: not.
+ */
+bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
+    sptr<SceneSession>& focusedSession, bool includingAppSession)
 {
+    uint32_t requestSessionZOrder = requestSceneSession->GetZOrder();
+    uint32_t focusedSessionZOrder = focusedSession->GetZOrder();
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
+        requestSessionZOrder, focusedSessionZOrder);
+    if  (requestSessionZOrder < focusedSessionZOrder)  {
+        auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder,
+            includingAppSession);
+        uint32_t topNearestBlockingZOrder = 0;
+        if  (topNearestBlockingFocusSession)  {
+            topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
+            TLOGD(WmsLogTag::WMS_FOCUS,  "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
+                topNearestBlockingZOrder:  %{public}d",  requestSessionZOrder,  focusedSessionZOrder,
+                topNearestBlockingZOrder);
+        }
+        if  (focusedSessionZOrder >=  topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder)  {
+            TLOGD(WmsLogTag::WMS_FOCUS,  "focus pass through, needs to be intercepted");
+            return true;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "not through");
+    return false;
+}
+
+WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
+    FocusChangeReason reason)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
     // dialog get focus
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
@@ -4198,6 +4220,20 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
         if (focusedSession->IsTopmost() && sceneSession->IsAppSession()) {
             // return ok if focused session is topmost
             return WSError::WS_OK;
+        }
+        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byForeground: %{public}d",  reason,
+            byForeground);
+        if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
+            TLOGD(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
+            return WSError::WS_DO_NOTHING;
+        }
+        if ((reason == FocusChangeReason::SPLIT_SCREEN || reason == FocusChangeReason::FLOATING_SCENE) &&
+            !byForeground)  {
+            if (!CheckFocusIsDownThroughBlockingType(sceneSession, focusedSession, false)
+                && focusedSession->IsAppSession()) {
+                TLOGD(WmsLogTag::WMS_FOCUS, "in split or floting , ok");
+                return WSError::WS_OK;
+            }
         }
         bool isBlockingType = focusedSession->IsAppSession() ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
@@ -4247,6 +4283,33 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
         return false;
     };
     TraverseSessionTree(func, true);
+    return ret;
+}
+
+/**
+ * Find the session through the specific zOrder, it is located abve it, its' blockingFocus attribute is true,
+ * and it is the closest;
+ */
+sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder, bool includingAppSession)
+{
+    sptr<SceneSession> ret = nullptr;
+    auto func = [this, &ret, zOrder, includingAppSession](sptr<SceneSession> session) {
+        if (session == nullptr) {
+            return false;
+        }
+        int sessionZOrder = session->GetZOrder();
+        if (sessionZOrder <= zOrder) { // must be above the target session
+            return false;
+        }
+        bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
+            (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus());
+        if (IsSessionVisible(session) && isBlockingType)  {
+            ret = session;
+            return true;
+        }
+        return false;
+    };
+    TraverseSessionTree(func, false);
     return ret;
 }
 
@@ -4302,7 +4365,6 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
 {
-    changeReason_ = reason;
     // unfocus
     int32_t focusedId = focusedSessionId_;
     auto focusedSession = GetSceneSession(focusedSessionId_);
@@ -4713,6 +4775,58 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
     }
     sceneSession->SetGetStateFromManagerListener(func);
     WLOGFD("RegisterGetStateFromManagerFunc success");
+}
+
+void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    SessionChangeByActionNotifyManagerFunc func = [this](const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) {
+        if (sceneSession == nullptr || property == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "params is nullptr");
+            return;
+        }
+        switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
+            case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
+                SetBrightness(sceneSession, property->GetBrightness());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
+            case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
+                UpdatePrivateStateAndNotify(property->GetPersistentId());
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+                CheckAndNotifyWaterMarkChangedResult();
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_MODE:
+                if (sceneSession->GetSessionProperty() != nullptr) {
+                    ProcessWindowModeType();
+                }
+                NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
+                HandleHideNonSystemFloatingWindows(property, sceneSession);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
+                FlushWindowInfoToMMI();
+                break;
+            default:
+                break;
+        }
+    };
+    if (sceneSession != nullptr) {
+        sceneSession->SetSessionChangeByActionNotifyManagerListener(func);
+    }
 }
 
 __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChange(
@@ -6463,6 +6577,10 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
             auto sessionInfo = sceneSession->GetSessionInfo();
             element = AppExecFwk::ElementName("", sessionInfo.bundleName_,
                 sessionInfo.abilityName_, sessionInfo.moduleName_);
+            std::string localDeviceId;
+            if (GetLocalDeviceId(localDeviceId)) {
+                element.SetDeviceID(localDeviceId);
+            }
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;

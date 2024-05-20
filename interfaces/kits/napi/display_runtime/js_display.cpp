@@ -527,7 +527,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         WLOGFE("Failed to get jsObject");
         return NapiGetUndefined(env);
     }
-    auto info = display->GetDisplayInfo();
+    auto info = display->GetDisplayInfoByJs();
     if (info == nullptr) {
         WLOGFE("Failed to GetDisplayInfo");
         return NapiGetUndefined(env);

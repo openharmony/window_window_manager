@@ -192,6 +192,15 @@ sptr<DisplayInfo> Display::GetDisplayInfo() const
     return pImpl_->GetDisplayInfo();
 }
 
+sptr<DisplayInfo> Display::GetDisplayInfoByJs() const
+{
+    if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
+        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        return nullptr;
+    }
+    return pImpl_->GetDisplayInfo();
+}
+
 sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
