@@ -111,6 +111,7 @@ void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType
 WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect)
 {
     if (moveTempProperty_.isEmpty()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "move temporary property is empty");
         return originalRect;
     }
     if (originalRect.width_ == 0) {
@@ -124,7 +125,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         windowRect.width_,
         windowRect.height_,
     };
-    TLOGI(WmsLogTag::WMS_LAYOUT, "original rect [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "original rect [%{public}d,%{public}d,%{public}u,%{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     return targetRect;
 }
@@ -773,7 +774,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     return WSError::WS_OK;
 }
 
-void MoveDragController::ClacFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
+void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
 {
     if (!GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
         return;

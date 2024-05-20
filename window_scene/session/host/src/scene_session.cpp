@@ -404,10 +404,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                     session->lastSafeRect);
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
-                session->moveDragController_->ClacFirstMoveTargetRect(rect, true);
+                session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
                 session->moveDragController_->SetStartMoveFlag(true);
-                session->moveDragController_->ClacFirstMoveTargetRect(session->winRect_, false);
+                session->moveDragController_->CalcFirstMoveTargetRect(session->winRect_, false);
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
@@ -1475,10 +1475,8 @@ bool SceneSession::IsFullScreenMovable()
     if (property == nullptr) {
         return false;
     }
-    bool supportFloating = WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FLOATING);
-
-    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && supportFloating;
+    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && 
+        WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
