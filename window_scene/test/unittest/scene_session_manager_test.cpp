@@ -2838,7 +2838,7 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 
 /**
  * @tc.name: NotifyRequestFocusStatusNotifyManager
- * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
+ * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
  * @tc.type: FUNC
 */
 HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Function | SmallTest | Level3)
@@ -2848,11 +2848,12 @@ HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Functio
     info.bundleName_ = "testInfo2"
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
-    FocusChangeReason reasonInput = FocusChangeReason::SCE_START_APP;
+
+    FocusChangeReason reasonInput = FocusChangeReason::SCB_START_APP;
     sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
     FocusChangeReason reasonResult = ssm->GetFocusChangeReason();
 
-    ASSERT_NE(reasonInput, reasonResult);
+    ASSERT_EQ(reasonInput, reasonResult);
 }
 
 /**
