@@ -343,7 +343,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             !session->moveDragController_->GetStartDragFlag()) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->moveDragController_->InitMoveDragProperty();
-            if (session->IsMovableFullScreen()) {
+            if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->lastSafeRect);
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, nullptr);
@@ -1392,10 +1392,10 @@ bool SceneSession::IsMovableWindowType()
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        IsMovableFullScreen();
+        IsFullScreenMovable();
 }
 
-bool SceneSession::IsMovableFullScreen()
+bool SceneSession::IsFullScreenMovable()
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
