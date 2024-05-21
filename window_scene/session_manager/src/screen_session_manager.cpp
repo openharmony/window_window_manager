@@ -72,7 +72,6 @@ const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
-const ScreenId DEFAULT_SCREEN_ID = 0;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
@@ -3815,6 +3814,7 @@ void ScreenSessionManager::SwitchUser()
         return;
     }
     auto userId = GetUserIdByCallingUid();
+    auto newScbPid = IPCSkeleton::GetCallingPid();
     TLOGI(WmsLogTag::DMS, "switch userId:%{public}d, currentId:%{public}d", userId, currentUserId_);
     {
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
@@ -3822,17 +3822,22 @@ void ScreenSessionManager::SwitchUser()
             TLOGI(WmsLogTag::DMS, "switch user not change");
             return;
         }
-        if (clientProxy_ != nullptr) {
-            clientProxy_->SwitchUserCallback();
+        if (clientProxy_) {
+            auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
+            if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
+                oldScbPids_.emplace_back(currentScbPId_);
+            }
+            oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
+            clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
         currentUserId_ = userId;
+        currentScbPId_ = newScbPid;
         auto it = clientProxyMap_.find(currentUserId_);
         if (it != clientProxyMap_.end()) {
             clientProxy_ = it->second;
         }
     }
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(currentUserId_,
-        static_cast<int32_t>(defaultScreenId_), false);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(currentUserId_, GetDefaultScreenId(), false);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -3846,17 +3851,24 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         return;
     }
     auto userId = GetUserIdByCallingUid();
+    auto newScbPid = IPCSkeleton::GetCallingPid();
     TLOGI(WmsLogTag::DMS, "set client userId:%{public}d", userId);
     {
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
         if (clientProxy_ != nullptr && userId != currentUserId_) {
-            clientProxy_->SwitchUserCallback();
+            auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
+            if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
+                oldScbPids_.emplace_back(currentScbPId_);
+            }
+            oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
+            clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
         currentUserId_ = userId;
+        currentScbPId_ = newScbPid;
         clientProxy_ = client;
         clientProxyMap_[currentUserId_] = client;
     }
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, DEFAULT_SCREEN_ID, true);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     SetClientInner();
 }
