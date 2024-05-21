@@ -83,6 +83,7 @@ HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, Function | SmallTest 
     info->bundleName_ = "TestAbilityTransitionInfo2";
     info->windowModes_.emplace_back(AppExecFwk::SupportWindowMode::SPLIT);
     sptr<WindowTransitionInfo> winTransitionInfo2 = new(std::nothrow) WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo2);
     ASSERT_EQ(info->bundleName_, winTransitionInfo2->bundleName_);
     ASSERT_EQ(1, winTransitionInfo2->supportWindowModes_.size());
     ASSERT_EQ(AppExecFwk::SupportWindowMode::SPLIT, winTransitionInfo2->supportWindowModes_[0]);
