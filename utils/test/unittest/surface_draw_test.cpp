@@ -304,11 +304,12 @@ HWTEST_F(SurfaceDrawTest, DoDraw02, Function | SmallTest | Level1)
     auto surfaceNode = window->GetSurfaceNode();
     ASSERT_NE(surfaceNode, nullptr);
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
+    ASSERT_NE(layer, nullptr);
+    sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
+    ASSERT_NE(buffer, nullptr);
     if (buffer == nullptr) {
         return;
     }
-    sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    ASSERT_NE(buffer, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_NE(pixelMap, nullptr);
     ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, pixelMap));
