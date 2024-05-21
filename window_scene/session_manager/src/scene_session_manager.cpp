@@ -2073,6 +2073,10 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
 
 bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& property)
 {
+    if (isScreenLocked_) {
+        TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");
+        return false;
+    }
     Rect pipRect = property->GetRequestRect();
     if (pipRect.width_ == 0 || pipRect.height_ == 0) {
         TLOGI(WmsLogTag::WMS_PIP, "pip rect is invalid.");
@@ -2084,7 +2088,7 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
     }
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT) {
-        TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as parent window disconnected");
+        TLOGI(WmsLogTag::WMS_PIP, "skip create pip window, maybe parentSession is null or disconnected");
         return false;
     }
     return true;
