@@ -1477,7 +1477,7 @@ bool SceneSession::IsFullScreenMovable()
         TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return false;
     }
-    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && 
+    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
