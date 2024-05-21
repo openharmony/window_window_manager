@@ -108,8 +108,8 @@ HWTEST_F(WindowTransitionInfoTest, Marshalling01, Function | SmallTest | Level2)
     bool result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
 
-    sptr<IRemoteObject> romote = new(std::nothrow) RemoteMocker();
-    winTransitionInfo->abilityToken_ = romote;
+    sptr<IRemoteObject> remote = new(std::nothrow) RemoteMocker();
+    winTransitionInfo->abilityToken_ = remote;
     result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
 }
@@ -131,8 +131,8 @@ HWTEST_F(WindowTransitionInfoTest, Unmarshalling, Function | SmallTest | Level2)
     winTransitionInfo->bundleName_ = "bundleNameValue";
     winTransitionInfo->abilityName_ = "abilityNameValue";
 
-    sptr<IRemoteObject> romote = new(std::nothrow) RemoteMocker();
-    winTransitionInfo->abilityToken_ = romote;
+    sptr<IRemoteObject> remote = new(std::nothrow) RemoteMocker();
+    winTransitionInfo->abilityToken_ = remote;
     auto result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
 
@@ -326,8 +326,8 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, Function | SmallTest | L
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
-    info->maxWindowRatio_ = 2.0;
-    info->minWindowRatio_ = 1.0;
+    info->maxWindowRatio_ = 2.0f;
+    info->minWindowRatio_ = 1.0f;
     info->maxWindowWidth_ = 2048;
     info->minWindowWidth_ = 512;
     info->maxWindowHeight_ = 2048;
@@ -335,8 +335,8 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, Function | SmallTest | L
     sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     auto windowSizeLimits = winTransitionInfo->GetWindowSizeLimits();
-    ASSERT_EQ(windowSizeLimits.maxRatio_, 2.0);
-    ASSERT_EQ(windowSizeLimits.minRatio_, 1.0);
+    ASSERT_FLOAT_EQ(windowSizeLimits.maxRatio_, 2.0f);
+    ASSERT_FLOAT_EQ(windowSizeLimits.minRatio_, 1.0f);
     ASSERT_EQ(windowSizeLimits.maxWidth_, 2048);
     ASSERT_EQ(windowSizeLimits.minWidth_, 512);
     ASSERT_EQ(windowSizeLimits.maxHeight_, 2048);
@@ -387,11 +387,11 @@ HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, Function | SmallTest | L
 }
 
 /**
- * @tc.name: GetOrientation
+ * @tc.name: GetOrientation01
  * @tc.desc: WindowTransitionInfo::GetOrientation test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetOrientation01, Function | SmallTest | Level2)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -432,10 +432,23 @@ HWTEST_F(WindowTransitionInfoTest, GetOrientation, Function | SmallTest | Level2
     winTransitionInfo->SetOrientation(orientationIn);
     orientationOut = winTransitionInfo->GetOrientation();
     ASSERT_EQ(orientationOut, AppExecFwk::DisplayOrientation::AUTO_ROTATION);
+}
 
-    orientationIn = AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE;
+/**
+ * @tc.name: GetOrientation02
+ * @tc.desc: WindowTransitionInfo::GetOrientation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTransitionInfoTest, GetOrientation02, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    ASSERT_NE(nullptr, info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    ASSERT_NE(nullptr, winTransitionInfo);
+
+    auto orientationIn = AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE;
     winTransitionInfo->SetOrientation(orientationIn);
-    orientationOut = winTransitionInfo->GetOrientation();
+    auto orientationOut = winTransitionInfo->GetOrientation();
     ASSERT_EQ(orientationOut, AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE);
 
     orientationIn = AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT;
