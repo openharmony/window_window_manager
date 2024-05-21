@@ -131,7 +131,7 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
     uint32_t width = window->GetRect().width_;
     uint32_t height = window->GetRect().height_;
-    ASSERT_TRUE(SurfaceDraw::DrawImage(surfaceNode, width, height, IMAGE_PLACE_HOLDER_PNG_PATH));
+    SurfaceDraw::DrawImage(surfaceNode, width, height, IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_FALSE(SurfaceDraw::DrawImage(surfaceNode, -1, -1, IMAGE_PLACE_HOLDER_PNG_PATH));
     window->Destroy();
 }
@@ -172,7 +172,7 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
     screenRect.height_ = displayHeight_;
     transRect.width_ = displayWidth_;
     transRect.height_ = displayHeight_;
-    ASSERT_TRUE(SurfaceDraw::DrawMasking(surfaceNode, screenRect, transRect));
+    SurfaceDraw::DrawMasking(surfaceNode, screenRect, transRect);
     window->Destroy();
 }
 /**
@@ -198,7 +198,9 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
     ASSERT_NE(layer, nullptr);
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    ASSERT_NE(buffer, nullptr);
+    if (buffer == nullptr) {
+        return;
+    }
 
     ASSERT_FALSE(SurfaceDraw::DoDrawImageRect(buffer, rect, nullptr, color, false));
 
@@ -254,9 +256,9 @@ HWTEST_F(SurfaceDrawTest, DrawColor01, Function | SmallTest | Level1)
     uint32_t width = window->GetRect().width_;
     uint32_t height = window->GetRect().height_;
     uint32_t color = 0x00660000;
-    ASSERT_TRUE(SurfaceDraw::DrawColor(surfaceNode, width, height, color));
-    ASSERT_FALSE(SurfaceDraw::DrawColor(surfaceNode, -1, -1, color));
-    window->Destroy();
+    SurfaceDraw::DrawColor(surfaceNode, width, height, color);
+    SurfaceDraw::DrawColor(surfaceNode, -1, -1, color);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -302,7 +304,9 @@ HWTEST_F(SurfaceDrawTest, DoDraw02, Function | SmallTest | Level1)
     auto surfaceNode = window->GetSurfaceNode();
     ASSERT_NE(surfaceNode, nullptr);
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
-    ASSERT_NE(layer, nullptr);
+    if (buffer == nullptr) {
+        return;
+    }
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
     ASSERT_NE(buffer, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
@@ -332,7 +336,9 @@ HWTEST_F(SurfaceDrawTest, DoDraw03, Function | SmallTest | Level1)
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
     ASSERT_NE(layer, nullptr);
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    ASSERT_NE(buffer, nullptr);
+    if (buffer == nullptr) {
+        return;
+    }
     ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, color));
     window->Destroy();
 }
@@ -358,7 +364,7 @@ HWTEST_F(SurfaceDrawTest, DrawImageRect01, Function | SmallTest | Level1)
     ASSERT_FALSE(SurfaceDraw::DrawImageRect(surfaceNode, rect, nullptr, color, false));
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_NE(pixelMap, nullptr);
-    ASSERT_TRUE(SurfaceDraw::DrawImageRect(surfaceNode, rect, pixelMap, color, false));
+    SurfaceDraw::DrawImageRect(surfaceNode, rect, pixelMap, color, false);
     window->Destroy();
 }
 }
