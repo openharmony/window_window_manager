@@ -582,19 +582,47 @@ HWTEST_F(MoveDragControllerTest, CalculateStartRectExceptHotZone, Function | Sma
 }
 
 /**
- * @tc.name: ClacFirstMoveTargetRect
- * @tc.desc: test function : ClacFirstMoveTargetRect
+ * @tc.name: CalcFirstMoveTargetRect
+ * @tc.desc: test function : CalcFirstMoveTargetRect
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, ClacFirstMoveTargetRect, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect, Function | SmallTest | Level1)
 {
     int res = 0;
     WSRect windowRect = { 0, 0, 0, 0 };
-    moveDragController->ClacFirstMoveTargetRect(windowRect);
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
     res++;
     moveDragController->moveTempProperty_.pointerId_ = 0;
-    moveDragController->ClacFirstMoveTargetRect(windowRect);
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
     ASSERT_EQ(res, 1);
+}
+
+/**
+ * @tc.name: CalcFirstMoveTargetRect001
+ * @tc.desc: test function : CalcFirstMoveTargetRect001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect001, Function | SmallTest | Level1)
+{
+    WSRect windowRect = { 1, 2, 3, 4 };
+    moveDragController->InitMoveDragProperty();
+    moveDragController->SetStartMoveFlag(true);
+    moveDragController->CalcFirstMoveTargetRect(windowRect, true);
+    WSRect targetRect = moveDragController->GetTargetRect();
+    ASSERT_EQ(targetRect.posX_, -1);
+}
+
+/**
+ * @tc.name: GetFullScreenToFloatingRect
+ * @tc.desc: test function : GetFullScreenToFloatingRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, Function | SmallTest | Level1)
+{
+    WSRect originalRect = { 1, 2, 3, 4 };
+    WSRect windowRect = { 5, 6, 7, 8 };
+    WSRect rect = moveDragController->GetFullScreenToFloatingRect(originalRect, windowRect);
+    ASSERT_EQ(originalRect.posX_, rect.posX_);
 }
 
 /**
