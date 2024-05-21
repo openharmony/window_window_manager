@@ -563,17 +563,15 @@ bool ScreenSession::IsScreenRotationLocked()
     return isScreenLocked_;
 }
 
-void ScreenSession::SetScreenEnableFromJs(bool isEnable)
+void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "isEnable:%{public}u", static_cast<uint32_t>(isEnable));
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    isScreenEnable_ = isEnable;
+    TLOGI(WmsLogTag::WMS_EVENT, "isTouchEnabled:%{public}u", static_cast<uint32_t>(isTouchEnabled));
+    touchEnabled_.store(isTouchEnabled);
 }
 
-bool ScreenSession::IsScreenEnable()
+bool ScreenSession::IsTouchEnabled()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return isScreenEnable_;
+    return touchEnabled_.load();
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const

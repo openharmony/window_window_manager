@@ -57,8 +57,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
-    BindNativeFunction(env, objValue, "setScreenEnable", moduleName,
-        JsScreenSession::SetScreenEnable);
+    BindNativeFunction(env, objValue, "setTouchEnabled", moduleName,
+        JsScreenSession::SetTouchEnabled);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
     return objValue;
 }
@@ -198,37 +198,37 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
     return NapiGetUndefined(env);
 }
 
-napi_value JsScreenSession::SetScreenEnable(napi_env env, napi_callback_info info)
+napi_value JsScreenSession::SetTouchEnabled(napi_env env, napi_callback_info info)
 {
     JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
-    return (me != nullptr) ? me->OnSetScreenEnable(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetTouchEnabled(env, info) : nullptr;
 }
 
-napi_value JsScreenSession::OnSetScreenEnable(napi_env env, napi_callback_info info)
+napi_value JsScreenSession::OnSetTouchEnabled(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "napi called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    bool isEnable = true;
+    bool isTouchEnabled = true;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        TLOGI(WmsLogTag::WMS_EVENT, "ConvertNativeValueTo isEnable failed!");
+        TLOGE(WmsLogTag::WMS_EVENT, "ConvertNativeValueTo isTouchEnabled failed!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    napi_get_value_bool(env, nativeVal, &isEnable);
+    napi_get_value_bool(env, nativeVal, &isTouchEnabled);
     if (screenSession_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Failed to register screen change listener, session is null!");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to register screen change listener, session is null!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    screenSession_->SetScreenEnableFromJs(isEnable);
+    screenSession_->SetTouchEnabledFromJs(isTouchEnabled);
     return NapiGetUndefined(env);
 }
 
