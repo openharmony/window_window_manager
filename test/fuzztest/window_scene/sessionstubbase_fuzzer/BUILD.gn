@@ -18,7 +18,7 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SessionStubUpdateFuzzTest") {
+ohos_fuzztest("SessionStubBaseFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
@@ -28,7 +28,7 @@ ohos_fuzztest("SessionStubUpdateFuzzTest") {
     "-O0",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "sessionstubupdate_fuzzer.cpp" ]
+  sources = [ "sessionstubbase_fuzzer.cpp" ]
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
@@ -54,7 +54,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SessionStubUpdateFuzzTest",
+    ":SessionStubBaseFuzzTest",
   ]
 }
 ###############################################################################

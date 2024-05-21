@@ -25,13 +25,13 @@
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/session.h"
-#include "sessionstubconnect_fuzzer.h"
+#include "sessionstubbase_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
+constexpr size_t DATA_MIN_SIZE = 2;
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -51,24 +51,33 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     SessionInfo info;
     info.abilityName_ = "stubConnectFuzzTest";
     info.bundleName_ = "stubConnectFuzzTest";
-    std::shared_ptr<Session> sessionStub = std::make_shared<Session>(info);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CONNECT),
+    sptr<Session> sessionStub = new (std::nothrow) Session(info);
+    if (sessionStub == nullptr) {
+        return false;
+    }
+
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CONNECT),
+        parcel, reply, option);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_DISCONNECT),
+        parcel, reply, option);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_FOREGROUND),
+        parcel, reply, option);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKGROUND),
+        parcel, reply, option);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SHOW),
+        parcel, reply, option);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_HIDE),
         parcel, reply, option);
     sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_DISCONNECT),
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
         parcel, reply, option);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_FOREGROUND),
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         parcel, reply, option);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKGROUND),
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         parcel, reply, option);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SHOW),
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TERMINATE),
         parcel, reply, option);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_HIDE),
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_EXCEPTION),
         parcel, reply, option);
     return true;
 }
