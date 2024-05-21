@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_SESSION_STUB_CONNECT_FUZZER_H
-#define TEST_FUZZTEST_SESSION_STUB_CONNECT_FUZZER_H
+#ifndef TEST_FUZZTEST_SESSION_STUB_BASE_FUZZER_H
+#define TEST_FUZZTEST_SESSION_STUB_BASE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "sessionstubconnect_fuzzer"
+#define FUZZ_PROJECT_NAME "sessionstubbase_fuzzer"
 
 #endif
