@@ -145,8 +145,8 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
     {
         std::lock_guard<std::mutex> lock(mtx_);
         if (destroyed_) {
-        return;
-    }
+            return;
+        }
         hasRequestedVsync_ = false;
         vsyncCallbacks = vsyncCallbacks_;
         vsyncCallbacks_.clear();
