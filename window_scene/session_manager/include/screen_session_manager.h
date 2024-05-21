@@ -330,6 +330,8 @@ private:
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 
     int32_t currentUserId_ { 0 };
+    int32_t currentScbPId_ { -1 };
+    std::vector<int32_t> oldScbPids_ {};
     mutable std::mutex currentUserIdMutex_;
     mutable std::mutex displayNodeChildrenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;

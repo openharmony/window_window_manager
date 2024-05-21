@@ -77,7 +77,7 @@ public:
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
     void SwitchingCurrentUser();
-    void SwitchUserCallback() override;
+    void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
 protected:
     ScreenSessionManagerClient() = default;
@@ -101,9 +101,6 @@ private:
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
-
-    mutable std::mutex displayNodeChildrenMapMutex_;
-    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap_;
 
     sptr<IScreenSessionManager> screenSessionManager_;
 
