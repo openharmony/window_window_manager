@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sessionstagestubback_fuzzer.h"
+#include "sessionstagestubupdate_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -58,8 +58,26 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (stageStub == nullptr) {
         return false;
     }
+
     stageStub->OnRemoteRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
+        parcel, reply, option);
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
         parcel, reply, option);
     return true;
 }
