@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_SCENE_SESSION_MANAGER_STUB_LABEL_FUZZER_H
-#define TEST_FUZZTEST_SCENE_SESSION_MANAGER_STUB_LABEL_FUZZER_H
+#ifndef TEST_FUZZTEST_SCENE_SESSION_MANAGER_STUB_CREATE_FUZZER_H
+#define TEST_FUZZTEST_SCENE_SESSION_MANAGER_STUB_CREATE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "scenesessionmgrstublabel_fuzzer"
+#define FUZZ_PROJECT_NAME "scenesessionmgrstubcreate_fuzzer"
 
 #endif
