@@ -39,7 +39,6 @@ constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
-
 } //namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -410,7 +409,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     windowInfo.flags = 0;
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if (screenSession != nullptr) {
-        if (!screenSession->IsScreenEnable()) {
+        if (!screenSession->IsTouchEnabled()) {
             windowInfo.flags = MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         } else {
             windowInfo.flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus());
@@ -427,7 +426,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     }
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
     if (windowSessionProperty == nullptr) {
-        WLOGFE("SceneSession` property is nullptr");
+        WLOGFE("SceneSession property is nullptr");
         return {};
     }
     
@@ -474,7 +473,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pixelMap = pixelMap,
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
-    UpdateWindowFlags(displayId, windowInfo);
+    UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
         static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
         WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
