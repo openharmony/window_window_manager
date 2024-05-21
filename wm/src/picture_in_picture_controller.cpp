@@ -680,6 +680,14 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
 
 ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string& key, std::string& value)
 {
+    if (remoteObj_ == nullptr) {
+        auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (systemAbilityManager == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "failed to get registry");
+            return ERR_NO_INIT;
+        }
+        remoteObj_ = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
+    }
     auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "create helper is nullptr");
