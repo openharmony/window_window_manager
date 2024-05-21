@@ -3078,9 +3078,14 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
         if (ScreenSnapshotPicker::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
             TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
             ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+            *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
             return nullptr;
         }
         ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+    } else {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        TLOGE(WmsLogTag::DMS, "SnapshotPickerConnectExtension failed");
+        return nullptr;
     }
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
