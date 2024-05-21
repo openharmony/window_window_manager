@@ -374,7 +374,6 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 
 bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     if (uiContent_ != nullptr) {
         return uiContent_->ProcessKeyEvent(keyEvent, true);
     }
