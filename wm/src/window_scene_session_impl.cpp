@@ -2965,7 +2965,16 @@ void WindowSceneSessionImpl::UpdateNewSize()
         return;
     }
     bool needResize = false;
-    const Rect& windowRect = GetRect();
+    Rect windowRect = GetRequestRect();
+    if (windowRect.IsUninitializedRect()) {
+        windowRect = GetRect();
+        if (windowRect.IsUninitializedRect()) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "The requestRect and rect are uninitialized. winId: %{public}u",
+                GetWindowId());
+            return;
+        }
+    }
+
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;
     const auto& newLimits = property_->GetWindowLimits();
@@ -2987,6 +2996,8 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
     if (needResize) {
         Resize(width, height);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. winId: %{public}u, width: %{public}u,"
+            " height: %{public}u", GetWindowId(), width, height);
     }
 }
 
