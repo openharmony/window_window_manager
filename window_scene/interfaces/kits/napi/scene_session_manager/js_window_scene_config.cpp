@@ -151,7 +151,7 @@ napi_value JsWindowSceneConfig::CreateWindowStatusBar(napi_env env,
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "showHide", CreateJsValue(env, config.showHide_));
-    napi_set_named_property(env, objValue, "bakgroundColor", CreateJsValue(env, config.bakgroundColor_));
+    napi_set_named_property(env, objValue, "backgroundColor", CreateJsValue(env, config.backgroundColor_));
     napi_set_named_property(env, objValue, "contentColor", CreateJsValue(env, config.contentColor_));
     return objValue;
 }

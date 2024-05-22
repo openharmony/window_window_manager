@@ -451,9 +451,9 @@ bool SceneSessionManager::ConfigStatusBar(const WindowSceneConfig::ConfigItem& c
     if (item.IsString()) {
         statusBarConfig.contentColor_ = item.stringValue_;
     }
-    item = config["bakgroundColor"];
+    item = config["backgroundColor"];
     if (item.IsString()) {
-        statusBarConfig.bakgroundColor_ = item.stringValue_;
+        statusBarConfig.backgroundColor_ = item.stringValue_;
     }
     return true;
 }
