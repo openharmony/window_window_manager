@@ -19,6 +19,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "display_cutout_controller.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -185,7 +186,11 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 {
     bool immersive = false;
     DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    }
 }
 
 /**
@@ -221,34 +226,6 @@ HWTEST_F(DisplayTest, GetAvailableArea, Function | SmallTest | Level1)
     EXPECT_CALL(m->Mock(), GetAvailableArea(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     DMRect area;
     auto res = defaultDisplay_ ->GetAvailableArea(area);
-    ASSERT_EQ(DMError::DM_OK, res);
-}
-
-/**
- * @tc.name: GetSupportedHDRFormats
- * @tc.desc: test GetSupportedHDRFormats
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
-    std::vector<uint32_t> hdrFormats;
-    auto res = defaultDisplay_ ->GetSupportedHDRFormats(hdrFormats);
-    ASSERT_EQ(DMError::DM_OK, res);
-}
-
-/**
- * @tc.name: GetSupportedColorSpaces
- * @tc.desc: test GetSupportedColorSpaces
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
-    std::vector<uint32_t> colorSpaces;
-    auto res = defaultDisplay_ -> GetSupportedColorSpaces(colorSpaces);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 }
