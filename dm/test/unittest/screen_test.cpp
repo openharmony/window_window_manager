@@ -20,6 +20,7 @@
 #include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -420,7 +421,11 @@ HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     res = screen_->SetDensityDpiSystem(100);
-    ASSERT_EQ(DMError::DM_OK, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, res);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, res);
+    }
 }
 
 /**
