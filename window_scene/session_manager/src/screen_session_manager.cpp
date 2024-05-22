@@ -413,7 +413,7 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
     if (displayNode == nullptr) {
         return;
     }
-    isHdmiScreen_ = false;
+    hdmiScreenCount_ = hdmiScreenCount_ > 0 ? hdmiScreenCount_ - 1 : 0;
     NotifyCaptureStatusChanged();
     displayNode->RemoveFromTree();
     auto transactionProxy = RSTransactionProxy::GetInstance();
@@ -885,7 +885,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         session->SetName("CastEngine");
         session->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         NotifyScreenChanged(session->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
-        isHdmiScreen_ = true;
+        hdmiScreenCount_ = hdmiScreenCount_ + 1;
         NotifyCaptureStatusChanged();
     } else {
         std::string screenName = "UNKNOWN";
@@ -1978,13 +1978,13 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (displayManagerAgent == nullptr) {
-            isVirtualScreen_ = true;
+            virtualScreenCount_ = virtualScreenCount_ + 1;
             NotifyCaptureStatusChanged();
             return smsScreenId;
         }
         AddVirtualScreenDeathRecipient(displayManagerAgent, smsScreenId);
     }
-    isVirtualScreen_ = true;
+    virtualScreenCount_ = virtualScreenCount_ + 1;
     NotifyCaptureStatusChanged();
     return smsScreenId;
 }
@@ -2132,7 +2132,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
-    isVirtualScreen_ = false;
+    virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
     NotifyCaptureStatusChanged();
     return DMError::DM_OK;
 }
@@ -3637,7 +3637,7 @@ bool ScreenSessionManager::IsFoldable()
 
 bool ScreenSessionManager::IsCaptured()
 {
-    return isScreenShot_ || isVirtualScreen_ || isHdmiScreen_;
+    return isScreenShot_ || virtualScreenCount_ > 0 || hdmiScreenCount_ > 0;
 }
 
 bool ScreenSessionManager::IsMultiScreenCollaboration()
