@@ -77,7 +77,6 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
-bool WindowSceneSessionImpl::enableImmersiveMode_ = true;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -1544,7 +1543,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
     bool preStatus = property_->IsLayoutFullScreen();
-    property_->SetIsLayoutFullScreen(true);
+    property_->SetIsLayoutFullScreen(status);
     if (hostSession_ != nullptr) {
         hostSession_->OnLayoutFullScreenChange(status);
     }
