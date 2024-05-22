@@ -4228,17 +4228,17 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     property->SetRequestRect(reqRect);
     ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
 
-    Rect reqRect = { 0, 0, 10, 0 };
+    reqRect = { 0, 0, 10, 0 };
     property->SetRequestRect(reqRect);
     ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
 
-    Rect reqRect = { 0, 0, 10, 10 };
+    reqRect = { 0, 0, 10, 10 };
     PiPTemplateInfo info = {0, 0, {}};
     property->SetPiPTemplateInfo(info);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->pipTemplateInfo_ = {0, 100, {}};
