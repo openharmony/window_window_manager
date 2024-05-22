@@ -79,7 +79,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
     return nullptr;
 }
 
-sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
+sptr<Window> WindowImpl::FindWindowById(uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(globalMutex_);
     if (windowMap_.empty()) {
@@ -87,8 +87,8 @@ sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
         return nullptr;
     }
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        if (WinId == iter->second.first) {
-            WLOGI("FindWindow id: %{public}u", WinId);
+        if (windowId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", windowId);
             return iter->second.second;
         }
     }
@@ -202,6 +202,7 @@ bool WindowImpl::IsMainHandlerAvailable() const
 
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto it = sysBarPropMap_.find(type);
     if (it == sysBarPropMap_.end()) {
         return SystemBarProperty(false, 0x0, 0x0);
@@ -211,7 +212,7 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    std::lock_guard<std::mutex> lock(globalMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     auto avoidAreaPtr = avoidAreaMap_[type];
     if (avoidAreaPtr == nullptr) {
         return WMError::WM_OK;
@@ -347,14 +348,17 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x ",
+    WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x",
         GetWindowId(), static_cast<uint32_t>(type), property.enable_,
         property.backgroundColor_, property.contentColor_);
 
     if (GetSystemBarPropertyByType(type) == property) {
         return WMError::WM_OK;
     }
-    sysBarPropMap_[type] = property;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        sysBarPropMap_[type] = property;
+    }
     NotifySystemBarChange(type, property);
     UpdateViewportConfig();
     return WMError::WM_OK;
@@ -829,7 +833,7 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
         avoidArea->bottomRect_.height_);
 
     {
-        std::lock_guard<std::mutex> lock(globalMutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         avoidAreaMap_[type] = avoidArea;
     }
     NotifyAvoidAreaChange(avoidArea, type);
