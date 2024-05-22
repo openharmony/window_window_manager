@@ -841,7 +841,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml07, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml08, Function | SmallTest | Level3)
 {
-     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<rotationMode>rotation</rotationMode>"
         "</Configs>";
