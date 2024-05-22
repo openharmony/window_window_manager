@@ -292,6 +292,7 @@ enum class WindowSizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     END
 };
