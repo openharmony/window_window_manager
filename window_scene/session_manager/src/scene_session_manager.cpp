@@ -4940,7 +4940,7 @@ void SceneSessionManager::ToastBackgroundTask(sptr<SceneSession>& sceneSession) 
             }
         }
         int64_t delayTime = 1000 * 11; // toast window show max 11 second.
-        taskScheduler_->PostTask(task, "backgroundToast:PID:" + std::to_string(persistentId), delayTime)
+        taskScheduler_->PostTask(task, "backgroundToast:PID:" + std::to_string(persistentId), delayTime);
     }
 }
 
