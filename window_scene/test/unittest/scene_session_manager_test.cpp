@@ -2844,7 +2844,7 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.abilityname_ = "testInfo1";
+    info.abilityName_ = "testInfo1";
     info.bundleName_ = "testInfo2"
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
