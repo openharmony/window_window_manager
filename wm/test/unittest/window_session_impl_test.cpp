@@ -2303,6 +2303,23 @@ HWTEST_F(WindowSessionImplTest, Filter, Function | SmallTest | Level2)
     auto ret = window->ClearKeyEventFilter();
     ASSERT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: UpdateOrientation
+ * @tc.desc: UpdateOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateOrientation, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateOrientation");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    auto ret = window->UpdateOrientation();
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
