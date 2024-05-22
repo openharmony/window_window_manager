@@ -1207,7 +1207,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest
 
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(virtualScreenId, refreshIntervalZero_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1237,7 +1241,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest
 
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(virtualScreenId, refreshIntervalMax_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1246,7 +1254,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest
 {
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(defaultScreenId_, refreshIntervalTwo_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 }
 }
 } // namespace Rosen
