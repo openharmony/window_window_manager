@@ -514,7 +514,7 @@ void WindowNodeContainer::UpdatePrivateWindowCount()
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     uint32_t count = 0;
-    for (const auto& node : windowNodes) {
+    for (const auto& node : windowNodes) {  
         if (node->GetWindowProperty()->GetPrivacyMode()) {
             ++count;
         }
@@ -774,7 +774,7 @@ void WindowNodeContainer::CloseInputMethodSyncTransaction()
 
 bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
 {
-    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    auto isPhone = uiType_ == "phone";
     if (!isPhone) {
         return false;
     }
