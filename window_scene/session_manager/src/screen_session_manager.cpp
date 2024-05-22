@@ -1918,6 +1918,23 @@ DMError ScreenSessionManager::SetScreenColorSpace(ScreenId screenId, GraphicCM_C
     return screenSession->SetScreenColorSpace(colorSpace);
 }
 
+void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent,
+    ScreenId smsScreenId)
+{
+    if (deathRecipient_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen Create deathRecipient");
+        deathRecipient_ =
+            new(std::nothrow) AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
+    }
+    if (deathRecipient_ != nullptr) {
+        auto agIter = screenAgentMap_.find(displayManagerAgent);
+        if (agIter == screenAgentMap_.end()) {
+            displayManagerAgent->AddDeathRecipient(deathRecipient_);
+        }
+    }
+    screenAgentMap_[displayManagerAgent].emplace_back(smsScreenId);
+}
+
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
@@ -1937,11 +1954,11 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
-    TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsid: %{public}" PRIu64"", rsId);
     if (rsId == SCREEN_ID_INVALID) {
-        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsid is invalid");
+        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsId is invalid");
         return SCREEN_ID_INVALID;
     }
+    TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsId: %{public}" PRIu64"", rsId);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
@@ -1956,24 +1973,16 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
-        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-        if (deathRecipient_ == nullptr) {
-            TLOGI(WmsLogTag::DMS, "CreateVirtualScreen Create deathRecipient");
-            deathRecipient_ =
-                new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
+        if (option.name_ == "CastEngine") {
+            screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
+        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (displayManagerAgent == nullptr) {
             isVirtualScreen_ = true;
             NotifyCaptureStatusChanged();
             return smsScreenId;
         }
-        auto agIter = screenAgentMap_.find(displayManagerAgent);
-        if (agIter == screenAgentMap_.end()) {
-            displayManagerAgent->AddDeathRecipient(deathRecipient_);
-        }
-        screenAgentMap_[displayManagerAgent].emplace_back(smsScreenId);
-    } else {
-        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen id: %{public}" PRIu64" in screenIdManager_", rsId);
+        AddVirtualScreenDeathRecipient(displayManagerAgent, smsScreenId);
     }
     isVirtualScreen_ = true;
     NotifyCaptureStatusChanged();
