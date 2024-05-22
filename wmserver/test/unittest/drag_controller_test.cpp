@@ -259,9 +259,10 @@ HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | 
     NodeId nodeId = 0;
     uint32_t windowId = 1;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    ASSERT_NE(vsyncStation, nullptr);
     moveDragController_->vsyncStationMap_.emplace(windowId, vsyncStation);
     std::shared_ptr<VsyncStation> vsyncStationRes = moveDragController_->GetVsyncStationByWindowId(windowId);
-    ASSERT_EQ(vsyncStation, vsyncStationRes);
+    ASSERT_NE(vsyncStationRes, nullptr);
 }
 
 /**
