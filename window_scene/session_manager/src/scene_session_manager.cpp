@@ -6052,7 +6052,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
                 "state=%{public}d, visible=%{public}d", sceneSession->GetWindowName().c_str(),
                 sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
                 sceneSession->GetSessionState(), sceneSession->IsVisibleForAccessibility());
-            if (sceneSession->IsVisibleForAccessibility()) {
+            if (sceneSession->IsVisibleForAccessibility() && IsSessionVisible(sceneSession)) {
                 FillWindowInfo(infos, iter->second);
             }
         }
@@ -8203,11 +8203,12 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
         if (sceneSession == nullptr) {
             continue;
         }
-        if (!sceneSession->IsVisibleForAccessibility()) {
+        if (!sceneSession->IsVisibleForAccessibility() || !IsSessionVisible(sceneSession)) {
             continue;
         }
-        if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos
-            || sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos) {
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
+            sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
+            sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
             continue;
         }
         sceneSessionList.push_back(sceneSession);
