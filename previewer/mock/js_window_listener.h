@@ -36,7 +36,7 @@ const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 class JsWindowListener : public IAvoidAreaChangedListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
-        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
+        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener>(this)) {}
     ~JsWindowListener();
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void CallJsMethod(const char* methodName, napi_value const* argv = nullptr, size_t argc = 0);
