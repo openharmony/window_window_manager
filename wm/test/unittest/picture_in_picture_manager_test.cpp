@@ -181,7 +181,6 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
 {
     bool res = PictureInPictureManager::IsAttachedToSameWindow(0);
     ASSERT_EQ(res, false);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
     sptr<PictureInPictureController> pipController =
@@ -193,6 +192,9 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
     ASSERT_EQ(res1, true);
     bool res2 = PictureInPictureManager::IsAttachedToSameWindow(1);
     ASSERT_EQ(res2, false);
+
+    PictureInPictureManager::RemoveActiveController(pipController);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
 }
 
 /**
@@ -243,6 +245,8 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     const std::string ACTION_RESTORE = "restore";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
+    PictureInPictureManager::RemoveActiveController(pipController);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_EQ(result, 1);
 }
 
@@ -266,9 +270,6 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     ASSERT_EQ(navId, "");
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
-
-    sptr<MockSceneSessionImpl> mainWindow = new = MockSceneSessionImpl();
-
 }
 
 }
