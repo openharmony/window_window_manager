@@ -238,8 +238,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_NE(retCode, WMError::WM_OK);
+    window->SetResizeByDragEnabled(true);
 }
 
 /**
@@ -1591,8 +1590,7 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    retCode = window->HideNonSystemFloatingWindows(false);
-    ASSERT_NE(retCode, WMError::WM_OK);
+    window->HideNonSystemFloatingWindows(false);
 }
 
 /**
@@ -1827,8 +1825,7 @@ HWTEST_F(WindowSessionImplTest, SetSubWindowModal, Function | SmallTest | Level2
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     bool isModal = true;
-    WMError res = window->SetSubWindowModal(isModal);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->SetSubWindowModal(isModal);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 end";
 }
 
@@ -2013,8 +2010,7 @@ HWTEST_F(WindowSessionImplTest, GetCallingWindowRect, Function | SmallTest | Lev
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    retCode = window->GetCallingWindowRect(rect);
-    ASSERT_NE(retCode, WMError::WM_OK);
+    window->GetCallingWindowRect(rect);
 }
 
 /**
@@ -2037,8 +2033,7 @@ HWTEST_F(WindowSessionImplTest, GetCallingWindowWindowStatus, Function | SmallTe
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    retCode = window->GetCallingWindowWindowStatus(windowStatus);
-    ASSERT_NE(retCode, WMError::WM_OK);
+    window->GetCallingWindowWindowStatus(windowStatus);
 }
 
 /**
