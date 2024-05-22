@@ -2250,7 +2250,6 @@ void SceneSession::SetForegroundInteractiveStatus(bool interactive)
         }
         auto state = toastSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            taskScheduler_->RemoveTask("backgroundToast:PID:" + std::to_string(toastSession->GetPersistentId()));
             continue;
         }
         toastSession->SetActive(false);
