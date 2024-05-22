@@ -181,6 +181,7 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
 {
     bool res = PictureInPictureManager::IsAttachedToSameWindow(0);
     ASSERT_EQ(res, false);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
     sptr<PictureInPictureController> pipController =
@@ -210,6 +211,7 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
     PictureInPictureManager::SetActiveController(pipController);
 
     sptr<Window> window = PictureInPictureManager::GetCurrentWindow();
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_EQ(window, pipController->window_);
 }
 
@@ -234,6 +236,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     result++;
 
     PictureInPictureManager::DoRestore();
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
     const std::string ACTION_CLOSE = "close";
@@ -242,6 +245,32 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
     ASSERT_EQ(result, 1);
 }
+
+/**
+ * @tc.name: AutoStartPipWindow
+ * @tc.desc: AutoStartPipWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
+{
+    int result = 0;
+    std::string navId = "";
+    PictureInPictureManager::autoStartController_ = nullptr;
+    PictureInPictureManager::AutoStartPipWindow(navId);
+    ASSERT_EQ(result, 0);
+
+    str<PipOption> option = new (std::nothrow) PipOption();
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    PictureInPictureManager::autoStartController_ = pipController;
+    ASSERT_EQ(navId, "");
+    PictureInPictureManager::AutoStartPipWindow(navId);
+    ASSERT_EQ(result, 0);
+
+    sptr<MockSceneSessionImpl> mainWindow = new = MockSceneSessionImpl();
+
+}
+
 }
 }
 }
