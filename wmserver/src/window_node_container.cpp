@@ -65,6 +65,7 @@ AnimationConfig WindowNodeContainer::animationConfig_;
 bool WindowNodeContainer::isFloatWindowAboveFullWindow_ = false;
 uint32_t WindowNodeContainer::maxMainFloatingWindowNumber_ = 100;
 bool WindowNodeContainer::isAnimateTransactionEnabled_ = false;
+std::string StartingWindow::uiType_ = "";
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {

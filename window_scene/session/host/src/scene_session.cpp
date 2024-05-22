@@ -999,12 +999,12 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     uint64_t displayId = GetSessionProperty()->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-        if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-         (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
-         (!screenSession || screenSession->GetName() != "HiCar")) {
+    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+            Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
+        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
+        (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
             return;
