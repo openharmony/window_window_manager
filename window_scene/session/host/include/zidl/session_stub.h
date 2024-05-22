@@ -70,6 +70,7 @@ private:
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
+    int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

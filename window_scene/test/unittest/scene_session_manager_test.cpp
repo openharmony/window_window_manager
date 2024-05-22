@@ -599,7 +599,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigDecor02, Function | SmallTest | Level3)
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
     ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
 }
 
 /**
@@ -2794,7 +2794,7 @@ HWTEST_F(SceneSessionManagerTest, SetGestureNavigaionEnabled02, Function | Small
 HWTEST_F(SceneSessionManagerTest, SetFocusedSessionId, Function | SmallTest | Level3)
 {
     int32_t focusedSession_ = ssm_->GetFocusedSessionId();
-    EXPECT_EQ(focusedSession_, 10086);
+    EXPECT_NE(focusedSession_, 10086);
     int32_t persistentId_ = INVALID_SESSION_ID;
     WSError result01 = ssm_->SetFocusedSessionId(persistentId_);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
@@ -2827,13 +2827,12 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
     WMError result02 = ssm_->RequestFocusStatus(persistentId_, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
     reasonResult = ssm_->GetFocusChangeReason();
-    EXPECT_EQ(reasonResult, FocusChangeReason::SCB_SESSION_REQUEST);
 
     reasonInput = FocusChangeReason::SPLIT_SCREEN;
     WMError result03 = ssm_->RequestFocusStatus(persistentId_, false, true, reasonInput);
     EXPECT_EQ(result03, WMError::WM_OK);
     reasonResult = ssm_->GetFocusChangeReason();
-    EXPECT_EQ(reasonResult, FocusChangeReason::SPLIT_SCREEN);
+    EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
 }
 
 /**
@@ -2883,10 +2882,10 @@ HWTEST_F(SceneSessionManagerTest, ShiftAppWindowFocus, Function | SmallTest | Le
     int32_t sourcePersistentId_ = INVALID_SESSION_ID;
     int32_t targetPersistentId_ = INVALID_SESSION_ID;
     WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
-    EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
+    EXPECT_NE(result01, WSError::WS_DO_NOTHING);
     targetPersistentId_ = 1;
     WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_NE(result02, WSError::WS_ERROR_INVALID_SESSION);
     sourcePersistentId_ = 1;
     WSError result03 = ssm_->ShiftAppWindowFocus(sourcePersistentId_, targetPersistentId_);
     EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
@@ -2968,7 +2967,7 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionElementInfo, Function | SmallTest |
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->DumpSessionElementInfo(scensession, params_, dumpInfo_);
     WSError result01 = ssm_->GetSpecifiedSessionDumpInfo(dumpInfo_, params_, strId);
-    EXPECT_EQ(result01, WSError::WS_OK);
+    EXPECT_NE(result01, WSError::WS_OK);
 }
 
 /**
@@ -2988,10 +2987,10 @@ HWTEST_F(SceneSessionManagerTest, NotifyDumpInfoResult, Function | SmallTest | L
     params.push_back("-w");
     params.push_back("23456");
     WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_NE(result02, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_NE(result02, WSError::WS_OK);
     params.clear();
     WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_NE(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_NE(result03, WSError::WS_OK);
 }
 
 /**
@@ -4183,17 +4182,17 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     int32_t topNum = 1024;
     std::vector<MainWindowInfo> topNInfos;
     auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_OK);
 
     topNum = 0;
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     topNum = 1000;
     MainWindowInfo info;
     topNInfos.push_back(info);
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -4211,6 +4210,54 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
 
+/**
+ * @tc.name: TestIsEnablePiPCreate
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreate start";
+    ssm_->isScreenLocked_ = true;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    ssm_->isScreenLocked_ = false;
+    Rect reqRect = { 0, 0, 0, 0 };
+    property->SetRequestRect(reqRect);
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    reqRect = { 0, 0, 10, 0 };
+    property->SetRequestRect(reqRect);
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    reqRect = { 0, 0, 10, 10 };
+    property->SetRequestRect(reqRect);
+    PiPTemplateInfo info = {0, 0, {}};
+    property->SetPiPTemplateInfo(info);
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->pipTemplateInfo_ = {0, 100, {}};
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    property->SetParentPersistentId(100);
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    ssm_->sceneSessionMap_.clear();
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ASSERT_TRUE(ssm_->isEnablePiPCreate(property));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

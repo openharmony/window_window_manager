@@ -1570,7 +1570,7 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 
 void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 {
-    WLOGFD("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+    WLOGFI("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
         info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
     std::set<sptr<IScreenshotListener>> screenshotListeners;
     {

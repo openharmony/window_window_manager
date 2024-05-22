@@ -374,7 +374,6 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 
 bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     if (uiContent_ != nullptr) {
         return uiContent_->ProcessKeyEvent(keyEvent, true);
     }
@@ -591,6 +590,12 @@ void WindowSessionImpl::UpdateDensity()
     UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
     WLOGFI("WindowSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+}
+
+WSError WindowSessionImpl::UpdateOrientation()
+{
+    TLOGD(WmsLogTag::DMS, "UpdateOrientation, wid: %{public}d", GetPersistentId());
+    return WSError::WS_OK;
 }
 
 WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
@@ -1841,13 +1846,11 @@ void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 {
     NotifyWindowAfterUnfocused();
     if (needNotifyUiContent) {
-        {
-            std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-            if (uiContent_ == nullptr) {
-                shouldReNotifyFocus_ = true;
-            }
+        if (uiContent_ == nullptr) {
+            shouldReNotifyFocus_ = true;
+        } else {
+            CALL_UI_CONTENT(UnFocus);
         }
-        CALL_UI_CONTENT(UnFocus);
     }
 }
 

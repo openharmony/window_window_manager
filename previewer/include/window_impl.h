@@ -228,7 +228,7 @@ public:
     virtual WMError UpdateSystemBarProperty(bool status);
 
 private:
-    static sptr<Window> FindWindowById(uint32_t WinId);
+    static sptr<Window> FindWindowById(uint32_t windowId);
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -274,6 +274,7 @@ private:
     void NotifySystemBarChange(WindowType type, const SystemBarProperty& property);
     void NotifySetIgnoreSafeArea(bool value);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    static std::mutex globalMutex_;
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<IWindowSystemBarEnableListener>>> systemBarEnableListeners_;
@@ -296,8 +297,8 @@ private:
     bool isIgnoreSafeArea_ = false;
     uint32_t windowId_ = 0;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    static std::mutex globalMutex_;
     sptr<WindowProperty> property_;
+    mutable std::mutex mutex_;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },

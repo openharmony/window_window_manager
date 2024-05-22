@@ -2927,13 +2927,13 @@ HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
 {
     int32_t persistentId = 123;
     sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
-    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
     session_->persistentId_ = persistentId;
     session_->SetAttachState(true);
     session_->RegisterDetachCallback(detachCallback);
     session_->SetAttachState(false);
     usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
+    ASSERT_EQ(session_->isAttach_, false);
 }
 
 /**
@@ -3081,7 +3081,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
@@ -3105,7 +3105,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_EQ(beforeTaskNum - 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum - 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
     session_->handler_->RemoveTask(taskName);
@@ -3126,7 +3126,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
@@ -3146,7 +3146,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }

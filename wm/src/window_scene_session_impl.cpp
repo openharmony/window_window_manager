@@ -77,7 +77,6 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
-bool WindowSceneSessionImpl::enableImmersiveMode_ = true;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -893,6 +892,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetMode());
+    NotifyDisplayInfoChange();
     return ret;
 }
 
@@ -1543,7 +1543,10 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
     bool preStatus = property_->IsLayoutFullScreen();
-    property_->SetIsLayoutFullScreen(true);
+    property_->SetIsLayoutFullScreen(status);
+    if (hostSession_ != nullptr) {
+        hostSession_->OnLayoutFullScreenChange(status);
+    }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
     if (WindowHelper::IsMainWindow(GetType()) &&
@@ -2961,7 +2964,16 @@ void WindowSceneSessionImpl::UpdateNewSize()
         return;
     }
     bool needResize = false;
-    const Rect& windowRect = GetRect();
+    Rect windowRect = GetRequestRect();
+    if (windowRect.IsUninitializedRect()) {
+        windowRect = GetRect();
+        if (windowRect.IsUninitializedRect()) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "The requestRect and rect are uninitialized. winId: %{public}u",
+                GetWindowId());
+            return;
+        }
+    }
+
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;
     const auto& newLimits = property_->GetWindowLimits();
@@ -2983,6 +2995,8 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
     if (needResize) {
         Resize(width, height);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. winId: %{public}u, width: %{public}u,"
+            " height: %{public}u", GetWindowId(), width, height);
     }
 }
 
@@ -3283,10 +3297,56 @@ void WindowSceneSessionImpl::UpdateDensity()
         }
     }
 
+    NotifyDisplayInfoChange();
+
     auto preRect = GetRect();
     UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
     WLOGFI("WindowSceneSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+}
+
+WSError WindowSceneSessionImpl::UpdateDisplayId(uint64_t displayId)
+{
+    property_->SetDisplayId(displayId);
+    NotifyDisplayInfoChange();
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::UpdateOrientation()
+{
+    TLOGD(WmsLogTag::DMS, "UpdateOrientation, wid: %{public}d", GetPersistentId());
+    NotifyDisplayInfoChange();
+    return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::NotifyDisplayInfoChange()
+{
+    TLOGD(WmsLogTag::DMS, "NotifyDisplayInfoChange, wid: %{public}d", GetPersistentId());
+    auto displayId = property_->GetDisplayId();
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get display by displayId %{public}" PRIu64 " failed.", displayId);
+        return;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
+        return;
+    }
+    float density = GetVirtualPixelRatio(displayInfo);
+    DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
+
+    if (context_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get token of window:%{public}d failed because of context is null.", GetPersistentId());
+        return;
+    }
+    auto token = context_->GetToken();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get token of window:%{public}d failed.", GetPersistentId());
+        return;
+    }
+    SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
