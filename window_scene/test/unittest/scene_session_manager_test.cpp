@@ -825,7 +825,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml06, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml07, Function | SmallTest | Level3)
 {
-     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<backgroundScreenLock enable=\"true\"></backgroundScreenLock>"
         "</Configs>";
@@ -1674,7 +1674,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigStatusBar, Function | SmallTest | Level3
     WindowSceneConfig::ConfigItem enable;
     enable.SetValue(true);
     WindowSceneConfig::ConfigItem showHide;
-    showHide.SetProperty({{"enable",enable}});
+    showHide.SetProperty({{"enable", enable}});
     WindowSceneConfig::ConfigItem item01;
     WindowSceneConfig::ConfigItem contentColor;
     contentColor.SetValue(std::string("#12345678"));

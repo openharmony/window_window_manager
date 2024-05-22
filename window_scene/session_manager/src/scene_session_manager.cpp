@@ -419,29 +419,29 @@ void SceneSessionManager::ConfigWindowImmersive(const WindowSceneConfig::ConfigI
     AppWindowSceneConfig config;
     WindowSceneConfig::ConfigItem item = immersiveConfig["inDesktopStatusBarConfig"];
     if (item.IsMap()) {
-        if(ConfigStatusBar(item, config.windowImmersive_.desktopStatusBarConfig_)) {
-            appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_ = 
+        if (ConfigStatusBar(item, config.windowImmersive_.desktopStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_ =
                 config.windowImmersive_.desktopStatusBarConfig_;
         }
     }
     item = immersiveConfig["inSplitStatusBarConfig"]["upDownSplit"];
     if (item.IsMap()) {
-        if(ConfigStatusBar(item, config.windowImmersive_.upDownStatusBarConfig_)) {
-            appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_ = 
+        if (ConfigStatusBar(item, config.windowImmersive_.upDownStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_ =
                 config.windowImmersive_.upDownStatusBarConfig_;
         }
     }
     item = immersiveConfig["inSplitStatusBarConfig"]["leftRightSplit"];
     if (item.IsMap()) {
-        if(ConfigStatusBar(item, config.windowImmersive_.leftRightStatusBarConfig_)) {
-            appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_ = 
+        if (ConfigStatusBar(item, config.windowImmersive_.leftRightStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_ =
                 config.windowImmersive_.leftRightStatusBarConfig_;
         }
     }
 }
 
 bool SceneSessionManager::ConfigStatusBar(const WindowSceneConfig::ConfigItem& config,
-     StatusBarConfig& statusBarConfig)
+    StatusBarConfig& statusBarConfig)
 {
     WindowSceneConfig::ConfigItem item = config["showHide"].GetProp("enable");
     if (item.IsBool()) {
