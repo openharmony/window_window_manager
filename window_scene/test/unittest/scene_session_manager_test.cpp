@@ -1685,7 +1685,7 @@ HWTEST_F(SceneSessionManagerTest, ConfigStatusBar, Function | SmallTest | Level3
     ASSERT_EQ(result01, true);
     ASSERT_EQ(out.showHide_, true);
     ASSERT_EQ(out.contentColor_, "#12345678");
-    ASSERT_EQ(out.bakgroundColor_, "#12345678");
+    ASSERT_EQ(out.backgroundColor_, "#12345678");
 }
 
 /**
