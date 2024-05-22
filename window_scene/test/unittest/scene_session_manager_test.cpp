@@ -4233,6 +4233,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
 
     reqRect = { 0, 0, 10, 10 };
+    property->SetRequestRect(reqRect);
     PiPTemplateInfo info = {0, 0, {}};
     property->SetPiPTemplateInfo(info);
     SessionInfo info1;
@@ -4250,6 +4251,11 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     property->SetParentPersistentId(100);
     ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
 
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+
+    ssm_->sceneSessionMap_.clear();
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ASSERT_TRUE(ssm_->isEnablePiPCreate(property));
 }
