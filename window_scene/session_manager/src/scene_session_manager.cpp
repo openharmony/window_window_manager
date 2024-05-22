@@ -4929,7 +4929,8 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
     ProcessWindowModeType();
 }
 
-void SceneSessionManager::ToastBackgroundTask(const sptr<SceneSession>& sceneSession) {
+void SceneSessionManager::ToastBackgroundTask(const sptr<SceneSession>& sceneSession)
+{
     if (sceneSession == nullptr) {
         TLOGW(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
@@ -4943,7 +4944,8 @@ void SceneSessionManager::ToastBackgroundTask(const sptr<SceneSession>& sceneSes
             }
         };
         int64_t delayTime = 1000 * 11; // toast window show max 11 second.
-        taskScheduler_->PostTask(task, "backgroundToast:PID:" + std::to_string(sceneSession->GetPersistentId()), delayTime);
+        taskScheduler_->PostTask(task, "backgroundToast:PID:"
+            + std::to_string(sceneSession->GetPersistentId()), delayTime);
     }
 }
 
