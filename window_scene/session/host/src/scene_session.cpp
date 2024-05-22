@@ -396,16 +396,25 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE && session->moveDragController_ &&
-            !session->moveDragController_->GetStartDragFlag()) {
+            !session->moveDragController_->GetStartDragFlag() && session->IsFocused()) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->moveDragController_->InitMoveDragProperty();
-            session->moveDragController_->SetStartMoveFlag(true);
-            session->moveDragController_->ClacFirstMoveTargetRect(session->winRect_);
+            if (session->IsFullScreenMovable()) {
+                WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
+                    session->lastSafeRect);
+                session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, nullptr);
+                session->moveDragController_->SetStartMoveFlag(true);
+                session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
+            } else {
+                session->moveDragController_->SetStartMoveFlag(true);
+                session->moveDragController_->CalcFirstMoveTargetRect(session->winRect_, false);
+            }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
-            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
+            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
+                session->sessionEventParam_);
         }
         return WSError::WS_OK;
     };
@@ -551,7 +560,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END) {
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
+            session->reason_ != SizeChangeReason::DRAG_END) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s!",
                 session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
@@ -1451,16 +1461,25 @@ bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return false;
     }
-
-    bool existFloating = WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FLOATING);
 
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        (property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && existFloating);
+        IsFullScreenMovable();
+}
+
+bool SceneSession::IsFullScreenMovable()
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        return false;
+    }
+    return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
@@ -2196,7 +2215,7 @@ void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
 sptr<IRemoteObject> SceneSession::GetSelfToken() const
 {
     std::shared_lock<std::shared_mutex> lock(selfTokenMutex_);
-    return selfToken_;
+    return selfToken_.promote();
 }
 
 void SceneSession::SetSessionState(SessionState state)
@@ -3213,6 +3232,25 @@ WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateRectChangeListenerRegistered");
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
+{
+    auto task = [weakThis = wptr(this), isLayoutFullScreen]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange, isLayoutFullScreen: %{public}d",
+            isLayoutFullScreen);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_) {
+            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnLayoutFullScreenChange");
     return WSError::WS_OK;
 }
 
