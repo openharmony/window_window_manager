@@ -1045,6 +1045,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2089,6 +2091,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
