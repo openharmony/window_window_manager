@@ -4166,7 +4166,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     int32_t topNum = 1024;
     std::vector<MainWindowInfo> topNInfos;
     auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_OK);    
+    EXPECT_EQ(result, WMError::WM_OK);
 
     topNum = 0;
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
