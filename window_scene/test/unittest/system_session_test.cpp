@@ -81,11 +81,41 @@ namespace {
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, Show, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
 
     ASSERT_TRUE((systemSession_ != nullptr));
+    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
+}
+
+/**
+ * @tc.name: Show
+ * @tc.desc: test function : Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Show02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_TRUE((property != nullptr));
+    property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    ASSERT_TRUE((systemSession_ != nullptr));
+    systemSession_->SetSessionProperty(property);
+    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
+}
+
+/**
+ * @tc.name: Show
+ * @tc.desc: test function : Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Show03, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_TRUE((property != nullptr));
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_TRUE((systemSession_ != nullptr));
+    systemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
 }
 
