@@ -382,11 +382,80 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
+    ConfigWindowSceneXml(config);
+}
 
-    item = config["systemUIStatusBar"];
+void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigItem& config)
+{
+    WindowSceneConfig::ConfigItem item = config["systemUIStatusBar"];
     if (item.IsMap()) {
         ConfigSystemUIStatusBar(item);
     }
+    item = config["uiType"];
+    if (item.IsString()) {
+        systemConfig_.uiType_ = item.stringValue_;
+        appWindowSceneConfig_.uiType_ = item.stringValue_;
+    }
+    item = config["backgroundScreenLock"].GetProp("enable");
+    if (item.IsBool()) {
+        appWindowSceneConfig_.backgroundScreenLock_ = item.boolValue_;
+    }
+    item = config["rotationMode"];
+    if (item.IsString()) {
+        appWindowSceneConfig_.rotationMode_ = item.stringValue_;
+    }
+    item = config["immersive"];
+    if (item.IsMap()) {
+        ConfigWindowImmersive(item);
+    }
+    item = config["supportTypeFloatWindow"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
+    }
+}
+
+void SceneSessionManager::ConfigWindowImmersive(const WindowSceneConfig::ConfigItem& immersiveConfig)
+{
+    AppWindowSceneConfig config;
+    WindowSceneConfig::ConfigItem item = immersiveConfig["inDesktopStatusBarConfig"];
+    if (item.IsMap()) {
+        if(ConfigStatusBar(item, config.windowImmersive_.desktopStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_ = 
+                config.windowImmersive_.desktopStatusBarConfig_;
+        }
+    }
+    item = immersiveConfig["inSplitStatusBarConfig"]["upDownSplit"];
+    if (item.IsMap()) {
+        if(ConfigStatusBar(item, config.windowImmersive_.upDownStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_ = 
+                config.windowImmersive_.upDownStatusBarConfig_;
+        }
+    }
+    item = immersiveConfig["inSplitStatusBarConfig"]["leftRightSplit"];
+    if (item.IsMap()) {
+        if(ConfigStatusBar(item, config.windowImmersive_.leftRightStatusBarConfig_)) {
+            appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_ = 
+                config.windowImmersive_.leftRightStatusBarConfig_;
+        }
+    }
+}
+
+bool SceneSessionManager::ConfigStatusBar(const WindowSceneConfig::ConfigItem& config,
+     StatusBarConfig& statusBarConfig)
+{
+    WindowSceneConfig::ConfigItem item = config["showHide"].GetProp("enable");
+    if (item.IsBool()) {
+        statusBarConfig.showHide_ = item.boolValue_;
+    }
+    item = config["contentColor"];
+    if (item.IsString()) {
+        statusBarConfig.contentColor_ = item.stringValue_;
+    }
+    item = config["bakgroundColor"];
+    if (item.IsString()) {
+        statusBarConfig.bakgroundColor_ = item.stringValue_;
+    }
+    return true;
 }
 
 void SceneSessionManager::ConfigFreeMultiWindow()
@@ -2114,9 +2183,8 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-        auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (isPC) {
+        if (systemConfig_.supportTypeFloatWindow_) {
             WLOGFD("check create float window permission success on 2in1 device.");
             return true;
         }

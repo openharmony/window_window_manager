@@ -422,6 +422,16 @@ void WindowManagerService::ConfigureWindowManagerService()
             maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
     }
+    item = config["uiType"];
+    if (item.IsString()) {
+        systemConfig_.uiType_ = item.stringValue_;
+        StartingWindow::uiType_ = item.stringValue_;
+        WindowNodeContainer::uiType_ = item.stringValue_;
+    }
+    item = config["supportTypeFloatWindow"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)

@@ -305,6 +305,72 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble01
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetSubWindowDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble01");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.uiType_ = "pc";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble02
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble02 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble02");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->windowSystemConfig_.uiType_ = "pc";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble02 end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble03
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble03 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble03");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->windowSystemConfig_.uiType_ = "phone";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(false, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble03 end";
+}
+
+/**
  * @tc.name: WindowSessionCreateCheck01
  * @tc.desc: WindowSessionCreateCheck01
  * @tc.type: FUNC
@@ -1761,12 +1827,11 @@ HWTEST_F(WindowSessionImplTest, SetTopmost, Function | SmallTest | Level2)
     option->SetWindowName("SetTopmost");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    window->windowSystemConfig_.uiType_ = "phone";
     WMError res = window->SetTopmost(true);
-    if (!isPC) {
-        ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
-        return;
-    }
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+    window->windowSystemConfig_.uiType_ = "pc";
+    res = window->SetTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 
     window->property_->SetPersistentId(1);
@@ -1776,7 +1841,7 @@ HWTEST_F(WindowSessionImplTest, SetTopmost, Function | SmallTest | Level2)
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     res = window->SetTopmost(true);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
