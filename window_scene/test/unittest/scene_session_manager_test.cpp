@@ -1722,12 +1722,12 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowImmersive, Function | SmallTest | 
     ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.showHide_, true);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.backgroundColor_, "#12341234");
     ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.contentColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownSplit_.showHide_, true);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownSplit_.backgroundColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownSplit_.contentColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightSplit_.showHide_, true);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightSplit_.backgroundColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightSplit_.contentColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.showHide_, true);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.backgroundColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.contentColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.showHide_, true);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.backgroundColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.contentColor_, "#12341234");
 }
 
 /**

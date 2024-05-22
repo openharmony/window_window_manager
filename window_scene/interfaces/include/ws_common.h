@@ -475,7 +475,7 @@ struct SystemUIStatusBarConfig {
 struct StatusBarConfig {
     bool showHide_ = false;
     std::string contentColor_ = "#000000";
-    std::string bakgroundColor_ = "#000000";
+    std::string backgroundColor_ = "#000000";
 };
 
 struct WindowImmersive {
