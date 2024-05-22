@@ -25,19 +25,7 @@ ohos_fuzztest("WindowManagerAgentStubStateFuzzTest") {
     "../../../../utils/include",
     "../../../../interfaces/innerkits/wm",
     "../../../../interfaces/include",
-    "../../../../window_scene",
-    "../../../../window_scene/interfaces/include",
-    "../../../../window_scene/session_manager/include",
-    "../../../../window_scene/session_manager/include/zidl",
-    "../../../../window_scene/session_manager_service/include",
-    "../../../../wmserver/include",
-    "../../../../wmserver/include/zidl",
     "../../../../utils/include",
-    "../../../../dm/include",
-    "../../../../interfaces/innerkits/wm",
-    "../../../../interfaces/innerkits/dm",
-    "../../../../dmserver/include",
-    "../../../../window_scene/screen_session_manager/include",
     "../../../../wm/include",
     "../../../../wm/include/zidl",
   ]
@@ -67,5 +55,10 @@ ohos_fuzztest("WindowManagerAgentStubStateFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
+
+  deps += [
+    # deps file
+    ":WindowManagerAgentStubStateFuzzTest",
+  ]
 }
 ###############################################################################

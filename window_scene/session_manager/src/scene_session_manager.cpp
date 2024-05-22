@@ -4290,14 +4290,14 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
  * Find the session through the specific zOrder, it is located abve it, its' blockingFocus attribute is true,
  * and it is the closest;
  */
-sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(int zOrder, bool includingAppSession)
+sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession)
 {
     sptr<SceneSession> ret = nullptr;
     auto func = [this, &ret, zOrder, includingAppSession](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        int sessionZOrder = session->GetZOrder();
+        uint32_t sessionZOrder = session->GetZOrder();
         if (sessionZOrder <= zOrder) { // must be above the target session
             return false;
         }
@@ -8088,8 +8088,8 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
         WLOGFE("last and current info is not Same");
         return false;
     }
-    int sizeOfLastInfo = static_cast<int>(lastInfo.size());
-    for (int i = 0; i < sizeOfLastInfo; i++) {
+    size_t sizeOfLastInfo = lastInfo.size();
+    for (size_t i = 0; i < sizeOfLastInfo; i++) {
         if (lastInfo[i].displayId != currentInfo[i].displayId ||
             lastInfo[i].visibleWindowNum != currentInfo[i].visibleWindowNum) {
             WLOGFE("last and current visible window num is not Same");
@@ -8118,10 +8118,10 @@ void SceneSessionManager::CacVisibleWindowNum()
 
         bool isWindowVisible = curSession->GetVisible();
         if (isWindowVisible) {
-            int32_t displayId = static_cast<int32_t>(curSession->GetSessionProperty()->GetDisplayId());
+            uint32_t displayId = static_cast<uint32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
-                    return (static_cast<int32_t>(info.displayId)) == displayId;
+                    return info.displayId == displayId;
             });
             if (it == visibleWindowNumInfo.end()) {
                 visibleWindowNumInfo.push_back({displayId, 1});
@@ -8479,9 +8479,12 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
-
     enterRecent_.store(enterRecent);
-
+    if (enterRecent) {
+        SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_ENTER_RECENTS);
+    } else {
+        SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
 
     return WSError::WS_OK;

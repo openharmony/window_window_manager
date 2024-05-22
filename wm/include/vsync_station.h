@@ -58,8 +58,8 @@ public:
     }
 
 private:
-    static void OnVsync(int64_t nanoTimestamp, int64_t frameCount, void* client);
-    void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
+    static void OnVsync(int64_t nanoTimestamp, void* client);
+    void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
     void Init();
 
@@ -76,7 +76,7 @@ private:
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
     VSyncReceiver::FrameCallback frameCallback_ = {
         .userData_ = this,
-        .callbackWithId_ = OnVsync,
+        .callback_ = OnVsync,
     };
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
