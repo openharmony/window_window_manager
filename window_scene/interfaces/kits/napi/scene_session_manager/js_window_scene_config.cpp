@@ -47,11 +47,11 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "uiType", CreateJsValue(env, config.uiType_));
     napi_set_named_property(env, objValue, "backgroundScreenLock", CreateJsValue(env, config.backgroundScreenLock_));
     napi_set_named_property(env, objValue, "rotationMode", CreateJsValue(env, config.rotationMode_));
-    napi_set_named_property(env, objValue, "desktopStatusBarConfig", 
+    napi_set_named_property(env, objValue, "desktopStatusBarConfig",
         CreateWindowStatusBar(env, config.windowImmersive_.desktopStatusBarConfig_));
-    napi_set_named_property(env, objValue, "leftRightStatusBarConfig", 
+    napi_set_named_property(env, objValue, "leftRightStatusBarConfig",
         CreateWindowStatusBar(env, config.windowImmersive_.leftRightStatusBarConfig_));
-    napi_set_named_property(env, objValue, "upDownStatusBarConfig", 
+    napi_set_named_property(env, objValue, "upDownStatusBarConfig",
         CreateWindowStatusBar(env, config.windowImmersive_.upDownStatusBarConfig_));
     return objValue;
 }

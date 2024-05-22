@@ -1002,7 +1002,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
+         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
@@ -1145,7 +1145,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
         if (WindowHelper::IsMainWindow(winType)) {
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            systemConfig_.uiType_ == "phone" || 
+            systemConfig_.uiType_ == "phone" ||
             systemConfig_.uiType_ == "pad") {
             return true;
         }
