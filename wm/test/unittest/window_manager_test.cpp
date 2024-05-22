@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "iremote_object_mocker.h"
 #include "window_manager.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
@@ -81,6 +82,15 @@ public:
     {
         WLOGI("TestGestureNavigationEnabledChangedListener");
     };
+};
+
+class TestDisplayInfoChangedListener : public IDisplayInfoChangedListener {
+public:
+    void OnDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId, float density,
+        DisplayOrientation orientation) override
+    {
+        TLOGI(WmsLogTag::DMS, "TestDisplayInfoChangedListener");
+    }
 };
 
 class TestVisibleWindowNumChangedListener : public IVisibleWindowNumChangedListener {
@@ -897,6 +907,127 @@ HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
+}
+
+/**
+ * @tc.name: RegisterDisplayInfoChangedListener
+ * @tc.desc: check RegisterDisplayInfoChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterDisplayInfoChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->displayInfoChangedListeners_.clear();
+
+    sptr<IRemoteObject> targetToken = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterDisplayInfoChangedListener(targetToken, nullptr));
+
+    targetToken = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, targetToken);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterDisplayInfoChangedListener(targetToken, nullptr));
+
+    sptr<IDisplayInfoChangedListener> listener = new (std::nothrow) TestDisplayInfoChangedListener();
+    ASSERT_NE(nullptr, listener);
+    sptr<IDisplayInfoChangedListener> listener2 = new (std::nothrow) TestDisplayInfoChangedListener();
+    ASSERT_NE(nullptr, listener2);
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterDisplayInfoChangedListener(nullptr, listener));
+    ASSERT_EQ(0, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener2));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    auto iter = windowManager.pImpl_->displayInfoChangedListeners_.find(targetToken);
+    ASSERT_NE(windowManager.pImpl_->displayInfoChangedListeners_.end(), iter);
+    ASSERT_EQ(2, iter->second.size());
+}
+
+/**
+ * @tc.name: UnregisterDisplayInfoChangedListener
+ * @tc.desc: check UnregisterDisplayInfoChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterDisplayInfoChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->displayInfoChangedListeners_.clear();
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterDisplayInfoChangedListener(nullptr, nullptr));
+
+    sptr<IRemoteObject> targetToken = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, targetToken);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterDisplayInfoChangedListener(targetToken, nullptr));
+
+    sptr<IDisplayInfoChangedListener> listener = new (std::nothrow) TestDisplayInfoChangedListener();
+    ASSERT_NE(nullptr, listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterDisplayInfoChangedListener(nullptr, listener));
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayInfoChangedListener(targetToken, listener));
+
+    sptr<IRemoteObject> targetToken2 = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, targetToken2);
+    sptr<IDisplayInfoChangedListener> listener2 = new (std::nothrow) TestDisplayInfoChangedListener();
+    ASSERT_NE(nullptr, listener2);
+
+    // the same token can have multiple listeners
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener2));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    auto iter = windowManager.pImpl_->displayInfoChangedListeners_.find(targetToken);
+    ASSERT_NE(windowManager.pImpl_->displayInfoChangedListeners_.end(), iter);
+    ASSERT_EQ(2, iter->second.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken2, listener));
+    ASSERT_EQ(2, windowManager.pImpl_->displayInfoChangedListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayInfoChangedListener(targetToken, listener));
+    ASSERT_EQ(1, iter->second.size());
+    ASSERT_EQ(2, windowManager.pImpl_->displayInfoChangedListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayInfoChangedListener(targetToken, listener2));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayInfoChangedListener(targetToken2, listener));
+    ASSERT_EQ(0, windowManager.pImpl_->displayInfoChangedListeners_.size());
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChanged
+ * @tc.desc: check NotifyDisplayInfoChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> targetToken = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, targetToken);
+    DisplayId displayId = 0;
+    float density = 0.2f;
+    DisplayOrientation orientation = DisplayOrientation::UNKNOWN;
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->displayInfoChangedListeners_.clear();
+    windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
+
+    sptr<IRemoteObject> targetToken2 = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, targetToken2);
+    sptr<IDisplayInfoChangedListener> listener = new (std::nothrow) TestDisplayInfoChangedListener();
+    ASSERT_NE(nullptr, listener);
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken, listener));
+    ASSERT_EQ(1, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDisplayInfoChangedListener(targetToken2, listener));
+    ASSERT_EQ(2, windowManager.pImpl_->displayInfoChangedListeners_.size());
+    windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
+    windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken2, displayId, density, orientation);
+    // no repeated notification is sent if parameters do not change
+    windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
 }
 }
 } // namespace Rosen
