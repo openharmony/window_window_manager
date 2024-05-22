@@ -273,6 +273,7 @@ private:
     DMError MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
+    void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();
