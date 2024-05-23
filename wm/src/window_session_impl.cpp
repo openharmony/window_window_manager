@@ -158,21 +158,23 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    if (isPC && WindowHelper::IsSubWindow(property_->GetWindowType())) {
-        WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
-            windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
-        property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
-        property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
-        subWindowTitle_ = windowOption_->GetSubWindowTitle();
-    }
-    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
-    if (isPC && isDialog) {
-        bool dialogDecorEnable = windowOption_->GetDialogDecorEnable();
-        property_->SetDecorEnable(dialogDecorEnable);
-        property_->SetDragEnabled(dialogDecorEnable);
-        dialogTitle_ = windowOption_->GetDialogTitle();
-        WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
-            dialogTitle_.c_str(), dialogDecorEnable);
+    if (isPC && windowOption_ != nullptr) {
+        if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
+                windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
+            property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
+            property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
+            subWindowTitle_ = windowOption_->GetSubWindowTitle();
+        }
+        bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+        if (isDialog) {
+            bool dialogDecorEnable = windowOption_->GetDialogDecorEnable();
+            property_->SetDecorEnable(dialogDecorEnable);
+            property_->SetDragEnabled(dialogDecorEnable);
+            dialogTitle_ = windowOption_->GetDialogTitle();
+            WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+                dialogTitle_.c_str(), dialogDecorEnable);
+        }
     }
 }
 
