@@ -289,12 +289,19 @@ ohos_unittest("ws_screen_session_test") {
 ohos_unittest("ws_screen_snapshot_ability_connection_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
-  sources = [ "screen_snapshot_ability_connection_test.cpp" ]
+  include_dirs = [ 
+    "${window_base_path}/window_scene/session/screen/include",
+    "${window_base_path}/window_scene/interfaces/innerkits/include",
+  ]
+  sources = [
+    "screen_snapshot_ability_connection_test.cpp",
+    "${window_base_path}/window_scene/interfaces/innerkits/src/scene_board_judgement.cpp",
+  ]
 
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [
