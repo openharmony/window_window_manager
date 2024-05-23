@@ -113,6 +113,12 @@ napi_value JsWindowManager::GetLastWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetLastWindow(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetSnapshot(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetSnapshot(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::SetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -536,6 +542,54 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindowManager::OnCreateWindow", env,
         CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    int32_t windowId = 0;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if (argc == 1) {
+        if (!ConvertFromJsValue(env, argv[0], windowId)) {
+            TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]failed to convert parameter to integer");
+            napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+            return NapiGetUndefined(env);
+        }
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+            WMError ret = SingletonContainer::Get<WindowManager>().GetSnapshotAndErrorCode(windowId, pixelMap);
+            if (ret != WMError::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret)));
+                TLOGW(WmsLogTag:WMS_SYSTEM, "[NAPI]getSnapshot not ok!");
+                return;
+            }
+            if (pixelMap == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]getSnapshot is nullptr!");
+                return;
+            }
+            auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            if (nativePixelMap == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]create native pixelmap is nullptr!");
+                return;
+            }
+            task.Resolve(env, nativePixelMap);
+        };
+    napi_value lastParam = (argc <= 1) ? nullptr : argv[0];
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetSnapshot",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -1130,6 +1184,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsWindowManager::UnregisterWindowMangerCallback);
     BindNativeFunction(env, exportObj, "getTopWindow", moduleName, JsWindowManager::GetTopWindow);
     BindNativeFunction(env, exportObj, "getLastWindow", moduleName, JsWindowManager::GetLastWindow);
+    BindNativeFunction(env, exportObj, "getSnapshot", moduleName, JsWindowManager::GetSnapshot);
     BindNativeFunction(env, exportObj, "minimizeAll", moduleName, JsWindowManager::MinimizeAll);
     BindNativeFunction(env, exportObj, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);

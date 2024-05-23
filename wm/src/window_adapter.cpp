@@ -239,6 +239,12 @@ void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
 
+WMError WindowAdapter::GetSnapshotAndErrorCode(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_IPC_FAILED);
+    return windowManagerServiceProxy_->GetSnapshotAndErrorCode(windowId, pixelMap);
+}
+
 void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

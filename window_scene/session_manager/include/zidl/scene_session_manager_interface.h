@@ -78,6 +78,7 @@ public:
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_GET_SESSION_SNAPSHOT,
+        TRANS_ID_GET_SESSION_SNAPSHOT_SIMPLE,
         TRANS_ID_SET_SESSION_CONTINUE_STATE,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_CLEAR_SESSION,
@@ -143,6 +144,10 @@ public:
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
+    virtual WMError GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
+    {
+        return WMError::WS_OK;
+    }
     virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override
     {
         return WSError::WS_OK;

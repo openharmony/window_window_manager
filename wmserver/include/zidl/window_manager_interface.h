@@ -26,6 +26,7 @@
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "window_property.h"
 #include "window_transition_info.h"
+#include "mission_snapshot.h"
 #include "zidl/window_interface.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "interfaces/include/ws_common.h"
@@ -182,6 +183,10 @@ public:
     virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
     {
         return WSError::WS_OK;
+    }
+    virtual WMError GetSnapshotAndErrorCode(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
+    {
+        return WMError::WM_OK;
     }
     virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
     {
