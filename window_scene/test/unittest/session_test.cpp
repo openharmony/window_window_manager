@@ -3379,7 +3379,7 @@ HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | 
     session_->sessionInfo_.closeAbilityWant = nullptr;
     session_->GetCloseAbilityWantAndClean(outWant);
     auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(result, false);    
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -3407,7 +3407,7 @@ HWTEST_F(WindowSessionTest, SetSessionState, Function | SmallTest | Level2)
 
     SessionState state03 = SessionState::STATE_CONNECT;
     session_->SetSessionState(state03);
-    ASSERT_EQ(state03, session_->state_);    
+    ASSERT_EQ(state03, session_->state_);
 }
 
 /**
