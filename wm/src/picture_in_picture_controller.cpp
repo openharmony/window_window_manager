@@ -530,7 +530,6 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         auto stopTask = [weakThis = wptr(this)]() {
             auto controller = weakThis.promote();
             if (!controller) {
-                controller->curState_ = PiPWindowState::STATE_UNDEFINED;
                 TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
                 return;
             }
