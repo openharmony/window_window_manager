@@ -283,7 +283,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
     navId = "NavId";
-    ASSERT_EQ(navId, "");
+    ASSERT_NE(navId, "");
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
 }
