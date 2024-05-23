@@ -30,6 +30,9 @@
 namespace OHOS {
 namespace Rosen {
 
+using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
+using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
+
 class WindowSessionProperty : public Parcelable {
 public:
     WindowSessionProperty() = default;
@@ -166,6 +169,45 @@ public:
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
+    bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
+    bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateFocusable(Parcel& parcel);
+    bool WriteActionUpdateTouchable(Parcel& parcel);
+    bool WriteActionUpdateSetBrightness(Parcel& parcel);
+    bool WriteActionUpdateOrientation(Parcel& parcel);
+    bool WriteActionUpdatePrivacyMode(Parcel& parcel);
+    bool WriteActionUpdateMaximizeState(Parcel& parcel);
+    bool WriteActionUpdateFlags(Parcel& parcel);
+    bool WriteActionUpdateMode(Parcel& parcel);
+    bool WriteActionUpdateAnimationFlag(Parcel& parcel);
+    bool WriteActionUpdateDecorEnable(Parcel& parcel);
+    bool WriteActionUpdateDragenabled(Parcel& parcel);
+    bool WriteActionUpdateRaiseenabled(Parcel& parcel);
+    bool WriteActionUpdateHideNonSystemFloatingWindows(Parcel& parcel);
+    bool WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel);
+    bool WriteActionUpdateTopmost(Parcel& parcel);
+    void ReadActionUpdateTurnScreenOn(Parcel& parcel);
+    void ReadActionUpdateKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateFocusable(Parcel& parcel);
+    void ReadActionUpdateTouchable(Parcel& parcel);
+    void ReadActionUpdateSetBrightness(Parcel& parcel);
+    void ReadActionUpdateOrientation(Parcel& parcel);
+    void ReadActionUpdatePrivacyMode(Parcel& parcel);
+    void ReadActionUpdatePrivacyMode(Parcel& parcel);
+    void ReadActionUpdateMaximizeState(Parcel& parcel);
+    void ReadActionUpdateSystemBar(Parcel& parcel);
+    void ReadActionUpdateFlags(Parcel& parcel);
+    void ReadActionUpdateMode(Parcel& parcel);
+    void ReadActionUpdateAnimationFlag(Parcel& parcel);
+    void ReadActionUpdateTouchHotArea(Parcel& parcel);
+    void ReadActionUpdateDecorEnable(Parcel& parcel);
+    void ReadActionUpdateWindowLimits(Parcel& parcel);
+    void ReadActionUpdateDragenabled(Parcel& parcel);
+    void ReadActionUpdateRaiseenabled(Parcel& parcel);
+    void ReadActionUpdateHideNonSystemFloatingWindows(Parcel& parcel);
+    void ReadActionUpdateTextfieldAvoidInfo(Parcel& parcel);
+    void ReadActionUpdateWindowMask(Parcel& parcel);
+    void ReadActionUpdateTopmost(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -228,6 +270,8 @@ private:
     bool isShaped_ = false;
     sptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
