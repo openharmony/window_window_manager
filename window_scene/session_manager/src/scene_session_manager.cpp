@@ -6630,6 +6630,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if ((sceneSession == nullptr) || (enterRecent_.load())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "scene session null or in recent no need update avoid area");
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
@@ -6641,12 +6642,17 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
             needUpdate = avoidAreaIter->second != avoidArea;
         } else {
             if (avoidArea.isEmptyAvoidArea()) {
+                TLOGI(WmmsLogTag::WMS_IMMS,
+                    "scene avoid area equal to last, persistentId=%{public}d avoidAreaType=%{public}d",
+                    persistentId, avoidAreaType);
                 needUpdate = false;
                 return needUpdate;
             }
         }
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
+            TLOGI(WmmsLogTag:: WMS_IMMS, "scene avoid area is empty persistentId=%{public}d avoidAreaType=%{public}d",
+                persistentId, avoidAreaType);
             needUpdate = false;
             return needUpdate;
         }
