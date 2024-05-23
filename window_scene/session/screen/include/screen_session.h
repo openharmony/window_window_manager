@@ -152,6 +152,8 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
+    void SetTouchEnabledFromJs(bool isTouchEnabled);
+    bool IsTouchEnabled();
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -210,6 +212,7 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { 0.0f };
