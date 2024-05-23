@@ -186,6 +186,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -195,6 +196,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;

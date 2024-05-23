@@ -1966,6 +1966,7 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
 
 WSError WindowSceneSessionImpl::HandleBackEvent()
 {
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
     bool isConsumed = false;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {

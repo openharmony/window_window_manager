@@ -1732,6 +1732,7 @@ void WindowSessionImpl::ClearVsyncStation()
 
 void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
 {
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     inputEventConsumer_ = inputEventConsumer;
 }
