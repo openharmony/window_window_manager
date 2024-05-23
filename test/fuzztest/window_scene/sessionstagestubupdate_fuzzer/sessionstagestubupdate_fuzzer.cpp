@@ -69,9 +69,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         parcel, reply, option);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
         parcel, reply, option);
-    stageStub->OnRemoteRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_DRAWING_STATUS),
-        parcel, reply, option);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
         parcel, reply, option);
     stageStub->OnRemoteRequest(
