@@ -170,7 +170,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(nullptr, mainWindow_);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
-
     EXPECT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 }
@@ -251,6 +250,7 @@ HWTEST_F(PictureInPictureControllerTest, IsAutoStartEnabled, Function | SmallTes
  */
 HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest | Level2)
 {
+    int result = 0;
     int32_t width = 0;
     int32_t height = 0;
     sptr<MockWindow> mw = new MockWindow();
@@ -258,6 +258,30 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
 
     pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
+
+    height = 150;
+    pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
+    height = 0;
+    width = 100;
+    pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
+    height = 150;
+    pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
+
+    pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
+    pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
+    pipControl->curState_ = PiPWindowState::STATE_STARTED;
+    pipControl->UpdateContentSize(width, height);
+    sptr<Window> window_ = nullptr;
+    ASSERT_EQ(nullptr, window_);
+    ASSERT_EQ(result, 0);
+    window_ = mw;
+    pipControl->UpdateContentSize(width, height);
+    ASSERT_EQ(result, 0);
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
 }
 
