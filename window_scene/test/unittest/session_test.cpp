@@ -3329,6 +3329,16 @@ HWTEST_F(WindowSessionTest, ResetSessionConnectState, Function | SmallTest | Lev
     ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
     ASSERT_EQ(session_->GetCallingPid(), -1);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, , Function | SmallTest | Level2)
+{
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
