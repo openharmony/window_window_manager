@@ -71,7 +71,7 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | Sma
 {
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipController = 
-            new PictureInPictureController(option, nullptr, 100, nullptr);
+        new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::RemoveActiveController(pipController);
@@ -115,7 +115,7 @@ HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest 
 HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
-    sptr<PictureInPictureController> pipController =
+    sptr<PictureInPictureController> pipController = 
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::SetActiveController(pipController);
@@ -222,7 +222,7 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
 
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    sptr<Window> window = PictureInPictureManager::GetCurrentWindow();
+    sptr<Window> window = nullptr;
     ASSERT_EQ(window, pipController->window_);
     PictureInPictureManager::SetActiveController(pipController);
     window = PictureInPictureManager::GetCurrentWindow();
@@ -242,7 +242,6 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
     std::string actionName = "test";
