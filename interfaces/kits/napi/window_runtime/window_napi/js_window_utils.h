@@ -44,6 +44,23 @@ constexpr int32_t WINDOW_MAX_WIDTH = 1920;
         }                                                                                 \
     } while (0)
 
+#define CHECK_NAPI_ENV_RETURN_IF_FAIL(env)               \
+    do {                                                 \
+        if ((env) == nullptr) {                          \
+            TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
+            return nullptr;                              \
+        }                                                \
+    } while (0)
+
+#define CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue)  \
+    do {                                                       \
+        napi_create_object((env), &(objValue));                \
+        if ((objValue) == nullptr) {                           \
+            TLOGE(WmsLogTag::DEFAULT, "Failed to get object"); \
+            return nullptr;                                    \
+        }                                                      \
+    } while (0)
+
 enum class ApiWindowType : uint32_t {
     TYPE_BASE,
     TYPE_APP = TYPE_BASE,
@@ -267,6 +284,12 @@ struct SystemBarPropertyFlag {
     bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
         sptr<Window>& window);
+    bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         napi_env env, napi_callback_info info, sptr<Window>& window);
