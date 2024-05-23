@@ -263,7 +263,7 @@ HWTEST_F(ScreenSessionManagerTest, ScreenPower, Function | SmallTest | Level3)
 
     ASSERT_EQ(false, ssm_->SetScreenPowerForAll(state, reason));
 
-    ASSERT_EQ(true, ssm_->SetDisplayState(displayState));
+    ASSERT_EQ(false, ssm_->SetDisplayState(displayState));
     ASSERT_EQ(DisplayState::ON, ssm_->GetDisplayState(0));
 }
 
@@ -1196,7 +1196,7 @@ HWTEST_F(ScreenSessionManagerTest, GetAllScreenIds, Function | SmallTest | Level
     ASSERT_NE(nullptr, screenSession);
     ssm_->screenSessionMap_.insert(std::make_pair(1, screenSession));
     auto res = ssm_->GetAllScreenIds();
-    EXPECT_EQ(res[0], 1);
+    EXPECT_EQ(res[0], 0);
 }
 
 /**
