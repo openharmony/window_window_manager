@@ -1000,11 +1000,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     uint64_t displayId = GetSessionProperty()->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet") &&
+        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1051,8 +1050,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
+        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad")) {
         return;
     }
     if (!GetSessionProperty()) {
@@ -1147,8 +1145,8 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-            system::GetParameter("const.product.devicetype", "unknown") == "tablet") {
+            systemConfig_.uiType_ == "phone" ||
+            systemConfig_.uiType_ == "pad") {
             return true;
         }
     }
@@ -1431,10 +1429,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
-            auto is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+            auto isPC = systemConfig_.uiType_ == "pc";
             bool freeMultiWindowSupportDevices = systemConfig_.freeMultiWindowSupport_ &&
                 systemConfig_.freeMultiWindowEnable_;
-            if ((is2in1 || freeMultiWindowSupportDevices) &&
+            if ((isPC || freeMultiWindowSupportDevices) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
@@ -1550,11 +1548,6 @@ bool SceneSession::IsDecorEnable() const
     auto property = GetSessionProperty();
     if (property == nullptr) {
         WLOGE("property is nullptr");
-        return false;
-    }
-    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING
-        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
-        /* FloatingWindow skip for Phone */
         return false;
     }
     auto windowType = property->GetWindowType();

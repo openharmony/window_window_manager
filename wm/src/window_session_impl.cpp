@@ -146,31 +146,35 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
-
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
-
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPC && WindowHelper::IsSubWindow(optionWindowType)) {
-        WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
-            option->GetSubWindowTitle().c_str(), option->GetSubWindowDecorEnable());
-        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
-        property_->SetDragEnabled(option->GetSubWindowDecorEnable());
-        subWindowTitle_ = option->GetSubWindowTitle();
-    }
-    bool isDialog = WindowHelper::IsDialogWindow(optionWindowType);
-    if (isPC && isDialog) {
-        bool dialogDecorEnable = option->GetDialogDecorEnable();
-        property_->SetDecorEnable(dialogDecorEnable);
-        property_->SetDragEnabled(dialogDecorEnable);
-        dialogTitle_ = option->GetDialogTitle();
-        WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
-            dialogTitle_.c_str(), dialogDecorEnable);
-    }
-
+    windowOption_ = option;
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+    }
+}
+
+void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
+{
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
+    if (isPC && windowOption_ != nullptr) {
+        if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
+                windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
+            property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
+            property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
+            subWindowTitle_ = windowOption_->GetSubWindowTitle();
+        }
+        bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+        if (isDialog) {
+            bool dialogDecorEnable = windowOption_->GetDialogDecorEnable();
+            property_->SetDecorEnable(dialogDecorEnable);
+            property_->SetDragEnabled(dialogDecorEnable);
+            dialogTitle_ = windowOption_->GetDialogTitle();
+            WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+                dialogTitle_.c_str(), dialogDecorEnable);
+        }
     }
 }
 
@@ -730,7 +734,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
@@ -1057,7 +1061,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "set topmost");
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
     if (!isPC) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1744,7 +1748,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
     if (!isPC) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2817,8 +2821,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-                 system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
+                (windowSystemConfig_.uiType_ == "phone" || windowSystemConfig_.uiType_ == "pad")) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;

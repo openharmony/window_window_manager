@@ -51,6 +51,8 @@ enum XmlNodeElement {
     SCREEN_SNAPSHOT_BUNDLE_NAME,
     SCREEN_SNAPSHOT_ABILITY_NAME,
     IS_RIGHT_POWER_BUTTON,
+    SUPPORT_ROTATE_WITH_SCREEN,
+    EXTERNAL_SCREEN_DEFAULT_MODE,
 };
 }
 
@@ -80,6 +82,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {SCREEN_SNAPSHOT_BUNDLE_NAME, "screenSnapshotBundleName"},
     {SCREEN_SNAPSHOT_ABILITY_NAME, "screenSnapshotAbilityName"},
     {IS_RIGHT_POWER_BUTTON, "isRightPowerButton"},
+    {SUPPORT_ROTATE_WITH_SCREEN, "supportRotateWithSensor"},
+    {EXTERNAL_SCREEN_DEFAULT_MODE, "externalScreenDefaultMode"},
 };
 
 
@@ -160,7 +164,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     std::string nodeName(reinterpret_cast<const char*>(currNode->name));
     bool enableConfigCheck = (xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
         (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) ||
-        (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName);
+        (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName) ||
+        (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName);
     bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
         (xmlNodeMap_[SUB_DPI] == nodeName) ||
         (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
@@ -171,7 +176,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
         (xmlNodeMap_[SCREEN_SNAPSHOT_BUNDLE_NAME] == nodeName) ||
-        (xmlNodeMap_[SCREEN_SNAPSHOT_ABILITY_NAME] == nodeName);
+        (xmlNodeMap_[SCREEN_SNAPSHOT_ABILITY_NAME] == nodeName) ||
+        (xmlNodeMap_[EXTERNAL_SCREEN_DEFAULT_MODE] == nodeName);
     if (enableConfigCheck) {
         ReadEnableConfigInfo(currNode);
     } else if (numberConfigCheck) {
@@ -404,4 +410,20 @@ uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
     }
     return curvedAreaInLandscape_;
 }
+
+bool ScreenSceneConfig::IsSupportRotateWithSensor()
+{
+    if (enableConfig_.count("supportRotateWithSensor") != 0) {
+        return static_cast<bool>(enableConfig_["supportRotateWithSensor"]);
+    }
+    return false;
+}
+std::string ScreenSceneConfig::GetExternalScreenDefaultMode()
+{
+    if (stringConfig_.count("externalScreenDefaultMode") != 0) {
+        return static_cast<std::string>(stringConfig_["externalScreenDefaultMode"]);
+    }
+    return "";
+}
+
 } // namespace OHOS::Rosen
