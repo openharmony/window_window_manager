@@ -5743,21 +5743,19 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
 
 WMError SceneSessionManager::GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
 {
-    WLOGFI("id: %{public}d isLowResolution: %{public}d", persistentId, isLowResolution);
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI() && !SessionPermission::IsShellCall()) {
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, persistentId, &snapshot]() {
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         if (!sceneSession) {
-            WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
+            TLOGW(WmsLogTag::WMS_SYSTEM, "fail to find session by persistentId: %{public}d", persistentId);
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         auto sessionInfo = sceneSession->GetSessionInfo();
         if (sessionInfo.abilityName_.empty() || sessionInfo.moduleName_.empty() || sessionInfo.bundleName_.empty()) {
-            WLOGFW("sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
-                   sceneSession->GetPersistentId());
+            TLOGW(WmsLogTag::WMS_SYSTEM, "sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
+                sceneSession->GetPersistentId());
         }
         snapshot.topAbility.SetElementBundleName(&(snapshot.topAbility), sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetElementModuleName(&(snapshot.topAbility), sessionInfo.moduleName_.c_str());
