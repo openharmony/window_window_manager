@@ -34,17 +34,10 @@ napi_value WindowTypeInit(napi_env env)
 {
     WLOGFD("WindowTypeInit");
 
-    if (env == nullptr) {
-        WLOGFE("env is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "TYPE_APP", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_APP)));
@@ -96,17 +89,10 @@ napi_value AvoidAreaTypeInit(napi_env env)
 {
     WLOGFD("AvoidAreaTypeInit");
 
-    if (env == nullptr) {
-        WLOGFE("env is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "TYPE_SYSTEM", CreateJsValue(env,
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM)));
@@ -125,17 +111,10 @@ napi_value WindowModeInit(napi_env env)
 {
     WLOGFD("WindowModeInit");
 
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowMode::UNDEFINED)));
@@ -154,17 +133,10 @@ napi_value ColorSpaceInit(napi_env env)
 {
     WLOGFD("ColorSpaceInit");
 
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "DEFAULT", CreateJsValue(env,
         static_cast<int32_t>(ColorSpace::COLOR_SPACE_DEFAULT)));
@@ -177,17 +149,10 @@ napi_value OrientationInit(napi_env env)
 {
     WLOGFD("OrientationInit");
 
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env,
         static_cast<int32_t>(ApiOrientation::UNSPECIFIED)));
@@ -232,17 +197,10 @@ napi_value WindowStageEventTypeInit(napi_env env)
 {
     WLOGFD("WindowStageEventTypeInit");
 
-    if (env == nullptr) {
-        WLOGFE("env is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
@@ -263,17 +221,10 @@ napi_value WindowEventTypeInit(napi_env env)
 {
     WLOGFD("WindowEventTypeInit");
 
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "WINDOW_SHOWN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
@@ -291,17 +242,10 @@ napi_value WindowEventTypeInit(napi_env env)
 napi_value WindowLayoutModeInit(napi_env env)
 {
     WLOGFD("WindowLayoutModeInit");
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "WINDOW_LAYOUT_MODE_CASCADE", CreateJsValue(env,
         static_cast<int32_t>(WindowLayoutMode::CASCADE)));
@@ -313,17 +257,10 @@ napi_value WindowLayoutModeInit(napi_env env)
 napi_value BlurStyleInit(napi_env env)
 {
     WLOGD("BlurStyleInit");
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "OFF", CreateJsValue(env,
         static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_OFF)));
@@ -339,17 +276,10 @@ napi_value BlurStyleInit(napi_env env)
 napi_value WindowErrorInit(napi_env env)
 {
     WLOGFD("WindowErrorInit");
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
 
     napi_set_named_property(env, objValue, "WM_DO_NOTHING", CreateJsValue(env,
         static_cast<int32_t>(WMError::WM_DO_NOTHING)));
@@ -387,17 +317,10 @@ napi_value WindowErrorInit(napi_env env)
 napi_value WindowErrorCodeInit(napi_env env)
 {
     WLOGFD("WindowErrorCodeInit");
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
     napi_set_named_property(env, objValue, "WM_ERROR_NO_PERMISSION", CreateJsValue(env,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)));
     napi_set_named_property(env, objValue, "WM_ERROR_NOT_SYSTEM_APP", CreateJsValue(env,
@@ -426,17 +349,10 @@ napi_value WindowErrorCodeInit(napi_env env)
 napi_value WindowStatusTypeInit(napi_env env)
 {
     WLOGFD("WindowStatusTypeInit");
-    if (env == nullptr) {
-        WLOGFE("Engine is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
     napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
         static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
     napi_set_named_property(env, objValue, "FULL_SCREEN", CreateJsValue(env,
@@ -456,10 +372,7 @@ napi_value RectChangeReasonInit(napi_env env)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "RectChangeReasonInit called");
 
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
-        return nullptr;
-    }
+    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -840,21 +753,10 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
     return defaultColor;
 }
 
-bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
-    sptr<Window>& window)
+bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
+    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
-        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(env,
-        jsObject, "navigationBarColor", navProperty.backgroundColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+    auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     napi_value jsStatusContentColor = nullptr;
     napi_get_named_property(env, jsObject, "statusBarContentColor", &jsStatusContentColor);
     napi_value jsStatusIcon = nullptr;
@@ -875,6 +777,13 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         }
         propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     }
+    return true;
+}
+
+bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
+    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     napi_value jsNavigationContentColor = nullptr;
     napi_get_named_property(env, jsObject, "navigationBarContentColor", &jsNavigationContentColor);
     napi_value jsNavigationIcon = nullptr;
@@ -895,6 +804,30 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         }
         propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     }
+    return true;
+}
+
+bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
+    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
+    sptr<Window>& window)
+{
+    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
+        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(env,
+        jsObject, "navigationBarColor", navProperty.backgroundColor_,
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+
+    if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
+        !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
+        return false;
+    }
+
     bool enableStatusBarAnimation = false;
     if (ParseJsValue(jsObject, env, "enableStatusBarAnimation", enableStatusBarAnimation)) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableStatusBarAnimation;
