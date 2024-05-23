@@ -559,7 +559,7 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     }
     if (argc == 1) {
         if (!ConvertFromJsValue(env, argv[0], windowId)) {
-            TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]failed to convert parameter to integer");
+            TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
             napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
             return NapiGetUndefined(env);
         }
@@ -570,18 +570,18 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
             WMError ret = SingletonContainer::Get<WindowManager>().GetSnapshotAndErrorCode(windowId, pixelMap);
             if (ret != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret)));
-                TLOGW(WmsLogTag:WMS_SYSTEM, "[NAPI]getSnapshot not ok!");
+                TLOGW(WmsLogTag:WMS_SYSTEM, "[NAPI]Get snapshot not ok!");
                 return;
             }
             if (pixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]getSnapshot is nullptr!");
+                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]create native pixelmap is nullptr!");
+                TLOGE(WmsLogTag:WMS_SYSTEM, "[NAPI]Create native pixelmap is nullptr!");
                 return;
             }
             task.Resolve(env, nativePixelMap);
