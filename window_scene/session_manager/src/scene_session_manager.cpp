@@ -5741,6 +5741,37 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
+WMError SceneSessionManager::GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
+{
+    WLOGFI("id: %{public}d isLowResolution: %{public}d", persistentId, isLowResolution);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, persistentId, &snapshot]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        if (!sceneSession) {
+            WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        auto sessionInfo = sceneSession->GetSessionInfo();
+        if (sessionInfo.abilityName_.empty() || sessionInfo.moduleName_.empty() || sessionInfo.bundleName_.empty()) {
+            WLOGFW("sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
+                   sceneSession->GetPersistentId());
+        }
+        snapshot.topAbility.SetElementBundleName(&(snapshot.topAbility), sessionInfo.bundleName_.c_str());
+        snapshot.topAbility.SetElementModuleName(&(snapshot.topAbility), sessionInfo.moduleName_.c_str());
+        snapshot.topAbility.SetElementAbilityName(&(snapshot.topAbility), sessionInfo.abilityName_.c_str());
+        auto oriSnapshot = sceneSession->Snapshot();
+        if (oriSnapshot != nullptr) {
+            snapshot.snapshot = oriSnapshot;
+            return WMError::WM_OK;
+        }
+        return WMError::WM_ERROR_NULLPTR;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotSimple");
+}
+
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
