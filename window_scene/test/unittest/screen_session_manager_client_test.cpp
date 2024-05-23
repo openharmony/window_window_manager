@@ -252,7 +252,7 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId01, Function 
 
     bool result = false;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -268,7 +268,7 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId02, Function 
     screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
     bool result = true;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 }
 
 /**

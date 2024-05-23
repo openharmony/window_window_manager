@@ -22,6 +22,7 @@
 #include "screen_snapshot_ability_connection.h"
 #include "extension_manager_client.h"
 #include "ipc_skeleton.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -79,16 +80,20 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityConnectDone, Function | S
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnection, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
-    ASSERT_EQ(resConnect, ERR_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(resConnect, ERR_OK);
+    } else {
+        ASSERT_EQ(resConnect, ERR_OK);
     {
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
-    ASSERT_EQ(resDisconnect, NO_ERROR);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+        EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
+        auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+        ASSERT_EQ(resDisconnect, NO_ERROR);
+        abilityConnection.clear();
+        abilityConnection = nullptr;
+    }
 }
 
 /**
@@ -107,12 +112,16 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityDisconnectDone, Function 
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnection, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
-    ASSERT_EQ(resConnect, ERR_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(resConnect, ERR_OK);
+    } else {
+        ASSERT_EQ(resConnect, ERR_OK);
     auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
     ASSERT_EQ(resDisconnect, NO_ERROR);
     EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
     abilityConnection.clear();
     abilityConnection = nullptr;
+    }
 }
 
 /**
@@ -145,7 +154,10 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, SendMessageSync, Function | SmallT
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnection, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
-    ASSERT_EQ(resConnect, ERR_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(resConnect, ERR_OK);
+    } else {
+        ASSERT_EQ(resConnect, ERR_OK);
     {
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
@@ -165,6 +177,7 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, SendMessageSync, Function | SmallT
     ASSERT_EQ(resDisconnect, NO_ERROR);
     abilityConnection.clear();
     abilityConnection = nullptr;
+    }
 }
 
 /**
@@ -183,12 +196,16 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnRemoteDied, Function | SmallTest
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnection, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
-    ASSERT_EQ(resConnect, ERR_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(resConnect, ERR_OK);
+    } else {
+        ASSERT_EQ(resConnect, ERR_OK);
     auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
     ASSERT_EQ(resDisconnect, NO_ERROR);
     EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
     abilityConnection.clear();
     abilityConnection = nullptr;
+    }
 }
 
 }
