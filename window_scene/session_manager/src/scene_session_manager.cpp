@@ -4926,7 +4926,7 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
         }
     }
 
-    WindowModeType type = WindowModeType::WINDOW_MODE_OTHER;
+    WindowModeType type;
     if (inSplit) {
         if (inFloating) {
             type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
