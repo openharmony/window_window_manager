@@ -84,10 +84,10 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityConnectDone, Function | S
         ASSERT_NE(resConnect, ERR_OK);
     } else {
         ASSERT_EQ(resConnect, ERR_OK);
-    {
-        std::unique_lock<std::mutex> lock(connectedMutex_);
-        static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
-    }
+        {
+            std::unique_lock<std::mutex> lock(connectedMutex_);
+            static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
+        }
         EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
         auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
         ASSERT_EQ(resDisconnect, NO_ERROR);
@@ -116,11 +116,11 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityDisconnectDone, Function 
         ASSERT_NE(resConnect, ERR_OK);
     } else {
         ASSERT_EQ(resConnect, ERR_OK);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
-    ASSERT_EQ(resDisconnect, NO_ERROR);
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+        auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+        ASSERT_EQ(resDisconnect, NO_ERROR);
+        EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
+        abilityConnection.clear();
+        abilityConnection = nullptr;
     }
 }
 
@@ -158,25 +158,25 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, SendMessageSync, Function | SmallT
         ASSERT_NE(resConnect, ERR_OK);
     } else {
         ASSERT_EQ(resConnect, ERR_OK);
-    {
-        std::unique_lock<std::mutex> lock(connectedMutex_);
-        static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
-    }
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString16(Str8ToStr16("SA"));
-    data.WriteString16(Str8ToStr16("ScreenSessionManager"));
-    abilityConnection->SendMessageSync(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
-    EXPECT_EQ(reply.ReadInt32(), 0);
-    EXPECT_EQ(reply.ReadInt32(), 0);
-    EXPECT_EQ(reply.ReadInt32(), 0);
-    EXPECT_EQ(reply.ReadInt32(), 0);
-    EXPECT_EQ(reply.ReadInt32(), 0);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
-    ASSERT_EQ(resDisconnect, NO_ERROR);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+        {
+            std::unique_lock<std::mutex> lock(connectedMutex_);
+            static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
+        }
+        EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteString16(Str8ToStr16("SA"));
+        data.WriteString16(Str8ToStr16("ScreenSessionManager"));
+        abilityConnection->SendMessageSync(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
+        EXPECT_EQ(reply.ReadInt32(), 0);
+        EXPECT_EQ(reply.ReadInt32(), 0);
+        EXPECT_EQ(reply.ReadInt32(), 0);
+        EXPECT_EQ(reply.ReadInt32(), 0);
+        EXPECT_EQ(reply.ReadInt32(), 0);
+        auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+        ASSERT_EQ(resDisconnect, NO_ERROR);
+        abilityConnection.clear();
+        abilityConnection = nullptr;
     }
 }
 
@@ -197,14 +197,14 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnRemoteDied, Function | SmallTest
         want, abilityConnection, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(resConnect, ERR_OK);
+            ASSERT_NE(resConnect, ERR_OK);
     } else {
-        ASSERT_EQ(resConnect, ERR_OK);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
-    ASSERT_EQ(resDisconnect, NO_ERROR);
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+            ASSERT_EQ(resConnect, ERR_OK);
+            auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+            ASSERT_EQ(resDisconnect, NO_ERROR);
+            EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
+            abilityConnection.clear();
+            abilityConnection = nullptr;
     }
 }
 
