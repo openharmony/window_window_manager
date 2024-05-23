@@ -2608,7 +2608,6 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_TOAST, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
-        sceneSession->NotifyDestroy();
     }
     ret = sceneSession->Disconnect();
     sceneSession->ClearSpecificSessionCbMap();
