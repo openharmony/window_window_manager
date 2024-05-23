@@ -7847,6 +7847,18 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
     return taskScheduler_->PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 
+void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [id, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        uint32_t visibilityState = static_cast<uint32_t>(session->GetVisibilityState());
+        windowVisibilityInfos.push_back(std::make_pair(id, visibilityState));
+    }
+}
+
 void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     const std::string taskName, const int delayTime)
 {
