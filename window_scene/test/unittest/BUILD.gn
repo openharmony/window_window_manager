@@ -392,7 +392,10 @@ ohos_unittest("ws_screen_property_test") {
 ohos_unittest("ws_session_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_test.cpp" ]
+  sources = [
+    "session_test.cpp",
+    "session_test2.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
