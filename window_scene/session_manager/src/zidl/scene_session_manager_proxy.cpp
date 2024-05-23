@@ -204,24 +204,24 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag:WMS_SYSTEM, "WriteInterfaceToken failed");
         return WMError::WS_ERROR_INVALID_PARAM;
     }
     if (!data.WriteInt32(persistentId)) {
-        WLOGFE("Write persistentId failed");
+        TLOGE(WmsLogTag:WMS_SYSTEM, "Write persistentId failed");
         return WMError::WS_ERROR_INVALID_PARAM;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_SIMPLE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag:WMS_SYSTEM, "SendRequest failed");
         return WMError::WS_ERROR_IPC_FAILED;
     }
     std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
     if (info) {
         snapshot = *info;
     } else {
-        WLOGFW("Read SessionSnapshotSimple is null.");
+        WLOGFW("Read snapshot is null.");
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
