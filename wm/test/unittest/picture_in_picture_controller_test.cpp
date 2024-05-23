@@ -135,17 +135,17 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    option = nullptr;
     sptr<WindowOption> windowOption = nullptr;
-    sptr<PipOption> pipOption_ = nullptr;
-    pipOption_->SetContext(nullptr);
-    ASSERT_EQ(nullptr, pipControl->pipOption_);
+
+    option->SetContext(nullptr);
+    ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
-    ASSERT_EQ(nullptr, pipOption_->GetContext());
+
+    option = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+
     EXPECT_EQ(nullptr, windowOption);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
-    
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
 }
 
@@ -157,12 +157,19 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
 HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | SmallTest | Level2)
 {
     StartPipType startType = StartPipType::AUTO_START;
-    sptr<PipOption> pipOption_;
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipOption_ = nullptr;
+
+    option->SetContext(nullptr);
+    ASSERT_EQ(nullptr, option->GetContext());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+
+    option = nullptr;
     sptr<Window> mainWindow_ = nullptr;
+    ASSERT_EQ(nullptr, mainWindow_);
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+
 
     EXPECT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
