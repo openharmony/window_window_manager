@@ -2851,7 +2851,7 @@ HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Functio
 
     FocusChangeReason reasonInput = FocusChangeReason::SCB_START_APP;
     sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
-    FocusChangeReason reasonResult = ssm->GetFocusChangeReason();
+    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
 
     ASSERT_EQ(reasonInput, reasonResult);
 }
