@@ -66,7 +66,6 @@ public:
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
-    static napi_value ResetFocusedOnShow(napi_env env, napi_callback_info info);
     static napi_value RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
     static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
@@ -119,7 +118,6 @@ private:
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
-    napi_value OnResetFocusedOnShow(napi_env env, napi_callback_info info);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
