@@ -233,7 +233,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "session foreground failed, ret=%{public}d persistentId=%{public}d",
-                ret, persistentId)
+                ret, persistentId);
             return ret;
         }
         auto sessionProperty = session->GetSessionProperty();
