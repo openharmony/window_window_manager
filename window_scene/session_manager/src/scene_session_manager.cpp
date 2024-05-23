@@ -1774,6 +1774,21 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
     }
 }
 
+void SceneSessionManager::DestroyToastSession(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFW("sceneSession is nullptr");
+        return;
+    }
+    for (const auto& elem : sceneSession->GetToastSession()) {
+        if (elem != nullptr) {
+            const auto& persistentId = elem->GetPersistentId();
+            TLOGI(WmsLogTag::WMS_TOAST, "DestroyToastSession, id: %{public}d", persistentId);
+            DestroyAndDisconnectSpecificSessionInner(persistentId);
+        }
+    }
+}
+
 void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -1797,6 +1812,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         RequestSessionUnfocus(persistentId);
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
+        DestroyToastSession(scnSession);
         DestroySubSession(scnSession); // destroy sub session by destruction
         TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d, remove:%{public}d",
             persistentId, needRemoveSession);
@@ -2401,11 +2417,14 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
         return;
     }
     if (SessionHelper::IsSystemWindow(type)) {
-        if ((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) {
+        if (type == WindowType::WINDOW_TYPE_FLOAT) {
             auto parentSession = GetSceneSession(property->GetParentPersistentId());
             if (parentSession != nullptr) {
                 newSession->SetParentSession(parentSession);
             }
+        }
+        if (type == WindowType::WINDOW_TYPE_TOAST) {
+            NotifyCreateToastSession(property->GetParentPersistentId(), newSession);
         }
         if (type != WindowType::WINDOW_TYPE_DIALOG) {
             if (WindowHelper::IsSystemSubWindow(type)) {
@@ -2457,6 +2476,25 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
         iter->second(session);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "NotifyCreateSubSession success, parentId: %{public}d, subId: %{public}d",
+        persistentId, session->GetPersistentId());
+}
+
+void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "toastSession is nullptr");
+        return;
+    }
+
+    auto parentSession = GetSceneSession(persistentId);
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Can't find parentSession, parentId: %{public}d, ToastId: %{public}d",
+            persistentId, session->GetPersistentId());
+        return;
+    }
+    parentSession->AddToastSession(session);
+    session->SetParentSession(parentSession);
+    TLOGD(WmsLogTag::WMS_LIFE, "NotifyCreateToastSession success, parentId: %{public}d, toastId: %{public}d",
         persistentId, session->GetPersistentId());
 }
 
@@ -2576,6 +2614,15 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
             parentSession->RemoveDialogToParentSession(sceneSession);
         }
         sceneSession->NotifyDestroy();
+    }
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_TOAST) {
+        auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
+        if (parentSession != nullptr) {
+            TLOGD(WmsLogTag::WMS_TOAST, "Find parentSession, id: %{public}d", persistentId);
+            parentSession->RemoveToastSession(persistentId);
+        } else {
+            TLOGW(WmsLogTag::WMS_TOAST, "ParentSession is nullptr, id: %{public}d", persistentId);
+        }
     }
     ret = sceneSession->Disconnect();
     sceneSession->ClearSpecificSessionCbMap();
@@ -5070,6 +5117,22 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
         HandleKeepScreenOn(dialogSession, false);
         UpdatePrivateStateAndNotify(dialog->GetPersistentId());
+    }
+    for (const auto& toastSession : sceneSession->GetToastSession()) {
+        if (toastSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_TOAST, "toastSession session is nullptr");
+            continue;
+        }
+        const auto& state = toastSession->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            TLOGD(WmsLogTag::WMS_TOAST, "toast session is not active");
+            continue;
+        }
+        NotifyWindowInfoChange(toastSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        HandleKeepScreenOn(toastSession, false);
+        UpdatePrivateStateAndNotify(toastSession->GetPersistentId());
+        toastSession->SetActive(false);
+        toastSession->BackgroundTask();
     }
 }
 

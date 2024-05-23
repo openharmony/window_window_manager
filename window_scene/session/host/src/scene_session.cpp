@@ -2240,6 +2240,21 @@ void SceneSession::SetForegroundInteractiveStatus(bool interactive)
 {
     Session::SetForegroundInteractiveStatus(interactive);
     NotifyAccessibilityVisibilityChange();
+    if (interactive) {
+        return;
+    }
+    for (auto toastSession : toastSession_) {
+        if (toastSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_TOAST, "toastSession session is nullptr");
+            continue;
+        }
+        auto state = toastSession->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            continue;
+        }
+        toastSession->SetActive(false);
+        toastSession->BackgroundTask();
+    }
 }
 
 void SceneSession::NotifyAccessibilityVisibilityChange()
@@ -2951,6 +2966,46 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
     return true;
 }
 
+bool SceneSession::AddToastSession(const sptr<SceneSession>& toastSession)
+{
+    if (toastSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_TOAST, "toastSession is nullptr");
+        return false;
+    }
+    const auto& persistentId = toastSession->GetPersistentId();
+    auto iter = std::find_if(toastSession_.begin(), toastSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter != toastSession_.end()) {
+        TLOGE(WmsLogTag::WMS_TOAST, "Toast ession is already exists, id: %{public}d, parentId: %{public}d",
+            toastSession->GetPersistentId(), GetPersistentId());
+        return false;
+    }
+    TLOGD(WmsLogTag::WMS_TOAST, "Success, id: %{public}d, parentId: %{public}d",
+        toastSession->GetPersistentId(), GetPersistentId());
+    toastSession_.push_back(toastSession);
+    return true;
+}
+
+bool SceneSession::RemoveToastSession(int32_t persistentId)
+{
+    auto iter = std::find_if(toastSession_.begin(), toastSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter == toastSession_.end()) {
+        TLOGE(WmsLogTag::WMS_TOAST, "Could not find toastSession, id: %{public}d, parentId: %{public}d",
+            persistentId, GetPersistentId());
+        return false;
+    }
+    TLOGD(WmsLogTag::WMS_TOAST, "Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
+    toastSession_.erase(iter);
+    return true;
+}
+
 void SceneSession::NotifyPiPWindowPrepareClose()
 {
     TLOGD(WmsLogTag::WMS_PIP, "NotifyPiPWindowPrepareClose");
@@ -2994,6 +3049,11 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
 {
     return subSession_;
+}
+
+std::vector<sptr<SceneSession>> SceneSession::GetToastSession() const
+{
+    return toastSession_;
 }
 
 WSRect SceneSession::GetSessionTargetRect() const
