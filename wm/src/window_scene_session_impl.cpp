@@ -77,7 +77,6 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
-bool WindowSceneSessionImpl::enableImmersiveMode_ = true;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -617,7 +616,8 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
         property_->SetModeSupportInfo(modeSupportInfo);
         auto isPhone = windowSystemConfig_.uiType_ == "phone";
-        if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone) {
+        auto isPad = windowSystemConfig_.uiType_ == "pad";
+        if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone && !isPad) {
             SetFullScreen(true);
         }
         // get orientation configuration
@@ -1545,7 +1545,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
     bool preStatus = property_->IsLayoutFullScreen();
-    property_->SetIsLayoutFullScreen(true);
+    property_->SetIsLayoutFullScreen(status);
     if (hostSession_ != nullptr) {
         hostSession_->OnLayoutFullScreenChange(status);
     }

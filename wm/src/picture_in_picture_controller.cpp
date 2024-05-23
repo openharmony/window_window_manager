@@ -166,11 +166,15 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     uint32_t requestWidth = 0;
     uint32_t requestHeight = 0;
     pipOption_->GetContentSize(requestWidth, requestHeight);
+    WindowSizeChangeReason reason = WindowSizeChangeReason::PIP_SHOW;
+    if (startType == StartPipType::AUTO_START) {
+        reason = WindowSizeChangeReason::PIP_AUTO_START;
+    }
     if (requestWidth > 0 && requestHeight > 0) {
         Rect requestRect = {0, 0, requestWidth, requestHeight};
-        window_->UpdatePiPRect(requestRect, WindowSizeChangeReason::PIP_SHOW);
+        window_->UpdatePiPRect(requestRect, reason);
     } else {
-        window_->UpdatePiPRect(windowRect_, WindowSizeChangeReason::PIP_SHOW);
+        window_->UpdatePiPRect(windowRect_, reason);
     }
     PictureInPictureManager::SetActiveController(this);
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
