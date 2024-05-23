@@ -4907,7 +4907,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionForeground(sceneSession);
             }
-            ToastBackgroundTask(sceneSession);
             break;
         case SessionState::STATE_BACKGROUND:
             RequestSessionUnfocus(persistentId, FocusChangeReason::APP_BACKGROUND);
@@ -4918,34 +4917,11 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionBackground(sceneSession);
             }
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_TOAST) {
-                taskScheduler_->RemoveTask("backgroundToast:PID:" + std::to_string(persistentId));
-            }
             break;
         default:
             break;
     }
     ProcessWindowModeType();
-}
-
-void SceneSessionManager::ToastBackgroundTask(const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
-        return;
-    }
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_TOAST) {
-        taskScheduler_->RemoveTask("backgroundToast:PID:" + std::to_string(sceneSession->GetPersistentId()));
-        auto task = [sceneSession]() {
-            if (sceneSession != nullptr) {
-                sceneSession->SetActive(false);
-                sceneSession->BackgroundTask();
-            }
-        };
-        int64_t delayTime = 1000 * 11; // toast window show max 11 second.
-        taskScheduler_->PostTask(task, "backgroundToast:PID:"
-            + std::to_string(sceneSession->GetPersistentId()), delayTime);
-    }
 }
 
 void SceneSessionManager::ProcessWindowModeType()
