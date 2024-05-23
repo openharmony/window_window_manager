@@ -4196,6 +4196,19 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetAllWindowVisibilityInfos
+ * @tc.desc: SceneSesionManager get all window visibility infos;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallTest | Level3)
+{
+    std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->GetAllWindowVisibilityInfos(windowVisibilityInfos);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
+}
+
+/**
  * @tc.name: TestNotifyEnterRecentTask
  * @tc.desc: Test whether the enterRecent_ is set correctly;
  * @tc.type: FUNC

@@ -115,6 +115,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
     BindNativeFunction(env, exportObj, "getAllAbilityInfo", moduleName, JsSceneSessionManager::GetAllAbilityInfos);
+    BindNativeFunction(env, exportObj, "getAllWindowVisibilityInfos", moduleName,
+        JsSceneSessionManager::GetAllWindowVisibilityInfos);
     BindNativeFunction(env, exportObj, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
     BindNativeFunction(env, exportObj, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     BindNativeFunction(env, exportObj, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
@@ -669,6 +671,13 @@ napi_value JsSceneSessionManager::InitWithRenderServiceAdded(napi_env env, napi_
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnInitWithRenderServiceAdded(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllWindowVisibilityInfos(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SetSystemAnimatedScenes(napi_env env, napi_callback_info info)
@@ -1754,6 +1763,63 @@ napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, nap
     WLOGFI("[NAPI]");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
     return NapiGetUndefined(env);
+}
+
+static napi_value CreateJsWindowVisibilityInfo(napi_env env,
+    const std::pair<int32_t, uint32_t>& visibilityInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "failed to create napi object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "windowId",
+        CreateJsValue(env, static_cast<int32_t>(visibilityInfo.first)));
+    napi_set_named_property(env, objValue, "visibility",
+        CreateJsValue(env, static_cast<int32_t>(visibilityInfo.second)));
+    return objValue;
+}
+
+static napi_value CreateJsWindowVisibilityInfoArray(napi_env env,
+    const std::vector<std::pair<int32_t, uint32_t>>& visibilityInfos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, visibilityInfos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    auto index = 0;
+    for (const auto& visibilityInfo : visibilityInfos) {
+        napi_set_element(env, arrayValue, index++, CreateJsWindowVisibilityInfo(env, visibilityInfo));
+    }
+    return arrayValue;
+}
+
+napi_value JsSceneSessionManager::OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info)
+{
+    auto windowVisibilityInfos = std::make_shared<std::vector<std::pair<int32_t, uint32_t>>>();
+    if (windowVisibilityInfos == nullptr) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "failed to create window visiblity infos"));
+        return NapiGetUndefined(env);
+    }
+
+    auto execute = [infos = windowVisibilityInfos]() {
+        SceneSessionManager::GetInstance().GetAllWindowVisibilityInfos(*infos);
+    };
+    auto complete = [infos = windowVisibilityInfos]
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
+        task.ResolveWithCustomize(env, CreateJsValue(env, static_cast<int32_t>(WSErrorCode::WS_OK)),
+            CreateJsWindowVisibilityInfoArray(env, *infos));
+    };
+
+    napi_value result = nullptr;
+    napi_value callback = nullptr;
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetAllWindowVisibilityInfos",
+        env, CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
+    return result;
 }
 
 napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info)

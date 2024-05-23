@@ -57,6 +57,7 @@ public:
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
+    static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
@@ -105,6 +106,7 @@ private:
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
+    napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
     napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos);
     napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo);
