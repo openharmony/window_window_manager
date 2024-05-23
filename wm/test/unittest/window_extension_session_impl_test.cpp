@@ -793,7 +793,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows, Function | SmallT
  */
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(WMError::WM_OK,window_->HideNonSecureWindows(false));
+    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
 
 /**
@@ -807,7 +807,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_OK,window_->HideNonSecureWindows(true));
+    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
 }
 
 /**
@@ -832,7 +832,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag, Function | SmallTest 
  */
 HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(WMError::WM_OK,window_->SetWaterMarkFlag(false));
+    ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(false));
 }
 
 /**
@@ -846,7 +846,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag02, Function | SmallTes
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_OK,window_->SetWaterMarkFlag(true));
+    ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
 }
 
 /**
