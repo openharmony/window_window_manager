@@ -820,16 +820,23 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::FULL_TO_FLOATING)));
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
-    napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_START)));
-    napi_set_named_property(env, objValue, "PIP_SHOW", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_SHOW)));
-    napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
+    CreatePiPSizeChangeReason(env, objValue);
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
     return objValue;
+}
+
+void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
+{
+    napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_START)));
+    napi_set_named_property(env, objValue, "PIP_SHOW", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_SHOW)));
+    napi_set_named_property(env, objValue, "PIP_AUTO_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_AUTO_START)));
+    napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
 }
 
 napi_value CreateJsSessionStartupVisibility(napi_env env)

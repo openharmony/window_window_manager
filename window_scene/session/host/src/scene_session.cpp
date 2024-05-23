@@ -2208,7 +2208,7 @@ void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
 sptr<IRemoteObject> SceneSession::GetSelfToken() const
 {
     std::shared_lock<std::shared_mutex> lock(selfTokenMutex_);
-    return selfToken_;
+    return selfToken_.promote();
 }
 
 void SceneSession::SetSessionState(SessionState state)
