@@ -615,7 +615,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
         property_->SetModeSupportInfo(modeSupportInfo);
         std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
-        TLOGI(WmsLogTag::WMS_LAYOUT, "deviceType: %{public}s", deviceType.c_str);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "deviceType: %{public}s", deviceType.c_str());
         auto isPhone = deviceType == "phone";
         auto isTablet = deviceType == "tablet";
         if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone && !isTablet) {
