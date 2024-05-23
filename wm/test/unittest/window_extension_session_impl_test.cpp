@@ -17,6 +17,8 @@
 #include "session_proxy.h"
 
 #include <transaction/rs_transaction.h>
+#include "ability_context_impl.h"
+#include "mock_session.h"
 #include "display_info.h"
 #include "accessibility_event_info.h"
 #include "window_manager_hilog.h"
@@ -37,6 +39,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    sptr<WindowExtensionSessionImpl> window_ = nullptr;
 };
 
 void WindowExtensionSessionImplTest::SetUpTestCase()
@@ -49,24 +53,361 @@ void WindowExtensionSessionImplTest::TearDownTestCase()
 
 void WindowExtensionSessionImplTest::SetUp()
 {
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("WindowExtensionSessionImplTest");
+    window_ = new WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window_);
 }
 
 void WindowExtensionSessionImplTest::TearDown()
 {
+    window_ = nullptr;
 }
 
 namespace {
 /**
  * @tc.name: Create01
- * @tc.desc: context is nullptr
+ * @tc.desc: normal test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowExtensionSessionImplTest, Create01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
-    sptr<Rosen::ISession> iSession = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowExtensionSessionImpl.Create(nullptr, iSession));
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window_->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+}
+
+/**
+ * @tc.name: Create02
+ * @tc.desc: context is nullptr, session is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Create02, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(nullptr, nullptr));
+}
+
+/**
+ * @tc.name: Create03
+ * @tc.desc: context is not nullptr, session is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Create03, Function | SmallTest | Level3)
+{
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, nullptr));
+}
+
+/**
+ * @tc.name: Create04
+ * @tc.desc: connet failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3)
+{
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window_->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+}
+
+/**
+ * @tc.name: AddExtensionWindowStageToSCB
+ * @tc.desc: AddExtensionWindowStageToSCB Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level3)
+{
+    window_->AddExtensionWindowStageToSCB();
+}
+
+/**
+ * @tc.name: UpdateConfigurationForAll01
+ * @tc.desc: UpdateConfigurationForAll01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    window_->UpdateConfigurationForAll(configuration);
+}
+
+/**
+ * @tc.name: UpdateConfigurationForAll02
+ * @tc.desc: UpdateConfigurationForAll02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    window_->windowExtensionSessionSet_.insert(window_);
+    window_->UpdateConfigurationForAll(configuration);
+    window_->windowExtensionSessionSet_.erase(window_);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback01
+ * @tc.desc: InputMethodKeyEventResultCallback01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback01, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    auto isTimeout = std::make_shared<bool>(false);
+    window_->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback02
+ * @tc.desc: InputMethodKeyEventResultCallback02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback02, Function | SmallTest | Level3)
+{
+    bool consumed = false;
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    auto isTimeout = std::make_shared<bool>(false);
+    window_->InputMethodKeyEventResultCallback(nullptr, consumed, isConsumedPromise, isTimeout);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback03
+ * @tc.desc: InputMethodKeyEventResultCallback03 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback03, Function | SmallTest | Level3)
+{
+    bool consumed = false;
+    auto isTimeout = std::make_shared<bool>(false);
+    window_->InputMethodKeyEventResultCallback(nullptr, consumed, nullptr, isTimeout);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback04
+ * @tc.desc: InputMethodKeyEventResultCallback04 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback04, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    auto isTimeout = std::make_shared<bool>(false);
+    window_->InputMethodKeyEventResultCallback(keyEvent, consumed, nullptr, isTimeout);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback05
+ * @tc.desc: InputMethodKeyEventResultCallback05 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback05, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    window_->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, nullptr);
+}
+
+/**
+ * @tc.name: InputMethodKeyEventResultCallback06
+ * @tc.desc: InputMethodKeyEventResultCallback06 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback06, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    auto isTimeout = std::make_shared<bool>(false);
+    window_->InputMethodKeyEventResultCallback(keyEvent, true, isConsumedPromise, isTimeout);
+}
+
+/**
+ * @tc.name: NotifyKeyEvent01
+ * @tc.desc: NotifyKeyEvent01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
+    bool consumed = false;
+    bool notifyInputMethod = true;
+    window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
+ * @tc.name: NotifyKeyEvent02
+ * @tc.desc: NotifyKeyEvent02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent02, Function | SmallTest | Level3)
+{
+    bool consumed = false;
+    bool notifyInputMethod = true;
+    window_->NotifyKeyEvent(nullptr, consumed, notifyInputMethod);
+}
+
+/**
+ * @tc.name: NotifyKeyEvent03
+ * @tc.desc: NotifyKeyEvent03 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent03, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    bool notifyInputMethod = true;
+    window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
+ * @tc.name: NotifyKeyEvent04
+ * @tc.desc: NotifyKeyEvent04 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
+    bool consumed = false;
+    bool notifyInputMethod = false;
+    window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
+ * @tc.name: CheckAndAddExtWindowFlags01
+ * @tc.desc: CheckAndAddExtWindowFlags01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, Function | SmallTest | Level3)
+{
+    window_->CheckAndAddExtWindowFlags();
+}
+
+/**
+ * @tc.name: CheckAndAddExtWindowFlags02
+ * @tc.desc: CheckAndAddExtWindowFlags02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, Function | SmallTest | Level3)
+{
+    window_->extensionWindowFlags_.bitData = 1;
+    window_->CheckAndAddExtWindowFlags();
+}
+
+/**
+ * @tc.name: CheckAndRemoveExtWindowFlags01
+ * @tc.desc: CheckAndRemoveExtWindowFlags01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, Function | SmallTest | Level3)
+{
+    window_->CheckAndRemoveExtWindowFlags();
+}
+
+/**
+ * @tc.name: CheckAndRemoveExtWindowFlags02
+ * @tc.desc: CheckAndRemoveExtWindowFlags02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags02, Function | SmallTest | Level3)
+{
+    window_->extensionWindowFlags_.bitData = 1;
+    window_->CheckAndRemoveExtWindowFlags();
+}
+
+/**
+ * @tc.name: GetHostWindowRect01
+ * @tc.desc: GetHostWindowRect01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect01, Function | SmallTest | Level3)
+{
+    Rect rect;
+    ASSERT_EQ(rect, window_->GetHostWindowRect(-1));
+}
+
+/**
+ * @tc.name: Show
+ * @tc.desc: Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->persistentId_ = 12345;
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(mockHostSession, nullptr);
+    window_->hostSession_ = mockHostSession;
+
+    window_->property_->displayId_ = DISPLAY_ID_INVALID;
+    EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
+    auto res = window_->Show();
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    window_->property_->displayId_ = 0;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_OK));
+    res = window_->Show();
+    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(window_->state_, WindowState::STATE_SHOWN);
+}
+
+/**
+ * @tc.name: Hide
+ * @tc.desc: Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Hide, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(mockHostSession, nullptr);
+    window_->hostSession_ = mockHostSession;
+
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto res = window_->Hide(0, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->persistentId_ = 12345;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    EXPECT_CALL(*mockHostSession, Background).Times(0);
+    res = window_->Hide(0, false, false);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    window_->state_ = WindowState::STATE_CREATED;
+    EXPECT_CALL(*mockHostSession, Background).Times(0);
+    res = window_->Hide(0, false, false);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    window_->state_ = WindowState::STATE_SHOWN;
+    EXPECT_CALL(*mockHostSession, Background).Times(1).WillOnce(Return(WSError::WS_OK));
+    res = window_->Hide(0, false, false);
+    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(window_->state_, WindowState::STATE_HIDDEN);
+
+    window_->state_ = WindowState::STATE_SHOWN;
+    EXPECT_CALL(*mockHostSession, Background).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));
+    res = window_->Hide(0, false, false);
+    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(window_->state_, WindowState::STATE_SHOWN);
 }
 
 /**
@@ -388,6 +729,23 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
 }
 
 /**
+ * @tc.name: TransferAccessibilityEvent01
+ * @tc.desc: TransferAccessibilityEvent01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+
+    AccessibilityEventInfo info;
+    int64_t uiExtensionIdLevel = 0;
+    ASSERT_EQ(WMError::WM_OK, window_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
+}
+
+/**
  * @tc.name: RegisterAvoidAreaChangeListener
  * @tc.desc: RegisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
@@ -429,6 +787,30 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows, Function | SmallT
 }
 
 /**
+ * @tc.name: HideNonSecureWindows01
+ * @tc.desc: HideNonSecureWindows01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_OK,window_->HideNonSecureWindows(false));
+}
+
+/**
+ * @tc.name: HideNonSecureWindows02
+ * @tc.desc: HideNonSecureWindows02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_OK,window_->HideNonSecureWindows(true));
+}
+
+/**
  * @tc.name: SetWaterMarkFlag
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
@@ -444,6 +826,30 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag, Function | SmallTest 
 }
 
 /**
+ * @tc.name: SetWaterMarkFlag01
+ * @tc.desc: SetWaterMarkFlag01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_OK,window_->SetWaterMarkFlag(false));
+}
+
+/**
+ * @tc.name: SetWaterMarkFlag02
+ * @tc.desc: SetWaterMarkFlag02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_OK,window_->SetWaterMarkFlag(true));
+}
+
+/**
  * @tc.name: UpdateExtWindowFlags
  * @tc.desc: UpdateExtWindowFlags Test
  * @tc.type: FUNC
@@ -455,6 +861,22 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowExtensionSessionImpl.UpdateExtWindowFlags(ExtensionWindowFlags(7),
         ExtensionWindowFlags(7)));
 }
+
+/**
+ * @tc.name: UpdateExtWindowFlags01
+ * @tc.desc: UpdateExtWindowFlags01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+
+    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+}
+
 
 /**
  * @tc.name: NotifyDensityFollowHost01
@@ -639,6 +1061,16 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | Smal
     displayInfo->SetVirtualPixelRatio(systemDensity);
     window->isDensityFollowHost_ = true;
     ASSERT_EQ(systemDensity, window->GetVirtualPixelRatio(displayInfo));
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio04
+ * @tc.desc: GetVirtualPixelRatio04 test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(1.0f, window_->GetVirtualPixelRatio(nullptr));
 }
 
 /**
@@ -829,24 +1261,26 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
 }
 
 /**
- * @tc.name: TriggerBindModalUIExtension
- * @tc.desc: TriggerBindModalUIExtension Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension, Function | SmallTest | Level3)
+* @tc.name: TriggerBindModalUIExtension01
+* @tc.desc: TriggerBindModalUIExtension01 Test
+* @tc.type: FUNC
+*/
+HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
+    window_->TriggerBindModalUIExtension();
+}
 
-    windowExtensionSessionImpl.hostSession_ = nullptr;
-
-    auto res = 0;
-    std::function<void()> func1 = [&]()
-    {
-        windowExtensionSessionImpl.TriggerBindModalUIExtension();
-        res = 1;
-    };
-    ASSERT_EQ(0, res);
+/**
+* @tc.name: TriggerBindModalUIExtension02
+* @tc.desc: TriggerBindModalUIExtension02 Test
+* @tc.type: FUNC
+*/
+HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    window_->hostSession_ = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->TriggerBindModalUIExtension();
 }
 
 /**
@@ -888,6 +1322,49 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, Function | SmallTest |
         windowExtensionSessionImpl.surfaceNode_ = RSSurfaceNode::Create(config);
     }
     ASSERT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetPrivacyMod03
+ * @tc.desc: SetPrivacyMod03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod03, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_NE(WMError::WM_OK, window_->SetPrivacyMode(true));
+}
+
+/**
+ * @tc.name: SetPrivacyMod04
+ * @tc.desc: SetPrivacyMod04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod04, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, window_->SetPrivacyMode(false));
+}
+
+/**
+ * @tc.name: SetPrivacyMod05
+ * @tc.desc: SetPrivacyMod05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    window_->state_ = WindowState::STATE_SHOWN;
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(WMError::WM_OK, window_->SetPrivacyMode(true));
 }
 
 /**
