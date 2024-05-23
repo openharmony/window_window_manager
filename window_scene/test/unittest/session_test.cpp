@@ -3421,7 +3421,7 @@ HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
     session_->isFocused_ = true;
     session_->property_ = new (std::nothrow) WindowSessionProperty();
     session_->property_->focusable_ = false;
-    bool isFocusabel = true;
+    bool isFocusable = true;
 
     auto result = session_->SetFocusable(isFocusable);
     ASSERT_EQ(result, WSError::WS_OK);
