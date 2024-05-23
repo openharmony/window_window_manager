@@ -476,20 +476,6 @@ bool Session::NeedNotify() const
     return needNotify_;
 }
 
-WSError Session::SetTouchable(bool touchable)
-{
-    SetSystemTouchable(touchable);
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (touchable !=  GetSessionProperty()->GetTouchable()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
-    }
-    UpdateSessionTouchable(touchable);
-    return WSError::WS_OK;
-}
-
 void Session::SetFocusedOnShow(bool focusedOnShow)
 {
     if (focusedOnShow == focusedOnShow_) {
@@ -503,6 +489,20 @@ bool Session::IsFocusedOnShow() const
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
     return focusedOnShow_;
+}
+
+WSError Session::SetTouchable(bool touchable)
+{
+    SetSystemTouchable(touchable);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (touchable !=  GetSessionProperty()->GetTouchable()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
+            static_cast<int>(touchable));
+    }
+    UpdateSessionTouchable(touchable);
+    return WSError::WS_OK;
 }
 
 bool Session::GetTouchable() const
