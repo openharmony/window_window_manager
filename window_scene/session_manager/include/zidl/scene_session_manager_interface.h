@@ -146,7 +146,7 @@ public:
         std::vector<std::int32_t>& result) = 0;
     virtual WMError GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
     {
-        return WMError::WS_OK;
+        return WMError::WM_OK;
     }
     virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override
     {
