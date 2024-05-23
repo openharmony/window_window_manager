@@ -182,8 +182,9 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
     });
 }
 
-WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError SceneSession::IsForegroundBypass(bool isFromClient, bool &isBypass)
 {
+    isBypass = false;
     // return when screen is locked and show without ShowWhenLocked flag
     if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
@@ -191,6 +192,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
         sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
         TLOGW(WmsLogTag::WMS_LIFE, "failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
+        isBypass = true;
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
@@ -199,8 +201,21 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             TLOGW(WmsLogTag::WMS_LIFE,
                 "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
                 GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+            isBypass = true;
             return WSError::WS_OK;
         }
+    }
+
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+{
+    bool isBypass = false;
+    WSError err = IsForegroundBypass(isFromClient, isBypass);
+    if (isBypass) {
+        // bypass场景下直接返回判定结果不需要继续走后续流程
+        return err;
     }
 
     auto task = [weakThis = wptr(this), property]() {
@@ -214,9 +229,11 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             session->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
-
+        int32_t persistentId = session->GetPersistentId();
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session foreground failed, ret=%{public}d persistentId=%{public}d",
+                ret, persistentId)
             return ret;
         }
         auto sessionProperty = session->GetSessionProperty();
@@ -226,10 +243,12 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         if (session->specificCallback_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            session->specificCallback_->onUpdateAvoidArea_(persistentId);
             session->specificCallback_->onWindowInfoUpdate_(
-                session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+                persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+        } else {
+            TLOGI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
         }
         return WSError::WS_OK;
     };
