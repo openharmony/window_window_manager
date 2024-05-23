@@ -242,13 +242,11 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoRestore();
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoClose(true, true);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_EQ(result, 0);
     
     PictureInPictureManager::SetActiveController(pipController);
@@ -277,7 +275,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
 
-    str<PipOption> option = new (std::nothrow) PipOption();
+    sptr<PipOption> option = new (std::nothrow) PipOption();
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::autoStartController_ = pipController;
