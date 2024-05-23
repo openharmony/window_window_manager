@@ -639,7 +639,6 @@ private:
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
-    void ToastBackgroundTask(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 
