@@ -70,7 +70,14 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
+    sptr<PictureInPictureController> pipController = 
+            new PictureInPictureController(option, nullptr, 100, nullptr);
+    PictureInPictureManager::activeController_ = nullptr;
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    PictureInPictureManager::RemoveActiveController(pipController);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
+
     PictureInPictureManager::SetActiveController(pipController);
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
@@ -186,15 +193,17 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
-    PictureInPictureManager::SetActiveController(pipController);
 
-    bool res1 = PictureInPictureManager::IsAttachedToSameWindow(100);
-    ASSERT_EQ(res1, true);
-    bool res2 = PictureInPictureManager::IsAttachedToSameWindow(1);
-    ASSERT_EQ(res2, false);
-
-    PictureInPictureManager::RemoveActiveController(pipController);
+    PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    bool res1 = PictureInPictureManager::IsAttachedToSameWindow(1);
+    ASSERT_EQ(res1, false);
+
+    PictureInPictureManager::SetActiveController(pipController);
+    bool res2 = PictureInPictureManager::IsAttachedToSameWindow(100);
+    ASSERT_EQ(res2, true);
+    bool res3 = PictureInPictureManager::IsAttachedToSameWindow(1);
+    ASSERT_EQ(res3, false);
 }
 
 /**
@@ -210,10 +219,13 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
-    PictureInPictureManager::SetActiveController(pipController);
 
-    sptr<Window> window = PictureInPictureManager::GetCurrentWindow();
+    PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    sptr<Window> window = PictureInPictureManager::GetCurrentWindow();
+    ASSERT_EQ(window, pipController->window_);
+    PictureInPictureManager::SetActiveController(pipController);
+    window = PictureInPictureManager::GetCurrentWindow();
     ASSERT_EQ(window, pipController->window_);
 }
 
@@ -225,28 +237,30 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
 HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 {
     int result = 0;
-    PictureInPictureManager::DoRestore();
-    PictureInPictureManager::DoClose(true, true);
-    std::string actionName = "test";
-    PictureInPictureManager::DoActionEvent(actionName, 0);
-
     sptr<PipOption> option = new (std::nothrow) PipOption();
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoRestore();
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    PictureInPictureManager::DoClose(true, true);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    std::string actionName = "test";
+    PictureInPictureManager::DoActionEvent(actionName, 0);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    ASSERT_EQ(result, 0);
+    
     PictureInPictureManager::SetActiveController(pipController);
     result++;
 
     PictureInPictureManager::DoRestore();
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
     const std::string ACTION_CLOSE = "close";
     const std::string ACTION_RESTORE = "restore";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
-    PictureInPictureManager::RemoveActiveController(pipController);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_EQ(result, 1);
 }
 
