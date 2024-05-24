@@ -97,8 +97,7 @@ HWTEST_F(ScenePersistenceTest, SaveSnapshot, Function | SmallTest | Level1)
     SessionInfo info;
     info.abilityName_ = bundleName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
 
     int32_t persistentId = 1423;
     ASSERT_NE(nullptr, scenePersistence);
