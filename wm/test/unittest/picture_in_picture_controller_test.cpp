@@ -292,6 +292,41 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
 }
 
 /**
+ * @tc.name: IsContextChange
+ * @tc.desc: IsContextChange
+ * @tc.type: FUNC
+ */
+ HWTEST_F(PictureInPictureControllerTest, IsContextChange, Function | SmallTest | Level2)
+ {
+    int result = 0;
+    float newWidth = 10.00;
+    float newHeight = 0;
+    float posX = 0;
+    float posY = 0;
+    Rect windowRect = {0, 0, 0, 0};
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
+    ASSERT_EQ(result, 0);
+    newWidth = 0;
+    newHeight = 20.00;
+    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
+    ASSERT_EQ(result, 0);
+    newHeight = 0;
+    posX = 5.5;
+    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
+    ASSERT_EQ(result, 0);
+    posX = 0;
+    posY = 5.5;
+    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
+    ASSERT_EQ(result, 0);
+ }
+
+/**
  * @tc.name: getSettingsAutoStartStatus
  * @tc.desc: getSettingsAutoStartStatus
  * @tc.type: FUNC
