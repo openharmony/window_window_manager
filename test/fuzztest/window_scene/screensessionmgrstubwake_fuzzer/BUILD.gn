@@ -63,7 +63,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SceneSessionMgrLStubSetFuzzTest",
+    ":ScreenSessionMgrStubWakeFuzzTest",
   ]
 }
 ###############################################################################
