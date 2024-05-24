@@ -166,8 +166,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
     option = nullptr;
-    sptr<Window> mainWindow_ = nullptr;
-    ASSERT_EQ(nullptr, mainWindow_);
+    sptr<Window> mainWindow = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
     EXPECT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
@@ -276,11 +275,8 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_EQ(result, 0);
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     pipControl->UpdateContentSize(width, height);
-    sptr<Window> window_ = nullptr;
-    ASSERT_EQ(nullptr, window_);
-    ASSERT_EQ(result, 0);
-    window_ = mw;
-    pipControl->UpdateContentSize(width, height);
+    sptr<Window> window = nullptr;
+    ASSERT_EQ(nullptr, window);
     ASSERT_EQ(result, 0);
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
 }
