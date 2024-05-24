@@ -214,7 +214,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     bool isBypass = false;
     WSError err = IsForegroundBypass(isFromClient, isBypass);
     if (isBypass) {
-        // bypass场景下直接返回判定结果不需要继续走后续流程
         return err;
     }
 
