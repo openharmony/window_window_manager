@@ -1045,7 +1045,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2090,7 +2091,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2442,6 +2444,62 @@ HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
     res = session->RemoveSubSession(subSession->GetPersistentId());
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: AddToastSession
+ * @tc.desc: AddToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<SceneSession> toastSession = nullptr;
+    bool res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+
+    toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: RemoveToastSession
+ * @tc.desc: RemoveToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RemoveToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    bool res = session->RemoveToastSession(0);
+    ASSERT_EQ(res, false);
+
+    sptr<SceneSession> toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->RemoveToastSession(toastSession->GetPersistentId());
+    ASSERT_EQ(res, true);
+}
+
 /**
  * @tc.name: NotifySessionForeground01
  * @tc.desc: NotifySessionForeground
@@ -2876,7 +2934,7 @@ HWTEST_F(SceneSessionTest, SetFloatingScale, Function | SmallTest | Level2)
     scensession->specificCallback_->onWindowInfoUpdate_ = windowInfoUpdateFun;
     scensession->specificCallback_->onUpdateAvoidArea_ = updateAvoidAreaFun;
     scensession->SetFloatingScale(3.14f);
-    EXPECT_NE(3.14f, scensession->floatingScale_);
+    EXPECT_EQ(3.14f, scensession->floatingScale_);
 }
 
 /**

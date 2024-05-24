@@ -539,6 +539,9 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    if (isScreenLocked_ == isLocked) {
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         isScreenLocked_ = isLocked;
@@ -561,6 +564,17 @@ bool ScreenSession::IsScreenRotationLocked()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return isScreenLocked_;
+}
+
+void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "isTouchEnabled:%{public}u", static_cast<uint32_t>(isTouchEnabled));
+    touchEnabled_.store(isTouchEnabled);
+}
+
+bool ScreenSession::IsTouchEnabled()
+{
+    return touchEnabled_.load();
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const

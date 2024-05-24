@@ -678,6 +678,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateAvailableArea(screenId, area);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME: {
+            int32_t delay = data.ReadInt32();
+            int32_t ret = SetScreenOffDelayTime(delay);
+            reply.WriteInt32(ret);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {
             ProcGetAvailableArea(data, reply);
             break;

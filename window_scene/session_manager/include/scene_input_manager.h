@@ -33,6 +33,7 @@ class SceneInputManager : public std::enable_shared_from_this<SceneInputManager>
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
     void FlushDisplayInfoToMMI(const bool forceFlush = false);
+    void FlushEmptyInfoToMMI();
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);

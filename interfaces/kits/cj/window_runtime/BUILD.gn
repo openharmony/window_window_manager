@@ -14,28 +14,8 @@
 import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
 
-config("window_manager_ffi_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [
-    "window_impl",
-    "window_manager_impl",
-    "../../../innerkits/wm",
-    "../../../innerkits/dm",
-    "../../../../wm/include",
-    "../../../../utils/include",
-  ]
-}
-
 config("window_ffi_kit_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [
-    "../../../innerkits/wm",
-    "../../../../utils/include",
-    "../../../../wm/include",
-    "../../../../wmserver/include",
-  ]
+  include_dirs = [ "./" ]
 }
 
 ohos_shared_library("cj_window_ffi") {
@@ -47,6 +27,8 @@ ohos_shared_library("cj_window_ffi") {
   }
 
   configs = [ "../../../../resources/config/build:coverage_flags" ]
+
+  public_configs = [ ":window_ffi_kit_config" ]
 
   if (!build_ohos_sdk) {
     sources = [

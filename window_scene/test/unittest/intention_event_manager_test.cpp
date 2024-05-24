@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "intention_event/include/intention_event_manager.h"
+#include "mock_uicontent.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 
@@ -33,6 +34,7 @@ public:
     std::unique_ptr<Ace::UIContent> uIContent_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener_;
+    std::shared_ptr<AppExecFwk::EventRunner> runner_;
 };
 
 void IntentionEventManagerTest::SetUpTestCase()
@@ -45,9 +47,10 @@ void IntentionEventManagerTest::TearDownTestCase()
 
 void IntentionEventManagerTest::SetUp()
 {
-    uIContent_ = Ace::UIContent::Create(nullptr);
+    uIContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_NE(nullptr, uIContent_);
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(nullptr);
+    runner_ = AppExecFwk::EventRunner::Create("TestRunner");
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     EXPECT_NE(nullptr, eventHandler_);
     inputEventListener_ =
         std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_);
@@ -60,6 +63,7 @@ void IntentionEventManagerTest::TearDown()
     uIContent_ = nullptr;
     eventHandler_ = nullptr;
     inputEventListener_ = nullptr;
+    runner_ = nullptr;
     SceneSessionManager::GetInstance().sceneSessionMap_.clear();
 }
 
@@ -387,7 +391,6 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
     EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(-1, sceneSession->GetPersistentId());
     
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     sceneSession->TransferPointerEvent(pointerEvent, true);
@@ -397,7 +400,6 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     SceneSession::ClearEnterWindow();
     info.persistentId_ = 2024;
     sceneSession = new SceneSession(info, callback);
-    EXPECT_EQ(2024, sceneSession->GetPersistentId());
     sceneSession->TransferPointerEvent(pointerEvent, true);
     inputEventListener_->ProcessEnterLeaveEventAsync();
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener2 =

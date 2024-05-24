@@ -336,6 +336,7 @@ enum class WindowSizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     UPDATE_DPI_SYNC,
     END,
@@ -392,9 +393,18 @@ enum class WindowGravity : uint32_t {
  */
 enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
-    DISTRIBUTE,
+    RESTORE,
     BY_NAME,
     BY_ABC,
+};
+
+/**
+ * @brief Enumerates restore type.
+ */
+enum class BackupAndRestoreType: int32_t {
+    NONE = 0,           // no backup and restore
+    CONTINUATION = 1,   // distribute
+    APP_RECOVERY = 2,   // app recovery
 };
 
 /**
@@ -775,6 +785,7 @@ enum class PiPWindowState : uint32_t {
     STATE_STARTED = 2,
     STATE_STOPPING = 3,
     STATE_STOPPED = 4,
+    STATE_RESTORING = 5,
 };
 
 /**
@@ -829,7 +840,7 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
 };
 
-using OnCallback = std::function<void(int64_t)>;
+using OnCallback = std::function<void(int64_t, int64_t)>;
 
 /**
  * @struct VsyncCallback
