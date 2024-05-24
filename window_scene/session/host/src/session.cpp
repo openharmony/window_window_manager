@@ -497,7 +497,7 @@ WSError Session::SetTouchable(bool touchable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (touchable !=  GetSessionProperty()->GetTouchable()) {
+    if (touchable != GetSessionProperty()->GetTouchable()) {
         TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
             static_cast<int>(touchable));
     }
