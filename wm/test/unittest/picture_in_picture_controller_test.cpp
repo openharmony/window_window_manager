@@ -141,7 +141,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
 
-    option = nullptr;
+    pipControl->option = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
 
     EXPECT_EQ(nullptr, windowOption);
@@ -165,7 +165,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
-    option = nullptr;
     sptr<Window> mainWindow = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
@@ -276,7 +275,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     pipControl->UpdateContentSize(width, height);
     sptr<Window> window = nullptr;
-    ASSERT_EQ(nullptr, window);
+    pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
 }
