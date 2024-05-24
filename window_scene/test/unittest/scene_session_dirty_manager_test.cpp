@@ -397,13 +397,25 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
     auto sessionList = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList.size());
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (!sceneSession) {
+        GTEST_LOG_(INFO) << "sceneSession is nullptr";
+        return;
+    }
     sessionMap.emplace(2, sceneSession);
     auto sessionList2 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList2.size());
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    if (!property) {
+        GTEST_LOG_(INFO) << "property is nullptr";
+        return;
+    }
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->SetSessionProperty(property);
     sptr<Session> session = new (std::nothrow) Session(info);
+    if (!session) {
+        GTEST_LOG_(INFO) << "session is nullptr";
+        return;
+    }
     sceneSession->SetParentSession(session);
     auto sessionList3 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(1, sessionList3.size());
@@ -419,7 +431,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (!sceneSession) {
+        GTEST_LOG_(INFO) << "sceneSession is nullptr";
+        return;
+    }
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    if (!property) {
+        GTEST_LOG_(INFO) << "property is nullptr";
+        return;
+    }
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetDragEnabled(false);
     sceneSession->SetSessionProperty(property);
