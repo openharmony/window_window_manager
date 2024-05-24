@@ -98,7 +98,8 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     ASSERT_EQ(PiPWindowState::STATE_UNDEFINED, pipControl->GetControllerState());
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
@@ -137,7 +138,8 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
     sptr<WindowOption> windowOption = nullptr;
 
     option->SetContext(nullptr);
@@ -164,7 +166,8 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
@@ -260,7 +263,8 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);
