@@ -56,7 +56,7 @@ void WindowExtensionSessionImplTest::SetUp()
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
     option->SetWindowName("WindowExtensionSessionImplTest");
-    window_ = new WindowExtensionSessionImpl(option);
+    window_ = new(std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window_);
 }
 
