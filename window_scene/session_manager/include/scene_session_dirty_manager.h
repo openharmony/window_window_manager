@@ -58,6 +58,8 @@ private:
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
     void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
     void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
+    void UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
+        MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
     void UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
@@ -65,6 +67,9 @@ private:
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
+    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+        MMI::WindowInfo& windowInfo) const;
+
     std::mutex mutexlock_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };

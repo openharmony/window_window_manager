@@ -36,6 +36,7 @@ ohos_executable("setresolution_screen") {
   external_deps = [
     "c_utils:utils",
     "graphic_surface:surface",
+    "init:libbegetutil",
   ]
 
   part_name = "window_manager"

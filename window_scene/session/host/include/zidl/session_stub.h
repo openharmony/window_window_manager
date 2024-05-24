@@ -52,7 +52,6 @@ private:
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
@@ -70,6 +69,8 @@ private:
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
+    int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

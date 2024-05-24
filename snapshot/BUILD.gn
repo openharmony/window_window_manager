@@ -43,6 +43,7 @@ ohos_executable("snapshot_display") {
   external_deps = [
     "c_utils:utils",
     "image_framework:image_native",
+    "init:libbegetutil",
   ]
 
   part_name = "window_manager"

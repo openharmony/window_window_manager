@@ -27,7 +27,7 @@ public:
         : IRemoteProxy<IScreenSessionManagerClient>(impl) {}
     virtual ~ScreenSessionManagerClientProxy() = default;
 
-    void SwitchUserCallback() override;
+    void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
         ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,

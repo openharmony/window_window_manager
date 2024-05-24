@@ -33,6 +33,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    WSError UpdateOrientation() override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;

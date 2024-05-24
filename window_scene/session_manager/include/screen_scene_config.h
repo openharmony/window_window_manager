@@ -43,6 +43,8 @@ public:
     static void SetCurvedCompressionAreaInLandscape();
     static std::vector<int> GetCurvedScreenBoundaryConfig();
     static uint32_t GetCurvedCompressionAreaInLandscape();
+    static bool IsSupportRotateWithSensor();
+    static std::string GetExternalScreenDefaultMode();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;

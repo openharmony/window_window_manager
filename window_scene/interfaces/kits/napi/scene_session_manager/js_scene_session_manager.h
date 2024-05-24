@@ -75,14 +75,14 @@ public:
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
-    static napi_value NotifySwitchingToCurrentUser(napi_env env, napi_callback_info info);
-    static napi_value UpdateConfig(napi_env env, napi_callback_info info);
+    static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value GetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
+    static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -123,11 +123,10 @@ private:
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
-    napi_value OnReportData(napi_env env, napi_callback_info info);
     napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
+    napi_value OnReportData(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
-    napi_value OnNotifySwitchingToCurrentUser(napi_env env, napi_callback_info info);
-    napi_value OnUpdateConfig(napi_env env, napi_callback_info info);
+    napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
@@ -136,6 +135,7 @@ private:
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
+    napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
@@ -146,7 +146,6 @@ private:
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
-    void OnSwitchingToAnotherUser();
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();
     void ProcessRecoverSceneSessionRegister();
@@ -156,7 +155,6 @@ private:
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessCallingSessionIdChangeRegister();
-    void ProcessSwitchingToAnotherUserRegister();
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

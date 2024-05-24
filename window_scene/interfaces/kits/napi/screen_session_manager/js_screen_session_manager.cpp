@@ -84,6 +84,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenLockEvent);
     BindNativeFunction(env, exportObj, "updateAvailableArea", moduleName,
         JsScreenSessionManager::UpdateAvailableArea);
+    BindNativeFunction(env, exportObj, "setScreenOffDelayTime", moduleName,
+        JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName,
@@ -162,6 +164,13 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
     WLOGD("[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetScreenOffDelayTime(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]SetScreenOffDelayTime");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetScreenOffDelayTime(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info)
@@ -508,6 +517,34 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnSetScreenOffDelayTime");
+    size_t argc = 1;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    int32_t delay;
+    if (!ConvertFromJsValue(env, argv[0], delay)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to delay");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetScreenOffDelayTime(delay);
+    napi_close_handle_scope(env, scope);
     return NapiGetUndefined(env);
 }
 
