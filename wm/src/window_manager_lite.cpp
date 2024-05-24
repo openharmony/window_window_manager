@@ -549,7 +549,7 @@ WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
 
 WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
 {
-    if (!info.empty()) {
+    if (!infos.empty()) {
         TLOGE(WmsLogTag::WMS_MAIN, "infos is not empty.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -562,7 +562,7 @@ WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persist
         TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
         return WMError::WM_OK;
     }
-    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds); 
+    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds);
 }
 
 WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
@@ -572,11 +572,7 @@ WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persist
         TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
         return WMError::WM_OK;
     }
-    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds); 
+    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
 }
-
-
-
-
 } // namespace Rosen
 } // namespace OHOS

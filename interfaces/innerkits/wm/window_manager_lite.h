@@ -158,7 +158,7 @@ public:
      * @brief Clear a specified set of sessions.
      *
      * @param persistentIds a vector of session persistentId.
-     * @return WM_OK means get success, others means get failed.
+     * @return WM_OK means clear session success, others means clear failed.
      */
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
 
@@ -167,7 +167,7 @@ public:
      *
      * @param persistentIds a vector of session persistentId.
      * @param clearFailedIds a vector of sessioni persistentId which is clear failed.
-     * @return WM_OK means get success, others means get failed.
+     * @return WM_OK means clear session success, others means clear failed.
      */
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
 private:

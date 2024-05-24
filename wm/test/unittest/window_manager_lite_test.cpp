@@ -324,7 +324,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest |
     infosResult.push_back(info2);
     infosResult.push_back(info3);
 
-    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
         Return(WMError::WM_OK)));
     
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
@@ -353,7 +353,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest |
     info1.bundleName_ = "calendar";
     infos.push_back(info1);
 
-    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
     
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
@@ -385,7 +385,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds = { 1, 2 };
 
-    EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
@@ -417,7 +417,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds = { 1, 2 };
     std::vector<int32_t> clearFailedIds;
-    EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);

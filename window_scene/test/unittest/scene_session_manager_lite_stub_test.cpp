@@ -142,7 +142,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         infos.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
-    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, 
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) override
     {
         clearFailedIds.push_back(1);
@@ -578,16 +578,16 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
 }
 
 /**
- * @tc.name: HandleGetAllMainWinodowInfos
- * @tc.desc: test function : HandleGetAllMainWinodowInfos
+ * @tc.name: HandleGetAllMainWindowInfos
+ * @tc.desc: test function : HandleGetAllMainWindowInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAllMainWinodowInfos, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAllMainWindowInfos, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetAllMainWinodowInfos(data, reply);
+        SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

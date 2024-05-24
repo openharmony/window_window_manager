@@ -64,7 +64,7 @@ private:
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleGetAllMainWinodowInfos(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply);
     int HandleClearMainSessions(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

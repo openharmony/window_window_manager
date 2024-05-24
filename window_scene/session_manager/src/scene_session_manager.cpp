@@ -8644,7 +8644,7 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
 {
     if (!infos.empty()) {
-        return WMError::WM_ERROR_INCALID_PARAM;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_MAIN, "Get all mainWindow infos failed, only support SA calling.");
@@ -8659,17 +8659,18 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         MainWindowInfo info;
         auto abilityInfo = session->GetSessionInfo().abilityInfo;
         if (abilityInfo == nullptr) {
-            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d abilityInfo is null." session->GetPersistentId());
+            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d abilityInfo is null.", session->GetPersistentId());
             continue;
         }
         info.pid_ = session->GetCallingPid();
         info.bundleName_ = session->GetSessionInfo().bundleName_;
         info.persistentId_ = session->GetPersistentId();
-        info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType)
+        info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
         TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info, Session id:%{public}d, bundleName:%{public}s, "
             "bundleType:%{public}d", session->GetPersistentId(), info.bundleName_.c_str(), info.bundleType_);
-
+        infos.push_back(info);
     }
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persistentIds,
@@ -8688,7 +8689,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
             clearFailedIds.push_back(persistentId);
             continue;
         }
-        if (!WindowHelper::IsMainWindow(session->GetWindowType())) {
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
             clearFailedIds.push_back(persistentId);
             continue;
