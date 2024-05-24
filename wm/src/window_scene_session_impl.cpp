@@ -428,6 +428,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         ret = CreateAndConnectSpecificSession();
     }
     if (ret == WMError::WM_OK) {
+        MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
     }
@@ -614,8 +615,9 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         }
         WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
         property_->SetModeSupportInfo(modeSupportInfo);
-        auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-        if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone) {
+        auto isPhone = windowSystemConfig_.uiType_ == "phone";
+        auto isPad = windowSystemConfig_.uiType_ == "pad";
+        if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone && !isPad) {
             SetFullScreen(true);
         }
         // get orientation configuration
@@ -1550,8 +1552,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
-        system::GetParameter("const.product.devicetype", "unknown") != "tablet") {
+        windowSystemConfig_.uiType_ != "phone" &&
+        windowSystemConfig_.uiType_ != "pad") {
         if (hostSession_ == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "hostSession is null");
             return WMError::WM_ERROR_NULLPTR;
@@ -1680,9 +1682,9 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 
     bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
         windowSystemConfig_.freeMultiWindowSupport_;
+
     if (isSwitchFreeMultiWindow || (WindowHelper::IsMainWindow(GetType()) &&
-        system::GetParameter("const.product.devicetype", "unknown") != "phone" &&
-        system::GetParameter("const.product.devicetype", "unknown") != "tablet")) {
+        windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad")) {
         if (hostSession_ == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "hostSession is null");
             return WMError::WM_ERROR_NULLPTR;
@@ -1721,11 +1723,6 @@ bool WindowSceneSessionImpl::IsFullScreen() const
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
-    if (GetMode() == WindowMode::WINDOW_MODE_FLOATING
-        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
-        /* FloatingWindow skip for Phone*/
-        return false;
-    }
     WindowType windowType = GetType();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
@@ -1851,7 +1848,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (system::GetParameter("const.product.devicetype", "unknown") != "2in1") {
+    if (windowSystemConfig_.uiType_ != "pc") {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1890,7 +1887,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isValidWindow = isMainWindow || (isPC && (isSubWindow || isDecorDialog));
     if (isValidWindow && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -1963,6 +1960,7 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
 
 WSError WindowSceneSessionImpl::HandleBackEvent()
 {
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
     bool isConsumed = false;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
@@ -2817,17 +2815,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
-        && system::GetParameter("const.product.devicetype", "unknown") == "pc") {
-        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        statusProperty.enable_ = false;
-        ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
-                static_cast<int32_t>(ret), GetWindowId());
-        }
-    }
-    if (system::GetParameter("const.product.devicetype", "unknown") == "2in1") {
+    if (windowSystemConfig_.uiType_ == "pc") {
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
             surfaceNode_->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {

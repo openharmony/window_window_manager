@@ -359,6 +359,64 @@ void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<Win
     surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
 }
 
+static void FillUnreliableWindowInfo(const sptr<WindowNode>& windowNode,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    if (windowNode == nullptr) {
+        WLOGFW("null window node.");
+        return;
+    }
+    sptr<UnreliableWindowInfo> info = new (std::nothrow) UnreliableWindowInfo();
+    if (info == nullptr) {
+        WLOGFE("null info.");
+        return;
+    }
+    info->windowId_ = static_cast<int32_t>(windowNode->GetWindowId());
+    info->windowRect_ = windowNode->GetWindowRect();
+    info->zOrder_ = windowNode->zOrder_;
+    infos.emplace_back(info);
+    WLOGFI("windowId = %{public}d", info->windowId_);
+}
+
+static bool CheckUnreliableWindowType(WindowType windowType)
+{
+    if (windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        windowType == WindowType::WINDOW_TYPE_TOAST) {
+        return true;
+    }
+    WLOGFI("false, WindowType = %{public}d", windowType);
+    return false;
+}
+
+void WindowRoot::GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) const
+{
+    WLOGFD("Called.");
+    for (const auto& [winId, windowNode] : windowNodeMap_) {
+        if (windowNode == nullptr) {
+            WLOGFW("null window node");
+            continue;
+        }
+        int32_t curWindowId = static_cast<int32_t>(winId);
+        if (curWindowId == windowId) {
+            WLOGFI("windowId: %{public}d is parameter chosen", curWindowId);
+            FillUnreliableWindowInfo(windowNode, infos);
+            continue;
+        }
+        if (!windowNode->currentVisibility_) {
+            WLOGFD("windowId: %{public}d is not visible", curWindowId);
+            continue;
+        }
+        WLOGFD("name = %{public}s, windowId = %{public}d, winType = %{public}d, "
+            "visible = %{public}d", windowNode->GetWindowName().c_str(),
+            curWindowId, windowNode->GetWindowType(), windowNode->currentVisibility_);
+        if (CheckUnreliableWindowType(windowNode->GetWindowType())) {
+            WLOGFI("windowId = %{public}d, WindowType = %{public}d", curWindowId, windowNode->GetWindowType());
+            FillUnreliableWindowInfo(windowNode, infos);
+        }
+    }
+}
+
 void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {

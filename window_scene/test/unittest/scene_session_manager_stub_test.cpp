@@ -659,6 +659,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAccessibilityWindowInfo, Function
 }
 
 /**
+ * @tc.name: HandleGetUnreliableWindowInfo
+ * @tc.desc: test HandleGetUnreliableWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t windowId = 0;
+    data.WriteInt32(windowId);
+
+    int res = stub_->HandleGetUnreliableWindowInfo(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetSessionContinueState
  * @tc.desc: test HandleSetSessionContinueState
  * @tc.type: FUNC

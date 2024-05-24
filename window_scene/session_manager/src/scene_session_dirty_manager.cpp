@@ -19,7 +19,6 @@
 #include <memory>
 #include <sstream>
 
-#include "input_manager.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -46,7 +45,7 @@ static bool operator==(const MMI::Rect left, const MMI::Rect right)
     return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
 }
 
-static MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
+MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
 {
     MMI::Direction rotation = MMI::DIRECTION0;
     if (NearEqual(degree, DIRECTION0)) {
@@ -403,6 +402,20 @@ void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession> sceneS
     }
 }
 
+void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    windowInfo.flags = 0;
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        if (!screenSession->IsTouchEnabled()) {
+            windowInfo.flags = MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
+        } else {
+            windowInfo.flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus());
+        }
+    }
+}
+
 MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>& sceneSession,
     const SceneSessionDirtyManager::WindowAction& action) const
 {
@@ -412,7 +425,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     }
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
     if (windowSessionProperty == nullptr) {
-        WLOGFE("SceneSession` property is nullptr");
+        WLOGFE("SceneSession property is nullptr");
         return {};
     }
     
@@ -451,7 +464,6 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
-        .flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus()),
         .displayId = displayId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
@@ -460,6 +472,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .pixelMap = pixelMap,
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
     };
+    UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
         static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
         WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);

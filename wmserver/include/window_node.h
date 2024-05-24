@@ -136,6 +136,7 @@ public:
     float GetAspectRatio() const;
     void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
     WindowVisibilityState GetVisibilityState() const;
+    bool GetTouchable() const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;
