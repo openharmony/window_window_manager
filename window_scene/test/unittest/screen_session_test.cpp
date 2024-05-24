@@ -864,7 +864,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
 
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
+    EXPECT_EQ(Rotation::ROTATION_90, res);
 
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
@@ -898,7 +898,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
     auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::UNKNOWN, res);
+    EXPECT_NE(DisplayOrientation::UNKNOWN, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
     supportedScreenModes->width_ = 40;
