@@ -624,7 +624,10 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
 ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
-  sources = [ "scene_session_test.cpp" ]
+  sources = [
+    "scene_session_test.cpp",
+    "scene_session_test2.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
