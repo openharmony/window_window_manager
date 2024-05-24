@@ -920,6 +920,25 @@ HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
     windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
     ASSERT_EQ(windowNode->GetVisibilityState(), WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
 }
+
+/**
+ * @tc.name: GetTouchable01
+ * @tc.desc: SetTouchable & GetTouchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeTest, GetTouchable01, Function | SmallTest | Level1)
+{
+    std::string windowName = "WindowNode33";
+    auto property = CreateWindowProperty(33, windowName);
+    ASSERT_NE(nullptr, property);
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    ASSERT_NE(nullptr, windowNode);
+
+    windowNode->SetTouchable(false);
+    ASSERT_EQ(false, windowNode->GetTouchable());
+    windowNode->SetTouchable(true);
+    ASSERT_EQ(true, windowNode->GetTouchable());
+}
 }
 }
 }

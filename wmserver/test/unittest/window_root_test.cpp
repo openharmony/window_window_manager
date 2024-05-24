@@ -1834,6 +1834,23 @@ HWTEST_F(WindowRootTest, GetVisibilityWindowInfo01, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: test WindowRoot GetUnreliableWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    int32_t windowId = 0;
+    sptr<WindowNode> windowNode = new WindowNode();
+    ASSERT_NE(windowNode, nullptr);
+    windowId = windowNode->GetWindowId();
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowId, windowNode));
+    ASSERT_NE(windowRoot_, nullptr);
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    windowRoot_->GetUnreliableWindowInfo(windowId, infos);
+}
+
+/**
  * @tc.name: AddWindowNode05
  * @tc.desc: test WindowRoot AddWindowNode05
  * @tc.type: FUNC

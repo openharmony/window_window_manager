@@ -72,6 +72,7 @@ public:
     virtual void ClearWindowAdapter();
 
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
+    virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);

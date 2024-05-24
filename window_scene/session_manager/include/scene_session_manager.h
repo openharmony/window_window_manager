@@ -69,6 +69,7 @@ struct SCBAbilityInfo {
 };
 class SceneSession;
 class AccessibilityWindowInfo;
+class UnreliableWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)>;
@@ -246,6 +247,8 @@ public:
     void NotifySessionTouchOutside(int32_t persistentId);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WMError GetUnreliableWindowInfo(int32_t windowId,
+        std::vector<sptr<UnreliableWindowInfo>>& infos) override;
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
 
     void OnScreenshot(DisplayId displayId);
