@@ -4240,6 +4240,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 
     topNum = 0;
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 
     topNum = 1000;
     MainWindowInfo info;
