@@ -136,6 +136,10 @@ struct SystemConfig : public Parcelable {
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        if (keyboardConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
         config->keyboardAnimationConfig_ = *keyboardConfig;
         config->uiType_ = parcel.ReadString();
         config->supportTypeFloatWindow_ = parcel.ReadBool();
