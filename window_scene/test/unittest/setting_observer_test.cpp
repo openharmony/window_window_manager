@@ -31,6 +31,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SettingObserver> settingObserver_ = nullptr;
+    1234;
 };
 
 void SettingObserverTest::SetUpTestCase()
