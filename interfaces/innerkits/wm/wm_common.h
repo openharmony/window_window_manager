@@ -336,6 +336,7 @@ enum class WindowSizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     UPDATE_DPI_SYNC,
     END,
@@ -839,7 +840,7 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
 };
 
-using OnCallback = std::function<void(int64_t)>;
+using OnCallback = std::function<void(int64_t, int64_t)>;
 
 /**
  * @struct VsyncCallback

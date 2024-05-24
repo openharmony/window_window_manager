@@ -914,6 +914,8 @@ WSError SceneSession::RaiseAppMainWindowToTop()
         if (session->IsFocusedOnShow()) {
             session->NotifyRequestFocusStatusNotifyManager(true, true);
             session->NotifyClick();
+        } else {
+            session->SetFocusedOnShow(true);
         }
         return WSError::WS_OK;
     };
@@ -1000,11 +1002,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     uint64_t displayId = GetSessionProperty()->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet") &&
+        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1051,8 +1052,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet")) {
+        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad")) {
         return;
     }
     if (!GetSessionProperty()) {
@@ -1147,8 +1147,8 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-            system::GetParameter("const.product.devicetype", "unknown") == "tablet") {
+            systemConfig_.uiType_ == "phone" ||
+            systemConfig_.uiType_ == "pad") {
             return true;
         }
     }
@@ -1431,10 +1431,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
-            auto is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+            auto isPC = systemConfig_.uiType_ == "pc";
             bool freeMultiWindowSupportDevices = systemConfig_.freeMultiWindowSupport_ &&
                 systemConfig_.freeMultiWindowEnable_;
-            if ((is2in1 || freeMultiWindowSupportDevices) &&
+            if ((isPC || freeMultiWindowSupportDevices) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
@@ -1550,11 +1550,6 @@ bool SceneSession::IsDecorEnable() const
     auto property = GetSessionProperty();
     if (property == nullptr) {
         WLOGE("property is nullptr");
-        return false;
-    }
-    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING
-        && system::GetParameter("const.product.devicetype", "unknown") == "phone") {
-        /* FloatingWindow skip for Phone */
         return false;
     }
     auto windowType = property->GetWindowType();
@@ -2240,6 +2235,21 @@ void SceneSession::SetForegroundInteractiveStatus(bool interactive)
 {
     Session::SetForegroundInteractiveStatus(interactive);
     NotifyAccessibilityVisibilityChange();
+    if (interactive) {
+        return;
+    }
+    for (auto toastSession : toastSession_) {
+        if (toastSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_TOAST, "toastSession session is nullptr");
+            continue;
+        }
+        auto state = toastSession->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            continue;
+        }
+        toastSession->SetActive(false);
+        toastSession->BackgroundTask();
+    }
 }
 
 void SceneSession::NotifyAccessibilityVisibilityChange()
@@ -2951,6 +2961,46 @@ bool SceneSession::RemoveSubSession(int32_t persistentId)
     return true;
 }
 
+bool SceneSession::AddToastSession(const sptr<SceneSession>& toastSession)
+{
+    if (toastSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_TOAST, "toastSession is nullptr");
+        return false;
+    }
+    const auto& persistentId = toastSession->GetPersistentId();
+    auto iter = std::find_if(toastSession_.begin(), toastSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter != toastSession_.end()) {
+        TLOGE(WmsLogTag::WMS_TOAST, "Toast ession is already exists, id: %{public}d, parentId: %{public}d",
+            toastSession->GetPersistentId(), GetPersistentId());
+        return false;
+    }
+    TLOGD(WmsLogTag::WMS_TOAST, "Success, id: %{public}d, parentId: %{public}d",
+        toastSession->GetPersistentId(), GetPersistentId());
+    toastSession_.push_back(toastSession);
+    return true;
+}
+
+bool SceneSession::RemoveToastSession(int32_t persistentId)
+{
+    auto iter = std::find_if(toastSession_.begin(), toastSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter == toastSession_.end()) {
+        TLOGE(WmsLogTag::WMS_TOAST, "Could not find toastSession, id: %{public}d, parentId: %{public}d",
+            persistentId, GetPersistentId());
+        return false;
+    }
+    TLOGD(WmsLogTag::WMS_TOAST, "Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
+    toastSession_.erase(iter);
+    return true;
+}
+
 void SceneSession::NotifyPiPWindowPrepareClose()
 {
     TLOGD(WmsLogTag::WMS_PIP, "NotifyPiPWindowPrepareClose");
@@ -2994,6 +3044,11 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
 {
     return subSession_;
+}
+
+std::vector<sptr<SceneSession>> SceneSession::GetToastSession() const
+{
+    return toastSession_;
 }
 
 WSRect SceneSession::GetSessionTargetRect() const

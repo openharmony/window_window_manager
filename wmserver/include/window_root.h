@@ -112,6 +112,7 @@ public:
     void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
     void GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& windowNodes);
     void GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+    void GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) const;
     WMError NotifyDesktopUnfrozen();
     void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
     bool HasMainFullScreenWindowShown(DisplayId displayId);

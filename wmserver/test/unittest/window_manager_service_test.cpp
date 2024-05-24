@@ -780,6 +780,19 @@ HWTEST_F(WindowManagerServiceTest, GetAccessibilityWindowInfo, Function | SmallT
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: GetUnreliableWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    int32_t windowId = 0;
+    WMError res = wms->GetUnreliableWindowInfo(windowId, infos);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetVisibilityWindowInfo
  * @tc.desc: GetVisibilityWindowInfo test
  * @tc.type: FUNC

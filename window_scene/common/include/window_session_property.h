@@ -284,6 +284,8 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
+    std::string uiType_;
+    bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -317,6 +319,12 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
+        if (!parcel.WriteString(uiType_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportTypeFloatWindow_)) {
+            return false;
+        }
         return true;
     }
 
@@ -331,6 +339,10 @@ struct SystemSessionConfig : public Parcelable {
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        if (keyboardConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
         config->keyboardAnimationConfig_ = *keyboardConfig;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
         config->miniWidthOfMainWindow_ = parcel.ReadUint32();
@@ -340,7 +352,14 @@ struct SystemSessionConfig : public Parcelable {
         config->backgroundswitch = parcel.ReadBool();
         config->freeMultiWindowEnable_ = parcel.ReadBool();
         config->freeMultiWindowSupport_ = parcel.ReadBool();
-        config->freeMultiWindowConfig_ = *parcel.ReadParcelable<FreeMultiWindowConfig>();
+        sptr<FreeMultiWindowConfig> freeMultiWindowConfig = parcel.ReadParcelable<FreeMultiWindowConfig>();
+        if (freeMultiWindowConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
+        config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
+        config->uiType_ = parcel.ReadString();
+        config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
 };

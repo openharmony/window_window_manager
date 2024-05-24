@@ -1338,6 +1338,22 @@ HWTEST_F(WindowSessionTest, NeedNotify, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetFocusedOnShow
+ * @tc.desc: SetFocusedOnShow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetFocusedOnShow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetFocusedOnShow(false);
+    auto focusedOnShow = session_->IsFocusedOnShow();
+    ASSERT_EQ(focusedOnShow, false);
+    session_->SetFocusedOnShow(true);
+    focusedOnShow = session_->IsFocusedOnShow();
+    ASSERT_EQ(focusedOnShow, true);
+}
+
+/**
  * @tc.name: SetTouchable01
  * @tc.desc: IsSessionValid() return false
  * @tc.type: FUNC

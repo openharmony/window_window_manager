@@ -3031,14 +3031,14 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleButtonVisible03, Function | SmallTe
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.uiType_ = "phone";
     WMError res = window->SetTitleButtonVisible(false, false, false);
-    std::string deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    if (deviceType == "phone") {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    }
-    if (deviceType == "2in1") {
-        ASSERT_EQ(res, WMError::WM_OK);
-    }
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->windowSystemConfig_.uiType_ = "pc";
+    res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
 }
 
