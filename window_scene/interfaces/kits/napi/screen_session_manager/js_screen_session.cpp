@@ -20,6 +20,8 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
 #include "window_manager_hilog.h"
+#include "singleton_container.h"
+#include "screen_manager.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -33,6 +35,7 @@ const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
+constexpr size_t ARGC_ONE = 1;
 } // namespace
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
@@ -56,6 +59,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
     BindNativeFunction(env, objValue, "setScreenRotationLocked", moduleName,
         JsScreenSession::SetScreenRotationLocked);
+    BindNativeFunction(env, objValue, "setTouchEnabled", moduleName,
+        JsScreenSession::SetTouchEnabled);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
     return objValue;
 }
@@ -191,7 +196,57 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
         return NapiGetUndefined(env);
     }
     screenSession_->SetScreenRotationLockedFromJs(isLocked);
+    NapiAsyncTask::CompleteCallback complete =
+        [isLocked](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked));
+            if (res == DmErrorCode::DM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+                WLOGFI("OnSetScreenRotationLocked success");
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(res),
+                                                  "JsScreenSession::OnSetScreenRotationLocked failed."));
+                WLOGFE("OnSetScreenRotationLocked failed");
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::OnSetScreenRotationLocked",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
+    return result;
+}
+
+napi_value JsScreenSession::SetTouchEnabled(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnSetTouchEnabled(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnSetTouchEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "napi called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    bool isTouchEnabled = true;
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "ConvertNativeValueTo isTouchEnabled failed!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    napi_get_value_bool(env, nativeVal, &isTouchEnabled);
+    if (screenSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to register screen change listener, session is null!");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    screenSession_->SetTouchEnabledFromJs(isTouchEnabled);
     return NapiGetUndefined(env);
 }
 

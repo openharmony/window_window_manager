@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "scenesessionmgrstublabel_fuzzer.h"
+#include "scenesessionmgrstubupdate_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -52,6 +52,38 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         parcel, reply, option);
     return true;
 }

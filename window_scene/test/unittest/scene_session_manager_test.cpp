@@ -712,6 +712,10 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml02, Function | SmallTest |
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultWindowMode>1 1</defaultWindowMode>"
+        "<uiType>phone</uiType>"
+        "<backgroundScreenLock enable=\"true\"></backgroundScreenLock>"
+        "<rotationMode>windowRotation</rotationMode>"
+        "<supportTypeFloatWindow enable=\"true\"></supportTypeFloatWindow>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -796,6 +800,54 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml05, Function | SmallTest |
     ssm_->ConfigWindowSceneXml();
     ASSERT_EQ(ssm_->systemConfig_.maxFloatingWindowSize_,
         static_cast<uint32_t>(1));
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml06
+ * @tc.desc: call uiType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml06, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<uiType>ut</uiType>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigWindowSceneXml();
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.uiType_, "ut");
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml07
+ * @tc.desc: call backgroundScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml07, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<backgroundScreenLock enable=\"true\"></backgroundScreenLock>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigWindowSceneXml();
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.backgroundScreenLock_, true);
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml08
+ * @tc.desc: call rotationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml08, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<rotationMode>rotation</rotationMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigWindowSceneXml();
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.rotationMode_, "rotation");
 }
 
 /**
@@ -1609,6 +1661,73 @@ HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation, Function | SmallTest 
     ssm_->ConfigKeyboardAnimation(animationConfig);
     ssm_->ConfigDefaultKeyboardAnimation();
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ConfigStatusBar
+ * @tc.desc: ConfigStatusBar config window immersive status bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStatusBar, Function | SmallTest | Level3)
+{
+    StatusBarConfig out;
+    WindowSceneConfig::ConfigItem enable;
+    enable.SetValue(true);
+    WindowSceneConfig::ConfigItem showHide;
+    showHide.SetProperty({{"enable", enable}});
+    WindowSceneConfig::ConfigItem item01;
+    WindowSceneConfig::ConfigItem contentColor;
+    contentColor.SetValue(std::string("#12345678"));
+    WindowSceneConfig::ConfigItem backgroundColor;
+    backgroundColor.SetValue(std::string("#12345678"));
+    item01.SetValue({{"show", showHide}, {"contentColor", contentColor}, {"backgroundColor", backgroundColor}});
+    bool result01 = ssm_->ConfigStatusBar(item01, out);
+    ASSERT_EQ(result01, true);
+    ASSERT_EQ(out.showHide_, true);
+    ASSERT_EQ(out.contentColor_, "#12345678");
+    ASSERT_EQ(out.backgroundColor_, "#12345678");
+}
+
+/**
+ * @tc.name: ConfigKeyboardAnimation
+ * @tc.desc: SceneSesionManager config keyboard animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowImmersive, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<immersive>"
+                "<inDesktopStatusBarConfig>"
+                    "<showHide enable=\"true\"/>"
+                    "<backgroundColor>#12341234</backgroundColor>"
+                    "<contentColor>#12341234</contentColor>"
+                "</inDesktopStatusBarConfig>"
+                "<inSplitStatusBarConfig>"
+                    "<upDownSplit>"
+                        "<showHide enable=\"true\"/>"
+                        "<backgroundColor>#12341234</backgroundColor>"
+                        "<contentColor>#12341234</contentColor>"
+                    "</upDownSplit>"
+                    "<leftRightSplit>"
+                        "<showHide enable=\"true\"/>"
+                        "<backgroundColor>#12341234</backgroundColor>"
+                        "<contentColor>#12341234</contentColor>"
+                    "</leftRightSplit>"
+                "</inSplitStatusBarConfig>"
+            "</immersive>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigWindowSceneXml();
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.showHide_, true);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.backgroundColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.contentColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.showHide_, true);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.backgroundColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.contentColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.showHide_, true);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.backgroundColor_, "#12341234");
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.contentColor_, "#12341234");
 }
 
 /**
@@ -3231,6 +3350,19 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos, Function | SmallTest | Level3
     SessionInfoBean sessionInfo;
     int result01 = ssm_->GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
     ASSERT_NE(result01, ERR_OK);
+}
+
+/**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: SceneSesionManager get unreliable window info
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level3)
+{
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
 }
 
 /**
