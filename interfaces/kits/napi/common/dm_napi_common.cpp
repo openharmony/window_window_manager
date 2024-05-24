@@ -26,25 +26,52 @@ namespace OHOS {
 napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value)
 {
     napi_value num;
-    GNAPI_INNER(napi_create_int32(env, value, &num));
-    GNAPI_INNER(napi_set_named_property(env, result, key, num));
-    return napi_ok;
+    napi_status ret = napi_ok;
+    ret = napi_create_int32(env, value, &num);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_create_int32 error, code is %{public}d", ret);
+        return ret;
+    }
+    ret = napi_set_named_property(env, result, key, num);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value)
 {
     napi_value num;
-    GNAPI_INNER(napi_create_uint32(env, value, &num));
-    GNAPI_INNER(napi_set_named_property(env, result, key, num));
-    return napi_ok;
+    napi_status ret = napi_ok;
+    ret = napi_create_uint32(env, value, &num);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_create_uint32 error, code is %{public}d", ret);
+        return ret;
+    }
+    ret = napi_set_named_property(env, result, key, num);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
 {
     napi_value undefined;
-    GNAPI_INNER(napi_get_undefined(env, &undefined));
-    GNAPI_INNER(napi_set_named_property(env, result, key, undefined));
-    return napi_ok;
+    napi_status ret = napi_ok;
+    ret = napi_get_undefined(env, &undefined);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_get_undefined error, code is %{public}d", ret);
+        return ret;
+    }
+    ret = napi_set_named_property(env, result, key, undefined);
+    if (ret != napi_ok) {
+        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 bool CheckCallingPermission(const std::string &permission)

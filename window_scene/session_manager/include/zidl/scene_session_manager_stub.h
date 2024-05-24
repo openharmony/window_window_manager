@@ -36,6 +36,7 @@ private:
     static const std::map<uint32_t, SceneSessionManagerStubFunc> stubFuncMap_;
 
     int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
+    int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
     int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
