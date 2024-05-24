@@ -403,5 +403,23 @@ HWTEST_F(ScreenSessionManagerClientTest, GetDeviceScreenConfig, Function | Small
     DeviceScreenConfig deviceScreenConfig = screenSessionManagerClient_->GetDeviceScreenConfig();
     EXPECT_FALSE(deviceScreenConfig.rotationPolicy_.empty());
 }
+
+/**
+ * @tc.name: OnUpdateFoldDisplayMode
+ * @tc.desc: OnUpdateFoldDisplayMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode, Function | SmallTest | Level2)
+{
+    screenSessionManagerClient_->OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    auto ret1 = screenSessionManagerClient_->GetFoldDisplayMode();
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, ret1);
+    screenSessionManagerClient_->OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
+    auto ret2 = screenSessionManagerClient_->GetFoldDisplayMode();
+    EXPECT_EQ(FoldDisplayMode::FULL, ret2);
+    screenSessionManagerClient_->OnUpdateFoldDisplayMode(FoldDisplayMode::MAIN);
+    auto ret3 = screenSessionManagerClient_->GetFoldDisplayMode();
+    EXPECT_EQ(FoldDisplayMode::MAIN, ret3);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -473,9 +473,23 @@ struct SystemUIStatusBarConfig {
     std::string immersiveStatusBarContentColor_ = "#ffffff";
 };
 
+struct StatusBarConfig {
+    bool showHide_ = false;
+    std::string contentColor_ = "#000000";
+    std::string backgroundColor_ = "#000000";
+};
+
+struct WindowImmersive {
+    StatusBarConfig desktopStatusBarConfig_;
+    StatusBarConfig leftRightStatusBarConfig_;
+    StatusBarConfig upDownStatusBarConfig_;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-
+    std::string uiType_ = "pad";
+    bool backgroundScreenLock_ = false;
+    std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
@@ -483,6 +497,7 @@ struct AppWindowSceneConfig {
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
+    WindowImmersive windowImmersive_;
 };
 
 struct DeviceScreenConfig {

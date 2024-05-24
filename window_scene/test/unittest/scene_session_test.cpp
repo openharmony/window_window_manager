@@ -2444,6 +2444,62 @@ HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
     res = session->RemoveSubSession(subSession->GetPersistentId());
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: AddToastSession
+ * @tc.desc: AddToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<SceneSession> toastSession = nullptr;
+    bool res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+
+    toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: RemoveToastSession
+ * @tc.desc: RemoveToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RemoveToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    bool res = session->RemoveToastSession(0);
+    ASSERT_EQ(res, false);
+
+    sptr<SceneSession> toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->RemoveToastSession(toastSession->GetPersistentId());
+    ASSERT_EQ(res, true);
+}
+
 /**
  * @tc.name: NotifySessionForeground01
  * @tc.desc: NotifySessionForeground

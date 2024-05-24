@@ -287,8 +287,12 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
 int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleTerminateSession");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -302,8 +306,12 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleSessionException");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -320,8 +328,12 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleChangeSessionVisibilityWithStatusBar");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -346,8 +358,12 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();

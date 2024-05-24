@@ -181,9 +181,7 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
-
-    bool isPcDevice = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (isPcDevice) {
+    if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
     } else {
         SetSensorSubscriptionEnabled();
@@ -405,7 +403,7 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
 
 void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession)
 {
-    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
     if (mirrorSession == nullptr || !phyMirrorEnable) {
         return;
     }
@@ -446,7 +444,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
-    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
@@ -862,7 +860,7 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
 
 sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property)
 {
-    bool phyMirrorEnable = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
     sptr<ScreenSession> session = nullptr;
     ScreenId defScreenId = GetDefaultScreenId();
     TLOGI(WmsLogTag::DMS, "GetScreenSessionInner: screenId:%{public}" PRIu64 "", screenId);
@@ -1382,9 +1380,7 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 
 void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-    auto isTablet = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
-    if (isPhone || isTablet) {
+    if (ScreenSceneConfig::IsSupportRotateWithSensor()) {
         if (status == ScreenPowerStatus::POWER_STATUS_ON) {
             TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();

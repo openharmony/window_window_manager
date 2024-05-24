@@ -176,6 +176,8 @@ private:
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
 
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;

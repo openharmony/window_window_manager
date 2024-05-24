@@ -24,12 +24,10 @@
 #include "session/host/include/scene_session.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
+#include "input_manager.h"
 
-namespace OHOS::MMI {
-    struct WindowInfo;
-    struct Rect;
-}
 namespace OHOS::Rosen {
+MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode);
 class SceneSessionDirtyManager {
 private:
     enum WindowAction : uint32_t {
@@ -67,6 +65,9 @@ private:
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
+    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+        MMI::WindowInfo& windowInfo) const;
+
     std::mutex mutexlock_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };
