@@ -141,7 +141,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
 
-    pipControl->option = nullptr;
+    pipControl->pipOption_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
 
     EXPECT_EQ(nullptr, windowOption);
