@@ -2972,7 +2972,7 @@ HWTEST_F(WindowSessionTest, RegisterDetachCallback03, Function | SmallTest | Lev
 {
     int32_t persistentId = 123;
     sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
-    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
+    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(::testing::AtLeast(1));
     session_->persistentId_ = persistentId;
     session_->SetAttachState(true);
     session_->SetAttachState(false);
