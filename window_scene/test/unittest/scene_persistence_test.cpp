@@ -195,7 +195,7 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     // create pixelMap
     const uint32_t colors[1] = { 0x6f0000ff };
     constexpr uint32_t COMMON_SIZE = 1;
-    uint32_t colorsLength = sizeof(colors) / sizeof(color[0]);
+    uint32_t colorsLength = sizeof(colors) / sizeof(colors[0]);
     const int32_t offset = 0;
     Media::InitializationOptions opts;
     opts.size.width = COMMON_SIZE;
