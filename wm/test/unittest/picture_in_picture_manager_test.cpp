@@ -115,7 +115,7 @@ HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest 
 HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
-    sptr<PictureInPictureController> pipController = 
+    sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::SetActiveController(pipController);
@@ -157,9 +157,6 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
 }
 
 /**
-
-
-
  * @tc.name: DetachAutoStartController
  * @tc.desc: DetachAutoStartController
  * @tc.type: FUNC
