@@ -25,6 +25,7 @@
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "input_manager.h"
+
 namespace OHOS::Rosen {
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode);
 class SceneSessionDirtyManager {
