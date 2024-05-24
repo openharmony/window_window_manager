@@ -123,6 +123,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            if (agent == nullptr) {
+                WLOGFE("agent is nullptr");
+                break;
+            }
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = RegisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));
@@ -130,6 +134,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            if (agent == nullptr) {
+                WLOGFE("agent is nullptr");
+                break;
+            }
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             DMError ret = UnregisterDisplayManagerAgent(agent, type);
             reply.WriteInt32(static_cast<int32_t>(ret));

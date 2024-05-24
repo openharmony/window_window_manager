@@ -268,10 +268,31 @@ namespace {
 
     /**
      * @tc.name: OnRemoteRequest12
-     * @tc.desc: TRANS_ID_ON_FOLD_STATUS_CHANGED
+     * @tc.desc: TRANS_ID_ON_PRIVATE_WINDOW_LIST
      * @tc.type: FUNC
      */
     HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest12, Function | SmallTest | Level1)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+
+        data.WriteInterfaceToken(DisplayManagerAgentStub::GetDescriptor());
+        DisplayId displayId = 0;
+        data.WriteUint64(displayId);
+        std::vector<std::string> privacyWindowList{"win0", "win1"};
+        data.WriteStringVector(privacyWindowList);
+        uint32_t code = static_cast<uint32_t>(IDisplayManagerAgent::TRANS_ID_ON_PRIVATE_WINDOW_LIST);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, 0);
+    }
+
+    /**
+     * @tc.name: OnRemoteRequest13
+     * @tc.desc: TRANS_ID_ON_FOLD_STATUS_CHANGED
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -286,11 +307,11 @@ namespace {
     }
 
     /**
-     * @tc.name: OnRemoteRequest13
+     * @tc.name: OnRemoteRequest14
      * @tc.desc: TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -306,11 +327,11 @@ namespace {
     }
 
     /**
-     * @tc.name: OnRemoteRequest14
+     * @tc.name: OnRemoteRequest15
      * @tc.desc: TRANS_ID_ON_DISPLAY_MODE_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -325,11 +346,11 @@ namespace {
     }
 
     /**
-     * @tc.name: OnRemoteRequest15
+     * @tc.name: OnRemoteRequest16
      * @tc.desc: TRANS_ID_ON_AVAILABLE_AREA_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -342,6 +363,26 @@ namespace {
         data.WriteUint32(1);
         uint32_t code = static_cast<uint32_t>(IDisplayManagerAgent::TRANS_ID_ON_AVAILABLE_AREA_CHANGED);
         int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, 0);
+    }
+
+    /**
+     * @tc.name: ProcPrivateWindowList
+     * @tc.desc: ProcPrivateWindowList test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DisplayManagerAgentStubTest, ProcPrivateWindowList, Function | SmallTest | Level1)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+
+        data.WriteInterfaceToken(DisplayManagerAgentStub::GetDescriptor());
+        DisplayId displayId = 0;
+        data.WriteUint64(displayId);
+        std::vector<std::string> privacyWindowList{"win0", "win1"};
+        data.WriteStringVector(privacyWindowList);
+        int res = stub_->ProcPrivateWindowList(data);
         EXPECT_EQ(res, 0);
     }
 }

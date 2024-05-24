@@ -19,14 +19,9 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
-                                          "SessionDisplayPowerController" };
-}
-
 bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
-    WLOGFI("reason:%{public}u", reason);
+    TLOGI(WmsLogTag::DMS, "reason:%{public}u", reason);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
@@ -34,11 +29,11 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
-    WLOGFI("[UL_POWER]state:%{public}u", state);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayState_ == state && ScreenSessionManager::GetInstance().BlockSetDisplayState()) {
-            WLOGFE("[UL_POWER]state is already set");
+            TLOGE(WmsLogTag::DMS, "[UL_POWER]state is already set");
             return false;
         }
     }
@@ -48,7 +43,8 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration() &&
+                ScreenSessionManager::GetInstance().GetNotifyLockOrNot()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                 ScreenSessionManager::GetInstance().BlockScreenOnByCV();
@@ -60,7 +56,8 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration() &&
+                ScreenSessionManager::GetInstance().GetNotifyLockOrNot()) {
                 ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
                     EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
                 WaitScreenOffNotify(state);
@@ -68,7 +65,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             break;
         }
         default: {
-            WLOGFW("[UL_POWER]unknown DisplayState!");
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]unknown DisplayState!");
             return false;
         }
     }
@@ -95,7 +92,7 @@ DisplayState SessionDisplayPowerController::GetDisplayState(DisplayId displayId)
 
 void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
-    WLOGFI("[UL_POWER]DisplayEvent:%{public}u", event);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
         std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);

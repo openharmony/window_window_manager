@@ -39,6 +39,7 @@ constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
+constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
 {
@@ -261,6 +262,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         .width = mainScreenWidth,
         .height = mainScreenHeight,
         .focusWindowId = focusId,
+        .currentUserId = currentUserId_,
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
     for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
@@ -272,7 +274,23 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
     }
     TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowinfolst.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
-} 
+}
+
+void SceneInputManager::FlushEmptyInfoToMMI()
+{
+    auto task = [this]() {
+        TLOGI(WmsLogTag::WMS_EVENT, "Flush empty info to MMI");
+        MMI::DisplayGroupInfo displayGroupInfo = {
+            .width = 0,
+            .height = 0,
+            .focusWindowId = EMPTY_FOCUS_WINDOW_ID,
+            .currentUserId = currentUserId_};
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+    };
+    if (eventHandler_) {
+        eventHandler_->PostTask(task);
+    }
+}
 
 void SceneInputManager::NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession, const WindowUpdateType& type)
 {
@@ -322,6 +340,8 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
     int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusId != lastFocusId_) {
         lastFocusId_ = focusId;
+        lastDisplayInfos_ = displayInfos;
+        lastWindowInfoList_ = windowInfoList;
         return true;
     }
 
@@ -371,10 +391,32 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
 }
 
-void SceneInputManager::FlushDisplayInfoToMMI()
+void SceneInputManager::SetUserBackground(bool userBackground)
 {
-    auto task = [this]() {
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
+    isUserBackground_ = userBackground;
+}
+
+bool SceneInputManager::IsUserBackground()
+{
+    return isUserBackground_;
+}
+
+void SceneInputManager::SetCurrentUserId(int32_t userId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Current userId = %{public}d", userId);
+    currentUserId_ = userId;
+    MMI::InputManager::GetInstance()->SetCurrentUser(userId);
+}
+
+void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
+{
+    auto task = [this, forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
+        if (isUserBackground_) {
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
+            return;
+        }
         if (sceneSessionDirty_ == nullptr) {
             return;
         }
@@ -382,7 +424,7 @@ void SceneInputManager::FlushDisplayInfoToMMI()
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
         std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
-        if (!CheckNeedUpdate(displayInfos, windowInfoList)) {
+        if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
         PrintWindowInfo(windowInfoList);

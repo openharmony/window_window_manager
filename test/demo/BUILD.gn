@@ -53,6 +53,7 @@ ohos_executable("demo_screenshot_listener") {
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
   ]
 
   external_deps = [

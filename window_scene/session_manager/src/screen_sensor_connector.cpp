@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER, "ScreenSensorConnector"};
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     constexpr int32_t MOTION_ACTION_PORTRAIT = 0;
     constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
@@ -37,7 +36,7 @@ sptr<RotationMotionEventCallback> MotionSubscriber::motionEventCallback_ = nullp
 
 void ScreenSensorConnector::SubscribeRotationSensor()
 {
-    WLOGFD("dms: subscribe rotation-related sensor");
+    TLOGD(WmsLogTag::DMS, "dms: subscribe rotation-related sensor");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
     if (MotionSubscriber::isMotionSensorSubscribed_) {
@@ -57,9 +56,9 @@ void ScreenSensorConnector::UnsubscribeRotationSensor()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    WLOGFI("dms: Subscribe motion Sensor");
+    TLOGI(WmsLogTag::DMS, "dms: Subscribe motion Sensor");
     if (isMotionSensorSubscribed_) {
-        WLOGFE("dms: motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor's already subscribed");
         return;
     }
     sptr<RotationMotionEventCallback> callback = new (std::nothrow) RotationMotionEventCallback();
@@ -77,7 +76,7 @@ void MotionSubscriber::SubscribeMotionSensor()
 void MotionSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        WLOGFI("dms: Unsubscribe motion sensor");
+        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe motion sensor");
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);

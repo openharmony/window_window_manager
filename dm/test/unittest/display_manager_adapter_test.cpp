@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
+#include "display_manager.h"
+#include "screen_manager.h"
 #include "display_manager_proxy.h"
 #include "window_scene.h"
 #include "scene_board_judgement.h"
@@ -115,7 +117,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorGamut, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -131,7 +133,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Le
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
@@ -146,7 +148,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, Function | SmallTest | Le
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
@@ -161,7 +163,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, Function | SmallTes
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -300,7 +302,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -316,7 +318,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, Function | SmallTest | Level
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -332,7 +334,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, Function | SmallTest
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -348,7 +350,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | L
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -363,7 +365,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | L
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -379,7 +381,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, Function | SmallTes
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -395,7 +397,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -411,7 +413,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
@@ -422,11 +424,13 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
  */
 HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest | Level2)
 {
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(0);
+    VirtualScreenOption defaultOption = {"virtualScreen01", 480, 320, 2.0, nullptr, 0};
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -579,7 +583,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 /**

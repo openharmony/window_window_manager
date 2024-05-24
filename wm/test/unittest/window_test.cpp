@@ -425,6 +425,20 @@ HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetImmersiveModeEnabledState
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetImmersiveModeEnabledState, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetImmersiveModeEnabledState(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetLayoutFullScreen
  * @tc.desc: get
  * @tc.type: FUNC
@@ -1631,6 +1645,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
+    
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     } else {
@@ -2289,7 +2304,8 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     uint32_t rate = 120;
-    window->FlushFrameRate(rate);
+    bool isAnimatorStopped = true;
+    window->FlushFrameRate(rate, isAnimatorStopped);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2332,6 +2348,36 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->UnregisterWindowRectChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: RegisterKeyboardPanelInfoChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
+    auto ret = window->RegisterKeyboardPanelInfoChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterKeyboardPanelInfoChangeListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
+    auto ret = window->UnregisterKeyboardPanelInfoChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2403,6 +2449,216 @@ HWTEST_F(WindowTest, GetMainWindowWithContext, Function | SmallTest | Level2)
     window->GetSubWindow(parentId);
     window->UpdateConfigurationForAll(configuration);
     ASSERT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: SetTopmost|GetWIsTopmostindowWithId
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTopmost, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetTopmost(false);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(false, window->IsTopmost());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetUIContentByName
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetUIContentByName, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    napi_env env = nullptr;
+    napi_value storage = nullptr;
+    auto ret = window->SetUIContentByName("/system/etc/window/resources/test.abc", env, storage);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: TriggerBindModalUIExtension
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, TriggerBindModalUIExtension, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> winOption = nullptr;
+    winOption = new(std::nothrow) OHOS::Rosen::WindowOption();
+    ASSERT_NE(nullptr, winOption);
+    winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowOption> option = new WindowOption();
+    sptr<Window> window = Window::Create("TriggerBindModalUIExtension", option);
+    if (window != nullptr) {
+        ASSERT_NE(nullptr, window);
+        window->TriggerBindModalUIExtension();
+    }
+    sptr<Window> window_ = new Window();
+    ASSERT_NE(nullptr, window_);
+    window_->PerformBack();
+}
+
+/**
+ * @tc.name: RegisterTransferComponentDataForResultListener
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterTransferComponentDataForResultListener, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    NotifyTransferComponentDataForResultFunc func;
+    auto ret = true;
+    window->RegisterTransferComponentDataForResultListener(func);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetTextFieldAvoidInfo|KeepKeyboardOnFocus
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTextFieldAvoidInfo, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetTextFieldAvoidInfo(50.0, 100.0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    auto retur = window->KeepKeyboardOnFocus(false);
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, retur);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test01
+ * @tc.desc: Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    SystemBarProperty prop;
+    ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorVisible(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true));
+    auto var = 5;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorHeight(var));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorHeight(var));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->ClearKeyEventFilter());
+    IWindowVisibilityChangedListener windowVisibilityChangedListener;
+    windowVisibilityChangedListener.OnWindowVisibilityChangedCallback(false);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test02
+ * @tc.desc: Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test02, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    IWindowLifeCycle windowLifeCycle;
+    windowLifeCycle.AfterResumed();
+    windowLifeCycle.AfterPaused();
+    windowLifeCycle.AfterDestroyed();
+    IWindowStatusChangeListener windowStatusChangeListener;
+    windowStatusChangeListener.OnWindowStatusChange(WindowStatus::WINDOW_STATUS_UNDEFINED);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDefaultDensityEnabled(true));
+    ASSERT_EQ(false, window->GetDefaultDensityEnabled());
+    Rect rect_ = {0, 0, 0, 0};
+    window->UpdatePiPRect(rect_, WindowSizeChangeReason::UNDEFINED);
+    IWindowRectChangeListener windowRectChangeListener;
+    windowRectChangeListener.OnRectChange(rect_, WindowSizeChangeReason::UNDEFINED);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test03
+ * @tc.desc: Test03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    KeyEventFilterFunc keyEventFilterFunc;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetKeyEventFilter(keyEventFilterFunc));
+    IWindowNoInteractionListener windowNoInteractionListener;
+    windowNoInteractionListener.OnWindowNoInteractionCallback();
+    windowNoInteractionListener.SetTimeout(100);
+    ASSERT_EQ(0, windowNoInteractionListener.GetTimeout());
+    TitleButtonRect titleButtonRect = {3, 3, 3, 3};
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetTitleButtonArea(titleButtonRect));
+    IWindowTitleButtonRectChangedListener windowTitleButtonRectChangedListener;
+    windowTitleButtonRectChangedListener.OnWindowTitleButtonRectChanged(titleButtonRect);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test04
+ * @tc.desc: Test04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test04, Function | SmallTest | Level2)
+{
+    ExtensionWindowFlags flags;
+    ASSERT_EQ(flags.bitData, 0);
+    ExtensionWindowFlags flags1(7);
+    ASSERT_EQ(flags1.bitData, 7);
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(0));
+    sptr<IKeyboardPanelInfoChangeListener> listener = new IKeyboardPanelInfoChangeListener();
+    KeyboardPanelInfo keyboardPanelInfo;
+    listener->OnKeyboardPanelInfoChanged(keyboardPanelInfo);
+    window->TriggerBindModalUIExtension();
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWaterMarkFlag(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetGrayScale(0));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test05
+ * @tc.desc: Test05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    auto mainWinId = 0;
+    auto window1 = window->GetTopWindowWithId(mainWinId);
+    ASSERT_EQ(nullptr, window1);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Test06
+ * @tc.desc: Test06
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Test06, Function | SmallTest | Level2)
+{
+    KeyboardLayoutParams param;
+    KeyboardLayoutParams param1;
+    ASSERT_EQ(true, (param == param1));
+    ASSERT_EQ(false, (param != param1));
+    ASSERT_EQ(true, param.isEmpty());
+    Parcel parcel;
+    Rect rect = {0, 0, 0, 0};
+    ASSERT_EQ(false, KeyboardLayoutParams::ReadParcel(parcel, rect));
+    parcel.WriteUint32(0);
+    ASSERT_EQ(nullptr, KeyboardLayoutParams::Unmarshalling(parcel));
 }
 }
 } // namespace Rosen

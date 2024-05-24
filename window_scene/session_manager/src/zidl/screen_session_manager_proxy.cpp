@@ -1380,11 +1380,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(
         WLOGFW("SendRequest failed");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
-    if (pixelMap == nullptr) {
-        WLOGFW("SendRequest nullptr.");
-        return nullptr;
-    }
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>()); // need't to check nullptr
     *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     rect.left = reply.ReadInt32();
     rect.top = reply.ReadInt32();
@@ -2043,6 +2039,22 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
     }
 }
 
+void ScreenSessionManagerProxy::SwitchUser()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SWITCH_USER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 ScreenProperty ScreenSessionManagerProxy::GetScreenProperty(ScreenId screenId)
 {
     MessageParcel data;
@@ -2192,7 +2204,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -2202,6 +2214,54 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
+    if (!data.WriteBool(hasPrivate)) {
+        WLOGFE("Write hasPrivate failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
+    if (!data.WriteStringVector(privacyWindowList)) {
+        WLOGFE("Write privacyWindowList failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
@@ -2231,6 +2291,27 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
+{
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return 0;
+    }
+    if (!data.WriteInt32(delay)) {
+        WLOGFE("Write delay failed");
+        return 0;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return 0;
+    }
+    return reply.ReadInt32();
 }
 
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)

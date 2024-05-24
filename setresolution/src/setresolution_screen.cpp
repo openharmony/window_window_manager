@@ -18,9 +18,16 @@
 #include "dm_common.h"
 #include "screen_manager.h"
 #include "setresolution_utils.h"
+#include "parameters.h"
 
 using namespace OHOS;
 using namespace OHOS::Rosen;
+using OHOS::system::GetIntParameter;
+
+// debug
+constexpr int32_t DEBUG_ON_DEFAULT = 0;
+static const std::string ENG_PARAMETER = "const.debuggable";
+const bool IS_ENG_MODE = static_cast<bool>(GetIntParameter(ENG_PARAMETER, DEBUG_ON_DEFAULT));
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +36,12 @@ int main(int argc, char *argv[])
     if (!SetResolutionUtils::ProcessArgs(argc, argv, cmdArgments)) {
         return 0;
     }
+
+    if (!IS_ENG_MODE) {
+        std::cout << "current mode is not debuggable, just return." << std::endl;
+        return 0;
+    }
+
     if (!cmdArgments.isWidthSet || !cmdArgments.isHeightSet || !cmdArgments.isDpiSet) {
         std::cout << "Error! Must set width, height and dpi." << std::endl;
         return 0;

@@ -44,7 +44,7 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(uint32_t rate);
+    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped);
     void SetFrameRateLinkerEnable(bool enabled);
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
@@ -58,8 +58,8 @@ public:
     }
 
 private:
-    static void OnVsync(int64_t nanoTimestamp, void* client);
-    void VsyncCallbackInner(int64_t nanoTimestamp);
+    static void OnVsync(int64_t nanoTimestamp, int64_t frameCount, void* client);
+    void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
     void OnVsyncTimeOut();
     void Init();
 
@@ -76,7 +76,7 @@ private:
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
     VSyncReceiver::FrameCallback frameCallback_ = {
         .userData_ = this,
-        .callback_ = OnVsync,
+        .callbackWithId_ = OnVsync,
     };
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);

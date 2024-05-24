@@ -19,6 +19,8 @@
 #include <parcel.h>
 #include <map>
 #include <float.h>
+#include <sstream>
+#include <string>
 
 namespace OHOS {
 namespace Rosen {
@@ -111,7 +113,9 @@ enum class WindowModeType : uint8_t {
     WINDOW_MODE_SPLIT_FLOATING = 0,
     WINDOW_MODE_SPLIT = 1,
     WINDOW_MODE_FLOATING = 2,
-    WINDOW_MODE_OTHER = 3
+    WINDOW_MODE_FULLSCREEN = 3,
+    WINDOW_MODE_FULLSCREEN_FLOATING = 4,
+    WINDOW_MODE_OTHER = 5
 };
 
 /**
@@ -289,11 +293,25 @@ enum class WindowFlag : uint32_t {
 };
 
 /**
- * @brief Enumerates flag of uiextension window.
+ * @brief Flag of uiextension window.
  */
-enum class ExtensionWindowFlag : uint32_t {
-    EXTENSION_WINDOW_FLAG_WATER_MARK = 1,
-    EXTENSION_WINDOW_FLAG_END = 1 << 1,
+union ExtensionWindowFlags {
+    uint32_t bitData;
+    struct {
+        // Each flag should be false default, true when active
+        bool hideNonSecureWindowsFlag : 1;
+        bool waterMarkFlag : 1;
+        bool privacyModeFlag : 1;
+    };
+    ExtensionWindowFlags() : bitData(0) {}
+    ExtensionWindowFlags(uint32_t bits) : bitData(bits) {}
+    ~ExtensionWindowFlags() {}
+    void SetAllActive()
+    {
+        hideNonSecureWindowsFlag = true;
+        waterMarkFlag = true;
+        privacyModeFlag = true;
+    }
 };
 
 /**
@@ -318,7 +336,9 @@ enum class WindowSizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    UPDATE_DPI_SYNC,
     END,
 };
 
@@ -365,6 +385,7 @@ enum class WindowSessionType : uint32_t {
 enum class WindowGravity : uint32_t {
     WINDOW_GRAVITY_FLOAT = 0,
     WINDOW_GRAVITY_BOTTOM,
+    WINDOW_GRAVITY_DEFAULT,
 };
 
 /**
@@ -372,9 +393,18 @@ enum class WindowGravity : uint32_t {
  */
 enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
-    DISTRIBUTE,
+    RESTORE,
     BY_NAME,
     BY_ABC,
+};
+
+/**
+ * @brief Enumerates restore type.
+ */
+enum class BackupAndRestoreType: int32_t {
+    NONE = 0,           // no backup and restore
+    CONTINUATION = 1,   // distribute
+    APP_RECOVERY = 2,   // app recovery
 };
 
 /**
@@ -385,6 +415,37 @@ enum class WindowSetUIContentType: uint32_t {
 struct PointInfo {
     int32_t x;
     int32_t y;
+};
+
+/**
+ * @struct MainWindowInfo.
+ *
+ * @brief topN main window info.
+ */
+struct MainWindowInfo : public Parcelable {
+    virtual bool Marshalling(Parcel &parcel) const override
+    {
+        if (!parcel.WriteInt32(pid_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(bundleName_)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    static MainWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowInfo* mainWindowInfo = new MainWindowInfo;
+        mainWindowInfo->pid_ = parcel.ReadInt32();
+        mainWindowInfo->bundleName_ = parcel.ReadString();
+        return mainWindowInfo;
+    }
+
+    int32_t pid_ = 0;
+    std::string bundleName_ = "";
 };
 
 namespace {
@@ -548,6 +609,51 @@ struct Rect {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
+
+    inline std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return ss.str();
+    }
+};
+
+/**
+ * @struct KeyboardPanelInfo
+ *
+ * @brief Info of keyboard panel
+ */
+struct KeyboardPanelInfo : public Parcelable {
+    Rect rect_ = {0, 0, 0, 0};
+    WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    bool isShowing_ = false;
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
+               parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+               parcel.WriteBool(isShowing_);
+    }
+
+    static KeyboardPanelInfo* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardPanelInfo* keyboardPanelInfo = new(std::nothrow)KeyboardPanelInfo;
+        if (keyboardPanelInfo == nullptr) {
+            return nullptr;
+        }
+        bool res = parcel.ReadInt32(keyboardPanelInfo->rect_.posX_) &&
+            parcel.ReadInt32(keyboardPanelInfo->rect_.posY_) && parcel.ReadUint32(keyboardPanelInfo->rect_.width_) &&
+            parcel.ReadUint32(keyboardPanelInfo->rect_.height_);
+        if (!res) {
+            delete keyboardPanelInfo;
+            return nullptr;
+        }
+        keyboardPanelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        keyboardPanelInfo->isShowing_ = parcel.ReadBool();
+
+        return keyboardPanelInfo;
+    }
 };
 
 /**
@@ -679,6 +785,7 @@ enum class PiPWindowState : uint32_t {
     STATE_STARTED = 2,
     STATE_STOPPING = 3,
     STATE_STOPPED = 4,
+    STATE_RESTORING = 5,
 };
 
 /**
@@ -733,7 +840,7 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
 };
 
-using OnCallback = std::function<void(int64_t)>;
+using OnCallback = std::function<void(int64_t, int64_t)>;
 
 /**
  * @struct VsyncCallback
@@ -870,6 +977,76 @@ struct MaximizeLayoutOption {
     ShowType dock = ShowType::HIDE;
 };
 
+/**
+ * @class KeyboardLayoutParams
+ *
+ * @brief Keyboard need adjust layout
+ */
+class KeyboardLayoutParams : public Parcelable {
+public:
+    WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    Rect LandscapeKeyboardRect_ { 0, 0, 0, 0 };
+    Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
+    Rect LandscapePanelRect_ { 0, 0, 0, 0 };
+    Rect PortraitPanelRect_ { 0, 0, 0, 0 };
+
+    bool operator==(const KeyboardLayoutParams& params) const
+    {
+        return (gravity_ == params.gravity_ && LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
+            PortraitKeyboardRect_ == params.PortraitKeyboardRect_ &&
+            LandscapePanelRect_ == params.LandscapePanelRect_ &&
+            PortraitPanelRect_ == params.PortraitPanelRect_);
+    }
+
+    bool operator!=(const KeyboardLayoutParams& params) const
+    {
+        return !this->operator==(params);
+    }
+
+    bool isEmpty() const
+    {
+        return LandscapeKeyboardRect_.IsUninitializedRect() && PortraitKeyboardRect_.IsUninitializedRect() &&
+            LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
+    }
+
+    static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+
+    static inline bool ReadParcel(Parcel& parcel, Rect& rect)
+    {
+        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
+            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+    }
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+            WriteParcel(parcel, LandscapeKeyboardRect_) &&
+            WriteParcel(parcel, PortraitKeyboardRect_) &&
+            WriteParcel(parcel, LandscapePanelRect_) &&
+            WriteParcel(parcel, PortraitPanelRect_));
+    }
+
+    static KeyboardLayoutParams* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardLayoutParams *params = new(std::nothrow) KeyboardLayoutParams();
+        if (params == nullptr) {
+            return nullptr;
+        }
+        params->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        if (ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
+            ReadParcel(parcel, params->PortraitKeyboardRect_) &&
+            ReadParcel(parcel, params->LandscapePanelRect_) &&
+            ReadParcel(parcel, params->PortraitPanelRect_)) {
+            return params;
+        }
+        delete params;
+        return nullptr;
+    }
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

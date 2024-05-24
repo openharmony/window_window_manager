@@ -89,6 +89,7 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     auto listener =
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
+    TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
     return true;
 }
 
@@ -182,7 +183,7 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         return false;
     }
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily");
+        TLOGW(WmsLogTag::WMS_EVENT, "inputEvent is disabled temporarily, eventId is %{public}d", pointerEvent->GetId());
         pointerEvent->MarkProcessed();
         return false;
     }
@@ -215,8 +216,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         }
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, wid:%{public}u "
-            "windowName:%{public}s action:%{public}d isSystem:%{public}d", pointerEvent->GetId(), windowId,
+        static uint32_t eventId = 0;
+        TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
+            "windowName:%{public}s action:%{public}d isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
@@ -295,8 +297,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         return;
     }
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
-    TLOGI(WmsLogTag::WMS_EVENT, "EventListener OnInputEvent InputTracking id:%{public}d, focusedSessionId:%{public}d,"
-        " isSystem:%{public}d", keyEvent->GetId(), focusedSessionId, isSystem);
+    static uint32_t eventId = 0;
+    TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, InputTracking id:%{public}d, wid:%{public}u "
+        "focusedSessionId:%{public}d, isSystem:%{public}d",
+        eventId++, keyEvent->GetId(), keyEvent->GetTargetWindowId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
         if ((ret != WSError::WS_OK || static_cast<int32_t>(getprocpid()) != focusedSceneSession->GetCallingPid()) &&

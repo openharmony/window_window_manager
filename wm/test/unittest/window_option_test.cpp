@@ -399,6 +399,56 @@ HWTEST_F(WindowOptionTest, GetWindowSessionType, Function | SmallTest | Level3)
     option->GetWindowSessionType();
     ASSERT_EQ(WindowSessionType::SCENE_SESSION, option->GetWindowSessionType());
 }
+
+/**
+ * @tc.name: Test01
+ * @tc.desc: Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetExtensionTag(true);
+    option->SetSubWindowTitle("Test");
+    std::string ret = option->GetSubWindowTitle();
+    ASSERT_EQ(true, ret == "Test");
+    option->SetSubWindowDecorEnable(true);
+    bool ret1 = option->GetSubWindowDecorEnable();
+    ASSERT_EQ(true, ret1);
+    option->SetOnlySupportSceneBoard(true);
+    bool ret2 = option->GetOnlySupportSceneBoard();
+    ASSERT_EQ(true, ret2);
+}
+
+/**
+ * @tc.name: SetDialogDecorEnable
+ * @tc.desc: SetDialogDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDialogDecorEnable, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    ASSERT_EQ(true, option->GetDialogDecorEnable());
+    option->SetDialogDecorEnable(false);
+    ASSERT_EQ(false, option->GetDialogDecorEnable());
+}
+
+/**
+ * @tc.name: SetDialogTitle
+ * @tc.desc: SetDialogTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDialogTitle, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogTitle("Test");
+    std::string ret = option->GetDialogTitle();
+    ASSERT_EQ(true, ret == "Test");
+}
 }
 } // namespace Rosen
 } // namespace OHOS

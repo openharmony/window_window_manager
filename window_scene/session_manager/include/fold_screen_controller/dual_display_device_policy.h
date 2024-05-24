@@ -30,9 +30,6 @@ public:
     ~DualDisplayDevicePolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
     void SendSensorResult(FoldStatus foldStatus) override;
-    FoldDisplayMode GetScreenDisplayMode() override;
-    FoldStatus GetFoldStatus() override;
-    void SetFoldStatus(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;
@@ -42,6 +39,7 @@ private:
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();

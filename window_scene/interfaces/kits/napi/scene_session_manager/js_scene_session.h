@@ -54,11 +54,16 @@ private:
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    static napi_value SetScale(napi_env env, napi_callback_info info);
+    static napi_value SetWindowLastSafeRect(napi_env env, napi_callback_info info);
+    static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
-    static napi_value SetScale(napi_env env, napi_callback_info info);
-    static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
+    static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
+    static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
+    static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
+    static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -72,11 +77,15 @@ private:
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
+    napi_value OnSetScale(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowLastSafeRect(napi_env env, napi_callback_info info);
+    napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);
-    napi_value OnSetScale(napi_env env, napi_callback_info info);
-    napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
+    napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
+    napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -113,21 +122,24 @@ private:
     void ProcessRequestedOrientationChange();
     void ProcessRaiseAboveTargetRegister();
     void ProcessForceHideChangeRegister();
-    void ProcessTouchOutsideRegister();
     void ProcessWindowDragHotAreaRegister();
+    void ProcessTouchOutsideRegister();
     void ProcessSessionInfoLockedStateChangeRegister();
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
     void ProcessContextTransparentRegister();
     void ProcessKeyboardGravityChangeRegister();
+    void ProcessAdjustKeyboardLayoutRegister();
+    void ProcessLayoutFullScreenChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
+    sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
     void OnBufferAvailableChange(const bool isBufferAvailable);
-    void OnSessionEvent(uint32_t eventId);
+    void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -140,7 +152,7 @@ private:
     void OnSessionTopmostChange(bool topmost);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string &label);
     void UpdateSessionIcon(const std::string &iconPath);
@@ -154,13 +166,17 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
+    void OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason);
     void OnTouchOutside();
-    void OnWindowDragHotArea(int32_t type, const SizeChangeReason& reason);
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
     void OnKeyboardGravityChange(SessionGravity gravity);
+    void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
+    void OnLayoutFullScreenChange(bool isLayoutFullScreen);
+
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

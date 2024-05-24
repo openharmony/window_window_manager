@@ -133,7 +133,7 @@ public:
     bool HasMainFullScreenWindowShown();
     static bool GetAnimateTransactionEnabled();
     void SetWindowPairFrameGravity(DisplayId displayId, Gravity gravity);
-
+    static std::string uiType_;
 private:
     friend class WindowRoot;
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

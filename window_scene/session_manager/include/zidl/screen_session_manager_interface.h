@@ -139,14 +139,18 @@ public:
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
 
     virtual void SetClient(const sptr<IScreenSessionManagerClient>& client) {}
+    virtual void SwitchUser() {}
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
+    virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
+    virtual void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) {}
+    virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override

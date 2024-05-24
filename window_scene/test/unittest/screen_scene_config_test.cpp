@@ -17,9 +17,11 @@
 
 #include <libxml/globals.h>
 #include <libxml/xmlstring.h>
-#include "screen_scene_config.h"
-#include "xml_config_base.h"
+
 #include "window_manager_hilog.h"
+#include "xml_config_base.h"
+#include "screen_scene_config.h"
+#include "screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -256,6 +258,11 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
             readCount++;
             continue;
         }
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("externalScreenDefaultMode"))) {
+            ScreenSceneConfig::ReadStringConfigInfo(curNodePtr);
+            readCount++;
+            continue;
+        }
     }
 
     ASSERT_LE(ScreenSceneConfig::stringConfig_.size(), readCount);
@@ -304,7 +311,11 @@ HWTEST_F(ScreenSceneConfigTest, GetStringConfig, Function | SmallTest | Level1)
 HWTEST_F(ScreenSceneConfigTest, GetCurvedScreenBoundaryConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetCurvedScreenBoundaryConfig();
-    ASSERT_NE(0, result.size());
+    if (ScreenSessionManager::GetInstance().GetCurvedCompressionArea() == 0) {
+        ASSERT_EQ(0, result.size());
+    } else {
+        ASSERT_NE(0, result.size());
+    }
 }
 
 /**
@@ -326,8 +337,17 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, Function | SmallTest | Level3)
 {
+    bool isFoldableMachine = false;
+    if (ScreenSessionManager::GetInstance().IsFoldable() &&
+        ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED) {
+        isFoldableMachine = true;
+    }
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
-    ASSERT_TRUE(result.size() > 0);
+    if (isFoldableMachine) {
+        ASSERT_TRUE(result.size() > 0);
+    } else {
+        ASSERT_TRUE(result.size() == 0);
+    }
 }
 
 /**
@@ -432,6 +452,55 @@ HWTEST_F(ScreenSceneConfigTest, SetCurvedCompressionAreaInLandscape, Function | 
     ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: IsSupportRotateWithSensor01
+ * @tc.desc: IsSupportRotateWithSensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportRotateWithSensor01, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::enableConfig_["supportRotateWithSensor"] = true;
+    bool res = ScreenSceneConfig::IsSupportRotateWithSensor();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsSupportRotateWithSensor01
+ * @tc.desc: IsSupportRotateWithSensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportRotateWithSensor02, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::enableConfig_.erase("supportRotateWithSensor");
+    bool res = ScreenSceneConfig::IsSupportRotateWithSensor();
+    ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: GetExternalScreenDefaultMode01
+ * @tc.desc: GetExternalScreenDefaultMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetExternalScreenDefaultMode01, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
+    std::string res = ScreenSceneConfig::GetExternalScreenDefaultMode();
+    ASSERT_EQ("mirror", res);
+}
+
+/**
+ * @tc.name: GetExternalScreenDefaultMode02
+ * @tc.desc: GetExternalScreenDefaultMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetExternalScreenDefaultMode02, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::stringConfig_.erase("externalScreenDefaultMode");
+    std::string res = ScreenSceneConfig::GetExternalScreenDefaultMode();
+    ASSERT_EQ("", res);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

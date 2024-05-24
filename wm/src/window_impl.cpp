@@ -74,6 +74,7 @@ std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathR
 std::recursive_mutex WindowImpl::globalMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
+bool WindowImpl::enableImmersiveMode_ = true;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -115,6 +116,10 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 
 void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
 {
+    if (option == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Init window property failed, option is nullptr.");
+        return;
+    }
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -154,7 +159,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    auto isPhone = windowSystemConfig_.uiType_ == "phone";
     if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
@@ -544,26 +549,29 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage,
-        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability);
 }
 
 WMError WindowImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowImpl::SetUIContentByAbc(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     if (!IsWindowValid()) {
@@ -586,13 +594,14 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     }
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    switch (type) {
+    switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT:
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
-        case WindowSetUIContentType::DISTRIBUTE:
-            aceRet = uiContent->Restore(this, contentInfo, storage);
+        case WindowSetUIContentType::RESTORE:
+            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
+                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -658,8 +667,8 @@ std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::strin
     begin = file.tellg();
     file.seekg(0, std::ios::end);
     end = file.tellg();
-    size_t len = static_cast<uint32_t>(end - begin);
-    WLOGFD("abc file: %{public}s, size: %{public}u", abcPath.c_str(), static_cast<uint32_t>(len));
+    int len = end - begin;
+    WLOGFD("abc file: %{public}s, size: %{public}d", abcPath.c_str(), len);
 
     if (len <= 0) {
         WLOGFE("abc file size is 0");
@@ -681,14 +690,20 @@ Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
     return nullptr;
 }
 
-std::string WindowImpl::GetContentInfo()
+std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
+    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
+        WLOGFE("Invalid type %{public}d", type);
+        return "";
+    }
+
     if (uiContent_ == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo();
+    return uiContent_->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
+        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
@@ -872,6 +887,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
             }
         }
     }
+    enableImmersiveMode_ = status;
     return ret;
 }
 
@@ -1203,7 +1219,6 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    property_->SetDisplayId(DISPLAY_ID_INVALID);
     SetDefaultDisplayIdIfNeed();
     context_ = context;
     sptr<WindowImpl> window(this);
@@ -1391,6 +1406,14 @@ void WindowImpl::DestroySubWindow()
     }
 }
 
+void WindowImpl::ClearVsyncStation()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (vsyncStation_ != nullptr) {
+        vsyncStation_.reset();
+    }
+}
+
 WMError WindowImpl::Destroy()
 {
     return Destroy(true);
@@ -1433,6 +1456,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
     DestroySubWindow();
     DestroyFloatingWindow();
     DestroyDialogWindow();
+    ClearVsyncStation();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -2015,6 +2039,34 @@ MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
     return SingletonContainer::Get<WindowAdapter>().GetMaximizeMode();
 }
 
+WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(enable));
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid window or fullscreen mode is not be supported, winId:%{public}u",
+            property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const WindowType curWindowType = GetType();
+    if (!WindowHelper::IsMainWindow(curWindowType) && !WindowHelper::IsSubWindow(curWindowType)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    enableImmersiveMode_ = enable;
+    const WindowMode mode = GetMode();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        return SetLayoutFullScreen(enableImmersiveMode_);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowImpl::GetImmersiveModeEnabledState() const
+{
+    return enableImmersiveMode_;
+}
+
 WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
 {
     sptr<WindowTransitionInfo> fromInfo = new(std::nothrow) WindowTransitionInfo();
@@ -2235,10 +2287,6 @@ WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAre
 
 WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("register touch outside listener permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(touchOutsideListeners_[GetWindowId()], listener);
@@ -2246,10 +2294,6 @@ WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListene
 
 WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("register touch outside listener permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(touchOutsideListeners_[GetWindowId()], listener);
@@ -2906,9 +2950,8 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         newStyleID = (GetRect().width_ > GetRect().height_) ?
             MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
-        // when receive up event, set default style
         if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-            newStyleID = MMI::MOUSE_ICON::DEFAULT;
+            newStyleID = MMI::MOUSE_ICON::DEFAULT; // when receive up event, set default style
         }
     }
     WLOGD("winId : %{public}u, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "

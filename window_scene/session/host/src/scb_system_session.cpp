@@ -45,6 +45,16 @@ SCBSystemSession::~SCBSystemSession()
     WLOGD("~SCBSystemSession, id: %{public}d", GetPersistentId());
 }
 
+void SCBSystemSession::RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func)
+{
+    if (surfaceNode_) {
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Set buffer available callback");
+        surfaceNode_->SetBufferAvailableCallback(func);
+    } else {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "surfaceNode_ is null");
+    }
+}
+
 WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
@@ -62,6 +72,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
+            session->keyboardPanelRectUpdateCallback_();
+        }
         // clear after use
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
@@ -73,6 +87,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     return WSError::WS_OK;
 }
 
+void SCBSystemSession::SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func)
+{
+    keyboardPanelRectUpdateCallback_ = func;
+}
 
 void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
 {
@@ -81,6 +99,12 @@ void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
         return;
     }
     keyboardSession_ = session;
+    KeyboardPanelRectUpdateCallback onKeyboardPanelRectUpdate = [this]() {
+        if (this->keyboardSession_ != nullptr) {
+            this->keyboardSession_->OnKeyboardPanelUpdated();
+        }
+    };
+    SetKeyboardPanelRectUpdateCallback(onKeyboardPanelRectUpdate);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
 }
 

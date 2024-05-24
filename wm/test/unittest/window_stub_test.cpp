@@ -273,6 +273,48 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
     IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
     EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
 }
+
+/**
+ * @tc.name: OnRemoteRequest11
+ * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
+    data.WriteBool(false);
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA);
+    uint32_t type = 1;
+    data.ReadUint32(type);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_DESTROY);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_BACKGROUND);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_DUMP_INFO);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE);
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS);
+
+    int res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, 10);
+}
 }
 }
 }

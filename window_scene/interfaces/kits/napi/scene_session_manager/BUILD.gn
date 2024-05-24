@@ -24,6 +24,7 @@ ohos_shared_library("scenesessionmanager_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -39,6 +40,7 @@ ohos_shared_library("scenesessionmanager_napi") {
 
   deps = [
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
@@ -54,8 +56,10 @@ ohos_shared_library("scenesessionmanager_napi") {
     "ability_runtime:process_options",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

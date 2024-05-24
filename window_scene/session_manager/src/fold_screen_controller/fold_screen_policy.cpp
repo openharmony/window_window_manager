@@ -14,16 +14,14 @@
  */
 
 #include "fold_screen_controller/fold_screen_policy.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
-FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMode::UNKNOWN; }
 void FoldScreenPolicy::LockDisplayStatus(bool locked) { lockDisplayStatus_ = locked; }
-FoldStatus FoldScreenPolicy::GetFoldStatus() { return FoldStatus::UNKNOWN; }
-void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus) {}
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
 sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; }
@@ -34,4 +32,28 @@ void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 }
 
 void FoldScreenPolicy::UpdateForPhyScreenPropertyChange() {}
+
+FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
+{
+    std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+    return globalDisplayMode_;
+}
+
+FoldStatus FoldScreenPolicy::GetFoldStatus()
+{
+    return globalFoldStatus_;
+}
+
+void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
+{
+    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    currentFoldStatus_ = foldStatus;
+    globalFoldStatus_ = foldStatus;
+}
+
+void FoldScreenPolicy::ClearState()
+{
+    currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    currentFoldStatus_ = FoldStatus::UNKNOWN;
+}
 } // namespace OHOS::Rosen

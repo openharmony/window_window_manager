@@ -67,7 +67,8 @@ public:
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
-        TRANS_ID_GET_WINDOW_BACK_HOME_STATUS,
+        TRANS_ID_GET_WINDOW_MODE_TYPE,
+        TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -85,7 +86,8 @@ public:
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
-    virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
+    virtual WSError TerminateSessionNew(
+        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
     virtual WSError ClearSession(int32_t persistentId) = 0;

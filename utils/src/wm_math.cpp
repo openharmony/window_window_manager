@@ -315,9 +315,9 @@ Vector3 Transform(const Vector3& vec, const Matrix4& mat)
     retVal.x_ = vec.x_ * mat.mat_[0][0] + vec.y_ * mat.mat_[1][0] +
         vec.z_ * mat.mat_[2][0] + mat.mat_[3][0]; // 2: row2, 3: row3
     retVal.y_ = vec.x_ * mat.mat_[0][1] + vec.y_ * mat.mat_[1][1] +
-        vec.z_ * mat.mat_[2][1] + mat.mat_[3][1];
-    retVal.z_ = vec.x_ * mat.mat_[0][2] + vec.y_ * mat.mat_[1][2] +
-        vec.z_ * mat.mat_[2][2] + mat.mat_[3][2];
+        vec.z_ * mat.mat_[2][1] + mat.mat_[3][1]; // 2: row2, 3: row3
+    retVal.z_ = vec.x_ * mat.mat_[0][2] + vec.y_ * mat.mat_[1][2] + // 2: row2
+        vec.z_ * mat.mat_[2][2] + mat.mat_[3][2]; // 2: row2, 3: row3
     return retVal;
 }
 

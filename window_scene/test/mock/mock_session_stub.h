@@ -29,47 +29,47 @@ public:
     SessionStubMocker() {};
     ~SessionStubMocker() {};
 
-    MOCK_METHOD8(Connect, WSError(const sptr<ISessionStage>& sessionStage,
+    MOCK_METHOD9(Connect, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
-        int32_t pid, int32_t uid));
+        int32_t pid, int32_t uid, const std::string& identityToken));
 
-    MOCK_METHOD1(Foreground, WSError(sptr<WindowSessionProperty> property));
-    MOCK_METHOD0(Background, WSError(void));
+    MOCK_METHOD2(Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient));
+    MOCK_METHOD1(Background, WSError(bool isFromClient));
     MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
     MOCK_METHOD1(Show, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Hide, WSError(void));
 
-    MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
+    MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
 
-    MOCK_METHOD2(HandleConnect, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleForeground, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleBackground, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleDisconnect, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleUpdateActivateStatus, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSessionEvent, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleUpdateSessionRect, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleRaiseToAppTop, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleBackPressed, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleMarkProcessed, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSetGlobalMaximizeMode, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleGetGlobalMaximizeMode, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleNeedAvoid, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleGetAvoidAreaByType, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSetSessionProperty, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSetAspectRatio, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSetWindowAnimationFlag, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleUpdateWindowSceneAfterCustomAnimation, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleRaiseAboveTarget, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleRaiseAppMainWindowToTop, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandlePendingSessionActivation, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleTerminateSession, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleSessionException, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleTransferAbilityResult, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleTransferExtensionData, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleNotifyRemoteReady, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleNotifyExtensionDied, int(MessageParcel &data, MessageParcel &reply));
-    MOCK_METHOD2(HandleNotifyExtensionTimeout, int(MessageParcel &data, MessageParcel &reply));
+    MOCK_METHOD2(HandleConnect, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleForeground, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleBackground, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleDisconnect, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleUpdateActivateStatus, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSessionEvent, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleUpdateSessionRect, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleRaiseToAppTop, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleBackPressed, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleMarkProcessed, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSetGlobalMaximizeMode, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleGetGlobalMaximizeMode, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleNeedAvoid, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleGetAvoidAreaByType, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSetSessionProperty, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSetAspectRatio, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSetWindowAnimationFlag, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleUpdateWindowSceneAfterCustomAnimation, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleRaiseAboveTarget, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleRaiseAppMainWindowToTop, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandlePendingSessionActivation, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleTerminateSession, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleSessionException, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleTransferAbilityResult, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleTransferExtensionData, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleNotifyRemoteReady, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleNotifyExtensionDied, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleNotifyExtensionTimeout, int(MessageParcel& data, MessageParcel& reply));
 };
 } // namespace Rosen
 } // namespace OHOS

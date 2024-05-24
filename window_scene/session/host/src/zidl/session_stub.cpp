@@ -71,8 +71,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNeedAvoid),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         &SessionStub::HandleGetAvoidAreaByType),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_PROPERTY),
-        &SessionStub::HandleSetSessionProperty),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
         &SessionStub::HandleSetAspectRatio),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
@@ -101,7 +99,12 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleSetKeyboardSessionGravity),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
         &SessionStub::HandleSetCallingSessionId),
-
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
+        &SessionStub::HandleSetCustomDecorHeight),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
+        &SessionStub::HandleAdjustKeyboardLayout),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
+        &SessionStub::HandleUpdatePropertyByAction),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
@@ -124,6 +127,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         &SessionStub::HandleUpdatePiPRect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE),
+        &SessionStub::HandleLayoutFullScreenChange),
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -162,7 +167,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = new WindowSessionProperty();
     }
-    const WSError& errCode = Foreground(property);
+    bool isFromClient = data.ReadBool();
+    const WSError errCode = Foreground(property, isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -170,7 +176,8 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    const WSError& errCode = Background();
+    bool isFromClient = data.ReadBool();
+    const WSError errCode = Background(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -233,8 +240,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     } else {
         WLOGI("accept token is nullptr");
     }
+    std::string identityToken = data.ReadString();
     SystemSessionConfig systemConfig;
-    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token,
+        -1, -1, identityToken);
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
@@ -251,6 +260,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(winRect.posY_);
         reply.WriteUint32(winRect.width_);
         reply.WriteUint32(winRect.height_);
+        reply.WriteInt32(property->GetCollaboratorType());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -265,11 +275,24 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isLayoutFullScreen = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleTerminateSession");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -283,8 +306,12 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleSessionException");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -301,8 +328,12 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleChangeSessionVisibilityWithStatusBar");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -327,8 +358,12 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -337,6 +372,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->callingTokenId = data.ReadUint32();
     abilitySessionInfo->reuse = data.ReadBool();
     abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
+    abilitySessionInfo->hasContinuousTask = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -458,15 +494,6 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleSetSessionProperty!");
-    auto property = data.ReadStrongParcelable<WindowSessionProperty>();
-    auto errCode = SetSessionProperty(property);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -646,6 +673,45 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
     SetCallingSessionId(callingSessionId);
     reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    int32_t height = data.ReadInt32();
+    SetCustomDecorHeight(height);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleAdjustKeyboardLayout!");
+    sptr<KeyboardLayoutParams> keyboardLayoutParams = data.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardLayoutParams is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = AdjustKeyboardLayout(*keyboardLayoutParams);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
+{
+    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
+    } else {
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
+    }
+    const WMError ret = UpdateSessionPropertyByAction(property, action);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

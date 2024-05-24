@@ -87,7 +87,6 @@ public:
     WMError SetAspectRatio(uint32_t windowId, float ratio);
     void FlushWindowInfo(uint32_t windowId);
     void SetDragFrameGravity(int32_t dragGravity);
-    WMError GetWindowBackHomeStatus(bool &isBackHome) const;
 
 private:
     uint32_t GenWindowId();

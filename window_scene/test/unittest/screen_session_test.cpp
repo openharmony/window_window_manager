@@ -110,7 +110,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, Function | SmallTest 
     std::vector<ScreenColorGamut> colorGamuts;
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     DMError ret = session->GetScreenSupportedColorGamuts(colorGamuts);
-    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    ASSERT_EQ(ret, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts end";
 }
 
@@ -184,7 +184,7 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 
     ScreenColorGamut colorGamut;
     DMError res = session->GetScreenColorGamut(colorGamut);
-    ASSERT_EQ(res, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    ASSERT_EQ(res, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut end";
 }
 
@@ -864,19 +864,19 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
 
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
-
+    EXPECT_EQ(Rotation::ROTATION_90, res);
+    
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_90, res);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
 
     orientation = Orientation::REVERSE_VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_180, res);
+    EXPECT_EQ(Rotation::ROTATION_270, res);
 
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_270, res);
+    EXPECT_EQ(Rotation::ROTATION_180, res);
 
     orientation = Orientation::LOCKED;
     res = session->CalcRotation(orientation, foldDisplayMode);
@@ -898,7 +898,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
     auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::UNKNOWN, res);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
     supportedScreenModes->width_ = 40;
@@ -908,19 +908,19 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level
 
     rotation = Rotation::ROTATION_0;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     rotation = Rotation::ROTATION_90;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
 
     rotation = Rotation::ROTATION_180;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
 }

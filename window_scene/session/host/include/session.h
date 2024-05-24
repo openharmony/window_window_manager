@@ -59,7 +59,8 @@ using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusab
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
-using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
+using NotifyTerminateSessionFuncNew =
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
@@ -119,16 +120,17 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1) override;
+        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError Foreground(sptr<WindowSessionProperty> property) override;
-    WSError Background() override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
+    WSError Background(bool isFromClient = false) override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
-
+    void ResetSessionConnectState();
+    
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
@@ -192,7 +194,9 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
+    void SetFocusedOnShow(bool focusedOnShow);
+    bool IsFocusedOnShow() const;
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
@@ -206,6 +210,7 @@ public:
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
+    WSError UpdateOrientation();
 
     void SetShowRecent(bool showRecent);
     void SetSystemActive(bool systemActive);
@@ -215,6 +220,8 @@ public:
     float GetOffsetY() const;
     void SetBounds(const WSRectF& bounds);
     WSRectF GetBounds();
+    void SetRotation(Rotation rotation);
+    Rotation GetRotation() const;
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
@@ -223,7 +230,7 @@ public:
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
-    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
     void SetSessionExceptionListener(const NotifySessionExceptionFunc& func, bool fromJsScene);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
@@ -390,11 +397,9 @@ public:
     bool IsSystemInput();
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-    void RegisterWindowModeChangedCallback(const std::function<void()>& callback);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    void RegisterWindowBackHomeCallback(const std::function<void()>& callback) {};
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
@@ -407,6 +412,11 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
+    virtual int32_t GetCustomDecorHeight()
+    {
+        return 0;
+    };
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -432,7 +442,6 @@ protected:
     virtual bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
-    virtual bool IfNotNeedAvoidKeyBoardForSplit();
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
@@ -468,6 +477,7 @@ protected:
     bool isSystemActive_ = false;
     WSRect winRect_;
     WSRectF bounds_;
+    Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     bool isVisible_ = false;
@@ -522,6 +532,7 @@ protected:
     float pivotY_ = 0.0f;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
+    mutable std::shared_mutex parentSessionMutex_;
     sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
 
@@ -564,7 +575,6 @@ private:
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
-    std::function<void()> windowModeCallback_;
     std::function<bool()> isScreenLockedCallback_;
 
     mutable std::shared_mutex propertyMutex_;
@@ -573,6 +583,7 @@ private:
     mutable std::shared_mutex uiRequestFocusMutex_;
     mutable std::shared_mutex uiLostFocusMutex_;
 
+    bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
     WSRect preRect_;

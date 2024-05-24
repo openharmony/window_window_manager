@@ -20,7 +20,6 @@
 #include <event_handler.h>
 #include <js_runtime_utils.h>
 
-#include "napi_common_util.h"
 #include "root_scene.h"
 #include "window_manager_hilog.h"
 #include "process_options.h"
@@ -318,44 +317,6 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     processOptions->processMode = static_cast<AAFwk::ProcessMode>(processMode);
     processOptions->startupVisibility = static_cast<AAFwk::StartupVisibility>(startupVisibility);
 
-    return true;
-}
-
-bool ConvertConfigurationFromJs(napi_env env, napi_value param, AppExecFwk::Configuration& config)
-{
-    if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
-        WLOGFE("params is invalid");
-        return false;
-    }
-    int32_t colorMode = -1;
-    if (AppExecFwk::UnwrapInt32ByPropertyName(env, param, "colorMode", colorMode)) {
-        if (colorMode != Global::Resource::DARK && colorMode != Global::Resource::LIGHT) {
-            WLOGFE("Set color mode unsupported value");
-            return false;
-        }
-    
-        std::string ret("no_color_mode");
-        switch (colorMode) {
-            case Global::Resource::ColorMode::DARK: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-                break;
-            }
-            case Global::Resource::ColorMode::LIGHT: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-                break;
-            }
-            case Global::Resource::ColorMode::COLOR_MODE_NOT_SET: {
-                ret = AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
-                break;
-            }
-            default:
-                break;
-        }
-        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ret)) {
-            WLOGFE("Set ColorMode [%{public}s] failed", ret.c_str());
-            return false;
-        }
-    }
     return true;
 }
 
@@ -721,6 +682,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, static_cast<int32_t>(sessionInfo.sessionState_)));
     napi_set_named_property(env, objValue, "requestOrientation",
         CreateJsValue(env, sessionInfo.requestOrientation_));
+    napi_set_named_property(env, objValue, "isCalledRightlyByCallerId",
+        CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
@@ -775,6 +738,8 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_HEIGHT, INVALID_VAL)));
         napi_set_named_property(env, objValue, "withAnimation",
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
+        napi_set_named_property(env, objValue, "focusedOnShow",
+            CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true)));
     }
 }
 
@@ -855,16 +820,23 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::FULL_TO_FLOATING)));
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
-    napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_START)));
-    napi_set_named_property(env, objValue, "PIP_SHOW", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_SHOW)));
-    napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
-        static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
+    CreatePiPSizeChangeReason(env, objValue);
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
     return objValue;
+}
+
+void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
+{
+    napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_START)));
+    napi_set_named_property(env, objValue, "PIP_SHOW", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_SHOW)));
+    napi_set_named_property(env, objValue, "PIP_AUTO_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_AUTO_START)));
+    napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
 }
 
 napi_value CreateJsSessionStartupVisibility(napi_env env)
@@ -915,7 +887,8 @@ napi_value CreateJsSessionProcessMode(napi_env env)
     return objValue;
 }
 
-napi_value CreateJsSessionRect(napi_env env, const WSRect& rect)
+template<typename T>
+napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
     WLOGFD("CreateJsSessionRect.");
     napi_value objValue = nullptr;
@@ -929,6 +902,21 @@ napi_value CreateJsSessionRect(napi_env env, const WSRect& rect)
     napi_set_named_property(env, objValue, "posY_", CreateJsValue(env, rect.posY_));
     napi_set_named_property(env, objValue, "width_", CreateJsValue(env, rect.width_));
     napi_set_named_property(env, objValue, "height_", CreateJsValue(env, rect.height_));
+    return objValue;
+}
+
+napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param)
+{
+    WLOGFD("CreateJsSessionEventParam.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
+    napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     return objValue;
 }
 
@@ -972,6 +960,27 @@ static napi_value CreateJsSystemBarPropertyObject(
     napi_set_named_property(
         env, objValue, "settingFlag", CreateJsValue(env, static_cast<uint32_t>(property.settingFlag_)));
 
+    return objValue;
+}
+
+napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "landscapeKeyboardRect",
+        CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
+    napi_set_named_property(env, objValue, "portraitKeyboardRect",
+        CreateJsSessionRect(env, params.PortraitKeyboardRect_));
+    napi_set_named_property(env, objValue, "landscapePanelRect",
+        CreateJsSessionRect(env, params.LandscapePanelRect_));
+    napi_set_named_property(env, objValue, "portraitPanelRect",
+        CreateJsSessionRect(env, params.PortraitPanelRect_));
+    
     return objValue;
 }
 

@@ -89,8 +89,8 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
-    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) {
-        PostAsyncTask(task, "WindowManagerService:cacheGuard");
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+        PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
     });
     rsUiDirector_->Init(false);
 }
@@ -122,10 +122,10 @@ void WindowManagerService::OnStart()
     WLOGI("end");
 }
 
-void WindowManagerService::PostAsyncTask(Task task, const std::string& taskName)
+void WindowManagerService::PostAsyncTask(Task task, const std::string& taskName, uint32_t delay)
 {
     if (handler_) {
-        bool ret = handler_->PostTask(task, "wms:" + taskName, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        bool ret = handler_->PostTask(task, "wms:" + taskName, delay, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         if (!ret) {
             WLOGFE("EventHandler PostTask Failed");
         }
@@ -421,6 +421,16 @@ void WindowManagerService::ConfigureWindowManagerService()
             numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
             maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
+    }
+    item = config["uiType"];
+    if (item.IsString()) {
+        systemConfig_.uiType_ = item.stringValue_;
+        StartingWindow::uiType_ = item.stringValue_;
+        WindowNodeContainer::uiType_ = item.stringValue_;
+    }
+    item = config["supportTypeFloatWindow"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
     }
 }
 

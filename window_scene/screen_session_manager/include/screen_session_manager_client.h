@@ -54,6 +54,8 @@ public:
     uint32_t GetCurvedCompressionArea();
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
     void SetScreenPrivacyState(bool hasPrivate);
+    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate);
+    void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
@@ -63,6 +65,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    int32_t SetScreenOffDelayTime(int32_t delay);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
@@ -71,6 +74,10 @@ public:
     ScreenId GetDefaultScreenId();
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
+
+    void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
+    void SwitchingCurrentUser();
+    void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
 protected:
     ScreenSessionManagerClient() = default;
@@ -93,6 +100,7 @@ private:
 
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
+    std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;
 

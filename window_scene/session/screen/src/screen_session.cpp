@@ -15,16 +15,21 @@
 
 #include "session/screen/include/screen_session.h"
 
-#include "window_manager_hilog.h"
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include "window_manager_hilog.h"
 #include "dm_common.h"
+#include "fold_screen_state_internel.h"
+#include <parameters.h>
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION, "ScreenSession" };
+static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+static const int32_t ROTATION_90 = 1;
+static const int32_t ROTATION_270 = 3;
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -68,10 +73,9 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
 
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
-    TLOGI(WmsLogTag::DMS, "[DPNODE]config screenId: %{public}d, isMirrored: %{public}d, mirrorNodeId: %{public}d ",
-        static_cast<int32_t>(config.screenId),
-        static_cast<int32_t>(config.isMirrored),
-        static_cast<int32_t>(config.mirrorNodeId));
+    TLOGI(WmsLogTag::DMS,
+        "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", isMirrored: %{public}d",
+        config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.isMirrored));
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -170,6 +174,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
     screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
         screenChangeListener->OnConnect(screenId_);
+        WLOGFI("Success to call onconnect callback.");
     }
     WLOGFI("Success to register screen change listener.");
 }
@@ -215,6 +220,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetHdrFormats(hdrFormats_);
     displayInfo->SetColorSpaces(colorSpaces_);
     displayInfo->SetDisplayState(property_.GetDisplayState());
+    displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     return displayInfo;
 }
 
@@ -452,7 +458,8 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
+        && g_screenRotationOffSet == ROTATION_270) {
         // fold phone need fix 90 degree by remainder 360 degree
         int foldRotation = (rotation + 90) % 360;
         updateToInputManagerCallback_(static_cast<float>(foldRotation));
@@ -532,6 +539,9 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    if (isScreenLocked_ == isLocked) {
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         isScreenLocked_ = isLocked;
@@ -554,6 +564,17 @@ bool ScreenSession::IsScreenRotationLocked()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return isScreenLocked_;
+}
+
+void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "isTouchEnabled:%{public}u", static_cast<uint32_t>(isTouchEnabled));
+    touchEnabled_.store(isTouchEnabled);
+}
+
+bool ScreenSession::IsTouchEnabled()
+{
+    return touchEnabled_.load();
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const
@@ -581,6 +602,21 @@ void ScreenSession::SetScreenSceneDpi(float density)
     SetScreenSceneDpiCallback_(density);
 }
 
+void ScreenSession::SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func)
+{
+    destroyScreenSceneCallback_  = func;
+    WLOGFI("SetScreenSceneDestroyListener");
+}
+
+void ScreenSession::DestroyScreenScene()
+{
+    if (destroyScreenSceneCallback_  == nullptr) {
+        WLOGFI("destroyScreenSceneCallback_  is nullptr");
+        return;
+    }
+    destroyScreenSceneCallback_ ();
+}
+
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
 {
     property_.SetDensityInCurResolution(densityInCurResolution);
@@ -599,7 +635,8 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
-    if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN &&
+        (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         isVerticalScreen = info->width_ > info->height_;
     }
     switch (orientation) {
@@ -629,7 +666,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 {
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
-    if (foldDisplayMode != FoldDisplayMode::UNKNOWN) {
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN
+        && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
@@ -1167,6 +1205,9 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->width_ = width;
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
+        displayNode_->SetFrame(0, 0, width, height);
+        displayNode_->SetBounds(0, 0, width, height);
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 

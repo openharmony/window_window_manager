@@ -127,6 +127,7 @@ ohos_unittest("utils_window_property_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "input:libmmi-client",
   ]
 }
 
@@ -276,6 +277,7 @@ ohos_static_library("utils_unittest_common") {
   public_deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/wm:libwm",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",

@@ -90,6 +90,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
 {
     inputMethodWindowInfo_.name = "input_method.2";
     const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
+    ASSERT_NE(inputMethodWindow, nullptr);
     inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
     inputMethodWindow->Show();
     if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {

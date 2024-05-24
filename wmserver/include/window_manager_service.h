@@ -146,7 +146,7 @@ public:
     void SetAnchorAndScale(int32_t x, int32_t y, float scale) override;
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
     void OffWindowZoom() override;
-    void PostAsyncTask(Task task, const std::string& taskName = "WMSTask");
+    void PostAsyncTask(Task task, const std::string& taskName = "WMSTask", uint32_t delay = 0);
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;

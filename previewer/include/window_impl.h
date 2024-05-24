@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "ui/rs_surface_node.h"
 #include "vsync_station.h"
 #include "window.h"
+#include "window_property.h"
 
 namespace OHOS::AbilityRuntime {
     class Context;
@@ -166,13 +167,14 @@ public:
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     virtual int64_t GetVSyncPeriod() override;
-    virtual void FlushFrameRate(uint32_t rate) override;
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
 
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
-    virtual std::string GetContentInfo() override;
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
@@ -214,13 +216,70 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
+    virtual WMError RegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener) override;
+    virtual WMError UnRegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener) override;
+    virtual WMError RegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener) override;
+    virtual WMError UnRegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    virtual WMError SetImmersiveModeEnabledState(bool enable) override;
+    virtual bool GetImmersiveModeEnabledState() const override;
+    virtual WMError UpdateSystemBarProperty(bool status);
 
 private:
+    static sptr<Window> FindWindowById(uint32_t windowId);
+    template<typename T1, typename T2, typename Ret>
+    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T>
+    inline EnableIfSame<T, IWindowSystemBarEnableListener, std::vector<sptr<IWindowSystemBarEnableListener>>>
+        GetListeners()
+    {
+        std::vector<sptr<IWindowSystemBarEnableListener>> systemBarEnableListeners;
+        {
+            std::lock_guard<std::mutex> lock(globalMutex_);
+            for (auto& listener : systemBarEnableListeners_[GetWindowId()]) {
+                systemBarEnableListeners.push_back(listener);
+            }
+        }
+        return systemBarEnableListeners;
+    }
+    template<typename T>
+    inline EnableIfSame<T, IIgnoreViewSafeAreaListener, std::vector<sptr<IIgnoreViewSafeAreaListener>>> GetListeners()
+    {
+        std::vector<sptr<IIgnoreViewSafeAreaListener>> ignoreSafeAreaListeners;
+        {
+            std::lock_guard<std::mutex> lock(globalMutex_);
+            for (auto& listener : ignoreSafeAreaListeners_[GetWindowId()]) {
+                ignoreSafeAreaListeners.push_back(listener);
+            }
+        }
+        return ignoreSafeAreaListeners;
+    }
+    template<typename T>
+    inline EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners()
+    {
+        std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
+        {
+            std::lock_guard<std::mutex> lock(globalMutex_);
+            for (auto& listener : avoidAreaChangeListeners_[GetWindowId()]) {
+                avoidAreaChangeListeners.push_back(listener);
+            }
+        }
+        return avoidAreaChangeListeners;
+    }
+    void ClearListenersById(uint32_t winId);
+    void NotifySystemBarChange(WindowType type, const SystemBarProperty& property);
+    void NotifySetIgnoreSafeArea(bool value);
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    static std::mutex globalMutex_;
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
+    static std::map<uint32_t, std::vector<sptr<IWindowSystemBarEnableListener>>> systemBarEnableListeners_;
+    static std::map<uint32_t, std::vector<sptr<IIgnoreViewSafeAreaListener>>> ignoreSafeAreaListeners_;
+    static std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     WindowState state_ { WindowState::STATE_INITIAL };
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -235,6 +294,23 @@ private:
     int32_t height_ = 0;
     int32_t orientation_ = 0;
     float density_ = 1.0f;
+    bool isIgnoreSafeArea_ = false;
+    uint32_t windowId_ = 0;
+    WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    sptr<WindowProperty> property_;
+    mutable std::mutex mutex_;
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+        { WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+    };
+    std::unordered_map<AvoidAreaType, sptr<AvoidArea>> avoidAreaMap_ {
+        { AvoidAreaType::TYPE_SYSTEM,               new AvoidArea() },
+        { AvoidAreaType::TYPE_CUTOUT,               new AvoidArea() },
+        { AvoidAreaType::TYPE_SYSTEM_GESTURE,       new AvoidArea() },
+        { AvoidAreaType::TYPE_KEYBOARD,             new AvoidArea() },
+        { AvoidAreaType::TYPE_NAVIGATION_INDICATOR, new AvoidArea() },
+    };
 };
 } // namespace Rosen
 } // namespace OHOS
