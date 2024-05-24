@@ -38,6 +38,8 @@ group("unittest") {
     ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
+    ":wm_window_impl_test2",
+    ":wm_window_impl_test3",
     ":wm_window_input_channel_test",
     ":wm_window_manager_agent_proxy_test",
     ":wm_window_manager_stub_proxy_test",
@@ -114,6 +116,42 @@ ohos_unittest("wm_window_impl_test") {
   module_out_path = module_out_path
 
   sources = [ "window_impl_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  include_dirs =
+      [ "${accessibility_path}/interfaces/innerkits/common/include/" ]
+
+  external_deps = [
+    "accessibility:accessibility_common",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_window_impl_test2") {
+  module_out_path = module_out_path
+
+  sources = [ "window_impl_test2.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  include_dirs =
+      [ "${accessibility_path}/interfaces/innerkits/common/include/" ]
+
+  external_deps = [
+    "accessibility:accessibility_common",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_window_impl_test3") {
+  module_out_path = module_out_path
+
+  sources = [ "window_impl_test3.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
