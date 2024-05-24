@@ -16,6 +16,7 @@
 #ifndef OHOS_WINDOW_ADAPTER_LITE_H
 #define OHOS_WINDOW_ADAPTER_LITE_H
 
+#include <shared_mutex>
 #include <refbase.h>
 #include <zidl/window_manager_agent_interface.h>
 
@@ -42,18 +43,22 @@ public:
     virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
-    virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType);
+    virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
     void OnUserSwitch();
+    void ReregisterWindowManagerLiteAgent();
 
     std::recursive_mutex mutex_;
     sptr<IWindowManagerLite> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ { false };
     bool isRegisteredUserSwitchListener_ = false;
+    std::shared_mutex windowManagerLiteAgentMapMutex_;
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerLiteAgentMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,10 @@ namespace {
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
+std::map<uint32_t, std::vector<sptr<IWindowSystemBarEnableListener>>> WindowImpl::systemBarEnableListeners_;
+std::map<uint32_t, std::vector<sptr<IIgnoreViewSafeAreaListener>>> WindowImpl::ignoreSafeAreaListeners_;
+std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avoidAreaChangeListeners_;
+std::mutex WindowImpl::globalMutex_;
 static int constructorCnt = 0;
 static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -75,9 +79,26 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
     return nullptr;
 }
 
+sptr<Window> WindowImpl::FindWindowById(uint32_t windowId)
+{
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    if (windowMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
+        if (windowId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", windowId);
+            return iter->second.second;
+        }
+    }
+    WLOGFE("Cannot find Window!");
+    return nullptr;
+}
+
 sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return nullptr;
+    return FindWindowById(mainWinId);
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -92,6 +113,7 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 
 void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
@@ -120,7 +142,7 @@ WindowType WindowImpl::GetType() const
 
 WindowMode WindowImpl::GetMode() const
 {
-    return WindowMode::WINDOW_MODE_UNDEFINED;
+    return windowMode_;
 }
 
 float WindowImpl::GetAlpha() const
@@ -160,7 +182,7 @@ const std::string& WindowImpl::GetWindowName() const
 
 uint32_t WindowImpl::GetWindowId() const
 {
-    return 0;
+    return windowId_;
 }
 
 uint32_t WindowImpl::GetWindowFlags() const
@@ -180,11 +202,23 @@ bool WindowImpl::IsMainHandlerAvailable() const
 
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
-    return SystemBarProperty();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = sysBarPropMap_.find(type);
+    if (it == sysBarPropMap_.end()) {
+        return SystemBarProperty(false, 0x0, 0x0);
+    }
+    return it->second;
 }
 
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto avoidAreaPtr = avoidAreaMap_[type];
+    if (avoidAreaPtr == nullptr) {
+        return WMError::WM_OK;
+    }
+
+    avoidArea = *avoidAreaPtr;
     return WMError::WM_OK;
 }
 
@@ -195,6 +229,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
 
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
+    windowMode_ = mode;
     return WMError::WM_OK;
 }
 
@@ -233,8 +268,8 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     return;
 }
 
-WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
-    napi_env env, napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("NapiSetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
@@ -250,8 +285,9 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
         WLOGFE("fail to NapiSetUIContent");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (isdistributed) {
-        uiContent->Restore(this, contentInfo, storage);
+    if (type != BackupAndRestoreType::NONE) {
+        uiContent->Restore(this, contentInfo, storage, type == BackupAndRestoreType::CONTINUATION ?
+            Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
@@ -260,6 +296,7 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
         WLOGFE("uiContent_ is NULL");
         return WMError::WM_ERROR_NULLPTR;
     }
+    NotifySetIgnoreSafeArea(isIgnoreSafeArea_);
     UpdateViewportConfig();
     if (contentInfoCallback_) {
         contentInfoCallback_(contentInfo);
@@ -270,10 +307,11 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
 
 Ace::UIContent* WindowImpl::GetUIContent() const
 {
+    WLOGFD("WindowImpl::GetUIContent");
     return uiContent_.get();
 }
 
-std::string WindowImpl::GetContentInfo()
+std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     return "";
 }
@@ -305,21 +343,70 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    return WMError::WM_OK;
+    return SetSpecificBarProperty(type, property);
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
+    WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x",
+        GetWindowId(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_);
+
+    if (GetSystemBarPropertyByType(type) == property) {
+        return WMError::WM_OK;
+    }
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        sysBarPropMap_[type] = property;
+    }
+    NotifySystemBarChange(type, property);
+    UpdateViewportConfig();
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::UpdateSystemBarProperty(bool status)
+{
+    bool enable = !status;
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if (statusProperty.enable_ != enable) {
+        statusProperty.enable_ = enable;
+        SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    }
+
+    SystemBarProperty naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (naviProperty.enable_ != enable) {
+        naviProperty.enable_ = enable;
+        SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, naviProperty);
+    }
+
+    SystemBarProperty naviIndicatorProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    if (naviIndicatorProperty.enable_ != enable) {
+        naviIndicatorProperty.enable_ = enable;
+        SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, naviIndicatorProperty);
+    }
+
     return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
+    isIgnoreSafeArea_ = status;
+    NotifySetIgnoreSafeArea(status);
+    UpdateViewportConfig();
     return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetFullScreen(bool status)
 {
+    WLOGI("status: %{public}d", status);
+    WMError ret = UpdateSystemBarProperty(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("UpdateSystemBarProperty errCode:%{public}d", static_cast<int32_t>(ret));
+    }
+    ret = SetLayoutFullScreen(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreen errCode:%{public}d", static_cast<int32_t>(ret));
+    }
     return WMError::WM_OK;
 }
 
@@ -327,6 +414,12 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
 {
     WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
     context_ = context;
+    sptr<Window> self(this);
+    static std::atomic<uint32_t> tempWindowId = 0;
+    uint32_t windowId = tempWindowId++; // for test
+    windowId_ = windowId;
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
     return WMError::WM_OK;
 }
 
@@ -340,6 +433,8 @@ WMError WindowImpl::Destroy()
     if (uiContent_) {
         uiContent_->Destroy();
     }
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    windowMap_.erase(GetWindowName());
     return WMError::WM_OK;
 }
 
@@ -509,12 +604,18 @@ WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListe
 
 WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return WMError::WM_OK;
+    WLOGFD("Start register");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = RegisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
+    return ret;
 }
 
 WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return WMError::WM_OK;
+    WLOGFD("Start unregister");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = UnregisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
+    return ret;
 }
 
 WMError WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
@@ -597,6 +698,67 @@ void WindowImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathR
     return;
 }
 
+WMError WindowImpl::RegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener)
+{
+    WLOGFI("Register");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = RegisterListener(systemBarEnableListeners_[GetWindowId()], listener);
+    return ret;
+}
+
+WMError WindowImpl::UnRegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener)
+{
+    WLOGFI("UnRegister");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = UnregisterListener(systemBarEnableListeners_[GetWindowId()], listener);
+    return ret;
+}
+
+WMError WindowImpl::RegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener)
+{
+    WLOGFI("Register");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = RegisterListener(ignoreSafeAreaListeners_[GetWindowId()], listener);
+    return ret;
+}
+
+WMError WindowImpl::UnRegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener)
+{
+    WLOGFI("UnRegister");
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    WMError ret = UnregisterListener(ignoreSafeAreaListeners_[GetWindowId()], listener);
+    return ret;
+}
+
+template<typename T>
+WMError WindowImpl::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        WLOGFE("Listener already registered");
+        return WMError::WM_OK;
+    }
+    holder.emplace_back(listener);
+    return WMError::WM_OK;
+}
+
+template<typename T>
+WMError WindowImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [listener](sptr<T> registeredListener) {
+            return registeredListener == listener;
+        }), holder.end());
+    return WMError::WM_OK;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     return;
@@ -640,7 +802,7 @@ int64_t WindowImpl::GetVSyncPeriod()
     return 0;
 }
 
-void WindowImpl::FlushFrameRate(uint32_t rate)
+void WindowImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     return;
 }
@@ -650,6 +812,63 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     if (uiContent_ != nullptr) {
         WLOGFD("notify ace winId:%{public}u", GetWindowId());
         uiContent_->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    if (!avoidArea) {
+        WLOGFE("invalid avoidArea");
+        return;
+    }
+
+    WLOGFI("type:%{public}d, top:{%{public}d,%{public}d,%{public}d,%{public}d}, "
+        "left:{%{public}d,%{public}d,%{public}d,%{public}d}, right:{%{public}d,%{public}d,%{public}d,%{public}d}, "
+        "bottom:{%{public}d,%{public}d,%{public}d,%{public}d}",
+        type, avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_,
+        avoidArea->topRect_.height_, avoidArea->leftRect_.posX_, avoidArea->leftRect_.posY_,
+        avoidArea->leftRect_.width_, avoidArea->leftRect_.height_, avoidArea->rightRect_.posX_,
+        avoidArea->rightRect_.posY_, avoidArea->rightRect_.width_, avoidArea->rightRect_.height_,
+        avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
+        avoidArea->bottomRect_.height_);
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        avoidAreaMap_[type] = avoidArea;
+    }
+    NotifyAvoidAreaChange(avoidArea, type);
+}
+
+void WindowImpl::NotifySystemBarChange(WindowType type, const SystemBarProperty& property)
+{
+    auto systemBarEnableListeners = GetListeners<IWindowSystemBarEnableListener>();
+    for (auto& listener : systemBarEnableListeners) {
+        if (listener != nullptr) {
+            WLOGFD("type = %{public}u", type);
+            listener->OnSetSpecificBarProperty(type, property);
+        }
+    }
+}
+
+void WindowImpl::NotifySetIgnoreSafeArea(bool value)
+{
+    auto ignoreSafeAreaListeners = GetListeners<IIgnoreViewSafeAreaListener>();
+    for (auto& listener : ignoreSafeAreaListeners) {
+        if (listener != nullptr) {
+            WLOGFD("value = %{public}d", value);
+            listener->SetIgnoreViewSafeArea(value);
+        }
+    }
+}
+
+void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
+    for (auto& listener : avoidAreaChangeListeners) {
+        if (listener != nullptr) {
+            WLOGFD("type = %{public}u", type);
+            listener->OnAvoidAreaChanged(*avoidArea, type);
+        }
     }
 }
 
@@ -665,12 +884,14 @@ void WindowImpl::SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChann
 
 bool WindowImpl::IsLayoutFullScreen() const
 {
-    return true;
+    return isIgnoreSafeArea_;
 }
 
 bool WindowImpl::IsFullScreen() const
 {
-    return true;
+    auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
@@ -899,6 +1120,16 @@ WMError WindowImpl::SetSingleFrameComposerEnabled(bool enable)
 WMError WindowImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
     return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
+{
+    return WMError::WM_OK;
+}
+
+bool WindowImpl::GetImmersiveModeEnabledState() const
+{
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

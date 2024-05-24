@@ -43,7 +43,8 @@ public:
         const sptr<IRemoteObject>& callback) override;
     WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
-    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true) override;
+    WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
 
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -75,7 +76,8 @@ public:
     WSError DumpSessionAll(std::vector<std::string> &infos) override;
     WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
-    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
+    WSError TerminateSessionNew(
+        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
@@ -99,12 +101,12 @@ public:
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
         int32_t parentId) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
-    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override;
-    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override;
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions) override;
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override;
+    WMError GetWindowModeType(WindowModeType& windowModeType) override;
 
 private:
     template<typename T>

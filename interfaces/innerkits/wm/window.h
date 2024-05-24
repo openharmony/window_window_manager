@@ -445,6 +445,21 @@ public:
     virtual void OnRectChange(Rect rect, WindowSizeChangeReason reason) {}
 };
 
+/**
+ * @class IKeyboardPanelInfoChangeListener
+ *
+ * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
+ */
+class IKeyboardPanelInfoChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when keyboard info changed.
+     *
+     * @param KeyboardPanelInfo keyboardPanelInfo of the keyboard panel;
+     */
+    virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -467,10 +482,12 @@ public:
      * @param context ability context
      * @param iSession session token of window session
      * @param errCode error code of create window
+     * @param identityToken identity token of sceneSession
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode);
+        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
+        const std::string& identityToken = "");
 
     /**
      * @brief create pip window with session
@@ -1020,7 +1037,7 @@ public:
      *
      * @param rate frame rate.
      */
-    virtual void FlushFrameRate(uint32_t rate) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
     /**
      * @brief Update Configuration.
      *
@@ -1228,8 +1245,8 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
@@ -1268,7 +1285,10 @@ public:
      *
      * @return UI content info.
      */
-    virtual std::string GetContentInfo() { return std::string(); }
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
+    {
+        return std::string();
+    }
     /**
      * @brief Get ui content object.
      *
@@ -1796,6 +1816,17 @@ public:
     }
 
     /**
+     * @brief Set water mark flag.
+     *
+     * @param isEnable bool.
+     * @return WMError
+     */
+    virtual WMError SetWaterMarkFlag(bool isEnable)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.
@@ -1813,22 +1844,6 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Add uiextension window flag.
-     *
-     * @param flag Flag of uiextension window.
-     * @return WM_OK means add success, others means failed.
-     */
-    virtual WMError AddExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Remove uiextension window flag.
-     *
-     * @param flag Flag of uiextension window
-     * @return WM_OK means remove success, others means failed.
-     */
-    virtual WMError RemoveExtensionWindowFlag(ExtensionWindowFlag flag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Make multi-window become landscape or not.
@@ -1870,7 +1885,7 @@ public:
      * @return Rect of window.
      */
     virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
-    
+
     /**
      * @brief Set Shaped Window Mask.
      *
@@ -1880,6 +1895,28 @@ public:
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister keyboard panel info change listener.
+     *
+     * @param listener IKeyboardPanelInfoChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener)
+    {
+        return WMError::WM_OK;
     }
 
     /**
@@ -1927,6 +1964,34 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set gray scale of window
+     * @param grayScale gray scale of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief adjust keyboard layout
+     * @param params
+     * @return WM_OK means set success, others means set failed
+     */
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set whether to enable immersive mode.
+     * @param enable the value true means to enable immersive mode, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the immersive mode is enabled or not.
+     *
+     * @return true means the immersive mode is enabled, and false means the opposite.
+     */
+    virtual bool GetImmersiveModeEnabledState() const { return true; }
 };
 }
 }

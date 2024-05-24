@@ -108,6 +108,29 @@ void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType
     moveDragProperty_.originalRect_ = winRect;
 }
 
+WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect)
+{
+    if (moveTempProperty_.isEmpty()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "move temporary property is empty");
+        return originalRect;
+    }
+    if (originalRect.width_ == 0) {
+        WLOGE("original rect witch is zero");
+        return windowRect;
+    }
+    float newPosX = static_cast<float>(windowRect.width_) / static_cast<float>(originalRect.width_) *
+        static_cast<float>(moveTempProperty_.lastDownPointerPosX_);
+    WSRect targetRect = {
+        moveTempProperty_.lastDownPointerPosX_ - static_cast<int32_t>(newPosX),
+        0,
+        windowRect.width_,
+        windowRect.height_,
+    };
+    TLOGI(WmsLogTag::WMS_LAYOUT, "original rect [%{public}d,%{public}d,%{public}u,%{public}u]", targetRect.posX_,
+        targetRect.posY_, targetRect.width_, targetRect.height_);
+    return targetRect;
+}
+
 void MoveDragController::SetAspectRatio(float ratio)
 {
     aspectRatio_ = ratio;
@@ -159,12 +182,13 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         WLOGFD("No need to move action id: %{public}d", action);
         return false;
     }
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+
+    SizeChangeReason reason = SizeChangeReason::MOVE;
     bool ret = true;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
             reason = SizeChangeReason::MOVE;
-            int32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
+            uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(oldWindowDragHotAreaType != windowDragHotAreaType_, reason);
             break;
@@ -751,7 +775,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     return WSError::WS_OK;
 }
 
-void MoveDragController::ClacFirstMoveTargetRect(const WSRect& windowRect)
+void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
 {
     if (!GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
         return;
@@ -763,6 +787,10 @@ void MoveDragController::ClacFirstMoveTargetRect(const WSRect& windowRect)
         windowRect.width_,
         windowRect.height_
     };
+    if (isFullToFloating) {
+        originalRect.posX_ = windowRect.posX_;
+        originalRect.posY_ = windowRect.posY_;
+    }
     SetOriginalValue(moveTempProperty_.pointerId_, moveTempProperty_.pointerType_,
         moveTempProperty_.lastDownPointerPosX_, moveTempProperty_.lastDownPointerPosY_, originalRect);
 
@@ -814,20 +842,23 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     }
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
-    std::map<int32_t, WSRect> areaMap = SceneSession::windowDragHotAreaMap_;
-    for (auto it = areaMap.begin(); it != areaMap.end(); ++it) {
-        int32_t key = it->first;
-        WSRect rect = it->second;
-        if (rect.IsInRegion(pointerDisplayX, pointerDisplayY)) {
-            if (windowDragHotAreaType_ != key) {
-                WLOGFI("the pointerEvent is window drag hot area, old type is: %{public}d, new type is: %{public}d",
-                    windowDragHotAreaType_, key);
-                windowDragHotAreaType_ = key;
-            }
-            return;
-        }
+    uint32_t windowDragHotAreaType = SceneSession::GetWindowDragHotAreaType(WINDOW_HOT_AREA_TYPE_UNDEFINED,
+        pointerDisplayX, pointerDisplayY);
+    if (windowDragHotAreaType_ != windowDragHotAreaType) {
+        WLOGFI("the pointerEvent is window drag hot area, old type is: %{public}d, new type is: %{public}d",
+            windowDragHotAreaType_, windowDragHotAreaType);
     }
-    windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
+    windowDragHotAreaType_ = windowDragHotAreaType;
+}
+
+int32_t MoveDragController::GetOriginalPointerPosX()
+{
+    return moveDragProperty_.originalPointerPosX_;
+}
+
+int32_t MoveDragController::GetOriginalPointerPosY()
+{
+    return moveDragProperty_.originalPointerPosY_;
 }
 
 void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func)

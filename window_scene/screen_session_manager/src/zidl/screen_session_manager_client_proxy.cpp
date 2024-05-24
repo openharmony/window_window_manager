@@ -57,6 +57,31 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
     }
 }
 
+void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32Vector(oldScbPids)) {
+        WLOGFE("Write oldScbPids failed");
+        return;
+    }
+    if (!data.WriteInt32(currentScbPid)) {
+        WLOGFE("Write currentScbPid failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SWITCH_USER_CMD),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnPropertyChanged(ScreenId screenId,
     const ScreenProperty& property, ScreenPropertyChangeReason reason)
 {
@@ -109,7 +134,12 @@ void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent eve
         WLOGFE("Write reason failed");
         return;
     }
-    if (Remote()->SendRequest(
+    auto remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SendRequest failed, Remote is nullptr");
+        return;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -298,7 +328,12 @@ void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)
         WLOGFE("Write displayId failed");
         return;
     }
-    if (Remote()->SendRequest(
+    auto remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SendRequest failed, Remote is nullptr");
+        return;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_SHOT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

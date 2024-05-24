@@ -35,6 +35,7 @@
 
 namespace OHOS::Rosen {
 using SetScreenSceneDpiFunc = std::function<void(float density)>;
+using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
@@ -110,6 +111,9 @@ public:
     void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
 
+    void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
+    void DestroyScreenScene();
+
     std::string GetName();
     ScreenId GetScreenId();
     ScreenId GetRSScreenId();
@@ -148,6 +152,8 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
+    void SetTouchEnabledFromJs(bool isTouchEnabled);
+    bool IsTouchEnabled();
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -206,12 +212,14 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
+    DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {

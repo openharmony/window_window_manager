@@ -93,10 +93,11 @@ WSError SceneSessionManagerLite::UnRegisterSessionListener(const sptr<ISessionLi
     return SceneSessionManager::GetInstance().UnRegisterSessionListener(listener);
 }
 
-WSError SceneSessionManagerLite::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
+WSError SceneSessionManagerLite::TerminateSessionNew(
+    const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker)
 {
     WLOGFD("run TerminateSessionNew");
-    return SceneSessionManager::GetInstance().TerminateSessionNew(info, needStartCaller);
+    return SceneSessionManager::GetInstance().TerminateSessionNew(info, needStartCaller, isFromBroker);
 }
 
 WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
@@ -199,9 +200,13 @@ WSError SceneSessionManagerLite::UpdateWindowMode(int32_t persistentId, int32_t 
     return SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
 }
 
-WMError SceneSessionManagerLite::GetWindowBackHomeStatus(bool &isBackHome)
+WMError SceneSessionManagerLite::GetWindowModeType(WindowModeType& windowModeType)
 {
-    return SceneSessionManager::GetInstance().GetWindowBackHomeStatus(isBackHome);
+    return SceneSessionManager::GetInstance().GetWindowModeType(windowModeType);
 }
 
+WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
+}
 } // namespace OHOS::Rosen

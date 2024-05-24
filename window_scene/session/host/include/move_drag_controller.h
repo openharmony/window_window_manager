@@ -32,11 +32,11 @@ namespace OHOS::Rosen {
 
 using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
 
-using NotifyWindowDragHotAreaFunc = std::function<void(int32_t type, const SizeChangeReason& reason)>;
+using NotifyWindowDragHotAreaFunc = std::function<void(uint32_t type, const SizeChangeReason& reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
-const int32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = -1;
+const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
 class MoveDragController : public RefBase {
 public:
@@ -57,7 +57,10 @@ public:
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
-    void ClacFirstMoveTargetRect(const WSRect& windowRect);
+    void CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating);
+    WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
+    int32_t GetOriginalPointerPosX();
+    int32_t GetOriginalPointerPosY();
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
@@ -162,7 +165,7 @@ private:
 
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
-    int32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
+    uint32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
 

@@ -70,7 +70,8 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 }
 
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
-    sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession)
+    sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession,
+    const std::string& identityToken)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "WindowScene with window session!");
     displayId_ = displayId;
@@ -83,7 +84,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
     }
-    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(option, context, iSession);
+    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(option, context, iSession, identityToken);
     if (mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after creat Window!");
         return WMError::WM_ERROR_NULLPTR;
@@ -208,13 +209,13 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     mainWindow_->UpdateConfiguration(configuration);
 }
 
-std::string WindowScene::GetContentInfo() const
+std::string WindowScene::GetContentInfo(BackupAndRestoreType type) const
 {
     if (mainWindow_ == nullptr) {
         WLOGFE("Get content info failed, because main window is null");
         return "";
     }
-    return mainWindow_->GetContentInfo();
+    return mainWindow_->GetContentInfo(type);
 }
 
 WMError WindowScene::NotifyMemoryLevel(int32_t level)

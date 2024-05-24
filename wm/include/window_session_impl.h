@@ -63,13 +63,13 @@ public:
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "");
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
-    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
@@ -98,21 +98,21 @@ public:
     uint32_t GetWindowId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
-    std::string GetContentInfo() override;
+    std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
     Ace::UIContent* GetUIContent() const override;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
-    PiPTemplateInfo GetPiPTemplateInfo() const;
     void OnNewWant(const AAFwk::Want& want) override;
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
-    void FlushFrameRate(uint32_t rate) override;
+    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
@@ -171,7 +171,6 @@ public:
     void NotifyForegroundFailed(WMError ret);
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
-    void UpdateWindowSizeLimits();
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     WSError NotifyCloseExistPipWindow() override;
@@ -224,7 +223,7 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
-    
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -235,6 +234,7 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
+    void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
@@ -261,6 +261,7 @@ protected:
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
+    mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
@@ -288,8 +289,9 @@ protected:
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
-    virtual bool IfNotNeedAvoidKeyBoardForSplit();
     WSError SwitchFreeMultiWindow(bool enable) override;
+    std::string identityToken_ = { "" };
+    void MakeSubOrDialogWindowDragableAndMoveble();
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -334,9 +336,10 @@ private:
     void NotifyAfterPaused();
 
     WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet);
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+        OHOS::Ace::UIContentErrorCode& aceRet);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType type, AppExecFwk::Ability* ability);
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
@@ -389,7 +392,9 @@ private:
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
+    std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
+    sptr<WindowOption> windowOption_;
 };
 } // namespace Rosen
 } // namespace OHOS

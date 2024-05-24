@@ -148,6 +148,25 @@ HWTEST_F(WindowSceneTest, Init05, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Init06
+ * @tc.desc: Init Scene with abilityContext, null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
+{
+    std::string identityToken = "testToken";
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> optionTest = new WindowOption();
+    sptr<IRemoteObject> iSession = new IPCObjectStub();
+    DisplayId displayId = 1;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
+        scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
+}
+
+
+/**
  * @tc.name: Create01
  * @tc.desc: CreateWindow without windowName
  * @tc.type: FUNC

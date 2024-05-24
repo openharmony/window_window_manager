@@ -203,6 +203,8 @@ public:
     virtual void StartMove() override;
     virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     virtual MaximizeMode GetGlobalMaximizeMode() const override;
+    virtual WMError SetImmersiveModeEnabledState(bool enable) override;
+    virtual bool GetImmersiveModeEnabledState() const override;
 
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
@@ -264,13 +266,13 @@ public:
     void PerformBack() override;
     void NotifyForegroundInteractiveStatus(bool interactive);
     virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
-    virtual std::string GetContentInfo() override;
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -531,6 +533,7 @@ private:
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
     void DestroySubWindow();
+    void ClearVsyncStation();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     static sptr<Window> FindWindowById(uint32_t WinId);
@@ -581,7 +584,7 @@ private:
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType type, AppExecFwk::Ability* ability);
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
 
     // colorspace, gamut
@@ -600,6 +603,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
+    static bool enableImmersiveMode_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState subWindowState_ {WindowState::STATE_INITIAL};

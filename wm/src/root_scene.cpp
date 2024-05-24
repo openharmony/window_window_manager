@@ -23,6 +23,7 @@
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
+#include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
@@ -36,6 +37,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+const uint32_t LEM_SUB_WIDTH = 340;
+const uint32_t LEM_SUB_HEIGHT = 340;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -134,6 +137,12 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
         WLOGFE("uiContent_ is nullptr!");
         return;
     }
+    // Arkui is not adapted to multi-display, which constantly refreshes the internal screen dpi.
+    // Currently, the system is temporarily isolated and needs to be formally rectified in the future
+    if (rect.width_ == LEM_SUB_WIDTH && rect.height_ == LEM_SUB_HEIGHT
+        && FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        return;
+    }
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
@@ -202,14 +211,14 @@ int64_t RootScene::GetVSyncPeriod()
     return vsyncStation_->GetVSyncPeriod();
 }
 
-void RootScene::FlushFrameRate(uint32_t rate)
+void RootScene::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "FlushFrameRate failed, vsyncStation is nullptr");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate);
+    vsyncStation_->FlushFrameRate(rate, isAnimatorStopped);
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)

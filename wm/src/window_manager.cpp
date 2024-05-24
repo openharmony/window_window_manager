@@ -25,6 +25,7 @@
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
+#include "window_display_change_adapter.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -51,7 +52,6 @@ public:
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowModeChange(WindowModeType type);
-    void NotifyWindowBackHomeStatus(bool isBackHome);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
@@ -62,6 +62,8 @@ public:
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     void NotifyGestureNavigationEnabledResult(bool enable);
+    void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
+        float density, DisplayOrientation orientation);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -71,8 +73,6 @@ public:
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
     std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
     sptr<WindowManagerAgent> windowModeListenerAgent_;
-    std::vector<sptr<IWindowBackHomeListener>> windowBackHomeListeners_;
-    sptr<WindowManagerAgent> windowBackHomeListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
     sptr<WindowManagerAgent> systemBarChangedListenerAgent_;
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners_;
@@ -89,6 +89,8 @@ public:
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
     std::vector<sptr<IVisibleWindowNumChangedListener>> visibleWindowNumChangedListeners_;
     sptr<WindowManagerAgent> visibleWindowNumChangedListenerAgent_;
+    std::map<sptr<IRemoteObject>,
+        std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -161,19 +163,6 @@ void WindowManager::Impl::NotifyWindowModeChange(WindowModeType type)
     }
 }
 
-void WindowManager::Impl::NotifyWindowBackHomeStatus(bool isBackHome)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl NotifyWindowBackHomeStatus isBackHome: %{public}d", isBackHome);
-    std::vector<sptr<IWindowBackHomeListener>> windowBackHomeListeners;
-    {
-        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
-        windowBackHomeListeners = windowBackHomeListeners_;
-    }
-    for (auto &listener : windowBackHomeListeners) {
-        listener->OnWindowBackHomeStatus(isBackHome);
-    }
-}
-
 void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     for (auto tint : tints) {
@@ -201,6 +190,10 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         return;
     }
     for (auto& info : infos) {
+        if (info == nullptr) {
+            TLOGD(WmsLogTag::WMS_MAIN, "info is nullptr");
+            continue;
+        }
         TLOGD(WmsLogTag::WMS_MAIN, "NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u]," \
             "uiNodeId_[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
             "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
@@ -304,6 +297,26 @@ void WindowManager::Impl::NotifyVisibleWindowNumChanged(
             continue;
         }
         listener->OnVisibleWindowNumChange(visibleWindowNumInfo);
+    }
+}
+
+void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
+    float density, DisplayOrientation orientation)
+{
+    auto iter = displayInfoChangedListeners_.end();
+    std::vector<sptr<WindowDisplayChangeAdapter>> displayInfoChangedListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        iter = displayInfoChangedListeners_.find(token);
+        if (iter == displayInfoChangedListeners_.end()) {
+            TLOGI(WmsLogTag::DMS, "can not find token in listener list, need not notify the change of display info");
+            return;
+        }
+        displayInfoChangedListeners = iter->second;
+    }
+
+    for (auto& listener : displayInfoChangedListeners) {
+        listener->OnDisplayInfoChange(token, displayId, density, orientation);
     }
 }
 
@@ -472,63 +485,6 @@ WMError WindowManager::UnregisterWindowModeChangedListener(const sptr<IWindowMod
     return ret;
 }
 
-WMError WindowManager::RegisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "RegisterWindowBackHomeListener!");
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
-    WMError ret = WMError::WM_OK;
-    if (pImpl_->windowBackHomeListenerAgent_ == nullptr) {
-        pImpl_->windowBackHomeListenerAgent_ = new WindowManagerAgent();
-    }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_BACK_HOME_STATE,
-        pImpl_->windowBackHomeListenerAgent_);
-    if (ret != WMError::WM_OK) {
-        TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
-        pImpl_->windowBackHomeListenerAgent_ = nullptr;
-        return ret;
-    }
-    auto iter = std::find(pImpl_->windowBackHomeListeners_.begin(), pImpl_->windowBackHomeListeners_.end(), listener);
-    if (iter != pImpl_->windowBackHomeListeners_.end()) {
-        TLOGW(WmsLogTag::WMS_MAIN, "Listener is already registered.");
-        return WMError::WM_OK;
-    }
-    pImpl_->windowBackHomeListeners_.push_back(listener);
-    return ret;
-}
- 
-WMError WindowManager::UnregisterWindowBackHomeListener(const sptr<IWindowBackHomeListener>& listener)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "UnregisterWindowBackHomeListener!");
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
-    auto iter = std::find(pImpl_->windowBackHomeListeners_.begin(), pImpl_->windowBackHomeListeners_.end(), listener);
-    if (iter == pImpl_->windowBackHomeListeners_.end()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
-        return WMError::WM_OK;
-    }
-    pImpl_->windowBackHomeListeners_.erase(iter);
-    WMError ret = WMError::WM_OK;
-    if (pImpl_->windowBackHomeListeners_.empty() && pImpl_->windowBackHomeListenerAgent_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_BACK_HOME_STATE,
-            pImpl_->windowBackHomeListenerAgent_);
-        if (ret == WMError::WM_OK) {
-            pImpl_->windowBackHomeListenerAgent_ = nullptr;
-        }
-    }
-    return ret;
-}
- 
 WMError WindowManager::RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener)
 {
     if (listener == nullptr) {
@@ -898,6 +854,91 @@ WMError WindowManager::UnregisterGestureNavigationEnabledChangedListener(
     return ret;
 }
 
+WMError WindowManager::RegisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
+    const sptr<IDisplayInfoChangedListener>& listener)
+{
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability token could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    sptr<WindowDisplayChangeAdapter> listenerAdapter = new (std::nothrow) WindowDisplayChangeAdapter(token, listener);
+    if (listenerAdapter == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create listener adapter failed.");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    auto iter = pImpl_->displayInfoChangedListeners_.find(token);
+    if (iter == pImpl_->displayInfoChangedListeners_.end()) {
+        pImpl_->displayInfoChangedListeners_.insert({token, {listenerAdapter}});
+    } else {
+        auto listerneIter = std::find_if(iter->second.begin(), iter->second.end(),
+            [&listener](const sptr<WindowDisplayChangeAdapter>& item) {
+                return listener == item->GetListener();
+            });
+        if (listerneIter != iter->second.end()) {
+            TLOGW(WmsLogTag::DMS, "listener is already registered.");
+        } else {
+            iter->second.push_back(listenerAdapter);
+        }
+    }
+    TLOGD(WmsLogTag::DMS, "try to registerDisplayInfoChangedListener success");
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UnregisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
+    const sptr<IDisplayInfoChangedListener>& listener)
+{
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability token could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    auto iter = pImpl_->displayInfoChangedListeners_.find(token);
+    if (iter == pImpl_->displayInfoChangedListeners_.end()) {
+        TLOGW(WmsLogTag::DMS, "can not find the ability token");
+    } else {
+        auto listerneIter = std::find_if(iter->second.begin(), iter->second.end(),
+            [&listener](sptr<WindowDisplayChangeAdapter>& item) {
+                return listener == item->GetListener();
+            });
+        if (listerneIter == iter->second.end()) {
+            TLOGW(WmsLogTag::DMS, "can not find the listener.");
+        } else {
+            iter->second.erase(listerneIter);
+            if (iter->second.empty()) {
+                pImpl_->displayInfoChangedListeners_.erase(iter);
+            }
+        }
+    }
+    TLOGD(WmsLogTag::DMS, "try to unregisterDisplayInfoChangedListener success");
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
+    float density, DisplayOrientation orientation)
+{
+    TLOGD(WmsLogTag::DMS, "notify display info change, displayid = %{public}" PRIu64", density=%{public}f," \
+        "orientation = %{public}d", displayId, density, orientation);
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::DMS, "notify display info change failed, token is nullptr");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    pImpl_->NotifyDisplayInfoChanged(token, displayId, density, orientation);
+    return WMError::WM_OK;
+}
+
 void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
@@ -931,16 +972,12 @@ void WindowManager::UpdateWindowModeTypeInfo(WindowModeType type) const
     pImpl_->NotifyWindowModeChange(type);
 }
 
-void WindowManager::UpdateWindowBackHomeStatus(bool isBackHome) const
-{
-    pImpl_->NotifyWindowBackHomeStatus(isBackHome);
-}
 
-WMError WindowManager::GetWindowBackHomeStatus(bool &isBackHome) const
+WMError WindowManager::GetWindowModeType(WindowModeType& windowModeType) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowBackHomeStatus(isBackHome);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowModeType(windowModeType);
     if (ret != WMError::WM_OK) {
-        WLOGFE("get window back home status failed");
+        WLOGFE("get window mode type failed");
     }
     return ret;
 }

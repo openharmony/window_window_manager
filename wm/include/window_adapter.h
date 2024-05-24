@@ -37,7 +37,7 @@ public:
 class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
-    using SessionRecoverCallbackFunc = std::function<void()>;
+    using SessionRecoverCallbackFunc = std::function<WMError()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
@@ -119,12 +119,12 @@ public:
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
         int32_t parentId);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
-    virtual WMError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide);
-    virtual WMError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags);
+    virtual WMError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions);
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
-    virtual WMError GetWindowBackHomeStatus(bool &isBackHome);
+    virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

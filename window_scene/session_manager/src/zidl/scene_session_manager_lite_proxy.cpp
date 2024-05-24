@@ -28,6 +28,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteProxy"};
+constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
 WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
@@ -331,7 +332,7 @@ WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, s
 }
 
 WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-    bool needStartCaller)
+    bool needStartCaller, bool isFromBroker)
 {
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
@@ -349,6 +350,10 @@ WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::Sess
     }
     if (!data.WriteBool(needStartCaller)) {
         WLOGFE("Write needStartCaller failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isFromBroker)) {
+        WLOGFE("Write isFromBroker failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
@@ -768,9 +773,9 @@ WMError SceneSessionManagerLiteProxy::GetVisibilityWindowInfo(std::vector<sptr<W
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
+WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowModeType)
 {
-    WLOGFI("get Window back home proxy");
+    WLOGFI("get Window mode type proxy");
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
@@ -780,12 +785,47 @@ WMError SceneSessionManagerLiteProxy::GetWindowBackHomeStatus(bool &isBackHome)
     MessageParcel reply;
     MessageOption option;
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_BACK_HOME_STATUS), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE), data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    isBackHome = reply.ReadBool();
+    windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerLiteProxy::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "get main info in %{public}d", topNum);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if ((topNum <= 0) || (topNum >= MAX_TOPN_INFO_SIZE)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(topNum)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "topNum write fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<int32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
+                              data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    WMError error = static_cast<WMError>(GetParcelableInfos(reply, topNInfo));
+    if (error != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get info error");
+        return error;
+    }
+
     return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

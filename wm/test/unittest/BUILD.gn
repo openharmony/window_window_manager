@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":wm_extension_window_impl_test",
+    ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
     ":wm_pattern_detach_callback_proxy_test",
     ":wm_pattern_detach_callback_test",
@@ -31,6 +32,7 @@ group("unittest") {
     ":wm_vsync_station_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
+    ":wm_window_display_change_adapter_test",
     ":wm_window_effect_test",
     ":wm_window_extension_session_impl_test",
     ":wm_window_frame_trace_impl_test",
@@ -66,6 +68,7 @@ ohos_unittest("wm_window_manager_test") {
 
   external_deps = [
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
   ]
 
@@ -73,6 +76,23 @@ ohos_unittest("wm_window_manager_test") {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
     defines = [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
+}
+
+ohos_unittest("wm_window_display_change_adapter_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/wm/src" ]
+  sources = [ "window_display_change_adapter_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("wm_window_manager_lite_test") {
@@ -161,6 +181,19 @@ ohos_unittest("wm_window_effect_test") {
   ]
 }
 
+ohos_unittest("wm_gtx_input_event_sender_test") {
+  module_out_path = module_out_path
+
+  sources = [ "gtx_input_event_sender_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("wm_input_transfer_station_test") {
   module_out_path = module_out_path
 
@@ -219,7 +252,10 @@ ohos_unittest("wm_window_test") {
 
   sources = [ "window_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -504,6 +540,7 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",

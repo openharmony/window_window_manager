@@ -42,13 +42,13 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     for (auto& appNodes: needMinimizeAppNodes_) {
         auto windowId = node->GetWindowId();
         auto iter = std::find_if(appNodes.second.begin(), appNodes.second.end(),
-                                    [windowId](wptr<WindowNode> srcNode) {
-                                    auto weakSrcNode = srcNode.promote();
-                                    if (weakSrcNode == nullptr) {
-                                        return false;
-                                    }
-                                    return weakSrcNode->GetWindowId() == windowId;
-                                });
+            [windowId](wptr<WindowNode> srcNode) {
+                auto weakSrcNode = srcNode.promote();
+                if (weakSrcNode == nullptr) {
+                    return false;
+                }
+                return weakSrcNode->GetWindowId() == windowId;
+            });
         if (iter != appNodes.second.end()) {
             WLOGI("[Minimize] Window %{public}u is already in minimize list", node->GetWindowId());
             return;

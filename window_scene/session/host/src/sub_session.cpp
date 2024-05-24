@@ -31,6 +31,10 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
+    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
+    }
     SetMoveDragCallback();
     TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
 }
@@ -112,7 +116,8 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
-    if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+    auto parentSession = GetParentSession();
+    if (parentSession && parentSession->CheckDialogOnForeground()) {
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
     }
@@ -132,7 +137,8 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
         WLOGFE("KeyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+    auto parentSession = GetParentSession();
+    if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, not transfer pointer event");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -143,7 +149,8 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 
 int32_t SubSession::GetMissionId() const
 {
-    return parentSession_ != nullptr ? parentSession_->GetPersistentId() : SceneSession::GetMissionId();
+    auto parentSession = GetParentSession();
+    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 void SubSession::UpdatePointerArea(const WSRect& rect)
@@ -159,28 +166,12 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = systemConfig_.uiType_ == "pc";
     if (isPC && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
         WLOGFW("Current Session Info: [persistentId: %{public}d, "
             "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
-        return false;
-    }
-    return true;
-}
-
-bool SubSession::IfNotNeedAvoidKeyBoardForSplit()
-{
-    if (ScreenSessionManagerClient::GetInstance().IsFoldable() &&
-            ScreenSessionManagerClient::GetInstance().GetFoldStatus() != OHOS::Rosen::FoldStatus::FOLDED) {
-        return false;
-    }
-    if (GetParentSession() != nullptr &&
-            GetParentSession()->GetWindowMode() != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return false;
-    }
-    if (!Session::GetFocused() || Session::GetSessionRect().posY_ == 0) {
         return false;
     }
     return true;

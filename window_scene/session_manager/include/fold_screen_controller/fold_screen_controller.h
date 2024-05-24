@@ -20,6 +20,7 @@
 #include "common/include/task_scheduler.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/fold_screen_state_machine.h"
+#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
@@ -48,6 +49,7 @@ public:
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
+    sptr<SensorFoldStateManager> sensorFoldStateManager_;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };

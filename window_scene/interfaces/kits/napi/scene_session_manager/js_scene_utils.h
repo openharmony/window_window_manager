@@ -21,7 +21,6 @@
 #include <native_engine/native_value.h>
 #include <pointer_event.h>
 
-#include "configuration.h"
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "common/include/window_session_property.h"
@@ -143,7 +142,6 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
 
 JsSessionType GetApiType(WindowType type);
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
-bool ConvertConfigurationFromJs(napi_env env, napi_value jsObject, AppExecFwk::Configuration& config);
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
@@ -162,9 +160,13 @@ napi_value CreateJsSessionProcessMode(napi_env env);
 napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
-napi_value CreateJsSessionRect(napi_env env, const WSRect& rect);
+void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
+template<typename T>
+napi_value CreateJsSessionRect(napi_env env, const T& rect);
+napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
+napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);
 napi_value SessionTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);

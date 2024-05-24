@@ -158,6 +158,77 @@ enum class ManagerState : uint32_t {
     MANAGER_STATE_SCREEN_LOCKED = 0,
 };
 
+enum class FocusChangeReason {
+    /**
+     * default focus change reason
+     */
+    DEFAULT = 0,
+    /**
+     * focus change for move up
+     */
+    MOVE_UP,
+    /**
+     * focus change for click
+     */
+    CLICK,
+    /**
+     * focus change for foreground
+     */
+    FOREGROUND,
+    /**
+     * focus change for background
+     */
+    BACKGROUND,
+    /**
+     * focus change for split screen.5
+     */
+    SPLIT_SCREEN,
+    /**
+     * focus change for full screen
+     */
+    FULL_SCREEN,
+    /**
+     * focus change for global search
+     */
+    SCB_SESSION_REQUEST,
+    /**
+     * focus change for floating scene
+     */
+    FLOATING_SCENE,
+    /**
+     * focus change for losing focus
+     */
+    SCB_SESSION_REQUEST_UNFOCUS,
+    /**
+     * focus change for client requerst.10
+     */
+    CLIENT_REQUEST,
+    /**
+     * focus change for wind
+     */
+    WIND,
+    /**
+     * focus change for app foreground
+     */
+    APP_FOREGROUND,
+    /**
+     * focus change for app background
+     */
+    APP_BACKGROUND,
+    /**
+     * focus change for recent,Multitasking
+     */
+    RECENT,
+    /**
+     * focus change for inner app.
+     */
+    SCB_START_APP,
+    /**
+     * focus change max.
+     */
+    MAX,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -205,6 +276,7 @@ struct SessionInfo {
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
+    bool isCalledRightlyByCallerId_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -235,6 +307,7 @@ enum class SizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     END,
 };
@@ -400,9 +473,23 @@ struct SystemUIStatusBarConfig {
     std::string immersiveStatusBarContentColor_ = "#ffffff";
 };
 
+struct StatusBarConfig {
+    bool showHide_ = false;
+    std::string contentColor_ = "#000000";
+    std::string backgroundColor_ = "#000000";
+};
+
+struct WindowImmersive {
+    StatusBarConfig desktopStatusBarConfig_;
+    StatusBarConfig leftRightStatusBarConfig_;
+    StatusBarConfig upDownStatusBarConfig_;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-
+    std::string uiType_ = "pad";
+    bool backgroundScreenLock_ = false;
+    std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
@@ -410,10 +497,17 @@ struct AppWindowSceneConfig {
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
+    WindowImmersive windowImmersive_;
 };
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+    bool isRightPowerButton_ = true;
+};
+
+struct SessionEventParam {
+    int32_t pointerX_ = 0;
+    int32_t pointerY_ = 0;
 };
 
 /**
@@ -454,6 +548,8 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_APPEAR_MISSION_CENTER, // A special case scenario that displays the mission center
     SCENE_ENTER_WIND_CLEAR, // Enter win+D in clear screen mode
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
+    SCENE_ENTER_RECENTS, // Enter recents
+    SCENE_EXIT_RECENTS, // Exit recent.
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 } // namespace OHOS::Rosen

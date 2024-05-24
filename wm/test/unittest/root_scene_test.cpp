@@ -38,6 +38,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void RootSceneTest::SetUpTestCase()
@@ -54,6 +56,7 @@ void RootSceneTest::SetUp()
 
 void RootSceneTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -168,7 +171,8 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     uint32_t rate = 120;
-    rootScene.FlushFrameRate(rate);
+    bool isAnimatorStopped = true;
+    rootScene.FlushFrameRate(rate, isAnimatorStopped);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 }

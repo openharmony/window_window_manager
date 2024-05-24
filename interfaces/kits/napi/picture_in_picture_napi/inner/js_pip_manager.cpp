@@ -33,9 +33,9 @@ napi_value NapiGetUndefined(napi_env env)
     return result;
 }
 
-napi_value NapiThrowInvalidParam(napi_env env)
+napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "")
 {
-    napi_throw(env, AbilityRuntime::CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+    napi_throw(env, AbilityRuntime::CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM), msg));
     return NapiGetUndefined(env);
 }
 

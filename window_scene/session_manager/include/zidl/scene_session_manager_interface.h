@@ -99,13 +99,12 @@ public:
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
-        TRANS_ID_ADD_OR_REMOVE_SECURE_EXT_SESSION,
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK,
         TRANS_ID_GET_WINDOW_STATUS,
         TRANS_ID_GET_WINDOW_RECT,
-        TRANS_ID_GET_WINDOW_BACK_HOME_STATUS,
+        TRANS_ID_GET_WINDOW_MODE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -132,7 +131,8 @@ public:
     }
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
 
-    virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
+    virtual WSError TerminateSessionNew(
+        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
@@ -220,11 +220,8 @@ public:
     {
         return WSError::WS_OK;
     }
-    WSError AddOrRemoveSecureExtSession(int32_t persistentId, int32_t parentId, bool shouldHide) override
-    {
-        return WSError::WS_OK;
-    }
-    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags) override
+    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+        uint32_t extWindowActions) override
     {
         return WSError::WS_OK;
     }
@@ -240,7 +237,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError GetWindowBackHomeStatus(bool &isBackHome) override { return WMError::WM_OK; }
+    WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

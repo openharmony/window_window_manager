@@ -342,6 +342,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: HandleUpdateOrientation
+ * @tc.desc: test function : HandleUpdateOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateOrientation, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateOrientation(data, reply));
+}
+
+/**
  * @tc.name: HandleNotifyCloseExistPipWindow
  * @tc.desc: test function : HandleNotifyCloseExistPipWindow
  * @tc.type: FUNC
@@ -378,6 +391,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTes
     MessageParcel reply;
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleUpdateTitleInTargetPos(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyDensityFollowHost
+ * @tc.desc: test function : HandleNotifyDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyDensityFollowHost(data, reply));
 }
 
 /**

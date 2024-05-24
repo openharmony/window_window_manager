@@ -24,6 +24,7 @@ ohos_shared_library("pipwindow_napi") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   sources = [
@@ -41,6 +42,7 @@ ohos_shared_library("pipwindow_napi") {
   deps = [
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
 

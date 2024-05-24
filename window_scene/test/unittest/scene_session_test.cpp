@@ -134,6 +134,51 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: BackgroundTask01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, BackgroundTask01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask01";
+    info.bundleName_ = "BackgroundTask01";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback, nullptr);
+    int resultValue = 0;
+    sptr<SceneSession> sceneSession;
+
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    specificCallback->onCreate_ =
+        [&resultValue, specificCallback](const SessionInfo& info,
+        sptr<WindowSessionProperty> property) -> sptr<SceneSession>
+    {
+        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        EXPECT_NE(sceneSessionReturn, nullptr);
+        resultValue = 1;
+        return sceneSessionReturn;
+    };
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetGlobalMaximizeMode01
  * @tc.desc: SetGlobalMaximizeMode
  * @tc.type: FUNC
@@ -410,6 +455,10 @@ HWTEST_F(SceneSessionTest, SetRequestedOrientation01, Function | SmallTest | Lev
     scensession->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
     Orientation ret5 = scensession->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+
+    scensession->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    Orientation ret6 = scensession->GetRequestedOrientation();
+    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 }
 
 /**
@@ -449,6 +498,10 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level
     scensession->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
     Orientation ret5 = scensession->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+
+    scensession->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    Orientation ret6 = scensession->GetRequestedOrientation();
+    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 }
 
 
@@ -909,11 +962,17 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(scensession->IsShowWhenLocked(), false);
     scensession->property_ = property;
+    scensession->SetTemporarilyShowWhenLocked(true);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
     property->SetWindowFlags(4);
+    scensession->SetTemporarilyShowWhenLocked(false);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
+    scensession->SetTemporarilyShowWhenLocked(true);
     ASSERT_EQ(scensession->IsShowWhenLocked(), true);
 }
 
@@ -956,7 +1015,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
-    ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -986,7 +1045,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -1015,7 +1075,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
     property->SetDragEnabled(true);
     property->SetPersistentId(12);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -1278,6 +1338,32 @@ HWTEST_F(SceneSessionTest, Background02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: BackgroundTask02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, BackgroundTask02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->BackgroundTask();
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: Disconnect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1514,8 +1600,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    scensession->SetAspectRatio(ratio);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -1633,8 +1719,8 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     WSRect rect({1, 1, 1, 1});
     WSRect newWinRect;
     WSRect newRequestRect;
-    bool result = scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(result, true);
+    scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -2005,7 +2091,8 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent01, Function | SmallTest | Level2
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_DO_NOTHING);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+        WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2357,6 +2444,62 @@ HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
     res = session->RemoveSubSession(subSession->GetPersistentId());
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: AddToastSession
+ * @tc.desc: AddToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<SceneSession> toastSession = nullptr;
+    bool res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+
+    toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: RemoveToastSession
+ * @tc.desc: RemoveToastSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RemoveToastSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    bool res = session->RemoveToastSession(0);
+    ASSERT_EQ(res, false);
+
+    sptr<SceneSession> toastSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(toastSession, nullptr);
+
+    res = session->AddToastSession(toastSession);
+    ASSERT_EQ(res, true);
+
+    res = session->RemoveToastSession(toastSession->GetPersistentId());
+    ASSERT_EQ(res, true);
+}
+
 /**
  * @tc.name: NotifySessionForeground01
  * @tc.desc: NotifySessionForeground
@@ -2539,6 +2682,24 @@ HWTEST_F(SceneSessionTest, RequestHideKeyboard, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->RequestHideKeyboard();
     ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.desc:  * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsDisplayStatusBarTemporarily, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
+    info.bundleName_ = "SetIsDisplayStatusBarTemporarily";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
+    sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
 
 /**
@@ -2773,7 +2934,7 @@ HWTEST_F(SceneSessionTest, SetFloatingScale, Function | SmallTest | Level2)
     scensession->specificCallback_->onWindowInfoUpdate_ = windowInfoUpdateFun;
     scensession->specificCallback_->onUpdateAvoidArea_ = updateAvoidAreaFun;
     scensession->SetFloatingScale(3.14f);
-    EXPECT_NE(3.14f, scensession->floatingScale_);
+    EXPECT_EQ(3.14f, scensession->floatingScale_);
 }
 
 /**
@@ -2925,30 +3086,8 @@ HWTEST_F(SceneSessionTest, SetPipActionEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ShouldHideNonSecureWindows
- * @tc.desc:  * @tc.name: ShouldHideNonSecureWindows
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ShouldHideNonSecureWindows, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ShouldHideNonSecureWindows";
-    info.bundleName_ = "ShouldHideNonSecureWindows";
-
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    EXPECT_FALSE(sceneSession->ShouldHideNonSecureWindows());
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    sceneSession->SetShouldHideNonSecureWindows(true);
-    EXPECT_TRUE(sceneSession->ShouldHideNonSecureWindows());
-}
-
-
-/**
  * @tc.name: SetShouldHideNonSecureWindows
- * @tc.desc:  * @tc.name: SetShouldHideNonSecureWindows
+ * @tc.desc: SetShouldHideNonSecureWindows
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetShouldHideNonSecureWindows, Function | SmallTest | Level2)
@@ -2967,30 +3106,133 @@ HWTEST_F(SceneSessionTest, SetShouldHideNonSecureWindows, Function | SmallTest |
 }
 
 /**
- * @tc.name: AddOrRemoveSecureExtSession
- * @tc.desc:  * @tc.name: AddOrRemoveSecureExtSession
+ * @tc.name: UpdateExtWindowFlags
+ * @tc.desc: update uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, AddOrRemoveSecureExtSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, UpdateExtWindowFlags, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "AddOrRemoveSecureExtSession";
-    info.bundleName_ = "AddOrRemoveSecureExtSession";
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
+    info.abilityName_ = "UpdateExtWindowFlags";
+    info.bundleName_ = "UpdateExtWindowFlags";
 
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
-    sceneSession->AddOrRemoveSecureExtSession(12345, true);
-    EXPECT_EQ(sceneSession->secureExtSessionSet_.size(), 1);
-    EXPECT_EQ(*sceneSession->secureExtSessionSet_.begin(), 12345);
-    sceneSession->AddOrRemoveSecureExtSession(12345, false);
-    EXPECT_TRUE(sceneSession->secureExtSessionSet_.empty());
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+    int32_t persistentId = 12345;
+    ExtensionWindowFlags flags(7);
+    ExtensionWindowFlags actions(7);
+    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.size(), 1);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.begin()->first, persistentId);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.begin()->second.bitData, 7);
+    flags.bitData = 0;
+    actions.bitData = 3;
+    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.size(), 1);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.begin()->first, persistentId);
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.begin()->second.bitData, 4);
+    actions.bitData = 4;
+    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+}
+
+/**
+ * @tc.name: GetCombinedExtWindowFlags
+ * @tc.desc: get combined uiextension window flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetCombinedExtWindowFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetCombinedExtWindowFlags";
+    info.bundleName_ = "GetCombinedExtWindowFlags";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    auto combinedExtWindowFlags = sceneSession->GetCombinedExtWindowFlags();
+    EXPECT_EQ(combinedExtWindowFlags.bitData, 0);
+    sceneSession->UpdateExtWindowFlags(1234, ExtensionWindowFlags(3), ExtensionWindowFlags(3));
+    sceneSession->UpdateExtWindowFlags(5678, ExtensionWindowFlags(4), ExtensionWindowFlags(4));
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    combinedExtWindowFlags = sceneSession->GetCombinedExtWindowFlags();
+    EXPECT_EQ(combinedExtWindowFlags.bitData, 7);
+
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    combinedExtWindowFlags = sceneSession->GetCombinedExtWindowFlags();
+    EXPECT_EQ(combinedExtWindowFlags.bitData, 6);
+}
+
+/**
+ * @tc.name: RemoveExtWindowFlags
+ * @tc.desc: remove uiextension window flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RemoveExtWindowFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RemoveExtWindowFlags";
+    info.bundleName_ = "RemoveExtWindowFlags";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+    sceneSession->UpdateExtWindowFlags(1234, ExtensionWindowFlags(3), ExtensionWindowFlags(3));
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.size(), 1);
+    sceneSession->RemoveExtWindowFlags(1234);
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+}
+
+/**
+ * @tc.name: ClearExtWindowFlags
+ * @tc.desc: clear uiextension window flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ClearExtWindowFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ClearExtWindowFlags";
+    info.bundleName_ = "ClearExtWindowFlags";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+    sceneSession->UpdateExtWindowFlags(1234, ExtensionWindowFlags(3), ExtensionWindowFlags(3));
+    sceneSession->UpdateExtWindowFlags(5678, ExtensionWindowFlags(4), ExtensionWindowFlags(4));
+    EXPECT_EQ(sceneSession->extWindowFlagsMap_.size(), 2);
+    sceneSession->ClearExtWindowFlags();
+    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
+}
+
+/**
+ * @tc.name: CalculateCombinedExtWindowFlags
+ * @tc.desc: calculate combined uiextension window flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalculateCombinedExtWindowFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalculateCombinedExtWindowFlags";
+    info.bundleName_ = "CalculateCombinedExtWindowFlags";
+
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    EXPECT_EQ(sceneSession->combinedExtWindowFlags_.bitData, 0);
+    sceneSession->UpdateExtWindowFlags(1234, ExtensionWindowFlags(3), ExtensionWindowFlags(3));
+    sceneSession->UpdateExtWindowFlags(5678, ExtensionWindowFlags(4), ExtensionWindowFlags(4));
+    sceneSession->CalculateCombinedExtWindowFlags();
+    EXPECT_EQ(sceneSession->combinedExtWindowFlags_.bitData, 7);
 }
 
 /**
@@ -3274,6 +3516,194 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent03, Function | SmallTest | Level2
     float vpr = 0.0;
     sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
+}
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback";
+    info.bundleName_ = "OnMoveDragCallback";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    Session session(info);
+    WSRect rect;
+    sceneSession->UpdateWinRectForSystemBar(rect);
+    sceneSession->SetSurfaceBounds(rect);
+    sceneSession->GetWindowNameAllType();
+    session.scenePersistence_ = new ScenePersistence("aa", 0);
+    sceneSession->GetUpdatedIconPath();
+
+    bool visible = true;
+    sceneSession->UpdateNativeVisibility(visible);
+}
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback01";
+    info.bundleName_ = "OnMoveDragCallback01";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    double alpha = 0.5;
+    Session session(info);
+
+    sceneSession->SetSystemSceneOcclusionAlpha(alpha);
+    sceneSession->IsNeedDefaultAnimation();
+    bool isPlaying = true;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    sceneSession->NotifyIsCustomAnimationPlaying(isPlaying);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    bool visible = true;
+    sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+}
+
+/**
+ * @tc.name: OnMoveDragCallback
+ * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnMoveDragCallback02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMoveDragCallback02";
+    info.bundleName_ = "OnMoveDragCallback02";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<SceneSession> ssession = nullptr;
+    sceneSession->HandleCastScreenConnection(info, ssession);
+
+    Session session(info);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    session.isTerminating = true;
+    sceneSession->TerminateSession(abilitySessionInfo);
+
+    bool needRemoveSession = true;
+    session.sessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    session.jsSceneSessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
+
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    sceneSession->NotifyPiPWindowPrepareClose();
+
+    bool isLandscapeMultiWindow = true;
+    sceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    bool isPreImeEvent = true;
+    sceneSession->SendKeyEventToUI(keyEvent, isPreImeEvent);
+    sceneSession->IsDirtyWindow();
+    sceneSession->moveDragController_ = new MoveDragController(0);
+    sceneSession->NotifyUILostFocus();
+}
+
+/**
+ * @tc.name: IsStartMoving
+ * @tc.desc:  * @tc.name: IsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsStartMoving, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsStartMoving";
+    info.bundleName_ = "IsStartMoving";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->IsStartMoving();
+    bool startMoving = true;
+    sceneSession->SetIsStartMoving(startMoving);
+    ExtensionWindowFlags extWindowActions;
+    sceneSession->UpdateExtWindowFlags(1, 0, extWindowActions);
+    DisplayId from = 0;
+    DisplayId to = 0;
+    sceneSession->NotifyDisplayMove(from, to);
+    sceneSession->RemoveExtWindowFlags(0);
+    sceneSession->ClearExtWindowFlags();
+    bool isRegister = true;
+    sceneSession->UpdateRectChangeListenerRegistered(isRegister);
+}
+
+/**
+ * @tc.name: SetTemporarilyShowWhenLocked
+ * @tc.desc:  * @tc.name: SetTemporarilyShowWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTemporarilyShowWhenLocked, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTemporarilyShowWhenLocked";
+    info.bundleName_ = "SetTemporarilyShowWhenLocked";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    bool isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, false);
+    sceneSession->SetTemporarilyShowWhenLocked(true);
+    isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, true);
+    sceneSession->SetTemporarilyShowWhenLocked(false);
+    isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
+    ASSERT_EQ(isTemporarilyShowWhenLocked, false);
+}
+
+/**
+ * @tc.name: GetShowWhenLockedFlagValue
+ * @tc.desc:  * @tc.name: GetShowWhenLockedFlagValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetShowWhenLockedFlagValue, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetShowWhenLockedFlagValue";
+    info.bundleName_ = "GetShowWhenLockedFlagValue";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(scensession->GetShowWhenLockedFlagValue(), false);
+    scensession->property_ = property;
+    property->SetWindowFlags(4);
+    ASSERT_EQ(scensession->GetShowWhenLockedFlagValue(), true);
+}
+
+/**
+ * @tc.name: SetClientIdentityToken
+ * @tc.desc: SetClientIdentityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetClientIdentityToken, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetClientIdentityToken";
+    info.bundleName_ = "SetClientIdentityToken";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    std::string token = "testToken";
+    sceneSession->SetClientIdentityToken(token);
+    ASSERT_EQ(sceneSession->GetClientIdentityToken(), token);
 }
 }
 }

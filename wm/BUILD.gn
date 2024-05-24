@@ -27,6 +27,7 @@ config("libwm_private_config") {
 
 config("libwm_public_config") {
   include_dirs = [
+    "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
     "../utils/include",
     "../window_scene",
@@ -39,6 +40,7 @@ ohos_static_library("libwm_static") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
     integer_overflow = true
     ubsan = true
@@ -56,6 +58,7 @@ ohos_static_library("libwm_static") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
     "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
@@ -69,6 +72,7 @@ ohos_static_library("libwm_static") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
@@ -96,6 +100,7 @@ ohos_static_library("libwm_static") {
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
@@ -187,6 +192,7 @@ ohos_shared_library("libwm") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
   }
   include_dirs = [
@@ -201,6 +207,7 @@ ohos_shared_library("libwm") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
     "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
@@ -214,6 +221,7 @@ ohos_shared_library("libwm") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
@@ -239,6 +247,7 @@ ohos_shared_library("libwm") {
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
@@ -423,6 +432,7 @@ ohos_shared_library("libwm_ndk") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
   }
 

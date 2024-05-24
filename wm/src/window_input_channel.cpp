@@ -55,7 +55,8 @@ void WindowInputChannel::DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>
     }
 }
 
-void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+__attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
+    std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {
         WLOGFE("keyEvent is nullptr");
@@ -159,6 +160,14 @@ void WindowInputChannel::Destroy()
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGI("Destroy WindowInputChannel, windowId:%{public}u", window_->GetWindowId());
     isAvailable_ = false;
+}
+
+Rect WindowInputChannel::GetWindowRect()
+{
+    if (window_ == nullptr) {
+        return { 0, 0, 0, 0 };
+    }
+    return window_->GetRect();
 }
 
 bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
