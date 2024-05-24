@@ -60,5 +60,10 @@ ohos_fuzztest("ScreenSessionMgrStubStateFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
+
+  deps += [
+    # deps file
+    ":SceneSessionMgrLStubSetFuzzTest",
+  ]
 }
 ###############################################################################
