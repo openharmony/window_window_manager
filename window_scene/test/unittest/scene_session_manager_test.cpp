@@ -4404,7 +4404,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, Function | SmallTest
     std::vector<MainWindowInfo> infos;
     WMError result = ssm_->GetAllMainWindowInfos(infos);
     EXPECT_EQ(result, WMError::WM_OK);
-    ssm_->sceneSessionMap_.erase(SceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 
 /**
@@ -4444,7 +4444,6 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Leve
     auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(clearFailedIds.size(), 0);
-
 }
 
 }

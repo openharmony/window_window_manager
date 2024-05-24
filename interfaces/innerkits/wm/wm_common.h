@@ -432,9 +432,11 @@ struct MainWindowInfo : public Parcelable {
         if (!parcel.WriteString(bundleName_)) {
             return false;
         }
+
         if (!parcel.WriteInt32(persistentId_)) {
             return false;
         }
+        
         if (!parcel.WriteInt32(bundleType_)) {
             return false;
         }

@@ -86,7 +86,7 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
         &SceneSessionManagerLiteStub::HandleGetWindowModeType),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO),
-        &SceneSessionManagerLiteStub::HandleGetAllMainWinodowInfos),
+        &SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS),
         &SceneSessionManagerLiteStub::HandleClearMainSessions),
 };
@@ -464,11 +464,11 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, M
 
     return ERR_NONE;
 }
-int SceneSessionManagerLiteStub::HandleGetAllMainWinodowInfos(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<MainWindowInfo> infos;
-    WMError errCode = GetAllMainWinodowInfos(infos);
-    reply.WriteInt32(info.size());
+    WMError errCode = GetAllMainWindowInfos(infos);
+    reply.WriteInt32(infos.size());
     for (auto& info : infos) {
         if (!reply.WriteParcelable(&info)) {
             TLOGE(WmsLogTag::WMS_MAIN, "write main window info fail");

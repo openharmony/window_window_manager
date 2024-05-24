@@ -216,7 +216,7 @@ WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInf
 }
 
 WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
-    std::vector<int32_t>& clearFailedIds);
+    std::vector<int32_t>& clearFailedIds)
 {
     return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
 }

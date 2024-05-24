@@ -839,7 +839,7 @@ WMError SceneSessionManagerLiteProxy::GetAllMainWindowInfos(std::vector<MainWind
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<int32_t>(
-            SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -868,7 +868,7 @@ WMError SceneSessionManagerLiteProxy::ClearMainSessions(const std::vector<int32_
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<int32_t>(
-            SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
         return WMError::WM_ERROR_IPC_FAILED;
     }
