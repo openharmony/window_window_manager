@@ -304,5 +304,4 @@ ohos_static_library("utils_unittest_common") {
   subsystem_name = "window"
   part_name = "window_manager"
 }
-
 ## Build wm_unittest_common.a }}}
