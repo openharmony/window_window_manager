@@ -145,6 +145,31 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+
+    /**
+     * @brief Get all main window info.
+     *
+     * @param infos the all main window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
+
+    /**
+     * @brief Clear a specified set of sessions.
+     *
+     * @param persistentIds a vector of session persistentId.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
+
+    /**
+     * @brief Clear a specified set of sessions.
+     *
+     * @param persistentIds a vector of session persistentId.
+     * @param clearFailedIds a vector of sessioni persistentId which is clear failed.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
 private:
     WindowManagerLite();
     ~WindowManagerLite();

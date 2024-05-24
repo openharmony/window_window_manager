@@ -297,5 +297,35 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
     auto ret = windowChecker.CheckWindowId(-1);
     ASSERT_EQ(-1, ret);
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfos001
+ * @tc.desc: GetAllMainWindowInfos001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<MainWindowInfo> infos;
+    std::vector<MainWindowInfo> infosResult;
+    MainWindowInfo info1;
+    info1.pid_ = 1900;
+    info1.bundleName_ = "calendar";
+
+    MainWindowInfo info2;
+    info1.pid_ = 1901;
+    info1.bundleName_ = "settings";
+
+    MainWindowInfo info3;
+    info1.pid_ = 1902;
+    info1.bundleName_ = "photos";
+
+    infosResult.push_back(info1);
+    infosResult.push_back(info2);
+    infosResult.push_back(info3);
+
+    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
+        Return(WMError::WM_OK)));
+}
 }
 }

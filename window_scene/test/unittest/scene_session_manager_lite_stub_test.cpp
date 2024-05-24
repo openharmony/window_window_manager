@@ -136,6 +136,18 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
+    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
+    {
+        MainWindowInfo mainWindowInfo;
+        infos.push_back(mainWindowInfo);
+        return WMError::WM_OK;
+    }
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, 
+        std::vector<int32_t>& clearFailedIds) override
+    {
+        clearFailedIds.push_back(1);
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -562,6 +574,36 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
     data.WriteInt32(numMax);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetAllMainWinodowInfos
+ * @tc.desc: test function : HandleGetAllMainWinodowInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAllMainWinodowInfos, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetAllMainWinodowInfos(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleClearMainSessions
+ * @tc.desc: test function : HandleClearMainSessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<int32_t> persistentIds = {1, 2, 3};
+    data.WriteInt32Vector(persistentIds);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
