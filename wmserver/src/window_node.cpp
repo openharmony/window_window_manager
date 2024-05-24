@@ -431,5 +431,10 @@ WindowVisibilityState WindowNode::GetVisibilityState() const
 {
     return visibilityState_;
 }
+
+bool WindowNode::GetTouchable() const
+{
+    return property_->GetTouchable();
+}
 } // namespace Rosen
 } // namespace OHOS

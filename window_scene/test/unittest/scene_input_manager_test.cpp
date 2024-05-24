@@ -16,6 +16,7 @@
 #include "scene_input_manager.h"
 #include <gtest/gtest.h>
 #include "session_manager/include/scene_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,6 +58,8 @@ void SceneInputManagerTest::TearDown()
 namespace {
 void CheckNeedUpdateTest()
 {
+    SceneInputManager::GetInstance().SetUserBackground(true);
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
     SceneInputManager::GetInstance().lastFocusId_ = -1;
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
 
@@ -140,7 +143,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, Function | SmallTest | Le
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
     // NotNeedUpdate
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
 
     CheckNeedUpdateTest();
@@ -242,6 +245,367 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest |
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyMMIWindowPidChange end";
 }
 
+/**
+ * @tc.name: FlushFullInfoToMMI
+ * @tc.desc: FlushFullInfoToMMI
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, FlushFullInfoToMMI, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    MMI::DisplayInfo displayInfo;
+    displayInfos.emplace_back(displayInfo);
+    SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: FlushChangeInfoToMMI
+ * @tc.desc: FlushChangeInfoToMMI
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, FlushChangeInfoToMMI, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::map<uint64_t, std::vector<MMI::WindowInfo>> screenId2Windows;
+    SceneInputManager::GetInstance().FlushChangeInfoToMMI(screenId2Windows);
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::WindowInfo windowInfo;
+    windowInfoList.emplace_back(windowInfo);
+    screenId2Windows.emplace(1, windowInfoList);
+    SceneInputManager::GetInstance().FlushChangeInfoToMMI(screenId2Windows);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ConstructDisplayInfos
+ * @tc.desc: ConstructDisplayInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
+    ScreenProperty screenProperty0;
+    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
+        std::make_pair(0, screenProperty0));
+    SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate1, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 1;
+    bool ret1 = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(ret1);
+
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    bool ret2 = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(ret2);
+
+    displayInfos.clear();
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    bool ret3 = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(ret3);
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate2, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_FALSE(result);
+
+    displayInfos[0].id = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].id = 0;
+
+    windowInfoList[0].id = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].id = 0;
+
+    windowInfoList[0].pid = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].pid = 0;
+
+    windowInfoList[0].uid = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].uid = 0;
+
+    windowInfoList[0].agentWindowId = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].agentWindowId = 0;
+
+    windowInfoList[0].flags = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].flags = 0;
+
+    windowInfoList[0].displayId = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].displayId = 0;
+
+    windowInfoList[0].zOrder = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].zOrder = 0;
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate3, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    windowInfoList[0].area.x = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].area.x = 0;
+
+    windowInfoList[0].area.y = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].area.y = 0;
+
+    windowInfoList[0].area.width = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].area.width = 0;
+
+    windowInfoList[0].area.height = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].area.height = 0;
+
+    MMI::Rect area;
+    windowInfoList[0].defaultHotAreas.emplace_back(area);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].defaultHotAreas.clear();
+
+    windowInfoList[0].pointerHotAreas.emplace_back(area);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].pointerHotAreas.clear();
+
+    windowInfoList[0].transform.emplace_back(1.0);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].transform.clear();
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    windowInfoList[0].transform.emplace_back(1.0);
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.emplace_back(2.0);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].transform.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.clear();
+
+    MMI::Rect area;
+    windowInfoList[0].defaultHotAreas.emplace_back(area);
+    area.x = 1;
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].defaultHotAreas.emplace_back(area);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].defaultHotAreas.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].defaultHotAreas.clear();
+    area.x = 0;
+
+    windowInfoList[0].pointerHotAreas.emplace_back(area);
+    area.x = 1;
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].pointerHotAreas.emplace_back(area);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].pointerHotAreas.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].pointerHotAreas.clear();
+    area.x = 0;
+
+    windowInfoList[0].pointerChangeAreas.emplace_back(1);
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].pointerChangeAreas.emplace_back(2);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].pointerChangeAreas.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].pointerChangeAreas.clear();
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    windowInfoList[0].transform.emplace_back(1.0);
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.emplace_back(2.0);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].transform.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.clear();
+
+    displayInfos[0].id = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].id = 0;
+
+    displayInfos[0].x = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].x = 0;
+
+    displayInfos[0].y = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].y = 0;
+
+    displayInfos[0].width = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].width = 0;
+
+    displayInfos[0].height = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].height = 0;
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    windowInfoList[0].transform.emplace_back(1.0);
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.emplace_back(2.0);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].transform.clear();
+    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.clear();
+    displayInfos[0].dpi = 1;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].dpi = 0;
+
+    displayInfos[0].name = "TestName";
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].name = "";
+
+    displayInfos[0].uniq = "TestUniq";
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].uniq = "";
+
+    displayInfos[0].direction = MMI::Direction::DIRECTION90;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].direction = MMI::Direction::DIRECTION0;
+
+    displayInfos[0].displayDirection = MMI::Direction::DIRECTION90;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].displayDirection = MMI::Direction::DIRECTION0;
+
+    displayInfos[0].displayMode = MMI::DisplayMode::FULL;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    displayInfos[0].displayMode = MMI::DisplayMode::UNKNOWN;
+}
 }
 }
 }

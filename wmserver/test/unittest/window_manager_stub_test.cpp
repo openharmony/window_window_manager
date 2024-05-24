@@ -532,6 +532,25 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest23
+ * @tc.desc: test TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteInt32(0);
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManager::WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }

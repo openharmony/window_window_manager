@@ -62,6 +62,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     context_ = context;
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
+        MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
@@ -186,6 +187,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -195,6 +197,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
