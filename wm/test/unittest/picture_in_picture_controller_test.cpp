@@ -298,7 +298,6 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  */
  HWTEST_F(PictureInPictureControllerTest, IsContextChange, Function | SmallTest | Level2)
  {
-    int result = 0;
     float newWidth = 10.00;
     float newHeight = 0;
     float posX = 0;
@@ -310,20 +309,68 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
-    ASSERT_EQ(result, 0);
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
     newWidth = 0;
     newHeight = 20.00;
-    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
-    ASSERT_EQ(result, 0);
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
     newHeight = 0;
     posX = 5.5;
-    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
-    ASSERT_EQ(result, 0);
+    pASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
     posX = 0;
     posY = 5.5;
-    pipControl->IsContextChange(newWidth, newHeight, posx, posY);
-    ASSERT_EQ(result, 0);
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    posX = 5.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    posX = 0;
+    newWidth = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newWidth = 0;
+    newHeight = 12.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    posY = 0;
+    posX = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newWidth = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newHeight = 0;
+    posX = 12.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    posY = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+ }
+
+/**
+ * @tc.name: IsContextChange01
+ * @tc.desc: IsContextChange
+ * @tc.type: FUNC
+ */
+ HWTEST_F(PictureInPictureControllerTest, IsContextChange01, Function | SmallTest | Level2)
+ {
+    float newWidth = 10.00;
+    float newHeight = 12.5;
+    float posX = 10.5;
+    float posY = 0;
+    Rect windowRect = {0, 0, 0, 0};
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    posX = 0;
+    posY = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newWidth = 0;
+    posX = 12.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newWidth = 10.5;
+    ASSERT_EQ(true, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
+    newWidth = 0;
+    newHeight = 0;
+    posX = 0;
+    posY = 0;
+    ASSERT_EQ(false, pipControl->IsContextChange(newWidth, newHeight, posx, posY));
  }
 
 /**

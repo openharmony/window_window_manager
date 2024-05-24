@@ -439,11 +439,8 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         float newHeight = 0;
         mainWindowXComponentController_->GetGlobalPosition(posX, posY);
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
-        if (windowRect_.width_ != static_cast<uint32_t>(newWidth) ||
-            windowRect_.height_ != static_cast<uint32_t>(newHeight) ||
-            windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY)) {
-            Rect r = {posX, posY, newWidth, newHeight};
-            window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
+        if(!IsContentSizeChange(newWidth, newHeight, posX, posY)) {
+            return;
         }
     }
     TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
@@ -451,6 +448,16 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
+}
+
+void PictureInPictureController::IsContentSizeChange(float width, float height, float posX, float posY)
+{
+    if (windowRect_.width_ != static_cast<uint32_t>(width) ||
+            windowRect_.height_ != static_cast<uint32_t>(height) ||
+            windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY)) {
+            Rect r = {posX, posY, width, height};
+            window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
+        }
 }
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
