@@ -144,6 +144,7 @@ public:
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
+    virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}

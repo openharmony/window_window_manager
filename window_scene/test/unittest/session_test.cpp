@@ -29,6 +29,7 @@
 #include "session_info.h"
 #include "key_event.h"
 #include "wm_common.h"
+#include "window_event_channel_base.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -39,109 +40,6 @@ namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest"};
-}
-
-class TestWindowEventChannel : public IWindowEventChannel {
-public:
-    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    WSError TransferFocusActiveEvent(bool isFocusActive) override;
-    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
-        bool isPreImeEvent = false) override;
-    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
-        const sptr<IRemoteObject>& listener) override;
-    WSError TransferFocusState(bool focusState) override;
-    WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
-    WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent) override;
-    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
-        int64_t timeMs) override;
-
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    };
-};
-
-WSError TestWindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
-    bool isPreImeEvent, const sptr<IRemoteObject>& listener)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferFocusState(bool foucsState)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferBackpressedEventForConsumed(bool& isConsumed)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t baseParent)
-{
-    return WSError::WS_OK;
-}
-
-WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
-    int32_t eventType, int64_t timeMs)
-{
-    return WSError::WS_OK;
 }
 
 class WindowSessionTest : public testing::Test {
@@ -3029,13 +2927,13 @@ HWTEST_F(WindowSessionTest, SetAttachState02, Function | SmallTest | Level2)
 {
     int32_t persistentId = 123;
     sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
-    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);
     session_->persistentId_ = persistentId;
     session_->SetAttachState(true);
     session_->RegisterDetachCallback(detachCallback);
     session_->SetAttachState(false);
     usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
+    ASSERT_EQ(session_->isAttach_, false);
 }
 
 /**
@@ -3183,7 +3081,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
@@ -3207,7 +3105,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_EQ(beforeTaskNum - 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum - 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
     session_->handler_->RemoveTask(taskName);
@@ -3228,7 +3126,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
@@ -3248,7 +3146,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }

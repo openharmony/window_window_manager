@@ -310,18 +310,18 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    WLOGFD("run HandleUpdateProperty, action:%{public}u", action);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    if (data.ReadBool() && (property != nullptr)) {
-        property->Read(data, action);
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = new (std::nothrow) WindowSessionProperty();
+        if (property != nullptr) {
+            property->Read(data, action);
+        }
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
     }
     const WMError& ret = UpdateSessionProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
-    if (property != nullptr) {
-        delete property;
-    }
     return ERR_NONE;
 }
 

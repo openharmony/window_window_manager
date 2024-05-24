@@ -45,6 +45,7 @@ public:
     // scene session
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
@@ -53,7 +54,6 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
-    virtual WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) { return WSError::WS_OK; }
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
@@ -105,6 +105,8 @@ public:
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
+    virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

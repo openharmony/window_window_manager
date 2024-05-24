@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,17 @@ class IWindowLifeCycle : virtual public RefBase {
 };
 class IWindowChangeListener : virtual public RefBase {
 };
+class IWindowSystemBarEnableListener : virtual public RefBase {
+public:
+    virtual WMError OnSetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
+};
+class IIgnoreViewSafeAreaListener : virtual public RefBase {
+public:
+    virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
+};
 class IAvoidAreaChangedListener : virtual public RefBase {
+public:
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) {}
 };
 class IWindowDragListener : virtual public RefBase {
 };
@@ -100,6 +110,7 @@ class IWindowTitleButtonRectChangedListener : virtual public RefBase {
 };
 class IWindowVisibilityChangedListener : virtual public RefBase {
 };
+
 using WindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 class IWindowNoInteractionListener : virtual public RefBase {
@@ -210,10 +221,14 @@ public:
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
+    virtual WMError RegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener) = 0;
+    virtual WMError UnRegisterSystemBarEnableListener(const sptr<IWindowSystemBarEnableListener>& listener) = 0;
+    virtual WMError RegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener) = 0;
+    virtual WMError UnRegisterIgnoreViewSafeAreaListener(const sptr<IIgnoreViewSafeAreaListener>& listener) = 0;
     virtual void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr) = 0;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability = nullptr)
@@ -225,7 +240,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual std::string GetContentInfo() = 0;
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
@@ -263,7 +278,7 @@ public:
     virtual void SetDensity(float density) = 0;
     virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetDefaultDensityEnabled() { return false; }
-
+    virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
@@ -320,7 +335,7 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
-    
+
     virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)

@@ -39,6 +39,7 @@ private:
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();
