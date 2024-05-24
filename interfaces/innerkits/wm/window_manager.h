@@ -23,6 +23,7 @@
 #include <iremote_object.h>
 #include "wm_single_instance.h"
 #include "wm_common.h"
+#include "dm_common.h"
 #include "focus_change_info.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
@@ -296,6 +297,25 @@ public:
 };
 
 /**
+ * @class IDisplayInfoChangedListener
+ *
+ * @brief Listener to observe display information changed.
+ */
+class IDisplayInfoChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when display information changed.
+     *
+     * @param token token of ability.
+     * @param displayId ID of the display where the main window of the ability is located.
+     * @param density density of the display where the main window of the ability is located.
+     * @param orientation orientation of the display where the main window of the ability is located.
+     */
+    virtual void OnDisplayInfoChange(const sptr<IRemoteObject>& token,
+        DisplayId displayId, float density, DisplayOrientation orientation) = 0;
+};
+
+/**
  * @class WindowManager
  *
  * @brief WindowManager used to manage window.
@@ -460,6 +480,41 @@ public:
      */
     WMError UnregisterGestureNavigationEnabledChangedListener(
         const sptr<IGestureNavigationEnabledChangedListener>& listener);
+
+    /**
+     * @brief register display information changed listener.
+     *
+     * @param token token of ability.
+     * @param listener IDisplayInfoChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
+        const sptr<IDisplayInfoChangedListener>& listener);
+
+    /**
+     * @brief unregister display info changed listener.Before the ability is destroyed, the
+     * UnregisterDisplayInfoChangedListener interface must be invoked.
+     * Otherwise, the sptr token may be destroyed abnormally.
+     *
+     * @param token token of ability.
+     * @param listener IDisplayInfoChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
+        const sptr<IDisplayInfoChangedListener>& listener);
+
+    /**
+     * @brief notify display information change.
+     *
+     * @param token ability token.
+     * @param displayid ID of the display where the main window of the ability is located
+     * @param density density of the display where the main window of the ability is located.
+     * @param orientation orientation of the display where the main window of the ability is located.
+     * @return WM_OK means notify success, others means notify failed.
+    */
+    WMError NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
+        float density, DisplayOrientation orientation);
+
     /**
      * @brief Minimize all app window.
      *

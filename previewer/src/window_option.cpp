@@ -25,17 +25,27 @@ WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
     AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
 }
 
-void WindowOption::SetWindowType(WindowType type)
-{
-    type_ = type;
-}
-
 void WindowOption::SetWindowMode(WindowMode mode)
 {
     if (!WindowHelper::IsValidWindowMode(mode)) {
         return;
     }
     mode_ = mode;
+}
+
+void WindowOption::SetWindowType(WindowType type)
+{
+    type_ = type;
+}
+
+void WindowOption::SetParentId(uint32_t parentId)
+{
+    parentId_ = parentId;
+}
+
+void WindowOption::SetDisplayId(DisplayId displayId)
+{
+    displayId_ = displayId;
 }
 
 void WindowOption::SetFocusable(bool isFocusable)
@@ -48,24 +58,14 @@ void WindowOption::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
-void WindowOption::SetDisplayId(DisplayId displayId)
-{
-    displayId_ = displayId;
-}
-
-void WindowOption::SetParentId(uint32_t parentId)
-{
-    parentId_ = parentId;
-}
-
 void WindowOption::SetWindowName(const std::string& windowName)
 {
     windowName_ = windowName;
 }
 
-void WindowOption::AddWindowFlag(WindowFlag flag)
+void WindowOption::SetWindowFlags(uint32_t flags)
 {
-    flags_ |= static_cast<uint32_t>(flag);
+    flags_ = flags;
 }
 
 void WindowOption::RemoveWindowFlag(WindowFlag flag)
@@ -73,9 +73,14 @@ void WindowOption::RemoveWindowFlag(WindowFlag flag)
     flags_ &= ~(static_cast<uint32_t>(flag));
 }
 
-void WindowOption::SetWindowFlags(uint32_t flags)
+void WindowOption::AddWindowFlag(WindowFlag flag)
 {
-    flags_ = flags;
+    flags_ |= static_cast<uint32_t>(flag);
+}
+
+void WindowOption::SetWindowTag(WindowTag windowTag)
+{
+    windowTag_ = windowTag;
 }
 
 void WindowOption::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -85,47 +90,9 @@ void WindowOption::SetSystemBarProperty(WindowType type, const SystemBarProperty
     }
 }
 
-Rect WindowOption::GetWindowRect() const
+void WindowOption::SetWindowSessionType(WindowSessionType sessionType)
 {
-    return windowRect_;
-}
-WindowType WindowOption::GetWindowType() const
-{
-    return type_;
-}
-
-WindowMode WindowOption::GetWindowMode() const
-{
-    return mode_;
-}
-
-bool WindowOption::GetFocusable() const
-{
-    return focusable_;
-}
-bool WindowOption::GetTouchable() const
-{
-    return touchable_;
-}
-
-DisplayId WindowOption::GetDisplayId() const
-{
-    return displayId_;
-}
-
-uint32_t WindowOption::GetParentId() const
-{
-    return parentId_;
-}
-
-const std::string& WindowOption::GetWindowName() const
-{
-    return windowName_;
-}
-
-uint32_t WindowOption::GetWindowFlags() const
-{
-    return flags_;
+    sessionType_ = sessionType;
 }
 
 void WindowOption::SetHitOffset(int32_t x, int32_t y)
@@ -134,54 +101,9 @@ void WindowOption::SetHitOffset(int32_t x, int32_t y)
     hitOffset_.y = y;
 }
 
-void WindowOption::SetWindowTag(WindowTag windowTag)
+bool WindowOption::IsTurnScreenOn() const
 {
-    windowTag_ = windowTag;
-}
-
-WindowTag WindowOption::GetWindowTag() const
-{
-    return windowTag_;
-}
-
-void WindowOption::SetWindowSessionType(WindowSessionType sessionType)
-{
-    sessionType_ = sessionType;
-}
-
-WindowSessionType WindowOption::GetWindowSessionType() const
-{
-    return sessionType_;
-}
-
-void WindowOption::SetMainHandlerAvailable(bool isMainHandlerAvailable)
-{
-    isMainHandlerAvailable_ = isMainHandlerAvailable;
-}
-
-bool WindowOption::GetMainHandlerAvailable() const
-{
-    return isMainHandlerAvailable_;
-}
-
-const PointInfo& WindowOption::GetHitOffset() const
-{
-    return hitOffset_;
-}
-
-const std::unordered_map<WindowType, SystemBarProperty>& WindowOption::GetSystemBarProperty() const
-{
-    return sysBarPropMap_;
-}
-
-void WindowOption::SetKeepScreenOn(bool keepScreenOn)
-{
-    keepScreenOn_ = keepScreenOn;
-}
-
-bool WindowOption::IsKeepScreenOn() const
-{
-    return keepScreenOn_;
+    return turnScreenOn_;
 }
 
 void WindowOption::SetTurnScreenOn(bool turnScreenOn)
@@ -189,19 +111,14 @@ void WindowOption::SetTurnScreenOn(bool turnScreenOn)
     turnScreenOn_ = turnScreenOn;
 }
 
-bool WindowOption::IsTurnScreenOn() const
+bool WindowOption::IsKeepScreenOn() const
 {
-    return turnScreenOn_;
+    return keepScreenOn_;
 }
 
-void WindowOption::SetBrightness(float brightness)
+void WindowOption::SetKeepScreenOn(bool keepScreenOn)
 {
-    brightness_ = brightness;
-}
-
-float WindowOption::GetBrightness() const
-{
-    return brightness_;
+    keepScreenOn_ = keepScreenOn;
 }
 
 void WindowOption::SetCallingWindow(uint32_t windowId)
@@ -209,29 +126,19 @@ void WindowOption::SetCallingWindow(uint32_t windowId)
     callingWindow_ = windowId;
 }
 
-uint32_t WindowOption::GetCallingWindow() const
-{
-    return callingWindow_;
-}
-
-Orientation WindowOption::GetRequestedOrientation() const
-{
-    return requestedOrientation_;
-}
-
 void WindowOption::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
 }
 
-void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
+void WindowOption::SetBrightness(float brightness)
 {
-    subWindowTitle_ = subWindowTitle;
+    brightness_ = brightness;
 }
 
-std::string WindowOption::GetSubWindowTitle() const
+void WindowOption::SetMainHandlerAvailable(bool isMainHandlerAvailable)
 {
-    return subWindowTitle_;
+    isMainHandlerAvailable_ = isMainHandlerAvailable;
 }
 
 void WindowOption::SetSubWindowDecorEnable(bool subWindowDecorEnable)
@@ -239,9 +146,9 @@ void WindowOption::SetSubWindowDecorEnable(bool subWindowDecorEnable)
     subWindowDecorEnable_ = subWindowDecorEnable;
 }
 
-bool WindowOption::GetSubWindowDecorEnable() const
+void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
 {
-    return subWindowDecorEnable_;
+    subWindowTitle_ = subWindowTitle;
 }
 
 void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
@@ -249,9 +156,104 @@ void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
     onlySupportSceneBoard_ = onlySupportSceneBoard;
 }
 
+WindowMode WindowOption::GetWindowMode() const
+{
+    return mode_;
+}
+
+WindowType WindowOption::GetWindowType() const
+{
+    return type_;
+}
+
+Rect WindowOption::GetWindowRect() const
+{
+    return windowRect_;
+}
+
+WindowTag WindowOption::GetWindowTag() const
+{
+    return windowTag_;
+}
+
+uint32_t WindowOption::GetParentId() const
+{
+    return parentId_;
+}
+
+DisplayId WindowOption::GetDisplayId() const
+{
+    return displayId_;
+}
+
+uint32_t WindowOption::GetWindowFlags() const
+{
+    return flags_;
+}
+
+bool WindowOption::GetTouchable() const
+{
+    return touchable_;
+}
+
+bool WindowOption::GetFocusable() const
+{
+    return focusable_;
+}
+
+const PointInfo& WindowOption::GetHitOffset() const
+{
+    return hitOffset_;
+}
+
+const std::string& WindowOption::GetWindowName() const
+{
+    return windowName_;
+}
+
+WindowSessionType WindowOption::GetWindowSessionType() const
+{
+    return sessionType_;
+}
+
+bool WindowOption::GetMainHandlerAvailable() const
+{
+    return isMainHandlerAvailable_;
+}
+
+const std::unordered_map<WindowType, SystemBarProperty>& WindowOption::GetSystemBarProperty() const
+{
+    return sysBarPropMap_;
+}
+
 bool WindowOption::GetOnlySupportSceneBoard() const
 {
     return onlySupportSceneBoard_;
+}
+
+float WindowOption::GetBrightness() const
+{
+    return brightness_;
+}
+
+Orientation WindowOption::GetRequestedOrientation() const
+{
+    return requestedOrientation_;
+}
+
+uint32_t WindowOption::GetCallingWindow() const
+{
+    return callingWindow_;
+}
+
+bool WindowOption::GetSubWindowDecorEnable() const
+{
+    return subWindowDecorEnable_;
+}
+
+std::string WindowOption::GetSubWindowTitle() const
+{
+    return subWindowTitle_;
 }
 } // namespace Rosen
 } // namespace OHOS

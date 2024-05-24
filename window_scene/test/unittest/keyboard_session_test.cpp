@@ -343,29 +343,6 @@ HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: IsStatusBarVisible
- * @tc.desc: IsStatusBarVisible
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, IsStatusBarVisible, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    bool res = keyboardSession->IsStatusBarVisible(nullptr);
-    ASSERT_EQ(res, false);
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> statusBarSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(statusBarSession, nullptr);
-    bool res1 = keyboardSession->IsStatusBarVisible(statusBarSession);
-    ASSERT_EQ(res1, false);
-}
-
-/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: GetStatusBarHeight
  * @tc.type: FUNC

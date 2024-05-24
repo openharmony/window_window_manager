@@ -209,13 +209,13 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     mainWindow_->UpdateConfiguration(configuration);
 }
 
-std::string WindowScene::GetContentInfo() const
+std::string WindowScene::GetContentInfo(BackupAndRestoreType type) const
 {
     if (mainWindow_ == nullptr) {
         WLOGFE("Get content info failed, because main window is null");
         return "";
     }
-    return mainWindow_->GetContentInfo();
+    return mainWindow_->GetContentInfo(type);
 }
 
 WMError WindowScene::NotifyMemoryLevel(int32_t level)

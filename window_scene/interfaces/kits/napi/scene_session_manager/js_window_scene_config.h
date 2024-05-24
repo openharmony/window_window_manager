@@ -36,6 +36,7 @@ private:
     static napi_value CreateKeyboardAnimationValue(napi_env env, const KeyboardSceneAnimationConfig& config);
     static napi_value CreateWindowAnimationValue(napi_env env, const AppWindowSceneConfig& config);
     static napi_value CreateSystemUIStatusBarValue(napi_env env, const SystemUIStatusBarConfig& config);
+    static napi_value CreateWindowStatusBar(napi_env env, const StatusBarConfig& config);
 };
 } // namespace OHOS::Rosen
 

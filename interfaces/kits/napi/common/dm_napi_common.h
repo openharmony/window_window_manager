@@ -43,15 +43,6 @@ const int PARAM_NUMBER = 2; // 2: callback func input number, also reused by Pro
         }                                       \
     } while (0)
 
-#define GNAPI_INNER(call)                         \
-    do {                                          \
-        napi_status s = (call);                   \
-        if (s != napi_ok) {                       \
-            GNAPI_LOG(#call " is %{public}d", s); \
-            return s;                             \
-        }                                         \
-    } while (0)
-
 namespace OHOS {
 napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value);
 napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value);

@@ -44,6 +44,7 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
     WSError OnNeedAvoid(bool status) override;
@@ -52,7 +53,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
@@ -80,6 +80,8 @@ public:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

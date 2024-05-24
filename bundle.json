@@ -380,6 +380,8 @@
             "name": "//foundation/window/window_manager/interfaces/kits/cj/window_runtime:cj_window_ffi",
             "header": {
               "header_files": [
+                "window_impl.h",
+                "window_stage_impl.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/cj/window_runtime"
             }
