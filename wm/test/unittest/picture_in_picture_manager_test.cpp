@@ -70,7 +70,7 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController = 
+    sptr<PictureInPictureController> pipController =
         new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
@@ -157,6 +157,9 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
 }
 
 /**
+
+
+
  * @tc.name: DetachAutoStartController
  * @tc.desc: DetachAutoStartController
  * @tc.type: FUNC
