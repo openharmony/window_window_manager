@@ -226,7 +226,8 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId,
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::GetSnapshotAndErrorCode(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
+WMError SceneSessionManagerProxy::GetSnapshotAndErrorCode(int32_t persistentId,
+    std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     SessionSnapshot snapshot;
     WMError ret = GetSessionSnapshotSimple(persistentId, snapshot);
