@@ -94,10 +94,11 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
  */
 HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | SmallTest | Level2)
 {
-    sptr<MockWindow> mw = new MockWindow();
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     ASSERT_EQ(PiPWindowState::STATE_UNDEFINED, pipControl->GetControllerState());
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
@@ -132,9 +133,11 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
  */
 HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function | SmallTest | Level2)
 {
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
     sptr<WindowOption> windowOption = nullptr;
 
     option->SetContext(nullptr);
@@ -157,9 +160,11 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
 HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | SmallTest | Level2)
 {
     StartPipType startType = StartPipType::AUTO_START;
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
@@ -251,9 +256,11 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     int result = 0;
     int32_t width = 0;
     int32_t height = 0;
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl = new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);

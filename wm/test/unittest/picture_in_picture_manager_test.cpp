@@ -98,6 +98,7 @@ HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest 
     ASSERT_FALSE(PictureInPictureManager::ShouldAbortPipStart());
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -115,6 +116,7 @@ HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest 
 HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -140,6 +142,7 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     PictureInPictureManager::AttachAutoStartController(0, nullptr);
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -166,6 +169,7 @@ HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | Smal
     int result = 0;
     PictureInPictureManager::DetachAutoStartController(0, nullptr);
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -190,6 +194,7 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
     ASSERT_EQ(res, false);
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -216,6 +221,7 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
     ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindow());
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -238,6 +244,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 {
     int result = 0;
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
@@ -275,6 +282,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     ASSERT_EQ(result, 0);
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::autoStartController_ = pipController;
