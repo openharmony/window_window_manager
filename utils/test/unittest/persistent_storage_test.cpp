@@ -53,7 +53,7 @@ namespace {
  */
 HWTEST_F(PersistentStorageTest, HasKey, Function | SmallTest | Level3)
 {
-    std::string keyName = "name";
+    const std::string keyName = "name";
     auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::UKNOWN);
     ASSERT_EQ(false, result);
 
@@ -62,48 +62,42 @@ HWTEST_F(PersistentStorageTest, HasKey, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: Insert
- * @tc.desc: Insert test
+ * @tc.name: Insert/Get/Delete
+ * @tc.desc: Insert/Get/Delete test
  * @tc.type: FUNC
  */
-HWTEST_F(PersistentStorageTest, Insert, Function | SmallTest | Level3)
+HWTEST_F(PersistentStorageTest, StorageOperate, Function | SmallTest | Level3)
 {
     int ret = 0;
-    std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
+    const std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
     float ratio = 1;
-    PersistentStorage::Insert(keyName, ratio, PersistentStorageType::UKNOWN);
-    PersistentStorage::Insert(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
-    PersistentStorage::Insert(keyName, ratio, PersistentStorageType::MAXIMIZE_STATE);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: Delete
- * @tc.desc: Delete test
- * @tc.type: FUNC
- */
-HWTEST_F(PersistentStorageTest, Delete, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    std::string keyName = "name";
-    PersistentStorage::Delete(keyName, PersistentStorageType::UKNOWN);
-    PersistentStorage::Delete(keyName, PersistentStorageType::ASPECT_RATIO);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: Get
- * @tc.desc: Get test
- * @tc.type: FUNC
- */
-HWTEST_F(PersistentStorageTest, Get, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
-    float ratio = 1;
+    float ratioValue = 2;
+    PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::UKNOWN);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::UKNOWN);
+    EXPECT_EQ(1, ratio);
+
+    PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::ASPECT_RATIO);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
+    EXPECT_EQ(2, ratio);
+
+    auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO);
+    EXPECT_EQ(true, result);
+
+    PersistentStorage::Delete(keyName, PersistentStorageType::ASPECT_RATIO);
+    auto result2 = PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO);
+    EXPECT_EQ(false, result2);
+
+    PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::MAXIMIZE_STATE);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::MAXIMIZE_STATE);
+    EXPECT_EQ(2, ratio);
+
+    auto result3 = PersistentStorage::HasKey(keyName, PersistentStorageType::MAXIMIZE_STATE);
+    EXPECT_EQ(true, result3);
+
+    PersistentStorage::Delete(keyName, PersistentStorageType::MAXIMIZE_STATE);
+    auto result4 = PersistentStorage::HasKey(keyName, PersistentStorageType::MAXIMIZE_STATE);
+    EXPECT_EQ(false, result4);
+
     ASSERT_EQ(ret, 0);
 }
 
