@@ -431,13 +431,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (!sceneSession) {
-        GTEST_LOG_(INFO) << "sceneSession is nullptr";
-        return;
-    }
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    if (!property) {
-        GTEST_LOG_(INFO) << "property is nullptr";
+    if (!sceneSession || !property) {
         return;
     }
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
