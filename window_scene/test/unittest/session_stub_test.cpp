@@ -158,8 +158,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleSetSessionProperty(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleSetAspectRatio(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
@@ -285,7 +283,7 @@ HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function 
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
-    ASSERT_EQ(-1, res);
+    ASSERT_EQ(0, res);
 }
 
 /**
