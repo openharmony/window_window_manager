@@ -4138,23 +4138,6 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::ResetFocusedOnShow(int32_t persistentId)
-{
-    auto task = [this, persistentId]() {
-        TLOGI(WmsLogTag::WMS_FOCUS, "ResetFocusedOnShow, id: %{public}d", persistentId);
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr");
-            return;
-        }
-        if (sceneSession->IsSessionForeground()) {
-            TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusedOnShow to true, id: %{public}d", persistentId);
-            sceneSession->SetFocusedOnShow(true);
-        }
-    };
-    taskScheduler_->PostAsyncTask(task, "ResetFocusedOnShow" + std::to_string(persistentId));
-}
-
 void SceneSessionManager::RequestAllAppSessionUnfocus()
 {
     auto task = [this]() {

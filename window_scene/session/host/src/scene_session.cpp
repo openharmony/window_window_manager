@@ -914,6 +914,8 @@ WSError SceneSession::RaiseAppMainWindowToTop()
         if (session->IsFocusedOnShow()) {
             session->NotifyRequestFocusStatusNotifyManager(true, true);
             session->NotifyClick();
+        } else {
+            session->SetFocusedOnShow(true);
         }
         return WSError::WS_OK;
     };
