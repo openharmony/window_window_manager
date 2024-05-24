@@ -309,21 +309,20 @@ napi_value OnRegisterScreenManagerCallback(napi_env env, napi_callback_info info
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, 2 args is needed.");
     }
     std::string cbType;
-    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to eventType");
-        errMsg = "Failed to convert parameter to eventType";
+        std::string errMsg = "Failed to convert parameter to eventType";
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     napi_value value = argv[INDEX_ONE];
     if (value == nullptr) {
         WLOGI("JsScreenManager::OnRegisterScreenManagerCallback argv[1] is nullptr");
-        errMsg = "OnRegisterScreenManagerCallback error, argv[1] is nullptr";
+        std::string errMsg = "OnRegisterScreenManagerCallback error, argv[1] is nullptr";
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     if (!NapiIsCallable(env, value)) {
         WLOGI("JsScreenManager::OnRegisterScreenManagerCallback argv[1] is not callable");
-        errMsg = "OnRegisterScreenManagerCallback error, argv[1] is not callable";
+        std::string errMsg = "OnRegisterScreenManagerCallback error, argv[1] is not callable";
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -346,10 +345,9 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
     std::string cbType;
-    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to eventType");
-        errMsg = "Failed to convert parameter to eventType";
+        std::string errMsg = "Failed to convert parameter to eventType";
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     std::lock_guard<std::mutex> lock(mtx_);

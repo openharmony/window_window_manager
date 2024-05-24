@@ -27,6 +27,7 @@ config("libwm_private_config") {
 
 config("libwm_public_config") {
   include_dirs = [
+    "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
     "../utils/include",
     "../window_scene",
@@ -71,6 +72,7 @@ ohos_static_library("libwm_static") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
@@ -219,6 +221,7 @@ ohos_shared_library("libwm") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",

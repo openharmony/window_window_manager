@@ -361,6 +361,15 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
     screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 
+int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return 0;
+    }
+    return screenSessionManager_->SetScreenOffDelayTime(delay);
+}
+
 void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     if (!screenSessionManager_) {
@@ -370,43 +379,25 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
 
-void ScreenSessionManagerClient::SwitchUserCallback()
+void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
 {
     if (screenSessionManager_ == nullptr) {
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    if (switchingToAnotherUserFunc_ != nullptr) {
-        WLOGFE("switch to another user");
-        switchingToAnotherUserFunc_();
+    if (oldScbPids.size() == 0) {
+        WLOGFI("oldScbPids size 0");
+        return;
     }
-    WLOGFI("remove display node start");
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    displayNodeChildrenMap_.clear();
     for (const auto& iter : screenSessionMap_) {
-        auto screenSession = GetScreenSession(iter.first);
-        if (screenSession == nullptr) {
-            WLOGFI("screenSession is null");
-            continue;
-        }
         auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
             WLOGFI("display node is null");
             continue;
         }
-        auto nodeChildren = displayNode->GetChildren();
-        std::vector<std::shared_ptr<RSBaseNode>> childrenList;
-        for (auto child : nodeChildren) {
-            auto childNode = RSNodeMap::Instance().GetNode(child);
-            if (childNode != nullptr) {
-                childrenList.push_back(childNode);
-                displayNode->RemoveChild(childNode);
-            }
-        }
-        RSTransaction::FlushImplicitTransaction();
-        displayNodeChildrenMap_.emplace(iter.first, childrenList);
+        displayNode->SetScbNodePid(oldScbPids, currentScbPid);
     }
-    WLOGFI("remove display node finish");
+    WLOGFI("switch user callback end");
 }
 
 void ScreenSessionManagerClient::SwitchingCurrentUser()
@@ -416,24 +407,7 @@ void ScreenSessionManagerClient::SwitchingCurrentUser()
         return;
     }
     screenSessionManager_->SwitchUser();
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    for (const auto& iter : displayNodeChildrenMap_) {
-        auto screenSession = GetScreenSession(iter.first);
-        if (screenSession == nullptr) {
-            WLOGFI("screenSession is null");
-            continue;
-        }
-        auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            WLOGFI("display node is null");
-            continue;
-        }
-        for (auto child : iter.second) {
-            displayNode->AddChild(child);
-        }
-        RSTransaction::FlushImplicitTransaction();
-    }
-    WLOGFI("recover display node finish");
+    WLOGFI("switch to current user end");
 }
 
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()

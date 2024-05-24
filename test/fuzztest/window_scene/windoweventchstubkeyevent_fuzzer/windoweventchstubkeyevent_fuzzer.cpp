@@ -30,7 +30,7 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
+constexpr size_t DATA_MIN_SIZE = 2;
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -47,18 +47,21 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     parcel.WriteBuffer(data, size);
     parcel.RewindRead(0);
 
-    std::shared_ptr<WindowEventChannel> eventStub = std::make_shared<WindowEventChannel>(nullptr);
+    sptr<WindowEventChannel> eventStub = new (std::nothrow) WindowEventChannel(nullptr);
+    if (eventStub == nullptr) {
+        return false;
+    }
     eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
+        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         parcel, reply, option);
     eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT),
+        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
         parcel, reply, option);
     eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
+        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
         parcel, reply, option);
     eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
+        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
         parcel, reply, option);
     return true;
 }
