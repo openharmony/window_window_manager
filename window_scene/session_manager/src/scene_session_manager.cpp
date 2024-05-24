@@ -1344,10 +1344,18 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
+        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+        DisplayId curDisplayId = DISPLAY_ID_INVALID;
+        if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
+            curDisplayId = sessionInfo.screenId_;
+        } else if (callerSession && callerSession->GetSessionProperty()) {
+            curDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
+        }
         if (sceneSession->GetSessionProperty()) {
-            sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+            sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
+            sceneSession->SetScreenId(curDisplayId);
             TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession, synchronous screenId with displayid %{public}" PRIu64"",
-                sessionInfo.screenId_);
+                curDisplayId);
         }
         sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
         auto isScreenLockedCallback = [this]() {
