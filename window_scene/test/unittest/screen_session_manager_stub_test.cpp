@@ -101,7 +101,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest02, Function | SmallTest |
         IDisplayManager::DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, -1);
 }
 
 /**
@@ -125,7 +125,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest03, Function | SmallTest |
         IDisplayManager::DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, -1);
 }
 
 /**
