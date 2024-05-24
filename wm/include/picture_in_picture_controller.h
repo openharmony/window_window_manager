@@ -63,6 +63,7 @@ public:
     void SetAutoStartEnabled(bool enable);
     void IsAutoStartEnabled(bool& enable) const;
     void UpdateContentSize(int32_t width, int32_t height);
+    void IsContextChange(int32_t width, int32_t height, int32_t posX, int32_t posY);
     void DoActionEvent(const std::string& actionName, int32_t status);
     void RestorePictureInPictureWindow();
     void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
