@@ -67,6 +67,9 @@ private:
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
+    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+        MMI::WindowInfo& windowInfo) const;
+
     std::mutex mutexlock_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };

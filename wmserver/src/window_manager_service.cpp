@@ -422,6 +422,16 @@ void WindowManagerService::ConfigureWindowManagerService()
             maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
     }
+    item = config["uiType"];
+    if (item.IsString()) {
+        systemConfig_.uiType_ = item.stringValue_;
+        StartingWindow::uiType_ = item.stringValue_;
+        WindowNodeContainer::uiType_ = item.stringValue_;
+    }
+    item = config["supportTypeFloatWindow"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
@@ -1352,6 +1362,19 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<Access
         return windowController_->GetAccessibilityWindowInfo(infos);
     };
     return PostSyncTask(task, "GetAccessibilityWindowInfo");
+}
+
+WMError WindowManagerService::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("get unreliable window info permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, windowId, &infos]() {
+        return windowController_->GetUnreliableWindowInfo(windowId, infos);
+    };
+    return PostSyncTask(task, "GetUnreliableWindowInfo");
 }
 
 WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
