@@ -102,6 +102,8 @@ struct SystemConfig : public Parcelable {
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
+    std::string uiType_;
+    bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -112,6 +114,14 @@ struct SystemConfig : public Parcelable {
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
             !parcel.WriteParcelable(&keyboardAnimationConfig_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(uiType_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(supportTypeFloatWindow_)) {
             return false;
         }
 
@@ -126,7 +136,13 @@ struct SystemConfig : public Parcelable {
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        if (keyboardConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
         config->keyboardAnimationConfig_ = *keyboardConfig;
+        config->uiType_ = parcel.ReadString();
+        config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
 };

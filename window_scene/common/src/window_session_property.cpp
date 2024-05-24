@@ -719,6 +719,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetExtensionFlag(parcel.ReadBool());
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        delete property;
+        return nullptr;
+    }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     return property;
 }

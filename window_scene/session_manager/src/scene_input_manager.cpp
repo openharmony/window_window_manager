@@ -41,42 +41,6 @@ constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 
-MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
-{
-    MMI::Direction rotation = MMI::DIRECTION0;
-    if (NearEqual(degree, DIRECTION0)) {
-        rotation = MMI::DIRECTION0;
-    }
-    if (NearEqual(degree, DIRECTION90)) {
-        rotation = MMI::DIRECTION90;
-    }
-    if (NearEqual(degree, DIRECTION180)) {
-        rotation = MMI::DIRECTION180;
-    }
-    if (NearEqual(degree, DIRECTION270)) {
-        rotation = MMI::DIRECTION270;
-    }
-    if (displayMode == MMI::DisplayMode::FULL) {
-        switch (rotation) {
-            case MMI::DIRECTION0: 
-                rotation = MMI::DIRECTION90; 
-                break;
-            case MMI::DIRECTION90: 
-                rotation = MMI::DIRECTION180;
-                break;
-            case MMI::DIRECTION180: 
-                rotation = MMI::DIRECTION270;
-                break;
-            case MMI::DIRECTION270:
-                rotation = MMI::DIRECTION0;
-                break;
-            default:
-                rotation = MMI::DIRECTION0;
-                break;
-        }
-    }
-    return rotation;
-}
 
 std::string DumpRect(const std::vector<MMI::Rect>& rects)
 {
