@@ -32,6 +32,10 @@ public:
     MOCK_METHOD1(GetWindowModeType, WMError(WindowModeType& windowModeType));
     MOCK_METHOD2(GetMainWindowInfos, WMError(int32_t topNum,
         std::vector<MainWindowInfo>& topNInfo));
+    MOCK_METHOD1(GetAllMainWindowInfos, WMError(std::vector<MainWindowInfo>& infos));
+    MOCK_METHOD1(ClearMainSessions, WMError(const std::vector<int32_t>& persistentIds));
+    MOCK_METHOD2(ClearMainSessions, WMError(std::vector<int32_t>& persistentIds,
+        std::vector<int32_t>& clearFailedIds));
 };
 }
 } // namespace OHOS

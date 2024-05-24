@@ -355,6 +355,7 @@ ohos_shared_library("libwm_lite") {
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
+    "${window_base_path}/window_scene/common:window_scene_common",
   ]
 
   public_configs = [ ":libwm_public_config" ]
