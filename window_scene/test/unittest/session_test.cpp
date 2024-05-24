@@ -1338,8 +1338,8 @@ HWTEST_F(WindowSessionTest, NeedNotify, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NeedNotify
- * @tc.desc: NeedNotify Test
+ * @tc.name: SetFocusedOnShow
+ * @tc.desc: SetFocusedOnShow Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest, SetFocusedOnShow, Function | SmallTest | Level2)
