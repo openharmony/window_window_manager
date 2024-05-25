@@ -768,6 +768,7 @@ bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
     } else if (GetType(env, jsStatusIcon) != napi_undefined) {
         bool isStatusBarLightIcon;
         if (!ConvertFromJsValue(env, jsStatusIcon, isStatusBarLightIcon)) {
+            TLOGE(WmsLogTag::DEFAULT, "Convert status icon value failed");
             return false;
         }
         if (isStatusBarLightIcon) {
@@ -795,6 +796,7 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
     } else if (GetType(env, jsNavigationIcon) != napi_undefined) {
         bool isNavigationBarLightIcon;
         if (!ConvertFromJsValue(env, jsNavigationIcon, isNavigationBarLightIcon)) {
+            TLOGE(WmsLogTag::DEFAULT, "Convert navigation icon value failed");
             return false;
         }
         if (isNavigationBarLightIcon) {
@@ -825,7 +827,6 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
 
     if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
         !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
-        TLOGE(WmsLogTag::DEFAULT, "Set window status bar or navigation bar content color failed");
         return false;
     }
 
