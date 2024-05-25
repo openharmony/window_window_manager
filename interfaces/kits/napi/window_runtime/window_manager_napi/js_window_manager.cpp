@@ -113,6 +113,12 @@ napi_value JsWindowManager::GetLastWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetLastWindow(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetSnapshot(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetSnapshot(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::SetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -536,6 +542,55 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindowManager::OnCreateWindow", env,
         CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
+{
+    int32_t windowId = 0;
+    const int maxArgumentsNum = 4;
+    size_t argc = maxArgumentsNum;
+    napi_value argv[maxArgumentsNum] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[0], windowId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    std::shared_ptr<WindowSnapshotDataPack> dataPack = std::make_shared<WindowSnapshotDataPack>();
+    NapiAsyncTask::ExecuteCallback execute = [dataPack, windowId]() {
+        dataPack->result = SingletonContainer::Get<WindowManager>()
+            .GetSnapshotAndErrorCode(windowId, dataPack->pixelMap);
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (dataPack->result != WMError::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
+                TLOGW(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot not ok!");
+                return;
+            }
+            if (dataPack->pixelMap == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot is nullptr!");
+                return;
+            }
+            auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
+            if (nativePixelMap == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Create native pixelmap is nullptr!");
+                return;
+            }
+            task.Resolve(env, nativePixelMap);
+        };
+    napi_value lastParam = (argc <= 1) ? nullptr : argv[0];
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetSnapshot",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -1130,6 +1185,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsWindowManager::UnregisterWindowMangerCallback);
     BindNativeFunction(env, exportObj, "getTopWindow", moduleName, JsWindowManager::GetTopWindow);
     BindNativeFunction(env, exportObj, "getLastWindow", moduleName, JsWindowManager::GetLastWindow);
+    BindNativeFunction(env, exportObj, "getSnapshot", moduleName, JsWindowManager::GetSnapshot);
     BindNativeFunction(env, exportObj, "minimizeAll", moduleName, JsWindowManager::MinimizeAll);
     BindNativeFunction(env, exportObj, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);

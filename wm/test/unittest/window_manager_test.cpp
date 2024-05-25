@@ -173,6 +173,20 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetSnapshotAndErrorCode01
+ * @tc.desc: Check GetSnapshotAndErrorCode01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetSnapshotAndErrorCode01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    int32_t windowId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError ret = windowManager.GetSnapshotAndErrorCode(windowId, pixelMap);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/*
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC
