@@ -375,11 +375,7 @@ napi_value RectChangeReasonInit(napi_env env)
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get object");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "UNDEFINED",
         CreateJsValue(env, static_cast<uint32_t>(RectChangeReason::UNDEFINED)));
@@ -401,11 +397,8 @@ napi_value RectChangeReasonInit(napi_env env)
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
     napi_set_named_property(env, objValue, "left", CreateJsValue(env, rect.posX_));
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, rect.posY_));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
@@ -417,11 +410,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert windowProperties to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     Rect windowRect = window->GetRect();
     napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
@@ -474,11 +463,8 @@ static std::string GetHexColor(uint32_t color)
 napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert SystemBarProperties to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
     SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty navi = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     napi_set_named_property(env, objValue, "statusBarColor",
@@ -499,11 +485,8 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
 static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBarRegionTint& tint)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert SystemBarProperty to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(tint.type_) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(tint.type_)));
     } else {
@@ -846,11 +829,8 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
 napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert avoidArea to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
     napi_set_named_property(env, objValue, "visible",
         CreateJsValue(env, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
     napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
@@ -863,11 +843,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
 napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert windowLimits t o jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env, windowLimits.maxWidth_));
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
@@ -879,11 +855,7 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
 napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert titleButtonRect to jsObject");
-        return nullptr;
-    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "right", CreateJsValue(env, titleButtonRect.posX_));
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
