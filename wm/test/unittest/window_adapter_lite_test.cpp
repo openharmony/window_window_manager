@@ -29,7 +29,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-   
 };
 
 void WindowAdapterLiteTest::SetUpTestCase()
@@ -42,7 +41,6 @@ void WindowAdapterLiteTest::TearDownTestCase()
 
 void WindowAdapterLiteTest::SetUp()
 {
-    
 }
 
 void WindowAdapterLiteTest::TearDown()
