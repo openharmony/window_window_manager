@@ -185,12 +185,12 @@ void WindowNode::SetPointerHotAreas(const std::vector<Rect>& rects)
     pointerHotAreas_ = rects;
 }
 
-void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
+void WindowNode::SetWindowSizeLimits(const WindowLimits& sizeLimits)
 {
     property_->SetSizeLimits(sizeLimits);
 }
 
-void WindowNode::SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits)
+void WindowNode::SetWindowUpdatedSizeLimits(const WindowLimits& sizeLimits)
 {
     property_->SetUpdatedSizeLimits(sizeLimits);
 }
@@ -219,12 +219,12 @@ void WindowNode::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomO
     }
 }
 
-WindowSizeLimits WindowNode::GetWindowSizeLimits() const
+WindowLimits WindowNode::GetWindowSizeLimits() const
 {
     return property_->GetSizeLimits();
 }
 
-WindowSizeLimits WindowNode::GetWindowUpdatedSizeLimits() const
+WindowLimits WindowNode::GetWindowUpdatedSizeLimits() const
 {
     return property_->GetUpdatedSizeLimits();
 }

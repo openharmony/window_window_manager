@@ -1045,7 +1045,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
-    WindowSizeLimits sizeLimits;
+    WindowLimits sizeLimits;
     sizeLimits.maxWidth_ = abilityInfo->maxWindowWidth;
     sizeLimits.maxHeight_ = abilityInfo->maxWindowHeight;
     sizeLimits.minWidth_ = abilityInfo->minWindowWidth;
