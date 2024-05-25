@@ -564,7 +564,6 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
-    WindowSnapshotDataPack
     std::shared_ptr<WindowSnapshotDataPack> dataPack = std::make_shared<WindowSnapshotDataPack>();
     NapiAsyncTask::ExecuteCallback execute = [dataPack, windowId]() {
         dataPack->result = SingletonContainer::Get<WindowManager>()
