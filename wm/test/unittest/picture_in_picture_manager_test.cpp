@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
+#include "singleton_container.h"
 
 using namespace testing;
 using namespace testing::ext;
