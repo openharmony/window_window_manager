@@ -1940,8 +1940,8 @@ void Session::NotifyClick()
 
 void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground, FocusChangeReason reason)
 {
-    TLOGD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d, reason:  %{public}d",
-        GetPersistentId(), isFocused, reason);
+    TLOGD(WmsLogTag::WMS_FOCUS, "NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d,\
+        reason:  %{public}d", GetPersistentId(), isFocused, reason);
     if (requestFocusStatusNotifyManagerFunc_) {
         requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused, byForeground, reason);
     }
