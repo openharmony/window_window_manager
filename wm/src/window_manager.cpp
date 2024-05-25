@@ -1185,6 +1185,11 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
     return ret;
 }
 
+WMError WindowManager::GetSnapshotAndErrorCode(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return SingletonContainer::Get<WindowAdapter>().GetSnapshotAndErrorCode(windowId, pixelMap);
+}
+
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {
