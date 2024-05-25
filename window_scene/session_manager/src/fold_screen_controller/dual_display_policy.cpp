@@ -349,7 +349,7 @@ void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t 
         TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenSession is null");
         return;
     }
-    std::shared_ptr<RSDidisplayNode> displayNode = screenSession->GetDisplayNode();
+    std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
     if (displayNode == nullptr) {
         TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
         return;
