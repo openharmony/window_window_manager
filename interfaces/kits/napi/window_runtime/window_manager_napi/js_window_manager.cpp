@@ -563,21 +563,25 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
+    WindowSnapshotDataPack
+    std::shared_ptr<WindowSnapshotDataPack> dataPack = std::make_shared<WindowSnapshotDataPack>();
+    NapiAsyncTask::ExecuteCallback execute = [dataPack, windowId]() {
+        dataPack->result = SingletonContainer::Get<WindowManager>()
+            .GetSnapshotAndErrorCode(windowId, dataPack->pixelMap);
+    };
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-            WMError ret = SingletonContainer::Get<WindowManager>().GetSnapshotAndErrorCode(windowId, pixelMap);
-            if (ret != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret)));
+            if (dataPack->result != WMError::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
                 TLOGW(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot not ok!");
                 return;
             }
-            if (pixelMap == nullptr) {
+            if (dataPack->pixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot is nullptr!");
                 return;
             }
-            auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Create native pixelmap is nullptr!");
@@ -588,7 +592,7 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     napi_value lastParam = (argc <= 1) ? nullptr : argv[0];
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindowManager::OnGetSnapshot",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
