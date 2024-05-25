@@ -3675,6 +3675,14 @@ uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
+    sptr<ScreenSession> defSession = GetDefaultScreenSession();
+    if (defSession != nullptr) {
+        if (foldStatus == FoldStatus::FOLDED) {
+            defSession->SetDefaultDeviceRotationOffset(0);
+        } else {
+            defSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
+        }
+    }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     if (agents.empty()) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged agents is empty");
