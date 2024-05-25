@@ -46,7 +46,7 @@ private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
-    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t commond);
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
