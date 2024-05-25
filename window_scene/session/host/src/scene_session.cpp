@@ -182,9 +182,8 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
     });
 }
 
-WSError SceneSession::IsForegroundBypass(bool isFromClient, bool &isBypass)
+WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
-    isBypass = false;
     // return when screen is locked and show without ShowWhenLocked flag
     if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
@@ -192,7 +191,6 @@ WSError SceneSession::IsForegroundBypass(bool isFromClient, bool &isBypass)
         sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
         TLOGW(WmsLogTag::WMS_LIFE, "failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
             GetPersistentId());
-        isBypass = true;
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
@@ -201,20 +199,8 @@ WSError SceneSession::IsForegroundBypass(bool isFromClient, bool &isBypass)
             TLOGW(WmsLogTag::WMS_LIFE,
                 "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
                 GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
-            isBypass = true;
             return WSError::WS_OK;
         }
-    }
-
-    return WSError::WS_OK;
-}
-
-WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
-{
-    bool isBypass = false;
-    WSError err = IsForegroundBypass(isFromClient, isBypass);
-    if (isBypass) {
-        return err;
     }
 
     auto task = [weakThis = wptr(this), property]() {
