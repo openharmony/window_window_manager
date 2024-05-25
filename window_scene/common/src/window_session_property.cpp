@@ -25,7 +25,7 @@ namespace {
     constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 }
 
-const std::map<uint32_t, HandlWritePropertyFunc> SceneSession::writeFuncMap_ {
+const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
         &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
@@ -45,13 +45,13 @@ const std::map<uint32_t, HandlWritePropertyFunc> SceneSession::writeFuncMap_ {
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &WindowSessionProperty::WriteActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
-        &WindowSessionProperty::MarshallingSystemBarMap),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS),
-        &WindowSessionProperty::MarshallingSystemBarMap),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS),
-        &WindowSessionProperty::MarshallingSystemBarMap),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS),
-        &WindowSessionProperty::MarshallingSystemBarMap),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS),
         &WindowSessionProperty::WriteActionUpdateFlags),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE),
@@ -59,11 +59,11 @@ const std::map<uint32_t, HandlWritePropertyFunc> SceneSession::writeFuncMap_ {
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG),
         &WindowSessionProperty::WriteActionUpdateAnimationFlag),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA),
-        &WindowSessionProperty::MarshallingTouchHotAreas),
+        &WindowSessionProperty::WriteActionUpdateTouchHotArea),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE),
         &WindowSessionProperty::WriteActionUpdateDecorEnable),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS),
-        &WindowSessionProperty::MarshallingWindowLimits),
+        &WindowSessionProperty::WriteActionUpdateWindowLimits),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED),
         &WindowSessionProperty::WriteActionUpdateDragenabled),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED),
@@ -78,7 +78,7 @@ const std::map<uint32_t, HandlWritePropertyFunc> SceneSession::writeFuncMap_ {
         &WindowSessionProperty::WriteActionUpdateTopmost),
 };
 
-const std::map<uint32_t, HandlReadPropertyFunc> SceneSession::readFuncMap_ {
+const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
         &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
@@ -876,10 +876,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
 {
-    if (parcel == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "parcel is nullptr");
-        return false;
-    }
     const auto funcIter = writeFuncMap_.find(static_cast<uint32_t>(action));
     if (funcIter == writeFuncMap_.end()) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
@@ -930,6 +926,11 @@ bool WindowSessionProperty::WriteActionUpdateMaximizeState(Parcel& parcel)
         parcel.WriteBool(isLayoutFullScreen_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateSystemBar(Parcel& parcel)
+{
+    return MarshallingSystemBarMap(parcel);
+}
+
 bool WindowSessionProperty::WriteActionUpdateFlags(Parcel& parcel)
 {
     return parcel.WriteUint32(flags_);
@@ -945,9 +946,19 @@ bool WindowSessionProperty::WriteActionUpdateAnimationFlag(Parcel& parcel)
     return parcel.WriteUint32(animationFlag_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateTouchHotArea(Parcel& parcel)
+{
+    return MarshallingTouchHotAreas(parcel);
+}
+
 bool WindowSessionProperty::WriteActionUpdateDecorEnable(Parcel& parcel)
 {
     return parcel.WriteBool(isDecorEnable_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateWindowLimits(Parcel& )
+{
+    return MarshallingWindowLimits(MarshallingWindowLimits);
 }
 
 bool WindowSessionProperty::WriteActionUpdateDragenabled(Parcel& parcel)
@@ -971,6 +982,11 @@ bool WindowSessionProperty::WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel)
     return parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateWindowMask(Parcel& parcel)
+{
+    return MarshallingWindowMask(parcel);
+}
+
 bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
 {
     return parcel.WriteBool(topmost_);
@@ -978,10 +994,6 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
-    if (parcel == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "parcel is nullptr");
-        return;
-    }
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
     if (funcIter == readFuncMap_.end()) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
