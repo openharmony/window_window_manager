@@ -298,7 +298,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
 
     auto taskScreenOnSub = [=] {
-        WLOGFI("ChangeScreenDisplayMode: on sub screenId");
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
         screenId_ = SCREEN_ID_SUB;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
