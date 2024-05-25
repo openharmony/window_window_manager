@@ -102,7 +102,7 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_SIMPLE),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
         &SceneSessionManagerStub::HandleGetSessionSnapshotById),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
