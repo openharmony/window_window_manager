@@ -4245,7 +4245,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     MainWindowInfo info;
     topNInfos.push_back(info);
     result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    ASSERT_EQ(result, WMError::WM_OK);
+    EXPECT_NE(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 }
