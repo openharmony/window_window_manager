@@ -40,6 +40,8 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenController"};
     const std::string CONTROLLER_THREAD_ID = "AbstractScreenControllerThread";
+    const static uint32_t MAX_RETRY_NUM = 3;
+    const static uint32_t RETRY_WAIT_MS = 100;
 }
 
 AbstractScreenController::AbstractScreenController(std::recursive_mutex& mutex)
@@ -53,13 +55,13 @@ AbstractScreenController::~AbstractScreenController() = default;
 
 void AbstractScreenController::Init()
 {
-    WLOGFD("screen controller init");
+    WLOGFI("screen controller init");
     RegisterRsScreenConnectionChangeListener();
 }
 
 void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
 {
-    WLOGFD("RegisterRsScreenConnectionChangeListener");
+    WLOGFI("RegisterRsScreenConnectionChangeListener");
     auto res = rsInterface_.SetScreenChangeCallback(
         [this](ScreenId rsScreenId, ScreenEvent screenEvent) { OnRsScreenConnectionChange(rsScreenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
@@ -297,6 +299,7 @@ void AbstractScreenController::ProcessDefaultScreenReconnected(ScreenId rsScreen
 
 void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 {
+    WLOGFI("start");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenIdManager_.HasRsScreenId(rsScreenId)) {
         WLOGFD("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
@@ -349,7 +352,7 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
 {
     ScreenId dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
     RSScreenCapability screenCapability = rsInterface_.GetScreenCapability(rsScreenId);
-    WLOGFD("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
+    WLOGFI("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
 
     sptr<AbstractScreen> absScreen =
@@ -1472,12 +1475,24 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,
 
 ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const
 {
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (dmsScreenMap_.find(dmsScreenId) == dmsScreenMap_.end()) {
-            WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
-            return ScreenPowerState::INVALID_STATE;
+    uint32_t retryTimes = 0;
+    bool res = false;
+    while (retryTimes < MAX_RETRY_NUM) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            if (dmsScreenMap_.find(dmsScreenId) != dmsScreenMap_.end()) {
+                WLOGFI("find screen %{public}" PRIu64"", dmsScreenId);
+                res = true;
+                break;
+            }
         }
+        retryTimes++;
+        WLOGFW("not find screen, retry %{public}u times", retryTimes);
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
+    }
+    if (retryTimes >= MAX_RETRY_NUM || !res) {
+        WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
+        return ScreenPowerState::INVALID_STATE;
     }
 
     ScreenId rsId = ConvertToRsScreenId(dmsScreenId);
