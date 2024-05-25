@@ -221,7 +221,7 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId,
     if (info) {
         snapshot = *info;
     } else {
-        WLOGFW("Read snapshot is null.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read snapshot is null.");
     }
     return static_cast<WMError>(reply.ReadInt32());
 }

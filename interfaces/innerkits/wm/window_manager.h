@@ -47,6 +47,11 @@ struct VisibleWindowNumInfo {
     uint32_t visibleWindowNum;
 };
 
+struct WindowSnapshotDataPack {
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError result = WMError::WM_OK;
+}
+
 /**
  * @class IWMSConnectionChangedListener
  *
