@@ -552,11 +552,6 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     size_t argc = maxArgumentsNum;
     napi_value argv[maxArgumentsNum] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
-    }
     if (argc == 1) {
         if (!ConvertFromJsValue(env, argv[0], windowId)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
