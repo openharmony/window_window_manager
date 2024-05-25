@@ -8644,6 +8644,7 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
 {
     if (!infos.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Input param invalid, infos must be empty.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
@@ -8682,7 +8683,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
     }
     clearFailedIds.clear();
     WSError result;
-    for (const auto& persistentId : persistentIds) {
+    for (const auto persistentId : persistentIds) {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not found.", persistentId);
@@ -8694,11 +8695,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
             clearFailedIds.push_back(persistentId);
             continue;
         }
-        result = sceneSession->Clear();
-        if (result != WSError::WS_OK) {
-            TLOGW(WmsLogTag::WMS_MAIN, "Clear session failed, session id:%{public}d.", persistentId);
-            clearFailedIds.push_back(persistentId);
-        }
+        sceneSession->Clear();
     }
     return WMError::WM_OK;
 }
