@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
 {
     int result = 0;
     int32_t source = 0;
@@ -76,14 +76,13 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
  * @tc.desc: ReportPiPActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
 {
     int result = 0;
     int32_t templateType = 1;
     std::string actionEvent = "";
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(templateType, actionEvent);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
 }
 
 /**
