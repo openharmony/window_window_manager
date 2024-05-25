@@ -49,6 +49,60 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
+ * @tc.name: ReportPiPStartWindow
+ * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
+{
+    int result = 0;
+    int32_t source = 0;
+    int32_t templateType = 1;
+    int32_t isSuccess = 1;
+    std::string errorReason = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errorReason);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
+    ASSERT_EQ(result, 0);
+    source = 1;
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errorReason);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
+    ASSERT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ReportPiPActionEvent
+ * @tc.desc: ReportPiPActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
+{
+    int result = 0;
+    int32_t templateType = 1;
+    std::string actionEvent = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(templateType, actionEvent);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
+}
+
+/**
+ * @tc.name: ReportPiPRatio
+ * @tc.desc: ReportPiPRatio/ReportPiPRestore
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, ReportPiPRatio, Function | SmallTest | Level2)
+{
+    int result = 0;
+    int32_t windowWidth = 100;
+    int32_t windowHeight = 120;
+    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(windowWidth, windowHeight);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
+}
+
+
+/**
  * @tc.name: PiPWindowState
  * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo
  * @tc.type: FUNC
