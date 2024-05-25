@@ -167,6 +167,41 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
 }
+
+/**
+ * @tc.name: NotifyWMSConnected
+ * @tc.desc: NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, NotifyWMSConnected, Function | SmallTest | Level2)
+{
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(100, 0, true);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(100, 0, false);
+}
+
+/**
+ * @tc.name: GetSMSDeathRecipientByUserId
+ * @tc.desc: GetSMSDeathRecipientByUserId/RemoveSMSDeathRecipientByUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, Function | SmallTest | Level2)
+{
+    auto smsDeathRecipient = MockSessionManagerService::GetInstance().GetSMSDeathRecipientByUserId(100);
+    ASSERT_EQ(nullptr, smsDeathRecipient);
+    MockSessionManagerService::GetInstance().RemoveSMSDeathRecipientByUserId(100);
+}
+
+/**
+ * @tc.name: GetSessionManagerServiceByUserId
+ * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Function | SmallTest | Level2)
+{
+    auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceByUserId(100);
+    ASSERT_EQ(nullptr, sessionManagerService);
+    MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(100);
+}
 }
 }
 }
