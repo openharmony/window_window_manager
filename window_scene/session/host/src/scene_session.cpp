@@ -2353,7 +2353,10 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             return WSError::WS_ERROR_NULLPTR;
         }
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-        if (!isPC && (session->GetAbilityInfo() != nullptr) && WindowHelper::IsMainWindow(session->GetWindowType())) {
+        bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
+            session->systemConfig_.freeMultiWindowEnable_;
+        if (!(isPC || isFreeMutiWindowMode) &&
+            (session->GetAbilityInfo() != nullptr) && WindowHelper::IsMainWindow(session->GetWindowType())) {
             if (!(session->GetForegroundInteractiveStatus())) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
                     session->GetForegroundInteractiveStatus());
