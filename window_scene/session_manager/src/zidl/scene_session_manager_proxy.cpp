@@ -198,7 +198,7 @@ WSError SceneSessionManagerProxy::RecoverAndReconnectSceneSession(const sptr<ISe
     return static_cast<WSError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
+WMError SceneSessionManagerProxy::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -217,7 +217,7 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId,
         TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
+    std::shared_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
     if (info) {
         snapshot = *info;
     } else {
@@ -226,11 +226,11 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotSimple(int32_t persistentId,
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::GetSnapshotAndErrorCode(int32_t persistentId,
+WMError SceneSessionManagerProxy::GetSnapshotByWindowId(int32_t persistentId,
     std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     SessionSnapshot snapshot;
-    WMError ret = GetSessionSnapshotSimple(persistentId, snapshot);
+    WMError ret = GetSessionSnapshotById(persistentId, snapshot);
     if (ret == WMError::WM_OK) {
         pixelMap = snapshot.snapshot;
     }

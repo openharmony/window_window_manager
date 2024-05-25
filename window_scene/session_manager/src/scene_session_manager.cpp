@@ -5862,9 +5862,10 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
-WMError SceneSessionManager::GetSessionSnapshotSimple(int32_t persistentId, SessionSnapshot& snapshot)
+WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
 {
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI() && !SessionPermission::IsShellCall()) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "Get snapshot failed, Get snapshot by id must be system app!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, persistentId, &snapshot]() {
@@ -5878,9 +5879,9 @@ WMError SceneSessionManager::GetSessionSnapshotSimple(int32_t persistentId, Sess
             TLOGW(WmsLogTag::WMS_SYSTEM, "sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
                 sceneSession->GetPersistentId());
         }
-        snapshot.topAbility.SetElementBundleName(&(snapshot.topAbility), sessionInfo.bundleName_.c_str());
-        snapshot.topAbility.SetElementModuleName(&(snapshot.topAbility), sessionInfo.moduleName_.c_str());
-        snapshot.topAbility.SetElementAbilityName(&(snapshot.topAbility), sessionInfo.abilityName_.c_str());
+        snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
+        snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
+        snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
         auto oriSnapshot = sceneSession->Snapshot();
         if (oriSnapshot != nullptr) {
             snapshot.snapshot = oriSnapshot;
@@ -5888,7 +5889,7 @@ WMError SceneSessionManager::GetSessionSnapshotSimple(int32_t persistentId, Sess
         }
         return WMError::WM_ERROR_NULLPTR;
     };
-    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotSimple");
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotById");
 }
 
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,

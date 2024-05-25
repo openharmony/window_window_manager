@@ -547,8 +547,7 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
 
 napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
 {
-    int32_t windowId = 0;
-    const int maxArgumentsNum = 4;
+    constexpr int maxArgumentsNum = 4;
     size_t argc = maxArgumentsNum;
     napi_value argv[maxArgumentsNum] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -557,6 +556,7 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
+    int32_t windowId = 0;
     if (!ConvertFromJsValue(env, argv[0], windowId)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
@@ -565,7 +565,7 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     std::shared_ptr<WindowSnapshotDataPack> dataPack = std::make_shared<WindowSnapshotDataPack>();
     NapiAsyncTask::ExecuteCallback execute = [dataPack, windowId]() {
         dataPack->result = SingletonContainer::Get<WindowManager>()
-            .GetSnapshotAndErrorCode(windowId, dataPack->pixelMap);
+            .GetSnapshotByWindowId(windowId, dataPack->pixelMap);
     };
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
