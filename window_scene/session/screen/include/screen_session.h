@@ -220,6 +220,7 @@ private:
     std::vector<uint32_t> colorSpaces_;
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
+    void ReportNotifyModeChange(DisplayOrientation displayOrientation);
 };
 
 class ScreenSessionGroup : public ScreenSession {
