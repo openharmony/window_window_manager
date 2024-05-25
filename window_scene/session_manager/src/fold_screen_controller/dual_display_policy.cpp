@@ -340,7 +340,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSessio
     screenId_ = screenId;
 }
 
-void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t commond)
+void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command)
 {
     TLOGI(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenId: %{public}" PRIu64 ", command: %{public}d",
         screenId, command);
@@ -357,7 +357,7 @@ void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t 
     if (command == AOD_DISPLAY_NODE) {
         displayNode->AddDisplayNodeToTree();
     } else if (command == REMOVE_DISPLAY_NODE) {
-        displayNode->RemoveDisplayNodeToTree();  
+        displayNode->RemoveDisplayNodeFromTree();  
     }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
