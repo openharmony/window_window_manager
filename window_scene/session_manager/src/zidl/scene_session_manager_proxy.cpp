@@ -217,7 +217,7 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotById(int32_t persistentId, S
         TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    std::shared_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
+    std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
     if (info) {
         snapshot = *info;
     } else {
