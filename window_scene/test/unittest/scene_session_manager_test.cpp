@@ -2956,6 +2956,27 @@ HWTEST_F(SceneSessionManagerTest, RequestFocusStatus, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: NotifyRequestFocusStatusNotifyManager
+ * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "testInfo1";
+    info.bundleName_ = "testInfo2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
+
+    FocusChangeReason reasonInput = FocusChangeReason::SCB_START_APP;
+    sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
+    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
+
+    ASSERT_EQ(reasonInput, reasonResult);
+}
+
+/**
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
  * @tc.type: FUNC

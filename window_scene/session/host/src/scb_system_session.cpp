@@ -117,7 +117,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
 {
     WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
-        NotifyRequestFocusStatusNotifyManager(true, false);
+        FocusChangeReason reason = FocusChangeReason::CLICK;
+        NotifyRequestFocusStatusNotifyManager(true, false, reason);
         NotifyClick();
     }
 }
@@ -139,7 +140,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         if (!isFocused_ && GetFocusable()) {
-            NotifyRequestFocusStatusNotifyManager(true, false);
+            FocusChangeReason reason = FocusChangeReason::CLICK;
+            NotifyRequestFocusStatusNotifyManager(true, false, reason);
             NotifyClick();
         }
     }
