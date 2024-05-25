@@ -73,7 +73,7 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO),
         &WindowSessionProperty::WriteActionUpdateTextfieldAvoidInfo),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK),
-        &WindowSessionProperty::MarshallingWindowMask),
+        &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
 };
@@ -98,7 +98,7 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &WindowSessionProperty::ReadActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
-        &WindowSessionProperty:::ReadActionUpdateSystemBar),
+        &WindowSessionProperty::ReadActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS),
         &WindowSessionProperty::ReadActionUpdateSystemBar),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS),
