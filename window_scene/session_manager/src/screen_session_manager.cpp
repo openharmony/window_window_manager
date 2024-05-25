@@ -65,6 +65,8 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
+const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -79,6 +81,7 @@ static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.typ
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const  int32_t ROTATION_270 = 3;
+std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -4116,7 +4119,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         ShowHelpInfo(dumpInfo);
     } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
         ShowHelpInfo(dumpInfo);
-    } else if (params.size() == 1 && (params[0] == ARG_FOLD_DISPLAY_FULL || params[0] == ARG_FOLD_DISPLAY_MAIN)) {
+    } else if (params.size() == 1 && IsValidDisplayModeCommand(params[0])) {
         int errCode = SetFoldDisplayMode(params[0]);
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
@@ -4137,6 +4140,14 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     return 0;
 }
 
+bool ScreenSessionManager::IsValidDisplayModeCommand(std::string command)
+{
+    if (std::find(displayModeCommands.begin(), displayModeCommands.end(), command) != displayModeCommands.end()) {
+        return true;
+    }
+    return false;
+}
+
 int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -4151,6 +4162,10 @@ int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
         displayMode = FoldDisplayMode::FULL;
     } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
         displayMode = FoldDisplayMode::MAIN;
+    } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
+        displayMode = FoldDisplayMode::SUB;
+    } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
+        displayMode = FoldDisplayMode::COOR;
     } else {
         TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;
