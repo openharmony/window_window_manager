@@ -51,7 +51,7 @@ namespace {
         "settingsdata/SETTINGSDATA?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
-static uint32_t GetPipPriority(uint32_t pipTemplateType)
+uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
 {
     if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
         TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
@@ -439,7 +439,8 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         float newHeight = 0;
         mainWindowXComponentController_->GetGlobalPosition(posX, posY);
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
-        if(!IsContentSizeChange(newWidth, newHeight, posX, posY)) {
+        bool isSizeChange = IsContentSizeChange(newWidth, newHeight, posX, posY);
+        if(isSizeChange) {
             Rect r = {posX, posY, width, height};
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }

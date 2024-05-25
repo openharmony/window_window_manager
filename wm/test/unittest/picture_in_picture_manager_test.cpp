@@ -293,6 +293,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     ASSERT_NE(navId, "");
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, "close");
 }
 
 }
