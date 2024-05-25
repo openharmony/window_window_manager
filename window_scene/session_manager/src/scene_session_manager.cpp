@@ -5903,8 +5903,7 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
         return result;
     }
     sessionSnapshot = *sessionSnapshotPtr;
-    return ERR_
-    OK;
+    return ERR_OK;
 }
 
 sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByType(int32_t collaboratorType)
