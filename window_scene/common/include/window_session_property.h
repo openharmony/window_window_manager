@@ -84,7 +84,7 @@ public:
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetExtensionFlag(bool isExtensionFlag);
-    void SetWindowMask(const sptr<Media::PixelMap>& windowMask);
+    void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
 
     bool GetIsNeedUpdateWindowMode() const;
@@ -131,7 +131,7 @@ public:
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     bool GetExtensionFlag() const;
-    sptr<Media::PixelMap> GetWindowMask() const;
+    std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
 
@@ -226,7 +226,7 @@ private:
     bool isExtensionFlag_ = false;
 
     bool isShaped_ = false;
-    sptr<Media::PixelMap> windowMask_ = nullptr;
+    std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
 };
 
