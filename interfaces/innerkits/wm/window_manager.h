@@ -668,7 +668,7 @@ public:
      * @param pixelMap Snapshot output pixel map.
      * @return WM_OK means get snapshot success, others means failed.
     */
-    WMError GetSnapshotAndErrorCode(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
+    WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Register visible main window num changed listener.

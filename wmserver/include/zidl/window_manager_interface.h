@@ -186,7 +186,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WMError GetSnapshotAndErrorCode(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
+    virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
     }
