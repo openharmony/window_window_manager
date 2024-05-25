@@ -548,9 +548,9 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
 napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
 {
     int32_t windowId = 0;
-    const int MAX_ARGUMENTS_NUM = 4;
-    size_t argc = MAX_ARGUMENTS_NUM;
-    napi_value argv[MAX_ARGUMENTS_NUM] = {nullptr};
+    const int maxArgumentsNum = 4;
+    size_t argc = maxArgumentsNum;
+    napi_value argv[maxArgumentsNum] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
