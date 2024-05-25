@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace Rosen {
-
+class WindowSessionProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
@@ -177,14 +177,18 @@ private:
     bool WriteActionUpdateOrientation(Parcel& parcel);
     bool WriteActionUpdatePrivacyMode(Parcel& parcel);
     bool WriteActionUpdateMaximizeState(Parcel& parcel);
+    bool WriteActionUpdateSystemBar(Parcel& parcel);
     bool WriteActionUpdateFlags(Parcel& parcel);
     bool WriteActionUpdateMode(Parcel& parcel);
     bool WriteActionUpdateAnimationFlag(Parcel& parcel);
+    bool WriteActionUpdateTouchHotArea(Parcel& parcel);
     bool WriteActionUpdateDecorEnable(Parcel& parcel);
+    bool WriteActionUpdateWindowLimits(Parcel& parcel);
     bool WriteActionUpdateDragenabled(Parcel& parcel);
     bool WriteActionUpdateRaiseenabled(Parcel& parcel);
     bool WriteActionUpdateHideNonSystemFloatingWindows(Parcel& parcel);
     bool WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel);
+    bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
@@ -192,7 +196,6 @@ private:
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
     void ReadActionUpdateOrientation(Parcel& parcel);
-    void ReadActionUpdatePrivacyMode(Parcel& parcel);
     void ReadActionUpdatePrivacyMode(Parcel& parcel);
     void ReadActionUpdateMaximizeState(Parcel& parcel);
     void ReadActionUpdateSystemBar(Parcel& parcel);
