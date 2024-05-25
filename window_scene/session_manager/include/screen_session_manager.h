@@ -405,6 +405,7 @@ private:
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
+    bool IsValidDisplayModeCommand(std::string command);
 };
 } // namespace OHOS::Rosen
 

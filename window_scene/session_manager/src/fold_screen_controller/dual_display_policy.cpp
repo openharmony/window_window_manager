@@ -284,12 +284,13 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     // on main screen
     auto taskScreenOnMain = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: 0");
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
         screenId_ = SCREEN_ID_MAIN;
         if (isScreenOn) {
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
+            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+                PowerStateChangeReason::POWER_BUTTON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
@@ -297,9 +298,12 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
 
     auto taskScreenOnSub = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: 1");
+        WLOGFI("ChangeScreenDisplayMode: on sub screenId");
         screenId_ = SCREEN_ID_SUB;
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+            PowerStateChangeReason::POWER_BUTTON);
+        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnSub, "taskScreenOnSub");
 }
