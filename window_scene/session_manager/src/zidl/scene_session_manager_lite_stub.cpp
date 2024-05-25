@@ -464,6 +464,7 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, M
 
     return ERR_NONE;
 }
+
 int SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<MainWindowInfo> infos;
