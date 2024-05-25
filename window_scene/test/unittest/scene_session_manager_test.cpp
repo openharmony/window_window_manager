@@ -2847,6 +2847,7 @@ HWTEST_F(SceneSessionManagerTest, NotifyRequestFocusStatusNotifyManager, Functio
     info.abilityName_ = "testInfo1";
     info.bundleName_ = "testInfo2";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
 
     FocusChangeReason reasonInput = FocusChangeReason::SCB_START_APP;
