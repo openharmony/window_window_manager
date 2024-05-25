@@ -810,7 +810,7 @@ void WindowImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        WLOGFI("notify ace winId:%{public}u", GetWindowId());
+        WLOGFD("notify ace winId:%{public}u", GetWindowId());
         uiContent_->UpdateConfiguration(configuration);
     }
 }
