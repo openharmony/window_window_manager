@@ -27,6 +27,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "application_info.h"
 #include "context.h"
 
 using namespace testing;
@@ -4390,6 +4391,74 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ASSERT_TRUE(ssm_->isEnablePiPCreate(property));
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfos001
+ * @tc.desc: SceneSessionManager get all main window infos.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    info.persistentId_ = 1;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    abilityInfo->applicationInfo = applicationInfo;
+    info.abilityInfo = abilityInfo;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (sceneSession == nullptr) {
+        return;
+    }
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<MainWindowInfo> infos;
+    WMError result = ssm_->GetAllMainWindowInfos(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: GetAllMainWindowInfos002
+ * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos002, Function | SmallTest | Level3)
+{
+    std::vector<MainWindowInfo> infos;
+    MainWindowInfo info;
+    info.pid_ = 1000;
+    info.bundleName_ = "test";
+    infos.push_back(info);
+    WMError result = ssm_->GetAllMainWindowInfos(infos);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ClearMainSessions
+ * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (sceneSession == nullptr) {
+        return;
+    }
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId()};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 0);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

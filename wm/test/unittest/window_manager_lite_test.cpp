@@ -297,5 +297,130 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
     auto ret = windowChecker.CheckWindowId(-1);
     ASSERT_EQ(-1, ret);
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfos001
+ * @tc.desc: GetAllMainWindowInfos001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<MainWindowInfo> infos;
+    std::vector<MainWindowInfo> infosResult;
+    MainWindowInfo info1;
+    info1.pid_ = 1900;
+    info1.bundleName_ = "calendar";
+
+    MainWindowInfo info2;
+    info1.pid_ = 1901;
+    info1.bundleName_ = "settings";
+
+    MainWindowInfo info3;
+    info1.pid_ = 1902;
+    info1.bundleName_ = "photos";
+
+    infosResult.push_back(info1);
+    infosResult.push_back(info2);
+    infosResult.push_back(info3);
+
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
+        Return(WMError::WM_OK)));
+    
+    auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+    auto it1 = infos.begin();
+    auto it2 = infosResult.begin();
+    for (; it1 != infos.end() && it2 != infosResult.end(); it1++, it2++) {
+        ASSERT_EQ(it1->pid_, it2->pid_);
+        ASSERT_EQ(it1->bundleName_, it2->bundleName_);
+        ASSERT_EQ(it1->persistentId_, it2->persistentId_);
+        ASSERT_EQ(it1->bundleType_, it2->bundleType_);
+    }
+}
+
+/**
+ * @tc.name: GetAllMainWindowInfos002
+ * @tc.desc: GetAllMainWindowInfos002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<MainWindowInfo> infos;
+    MainWindowInfo info1;
+    info1.pid_ = 1900;
+    info1.bundleName_ = "calendar";
+    infos.push_back(info1);
+
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
+    
+    auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
+}
+
+/**
+ * @tc.name: ClearMainSessions001
+ * @tc.desc: ClearMainSessions001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<int32_t> persistentIds;
+
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: ClearMainSessions002
+ * @tc.desc: ClearMainSessions002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<int32_t> persistentIds = { 1, 2 };
+
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: ClearMainSessions003
+ * @tc.desc: ClearMainSessions003
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<int32_t> persistentIds;
+    std::vector<int32_t> clearFailedIds;
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: ClearMainSessions004
+ * @tc.desc: ClearMainSessions004
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<int32_t> persistentIds = { 1, 2 };
+    std::vector<int32_t> clearFailedIds;
+    EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
 }
 }

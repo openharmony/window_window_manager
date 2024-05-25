@@ -188,5 +188,28 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     TLOGD(WmsLogTag::WMS_MAIN, "get top main window info");
     return windowManagerServiceProxy_->GetMainWindowInfos(topNum, topNInfo);
 }
+
+WMError WindowAdapterLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_MAIN, "get all main window info");
+    return windowManagerServiceProxy_->GetAllMainWindowInfos(infos);
+}
+
+WMError WindowAdapterLite::ClearMainSessions(const std::vector<int32_t>& persistentIds)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_MAIN, "clear main sessions.");
+    std::vector<int32_t> clearFailedIds;
+    return windowManagerServiceProxy_->ClearMainSessions(persistentIds, clearFailedIds);
+}
+
+WMError WindowAdapterLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_MAIN, "clear main sessions with failed ids.");
+    return windowManagerServiceProxy_->ClearMainSessions(persistentIds, clearFailedIds);
+}
 } // namespace Rosen
 } // namespace OHOS
