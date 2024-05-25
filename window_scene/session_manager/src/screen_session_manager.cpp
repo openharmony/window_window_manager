@@ -4165,7 +4165,7 @@ int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
     } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
         displayMode = FoldDisplayMode::SUB;
     } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
-        displayMode = FoldDisplayMode::COOR;
+        displayMode = FoldDisplayMode::COORDINATION;
     } else {
         TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;
