@@ -354,7 +354,7 @@ void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t 
         TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
         return;
     }
-    if (command == AOD_DISPLAY_NODE) {
+    if (command == ADD_DISPLAY_NODE) {
         displayNode->AddDisplayNodeToTree();
     } else if (command == REMOVE_DISPLAY_NODE) {
         displayNode->RemoveDisplayNodeFromTree();  
