@@ -150,3 +150,8 @@ CONTAINER_START_BEGIN:
   MISSION_ID: {type: INT32, desc: mission id}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   TIMESTAMP: {type: INT64, desc: timestamp}
+
+VH_MODE:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: notify VH_MODE}
+  MODE: {type: INT32, desc: VH MODE after rotation}
+ 
