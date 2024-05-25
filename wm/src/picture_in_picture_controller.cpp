@@ -456,6 +456,10 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 {
     TLOGI(WmsLogTag::WMS_PIP, "PipMainWindowLifeCycleImpl AfterBackground is called");
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        TLOGI(WmsLogTag::WMS_PIP, "disable auto start as screen is off");
+        return;
+    }
     std::string value;
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
