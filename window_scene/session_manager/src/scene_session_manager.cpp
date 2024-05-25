@@ -8682,7 +8682,6 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     clearFailedIds.clear();
-    WSError result;
     for (const auto persistentId : persistentIds) {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
