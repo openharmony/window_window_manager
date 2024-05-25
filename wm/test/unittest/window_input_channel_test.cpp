@@ -32,6 +32,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     sptr<WindowImpl> window_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 300000;
 };
 void WindowInputChannelTest::SetUpTestCase()
 {
@@ -51,7 +53,7 @@ void WindowInputChannelTest::SetUp()
 
 void WindowInputChannelTest::TearDown()
 {
-    usleep(300000);
+    usleep(WAIT_SYNC_IN_NS);
     window_->Destroy();
     window_ = nullptr;
 }
