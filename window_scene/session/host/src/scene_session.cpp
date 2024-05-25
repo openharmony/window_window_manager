@@ -214,9 +214,11 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             session->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
             session->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
         }
-
+        int32_t persistentId = session->GetPersistentId();
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session foreground failed, ret=%{public}d persistentId=%{public}d",
+                ret, persistentId);
             return ret;
         }
         auto sessionProperty = session->GetSessionProperty();
@@ -226,10 +228,12 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         if (session->specificCallback_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            session->specificCallback_->onUpdateAvoidArea_(persistentId);
             session->specificCallback_->onWindowInfoUpdate_(
-                session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+                persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+        } else {
+            TLOGI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
         }
         return WSError::WS_OK;
     };
