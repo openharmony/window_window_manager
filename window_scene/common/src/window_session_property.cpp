@@ -956,9 +956,9 @@ bool WindowSessionProperty::WriteActionUpdateDecorEnable(Parcel& parcel)
     return parcel.WriteBool(isDecorEnable_);
 }
 
-bool WindowSessionProperty::WriteActionUpdateWindowLimits(Parcel& )
+bool WindowSessionProperty::WriteActionUpdateWindowLimits(Parcel& parcel)
 {
-    return MarshallingWindowLimits(MarshallingWindowLimits);
+    return MarshallingWindowLimits(parcel);
 }
 
 bool WindowSessionProperty::WriteActionUpdateDragenabled(Parcel& parcel)
