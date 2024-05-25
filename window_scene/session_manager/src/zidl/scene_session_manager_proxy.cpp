@@ -212,12 +212,12 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotById(int32_t persistentId, S
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_SIMPLE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
+    sptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
     if (info) {
         snapshot = *info;
     } else {
