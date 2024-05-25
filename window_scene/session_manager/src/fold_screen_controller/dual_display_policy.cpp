@@ -357,7 +357,7 @@ void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t 
     if (command == ADD_DISPLAY_NODE) {
         displayNode->AddDisplayNodeToTree();
     } else if (command == REMOVE_DISPLAY_NODE) {
-        displayNode->RemoveDisplayNodeFromTree();  
+        displayNode->RemoveDisplayNodeFromTree();
     }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
