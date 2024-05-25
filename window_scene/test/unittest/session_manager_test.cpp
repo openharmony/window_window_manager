@@ -99,6 +99,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
 
     sptr<ISessionManagerService> sessionManagerService;
     sessionManager.RecoverSessionManagerService(sessionManagerService);
+    sessionManager.RegisterUserSwitchListener([]() {});
     sessionManager.OnUserSwitch(sessionManagerService);
     sessionManager.Clear();
 
