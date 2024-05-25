@@ -72,6 +72,28 @@ void PictureInPictureControllerTest::TearDown()
 namespace {
 
 /**
+ * @tc.name: GetPipPriority
+ * @tc.desc: GetPipPriority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, GetPipPriority, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    uint32_t pipTypeTemplate = 4;
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    pipTypeTemplate = 3;
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    pipTypeTemplate = 0;
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    pipTypeTemplate = 1;
+    ASSERT_EQ(1, pipControl->GetPipPriority(pipTypeTemplate));
+
+}
+
+/**
  * @tc.name: ShowPictureInPictureWindow01
  * @tc.desc: ShowPictureInPictureWindow
  * @tc.type: FUNC
@@ -328,7 +350,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
     newHeight = 0;
     posX = 5.5;
-    pASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
     posX = 0;
     posY = 5.5;
     ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
