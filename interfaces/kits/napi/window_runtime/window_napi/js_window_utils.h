@@ -44,7 +44,7 @@ constexpr int32_t WINDOW_MAX_WIDTH = 1920;
         }                                                                                 \
     } while (0)
 
-#define CHECK_NAPI_ENV_RETURN_IF_FAIL(env)               \
+#define CHECK_NAPI_ENV_RETURN_IF_NULL(env)               \
     do {                                                 \
         if ((env) == nullptr) {                          \
             TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
@@ -52,7 +52,7 @@ constexpr int32_t WINDOW_MAX_WIDTH = 1920;
         }                                                \
     } while (0)
 
-#define CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue)  \
+#define CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue) \
     do {                                                       \
         napi_create_object((env), &(objValue));                \
         if ((objValue) == nullptr) {                           \

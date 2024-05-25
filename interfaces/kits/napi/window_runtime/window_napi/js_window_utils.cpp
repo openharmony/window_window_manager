@@ -34,10 +34,10 @@ napi_value WindowTypeInit(napi_env env)
 {
     WLOGFD("WindowTypeInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "TYPE_APP", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_APP)));
@@ -89,10 +89,10 @@ napi_value AvoidAreaTypeInit(napi_env env)
 {
     WLOGFD("AvoidAreaTypeInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "TYPE_SYSTEM", CreateJsValue(env,
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM)));
@@ -111,10 +111,10 @@ napi_value WindowModeInit(napi_env env)
 {
     WLOGFD("WindowModeInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowMode::UNDEFINED)));
@@ -133,10 +133,10 @@ napi_value ColorSpaceInit(napi_env env)
 {
     WLOGFD("ColorSpaceInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "DEFAULT", CreateJsValue(env,
         static_cast<int32_t>(ColorSpace::COLOR_SPACE_DEFAULT)));
@@ -149,10 +149,10 @@ napi_value OrientationInit(napi_env env)
 {
     WLOGFD("OrientationInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env,
         static_cast<int32_t>(ApiOrientation::UNSPECIFIED)));
@@ -197,10 +197,10 @@ napi_value WindowStageEventTypeInit(napi_env env)
 {
     WLOGFD("WindowStageEventTypeInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
@@ -221,10 +221,10 @@ napi_value WindowEventTypeInit(napi_env env)
 {
     WLOGFD("WindowEventTypeInit");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "WINDOW_SHOWN", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
@@ -242,10 +242,10 @@ napi_value WindowEventTypeInit(napi_env env)
 napi_value WindowLayoutModeInit(napi_env env)
 {
     WLOGFD("WindowLayoutModeInit");
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "WINDOW_LAYOUT_MODE_CASCADE", CreateJsValue(env,
         static_cast<int32_t>(WindowLayoutMode::CASCADE)));
@@ -257,10 +257,10 @@ napi_value WindowLayoutModeInit(napi_env env)
 napi_value BlurStyleInit(napi_env env)
 {
     WLOGD("BlurStyleInit");
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "OFF", CreateJsValue(env,
         static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_OFF)));
@@ -276,10 +276,10 @@ napi_value BlurStyleInit(napi_env env)
 napi_value WindowErrorInit(napi_env env)
 {
     WLOGFD("WindowErrorInit");
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "WM_DO_NOTHING", CreateJsValue(env,
         static_cast<int32_t>(WMError::WM_DO_NOTHING)));
@@ -317,10 +317,10 @@ napi_value WindowErrorInit(napi_env env)
 napi_value WindowErrorCodeInit(napi_env env)
 {
     WLOGFD("WindowErrorCodeInit");
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "WM_ERROR_NO_PERMISSION", CreateJsValue(env,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)));
     napi_set_named_property(env, objValue, "WM_ERROR_NOT_SYSTEM_APP", CreateJsValue(env,
@@ -349,10 +349,10 @@ napi_value WindowErrorCodeInit(napi_env env)
 napi_value WindowStatusTypeInit(napi_env env)
 {
     WLOGFD("WindowStatusTypeInit");
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
-    CHECK_NAPI_OBJECT_VALUE_RETURN_IF_FAIL(env, objValue);
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
         static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
     napi_set_named_property(env, objValue, "FULL_SCREEN", CreateJsValue(env,
@@ -372,7 +372,7 @@ napi_value RectChangeReasonInit(napi_env env)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "RectChangeReasonInit called");
 
-    CHECK_NAPI_ENV_RETURN_IF_FAIL(env);
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -825,6 +825,7 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
 
     if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
         !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
+        TLOGE(WmsLogTag::DEFAULT, "Set window status bar or navigation bar content color failed");
         return false;
     }
 
