@@ -4865,8 +4865,7 @@ void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneS
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
     NotifyRequestFocusStatusNotifyManagerFunc func =
-    [this](int32_t persistentId, const bool isFocused, const bool byForeground) {
-        FocusChangeReason reason = FocusChangeReason::CLICK;
+    [this](int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason) {
         this->RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     };
     if (sceneSession == nullptr) {
@@ -5863,6 +5862,36 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
+WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
+{
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI() && !SessionPermission::IsShellCall()) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "Get snapshot failed, Get snapshot by id must be system app!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, persistentId, &snapshot]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        if (!sceneSession) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "fail to find session by persistentId: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        auto sessionInfo = sceneSession->GetSessionInfo();
+        if (sessionInfo.abilityName_.empty() || sessionInfo.moduleName_.empty() || sessionInfo.bundleName_.empty()) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
+                sceneSession->GetPersistentId());
+        }
+        snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
+        snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
+        snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
+        auto oriSnapshot = sceneSession->Snapshot();
+        if (oriSnapshot != nullptr) {
+            snapshot.snapshot = oriSnapshot;
+            return WMError::WM_OK;
+        }
+        return WMError::WM_ERROR_NULLPTR;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotById");
+}
+
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
@@ -6831,6 +6860,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if ((sceneSession == nullptr) || (enterRecent_.load())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "scene session null or in recent no need update avoid area");
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
@@ -6842,12 +6872,17 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
             needUpdate = avoidAreaIter->second != avoidArea;
         } else {
             if (avoidArea.isEmptyAvoidArea()) {
+                TLOGI(WmsLogTag::WMS_IMMS,
+                    "scene avoid area equal to last, persistentId=%{public}d avoidAreaType=%{public}d",
+                    persistentId, avoidAreaType);
                 needUpdate = false;
                 return needUpdate;
             }
         }
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "update avoid area is empty persistentId=%{public}d avoidAreaType=%{public}d",
+                persistentId, avoidAreaType);
             needUpdate = false;
             return needUpdate;
         }
@@ -8709,5 +8744,63 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
     TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
 
     return WSError::WS_OK;
+}
+
+WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
+{
+    if (!infos.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Input param invalid, infos must be empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Get all mainWindow infos failed, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session == nullptr || !WindowHelper::IsMainWindow(session->GetWindowType())) {
+            continue;
+        }
+        MainWindowInfo info;
+        auto abilityInfo = session->GetSessionInfo().abilityInfo;
+        if (abilityInfo == nullptr) {
+            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d abilityInfo is null.", session->GetPersistentId());
+            continue;
+        }
+        info.pid_ = session->GetCallingPid();
+        info.bundleName_ = session->GetSessionInfo().bundleName_;
+        info.persistentId_ = session->GetPersistentId();
+        info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
+        TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info, Session id:%{public}d, bundleName:%{public}s, "
+            "bundleType:%{public}d", session->GetPersistentId(), info.bundleName_.c_str(), info.bundleType_);
+        infos.push_back(info);
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Clear main sessions failed, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    clearFailedIds.clear();
+    for (const auto persistentId : persistentIds) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not found.", persistentId);
+            clearFailedIds.push_back(persistentId);
+            continue;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
+            clearFailedIds.push_back(persistentId);
+            continue;
+        }
+        sceneSession->Clear();
+    }
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

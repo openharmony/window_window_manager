@@ -828,4 +828,51 @@ WMError SceneSessionManagerLiteProxy::GetMainWindowInfos(int32_t topNum, std::ve
 
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerLiteProxy::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<int32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    WMError error = static_cast<WMError>(GetParcelableInfos(reply, infos));
+    if (error != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get info error");
+        return error;
+    }
+
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerLiteProxy::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32Vector(persistentIds)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write persistentIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<int32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    reply.ReadInt32Vector(&clearFailedIds);
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

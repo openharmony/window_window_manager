@@ -198,6 +198,45 @@ WSError SceneSessionManagerProxy::RecoverAndReconnectSceneSession(const sptr<ISe
     return static_cast<WSError>(ret);
 }
 
+WMError SceneSessionManagerProxy::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write persistentId failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
+    if (info) {
+        snapshot = *info;
+    } else {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read snapshot is null.");
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::GetSnapshotByWindowId(int32_t persistentId,
+    std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    SessionSnapshot snapshot;
+    WMError ret = GetSessionSnapshotById(persistentId, snapshot);
+    if (ret == WMError::WM_OK) {
+        pixelMap = snapshot.snapshot;
+    }
+    return ret;
+}
+
 WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
     MessageParcel data;

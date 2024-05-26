@@ -65,6 +65,8 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
+const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -72,6 +74,7 @@ const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
@@ -493,6 +496,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
         screenSession->UpdateRefreshRate(refreshRate);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::UPDATE_REFRESHRATE);
     } else {
         TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
     }
@@ -3673,6 +3678,14 @@ uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
+    sptr<ScreenSession> defSession = GetDefaultScreenSession();
+    if (defSession != nullptr) {
+        if (foldStatus == FoldStatus::FOLDED) {
+            defSession->SetDefaultDeviceRotationOffset(0);
+        } else {
+            defSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
+        }
+    }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     if (agents.empty()) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged agents is empty");
@@ -4114,7 +4127,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         ShowHelpInfo(dumpInfo);
     } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
         ShowHelpInfo(dumpInfo);
-    } else if (params.size() == 1 && (params[0] == ARG_FOLD_DISPLAY_FULL || params[0] == ARG_FOLD_DISPLAY_MAIN)) {
+    } else if (params.size() == 1 && IsValidDisplayModeCommand(params[0])) {
         int errCode = SetFoldDisplayMode(params[0]);
         if (errCode != 0) {
             ShowIllegalArgsInfo(dumpInfo);
@@ -4135,6 +4148,14 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     return 0;
 }
 
+bool ScreenSessionManager::IsValidDisplayModeCommand(std::string command)
+{
+    if (std::find(displayModeCommands.begin(), displayModeCommands.end(), command) != displayModeCommands.end()) {
+        return true;
+    }
+    return false;
+}
+
 int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -4149,6 +4170,10 @@ int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
         displayMode = FoldDisplayMode::FULL;
     } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
         displayMode = FoldDisplayMode::MAIN;
+    } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
+        displayMode = FoldDisplayMode::SUB;
+    } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
+        displayMode = FoldDisplayMode::COORDINATION;
     } else {
         TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;

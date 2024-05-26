@@ -62,6 +62,8 @@ public:
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override;
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
+    WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;

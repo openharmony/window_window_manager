@@ -614,7 +614,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
         return false;
     }
     if (isShaped_) {
-        if (!parcel.WriteParcelable(windowMask_)) {
+        if (!windowMask_->Marshalling(parcel)) {
             return false;
         }
     }
@@ -626,7 +626,7 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     bool isShaped = parcel.ReadBool();
     property->SetIsShaped(isShaped);
     if (isShaped) {
-        property->SetWindowMask(parcel.ReadParcelable<Media::PixelMap>());
+        property->SetWindowMask(std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel)));
     }
 }
 
@@ -991,12 +991,12 @@ bool WindowSessionProperty::GetExtensionFlag() const
     return isExtensionFlag_;
 }
 
-void WindowSessionProperty::SetWindowMask(const sptr<Media::PixelMap>& windowMask)
+void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)
 {
     windowMask_ = windowMask;
 }
 
-sptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
+std::shared_ptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
 {
     return windowMask_;
 }

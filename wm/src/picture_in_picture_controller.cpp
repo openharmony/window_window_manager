@@ -469,7 +469,6 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
-        return;
     }
     if (value == "false") {
         return;
