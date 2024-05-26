@@ -433,6 +433,13 @@ struct MainWindowInfo : public Parcelable {
             return false;
         }
 
+        if (!parcel.WriteInt32(persistentId_)) {
+            return false;
+        }
+        
+        if (!parcel.WriteInt32(bundleType_)) {
+            return false;
+        }
         return true;
     }
 
@@ -441,11 +448,15 @@ struct MainWindowInfo : public Parcelable {
         MainWindowInfo* mainWindowInfo = new MainWindowInfo;
         mainWindowInfo->pid_ = parcel.ReadInt32();
         mainWindowInfo->bundleName_ = parcel.ReadString();
+        mainWindowInfo->persistentId_ = parcel.ReadInt32();
+        mainWindowInfo->bundleType_ = parcel.ReadInt32();
         return mainWindowInfo;
     }
 
     int32_t pid_ = 0;
     std::string bundleName_ = "";
+    int32_t persistentId_ = 0;
+    int32_t bundleType_ = 0;
 };
 
 namespace {

@@ -446,7 +446,8 @@ WSError Session::SetFocusable(bool isFocusable)
     WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
     GetSessionProperty()->SetFocusable(isFocusable);
     if (isFocused_ && !GetFocusable()) {
-        NotifyRequestFocusStatusNotifyManager(false);
+        FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
+        NotifyRequestFocusStatusNotifyManager(false, true, reason);
     }
     return WSError::WS_OK;
 }
@@ -1580,7 +1581,8 @@ void Session::PresentFocusIfPointDown()
 {
     WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
-        NotifyRequestFocusStatusNotifyManager(true, false);
+        FocusChangeReason reason = FocusChangeReason::CLICK;
+        NotifyRequestFocusStatusNotifyManager(true, false, reason);
     }
     NotifyClick();
 }
@@ -1965,11 +1967,12 @@ void Session::NotifyClick()
     }
 }
 
-void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground)
+void Session::NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground, FocusChangeReason reason)
 {
-    WLOGFD("NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d", GetPersistentId(), isFocused);
+    TLOGD(WmsLogTag::WMS_FOCUS, "NotifyRequestFocusStatusNotifyManager id: %{public}d, focused: %{public}d,\
+        reason:  %{public}d", GetPersistentId(), isFocused, reason);
     if (requestFocusStatusNotifyManagerFunc_) {
-        requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused, byForeground);
+        requestFocusStatusNotifyManagerFunc_(GetPersistentId(), isFocused, byForeground, reason);
     }
 }
 
@@ -2012,7 +2015,8 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         if (!isFocused_ && GetFocusable()) {
-            NotifyRequestFocusStatusNotifyManager(true, false);
+            FocusChangeReason reason = FocusChangeReason::CLICK;
+            NotifyRequestFocusStatusNotifyManager(true, false, reason);
         }
         NotifyClick();
     }

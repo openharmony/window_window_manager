@@ -201,6 +201,7 @@ public:
     void SetFoldScreen(bool isFold);
     void UpdateRotationAfterBoot(bool foldToExpand);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
+    void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
 
 private:
     Rotation ConvertIntToRotation(int rotation);
@@ -220,6 +221,7 @@ private:
     std::vector<uint32_t> colorSpaces_;
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
+    void ReportNotifyModeChange(DisplayOrientation displayOrientation);
 };
 
 class ScreenSessionGroup : public ScreenSession {

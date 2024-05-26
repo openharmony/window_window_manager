@@ -59,12 +59,56 @@ namespace {
  * @tc.desc: ConvertToMissionInfos func
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos_EmptyInput, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest | Level1)
 {
     std::vector<sptr<SceneSession>> sceneSessionInfos;
     std::vector<AAFwk::MissionInfo> missionInfos;
     auto result = SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, missionInfos);
-    ASSERT_EQ(WSError::WS_OK, result);
+    EXPECT_EQ(WSError::WS_OK, result);
+
+    SessionInfo info1;
+    sptr<SceneSession> sceneSession = new SceneSession(info1, nullptr);
+    sceneSessionInfos.push_back(sceneSession);
+
+    SessionInfo info2;
+    AppExecFwk::AbilityInfo abilityInfo_;
+    abilityInfo_.excludeFromMissions = true;
+    info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    info2.want = want;
+    sptr<SceneSession> sceneSession2 = new SceneSession(info2, nullptr);
+    sceneSessionInfos.push_back(sceneSession2);
+
+    auto result2 = SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, missionInfos);
+    EXPECT_EQ(WSError::WS_OK, result2);
+}
+
+/**
+ * @tc.name: ConvertToMissionInfo
+ * @tc.desc: ConvertToMissionInfo func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest | Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    AAFwk::MissionInfo missionInfo;
+    auto result = SceneSessionConverter::ConvertToMissionInfo(sceneSession, missionInfo);
+    EXPECT_EQ(WSError::WS_OK, result);
+
+    SessionInfo info2;
+    sptr<SceneSession> sceneSession2 = new SceneSession(info2, nullptr);
+    auto result2 = SceneSessionConverter::ConvertToMissionInfo(sceneSession2, missionInfo);
+    EXPECT_EQ(WSError::WS_OK, result2);
+
+    SessionInfo info3;
+    AppExecFwk::AbilityInfo abilityInfo_;
+    abilityInfo_.excludeFromMissions = true;
+    info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    info3.want = want;
+    sptr<SceneSession> sceneSession3 = new SceneSession(info3, nullptr);
+    auto result3 = SceneSessionConverter::ConvertToMissionInfo(sceneSession3, missionInfo);
+    EXPECT_EQ(WSError::WS_OK, result3);
 }
 
 }

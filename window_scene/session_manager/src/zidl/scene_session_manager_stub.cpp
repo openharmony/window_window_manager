@@ -102,6 +102,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
+        &SceneSessionManagerStub::HandleGetSessionSnapshotById),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
@@ -700,6 +702,17 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, Messa
     const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Handled!");
+    int32_t persistentId = data.ReadInt32();
+    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
+    const WMError ret = GetSessionSnapshotById(persistentId, *snapshot);
+    reply.WriteParcelable(snapshot.get());
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

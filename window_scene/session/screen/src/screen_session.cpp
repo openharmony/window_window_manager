@@ -14,6 +14,7 @@
  */
 
 #include "session/screen/include/screen_session.h"
+#include <hisysevent.h>
 
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
@@ -263,6 +264,12 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
+{
+    WLOGFI("set device default rotation offset: %{public}d", defaultRotationOffset);
+    property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
+}
+
 void ScreenSession::UpdatePropertyByActiveMode()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
@@ -492,6 +499,24 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+    ReportNotifyModeChange(displayOrientation);
+}
+
+void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
+{
+    int32_t vhMode = 1;
+    if (displayOrientation == DisplayOrientation::PORTRAIT_INVERTED ||
+        displayOrientation == DisplayOrientation::PORTRAIT) {
+        vhMode = 0;
+    }
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "VH_MODE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "MODE", vhMode);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportNotifyModeChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
 }
 
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
