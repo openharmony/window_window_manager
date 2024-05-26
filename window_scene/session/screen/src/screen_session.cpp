@@ -264,6 +264,12 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
+{
+    WLOGFI("set device default rotation offset: %{public}d", defaultRotationOffset);
+    property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
+}
+
 void ScreenSession::UpdatePropertyByActiveMode()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
