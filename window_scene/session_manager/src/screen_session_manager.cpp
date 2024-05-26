@@ -104,7 +104,7 @@ const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false
 ScreenSessionManager::ScreenSessionManager()
     : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true), rsInterface_(RSInterfaces::GetInstance())
 {
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CONSTRUCTION, "Dms construct.");
+    screenEventTracker_.RecordEvent("Dms construct.");
     LoadScreenSceneXml();
     screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
@@ -189,7 +189,7 @@ void ScreenSessionManager::Init()
     } else {
         SetSensorSubscriptionEnabled();
     }
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_ONSTART, "Dms init end.");
+    screenEventTracker_.RecordEvent("Dms init end.");
 }
 
 void ScreenSessionManager::OnStart()
@@ -203,7 +203,7 @@ void ScreenSessionManager::OnStart()
         return;
     }
     TLOGI(WmsLogTag::DMS, "DMS SA OnStart end");
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_ONSTART, "Dms onstart end.");
+    screenEventTracker_.RecordEvent("Dms onstart end.");
 }
 
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
@@ -224,7 +224,8 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return DMError::DM_ERROR_NULLPTR;
     }
-
+    TLOGD(WmsLogTag::DMS, "Register display listener type: %{public}u, clientName: %{public}s",
+        type, SysCapUtil::GetClientName().c_str());
     return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
@@ -242,6 +243,8 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
         return DMError::DM_ERROR_NULLPTR;
     }
 
+    TLOGD(WmsLogTag::DMS, "UnRegister display listener type: %{public}u, clientName: %{public}s",
+        type, SysCapUtil::GetClientName().c_str());
     return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
@@ -360,8 +363,10 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     if (res != StatusCode::SUCCESS) {
         auto task = [this]() { RegisterScreenChangeListener(); };
         taskScheduler_->PostAsyncTask(task, "RegisterScreenChangeListener", 50); // Retry after 50 ms.
+        screenEventTracker_.RecordEvent("Dms OnScreenChange register failed.");
+    } else {
+        screenEventTracker_.RecordEvent("Dms OnScreenChange register success.");
     }
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_REGISTER_STATUS, "Dms ScreenChange register success.");
 }
 
 void ScreenSessionManager::RegisterRefreshRateChangeListener()
@@ -372,10 +377,10 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
             [this](uint32_t refreshRate) { OnHgmRefreshRateChange(refreshRate); });
         if (res != StatusCode::SUCCESS) {
             TLOGE(WmsLogTag::DMS, "Register refresh rate mode change listener failed.");
+            screenEventTracker_.RecordEvent("Dms RefreshRateChange register failed.");
         } else {
             isRegisterRefreshRateListener = true;
-            screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_REGISTER_STATUS,
-                "Dms RefreshRateChange register success.");
+            screenEventTracker_.RecordEvent("Dms RefreshRateChange register success.");
         }
     }
 }
@@ -429,7 +434,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     std::ostringstream oss;
     oss << "OnScreenChange triggered. screenId: " << static_cast<int32_t>(screenId)
         << "  screenEvent: " << static_cast<int32_t>(screenEvent);
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, oss.str());
+    screenEventTracker_.RecordEvent(oss.str());
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenEvent: %{public}d",
         screenId, static_cast<int>(screenEvent));
     auto screenSession = GetOrCreateScreenSession(screenId);
@@ -958,7 +963,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
 
     ScreenProperty property;
     CreateScreenProperty(screenId, property);
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "CreateScreenProperty by rsInterface success.");
+    screenEventTracker_.RecordEvent("CreateScreenProperty by rsInterface success.");
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
         phyScreenPropMap_[screenId] = property;
@@ -984,7 +989,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[screenId] = session;
     }
-    screenEventTracker_.RecordEvent(TrackSupportEvent::DMS_CALLBACK, "create screen session success.");
+    screenEventTracker_.RecordEvent("create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
     RegisterRefreshRateChangeListener();
@@ -3869,7 +3874,12 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     }
     auto userId = GetUserIdByCallingUid();
     auto newScbPid = IPCSkeleton::GetCallingPid();
-    TLOGI(WmsLogTag::DMS, "set client userId:%{public}d", userId);
+
+    std::ostringstream oss;
+    oss << "set client userId: " << userId
+        << " clientName: " << SysCapUtil::GetClientName();
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    screenEventTracker_.RecordEvent(oss.str());
     {
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
         if (clientProxy_ != nullptr && userId != currentUserId_) {
