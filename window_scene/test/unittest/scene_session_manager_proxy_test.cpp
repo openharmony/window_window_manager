@@ -286,7 +286,8 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTe
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->GetSnapshotByWindowId(windowId, pixelMap));
+    WMError ret = sceneSessionManagerProxy_->GetSnapshotByWindowId(windowId, pixelMap);
+    ASSERT_EQ(WSError::WS_OK, ret);
     sceneSessionManagerProxy_ = nullptr;
 }
 
