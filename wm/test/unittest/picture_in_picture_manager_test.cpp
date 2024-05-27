@@ -58,14 +58,14 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
     int result = 0;
     int32_t source = 0;
     std::string errorReason = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
     ASSERT_EQ(result, 0);
     source = 1;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
     ASSERT_EQ(result, 0);
 }
 
@@ -78,7 +78,7 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest
 {
     int result = 0;
     std::string actionEvent = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actEvent);
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
     ASSERT_EQ(result, 0);
 }
 
@@ -325,6 +325,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
 {
     int result = 0;
+
     std::string navId = "";
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::AutoStartPipWindow(navId);
