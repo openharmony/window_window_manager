@@ -80,16 +80,16 @@ HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | 
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
+    sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     uint32_t pipTypeTemplate = 5;
-    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 3;
-    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 0;
-    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 1;
-    ASSERT_EQ(1, pipController->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(1, pipControl->GetPipPriority(pipTypeTemplate));
 }
 
 /**
