@@ -210,6 +210,9 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
 
+    WMError HandleAlreadyShown(WindowType type);
+    WMError ShowWithValidDisplay(const sptr<Display>& display, bool withAnimation, WindowType type);
+    WMError HandleShowResult(WMError ret, WindowType type);
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;
