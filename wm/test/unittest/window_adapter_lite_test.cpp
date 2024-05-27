@@ -56,13 +56,14 @@ namespace {
 HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTest | Level2)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    if (!windowAdapterLite_){
+    if (!windowAdapterLite_) {
         return;
     }
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     std::set<sptr<IWindowManagerAgent>> aa = {nullptr};
-    windowAdapterLite_->windowManagerLiteAgentMap_.insert(std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, aa));
+    windowAdapterLite_->windowManagerLiteAgentMap_.insert(
+        std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, aa));
     auto ret = windowAdapterLite_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 
     windowAdapterLite_->ReregisterWindowManagerLiteAgent();
