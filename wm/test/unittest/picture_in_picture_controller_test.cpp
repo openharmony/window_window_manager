@@ -411,7 +411,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     newHeight = 0;
     posX = 0;
     posY = 0;
-    ASSERT_EQ(false, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(false, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
  }
 
 /**
