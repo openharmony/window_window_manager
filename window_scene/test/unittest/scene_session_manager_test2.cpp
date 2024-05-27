@@ -28,6 +28,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1535,6 +1536,208 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
     ssm_->SetSessionContinueState(token, continueState);
     ASSERT_NE(sceneSession, nullptr);
     delete data;
+}
+
+/**
+ * @tc.name: StartWindowInfoReportLoop
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, StartWindowInfoReportLoop, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->StartWindowInfoReportLoop();
+    ssm_->eventHandler_ = nullptr;
+    ssm_->StartWindowInfoReportLoop();
+    ssm_->isReportTaskStart_ = true;
+    ssm_->StartWindowInfoReportLoop();
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    FocusChangeInfo info;
+    ssm_->GetFocusWindowInfo(info);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo2, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->GetFocusWindowInfo(nullptr);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    FocusChangeInfo fcinfo;
+    ssm_->GetFocusWindowInfo(fcinfo);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionMovedToFront, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->NotifySessionMovedToFront(0);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->NotifySessionMovedToFront(100);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: SetSessionLabel
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetSessionLabel, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->SetSessionLabel(nullptr, "test");
+    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->SetSessionLabel(nullptr, "test");
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: SetSessionIcon
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetSessionIcon, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->SetSessionIcon(nullptr, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->SetSessionIcon(nullptr, nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: InitWithRenderServiceAdded
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, InitWithRenderServiceAdded, Function | SmallTest | Level3)
+{
+    int ret = 0;;
+    ssm_->InitWithRenderServiceAdded();
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: PendingSessionToForeground
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, PendingSessionToForeground, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->PendingSessionToForeground(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->PendingSessionToForeground(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: PendingSessionToBackgroundForDelegator
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: GetFocusSessionToken
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetFocusSessionToken, Function | SmallTest | Level3)
+{
+    WSError ret;
+    sptr<IRemoteObject> token = new IRemoteObjectMocker();
+    ret = ssm_->GetFocusSessionToken(token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->GetFocusSessionToken(token);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: GetFocusSessionElement
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetFocusSessionElement, Function | SmallTest | Level3)
+{
+    WSError ret;
+    AppExecFwk::ElementName element;
+    ret = ssm_->GetFocusSessionElement(element);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->GetFocusSessionElement(element);
+    ASSERT_EQ(WSError::WS_OK, ret);
 }
 }
 } // namespace Rosen
