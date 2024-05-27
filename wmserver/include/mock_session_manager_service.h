@@ -97,6 +97,9 @@ private:
     std::shared_mutex smsLiteRecoverListenerLock_;
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
 
+    std::mutex wmsConnectionStatusLock_;
+    std::map<int32_t, bool> wmsConnectionStatusMap_;
+
     int32_t currentWMSUserId_;
     int32_t currentScreenId_;
 };
