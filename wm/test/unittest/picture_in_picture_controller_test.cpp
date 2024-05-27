@@ -83,13 +83,15 @@ HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | 
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     uint32_t pipTypeTemplate = 5;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    uint32_t testValue = 0;
+    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 3;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 0;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 1;
-    ASSERT_EQ(1, pipControl->GetPipPriority(pipTypeTemplate));
+    testValue = 1;
+    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
 }
 
 /**
