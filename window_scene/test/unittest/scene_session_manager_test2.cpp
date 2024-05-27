@@ -1575,14 +1575,14 @@ HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo2, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->GetFocusWindowInfo(nullptr);
+    FocusChangeInfo fcinfo;
+    ssm_->GetFocusWindowInfo(fcinfo);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
-    FocusChangeInfo fcinfo;
     ssm_->GetFocusWindowInfo(fcinfo);
     ASSERT_EQ(0, ret);
 }
@@ -1708,7 +1708,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusSessionToken, Function | SmallTest | L
     WSError ret;
     sptr<IRemoteObject> token = new IRemoteObjectMocker();
     ret = ssm_->GetFocusSessionToken(token);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1716,7 +1716,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusSessionToken, Function | SmallTest | L
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->GetFocusSessionToken(token);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -1729,7 +1729,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusSessionElement, Function | SmallTest |
     WSError ret;
     AppExecFwk::ElementName element;
     ret = ssm_->GetFocusSessionElement(element);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1737,7 +1737,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusSessionElement, Function | SmallTest |
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->GetFocusSessionElement(element);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 }
 }
 } // namespace Rosen
