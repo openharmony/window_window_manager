@@ -172,45 +172,18 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (token) {
         property_->SetTokenState(true);
     }
+    UpdateSessionInfo();
     const WindowType& type = GetType();
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-        auto info = property_->GetSessionInfo();
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
-        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-        property_->SetSessionInfo(info);
+    WMError res = WMError::WM_OK;
+    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) {
+        res = HandleSubWindow(iSessionStage, eventChannel, persistentId, session);
+    } else if (property_->GetExtensionFlag()) {
+        res = HandleExtensionWindow(iSessionStage, eventChannel, persistentId, session);
+    } else {
+        res = HandleSystemWindow(iSessionStage, eventChannel, persistentId, session);
     }
-    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
-        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                property_->GetWindowName().c_str(), type);
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        // set parent persistentId
-        property_->SetParentPersistentId(parentSession->GetPersistentId());
-        // creat sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        // update subWindowSessionMap_
-        subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
-    } else if (property_->GetExtensionFlag() == true) {
-        property_->SetParentPersistentId(property_->GetParentId());
-        // creat sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-    } else { // system window
-        WMError createSystemWindowRet = CreateSystemWindow(type);
-        if (createSystemWindowRet != WMError::WM_OK) {
-            return createSystemWindowRet;
-        }
-        PreProcessCreate();
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
-            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-        }
+    if (res != WMError::WM_OK) {
+        return res;
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
@@ -222,6 +195,61 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, parentId: %{public}d, "
         "type: %{public}u]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType());
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::UpdateSessionInfo()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
+        auto info = property_->GetSessionInfo();
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+        property_->SetSessionInfo(info);
+    }
+}
+
+WMError WindowSceneSessionImpl::HandleSubWindow(const sptr<ISessionStage>& iSessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session)
+{
+    auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+    if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            property_->GetWindowName().c_str(), GetType());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetParentPersistentId(parentSession->GetPersistentId());
+    // creat sub session by parent session
+    SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+        surfaceNode_, property_, persistentId, session, windowSystemConfig_, context_->GetToken());
+
+    subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::HandleExtensionWindow(const sptr<ISessionStage>& iSessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session)
+{
+    property_->SetParentPersistentId(property_->GetParentId());
+    SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+        surfaceNode_, property_, persistentId, session, windowSystemConfig_, context_->GetToken());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::HandleSystemWindow(const sptr<ISessionStage>& iSessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session)
+{
+    WMError createSystemWindowRet = CreateSystemWindow(GetType());
+    if (createSystemWindowRet != WMError::WM_OK) {
+        return createSystemWindowRet;
+    }
+    PreProcessCreate();
+    SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+        surfaceNode_, property_, persistentId, session, windowSystemConfig_, context_->GetToken());
+    if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
+        maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
+    }
     return WMError::WM_OK;
 }
 
@@ -382,33 +410,10 @@ void WindowSceneSessionImpl::UpdateWindowState()
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
-    if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Window Create failed, property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), state_, GetMode());
-    // allow iSession is nullptr when create window by innerkits
-    if (!context) {
-        WLOGFW("[WMSLife] context is nullptr, name:%{public}s", property_->GetWindowName().c_str());
-    }
-    WMError ret = WindowSessionCreateCheck();
+    WMError ret = InitializeCreate(context, iSession, identityToken);
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    SetDefaultDisplayIdIfNeed();
-    hostSession_ = iSession;
-    context_ = context;
-    identityToken_ = identityToken;
-    AdjustWindowAnimationFlag();
-    if (context && context->GetApplicationInfo() &&
-        context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
-        !SessionPermission::IsSystemCalling()) {
-        WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
-        property_->SetWindowFlags(property_->GetWindowFlags() &
-            (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
-    }
-
     bool isSpecificSession = false;
     if (hostSession_) { // main window
         ret = Connect();
@@ -439,6 +444,38 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+WMError WindowSceneSessionImpl::InitializeCreate(const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
+{
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Window Create failed, property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, windowmode:%{public}u",
+        property_->GetWindowName().c_str(), state_, GetMode());
+    // allow iSession is nullptr when create window by innerkits
+    if (!context) {
+        TLOGW(WmsLogTag::WMS_LIFE, "context is nullptr");
+    }
+    WMError ret = WindowSessionCreateCheck();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    SetDefaultDisplayIdIfNeed();
+    hostSession_ = iSession;
+    context_ = context;
+    identityToken_ = identityToken;
+    AdjustWindowAnimationFlag();
+    if (context && context->GetApplicationInfo() &&
+        context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+        !SessionPermission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        property_->SetWindowFlags(property_->GetWindowFlags() &
+            (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
+    }
+    return WMError::WM_OK;
 }
 
 bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
