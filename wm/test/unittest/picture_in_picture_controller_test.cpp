@@ -369,7 +369,7 @@ HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus01, Function 
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     PictureInPictureController::remoteObj_ = nullptr;
-    ASSERT_EQ(0,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_EQ(ERR_OK,  pipControl->getSettingsAutoStartStatus(key, value));
 }
 
 /**
@@ -478,7 +478,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdatePiPSourceRect, Function | SmallTe
     pipControl->SetXComponentController(xComponentController);
     pipControl->UpdatePiPSourceRect();
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
-    ASSERT_EQ(0, PictureInPictureController::GetPipPriority(0));
+    ASSERT_EQ(0, pipControl->GetPipPriority(0));
 }
 }
 }
