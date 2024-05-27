@@ -90,7 +90,6 @@ HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | 
     ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 1;
     ASSERT_EQ(1, pipController->GetPipPriority(pipTypeTemplate));
-
 }
 
 /**
@@ -103,7 +102,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
-    ASSERT_NE(nullptr,option);
+    ASSERT_NE(nullptr, option);
     PictureInPictureController* pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
@@ -330,7 +329,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  * @tc.type: FUNC
  */
  HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange, Function | SmallTest | Level2)
- {
+{
     float newWidth = 10.00;
     float newHeight = 0;
     float posX = 0;
@@ -374,7 +373,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posY = 10.5;
     ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
- }
+}
 
 /**
  * @tc.name: IsContentSizeChange01
@@ -382,7 +381,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  * @tc.type: FUNC
  */
  HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange01, Function | SmallTest | Level2)
- {
+{
     float newWidth = 10.00;
     float newHeight = 12.5;
     float posX = 10.5;
@@ -412,7 +411,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     posX = 0;
     posY = 0;
     ASSERT_EQ(false, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
- }
+}
 
 /**
  * @tc.name: getSettingsAutoStartStatus
