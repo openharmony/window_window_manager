@@ -60,14 +60,15 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
     int32_t templateType = 1;
     int32_t isSuccess = 1;
     std::string errorReason = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errorReason);
+    std::string &errReason = errorReason;
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errReason);
     ASSERT_EQ(result, 0);
     source = 1;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errReason);
     ASSERT_EQ(result, 0);
 }
 
@@ -81,7 +82,8 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest
     int result = 0;
     int32_t templateType = 1;
     std::string actionEvent = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(templateType, actionEvent);
+    std::string &actEvent = actionEvent;
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(templateType, actEvent);
     ASSERT_EQ(result, 0);
 }
 

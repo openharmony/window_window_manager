@@ -76,20 +76,20 @@ namespace {
  * @tc.desc: GetPipPriority
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, GetPipPriority, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
-    uint32_t pipTypeTemplate = 4;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    uint32_t pipTypeTemplate = 5;
+    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 3;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 0;
-    ASSERT_EQ(0, pipControl->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(0, pipController->GetPipPriority(pipTypeTemplate));
     pipTypeTemplate = 1;
-    ASSERT_EQ(1, pipControl->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(1, pipController->GetPipPriority(pipTypeTemplate));
 
 }
 
@@ -100,10 +100,12 @@ HWTEST_F(PictureInPictureManagerTest, GetPipPriority, Function | SmallTest | Lev
  */
 HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function | SmallTest | Level2)
 {
-    sptr<MockWindow> mw = new MockWindow();
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    PictureInPictureController* pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr,option);
+    PictureInPictureController* pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->window_ = mw;
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
@@ -347,31 +349,31 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 0;
     newHeight = 20.00;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newHeight = 0;
     posX = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posX = 0;
     posY = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posX = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posX = 0;
     newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 0;
     newHeight = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posY = 0;
     posX = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newHeight = 0;
     posX = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posY = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
  }
 
 /**
@@ -396,15 +398,15 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     posX = 0;
     posY = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 0;
     posX = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, poX, posY));
+    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
     newWidth = 0;
     newHeight = 0;
     posX = 0;
