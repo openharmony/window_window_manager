@@ -127,10 +127,18 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    Rect rect = {0, 0, 10, 10};
+    option->SetWindowRect(rect);
+    WMError errCode;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+        sptr<Window> window = Window::CreatePiP(option, pipTemplateInfo, abilityContext_, errCode);
+        if (errCode == WMError::WM_OK) {
+            ASSERT_NE(nullptr, window);
+        } else {
+            ASSERT_EQ(nullptr, window);
+        }
     } else {
-        ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_));
+        ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_, errCode));
     }
 }
 
