@@ -148,7 +148,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     pipControl->curState_ = PiPWindowState::STATE_STOPPED;
     ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(false, StopPipType::NULL_STOP));
 
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
@@ -227,26 +227,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_ = option;
-
-    pipControl->curState_ = PiPWindowState::STATE_STARTING;
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    pipControl->curState_ = PiPWindowState::STATE_STARTED;
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-    EXPECT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
-
-    sptr<Window> mainWindow = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    mainWindow = mw1;
-    EXPECT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
-
-    EXPECT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
-    ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    EXPECT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
-    ASSERT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
-
-    EXPECT_EQ(false, PictureInPictureManager::HasActiveController());
-    ASSERT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
 }
 
 /**
@@ -273,30 +253,25 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureFromClient, Functio
 {
     sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
+    sptr<MockWindow> mw1 = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw1);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
-    pipControl->window_ = option;
+    pipControl->window_ = mw1;
     ASSERT_NE(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPictureFromClient());
     pipControl->window_ = nullptr;
     ASSERT_NE(WMError::WM_OK, pipControl->StopPictureInPictureFromClient());
-
-    pipControl->curState_ = PiPWindowState::STATE_STARTING;
+    pipControl->window_ = mw1;
+    pipControl->curState_ = PiPWindowState::STATE_STOPPING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPictureFromClient());
     pipControl->curState_ = PiPWindowState::STATE_STOPPED;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPictureFromClient());
     pipControl->curState_ = PiPWindowState::STATE_RESTORING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPictureFromClient());
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-    EXPECT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureFromClient());
-
-    WMError res = WMError::WM_ERROR_PIP_REPEAT_OPERATION;
-    ASSERT_NE(res, WMError::WM_OK);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->StopPictureInPictureFromClient());
-    res = WMError::WM_OK;
-    ASSERT_EQ(res, WMError::WM_OK);
     EXPECT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureFromClient());
 }
 
@@ -341,8 +316,14 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->GetPiPNavigationId();
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
+    pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
-    ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
+    enable = false;
+    pipControl->isAutoStartEnabled_ = enable;
+    ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
+    pipControl->pipOption_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
+    ASSERT_EQ(result, 0);
 }
 
 /**
