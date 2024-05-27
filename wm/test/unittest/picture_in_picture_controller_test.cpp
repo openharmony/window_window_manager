@@ -328,7 +328,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  * @tc.desc: IsContentSizeChange
  * @tc.type: FUNC
  */
- HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange, Function | SmallTest | Level2)
 {
     float newWidth = 10.00;
     float newHeight = 0;
@@ -380,7 +380,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
  * @tc.desc: IsContentSizeChange
  * @tc.type: FUNC
  */
- HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange01, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange01, Function | SmallTest | Level2)
 {
     float newWidth = 10.00;
     float newHeight = 12.5;
