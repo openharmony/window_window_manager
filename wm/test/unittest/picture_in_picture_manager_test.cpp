@@ -78,7 +78,7 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest
 {
     int result = 0;
     std::string actionEvent = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actEvent);
     ASSERT_EQ(result, 0);
 }
 
