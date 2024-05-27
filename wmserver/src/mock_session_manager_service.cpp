@@ -336,12 +336,23 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
         smsListener = iface_cast<ISessionManagerServiceRecoverListener>(listener);
         smsRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
-    if (clientUserId == SYSTEM_USERID && smsListener && currentWMSUserId_ > INVALID_USER_ID) {
+    if (clientUserId != SYSTEM_USERID) {
+        return;
+    }
+    bool isWMSConnected = false;
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
+        if (wmsConnectionStatusMap_.find(currentWMSUserId_) != wmsConnectionStatusMap_.end()){
+            isWMSConnected = wmsConnectionStatusMap_[currentWMSUserId_];
+        }
+    }
+    if (smsListener && isWMSConnected) {
         auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return;
         }
+        TLOGI(WmsLogTag::WMS_RECOVER, "WMS is already connected, notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
 }
@@ -509,6 +520,10 @@ void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t scree
 void MockSessionManagerService::NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
+        wmsConnectionStatusMap_[wmsUserId] = isConnected;
+    }
     NotifyWMSConnectionChangedToLiteClient(wmsUserId, screenId, isConnected);
     NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnected);
 }
