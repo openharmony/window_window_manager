@@ -133,6 +133,48 @@ HWTEST_F(WmMathTest, Invert, Function | SmallTest | Level2)
     mat.Invert();
     ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
 }
+
+/**
+ * @tc.name: Invert02
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, Invert02, Function | SmallTest | Level2)
+{
+    Matrix4 mat;
+    mat.mat_[0][0] = 10.0f;
+    mat.mat_[1][0] = -1.0f;
+    mat.Invert();
+    ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
+}
+
+/**
+ * @tc.name: Invert02
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, Invert03, Function | SmallTest | Level2)
+{
+    Matrix4 mat;
+    mat.mat_[0][0] = 0.f;
+    mat.mat_[1][0] = 0.f;
+    mat.Invert();
+    ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
+}
+
+/**
+ * @tc.name: Invert02
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, Invert04, Function | SmallTest | Level2)
+{
+    Matrix4 mat;
+    mat.mat_[0][0] = 10.0f;
+    mat.mat_[1][0] = 0.f;
+    mat.Invert();
+    ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
