@@ -30,6 +30,7 @@ group("unittest") {
     ":wm_root_scene_test",
     ":wm_screen_scene_test",
     ":wm_vsync_station_test",
+    ":wm_window_adapter_lite_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
     ":wm_window_display_change_adapter_test",
@@ -49,7 +50,6 @@ group("unittest") {
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
-    ":wm_window_adapter_lite_test",
   ]
   if (!scene_board_enabled) {
     deps += [ ":wm_window_proxy_test" ]
@@ -559,8 +559,8 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/wm:libwm",
-    "${window_base_path}/wmserver:libwms",
     "${window_base_path}/wm:libwm_lite",
+    "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
