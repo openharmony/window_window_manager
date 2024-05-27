@@ -3664,7 +3664,6 @@ void WindowImpl::HandleSystemToastWindow()
     property_->SetFocusable(false);
 }
 
-
 bool WindowImpl::IsWindowValid() const
 {
     bool res = ((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM));
