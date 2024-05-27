@@ -57,18 +57,15 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
 {
     int result = 0;
     int32_t source = 0;
-    int32_t templateType = 1;
-    int32_t isSuccess = 1;
     std::string errorReason = "";
-    std::string &errReason = errorReason;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errReason);
     ASSERT_EQ(result, 0);
     source = 1;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, templateType, isSuccess, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errReason);
     ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, templateType, isSuccess, errReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errReason);
     ASSERT_EQ(result, 0);
 }
 
@@ -80,10 +77,8 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
 HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
 {
     int result = 0;
-    int32_t templateType = 1;
     std::string actionEvent = "";
-    std::string &actEvent = actionEvent;
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(templateType, actEvent);
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actEvent);
     ASSERT_EQ(result, 0);
 }
 
@@ -95,9 +90,7 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest
 HWTEST_F(PictureInPictureManagerTest, ReportPiPRatio, Function | SmallTest | Level2)
 {
     int result = 0;
-    int32_t windowWidth = 100;
-    int32_t windowHeight = 120;
-    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(windowWidth, windowHeight);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(100, 120);
     ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
 }
