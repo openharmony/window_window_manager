@@ -1557,8 +1557,6 @@ HWTEST_F(SceneSessionManagerTest3, CheckFocusIsDownThroughBlockingType, Function
     ASSERT_FALSE(ret);
 }
 
-
-
 /**
  * @tc.name: RaiseWindowToTop
  * @tc.desc: SceneSesionManager raise window to top
