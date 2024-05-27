@@ -342,7 +342,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
-        if (wmsConnectionStatusMap_.find(currentWMSUserId_) != wmsConnectionStatusMap_.end()){
+        if (wmsConnectionStatusMap_.find(currentWMSUserId_) != wmsConnectionStatusMap_.end()) {
             isWMSConnected = wmsConnectionStatusMap_[currentWMSUserId_];
         }
     }
