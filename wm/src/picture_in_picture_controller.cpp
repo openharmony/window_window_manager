@@ -439,9 +439,9 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         float newHeight = 0;
         mainWindowXComponentController_->GetGlobalPosition(posX, posY);
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
-        bool isSizeChange = IsContentSizeChange(newWidth, newHeight, posX, posY);
+        bool isSizeChange = IsContentSizeChanged(newWidth, newHeight, posX, posY);
         if (isSizeChange) {
-            Rect r = {posX, posY, width, height};
+            Rect r = {posX, posY, newWidth, newHeight};
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
@@ -452,7 +452,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
 }
 
-bool PictureInPictureController::IsContentSizeChange(float width, float height, float posX, float posY)
+bool PictureInPictureController::IsContentSizeChanged(float width, float height, float posX, float posY)
 {
     return windowRect_.width_ != static_cast<uint32_t>(width) ||
         windowRect_.height_ != static_cast<uint32_t>(height) ||

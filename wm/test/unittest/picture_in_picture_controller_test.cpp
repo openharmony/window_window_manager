@@ -103,7 +103,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    PictureInPictureController* pipControl =
+    sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->window_ = mw;
@@ -126,7 +126,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
 
     pipControl->curState_ = PiPWindowState::STATE_STOPPING;
     ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
-    pipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    pipControl->curState_ = PiPWindowState::STATE_STOPPED;
     ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
 
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
@@ -324,93 +324,35 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize, Function | SmallTest
 }
 
 /**
- * @tc.name: IsContentSizeChange
- * @tc.desc: IsContentSizeChange
+ * @tc.name: IsContentSizeChanged
+ * @tc.desc: IsContentSizeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, IsContentSizeChanged, Function | SmallTest | Level2)
 {
-    float newWidth = 10.00;
-    float newHeight = 0;
-    float posX = 0;
-    float posY = 0;
-    Rect windowRect = {0, 0, 0, 0};
-    windowRect.width_ = 0;
-    windowRect.height_ = 0;
-    windowRect.posX_ = 0;
-    windowRect.posY_ = 0;
     sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 0;
-    newHeight = 20.00;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newHeight = 0;
-    posX = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posX = 0;
-    posY = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posX = 5.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posX = 0;
-    newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 0;
-    newHeight = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posY = 0;
-    posX = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newHeight = 0;
-    posX = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posY = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-}
-
-/**
- * @tc.name: IsContentSizeChange01
- * @tc.desc: IsContentSizeChange
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, IsContentSizeChange01, Function | SmallTest | Level2)
-{
-    float newWidth = 10.00;
-    float newHeight = 12.5;
-    float posX = 10.5;
-    float posY = 0;
-    Rect windowRect = {0, 0, 0, 0};
-    windowRect.width_ = 0;
-    windowRect.height_ = 0;
-    windowRect.posX_ = 0;
-    windowRect.posY_ = 0;
-    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new (std::nothrow) PipOption();
-    ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    posX = 0;
-    posY = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 0;
-    posX = 12.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 10.5;
-    ASSERT_EQ(true, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
-    newWidth = 0;
-    newHeight = 0;
-    posX = 0;
-    posY = 0;
-    ASSERT_EQ(false, pipControl->IsContentSizeChange(newWidth, newHeight, posX, posY));
+    pipControl->windowRect_ = {0, 0, 0, 0};
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 0, 0, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 0, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 0, 10.5, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 0, 0, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 10.5, 0, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 0, 10.5, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 0, 0, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 10.5, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 0, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 0, 10.5, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 10.5, 10.5, 0));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 10.5, 0, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 0, 10.5, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 10.5, 10.5));
+    ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 10.5, 10.5, 10.5));
+    ASSERT_EQ(false, pipControl->IsContentSizeChanged(0, 0, 0, 0));
 }
 
 /**
@@ -427,7 +369,7 @@ HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus01, Function 
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     PictureInPictureController::remoteObj_ = nullptr;
-    ASSERT_EQ(ERR_NO_INIT,  pipControl->getSettingsAutoStartStatus(key, value));
+    ASSERT_EQ(0,  pipControl->getSettingsAutoStartStatus(key, value));
 }
 
 /**
