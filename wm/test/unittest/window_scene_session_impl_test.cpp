@@ -224,7 +224,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     if (parentSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentSceneSession->CreateAndConnectSpecificSession());
     }
-    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentSceneSession->Destroy(true));
 }
 
 /**
