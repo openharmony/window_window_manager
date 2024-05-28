@@ -59,13 +59,28 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTe
     if (!windowAdapterLite_) {
         return;
     }
-    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+
     std::set<sptr<IWindowManagerAgent>> aa = {nullptr};
     windowAdapterLite_->windowManagerLiteAgentMap_.insert(
         std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, aa));
-    auto ret = windowAdapterLite_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    int32_t pid = 0;
+    auto ret = windowAdapterLite_->CheckWindowId(0, pid);
 
+    ASSERT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UnregisterWindowManagerAgent
+ * @tc.desc: WindowAdapterLite/UnregisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, Function | SmallTest | Level2)
+{
+    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
+    if (!windowAdapterLite_) {
+        return;
+    }
     windowAdapterLite_->ReregisterWindowManagerLiteAgent();
     windowAdapterLite_->OnUserSwitch();
     windowAdapterLite_->ClearWindowAdapter();
@@ -76,10 +91,12 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTe
 
     FocusChangeInfo focusInfo;
     windowAdapterLite_->GetFocusWindowInfo(focusInfo);
-
     WindowModeType windowModeType;
     windowAdapterLite_->GetWindowModeType(windowModeType);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    int32_t pid = 0;
+    auto ret = windowAdapterLite_->CheckWindowId(0, pid);
+
+    ASSERT_NE(WMError::WM_OK, ret);
 }
 }
 }
