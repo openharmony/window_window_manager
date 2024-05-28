@@ -490,6 +490,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
             phyScreenPropMap_.erase(screenId);
         }
+        TLOGI(WmsLogTag::DMS, "DisconnectScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     }
 }
 
@@ -989,6 +990,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[screenId] = session;
     }
+    TLOGI(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     screenEventTracker_.RecordEvent("create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
@@ -1979,6 +1981,8 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
+            smsScreenId, rsId);
         if (option.name_ == "CastEngine") {
             screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
@@ -2128,7 +2132,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
             }
             screenSessionMap_.erase(smsScreenMapIter);
             NotifyScreenDisconnected(screenId);
-            TLOGI(WmsLogTag::DMS, "DestroyVirtualScreen id: %{public}" PRIu64"", screenId);
+            TLOGI(WmsLogTag::DMS, "DestroyVirtualScreen success, id: %{public}" PRIu64"", screenId);
         }
     }
     screenIdManager_.DeleteScreenId(screenId);
