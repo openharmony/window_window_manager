@@ -417,7 +417,8 @@ HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
     EXPECT_NE(keyboardCb, nullptr);
-    keyboardCb->onGetFocusedSessionId_ = [](){
+    keyboardCb->onGetFocusedSessionId_ = []()
+    {
         return 0;
     };
     EXPECT_NE(keyboardCb->onGetFocusedSessionId_, nullptr);
@@ -487,7 +488,26 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
         };
     statusBarHeight = keyboardSession->GetStatusBarHeight();
     ASSERT_EQ(statusBarHeight, 0);
+}
 
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetStatusBarHeight02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(windowSessionProperty, nullptr);
+    sceneSession->property_ = windowSessionProperty;
     WSRect rect3({0, 0, 0, 1});
     sceneSession->winRect_ = rect3;
     sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
@@ -497,7 +517,12 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
             vec.push_back(sceneSession);
             return vec;
         };
-    statusBarHeight = keyboardSession->GetStatusBarHeight();
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback;
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+    int32_t statusBarHeight = keyboardSession->GetStatusBarHeight();
     ASSERT_EQ(statusBarHeight, 1);
 }
 
