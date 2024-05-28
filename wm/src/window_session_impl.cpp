@@ -74,6 +74,7 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
+std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -88,6 +89,7 @@ std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
+std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1587,6 +1589,44 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
     return ret;
 }
 
+template<typename T>
+EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> WindowSessionImpl::GetListeners()
+{
+    sptr<ISubWindowCloseListener> subWindowCloseListeners;
+    subWindowCloseListeners = subWindowCloseListeners_[GetPersistentId()];
+    return subWindowCloseListeners;
+}
+
+WMError WindowSessionImpl::RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener)
+{
+    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
+    subWindowCloseListeners_[GetPersistentId()] = listener;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener)
+{
+    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
+    subWindowCloseListeners_[GetPersistentId()] = nullptr;
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
@@ -1718,6 +1758,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
+        subWindowCloseListeners_[GetPersistentId()] = nullptr;
     }
 }
 
@@ -2132,6 +2176,16 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
                 listener->OnRectChange(rect, reason);
             }
         }
+    }
+}
+
+void WindowSessionImpl::NotifySubWindowClose(bool& terminateCloseProcess)
+{
+    WLOGFD("WindowSessionImpl::NotifySubWindowClose");
+    std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
+    auto subWindowCloseListeners = GetListeners<ISubWindowCloseListener>();
+    if (subWindowCloseListeners != nullptr) {
+        subWindowCloseListeners->OnSubWindowClose(terminateCloseProcess);
     }
 }
 

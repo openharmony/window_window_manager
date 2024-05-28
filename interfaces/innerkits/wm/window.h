@@ -446,6 +446,21 @@ public:
 };
 
 /**
+ * @class ISubWindowCloseListener
+ *
+ * @brief ISubWindowCloseListener is used to observe the window rect and its changing reason when window changed.
+ */
+class ISubWindowCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when subwindow closed.
+     *
+     * @param terminateCloseProcess Whather need to terminate the subwindow close process.
+     */
+    virtual void OnSubWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
  * @class IKeyboardPanelInfoChangeListener
  *
  * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
@@ -1877,6 +1892,24 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Register subwindow close listener.
+     *
+     * @param listener ISubWindowCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSubWindowCloseListeners(
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
+
+    /**
+     * @brief Unregister subwindow close listener.
+     *
+     * @param listener ISubWindowCloseListeners.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSubWindowCloseListeners(
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
 
     /**
      * @brief Get the rect of host window.
