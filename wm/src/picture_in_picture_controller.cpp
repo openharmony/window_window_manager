@@ -67,8 +67,7 @@ static uint32_t GetPipPriority(uint32_t pipTemplateType)
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
     uint32_t windowId, napi_env env, napi_ref nodeControllerRef)
-    : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env),
-    customNodeController_(nodeControllerRef)
+    : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env))
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
@@ -731,7 +730,7 @@ std::string PictureInPictureController::GetPiPNavigationId()
 
 napi_ref PictureInPictureController::GetCustomNodeController()
 {
-    return customNodeController_;
+    return pipOption_ == nullptr ? nullptr : pipOption_->GetNodeControllerRef();
 }
 
 PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl(const sptr<Window> window)
