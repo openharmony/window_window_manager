@@ -58,6 +58,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t ANIMATION_TIME = 400;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -679,14 +680,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     auto displayInfo = display->GetDisplayInfo();
     float rotation = displayInfo->getRotation();
     int32_t deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
-    float transformHint = (rotation + deviceRotation) % 360;
+    int32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT,"rotation:%{rotation}d,deviceRotation:%{deviceRotation}d,transformHint:%{transformHint}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT,"[rotation, deviceRotation, transformHint]: [%{public}f, %{public}d, %{public}d,]",
     rotation,deviceRotation,transformHint);
-
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
