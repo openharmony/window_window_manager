@@ -216,8 +216,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     StartPipType startType = StartPipType::AUTO_START;
     sptr<MockWindow> mw = new (std::nothrow) MockWindow();
     ASSERT_NE(nullptr, mw);
-    sptr<MockWindow> mw1 = new (std::nothrow) MockWindow();
-    ASSERT_NE(nullptr, mw1);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
@@ -234,9 +232,11 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
 
     pipControl->curState_ = PiPWindowState::STATE_STARTING;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+
+
     delete static_cast<AbilityRuntime::AbilityContextImpl*>(contextPtr);
 }
 
