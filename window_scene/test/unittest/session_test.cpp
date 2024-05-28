@@ -1970,7 +1970,7 @@ HWTEST_F(WindowSessionTest, Foreground02, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_INACTIVE;
     session_->isActive_ = false;
     session_->sessionInfo_.isSystem_ = true;
-    EXPECT_EQ(session_->sessionInfo.isSystem_, true);
+    EXPECT_EQ(session_->sessionInfo_.isSystem_, true);
     auto result02 = session_->Foreground(property);
 
     session_->property_ = nullptr;
