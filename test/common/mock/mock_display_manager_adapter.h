@@ -90,6 +90,7 @@ public:
     MOCK_METHOD1(RemoveVirtualScreenFromGroup, void(std::vector<ScreenId> screens));
     MOCK_METHOD1(SetScreenRotationLocked, DMError(bool isLocked));
     MOCK_METHOD1(IsScreenRotationLocked, DMError(bool& isLocked));
+    MOCK_METHOD4(SetResolution, DMError(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio));
 };
 }
 } // namespace OHOS
