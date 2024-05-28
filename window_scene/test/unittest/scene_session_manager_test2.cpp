@@ -1768,7 +1768,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Le
     ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
-    ssm_->bundleMgr_ = null;
+    ssm_->bundleMgr_ = nullptr;
     ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
@@ -1900,8 +1900,8 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3
 {
     WMError ret;
     ssm_->sceneSessionMap_.clear();
-    int32_t persistentId = 100;
-    int32_t topWinId = 200;
+    uint32_t persistentId = 100;
+    uint32_t topWinId = 200;
     ret = ssm_->GetTopWindowId(persistentId, topWinId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
