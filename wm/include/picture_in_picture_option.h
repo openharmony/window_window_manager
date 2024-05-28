@@ -38,6 +38,8 @@ public:
     std::vector<std::uint32_t> GetControlGroup();
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
+    void SetNodeControllerRef(napi_ref ref);
+    napi_ref GetNodeControllerRef();
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
@@ -46,6 +48,7 @@ private:
     uint32_t contentHeight_ = 0;
     std::shared_ptr<XComponentController> xComponentController_;
     std::vector<std::uint32_t> controlGroup_;
+    napi_ref customNodeController_;
 };
 }
 }

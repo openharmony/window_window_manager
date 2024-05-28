@@ -126,6 +126,8 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value heightValue = nullptr;
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
+    napi_value nodeController = nullptr;
+    napi_ref nodeControllerRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
@@ -140,6 +142,8 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
+    napi_get_named_property(env, config, "nodeController", &nodeController);
+    napi_create_reference(env, nodeController, 1, &nodeControllerRef);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
@@ -154,6 +158,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     option.SetContentSize(width, height);
     option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
+    option.SetNodeControllerRef(nodeControllerRef);
     return checkOptionParams(option);
 }
 
@@ -211,10 +216,6 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
-    napi_value nodeController = nullptr;
-    napi_get_named_property(env, config, "nodeController", &nodeController);
-    napi_ref nodeControllerRef = nullptr;
-    napi_create_reference(env, nodeController, 1, &nodeControllerRef);
     napi_value callback = argc > 1 ? (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr) : nullptr;
     NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (!PictureInPictureManager::IsSupportPiP()) {
