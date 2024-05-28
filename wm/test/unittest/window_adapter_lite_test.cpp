@@ -61,9 +61,9 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTe
     }
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
 
-    std::set<sptr<IWindowManagerAgent>> aa = {nullptr};
+    std::set<sptr<IWindowManagerAgent>> iWindowManagerAgent = {nullptr};
     windowAdapterLite_->windowManagerLiteAgentMap_.insert(
-        std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, aa));
+        std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, iWindowManagerAgent));
     int32_t pid = 0;
     auto ret = windowAdapterLite_->CheckWindowId(0, pid);
 
