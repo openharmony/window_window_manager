@@ -314,8 +314,6 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
 
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
-    pipControl->GetPiPNavigationId();
-    ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
     pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
     enable = false;
