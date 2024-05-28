@@ -15,6 +15,9 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "mock/mock_session.h"
+#include "mock/mock_session_stage.h"
+#include "mock/mock_window_event_channel.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
@@ -52,6 +55,475 @@ void sceneSessionManagerProxyTest::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: CreateAndConnectSpecificSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    int32_t persistentId = 0;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        persistentId, session, systemConfig, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession2, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    int32_t persistentId = 0;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        persistentId, session, systemConfig, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession3, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = nullptr;
+    int32_t persistentId = 0;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        persistentId, session, systemConfig, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession4
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession4, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    int32_t persistentId = 0;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token = nullptr;
+
+    sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        persistentId, session, systemConfig, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndConnectSpecificSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        session, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndConnectSpecificSession2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = nullptr;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        session, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndConnectSpecificSession3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = nullptr;
+
+    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+        session, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+        property, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndReconnectSceneSession2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = nullptr;
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+        property, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverAndReconnectSceneSession3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    SessionInfo info;
+    sptr<ISession> session = new (std::nothrow) SessionMocker(info);
+    sptr<IRemoteObject> token = nullptr;
+
+    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+        property, token);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotById
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    SessionSnapshot snapshot;
+
+    sceneSessionManagerProxy_->GetSessionSnapshotById(0, snapshot);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotByWindowId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+
+    sceneSessionManagerProxy_->GetSnapshotByWindowId(0, pixelMap);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(0);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    sceneSessionManagerProxyTest,
+    DestroyAndDisconnectSpecificSessionWithDetachCallback,
+    Function | SmallTest | Level2
+)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> callback = new (std::nothrow) IRemoteObjectMocker();
+
+    sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSessionWithDetachCallback(0, callback);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSessionProperty
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionProperty, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    WSPropertyChangeAction action{};
+    sceneSessionManagerProxy_->UpdateSessionProperty(property, action);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSessionProperty2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionProperty2, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<WindowSessionProperty> property = nullptr;
+    WSPropertyChangeAction action{};
+    sceneSessionManagerProxy_->UpdateSessionProperty(property, action);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSessionTouchOutsideListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    int32_t persistentId = 0;
+    sceneSessionManagerProxy_->UpdateSessionTouchOutsideListener(persistentId, true);
+    sceneSessionManagerProxy_->UpdateSessionTouchOutsideListener(persistentId, false);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: SetGestureNavigaionEnabled
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sceneSessionManagerProxy_->SetGestureNavigaionEnabled(true);
+    sceneSessionManagerProxy_->SetGestureNavigaionEnabled(false);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    FocusChangeInfo focusInfo{};
+    sceneSessionManagerProxy_->GetFocusWindowInfo(focusInfo);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: SetSessionIcon
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetSessionIcon, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    sceneSessionManagerProxy_->SetSessionIcon(token, icon);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetAccessibilityWindowInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetAccessibilityWindowInfo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::vector<sptr<AccessibilityWindowInfo>> infos{};
+    sceneSessionManagerProxy_->GetAccessibilityWindowInfo(infos);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::vector<sptr<UnreliableWindowInfo>> infos{};
+    sceneSessionManagerProxy_->GetUnreliableWindowInfo(0, infos);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetSessionInfos
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfos, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::string deviceId;
+    std::vector<SessionInfoBean> sessionInfos{};
+    sceneSessionManagerProxy_->GetSessionInfos(deviceId, 0, sessionInfos);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GetSessionInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    std::string deviceId;
+    SessionInfoBean sessionInfo;
+    sceneSessionManagerProxy_->GetSessionInfo(deviceId, 0, sessionInfo);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
 /**
  * @tc.name: RegisterWindowManagerAgent01
  * @tc.desc: normal function
@@ -167,6 +639,36 @@ HWTEST_F(sceneSessionManagerProxyTest, RaiseWindowToTop, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: BindDialogSessionTarget
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> targetToken = new (std::nothrow) IRemoteObjectMocker();
+    sceneSessionManagerProxy_->BindDialogSessionTarget(0, targetToken);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
+ * @tc.name: BindDialogSessionTarget2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget2, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> targetToken = nullptr;
+    sceneSessionManagerProxy_->BindDialogSessionTarget(0, targetToken);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+}
+
+/**
  * @tc.name: UpdateSessionAvoidAreaListener
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -276,6 +778,21 @@ HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, Function | Sma
 }
 
 /**
+ * @tc.name: TerminateSessionNew
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, Function | SmallTest | Level2)
+{
+    sptr<ISessionListener> listener = nullptr;
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSessionManagerProxy_->TerminateSessionNew(nullptr, true, true));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
+/**
  * @tc.name: GetSessionDumpInfo
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -377,6 +894,6 @@ HWTEST_F(sceneSessionManagerProxyTest, GetVisibilityWindowInfo, Function | Small
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetVisibilityWindowInfo(infos));
     sceneSessionManagerProxy_ = nullptr;
 }
-}
+}  // namespace
 }
 }
