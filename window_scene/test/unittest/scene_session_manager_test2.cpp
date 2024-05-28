@@ -1748,15 +1748,11 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
 HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Level3)
 {
     WSError ret;
+    AAFwk::Want want;
+    AppExecFwk::ElementName elementName = want.GetElement();
     int32_t userId = 1;
     std::vector<SCBAbilityInfo> scbAbilityInfos;
-    ret = ssm_->GetAllAbilityInfos(nullptr, userId, scbAbilityInfos);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-
-    ssm_->bundleMgr_ = new AppExecFwk::IBundleMgr();
-    AAFwk::Want want;
-    OHOS::AppExecFwk::ElementName elementName;
-    want.setElement(elementName);
+    
     ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
@@ -1771,6 +1767,10 @@ HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Le
     elementName.bundleName_ = "";
     ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    ssm_->bundleMgr_ = null;
+    ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1813,7 +1813,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
 {
     WSError ret;
     ssm_->sceneSessionMap_.clear();
-    ret = ssm_->UpdateSessionAvoidAreaListener(100, true);
+    int32_t persistentId = 100;
+    ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
     ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
 
     SessionInfo info;
@@ -1821,10 +1822,10 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->UpdateSessionAvoidAreaListener(100, true);
+    ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    ret = ssm_->UpdateSessionAvoidAreaListener(100, false);
+    ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -1837,7 +1838,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
 {
     WSError ret;
     ssm_->sceneSessionMap_.clear();
-    ret = ssm_->UpdateSessionTouchOutsideListener(100, true);
+    int32_t persistentId = 100;
+    ret = ssm_->UpdateSessionTouchOutsideListener(persistentId, true);
     ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
 
     SessionInfo info;
@@ -1845,10 +1847,10 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->UpdateSessionTouchOutsideListener(100, true);
+    ret = ssm_->UpdateSessionTouchOutsideListener(persistentId, true);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    ret = ssm_->UpdateSessionTouchOutsideListener(100, false);
+    ret = ssm_->UpdateSessionTouchOutsideListener(persistentId, false);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -1859,10 +1861,10 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
 */
 HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest | Level3)
 {
-    WSError ret;
+    WMError ret;
     SessionSnapshot snapshot;
     ret = ssm_->GetSessionSnapshotById(100, snapshot);
-    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -1874,7 +1876,7 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
 {
     WSError ret;
     ret = ssm_->ClearSession(100);
-    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -1885,8 +1887,8 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
 HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Level3)
 {
     WSError ret;
-    ret = ssm_->ClearAllSessions(100);
-    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ret = ssm_->ClearAllSessions();
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -1896,18 +1898,20 @@ HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Leve
 */
 HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3)
 {
-    WSError ret;
+    WMError ret;
     ssm_->sceneSessionMap_.clear();
-    ret = ssm_->GetTopWindowId(100, 200);
-    ASSERT_EQ(WSError::WM_ERROR_INVALID_WINDOW, ret);
+    int32_t persistentId = 100;
+    int32_t topWinId = 200;
+    ret = ssm_->GetTopWindowId(persistentId, topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->UpdateSessionTouchOutsideListener(100, 200);
-    ASSERT_EQ(WSError::WM_ERROR_INVALID_PERMISSION, ret);
+    ret = ssm_->GetTopWindowId(persistentId, topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
 }
 } // namespace Rosen
