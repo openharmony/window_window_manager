@@ -1970,7 +1970,7 @@ HWTEST_F(WindowSessionTest, Foreground02, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_INACTIVE;
     session_->isActive_ = false;
     session_->sessionInfo_.isSystem_ = true;
-    EXPECT_EQ(session_->sessioninfo.isSystem_, true);
+    EXPECT_EQ(session_->sessionInfo.isSystem_, true);
     auto result02 = session_->Foreground(property);
 
     session_->property_ = nullptr;
@@ -1987,7 +1987,7 @@ HWTEST_F(WindowSessionTest, SetFocusable04, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_ = nullptr;
-    auto result = session_->setfocusable(false);
+    auto result = session_->SetFocusable(false);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -2007,7 +2007,7 @@ HWTEST_F(WindowSessionTest, Connect02, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(nullptr, property);
     session_->property_ = property;
-    session_->property_->SetlsNeedUpdateWindowMode(true);
+    session_->property_->SetIsNeedUpdateWindowMode(true);
     EXPECT_EQ(session_->property_->windowMode_, WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
@@ -2023,7 +2023,7 @@ HWTEST_F(WindowSessionTest, HandleDialogBackground, Function | SmallTest | Level
     session_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     session_->HandleDialogBackground();
     session_->HandleDialogForeground();
-    EXPECT_EQ(session_->property_->type_, WindowType::APP_MAIN_WINDOW_END;);
+    EXPECT_EQ(session_->property_->type_, WindowType::APP_MAIN_WINDOW_END);
 }
 
 /**
@@ -2051,7 +2051,7 @@ HWTEST_F(WindowSessionTest, SetActive02, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     ASSERT_EQ(WSError::WS_DO_NOTHING, session_->SetActive(false));
 
-    session_->isActive = true;
+    session_->isActive_ = true;
     session_->state_ = SessionState::STATE_ACTIVE;
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
