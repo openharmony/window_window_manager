@@ -678,14 +678,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
-    float rotation = displayInfo->getRotation();
-    int32_t deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
-    int32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
+    auto rotation = static_cast<uint32_t>(displayInfo->getRotation());
+    auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
+    uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT,"[rotation, deviceRotation, transformHint]: [%{public}f, %{public}d, %{public}d,]",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint]: [%{public}f, %{public}d, %{public}d]",
     rotation,deviceRotation,transformHint);
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
