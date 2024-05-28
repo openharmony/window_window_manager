@@ -15,6 +15,7 @@
 
 #ifndef OHOS_ROSEN_SESSION_MANAGER_AGENT_CONTROLLER_H
 #define OHOS_ROSEN_SESSION_MANAGER_AGENT_CONTROLLER_H
+#include <mutex>
 
 #include "client_agent_container.h"
 #include "window_manager.h"
@@ -29,9 +30,9 @@ class SessionManagerAgentController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerAgentController)
 public:
     WMError RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
-        WindowManagerAgentType type);
+        WindowManagerAgentType type, int32_t pid);
     WMError UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
-        WindowManagerAgentType type);
+        WindowManagerAgentType type, int32_t pid);
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
@@ -45,10 +46,19 @@ public:
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
 
 private:
-    SessionManagerAgentController() {}
+    SessionManagerAgentController()
+    {
+        smAgentContainer_.SetAgentDeathCallback(([this](const sptr<IRemoteObject>& remoteObject) {
+            DoAfterAgentDeath(remoteObject);
+        }));
+    }
     virtual ~SessionManagerAgentController() = default;
+    void DoAfterAgentDeath(const sptr<IRemoteObject>& remoteObject);
 
     ClientAgentContainer<IWindowManagerAgent, WindowManagerAgentType> smAgentContainer_;
+    std::map<int32_t, std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>> windowManagerPidAgentMap_;
+    std::map<sptr<IRemoteObject>, std::pair<int32_t, WindowManagerAgentType>> windowManagerAgentPairMap_;
+    std::mutex windowManagerAgentPidMapMutex_;
 };
 }
 }
