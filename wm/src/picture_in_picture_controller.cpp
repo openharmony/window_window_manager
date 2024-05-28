@@ -441,7 +441,8 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
         bool isSizeChange = IsContentSizeChanged(newWidth, newHeight, posX, posY);
         if (isSizeChange) {
-            Rect r = {static_cast<int32_t>(posX), static_cast<int32_t>(posY), static_cast<uint32_t>(newWidth), static_cast<uint32_t>(newHeight)};
+            Rect r = {static_cast<int32_t>(posX), static_cast<int32_t>(posY),
+                static_cast<uint32_t>(newWidth), static_cast<uint32_t>(newHeight)};
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
