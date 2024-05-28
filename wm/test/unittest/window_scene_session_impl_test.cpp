@@ -474,7 +474,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId01, Function | S
     ASSERT_EQ(WMError::WM_OK, parentscenesession->Create(abilityContext_, session));
     parentscenesession->hostSession_ = session;
     ASSERT_TRUE(nullptr != parentscenesession->FindParentSessionByParentId(1112));
-    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentscenesession->Destroy(true));
 }
 
 /**
@@ -504,7 +504,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
     ASSERT_EQ(WMError::WM_OK, parentscenesession->Create(abilityContext_, session));
     parentscenesession->hostSession_ = session;
     ASSERT_TRUE(nullptr != parentscenesession->FindParentSessionByParentId(1002));
-    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentscenesession->Destroy(true));
     
     sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
     option_->SetWindowTag(WindowTag::MAIN_WINDOW);
