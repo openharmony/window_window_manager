@@ -1739,6 +1739,176 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
     ret = ssm_->GetFocusSessionElement(element);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 }
+
+/**
+ * @tc.name: GetAllAbilityInfos
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Level3)
+{
+    WSError ret;
+    int32_t userId = 1;
+    std::vector<SCBAbilityInfo> scbAbilityInfos;
+    ret = ssm_->GetAllAbilityInfos(nullptr, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+
+    ssm_->bundleMgr_ = new AppExecFwk::IBundleMgr();
+    AAFwk::Want want;
+    OHOS::AppExecFwk::ElementName elementName;
+    want.setElement(elementName);
+    ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    elementName.bundleName_ = "test";
+    ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    elementName.abilityName_ = "test";
+    ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    elementName.bundleName_ = "";
+    ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: GetIsLayoutFullScreen
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest | Level3)
+{
+    WSError ret;
+    bool isLayoutFullScreen = true;
+    ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    isLayoutFullScreen = false;
+    ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    isLayoutFullScreen = true;
+    ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    isLayoutFullScreen = false;
+    ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+}
+
+/**
+ * @tc.name: UpdateSessionAvoidAreaListener
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ssm_->sceneSessionMap_.clear();
+    ret = ssm_->UpdateSessionAvoidAreaListener(100, true);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->UpdateSessionAvoidAreaListener(100, true);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    ret = ssm_->UpdateSessionAvoidAreaListener(100, false);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateSessionTouchOutsideListener
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ssm_->sceneSessionMap_.clear();
+    ret = ssm_->UpdateSessionTouchOutsideListener(100, true);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->UpdateSessionTouchOutsideListener(100, true);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    ret = ssm_->UpdateSessionTouchOutsideListener(100, false);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotById
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest | Level3)
+{
+    WSError ret;
+    SessionSnapshot snapshot;
+    ret = ssm_->GetSessionSnapshotById(100, snapshot);
+    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+}
+
+/**
+ * @tc.name: ClearSession
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->ClearSession(100);
+    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+}
+
+/**
+ * @tc.name: ClearAllSessions
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ret = ssm_->ClearAllSessions(100);
+    ASSERT_EQ(WSError::WM_ERROR_NOT_SYSTEM_APP, ret);
+}
+
+/**
+ * @tc.name: GetTopWindowId
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3)
+{
+    WSError ret;
+    ssm_->sceneSessionMap_.clear();
+    ret = ssm_->GetTopWindowId(100, 200);
+    ASSERT_EQ(WSError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->UpdateSessionTouchOutsideListener(100, 200);
+    ASSERT_EQ(WSError::WM_ERROR_INVALID_PERMISSION, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
