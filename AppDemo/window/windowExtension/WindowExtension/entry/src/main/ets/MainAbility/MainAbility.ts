@@ -17,27 +17,27 @@
 import Ability from '@ohos.app.ability.UIAbility';
 
 export default class MainAbility extends Ability {
-  onCreate(want, launchParam) {
+  onCreate(want, launchParam): void {
     console.log("onCreate");
   }
 
-  onDestroy() {
+  onDestroy(): void {
     console.log("onDestroy");
   }
 
-  onWindowStageCreate(windowStage) {
+  onWindowStageCreate(windowStage): void {
     let context = this.context;
     windowStage.setUIContent(this.context, "WindowExtAbility/pages/second", null);
   }
 
-  onWindowStageDestroy() {
+  onWindowStageDestroy(): void {
   }
 
-  onForeground() {
+  onForeground(): void {
     console.log("onForeground");
   }
 
-  onBackground() {
+  onBackground(): void {
     console.log("onBackground");
   }
 }
