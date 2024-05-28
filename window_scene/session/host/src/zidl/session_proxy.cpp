@@ -1215,6 +1215,9 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    if (WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON == action) {
+        option.SetFlags(MessageOption::TF_ASYNC);
+    }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
