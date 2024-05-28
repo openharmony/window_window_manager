@@ -25,6 +25,7 @@
 #include "result_set.h"
 #include "system_ability_definition.h"
 #include "uri.h"
+#include "ability_context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -552,9 +553,9 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, Function 
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
 
-    pipControl->pipOption_->SetNavgationId("");
+    pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
-    pipControl->pipOption_->SetNavgationId("navId");
+    pipControl->pipOption_->SetNavigationId("navId");
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
 
     pipControl->mainWindow_ = nullptr;
