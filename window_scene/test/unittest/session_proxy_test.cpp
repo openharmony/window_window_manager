@@ -373,7 +373,7 @@ HWTEST_F(SessionProxyTest, UpdateSessionPropertyByAction01, Function | SmallTest
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction01 start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->UpdateSessionPropertyByAction(nullptr,
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction01 end";
@@ -389,7 +389,7 @@ HWTEST_F(SessionProxyTest, UpdateSessionPropertyByAction02, Function | SmallTest
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction02 start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->UpdateSessionPropertyByAction(nullptr,
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction02 end";
