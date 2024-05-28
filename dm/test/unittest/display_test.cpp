@@ -26,6 +26,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
+using ScreenMocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 class DisplayTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -231,7 +232,7 @@ HWTEST_F(DisplayTest, GetAvailableArea, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::unique_ptr<ScreenMocker> m = std::make_unique<ScreenMocker>();
     EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     std::vector<uint32_t> hdrFormats;
     auto res = defaultDisplay_ ->GetSupportedHDRFormats(hdrFormats);
@@ -245,7 +246,7 @@ HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::unique_ptr<ScreenMocker> m = std::make_unique<ScreenMocker>();
     EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     std::vector<uint32_t> colorSpaces;
     auto res = defaultDisplay_ -> GetSupportedColorSpaces(colorSpaces);

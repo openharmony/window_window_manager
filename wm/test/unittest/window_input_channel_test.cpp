@@ -112,10 +112,10 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
         return;
     }
     window_->ConsumeKeyEvent(keyEvent);
-    auto tempkeyEvent = keyEvent;
+    auto tempKeyEvent = keyEvent;
     keyEvent = nullptr;
     inputChannel->HandleKeyEvent(keyEvent);
-    keyEvent = tempkeyEvent;
+    keyEvent = tempKeyEvent;
     window_->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     keyEvent->SetAgentWindowId(0);
     keyEvent->SetTargetWindowId(1);
@@ -143,10 +143,10 @@ HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest 
         GTEST_LOG_(INFO) << "Null Pointer";
         return;
     }
-    auto tempkeyEvent = keyEvent;
+    auto tempKeyEvent = keyEvent;
     keyEvent = nullptr;
     inputChannel->DispatchKeyEventCallback(keyEvent, false);
-    keyEvent = tempkeyEvent;
+    keyEvent = tempKeyEvent;
     inputChannel->DispatchKeyEventCallback(keyEvent, true);
     inputChannel->DispatchKeyEventCallback(keyEvent, false);
     inputChannel->window_ = nullptr;

@@ -184,22 +184,6 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
 
 std::string ScenePersistence::GetSnapshotFilePath()
 {
-    auto task = [weakThis = wptr(this)]() -> std::string {
-        auto scenePersistence = weakThis.promote();
-        if (scenePersistence == nullptr) {
-            WLOGFE("scenePersistence is nullptr");
-            return "";
-        }
-        return scenePersistence->snapshotPath_;
-    };
-    return snapshotScheduler_->PostSyncTask(task, "GetSnapshotFilePath");
-}
-
-std::string ScenePersistence::GetSnapshotFilePathFromAce()
-{
-    if (IsAstcEnabled() && IsSnapshotExisted(oldSnapshotPath_)) {
-        return oldSnapshotPath_;
-    }
     return snapshotPath_;
 }
 
@@ -240,6 +224,16 @@ std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize() const
     return snapshotSize_;
 }
 
+void ScenePersistence::SetHasSnapshot(bool hasSnapshot)
+{
+    hasSnapshot_ = hasSnapshot;
+}
+
+bool ScenePersistence::HasSnapshot() const
+{
+    return hasSnapshot_;
+}
+
 bool ScenePersistence::IsSnapshotExisted() const
 {
     if (IsAstcEnabled()) {
@@ -251,6 +245,7 @@ bool ScenePersistence::IsSnapshotExisted() const
 
 bool ScenePersistence::IsSnapshotExisted(const std::string& path) const
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IsSnapshotExisted");
     struct stat buf;
     if (stat(path.c_str(), &buf)) {
         WLOGFD("Snapshot file %{public}s does not exist", path.c_str());
