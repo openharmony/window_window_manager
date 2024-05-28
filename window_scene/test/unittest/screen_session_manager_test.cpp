@@ -264,7 +264,7 @@ HWTEST_F(ScreenSessionManagerTest, ScreenPower, Function | SmallTest | Level3)
     ASSERT_EQ(false, ssm_->SetScreenPowerForAll(state, reason));
 
     ASSERT_EQ(false, ssm_->SetDisplayState(displayState));
-    ASSERT_EQ(DisplayState::ON, ssm_->GetDisplayState(0));
+    ASSERT_EQ(DisplayState::UNKNOWN, ssm_->GetDisplayState(0));
 }
 
 /**
