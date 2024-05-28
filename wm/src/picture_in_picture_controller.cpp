@@ -453,7 +453,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
 }
 
-bool PictureInPictureController::IsContentSizeChange(float width, float height, float posX, float posY)
+bool PictureInPictureController::IsContentSizeChanged(float width, float height, float posX, float posY)
 {
     return windowRect_.width_ != static_cast<uint32_t>(width) ||
         windowRect_.height_ != static_cast<uint32_t>(height) ||
