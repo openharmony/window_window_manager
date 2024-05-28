@@ -18,6 +18,7 @@
 #include <refbase.h>
 #include <string>
 #include "xcomponent_controller.h"
+#include "napi/native_api.h"
 
 namespace OHOS {
 namespace Rosen {

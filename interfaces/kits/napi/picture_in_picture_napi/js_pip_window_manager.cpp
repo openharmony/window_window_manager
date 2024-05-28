@@ -142,7 +142,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
-    napi_get_named_property(env, config, "nodeController", &nodeController);
+    napi_get_named_property(env, optionObject, "nodeController", &nodeController);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
@@ -237,7 +237,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
             return;
         }
         sptr<PictureInPictureController> pipController =
-            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env, nodeControllerRef);
+            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task.Resolve(env, CreateJsPipControllerObject(env, pipController));
     };
     napi_value result = nullptr;
