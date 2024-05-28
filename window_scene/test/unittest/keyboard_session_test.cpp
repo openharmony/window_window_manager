@@ -76,7 +76,7 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCb, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb)；
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(windowSessionProperty, nullptr);
     sceneSession->property_ = windowSessionProperty;
