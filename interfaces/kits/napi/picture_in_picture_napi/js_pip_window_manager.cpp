@@ -214,7 +214,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
     napi_value nodeController = nullptr;
     napi_get_named_property(env, config, "nodeController", &nodeController);
     napi_ref nodeControllerRef = nullptr;
-    napi_create_reference(env, nodeController, 1, nodeControllerRef);
+    napi_create_reference(env, nodeController, 1, &nodeControllerRef);
     napi_value callback = argc > 1 ? (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr) : nullptr;
     NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (!PictureInPictureManager::IsSupportPiP()) {
