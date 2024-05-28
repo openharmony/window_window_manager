@@ -2905,7 +2905,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+            WindowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
