@@ -6793,6 +6793,17 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
 }
 
+void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
+{
+    for (auto& persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    }
+}
+
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     if (!SessionPermission::IsSACalling()) {
