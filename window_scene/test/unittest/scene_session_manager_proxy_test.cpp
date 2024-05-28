@@ -305,7 +305,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallT
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
     int32_t windowId = -1;
     SessionSnapshot snapshot;
-    WMError ret = sceneSessionManagerProxy_->GetSessionSnapshotById(windowId, snapshot);
+    WMError ret = sceneSessionManagerProxy->GetSessionSnapshotById(windowId, snapshot);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
