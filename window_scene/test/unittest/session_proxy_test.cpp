@@ -375,7 +375,7 @@ HWTEST_F(SessionProxyTest, UpdateSessionPropertyByAction01, Function | SmallTest
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    ASSERT_EQ(res, WMError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction01 end";
 }
 
@@ -391,7 +391,7 @@ HWTEST_F(SessionProxyTest, UpdateSessionPropertyByAction02, Function | SmallTest
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
-    ASSERT_EQ(res, WMError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionPropertyByAction02 end";
 }
 
