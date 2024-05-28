@@ -19,7 +19,6 @@
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
-#include "mock_window.h"
 #include "parameters.h"
 
 using namespace testing;
@@ -27,6 +26,26 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+
+class MockWindowChangeListener : public IWindowChangeListener {
+public:
+    MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockWindowLifeCycleListener : public IWindowLifeCycle {
+public:
+    MOCK_METHOD0(AfterForeground, void(void));
+    MOCK_METHOD0(AfterBackground, void(void));
+    MOCK_METHOD0(AfterFocused, void(void));
+    MOCK_METHOD0(AfterUnfocused, void(void));
+    MOCK_METHOD1(ForegroundFailed, void(int32_t));
+    MOCK_METHOD0(AfterActive, void(void));
+    MOCK_METHOD0(AfterInactive, void(void));
+    MOCK_METHOD0(AfterResumed, void(void));
+    MOCK_METHOD0(AfterPaused, void(void));
+};
+
 class WindowSessionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1364,18 +1383,9 @@ HWTEST_F(WindowSessionImplTest, NotifyKeyEvent, Function | SmallTest | Level2)
     int res = 0;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
-    bool notifyInputMethod = false;
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_VIRTUAL_MULTITASK);
-    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
-
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
-    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
-
-    notifyInputMethod = true;
-    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
-
+    window->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent = nullptr;
-    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
+    window->NotifyKeyEvent(keyEvent, isConsumed);
     ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyKeyEvent end";
