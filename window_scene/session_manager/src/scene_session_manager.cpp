@@ -8575,7 +8575,7 @@ WindowStatus SceneSessionManager::GetWindowStatus(WindowMode mode, SessionState 
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) { // maximize floating
-            windowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+            windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
