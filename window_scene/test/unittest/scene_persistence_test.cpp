@@ -248,18 +248,20 @@ HWTEST_F(ScenePersistenceTest, GetSnapshotFilePath, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: GetSnapshotFilePathFromAce
- * @tc.desc: test function : GetSnapshotFilePathFromAce
+ * @tc.name: HasSnapshot
+ * @tc.desc: test function: HasSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(ScenePersistenceTest, GetSnapshotFilePathFromAce, Function | SmallTest | Level1)
+HWTEST_F(ScenePersistenceTest, HasSnapshot, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
     sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
-    auto result = scenePersistence->GetSnapshotFilePathFromAce();
-    ASSERT_EQ(result, scenePersistence->snapshotPath_);
+    scenePersistence->SetHasSnapshot(true);
+    ASSERT_EQ(scenePersistence->HasSnapshot(), true);
+    scenePersistence->SetHasSnapshot(false);
+    ASSERT_EQ(scenePersistence->HasSnapshot(), false);
 }
 }
 }
