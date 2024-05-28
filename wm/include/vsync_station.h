@@ -26,6 +26,7 @@
 #include <event_handler.h>
 #include <vsync_receiver.h>
 #include <ui/rs_display_node.h>
+#include <ui/rs_ui_display_soloist.h>
 
 #include "wm_common.h"
 #include "wm_single_instance.h"
@@ -46,6 +47,7 @@ public:
     FrameRateLinkerId GetFrameRateLinkerId();
     void FlushFrameRate(uint32_t rate, bool isAnimatorStopped);
     void SetFrameRateLinkerEnable(bool enabled);
+    void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
     {
