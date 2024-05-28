@@ -1804,6 +1804,260 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 }
+
+/**
+ * @tc.name: PostExportTask02
+ * @tc.desc: PostExportTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string name = "sessionExportTask";
+    auto task = [](){};
+    int64_t delayTime = 0;
+
+    session_->PostExportTask(task, name, delayTime);
+    auto result = session_->GetBufferAvailable();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetLeashWinSurfaceNode02
+ * @tc.desc: SetLeashWinSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->leashWinSurfaceNode_ = WindowSessionTest::CreateRSSurfaceNode();
+    session_->SetLeashWinSurfaceNode(nullptr);
+
+    session_->leashWinSurfaceNode_ = nullptr;
+    session_->SetLeashWinSurfaceNode(nullptr);
+    auto result = session_->GetBufferAvailable();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetCloseAbilityWantAndClean
+ * @tc.desc: GetCloseAbilityWantAndClean
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    AAFwk::Want outWant;
+    session_->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>();
+    session_->GetCloseAbilityWantAndClean(outWant);
+
+    session_->sessionInfo_.closeAbilityWant = nullptr;
+    session_->GetCloseAbilityWantAndClean(outWant);
+    auto result = session_->GetBufferAvailable();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetScreenId02
+ * @tc.desc: SetScreenId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    uint64_t screenId = 0;
+    session_->sessionStage_ = new (std::nothrow) SessionStageMocker();
+    session_->SetScreenId(screenId);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: SetFocusable03
+ * @tc.desc: SetFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isFocused_ = true;
+    session_->property_ = new (std::nothrow) WindowSessionProperty();
+    session_->property_->focusable_ = false;
+    bool isFocusable = true;
+
+    auto result = session_->SetFocusable(isFocusable);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetFocused
+ * @tc.desc: GetFocused Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool result = session_->GetFocused();
+    ASSERT_EQ(result, false);
+
+    session_->isFocused_ = true;
+    bool result2 = session_->GetFocused();
+    ASSERT_EQ(result2, true);
+}
+
+/**
+ * @tc.name: UpdatePointerArea
+ * @tc.desc: UpdatePointerArea Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 0, 0 };
+    session_->preRect_ = rect;
+    session_->UpdatePointerArea(rect);
+    ASSERT_EQ(session_->GetFocused(), false);
+}
+
+/**
+ * @tc.name: UpdateSizeChangeReason02
+ * @tc.desc: UpdateSizeChangeReason Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    WSError result = session_->UpdateSizeChangeReason(reason);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: UpdateDensity
+ * @tc.desc: UpdateDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateDensity, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_FALSE(session_->IsSessionValid());
+    WSError result = session_->UpdateDensity();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->state_ = SessionState::STATE_CONNECT;
+    ASSERT_TRUE(session_->IsSessionValid());
+    session_->sessionStage_ = nullptr;
+    WSError result02 = session_->UpdateDensity();
+    ASSERT_EQ(result02, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: Foreground02
+ * @tc.desc: Foreground Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Foreground02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    session_->isActive_ = true;
+    auto result = session_->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    session_->state_ = SessionState::STATE_INACTIVE;
+    session_->isActive_ = false;
+    session_->sessionInfo_.isSystem_ = true;
+    EXPECT_EQ(session_->sessioninfo.isSystem_, true);
+    auto result02 = session_->Foreground(property);
+
+    session_->property_ = nullptr;
+    session_->UpdateSessionTouchable(false);
+    ASSERT_EQ(result02, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetFocusable04
+ * @tc.desc: SetFocusable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetFocusable04, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_ = nullptr;
+    auto result = session_->setfocusable(false);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: Connect02
+ * @tc.desc: Connect Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Connect02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
+    EXPECT_NE(nullptr, testWindowEventChannel);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(nullptr, property);
+    session_->property_ = property;
+    session_->property_->SetlsNeedUpdateWindowMode(true);
+    EXPECT_EQ(session_->property_->windowMode_, WindowMode::WINDOW_MODE_FULLSCREEN);
+}
+
+/**
+ * @tc.name: HandleDialogBackground
+ * @tc.desc: HandleDialogBackground and HandleDialogForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, HandleDialogBackground, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_ = new (std::nothrow) WindowSessionProperty();
+    session_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    session_->HandleDialogBackground();
+    session_->HandleDialogForeground();
+    EXPECT_EQ(session_->property_->type_, WindowType::APP_MAIN_WINDOW_END;);
+}
+
+/**
+ * @tc.name: Background02
+ * @tc.desc: Background Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Background, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_ACTIVE;
+    auto result = session_->Background();
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(session_->state_, SessionState::STATE_BACKGROUND);
+}
+
+/**
+ * @tc.name: SetActive02
+ * @tc.desc: SetActive Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetActive02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_CONNECT;
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->SetActive(false));
+
+    session_->isActive = true;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    ASSERT_EQ(WSError::WS_OK, session_->SetActive(false));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
