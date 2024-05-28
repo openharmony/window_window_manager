@@ -69,8 +69,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
         WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
-        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
+        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
+            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
             session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
