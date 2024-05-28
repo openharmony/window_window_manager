@@ -1543,7 +1543,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, StartWindowInfoReportLoop, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTest | Level3)
 {
     int ret = 0;
     ssm_->StartWindowInfoReportLoop();
@@ -1559,7 +1559,7 @@ HWTEST_F(SceneSessionManagerTest, StartWindowInfoReportLoop, Function | SmallTes
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Level3)
 {
     int ret = 0;
     FocusChangeInfo info;
@@ -1572,7 +1572,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo, Function | SmallTest | Lev
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo2, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | Level3)
 {
     int ret = 0;
     FocusChangeInfo fcinfo;
@@ -1592,7 +1592,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusWindowInfo2, Function | SmallTest | Le
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, NotifySessionMovedToFront, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, NotifySessionMovedToFront, Function | SmallTest | Level3)
 {
     int ret = 0;
     ssm_->NotifySessionMovedToFront(0);
@@ -1611,7 +1611,7 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionMovedToFront, Function | SmallTes
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SetSessionLabel, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level3)
 {
     WSError ret;
     ret = ssm_->SetSessionLabel(nullptr, "test");
@@ -1631,7 +1631,7 @@ HWTEST_F(SceneSessionManagerTest, SetSessionLabel, Function | SmallTest | Level3
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, SetSessionIcon, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3)
 {
     WSError ret;
     ret = ssm_->SetSessionIcon(nullptr, nullptr);
@@ -1651,7 +1651,7 @@ HWTEST_F(SceneSessionManagerTest, SetSessionIcon, Function | SmallTest | Level3)
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, InitWithRenderServiceAdded, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallTest | Level3)
 {
     int ret = 0;;
     ssm_->InitWithRenderServiceAdded();
@@ -1663,7 +1663,7 @@ HWTEST_F(SceneSessionManagerTest, InitWithRenderServiceAdded, Function | SmallTe
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, PendingSessionToForeground, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallTest | Level3)
 {
     WSError ret;
     ret = ssm_->PendingSessionToForeground(nullptr);
@@ -1683,7 +1683,7 @@ HWTEST_F(SceneSessionManagerTest, PendingSessionToForeground, Function | SmallTe
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
 {
     WSError ret;
     ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
@@ -1703,7 +1703,7 @@ HWTEST_F(SceneSessionManagerTest, PendingSessionToBackgroundForDelegator, Functi
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, GetFocusSessionToken, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, Function | SmallTest | Level3)
 {
     WSError ret;
     sptr<IRemoteObject> token = new IRemoteObjectMocker();
@@ -1724,7 +1724,7 @@ HWTEST_F(SceneSessionManagerTest, GetFocusSessionToken, Function | SmallTest | L
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, GetFocusSessionElement, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest | Level3)
 {
     WSError ret;
     AppExecFwk::ElementName element;
