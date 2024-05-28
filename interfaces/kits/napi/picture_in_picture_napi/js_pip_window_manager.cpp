@@ -211,6 +211,10 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
+    napi_value nodeController = nullptr;
+    napi_get_named_property(env, config, "nodeController", &nodeController);
+    napi_ref nodeControllerRef = nullptr;
+    napi_create_reference(env, nodeController, 1, nodeControllerRef);
     napi_value callback = argc > 1 ? (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr) : nullptr;
     NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (!PictureInPictureManager::IsSupportPiP()) {
@@ -232,7 +236,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
             return;
         }
         sptr<PictureInPictureController> pipController =
-            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
+            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env, nodeControllerRef);
         task.Resolve(env, CreateJsPipControllerObject(env, pipController));
     };
     napi_value result = nullptr;

@@ -52,7 +52,8 @@ enum class StopPipType : uint32_t {
 using namespace Ace;
 class PictureInPictureController : virtual public RefBase {
 public:
-    PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
+    PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId,
+        napi_env env, napi_ref nodeControllerRef);
     ~PictureInPictureController();
     WMError StartPictureInPicture(StartPipType startType);
     WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
@@ -72,6 +73,7 @@ public:
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
+    napi_ref GetCustomNodeController();
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:
@@ -139,6 +141,7 @@ private:
     std::shared_ptr<XComponentController> pipXComponentController_;
     std::shared_ptr<XComponentController> mainWindowXComponentController_;
     napi_env env_;
+    napi_ref customNodeController_;
     std::mutex mutex_;
     int32_t handleId_ = -1;
 };
