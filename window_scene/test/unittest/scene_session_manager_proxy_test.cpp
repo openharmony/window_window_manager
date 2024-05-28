@@ -287,7 +287,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTe
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = sceneSessionManagerProxy_->GetSnapshotByWindowId(windowId, pixelMap);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
     sceneSessionManagerProxy_ = nullptr;
 }
 
@@ -303,7 +303,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallT
     int32_t windowId = -1;
     SessionSnapshot snapshot;
     WMError ret = sceneSessionManagerProxy_->GetSessionSnapshotById(windowId, snapshot);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
     sceneSessionManagerProxy_ = nullptr;
 }
 
