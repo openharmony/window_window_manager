@@ -236,7 +236,12 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
 
-
+    pipControl->pipOption_->SetNavigationId("");
+    ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    pipControl->pipOption_->SetNavigationId("navId");
+    ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     delete static_cast<AbilityRuntime::AbilityContextImpl*>(contextPtr);
 }
 
