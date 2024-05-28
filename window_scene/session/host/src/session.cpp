@@ -2197,6 +2197,22 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+void Session::SetOldRect(const WSRect& rect)
+{
+    if (oldWinRect_ == rect) {
+        WLOGFW("id: %{public}d skip same rect", persistentId_);
+        return;
+    }
+    oldWinRect_ = rect;
+    isDirty_ = true;
+    RectCheckProcess();
+}
+
+WSRect Session::GetOldRect() const
+{
+    return oldWinRect_;
+}
+
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     auto property = GetSessionProperty();
