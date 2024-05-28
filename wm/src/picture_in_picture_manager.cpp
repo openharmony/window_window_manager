@@ -28,6 +28,7 @@ namespace Rosen {
 namespace {
     const std::string ACTION_CLOSE = "close";
     const std::string ACTION_RESTORE = "restore";
+    const std::string ACTION_DESTROY = "destroy";
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
@@ -207,6 +208,16 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
     activeController_->StopPictureInPicture(destroyWindow, currentStopType);
 }
 
+void PictureInPictureManager::DoDestroy()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "DoDestroy is called");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->DestroyPictureInPictureWindow();
+}
+
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
     TLOGD(WmsLogTag::WMS_PIP, "DoActionEvent is called");
@@ -217,6 +228,8 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
         DoClose(true, false);
     } else if (actionName.c_str() == ACTION_RESTORE) {
         DoRestore();
+    } else if (actionName.c_str() == ACTION_DESTROY) {
+        DoDestroy();
     } else {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         activeController_->DoActionEvent(actionName, status);
