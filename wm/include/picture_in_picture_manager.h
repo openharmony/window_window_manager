@@ -47,6 +47,7 @@ public:
 
     static void DoRestore();
     static void DoClose(bool destroyWindow, bool needAnim);
+    static void DoDestroy();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void AutoStartPipWindow(std::string navigationId);
 private:
