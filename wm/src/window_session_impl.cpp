@@ -677,15 +677,22 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
+    float rotation = displayInfo->getRotation();
+    int32_t deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
+    float transformHint = (rotation + deviceRotation) % 360;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    
     virtualPixelRatio_ = density;
+    TLOGI(WmsLogTag::WMS_LAYOUT,"rotation:%{rotation}d,deviceRotation:%{deviceRotation}d,transformHint:%{transformHint}d",
+    rotation,deviceRotation,transformHint);
 
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density);
     config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
     {
         std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
         if (uiContent_ == nullptr) {
