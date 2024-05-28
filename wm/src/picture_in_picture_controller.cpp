@@ -66,8 +66,9 @@ static uint32_t GetPipPriority(uint32_t pipTemplateType)
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
-    uint32_t windowId, napi_env env)
-    : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env)
+    uint32_t windowId, napi_env env, napi_ref nodeControllerRef)
+    : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env),
+    customNodeController_(nodeControllerRef)
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
@@ -726,6 +727,11 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
 std::string PictureInPictureController::GetPiPNavigationId()
 {
     return pipOption_? pipOption_->GetNavigationId() : "";
+}
+
+napi_ref PictureInPictureController::GetCustomNodeController()
+{
+    return customNodeController_;
 }
 
 PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl(const sptr<Window> window)

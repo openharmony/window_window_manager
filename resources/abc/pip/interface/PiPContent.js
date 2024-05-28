@@ -20,8 +20,9 @@ const TAG = 'PiPContent';
 export class PiPContent extends ViewPU {
     constructor(e, o, t, n = -1, i = void 0) {
         super(e, t, n);
-        "function" === typeof i && (this.paramsGenerator_ = i);
+        'function' === typeof i && (this.paramsGenerator_ = i);
         this.xComponentController = new XComponentController;
+        this.nodeController = null;
         this.xComponentId = 'pipContent';
         this.xComponentType = 'surface';
         this.setInitiallyProvidedValue(o);
@@ -31,12 +32,17 @@ export class PiPContent extends ViewPU {
         void 0 !== e.xComponentController && (this.xComponentController = e.xComponentController);
         void 0 !== e.xComponentId && (this.xComponentId = e.xComponentId);
         void 0 !== e.xComponentType && (this.xComponentType = e.xComponentType);
+        void 0 !== e.nodeController && (this.nodeController = e.nodeController);
     }
 
     updateStateVars(e) {
     }
 
     purgeVariableDependenciesOnElmtId(e) {
+    }
+
+    aboutToAppear() {
+        this.nodeController = pip.getCustomUIController();
     }
 
     aboutToBeDeleted() {
@@ -54,13 +60,28 @@ export class PiPContent extends ViewPU {
                 id: this.xComponentId,
                 type: this.xComponentType,
                 controller: this.xComponentController
-            }, "pipContent_XComponent");
+            }, 'pipContent_XComponent');
             XComponent.onLoad((() => {
                 pip.initXComponentController(this.xComponentController);
                 console.debug(TAG, 'XComponent onLoad done');
             }));
             XComponent.size({ width: '100%', height: '100%' });
         }), XComponent);
+        this.observeComponentCreation2((d, e) => {
+            If.create();
+            if (this.nodeController != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((i, j) => {
+                        NodeContainer.create(this.nodeController);
+                        NodeContainer.size({ width: '100%', height: '100%'});
+                    }, NodeContainer);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, ()=> {
+                });
+            }
+        }, If);
+        If.pop();
         Stack.pop();
     }
 
