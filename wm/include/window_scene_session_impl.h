@@ -214,6 +214,15 @@ private:
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;
     sptr<IKeyboardPanelInfoChangeListener> keyboardPanelInfoChangeListeners_ = nullptr;
+    void UpdateSessionInfo();
+    WMError HandleSubWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError HandleExtensionWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError HandleSystemWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError InitializeCreate(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken);
 };
 } // namespace Rosen
 } // namespace OHOS
