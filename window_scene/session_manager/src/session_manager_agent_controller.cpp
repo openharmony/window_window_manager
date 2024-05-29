@@ -194,7 +194,7 @@ void SessionManagerAgentController::DoAfterAgentDeath(const sptr<IRemoteObject>&
                 windowManagerPidAgentMap_.erase(pid);
             }
         }
-    windowManagerAgentPairMap_.erase(remoteObject);
+        windowManagerAgentPairMap_.erase(remoteObject);
     }
 }
 } // namespace Rosen
