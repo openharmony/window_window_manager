@@ -228,7 +228,6 @@ void SessionManagerLite::OnWMSConnectionChanged(
         "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId, 
         currentWMSUserId_, screenId, isConnected);
     if (isConnected) {
-        OnUserSwitch(sessionManagerService);
         if (currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
             OnUserSwitch(sessionManagerService);
         }
