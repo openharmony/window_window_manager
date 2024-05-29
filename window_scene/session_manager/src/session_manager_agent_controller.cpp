@@ -67,10 +67,10 @@ WMError SessionManagerAgentController::UnregisterWindowManagerAgent(const sptr<I
             auto typeAgentIter = typeAgentMap.find(type);
             if (typeAgentIter != typeAgentMap.end()) {
                 windowManagerAgentPairMap_.erase((typeAgentIter->second)->AsObject());
-            }
-            typeAgentMap.erase(type);
-            if (typeAgentMap.size() == 0) {
-                windowManagerPidAgentMap_.erase(pid);
+                typeAgentMap.erase(type);
+                if (typeAgentMap.empty()) {
+                    windowManagerPidAgentMap_.erase(pid);
+                }
             }
         }
         return WMError::WM_OK;
