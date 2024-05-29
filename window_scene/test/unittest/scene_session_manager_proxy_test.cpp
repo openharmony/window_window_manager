@@ -276,6 +276,40 @@ HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, Function | Sma
 }
 
 /**
+ * @tc.name: GetSnapshotByWindowId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy = new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    int32_t windowId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError ret = sceneSessionManagerProxy->GetSnapshotByWindowId(windowId, pixelMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotById
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy = new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    int32_t windowId = -1;
+    SessionSnapshot snapshot;
+    WMError ret = sceneSessionManagerProxy->GetSessionSnapshotById(windowId, snapshot);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/*
  * @tc.name: TerminateSessionNew
  * @tc.desc: normal function
  * @tc.type: FUNC
