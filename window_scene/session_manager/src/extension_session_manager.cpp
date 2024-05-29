@@ -62,6 +62,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->parentToken = sessionInfo.rootToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
+    abilitySessionInfo->isModal = sessionInfo.isModal_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     }
