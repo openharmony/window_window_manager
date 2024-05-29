@@ -2268,18 +2268,20 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
 
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    if (windowSessionMap_.empty()) {
-        WLOGFE("[GetTopWin] Please create mainWindow First!");
-        return nullptr;
-    }
     uint32_t mainWinId = INVALID_WINDOW_ID;
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
-            mainWinId = win->GetWindowId();
-            WLOGD("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
-            break;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        if (windowSessionMap_.empty()) {
+            WLOGFE("[GetTopWin] Please create mainWindow First!");
+            return nullptr;
+        }
+        for (const auto& winPair : windowSessionMap_) {
+            auto win = winPair.second.second;
+            if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
+                mainWinId = win->GetWindowId();
+                WLOGD("[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+                break;
+            }
         }
     }
     WLOGFD("[GetTopWin] mainId: %{public}u!", mainWinId);
