@@ -586,6 +586,19 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap, Function | SmallTe
 }
 
 /**
+ * @tc.name: GetSessionSnapshotById
+ * @tc.desc: test GetSessionSnapshotById
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotById, Function | SmallTest | Level3)
+{
+    int32_t persistentId = -1;
+    SessionSnapshot snapshot;
+    WMError ret = ssm_->GetSessionSnapshotById(persistentId, snapshot);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: CalculateCombinedExtWindowFlags
  * @tc.desc: SceneSesionManager calculate combined extension window flags
  * @tc.type: FUNC

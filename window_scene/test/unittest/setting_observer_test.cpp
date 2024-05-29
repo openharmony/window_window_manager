@@ -90,6 +90,10 @@ HWTEST_F(SettingObserverTest, SetKey, Function | SmallTest | Level1)
  */
 HWTEST_F(SettingObserverTest, OnChange, Function | SmallTest | Level1)
 {
+    EXPECT_EQ(settingObserver_->update_, nullptr);
+    settingObserver_->SetKey("OnChange");
+    settingObserver_->OnChange();
+
     UpdateFunc func = [this](const std::string& key) {
         settingObserver_->SetKey(key);
     };

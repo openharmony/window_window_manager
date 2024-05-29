@@ -133,7 +133,7 @@ std::vector<AppExecFwk::SupportWindowMode> WindowTransitionInfo::GetWindowSuppor
     return supportWindowModes_;
 }
 
-WindowSizeLimits WindowTransitionInfo::GetWindowSizeLimits() const
+WindowLimits WindowTransitionInfo::GetWindowSizeLimits() const
 {
     return sizeLimits_;
 }
