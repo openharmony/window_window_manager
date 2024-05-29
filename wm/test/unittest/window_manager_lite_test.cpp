@@ -422,5 +422,17 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
+
+/**
+ * @tc.name: GetWindowModeType
+ * @tc.desc: GetWindowModeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2)
+{
+    WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
+    auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
 }
 }

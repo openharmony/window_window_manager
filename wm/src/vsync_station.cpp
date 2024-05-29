@@ -103,6 +103,12 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
     }
 }
 
+void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
+{
+    RSDisplaySoloistManager& soloistManager = RSDisplaySoloistManager::GetInstance();
+    soloistManager.SetMainFrameRateLinkerEnable(enabled);
+}
+
 void VsyncStation::Init()
 {
     if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
