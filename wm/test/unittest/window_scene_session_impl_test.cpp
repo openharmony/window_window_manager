@@ -1460,9 +1460,10 @@ HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Leve
  * @tc.desc: DestoryInner02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, DestoryInner02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("DestoryInner02");
     option->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
