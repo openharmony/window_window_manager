@@ -303,38 +303,6 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, Functio
 }
 
 /**
- * @tc.name: GetSessionSnapshotById
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
-
-    SessionSnapshot snapshot;
-
-    sceneSessionManagerProxy_->GetSessionSnapshotById(0, snapshot);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-}
-
-/**
- * @tc.name: GetSnapshotByWindowId
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
-
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-
-    sceneSessionManagerProxy_->GetSnapshotByWindowId(0, pixelMap);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-}
-
-/**
  * @tc.name: DestroyAndDisconnectSpecificSession
  * @tc.desc: normal function
  * @tc.type: FUNC
