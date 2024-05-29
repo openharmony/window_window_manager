@@ -185,18 +185,16 @@ void SessionManagerAgentController::DoAfterAgentDeath(const sptr<IRemoteObject>&
     std::lock_guard<std::mutex> lock(windowManagerAgentPidMapMutex_);
     auto it = windowManagerAgentPairMap_.find(remoteObject);
     if (it != windowManagerAgentPairMap_.end()) {
-        auto pidPair = it->second;
-        auto pid = pidPair.first;
-        auto type = pidPair.second;
-        auto pt = windowManagerPidAgentMap_.find(pid);
-        if (pt != windowManagerPidAgentMap_.end()) {
-            auto& typeAgentMap = pt->second;
+        auto [pid, type] = it->second; 
+        auto pidIter = windowManagerPidAgentMap_.find(pid);
+        if (pidIter != windowManagerPidAgentMap_.end()) {
+            auto& typeAgentMap = pidIter->second;
             typeAgentMap.erase(type);
-            if (typeAgentMap.size() == 0) {
+            if (typeAgentMap.empty()) {
                 windowManagerPidAgentMap_.erase(pid);
             }
+            windowManagerAgentPairMap_.erase(remoteObject);
         }
-        windowManagerAgentPairMap_.erase(remoteObject);
     }
 }
 } // namespace Rosen
