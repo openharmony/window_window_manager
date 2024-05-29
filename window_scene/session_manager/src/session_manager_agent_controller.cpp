@@ -185,7 +185,7 @@ void SessionManagerAgentController::DoAfterAgentDeath(const sptr<IRemoteObject>&
     std::lock_guard<std::mutex> lock(windowManagerAgentPidMapMutex_);
     auto it = windowManagerAgentPairMap_.find(remoteObject);
     if (it != windowManagerAgentPairMap_.end()) {
-        auto [pid, type] = it->second; 
+        auto [pid, type] = it->second;
         auto pidIter = windowManagerPidAgentMap_.find(pid);
         if (pidIter != windowManagerPidAgentMap_.end()) {
             auto& typeAgentMap = pidIter->second;
