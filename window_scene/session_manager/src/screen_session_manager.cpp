@@ -4328,4 +4328,24 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
     IPCSkeleton::SetCallingIdentity(identify);
 #endif
 }
+
+void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
+    if (windowIdList.empty()) {
+        TLOGE(WmsLogTag::DMS, "WindowIdList is empty");
+        return;
+    }
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
+        return;
+    }
+    std::vector<uint64_t> surfaceNodeIds;
+    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds);
+}
 } // namespace OHOS::Rosen
