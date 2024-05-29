@@ -40,11 +40,11 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
             typeAgentMap.insert(std::map<WindowManagerAgentType,
                 sptr<IWindowManagerAgent>>::value_type(type, windowManagerAgent));
         } else {
-            std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>> tamap;
-            tamap.insert(std::map<WindowManagerAgentType,
+            std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>> typeAgentMap;
+            typeAgentMap.insert(std::map<WindowManagerAgentType,
                 sptr<IWindowManagerAgent>>::value_type(type, windowManagerAgent));
             windowManagerPidAgentMap_.insert(std::map<int32_t,
-                std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>>::value_type(pid, tamap));
+                std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>>::value_type(pid, typeAgentMap));
         }
         std::pair<int32_t, WindowManagerAgentType> pidPair = {pid, type};
         windowManagerAgentPairMap_.insert(std::map<sptr<IRemoteObject>,
@@ -64,9 +64,9 @@ WMError SessionManagerAgentController::UnregisterWindowManagerAgent(const sptr<I
         auto it = windowManagerPidAgentMap_.find(pid);
         if (it != windowManagerPidAgentMap_.end()) {
             auto& typeAgentMap = it->second;
-            auto ta = typeAgentMap.find(type);
-            if (ta != typeAgentMap.end()) {
-                windowManagerAgentPairMap_.erase((ta->second)->AsObject());
+            auto typeAgentIter = typeAgentMap.find(type);
+            if (typeAgentIter != typeAgentMap.end()) {
+                windowManagerAgentPairMap_.erase((typeAgentIter->second)->AsObject());
             }
             typeAgentMap.erase(type);
             if (typeAgentMap.size() == 0) {
