@@ -1431,6 +1431,54 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
 }
 
 /*
+ * @tc.name: DestoryInner01
+ * @tc.desc: DestoryInner01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("DestoryInner01");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->property_->SetPersistentId(123);
+    window->property_->SetExtensionFlag(true);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetExtensionFlag(false);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+}
+
+/*
+ * @tc.name: DestoryInner02
+ * @tc.desc: DestoryInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DestoryInner02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("DestoryInner02");
+    option->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->property_->SetPersistentId(134);
+    window->property_->SetExtensionFlag(true);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetExtensionFlag(false);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+}
+
+/*
  * @tc.name: SetPrivacyMode
  * @tc.desc: SetPrivacyMode test
  * @tc.type: FUNC
