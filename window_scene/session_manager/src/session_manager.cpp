@@ -110,7 +110,7 @@ void SessionManager::OnWMSConnectionChanged(
     TLOGI(WmsLogTag::WMS_MULTI_USER, 
         "curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId, 
         currentWMSUserId_, screenId, isConnected);
-    if (isConnected ) {
+    if (isConnected) {
         if (currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
             // Notify the user that the old wms has been disconnected.
             OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, false);
