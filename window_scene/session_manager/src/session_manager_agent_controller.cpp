@@ -36,6 +36,7 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
             auto typeAgentIter = typeAgentMap.find(type);
             if (typeAgentIter != typeAgentMap.end()) {
                 smAgentContainer_.UnregisterAgent(typeAgentIter->second, type);
+                windowManagerAgentPairMap_.erase((typeAgentIter->second)->AsObject());
             }
             typeAgentMap.insert(std::map<WindowManagerAgentType,
                 sptr<IWindowManagerAgent>>::value_type(type, windowManagerAgent));
