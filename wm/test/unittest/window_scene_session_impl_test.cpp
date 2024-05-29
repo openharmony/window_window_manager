@@ -1416,6 +1416,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
 HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
@@ -1438,6 +1439,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
 HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("DestoryInner01");
     option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
