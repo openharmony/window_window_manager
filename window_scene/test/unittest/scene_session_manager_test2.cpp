@@ -1801,7 +1801,6 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest |
     isLayoutFullScreen = false;
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     ASSERT_EQ(WSError::WS_OK, ret);
-
 }
 
 /**
