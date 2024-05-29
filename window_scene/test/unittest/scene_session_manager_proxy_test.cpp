@@ -309,6 +309,21 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallT
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
+/*
+ * @tc.name: TerminateSessionNew
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, Function | SmallTest | Level2)
+{
+    sptr<ISessionListener> listener = nullptr;
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ = new SceneSessionManagerProxy(iRemoteObjectMocker);
+
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSessionManagerProxy_->TerminateSessionNew(nullptr, true, true));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
 /**
  * @tc.name: GetSessionDumpInfo
  * @tc.desc: normal function

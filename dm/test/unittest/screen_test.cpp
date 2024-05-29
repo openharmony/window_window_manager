@@ -402,6 +402,8 @@ HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
 {
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), SetResolution(_, _, _, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     auto res = screen_->SetResolution(0, 0, 1000);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
