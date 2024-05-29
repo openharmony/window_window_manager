@@ -1912,6 +1912,93 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3
     ret = ssm_->GetTopWindowId(persistentId, topWinId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
+
+/**
+ * @tc.name: InitPersistentStorage
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->InitPersistentStorage();
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotFilePath
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level3)
+{
+    string ret;
+    ssm_->sceneSessionMap_.clear();
+    ret = ssm_->GetSessionSnapshotFilePath(100);
+    ASSERT_EQ("", ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->GetSessionSnapshotFilePath(100);
+    ASSERT_EQ("", ret);
+}
+
+/**
+ * @tc.name: GetAccessibilityWindowInfo
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallTest | Level3)
+{
+    WMError ret;
+    ssm_->sceneSessionMap_.clear();
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    ret = ssm_->GetAccessibilityWindowInfo(infos);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->GetAccessibilityWindowInfo(infos);
+    ASSERT_EQ(WMError::OK, ret);
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = 0;
+    ssm_->OnScreenshot(displayId);
+    ASSERT_EQ(0, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->OnScreenshot(displayId);
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->OnScreenshot(displayId);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->OnScreenshot(displayId);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ssm_->OnScreenshot(displayId);
+    sceneSession->SetSessionState(SessionState::STATE_END);
+    ssm_->OnScreenshot(displayId);
+    ASSERT_EQ(0, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
