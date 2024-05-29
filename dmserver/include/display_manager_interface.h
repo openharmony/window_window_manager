@@ -130,6 +130,7 @@ public:
         TRANS_ID_DEVICE_IS_CAPTURE,
         TRANS_ID_GET_SNAPSHOT_BY_PICKER,
         TRANS_ID_SWITCH_USER,
+        TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -273,6 +274,7 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) {}
 };
 } // namespace OHOS::Rosen
 
