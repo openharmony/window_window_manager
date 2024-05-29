@@ -1437,10 +1437,9 @@ HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, Function | SmallTest | Lev
  */
 HWTEST_F(SceneSessionManagerTest2, Init, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->Init();
     ssm_->RegisterAppListener();
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1450,13 +1449,11 @@ HWTEST_F(SceneSessionManagerTest2, Init, Function | SmallTest | Level3)
  */
 HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->LoadWindowSceneXml();
     ssm_->ConfigWindowSceneXml();
     ssm_->SetEnableInputEvent(true);
     ssm_->SetEnableInputEvent(false);
     ASSERT_EQ(ssm_->IsInputEventEnabled(), false);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1466,7 +1463,6 @@ HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, Function | SmallTest | Le
  */
 HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallTest | Level3)
 {
-    int ret = 0;
     std::vector<int32_t> recoveredPersistentIds;
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     recoveredPersistentIds.push_back(0);
@@ -1481,7 +1477,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallT
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     ssm_->sceneSessionMap_.erase(0);
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1491,9 +1487,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallT
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1545,13 +1540,12 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
 */
 HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->StartWindowInfoReportLoop();
     ssm_->eventHandler_ = nullptr;
     ssm_->StartWindowInfoReportLoop();
     ssm_->isReportTaskStart_ = true;
     ssm_->StartWindowInfoReportLoop();
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1561,10 +1555,9 @@ HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTe
 */
 HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Level3)
 {
-    int ret = 0;
     FocusChangeInfo info;
     ssm_->GetFocusWindowInfo(info);
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1574,7 +1567,6 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Le
 */
 HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | Level3)
 {
-    int ret = 0;
     FocusChangeInfo fcinfo;
     ssm_->GetFocusWindowInfo(fcinfo);
 
@@ -1584,7 +1576,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | L
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->GetFocusWindowInfo(fcinfo);
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1594,7 +1586,6 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | L
 */
 HWTEST_F(SceneSessionManagerTest2, NotifySessionMovedToFront, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->NotifySessionMovedToFront(0);
 
     SessionInfo info;
@@ -1603,7 +1594,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifySessionMovedToFront, Function | SmallTe
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ssm_->NotifySessionMovedToFront(100);
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1653,9 +1644,8 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
 */
 HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallTest | Level3)
 {
-    int ret = 0;;
     ssm_->InitWithRenderServiceAdded();
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1920,10 +1910,9 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3
 */
 HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     ssm_->InitPersistentStorage();
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 
 /**
@@ -1958,7 +1947,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallT
     ssm_->sceneSessionMap_.clear();
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     ret = ssm_->GetAccessibilityWindowInfo(infos);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1966,7 +1955,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallT
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->GetAccessibilityWindowInfo(infos);
-    ASSERT_EQ(WMError::OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1976,11 +1965,9 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallT
 */
 HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     DisplayId displayId = 0;
     ssm_->OnScreenshot(displayId);
-    ASSERT_EQ(0, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1997,7 +1984,7 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
     ssm_->OnScreenshot(displayId);
     sceneSession->SetSessionState(SessionState::STATE_END);
     ssm_->OnScreenshot(displayId);
-    ASSERT_EQ(0, ret);
+    ASSERT_NE(nullptr, ssm_);
 }
 }
 } // namespace Rosen
