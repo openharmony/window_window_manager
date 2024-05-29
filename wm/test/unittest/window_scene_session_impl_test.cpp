@@ -1749,9 +1749,11 @@ HWTEST_F(WindowSceneSessionImplTest, Create, Function | SmallTest | Level2)
     std::string identityToken = "testToken";
     auto ret = windowSceneSessionImpl->Create(abilityContext_, session, identityToken);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSessionImpl->Destroy(true));
     windowSceneSessionImpl->property_ = nullptr;
     auto ret1 = windowSceneSessionImpl->Create(abilityContext_, session, identityToken);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSessionImpl->Destroy(true));
 }
 
 /**
