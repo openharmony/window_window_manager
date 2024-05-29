@@ -1588,9 +1588,11 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
-    if (WindowHelper::IsMainWindow(GetType()) &&
+    bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
+    if (isSwitchFreeMultiWindow || (WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.uiType_ != "phone" &&
-        windowSystemConfig_.uiType_ != "pad") {
+        windowSystemConfig_.uiType_ != "pad")) {
         if (hostSession_ == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "hostSession is null");
             return WMError::WM_ERROR_NULLPTR;
