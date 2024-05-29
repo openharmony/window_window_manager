@@ -154,7 +154,7 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, Function | Smal
     sceneSessionSecond->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSessionSecond->state_ = SessionState::STATE_FOREGROUND;
 
-    std::vector<std::string> privacyBundleList;
+    std::unordered_set<std::string> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 2);
 
