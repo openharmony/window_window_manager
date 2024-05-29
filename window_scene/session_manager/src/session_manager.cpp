@@ -107,8 +107,8 @@ void SessionManager::OnWMSConnectionChangedCallback(int32_t userId, int32_t scre
 void SessionManager::OnWMSConnectionChanged(
     int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, 
-        "curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId, 
+    TLOGI(WmsLogTag::WMS_MULTI_USER,
+        "curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
         currentWMSUserId_, screenId, isConnected);
     if (isConnected) {
         if (currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
