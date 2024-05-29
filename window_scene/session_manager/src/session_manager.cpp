@@ -118,7 +118,7 @@ void SessionManager::OnWMSConnectionChanged(
         }
         currentWMSUserId_ = userId;
         currentScreenId_ = screenId;
-    }    
+    }
     isWMSConnected_ = isConnected;
     // Notify the user that the current wms connection has changed.
     OnWMSConnectionChangedCallback(userId, screenId, isConnected);
