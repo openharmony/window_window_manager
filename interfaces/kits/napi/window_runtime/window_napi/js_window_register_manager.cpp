@@ -380,7 +380,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
+        WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
@@ -414,8 +414,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             break;
         }
         if (!findFlag) {
-            WLOGFE("[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
-            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            WLOGFW("[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            return WmErrorCode::WM_OK;
         }
     }
     WLOGI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
