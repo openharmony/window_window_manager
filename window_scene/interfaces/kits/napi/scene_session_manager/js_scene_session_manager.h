@@ -157,6 +157,7 @@ private:
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
