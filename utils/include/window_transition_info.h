@@ -68,7 +68,7 @@ public:
     TransitionReason GetTransitionReason();
     void SetIsRecent(bool isRecent);
     bool GetIsRecent() const;
-    WindowSizeLimits GetWindowSizeLimits() const;
+    WindowLimits GetWindowSizeLimits() const;
     void SetMissionId(int32_t missionId);
     int32_t GetMissionId() const;
     void SetOrientation(AppExecFwk::DisplayOrientation orientation);
@@ -88,7 +88,7 @@ private:
     bool isRecent_ = false;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
-    WindowSizeLimits sizeLimits_;
+    WindowLimits sizeLimits_;
     int32_t missionId_ = -1;
     AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
     uint32_t apiCompatibleVersion_ = 0;

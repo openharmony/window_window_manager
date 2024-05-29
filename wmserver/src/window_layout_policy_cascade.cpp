@@ -275,7 +275,7 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
 }
 
 bool WindowLayoutPolicyCascade::CheckAspectRatioBySizeLimits(const sptr<WindowNode>& node,
-    WindowSizeLimits& newLimits) const
+    WindowLimits& newLimits) const
 {
     // get new limit config with the settings of system and app
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
@@ -320,7 +320,7 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
     }
 
     // 1. check ratio by size limits
-    WindowSizeLimits newLimits;
+    WindowLimits newLimits;
     if (!CheckAspectRatioBySizeLimits(node, newLimits)) {
         return;
     }
