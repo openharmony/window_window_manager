@@ -357,8 +357,8 @@ napi_value WindowStatusTypeInit(napi_env env)
         static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
     napi_set_named_property(env, objValue, "FULL_SCREEN", CreateJsValue(env,
         static_cast<int32_t>(WindowStatus::WINDOW_STATUS_FULLSCREEN)));
-    napi_set_named_property(env, objValue, "MAXMIZE", CreateJsValue(env,
-        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MAXMIZE)));
+    napi_set_named_property(env, objValue, "MAXIMIZE", CreateJsValue(env,
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MAXIMIZE)));
     napi_set_named_property(env, objValue, "MINIMIZE", CreateJsValue(env,
         static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MINIMIZE)));
     napi_set_named_property(env, objValue, "FLOATING", CreateJsValue(env,
