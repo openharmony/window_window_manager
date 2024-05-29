@@ -773,6 +773,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, Function | Small
 }
 
 /**
+ * @tc.name: HandleGetSessionSnapshotById
+ * @tc.desc: test HandleGetSessionSnapshotById
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = -1;
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleGetSessionSnapshotById(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleBindDialogTarget
  * @tc.desc: test HandleBindDialogTarget
  * @tc.type: FUNC

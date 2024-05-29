@@ -485,7 +485,7 @@ public:
         return isOk;
     }
 
-    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowSizeLimits& sizeLimits)
+    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowLimits& sizeLimits)
     {
         if (rect.height_ == 0) {
             return false;
@@ -532,7 +532,7 @@ public:
         return true;
     }
 
-    static bool IsAspectRatioSatisfiedWithSizeLimits(const WindowSizeLimits& sizeLimits, float ratio, float vpr)
+    static bool IsAspectRatioSatisfiedWithSizeLimits(const WindowLimits& sizeLimits, float ratio, float vpr)
     {
         /*
          * 1) Usually the size limits won't be empty after show window.

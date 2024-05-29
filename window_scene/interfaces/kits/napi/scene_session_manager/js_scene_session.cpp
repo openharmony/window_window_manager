@@ -2391,14 +2391,9 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 void JsSceneSession::OnPrepareClosePiPSession()
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]OnPrepareClosePiPSession");
-    std::shared_ptr<NativeReference> jsCallBack = nullptr;
-    {
-        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
-        auto iter = jsCbMap_.find(PREPARE_CLOSE_PIP_SESSION);
-        if (iter == jsCbMap_.end()) {
-            return;
-        }
-        jsCallBack = iter-> second;
+    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PREPARE_CLOSE_PIP_SESSION);
+    if (jsCallBack == nullptr) {
+        return;
     }
     auto task = [jsCallBack, env = env_]() {
         if (!jsCallBack) {
