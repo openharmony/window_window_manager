@@ -4776,6 +4776,40 @@ void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
     WindowChangedFunc_ = func;
 }
 
+bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
+    std::unordered_set<std::string>& privacyBundles)
+{
+    bool needNotify = false;
+    std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
+    do {
+        if (privacyBundleMap_.find(displayId) == privacyBundleMap_.end()) {
+            TLOGD(WmsLogTag::WMS_MAIN, "can not find display[%{public}" PRIu64 "].", displayId);
+            needNotify = !privacyBundles.empty();
+            break;
+        }
+        auto lastPrivacyBundles = privacyBundleMap_[displayId];
+        if (lastPrivacyBundles.size() != privacyBundles.size()) {
+            TLOGD(WmsLogTag::WMS_MAIN, "privacy bundle list size is not equal, %{public}zu != %{public}zu.",
+                  lastPrivacyBundles.size(), privacyBundles.size());
+            needNotify = true;
+            break;
+        }
+        for (const auto& bundle : lastPrivacyBundles) {
+            if (privacyBundles.find(bundle) == privacyBundles.end()) {
+                needNotify = true;
+                break;
+            }
+        }
+    } while (false);
+
+    TLOGD(WmsLogTag::WMS_MAIN, "display[%{public}" PRIu64 "] need notify privacy state: %{public}d.",
+          displayId, needNotify);
+    if (needNotify) {
+        privacyBundleMap_[displayId] = privacyBundles;
+    }
+    return needNotify;
+}
+
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -4790,15 +4824,23 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
-    std::vector<std::string> privacyBundleList;
+    std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
+        return;
+    }
 
-    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !privacyBundleList.empty());
-    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, privacyBundleList);
+    std::vector<std::string> bundleListForNotify(privacyBundleList.begin(), privacyBundleList.end());
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !bundleListForNotify.empty());
+    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
+    for (const auto& bundle : bundleListForNotify) {
+        TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
+              displayId, bundle.c_str());
+    }
 }
 
 void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
-    std::vector<std::string>& privacyBundles)
+    std::unordered_set<std::string>& privacyBundles)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& item : sceneSessionMap_) {
@@ -4816,6 +4858,10 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         if (displayId != currentDisplayId) {
             continue;
         }
+        if (sceneSession->GetSessionInfo().bundleName_.empty()) {
+            TLOGW(WmsLogTag::WMS_MAIN, "bundle name is empty, wid = %{public}d.", item.first);
+            continue;
+        }
         bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
         if (isForeground && sceneSession->GetParentSession() != nullptr) {
@@ -4827,7 +4873,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
-            privacyBundles.push_back(sceneSession->GetSessionInfo().bundleName_);
+            privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
         }
     }
 }
