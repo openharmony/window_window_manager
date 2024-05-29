@@ -40,7 +40,8 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         return;
     }
     if (mState_ != nextState) {
-        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
+        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d, angle:%{public}f",
+            mState_, nextState, angle);
         ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
         mState_ = nextState;
         if (foldScreenPolicy != nullptr) {
