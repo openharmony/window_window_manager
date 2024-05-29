@@ -1332,11 +1332,13 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
                 status = ScreenPowerStatus::POWER_STATUS_OFF;
                 TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
             }
+            rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
         case ScreenPowerState::POWER_SUSPEND: {
             status = ScreenPowerStatus::POWER_STATUS_SUSPEND;
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
         default: {
