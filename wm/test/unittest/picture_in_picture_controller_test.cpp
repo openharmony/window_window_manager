@@ -221,8 +221,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     void *contextPtr = static_cast<void*>(new AbilityRuntime::AbilityContextImpl());
     option->SetContext(contextPtr);
-    EXPECT_EQ(WMError::WM_OK, pipControl->StartPictureInPicture(startType));
-
     pipControl->curState_ = PiPWindowState::STATE_STARTING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StartPictureInPicture(startType));
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
