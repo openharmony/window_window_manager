@@ -85,6 +85,7 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
     virtual void SetFoldStatusLocked(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
