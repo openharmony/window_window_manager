@@ -610,6 +610,32 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetOldRect
+ * @tc.desc: check func SetOldRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetOldRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    session_->SetOldRect(rect);
+    ASSERT_EQ(rect, session_->oldWinRect_);
+}
+
+/**
+ * @tc.name: GetOldRect
+ * @tc.desc: check func GetOldRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetOldRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    session_->SetOldRect(rect);
+    ASSERT_EQ(rect, session_->GetOldRect());
+}
+
+/**
  * @tc.name: CheckDialogOnForeground
  * @tc.desc: check func CheckDialogOnForeground
  * @tc.type: FUNC
