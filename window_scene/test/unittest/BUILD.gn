@@ -39,6 +39,7 @@ group("unittest") {
     ":ws_scene_session_converter_test",
     ":ws_scene_session_dirty_manager_test",
     ":ws_scene_session_manager_lite_stub_test",
+    ":ws_scene_session_manager_lite_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
@@ -72,6 +73,7 @@ group("unittest") {
     ":ws_session_stub_test",
     ":ws_session_test",
     ":ws_setting_observer_test",
+    ":ws_setting_provider_test",
     ":ws_sub_session_test",
     ":ws_system_session_test",
     ":ws_task_scheduler_test",
@@ -551,6 +553,20 @@ ohos_unittest("ws_window_scene_config_test") {
   ]
 }
 
+ohos_unittest("ws_scene_session_manager_lite_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_lite_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_scene_session_manager_test") {
   module_out_path = module_out_path
 
@@ -1011,7 +1027,10 @@ ohos_unittest("ws_session_stub_mock_test") {
 ohos_unittest("ws_distributed_client_test") {
   module_out_path = module_out_path
 
-  sources = [ "distributed_client_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "distributed_client_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1032,6 +1051,20 @@ ohos_unittest("ws_setting_observer_test") {
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_setting_provider_test") {
+  module_out_path = module_out_path
+
+  sources = [ "setting_provider_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "data_share:datashare_consumer",
     "hilog:libhilog",
   ]
 }

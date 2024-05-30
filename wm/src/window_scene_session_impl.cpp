@@ -873,22 +873,32 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     property_->SetDecorEnable(isDecorEnable);
 
     if (state_ == WindowState::STATE_SHOWN) {
-        TLOGD(WmsLogTag::WMS_LIFE, "window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
-        if (WindowHelper::IsMainWindow(type) && hostSession_ != nullptr) {
-            hostSession_->RaiseAppMainWindowToTop();
-        }
-        NotifyAfterForeground(true, false);
-        RefreshNoInteractionTimeoutMonitor();
-        return WMError::WM_OK;
+        return HandleAlreadyShown(type);
     }
-
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    return ShowWithValidDisplay(display, withAnimation, type);
+}
+
+WMError WindowSceneSessionImpl::HandleAlreadyShown(WindowType type)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "window session is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
+    if (WindowHelper::IsMainWindow(type) && hostSession_ != nullptr) {
+        hostSession_->RaiseAppMainWindowToTop();
+    }
+    NotifyAfterForeground(true, false);
+    RefreshNoInteractionTimeoutMonitor();
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::ShowWithValidDisplay(const sptr<Display>& display, bool withAnimation,
+    WindowType type)
+{
     auto displayInfo = display->GetDisplayInfo();
     float density = GetVirtualPixelRatio(displayInfo);
     if (!MathHelper::NearZero(virtualPixelRatio_ - density) ||
@@ -913,7 +923,11 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
     }
+    return HandleShowResult(ret, type);
+}
 
+WMError WindowSceneSessionImpl::HandleShowResult(WMError ret, WindowType type)
+{
     if (ret == WMError::WM_OK) {
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
@@ -1885,7 +1899,10 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (windowSystemConfig_.uiType_ != "pc") {
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if (!(isPC || isFreeMutiWindowMode)) {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1925,7 +1942,9 @@ void WindowSceneSessionImpl::StartMove()
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isValidWindow = isMainWindow || (isPC && (isSubWindow || isDecorDialog));
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    bool isValidWindow = isMainWindow || ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDecorDialog));
     if (isValidWindow && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }

@@ -250,6 +250,7 @@ public:
 
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

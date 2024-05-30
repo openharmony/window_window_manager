@@ -33,6 +33,7 @@ public:
     bool RegisterAgent(const sptr<T1>& agent, T2 type);
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
     std::set<sptr<T1>> GetAgentsByType(T2 type);
+    void SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback);
 
 private:
     void RemoveAgent(const sptr<IRemoteObject>& remoteObject);
@@ -54,6 +55,7 @@ private:
     std::recursive_mutex mutex_;
     std::map<T2, std::set<sptr<T1>>> agentMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
+    std::function<void(const sptr<IRemoteObject>&)> deathCallback_;
 };
 
 template<typename T1, typename T2>
@@ -122,6 +124,9 @@ template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remoteObject)
 {
     WLOGFI("RemoveAgent");
+    if (deathCallback_ != nullptr) {
+        deathCallback_(remoteObject);
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& elem : agentMap_) {
         if (UnregisterAgentLocked(elem.second, remoteObject)) {
@@ -129,6 +134,12 @@ void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remote
         }
     }
     remoteObject->RemoveDeathRecipient(deathRecipient_);
+}
+
+template<typename T1, typename T2>
+void ClientAgentContainer<T1, T2>::SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback)
+{
+    deathCallback_ = callback;
 }
 }
 }

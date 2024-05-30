@@ -35,6 +35,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
     if (sessionInfo_.isSystem_) {
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
+        config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
     WLOGFD("Create SCBSystemSession");

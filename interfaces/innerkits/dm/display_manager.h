@@ -583,6 +583,14 @@ public:
      */
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
 
+    /**
+     * @brief Set virtual screen black list to RS.
+     *
+     * @param screenId ScreenId used in virtual screen.
+     * @param windowIdList The windowId list to shield on cast screen.
+    */
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:
