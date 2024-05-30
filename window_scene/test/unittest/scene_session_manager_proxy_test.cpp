@@ -587,7 +587,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureSession001, Function | S
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
 
     int32_t persistentId = 12345;
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->AddOrRemoveSecureSession(persistentId, true));
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->AddOrRemoveSecureSession(persistentId, true));
     sceneSessionManagerProxy = nullptr;
 }
 
@@ -605,7 +605,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateExtWindowFlags, Function | SmallTes
 
     int32_t parentId = 1234;
     int32_t persistentId = 12345;
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateExtWindowFlags(parentId, persistentId, 7, 7));
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->UpdateExtWindowFlags(parentId, persistentId, 7, 7));
     sceneSessionManagerProxy = nullptr;
 }
 
