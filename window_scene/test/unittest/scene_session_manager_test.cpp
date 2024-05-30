@@ -1545,7 +1545,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
  * @tc.desc: SceneSessionManager clear main session by persistentid.
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions001, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -1588,8 +1588,8 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | L
     }
 
     std::vector<int32_t> clearFailedIds;
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1}, 
-        {sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     std::vector<int32_t> persistentIds = {sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
     EXPECT_EQ(result, WMError::WM_OK);
