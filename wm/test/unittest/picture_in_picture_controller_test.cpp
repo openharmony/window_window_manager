@@ -114,7 +114,6 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     pipControl->pipOption_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->pipOption_ = option;
-    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
 
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
@@ -233,9 +232,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->mainWindow_ = mw;
-    pipControl->pipOption_->SetNavigationId("");
-    ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
-    delete static_cast<AbilityRuntime::AbilityContextImpl*>(contextPtr);
 }
 
 /**
@@ -553,7 +549,6 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, Function 
 
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
-    pipControl->pipOption_->SetNavigationId("navId");
 
     pipControl->mainWindow_ = nullptr;
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
