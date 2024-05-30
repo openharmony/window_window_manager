@@ -51,7 +51,7 @@ namespace {
         "settingsdata/SETTINGSDATA?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
-static uint32_t GetPipPriority(uint32_t pipTemplateType)
+uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
 {
     if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
         TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
@@ -443,10 +443,10 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         float newHeight = 0;
         mainWindowXComponentController_->GetGlobalPosition(posX, posY);
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
-        if (windowRect_.width_ != static_cast<uint32_t>(newWidth) ||
-            windowRect_.height_ != static_cast<uint32_t>(newHeight) ||
-            windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY)) {
-            Rect r = {posX, posY, newWidth, newHeight};
+        bool isSizeChange = IsContentSizeChanged(newWidth, newHeight, posX, posY);
+        if (isSizeChange) {
+            Rect r = {static_cast<int32_t>(posX), static_cast<int32_t>(posY),
+                static_cast<uint32_t>(newWidth), static_cast<uint32_t>(newHeight)};
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
@@ -455,6 +455,13 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
+}
+
+bool PictureInPictureController::IsContentSizeChanged(float width, float height, float posX, float posY)
+{
+    return windowRect_.width_ != static_cast<uint32_t>(width) ||
+        windowRect_.height_ != static_cast<uint32_t>(height) ||
+        windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY);
 }
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
@@ -469,7 +476,6 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
-        return;
     }
     if (value == "false") {
         return;

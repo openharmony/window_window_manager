@@ -196,6 +196,21 @@ HWTEST_F(WindowAdapterTest, ToggleShownStateForAllAppWindows, Function | SmallTe
 }
 
 /**
+ * @tc.name: GetSnapshotByWindowId
+ * @tc.desc: WindowAdapter/GetSnapshotByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    windowAdapter.GetSnapshotByWindowId(persistentId, pixelMap);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
  * @tc.name: InitWMSProxy
  * @tc.desc: WindowAdapter/InitWMSProxy
  * @tc.type: FUNC

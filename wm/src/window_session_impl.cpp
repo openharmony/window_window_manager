@@ -1772,9 +1772,14 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable ture failed, vsyncStation is nullptr");
         return;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: ture, linkerId = %{public}" PRIu64,
+    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: true, linkerId = %{public}" PRIu64,
         vsyncStation_->GetFrameRateLinkerId());
     vsyncStation_->SetFrameRateLinkerEnable(true);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: %{public}d, WindowType: %{public}d",
+            WindowHelper::IsMainWindow(GetType()), GetType());
+        vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(true);
+    }
 }
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -1794,6 +1799,11 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: false, linkerId = %{public}" PRIu64,
         vsyncStation_->GetFrameRateLinkerId());
     vsyncStation_->SetFrameRateLinkerEnable(false);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: %{public}d, WindowType: %{public}d",
+            WindowHelper::IsMainWindow(GetType()), GetType());
+        vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(false);
+    }
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
@@ -2895,7 +2905,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+            WindowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;

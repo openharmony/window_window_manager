@@ -15,11 +15,30 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "scenesessionmgrlstubget_fuzzer:fuzztest",
+    "scenesessionmgrlstubreg_fuzzer:fuzztest",
+    "scenesessionmgrlstubset_fuzzer:fuzztest",
+    "scenesessionmgrstubcreate_fuzzer:fuzztest",
+    "scenesessionmgrstubinfo_fuzzer:fuzztest",
+    "scenesessionmgrstubreg_fuzzer:fuzztest",
+    "scenesessionmgrstubstate_fuzzer:fuzztest",
+    "scenesessionmgrstubupdate_fuzzer:fuzztest",
     "screensessionmanager_fuzzer:fuzztest",
     "screensessionmgrstubagent_fuzzer:fuzztest",
     "screensessionmgrstubstate_fuzzer:fuzztest",
     "screensessionmgrstubwake_fuzzer:fuzztest",
     "sessioninterface_fuzzer:fuzztest",
+    "sessionmgrsrvstubgetmgr_fuzzer:fuzztest",
+    "sessionstagestubactive_fuzzer:fuzztest",
+    "sessionstagestubchange_fuzzer:fuzztest",
+    "sessionstagestubupdate_fuzzer:fuzztest",
+    "sessionstubbase_fuzzer:fuzztest",
+    "sessionstubextension_fuzzer:fuzztest",
+    "sessionstubscene_fuzzer:fuzztest",
+    "windoweventchstubfocus_fuzzer:fuzztest",
+    "windoweventchstubkeyevent_fuzzer:fuzztest",
+    "windoweventchstubpoint_fuzzer:fuzztest",
     "windowextensionclstub_fuzzer:fuzztest",
+    "windowextensionstub_fuzzer:fuzztest",
   ]
 }
