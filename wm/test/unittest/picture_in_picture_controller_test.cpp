@@ -43,7 +43,7 @@ class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD02(Show, WMError(uint32_t reason, bool withAnimation));
+    MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
     MOCK_METHOD0(Destroy, WMError());
 };
 
