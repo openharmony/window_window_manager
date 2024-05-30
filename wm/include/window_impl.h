@@ -661,6 +661,15 @@ private:
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void HandleFloatingWindowTypes();
+    void HandleSystemAlarmWindow();
+    void HandleKeyguardWindow();
+    void HandleDraggingEffectWindow();
+    void HandleAppComponentWindow();
+    void HandleCommonFloatingWindows();
+    void HandleNonFocusableWindows();
+    void HandleDockSliceWindow();
+    void HandleSystemToastWindow();
 };
 } // namespace Rosen
 } // namespace OHOS

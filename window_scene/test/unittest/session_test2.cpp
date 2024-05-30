@@ -1321,6 +1321,7 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
  */
 HWTEST_F(WindowSessionTest2, SetAttachState01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     session_->SetAttachState(false);
     ASSERT_EQ(session_->isAttach_, false);
 }
@@ -1332,6 +1333,7 @@ HWTEST_F(WindowSessionTest2, SetAttachState01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, SetAttachState02, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     int32_t persistentId = 123;
     sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
     session_->persistentId_ = persistentId;
@@ -1350,6 +1352,7 @@ HWTEST_F(WindowSessionTest2, SetAttachState02, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, RegisterDetachCallback01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     sptr<IPatternDetachCallback> detachCallback;
     session_->RegisterDetachCallback(detachCallback);
     ASSERT_EQ(session_->detachCallback_, detachCallback);
@@ -1362,6 +1365,7 @@ HWTEST_F(WindowSessionTest2, RegisterDetachCallback01, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionTest2, RegisterDetachCallback02, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     sptr<IPatternDetachCallback> detachCallback;
     session_->RegisterDetachCallback(detachCallback);
     ASSERT_EQ(session_->detachCallback_, detachCallback);
@@ -1377,6 +1381,7 @@ HWTEST_F(WindowSessionTest2, RegisterDetachCallback02, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionTest2, RegisterDetachCallback03, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     int32_t persistentId = 123;
     sptr<PatternDetachCallbackMocker> detachCallback = new PatternDetachCallbackMocker();
     EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(1);

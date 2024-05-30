@@ -65,7 +65,7 @@ private:
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
     void ComputeRectByAspectRatio(const sptr<WindowNode>& node) const;
-    bool CheckAspectRatioBySizeLimits(const sptr<WindowNode>& node, WindowSizeLimits& newLimits) const;
+    bool CheckAspectRatioBySizeLimits(const sptr<WindowNode>& node, WindowLimits& newLimits) const;
 
     /*
      * methods for floating window limitSize and position

@@ -67,6 +67,7 @@ ohos_fuzztest("PipFuzzTest") {
     "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hilog:libhilog",
     "image_framework:image_native",

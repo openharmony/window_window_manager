@@ -71,9 +71,9 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest 
     sceneSessionInfos.push_back(sceneSession);
 
     SessionInfo info2;
-    AppExecFwk::AbilityInfo abilityInfo_;
-    abilityInfo_.excludeFromMissions = true;
-    info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.excludeFromMissions = true;
+    info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     info2.want = want;
     sptr<SceneSession> sceneSession2 = new SceneSession(info2, nullptr);
@@ -101,9 +101,9 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest |
     EXPECT_EQ(WSError::WS_OK, result2);
 
     SessionInfo info3;
-    AppExecFwk::AbilityInfo abilityInfo_;
-    abilityInfo_.excludeFromMissions = true;
-    info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.excludeFromMissions = true;
+    info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     info3.want = want;
     sptr<SceneSession> sceneSession3 = new SceneSession(info3, nullptr);

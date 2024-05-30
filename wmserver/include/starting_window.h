@@ -54,6 +54,8 @@ private:
     static WindowMode defaultMode_;
     static AnimationConfig animationConfig_;
     static bool IsWindowFollowParent(WindowType type);
+    static sptr<WindowProperty> InitializeWindowProperty(const sptr<WindowTransitionInfo>& info, uint32_t winId);
+    static void UpdateRSTree(sptr<WindowNode>& node, bool isMultiDisplay);
 };
 } // Rosen
 } // OHOS

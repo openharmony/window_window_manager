@@ -457,10 +457,10 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
     node->SetPointerHotAreas(pointerHotAreas);
 }
 
-WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>& node,
+WindowLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>& node,
     const Rect& displayRect, float vpr)
 {
-    WindowSizeLimits systemLimits;
+    WindowLimits systemLimits;
     systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
     systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
 
@@ -501,7 +501,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& systemLimits = GetSystemSizeLimits(node, displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
 
-    WindowSizeLimits newLimits = systemLimits;
+    WindowLimits newLimits = systemLimits;
 
     // configured limits of floating window
     uint32_t configuredMaxWidth = static_cast<uint32_t>(customizedLimits.maxWidth_ * virtualPixelRatio);
