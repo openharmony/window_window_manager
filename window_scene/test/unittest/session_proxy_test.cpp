@@ -469,11 +469,13 @@ HWTEST_F(SessionProxyTest, UpdateWindowAnimationFlag, Function | SmallTest | Lev
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowAnimationFlag start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
     bool needDefaultAnimationFlag = false;
     WSError res = sProxy->UpdateWindowAnimationFlag(needDefaultAnimationFlag);
     ASSERT_EQ(res, WSError::WS_OK);
-
+    delete sProxy;
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowAnimationFlag end";
 }
 
@@ -486,12 +488,14 @@ HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Le
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
     WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
     ASSERT_EQ(res, WSError::WS_OK);
-
+    delete sProxy;
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent end";
 }
 } // namespace
