@@ -40,6 +40,10 @@ using OHOS::AppExecFwk::DisplayOrientation;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+template<typename T1, typename T2, typename Ret>
+using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+}
 union ColorParam {
 #if BIG_ENDIANNESS
     struct {
@@ -305,221 +309,43 @@ public:
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 private:
-    template<typename T1, typename T2, typename Ret>
-    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
     {
         listeners.erase(winId);
     }
+    template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners()
-    {
-        std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : lifecycleListeners_[GetWindowId()]) {
-                lifecycleListeners.push_back(listener);
-            }
-        }
-        return lifecycleListeners;
-    }
+    EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners()
-    {
-        std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : windowChangeListeners_[GetWindowId()]) {
-                windowChangeListeners.push_back(listener);
-            }
-        }
-        return windowChangeListeners;
-    }
+    EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
+    template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
+    template<typename T> EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners()
-    {
-        std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : avoidAreaChangeListeners_[GetWindowId()]) {
-                avoidAreaChangeListeners.push_back(listener);
-            }
-        }
-        return avoidAreaChangeListeners;
-    }
+    EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners()
-    {
-        std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            for (auto& listener : displayMoveListeners_) {
-                displayMoveListeners.push_back(listener);
-            }
-        }
-        return displayMoveListeners;
-    }
+    EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners();
+    template<typename T> EnableIfSame<T, IWindowDragListener, std::vector<sptr<IWindowDragListener>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners()
-    {
-        std::vector<sptr<IScreenshotListener>> screenshotListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : screenshotListeners_[GetWindowId()]) {
-                screenshotListeners.push_back(listener);
-            }
-        }
-        return screenshotListeners;
-    }
+    EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners();
     template<typename T>
-    inline EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners()
-    {
-        std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : touchOutsideListeners_[GetWindowId()]) {
-                touchOutsideListeners.push_back(listener);
-            }
-        }
-        return touchOutsideListeners;
-    }
-    template<typename T>
-    inline EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners()
-    {
-        std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : dialogTargetTouchListeners_[GetWindowId()]) {
-                dialogTargetTouchListeners.push_back(listener);
-            }
-        }
-        return dialogTargetTouchListeners;
-    }
-    template<typename T>
-    inline EnableIfSame<T, IWindowDragListener, std::vector<sptr<IWindowDragListener>>> GetListeners()
-    {
-        std::vector<sptr<IWindowDragListener>> windowDragListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            for (auto& listener : windowDragListeners_) {
-                windowDragListeners.push_back(listener);
-            }
-        }
-        return windowDragListeners;
-    }
-    template<typename T>
-    inline EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners()
-    {
-        std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-            for (auto& listener : occupiedAreaChangeListeners_[GetWindowId()]) {
-                occupiedAreaChangeListeners.push_back(listener);
-            }
-        }
-        return occupiedAreaChangeListeners;
-    }
-    template<typename T>
-    inline EnableIfSame<T, IDialogDeathRecipientListener, wptr<IDialogDeathRecipientListener>> GetListener()
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        return dialogDeathRecipientListener_[GetWindowId()];
-    }
-    inline void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
-    {
-        if (needNotifyListeners) {
-            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
-        }
-        if (needNotifyUiContent) {
-            CALL_UI_CONTENT(Foreground);
-        }
-    }
-    inline void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
-    {
-        if (needNotifyListeners) {
-            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
-        }
-        if (needNotifyUiContent) {
-            CALL_UI_CONTENT(Background);
-        }
-    }
-    inline void NotifyAfterFocused()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
-        CALL_UI_CONTENT(Focus);
-    }
-    inline void NotifyAfterUnfocused(bool needNotifyUiContent = true)
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        // use needNotifyUinContent to separate ui content callbacks
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
-        if (needNotifyUiContent) {
-            CALL_UI_CONTENT(UnFocus);
-        }
-    }
-    inline void NotifyAfterResumed()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners);
-    }
-    inline void NotifyAfterPaused()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
-    }
-    inline void NotifyBeforeDestroy(std::string windowName)
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (uiContent_ != nullptr) {
-            auto uiContent = std::move(uiContent_);
-            uiContent_ = nullptr;
-            uiContent->Destroy();
-        }
-        if (notifyNativefunc_) {
-            notifyNativefunc_(windowName);
-        }
-    }
-    inline void NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window)
-    {
-        auto uiContent = window->GetUIContent();
-        if (uiContent != nullptr) {
-            uiContent->Destroy();
-        }
-        if (window->GetNativeDestroyCallback()) {
-            window->GetNativeDestroyCallback()(window->GetWindowName());
-        }
-    }
-    inline void NotifyAfterActive()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
-    }
-    inline void NotifyAfterInactive()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
-    }
-    inline void NotifyForegroundFailed(WMError ret)
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
-    }
-    inline void NotifyBackgroundFailed(WMError ret)
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER_WITH_PARAM(BackgroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
-    }
-    inline bool IsStretchableReason(WindowSizeChangeReason reason)
-    {
-        return reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
-            reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
-            reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
-    }
+    EnableIfSame<T, IDialogDeathRecipientListener, wptr<IDialogDeathRecipientListener>> GetListener();
+
+    void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterFocused();
+    void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+    void NotifyAfterResumed();
+    void NotifyAfterPaused();
+    void NotifyBeforeDestroy(std::string windowName);
+    void NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window);
+    void NotifyAfterActive();
+    void NotifyAfterInactive();
+    void NotifyForegroundFailed(WMError ret);
+    void NotifyBackgroundFailed(WMError ret);
+    bool IsStretchableReason(WindowSizeChangeReason reason);
+
     void InitWindowProperty(const sptr<WindowOption>& option);
     void ClearListenersById(uint32_t winId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
