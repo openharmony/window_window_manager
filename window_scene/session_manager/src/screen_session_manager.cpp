@@ -1060,9 +1060,6 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         usleep(SLEEP_10_MS);
     }
     lastWakeUpReason_ = reason;
-    if (!notifyLockOrNot_) {
-        return true;
-    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN, reason);
 }
 
@@ -1076,9 +1073,6 @@ bool ScreenSessionManager::WakeUpEnd()
     TLOGI(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd enter");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
-        return true;
-    }
-    if (!notifyLockOrNot_) {
         return true;
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END,
@@ -1104,9 +1098,6 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         isMultiScreenCollaboration_ = true;
         return true;
     }
-    if (!notifyLockOrNot_) {
-        return true;
-    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
 }
 
@@ -1120,9 +1111,6 @@ bool ScreenSessionManager::SuspendEnd()
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendEnd");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
-        return true;
-    }
-    if (!notifyLockOrNot_) {
         return true;
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
@@ -1277,7 +1265,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
     }
 
     rsInterface_.SetScreenPowerStatus(screenId, status);
-    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION || !notifyLockOrNot_) {
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
@@ -1378,9 +1366,6 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
     buttonBlock_ = false;
-    if (!notifyLockOrNot_) {
-        return true;
-    }
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
@@ -1397,7 +1382,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
             TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && notifyLockOrNot_) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
@@ -1407,7 +1392,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
             TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && notifyLockOrNot_) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
@@ -3829,16 +3814,6 @@ void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMod
             static_cast<int>(displayMode));
         clientProxy_->OnUpdateFoldDisplayMode(displayMode);
     }
-}
-
-void ScreenSessionManager::SetNotifyLockOrNot(bool notifyLockOrNot)
-{
-    notifyLockOrNot_ = notifyLockOrNot;
-}
-
-bool ScreenSessionManager::GetNotifyLockOrNot()
-{
-    return notifyLockOrNot_;
 }
 
 void ScreenSessionManager::SwitchUser()
