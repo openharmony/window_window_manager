@@ -166,10 +166,6 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     pipControl->window_ = mw;
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     ASSERT_EQ(PiPWindowState::STATE_STARTED, pipControl->GetControllerState());
-    EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
-
-    EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
     ASSERT_EQ(PiPWindowState::STATE_STOPPED, pipControl->GetControllerState());
 }
@@ -611,6 +607,35 @@ HWTEST_F(PictureInPictureControllerTest, UpdatePiPSourceRect, Function | SmallTe
     pipControl->UpdatePiPSourceRect();
     ASSERT_NE(WMError::WM_OK, pipControl->CreatePictureInPictureWindow());
     ASSERT_EQ(0, pipControl->GetPipPriority(0));
+}
+
+/**
+ * @tc.name: DestroyPictureInPictureWindow
+ * @tc.desc: DestroyPictureInPictureWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+
+    pipControl->handler_ = nullptr;
+    pipControl->window_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->DestroyPictureInPictureWindow());
+
+    pipControl->window_ = mw;
+    EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+
+    pipControl->window_ = mw;
+    EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 }
 }
 }
