@@ -1374,7 +1374,6 @@ HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos002, Function | SmallTest
 }
 
 /**
-<<<<<<< HEAD
  * @tc.name: GetUnreliableWindowInfo01
  * @tc.desc: SceneSesionManager get unreliable window info, windowId correct
  * @tc.type: FUNC
@@ -1542,12 +1541,8 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
- * @tc.name: ClearMainSessions
- * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
-=======
  * @tc.name: ClearMainSessions001
  * @tc.desc: SceneSessionManager clear main session by persistentid.
->>>>>>> dd875308b (支持删除指定任务UT补充)
  * @tc.type: FUNC
 */
 HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Level3)
@@ -1567,8 +1562,6 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Leve
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(clearFailedIds.size(), 0);
 }
-<<<<<<< HEAD
-=======
 
 /**
  * @tc.name: ClearMainSessions002
@@ -1627,7 +1620,6 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | L
     EXPECT_EQ(clearFailedIds.size(), 1);
 }
 
->>>>>>> dd875308b (支持删除指定任务UT补充)
 }
 } // namespace Rosen
 } // namespace OHOS
