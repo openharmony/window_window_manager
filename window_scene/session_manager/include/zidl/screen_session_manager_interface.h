@@ -157,6 +157,7 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
 };
 } // namespace Rosen
 } // namespace OHOS
