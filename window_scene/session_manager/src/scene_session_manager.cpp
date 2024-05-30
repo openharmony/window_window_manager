@@ -6123,8 +6123,10 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [this, &windowManagerAgent, type]() {
-        return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, windowManagerAgent, type, callingPid]() {
+        return SessionManagerAgentController::GetInstance()
+            .RegisterWindowManagerAgent(windowManagerAgent, type, callingPid);
     };
     return taskScheduler_->PostSyncTask(task, "RegisterWindowManagerAgent");
 }
@@ -6144,8 +6146,10 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [this, &windowManagerAgent, type]() {
-        return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, windowManagerAgent, type, callingPid]() {
+        return SessionManagerAgentController::GetInstance()
+            .UnregisterWindowManagerAgent(windowManagerAgent, type, callingPid);
     };
     return taskScheduler_->PostSyncTask(task, "UnregisterWindowManagerAgent");
 }
