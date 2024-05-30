@@ -1633,7 +1633,10 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (scnSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(scnSession);
-        PreHandleCollaborator(scnSession, persistentId);
+        if (!PreHandleCollaborator(scnSession, persistentId)) {
+            scnSession->NotifySessionException(SetAbilitySessionInfo(scnSession), true);
+            return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
+        }
     }
     auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
     if (!scnSessionInfo) {
@@ -7626,11 +7629,11 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
+bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
         WLOGFI("sceneSession is null");
-        return;
+        return false;
     }
     std::string sessionAffinity;
     WLOGFI("call NotifyStartAbility & NotifySessionCreate");
@@ -7644,7 +7647,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
             WLOGFI("notifyReturn not BROKER_STARTED!");
-            return;
+            return false;
         }
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
@@ -7658,6 +7661,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
+    return true;
 }
 
 void SceneSessionManager::AddWindowDragHotArea(uint32_t type, WSRect& area)
