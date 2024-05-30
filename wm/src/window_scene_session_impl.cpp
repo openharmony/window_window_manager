@@ -907,7 +907,7 @@ void WindowSceneSessionImpl::NotifyUIBufferAvailable()
             auto promoteThis = weakThis.promote();
             if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
                 // false: Make the function callable
-                surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+                promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             }
         });
     }
