@@ -757,7 +757,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, Function | SmallTest | Level1)
     ASSERT_EQ(UINT32_MAX, defaultValue.maxHeight_);
     ASSERT_EQ(FLT_MAX, defaultValue.maxRatio_);
 
-    WindowSizeLimits testValue = { 200, 200, 50, 50, 2.0f, 2.0f };
+    WindowLimits testValue = { 200, 200, 50, 50, 2.0f, 2.0f };
     windowNode->SetWindowSizeLimits(testValue);
 
     auto resultValue = windowNode->GetWindowSizeLimits();
@@ -789,7 +789,7 @@ HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, Function | SmallTest | Le
     ASSERT_EQ(UINT32_MAX, defaultValue.maxHeight_);
     ASSERT_EQ(FLT_MAX, defaultValue.maxRatio_);
 
-    WindowSizeLimits testValue = { 200, 200, 50, 50, 2.0f, 2.0f };
+    WindowLimits testValue = { 200, 200, 50, 50, 2.0f, 2.0f };
     windowNode->SetWindowUpdatedSizeLimits(testValue);
 
     auto resultValue = windowNode->GetWindowUpdatedSizeLimits();

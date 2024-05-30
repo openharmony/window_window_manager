@@ -27,6 +27,7 @@
 #include "focus_change_info.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -44,6 +45,11 @@ using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 struct VisibleWindowNumInfo {
     uint32_t displayId;
     uint32_t visibleWindowNum;
+};
+
+struct WindowSnapshotDataPack {
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError result = WMError::WM_OK;
 };
 
 /**
@@ -654,6 +660,15 @@ public:
      * @return WM_OK means shift window focus success, others means failed.
     */
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+
+    /**
+     * @brief Get snapshot by window id.
+     *
+     * @param windowId Window id which want to snapshot.
+     * @param pixelMap Snapshot output pixel map.
+     * @return WM_OK means get snapshot success, others means failed.
+    */
+    WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Register visible main window num changed listener.
