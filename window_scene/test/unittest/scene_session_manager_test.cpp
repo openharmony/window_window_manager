@@ -330,6 +330,27 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener02, Function | SmallTes
 }
 
 /**
+ * @tc.name: ClearDisplayStatusBarTemporarilyFlags
+ * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
+    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    int32_t id = sceneSession->GetPersistentId();
+    ASSERT_EQ(WSError::WS_OK, ssm_->UpdateSessionAvoidAreaListener(id, true));
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
+    ssm_->ClearDisplayStatusBarTemporarilyFlags();
+    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
+}
+
+/**
  * @tc.name: RequestSceneSessionByCall
  * @tc.desc: SceneSesionManager request scene session by call
  * @tc.type: FUNC
