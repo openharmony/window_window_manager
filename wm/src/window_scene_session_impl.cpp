@@ -906,7 +906,7 @@ void WindowSceneSessionImpl::NotifyUIBufferAvailable()
         uiContent_->SetFrameLayoutFinishCallback([weakThis]() {
             auto promoteThis = weakThis.promote();
             if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
-                // false:Make the function callable
+                // false: Make the function callable
                 surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             }
         });
