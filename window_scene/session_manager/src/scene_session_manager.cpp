@@ -1165,6 +1165,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSessionInner,
         this, std::placeholders::_1);
+    specificCb->onClearDisplayStatusBarTemporarilyFlags_ =
+        std::bind(&SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags, this);
     specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
@@ -6803,6 +6805,17 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
+}
+
+void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
+{
+    for (auto persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    }
 }
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
