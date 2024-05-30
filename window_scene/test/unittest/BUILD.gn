@@ -642,6 +642,21 @@ ohos_unittest("ws_scene_session_manager_proxy_test") {
   ]
 }
 
+ohos_unittest("ws_scene_session_manager_lite_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_lite_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "ability_runtime:mission_info",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_session_manager_agent_controller_test") {
   module_out_path = module_out_path
 
