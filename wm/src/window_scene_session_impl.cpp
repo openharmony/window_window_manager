@@ -882,15 +882,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             wptr<WindowSceneSessionImpl> weakThis = this;
             uiContent_->SetFrameLayoutFinishCallback([weakThis]() {
                 auto promoteThis = weakThis.promote();
-                if (promoteThis == nullptr) {
-                    TLOGW(WmsLogTag::WMS_RECOVER, "promoteThis is nullptr");
-                    return WMError::WM_ERROR_NULLPTR;
+                if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
+                    surfaceNode_->SetIsNotifyUIBufferAvailable(false);
                 }
-                if (surfaceNode_ == nullptr) {
-                    WLOGFE("RSSurface node is null");
-                    return WMError::WM_ERROR_NULLPTR;
-                }
-                surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             });
         }
         // update sub window state if this is main window
