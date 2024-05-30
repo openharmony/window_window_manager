@@ -300,6 +300,25 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
+
+    int res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, 10);
+}
+
+/**
+ * @tc.name: OnRemoteRequest12
+ * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
+    data.WriteBool(false);
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT);
