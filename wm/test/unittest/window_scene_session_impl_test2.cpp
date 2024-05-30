@@ -41,6 +41,7 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void WindowSceneSessionImplTest2::SetUpTestCase() {}
@@ -54,7 +55,8 @@ void WindowSceneSessionImplTest2::SetUp()
 
 void WindowSceneSessionImplTest2::TearDown()
 {
-    abilityContext_ = nullptr;
+    abilityContext_ = nullptr;\
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
