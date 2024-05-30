@@ -275,6 +275,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::POWER_BUTTON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
