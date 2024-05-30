@@ -81,7 +81,7 @@ protected:
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
-    WindowSizeLimits GetSystemSizeLimits(const sptr<WindowNode>& node, const Rect& displayRect, float vpr);
+    WindowLimits GetSystemSizeLimits(const sptr<WindowNode>& node, const Rect& displayRect, float vpr);
 
     /*
      * methods for multiDisplay

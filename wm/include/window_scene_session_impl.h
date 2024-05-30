@@ -210,10 +210,22 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
 
+    WMError HandleAlreadyShown(WindowType type);
+    WMError ShowWithValidDisplay(const sptr<Display>& display, bool withAnimation, WindowType type);
+    WMError HandleShowResult(WMError ret, WindowType type);
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;
     sptr<IKeyboardPanelInfoChangeListener> keyboardPanelInfoChangeListeners_ = nullptr;
+    void UpdateSessionInfo();
+    WMError HandleSubWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError HandleExtensionWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError HandleSystemWindow(const sptr<ISessionStage>& iSessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
+    WMError InitializeCreate(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken);
 };
 } // namespace Rosen
 } // namespace OHOS

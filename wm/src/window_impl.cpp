@@ -1045,7 +1045,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
-    WindowSizeLimits sizeLimits;
+    WindowLimits sizeLimits;
     sizeLimits.maxWidth_ = abilityInfo->maxWindowWidth;
     sizeLimits.maxHeight_ = abilityInfo->maxWindowHeight;
     sizeLimits.minWidth_ = abilityInfo->minWindowWidth;
@@ -3570,30 +3570,21 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetFocusable(false);
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
+            HandleFloatingWindowTypes();
             break;
-        }
-        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
-            property_->SetRequestRect(GetSystemAlarmWindowDefaultSize(property_->GetRequestRect()));
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
+            HandleSystemAlarmWindow();
             break;
-        }
-        case WindowType::WINDOW_TYPE_KEYGUARD: {
-            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        case WindowType::WINDOW_TYPE_KEYGUARD:
+            HandleKeyguardWindow();
             break;
-        }
-        case WindowType::WINDOW_TYPE_DRAGGING_EFFECT: {
-            property_->SetWindowFlags(0);
+        case WindowType::WINDOW_TYPE_DRAGGING_EFFECT:
+            HandleDraggingEffectWindow();
             break;
-        }
-        case WindowType::WINDOW_TYPE_APP_COMPONENT: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+        case WindowType::WINDOW_TYPE_APP_COMPONENT:
+            HandleAppComponentWindow();
             break;
-        }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
         case WindowType::WINDOW_TYPE_SYSTEM_FLOAT:
@@ -3603,29 +3594,74 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
-        case WindowType::WINDOW_TYPE_DIALOG: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        case WindowType::WINDOW_TYPE_DIALOG:
+            HandleCommonFloatingWindows();
             break;
-        }
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
-        case WindowType::WINDOW_TYPE_POINTER: {
-            property_->SetFocusable(false);
+        case WindowType::WINDOW_TYPE_POINTER:
+            HandleNonFocusableWindows();
             break;
-        }
-        case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetFocusable(false);
+        case WindowType::WINDOW_TYPE_DOCK_SLICE:
+            HandleDockSliceWindow();
             break;
-        }
-        case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetTouchable(false);
-            property_->SetFocusable(false);
+        case WindowType::WINDOW_TYPE_SYSTEM_TOAST:
+            HandleSystemToastWindow();
             break;
-        }
         default:
             break;
     }
+}
+
+void WindowImpl::HandleFloatingWindowTypes()
+{
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property_->SetFocusable(false);
+}
+
+void WindowImpl::HandleSystemAlarmWindow()
+{
+    property_->SetRequestRect(GetSystemAlarmWindowDefaultSize(property_->GetRequestRect()));
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+}
+
+void WindowImpl::HandleKeyguardWindow()
+{
+    RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+}
+
+void WindowImpl::HandleDraggingEffectWindow()
+{
+    property_->SetWindowFlags(0);
+}
+
+void WindowImpl::HandleAppComponentWindow()
+{
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+}
+
+void WindowImpl::HandleCommonFloatingWindows()
+{
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+}
+
+void WindowImpl::HandleNonFocusableWindows()
+{
+    property_->SetFocusable(false);
+}
+
+void WindowImpl::HandleDockSliceWindow()
+{
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property_->SetFocusable(false);
+}
+
+void WindowImpl::HandleSystemToastWindow()
+{
+    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property_->SetTouchable(false);
+    property_->SetFocusable(false);
 }
 
 bool WindowImpl::IsWindowValid() const
