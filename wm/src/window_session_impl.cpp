@@ -58,6 +58,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t ANIMATION_TIME = 400;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -158,7 +160,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    if (isPC && windowOption_ != nullptr) {
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if ((isPC || isFreeMutiWindowMode) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -677,15 +681,21 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
+    auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
+    auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
+    uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    
     virtualPixelRatio_ = density;
-
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint]: [%{public}u, %{public}u, %{public}u]",
+        rotation, deviceRotation, transformHint);
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density);
     config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
     {
         std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
         if (uiContent_ == nullptr) {
@@ -735,10 +745,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if (isPC && (isSubWindow || isDialogWindow)) {
+    if ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent_->HideWindowTitleButton(true, true, true);
         return;
@@ -1750,7 +1762,9 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    if (!isPC) {
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if (!(isPC || isFreeMutiWindowMode)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -2905,7 +2919,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            WindowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+            WindowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;

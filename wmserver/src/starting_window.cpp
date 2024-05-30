@@ -61,6 +61,34 @@ AnimationConfig StartingWindow::animationConfig_;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
+    sptr<WindowProperty> property = InitializeWindowProperty(info, winId);
+    if (property == nullptr) {
+        return nullptr;
+    }
+
+    sptr<WindowNode> node = new(std::nothrow) WindowNode(property);
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    node->stateMachine_.SetWindowId(winId);
+    node->abilityToken_ = info->GetAbilityToken();
+    node->SetWindowSizeLimits(info->GetWindowSizeLimits());
+    node->abilityInfo_.missionId_ = info->GetMissionId();
+    node->abilityInfo_.bundleName_ = info->GetBundleName();
+    node->abilityInfo_.abilityName_ = info->GetAbilityName();
+    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(info->GetWindowSupportModes());
+    node->SetModeSupportInfo(modeSupportInfo);
+
+    if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
+        return nullptr;
+    }
+    node->stateMachine_.TransitionTo(WindowNodeState::STARTING_CREATED);
+    return node;
+}
+
+sptr<WindowProperty> StartingWindow::InitializeWindowProperty(const sptr<WindowTransitionInfo>& info, uint32_t winId)
+{
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
     if (property == nullptr || info == nullptr) {
         return nullptr;
@@ -98,25 +126,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
         }
     }
     property->SetWindowId(winId);
-    sptr<WindowNode> node = new(std::nothrow) WindowNode(property);
-    if (node == nullptr) {
-        return nullptr;
-    }
-    // test
-    node->stateMachine_.SetWindowId(winId);
-    node->abilityToken_ = info->GetAbilityToken();
-    node->SetWindowSizeLimits(info->GetWindowSizeLimits());
-    node->abilityInfo_.missionId_ = info->GetMissionId();
-    node->abilityInfo_.bundleName_ = info->GetBundleName();
-    node->abilityInfo_.abilityName_ = info->GetAbilityName();
-    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(info->GetWindowSupportModes());
-    node->SetModeSupportInfo(modeSupportInfo);
-
-    if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
-        return nullptr;
-    }
-    node->stateMachine_.TransitionTo(WindowNodeState::STARTING_CREATED);
-    return node;
+    return property;
 }
 
 void StartingWindow::ChangePropertyByApiVersion(const sptr<WindowTransitionInfo>& info,
@@ -313,36 +323,8 @@ bool StartingWindow::IsWindowFollowParent(WindowType type)
 
 void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay)
 {
-    auto updateRSTreeFunc = [&]() {
-        auto& dms = DisplayManagerServiceInner::GetInstance();
-        DisplayId displayId = node->GetDisplayId();
-        if (!node->surfaceNode_) { // cold start
-            if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
-                WLOGFE("window id:%{public}d type: %{public}u is not Main Window!",
-                    node->GetWindowId(), static_cast<uint32_t>(node->GetWindowType()));
-            }
-            dms.UpdateRSTree(displayId, displayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
-            node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
-            WLOGFD("Add startingWinSurfaceNode_ to leashWinSurfaceNode_ end during cold start");
-        } else { // hot start
-            const auto& displayIdVec = node->GetShowingDisplays();
-            for (auto& shownDisplayId : displayIdVec) {
-                if (node->leashWinSurfaceNode_) { // to app
-                    dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
-                } else { // to launcher
-                    dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->surfaceNode_, true, isMultiDisplay);
-                }
-                for (auto& child : node->children_) {
-                    if (IsWindowFollowParent(child->GetWindowType())) {
-                        continue;
-                    }
-                    if (child->currentVisibility_) {
-                        dms.UpdateRSTree(shownDisplayId, shownDisplayId, child->surfaceNode_, true, isMultiDisplay);
-                    }
-                }
-            }
-            WLOGFD("Update RsTree with hot start");
-        }
+    auto updateRSTreeFunc = [&node, isMultiDisplay]() {
+        UpdateRSTree(node, isMultiDisplay);
     };
     wptr<WindowNode> weakNode = node;
     auto finishCallBack = [weakNode]() {
@@ -367,6 +349,40 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
         // add or remove window without animation
         updateRSTreeFunc();
     }
+}
+
+void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, bool isMultiDisplay)
+{
+    auto& dms = DisplayManagerServiceInner::GetInstance();
+    DisplayId displayId = node->GetDisplayId();
+    if (!node->surfaceNode_) { // cold start
+        if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+            TLOGE(WmsLogTag::WMS_MAIN, "window id: %{public}d type: %{public}u is not Main Window!",
+                node->GetWindowId(), static_cast<uint32_t>(node->GetWindowType()));
+        }
+        dms.UpdateRSTree(displayId, displayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
+        node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
+        TLOGD(WmsLogTag::WMS_MAIN, "Add startingWinSurfaceNode_ to leashWinSurfaceNode_ end during cold start");
+        return;
+    }
+    // hot start
+    const auto& displayIdVec = node->GetShowingDisplays();
+    for (auto& shownDisplayId : displayIdVec) {
+        if (node->leashWinSurfaceNode_) { // to app
+            dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
+        } else { // to launcher
+            dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->surfaceNode_, true, isMultiDisplay);
+        }
+        for (auto& child : node->children_) {
+            if (IsWindowFollowParent(child->GetWindowType())) {
+                continue;
+            }
+            if (child->currentVisibility_) {
+                dms.UpdateRSTree(shownDisplayId, shownDisplayId, child->surfaceNode_, true, isMultiDisplay);
+            }
+        }
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "Update RsTree with hot start");
 }
 
 void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)

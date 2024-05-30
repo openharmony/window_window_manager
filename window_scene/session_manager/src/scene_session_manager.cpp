@@ -6123,8 +6123,10 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [this, &windowManagerAgent, type]() {
-        return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, windowManagerAgent, type, callingPid]() {
+        return SessionManagerAgentController::GetInstance()
+            .RegisterWindowManagerAgent(windowManagerAgent, type, callingPid);
     };
     return taskScheduler_->PostSyncTask(task, "RegisterWindowManagerAgent");
 }
@@ -6144,8 +6146,10 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [this, &windowManagerAgent, type]() {
-        return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, windowManagerAgent, type, callingPid]() {
+        return SessionManagerAgentController::GetInstance()
+            .UnregisterWindowManagerAgent(windowManagerAgent, type, callingPid);
     };
     return taskScheduler_->PostSyncTask(task, "UnregisterWindowManagerAgent");
 }
@@ -8042,6 +8046,18 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
     return taskScheduler_->PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 
+void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [id, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        uint32_t visibilityState = static_cast<uint32_t>(session->GetVisibilityState());
+        windowVisibilityInfos.push_back(std::make_pair(id, visibilityState));
+    }
+}
+
 void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     const std::string taskName, const int delayTime)
 {
@@ -8534,7 +8550,7 @@ WindowStatus SceneSessionManager::GetWindowStatus(WindowMode mode, SessionState 
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) { // maximize floating
-            windowStatus = WindowStatus::WINDOW_STATUS_MAXMIZE;
+            windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
