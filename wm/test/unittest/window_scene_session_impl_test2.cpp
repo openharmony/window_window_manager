@@ -55,7 +55,7 @@ void WindowSceneSessionImplTest2::SetUp()
 
 void WindowSceneSessionImplTest2::TearDown()
 {
-    abilityContext_ = nullptr;\
+    abilityContext_ = nullptr;
     usleep(WAIT_SYNC_IN_NS);
 }
 
