@@ -43,7 +43,7 @@ std::pair<sptr<ISession>, sptr<IRemoteObject>> GetProxy()
 
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("SessionInterfaceFuzzTest");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
 
     sptr<WindowSessionImpl> window = new WindowSceneSessionImpl(option);
     WMError err = window->Create(abilityContext, nullptr);
