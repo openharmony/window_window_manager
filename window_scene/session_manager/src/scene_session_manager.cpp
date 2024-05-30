@@ -6802,7 +6802,7 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
 
 void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
 {
-    for (auto& persistentId : avoidAreaListenerSessionSet_) {
+    for (auto persistentId : avoidAreaListenerSessionSet_) {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             continue;
