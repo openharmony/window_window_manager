@@ -2197,7 +2197,7 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
-void Session::SetOldRect(const WSRect& rect)
+void Session::SetSessionOldRect(const WSRect& rect)
 {
     if (oldWinRect_ == rect) {
         TLOGW(WmsLogTag::DEFAULT, "id: %{public}d skip same rect", persistentId_);
@@ -2206,7 +2206,7 @@ void Session::SetOldRect(const WSRect& rect)
     oldWinRect_ = rect;
 }
 
-WSRect Session::GetOldRect() const
+WSRect Session::GetSessionOldRect() const
 {
     return oldWinRect_;
 }

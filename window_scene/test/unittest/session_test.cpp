@@ -610,29 +610,29 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetOldRect
- * @tc.desc: check func SetOldRect
+ * @tc.name: SetSessionOldRect
+ * @tc.desc: check func SetSessionOldRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetSessionOldRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
-    session_->SetOldRect(rect);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetSessionOldRect(rect);
     ASSERT_EQ(rect, session_->oldWinRect_);
 }
 
 /**
- * @tc.name: GetOldRect
- * @tc.desc: check func GetOldRect
+ * @tc.name: GetSessionOldRect
+ * @tc.desc: check func GetSessionOldRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetSessionOldRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
-    session_->SetOldRect(rect);
-    ASSERT_EQ(rect, session_->GetOldRect());
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetSessionOldRect(rect);
+    ASSERT_EQ(rect, session_->GetSessionOldRect());
 }
 
 /**

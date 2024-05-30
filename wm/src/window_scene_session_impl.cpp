@@ -879,7 +879,17 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
     if (ret == WMError::WM_OK) {
         if (state_ == WindowState::STATE_HIDDEN && uiContent_ != nullptr) {
-            uiContent_->SetFrameLayoutFinishCallback([this]() {
+            wptr<WindowSceneSessionImpl> weakThis = this;
+            uiContent_->SetFrameLayoutFinishCallback([weakThis]() {
+                auto promoteThis = weakThis.promote();
+                if (promoteThis == nullptr) {
+                    TLOGW(WmsLogTag::WMS_RECOVER, "promoteThis is nullptr");
+                    return WMError::WM_ERROR_NULLPTR;
+                }
+                if (surfaceNode_ == nullptr) {
+                    WLOGFE("RSSurface node is null");
+                    return WMError::WM_ERROR_NULLPTR;
+                }
                 surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             });
         }
