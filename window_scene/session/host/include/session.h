@@ -203,8 +203,8 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
-    void SetOldRect(const WSRect& rect);
-    WSRect GetOldRect() const;
+    void SetSessionOldRect(const WSRect& rect);
+    WSRect GetSessionOldRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
