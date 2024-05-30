@@ -2200,7 +2200,7 @@ WSRect Session::GetSessionRect() const
 void Session::SetOldRect(const WSRect& rect)
 {
     if (oldWinRect_ == rect) {
-        WLOGFW("id: %{public}d skip same rect", persistentId_);
+        TLOGW("id: %{public}d skip same rect", persistentId_);
         return;
     }
     oldWinRect_ = rect;
