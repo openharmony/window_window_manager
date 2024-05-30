@@ -2204,8 +2204,6 @@ void Session::SetOldRect(const WSRect& rect)
         return;
     }
     oldWinRect_ = rect;
-    isDirty_ = true;
-    RectCheckProcess();
 }
 
 WSRect Session::GetOldRect() const
