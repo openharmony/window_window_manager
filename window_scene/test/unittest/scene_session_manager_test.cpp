@@ -1374,6 +1374,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos002, Function | SmallTest
 }
 
 /**
+<<<<<<< HEAD
  * @tc.name: GetUnreliableWindowInfo01
  * @tc.desc: SceneSesionManager get unreliable window info, windowId correct
  * @tc.type: FUNC
@@ -1543,6 +1544,10 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 /**
  * @tc.name: ClearMainSessions
  * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
+=======
+ * @tc.name: ClearMainSessions001
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+>>>>>>> dd875308b (支持删除指定任务UT补充)
  * @tc.type: FUNC
 */
 HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Level3)
@@ -1562,6 +1567,67 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions, Function | SmallTest | Leve
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(clearFailedIds.size(), 0);
 }
+<<<<<<< HEAD
+=======
+
+/**
+ * @tc.name: ClearMainSessions002
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    if (sceneSession1 == nullptr) {
+        return;
+    }
+    SessionInfo info2;
+    info2.abilityName_ = "test1";
+    info2.bundleName_ = "test1";
+    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    if (sceneSession2 == nullptr) {
+        return;
+    }
+
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1}, 
+        {sceneSession2->GetPersistentId(), sceneSession2});
+    std::vector<int32_t> persistentIds = {sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
+}
+
+/**
+ * @tc.name: ClearMainSessions003
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (sceneSession == nullptr) {
+        return;
+    }
+    int32_t invalidPersistentId = -1;
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId(), invalidPersistentId};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
+}
+
+>>>>>>> dd875308b (支持删除指定任务UT补充)
 }
 } // namespace Rosen
 } // namespace OHOS
