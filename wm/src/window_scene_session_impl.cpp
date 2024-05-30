@@ -878,7 +878,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
 
     if (ret == WMError::WM_OK) {
-        if (state_ == WindowState::STATE_HIDDEN) {
+        if (state_ == WindowState::STATE_HIDDEN && uiContent_ != nullptr) {
             uiContent_->SetFrameLayoutFinishCallback([this]() {
                 surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             });
