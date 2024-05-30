@@ -550,7 +550,6 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, Function 
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->mainWindow_ = nullptr;
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
-    pipControl->mainWindow_ = mw;
 }
 
 /**
