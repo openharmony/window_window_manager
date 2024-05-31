@@ -1731,11 +1731,9 @@ public:
      * @brief Get System Bar(include status bar and nav bar) Properties
      *
      * @param properties system bar properties got
-     * @param propertyFlags flags of system bar property
      * @return WMError
      */
-    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
     {
         return WMError::WM_OK;
     }

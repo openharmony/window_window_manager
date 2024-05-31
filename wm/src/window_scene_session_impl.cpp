@@ -1699,14 +1699,12 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "GetSystemBarProperties windowId:%{public}u", GetWindowId());
     if (property_ != nullptr) {
         auto curProperties = property_->GetSystemBarProperty();
         properties[WindowType::WINDOW_TYPE_STATUS_BAR] = curProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
-        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     } else {
         TLOGW(WmsLogTag::WMS_IMMS, "inner property is null, windowId:%{public}u", GetWindowId());
     }
