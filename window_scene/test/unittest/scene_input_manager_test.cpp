@@ -23,6 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+constexpr int MAX_WINDOWINFO_NUM = 15;
 class SceneInputManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -605,6 +606,28 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, Function | SmallTest | Level3)
     result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
     ASSERT_TRUE(result);
     displayInfos[0].displayMode = MMI::DisplayMode::UNKNOWN;
+}
+
+/**
+ * @tc.name: UpdateDisplayAndWindowInfo
+ * @tc.desc: UpdateDisplayAndWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    windowinfo.defaultHotAreas = std::vector<MMI::Rect>(MMI::WindowInfo::DEFAULT_HOTAREA_COUNT + 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    windowinfo.defaultHotAreas = std::vector<MMI::Rect>();
+    windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM - 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM + 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
 }
 }
 }
