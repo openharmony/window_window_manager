@@ -82,6 +82,11 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
     return rotation;
 }
 
+bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
+{
+    return a.defaultHotAreas.size() > b.defaultHotAreas.size();
+}
+
 void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const
 {
     if (sceneSession == nullptr || sceneSession->GetSessionProperty() == nullptr) {
@@ -317,7 +322,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
     const auto sceneSessionMap = Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
-    std::string windowIDLstLog;
+    uint32_t maxHotAreasNum = 0;
     for (const auto& sceneSessionValuePair : sceneSessionMap) {
         const auto& sceneSessionValue = sceneSessionValuePair.second;
         if (sceneSessionValue == nullptr) {
@@ -340,10 +345,13 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
                 iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
-        windowIDLstLog.append(std::to_string(windowInfo.id).append(", "));
+        if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
+            maxHotAreasNum = windowInfo.defaultHotAreas.size();
+        }
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "windowIDList: size:%{public}d %{public}s ",
-        static_cast<int>(windowInfoList.size()), windowIDLstLog.c_str());
+    if (maxHotAreasNum > MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
+        std::sort(windowInfoList.begin(), windowInfoList.end(), CmpMMIWindowInfo);
+    }
     return windowInfoList;
 }
 
@@ -475,7 +483,6 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
         static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
-        WLOGFI("Add handwrite flag for session, id: %{public}d", windowId);
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
     }
     UpdatePrivacyMode(sceneSession, windowInfo);
