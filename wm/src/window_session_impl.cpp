@@ -837,7 +837,7 @@ void WindowSessionImpl::NotifyUIBufferAvailable()
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto promoteThis = weakThis.promote();
         if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr &&
-            promoteThis->frameLayoutFinishCallbackFlag_) {
+            promoteThis->bufferAvailablCallbackFlag_) {
             // false: Make the function callable
             promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             promoteThis->UpdateBufferAvailableCallbackFlag(false);
