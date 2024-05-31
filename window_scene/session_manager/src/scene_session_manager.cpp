@@ -1165,6 +1165,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSessionInner,
         this, std::placeholders::_1);
+    specificCb->onClearDisplayStatusBarTemporarilyFlags_ =
+        std::bind(&SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags, this);
     specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
     specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
@@ -1633,7 +1635,10 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (scnSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(scnSession);
-        PreHandleCollaborator(scnSession, persistentId);
+        if (!PreHandleCollaborator(scnSession, persistentId)) {
+            scnSession->NotifySessionException(SetAbilitySessionInfo(scnSession), true);
+            return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
+        }
     }
     auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
     if (!scnSessionInfo) {
@@ -6802,6 +6807,17 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
 }
 
+void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
+{
+    for (auto persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        sceneSession->SetIsDisplayStatusBarTemporarily(false);
+    }
+}
+
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -7626,11 +7642,11 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
+bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
         WLOGFI("sceneSession is null");
-        return;
+        return false;
     }
     std::string sessionAffinity;
     WLOGFI("call NotifyStartAbility & NotifySessionCreate");
@@ -7644,7 +7660,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
             WLOGFI("notifyReturn not BROKER_STARTED!");
-            return;
+            return false;
         }
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
@@ -7658,6 +7674,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
+    return true;
 }
 
 void SceneSessionManager::AddWindowDragHotArea(uint32_t type, WSRect& area)

@@ -1036,6 +1036,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         return;
     }
     if (isDisplayStatusBarTemporarily_.load()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "temporary show status bar, no need to avoid");
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector;
@@ -1129,6 +1130,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
 {
     if (isDisplayStatusBarTemporarily_.load()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
         return;
     }
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
