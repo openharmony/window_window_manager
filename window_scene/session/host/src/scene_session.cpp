@@ -29,6 +29,9 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#ifdef DEVICE_STATUS_ENABLE
+#include "interaction_manager.h"
+#endif // DEVICE_STATUS_ENABLE
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "session/screen/include/screen_session.h"
@@ -682,6 +685,12 @@ WSError SceneSession::NotifyClientToUpdateRectTask(
         ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
     } else {
         ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+#ifdef DEVICE_STATUS_ENABLE
+        // When the drag is in progress, the drag window needs to be notified to rotate.
+        if (rsTransaction != nullptr) {
+            RotateDragWindow(rsTransaction);
+        }
+#endif // DEVICE_STATUS_ENABLE
     }
 
     return ret;
@@ -1533,6 +1542,17 @@ void SceneSession::ClearEnterWindow()
     std::lock_guard<std::mutex> guard(enterSessionMutex_);
     enterSession_ = nullptr;
 }
+
+#ifdef DEVICE_STATUS_ENABLE
+void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction)
+{
+    Msdp::DeviceStatus::DragState state = Msdp::DeviceStatus::DragState::STOP;
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->GetDragState(state);
+    if (state == Msdp::DeviceStatus::DragState::START) {
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->RotateDragWindowSync(rsTransaction);
+    }
+}
+#endif // DEVICE_STATUS_ENABLE
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
