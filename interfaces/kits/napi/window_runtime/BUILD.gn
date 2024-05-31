@@ -65,13 +65,13 @@ ohos_shared_library("window_native_kit") {
     "window_napi/js_window_utils.cpp",
   ]
 
+  public_config = [
+    ":window_native_kit_public_config",
+  ]
+
   configs = [
     ":window_native_kit_config",
     "../../../../resources/config/build:coverage_flags",
-  ]
-
-  public_config = [
-    ":window_native_kit_public_config",
   ]
 
   deps = [
