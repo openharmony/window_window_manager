@@ -1996,9 +1996,12 @@ WMError WindowSceneSessionImpl::Close()
         }
     } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
         WLOGFI("WindowSceneSessionImpl::Close subwindow or dialog");
-        return Destroy(true);
+        bool terminateCloseProcess = false;
+        NotifySubWindowClose(terminateCloseProcess);
+        if (!terminateCloseProcess || isDialogWindow) {
+            return Destroy(true);
+        }
     }
-
     return WMError::WM_OK;
 }
 
