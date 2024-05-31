@@ -878,7 +878,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
 
     if (ret == WMError::WM_OK) {
-        NotifyUIBufferAvailable();
+        if (state_ == WindowState::STATE_HIDDEN){
+            UpdateBufferAvailableCallbackFlag(true);
+        }
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
@@ -897,24 +899,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     NotifyWindowStatusChange(GetMode());
     NotifyDisplayInfoChange();
     return ret;
-}
-
-void WindowSceneSessionImpl::NotifyUIBufferAvailable()
-{
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (state_ == WindowState::STATE_HIDDEN && uiContent_ != nullptr) {
-        frameLayoutFinishCallbackFlag_ = true;
-        wptr<WindowSceneSessionImpl> weakThis = this;
-        uiContent_->SetFrameLayoutFinishCallback([weakThis]() {
-            auto promoteThis = weakThis.promote();
-            if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr &&
-                promoteThis->frameLayoutFinishCallbackFlag_) {
-                // false: Make the function callable
-                promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-                promoteThis->frameLayoutFinishCallbackFlag_ = false;
-            }
-        });
-    }
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
