@@ -1663,7 +1663,7 @@ HWTEST_F(WindowSessionTest2, ResetSessionConnectState, Function | SmallTest | Le
  * @tc.desc: PostExportTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, PostExportTask02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     std::string name = "sessionExportTask";
@@ -1680,10 +1680,10 @@ HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
  * @tc.desc: SetLeashWinSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->leashWinSurfaceNode_ = WindowSessionTest::CreateRSSurfaceNode();
+    session_->leashWinSurfaceNode_ = WindowSessionTest2::CreateRSSurfaceNode();
     session_->SetLeashWinSurfaceNode(nullptr);
 
     session_->leashWinSurfaceNode_ = nullptr;
@@ -1697,7 +1697,7 @@ HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Lev
  * @tc.desc: GetCloseAbilityWantAndClean
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     AAFwk::Want outWant;
@@ -1715,7 +1715,7 @@ HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | 
  * @tc.desc: SetScreenId Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetScreenId02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     uint64_t screenId = 0;
@@ -1729,7 +1729,7 @@ HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
  * @tc.desc: SetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->isFocused_ = true;
