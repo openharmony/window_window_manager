@@ -1074,6 +1074,18 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | Smal
 }
 
 /**
+ * @tc.name: NotifyHostWindowMode
+ * @tc.desc: NotifyHostWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyHostWindowMode, Function | SmallTest | Level3)
+{
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyHostWindowMode(mode));
+    ASSERT_EQ(mode, window_->GetMode());
+}
+
+/**
  * @tc.name: UpdateConfiguration
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
