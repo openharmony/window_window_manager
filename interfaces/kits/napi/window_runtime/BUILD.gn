@@ -65,7 +65,7 @@ ohos_shared_library("window_native_kit") {
     "window_napi/js_window_utils.cpp",
   ]
 
-  public_config = [
+  public_configs = [
     ":window_native_kit_public_config",
   ]
 
