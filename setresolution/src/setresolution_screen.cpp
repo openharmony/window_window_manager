@@ -16,18 +16,18 @@
 #include <iostream>
 
 #include "dm_common.h"
+#include "parameters.h"
 #include "screen_manager.h"
 #include "setresolution_utils.h"
-#include "parameters.h"
 
 using namespace OHOS;
 using namespace OHOS::Rosen;
 using OHOS::system::GetIntParameter;
 
-// debug
+// ENG mode
 constexpr int32_t DEBUG_ON_DEFAULT = 0;
 static const std::string ENG_PARAMETER = "const.debuggable";
-const bool IS_ENG_MODE = static_cast<bool>(GetIntParameter(ENG_PARAMETER, DEBUG_ON_DEFAULT));
+static const bool IS_ENG_MODE = static_cast<bool>(GetIntParameter(ENG_PARAMETER, DEBUG_ON_DEFAULT));
 
 int main(int argc, char *argv[])
 {
