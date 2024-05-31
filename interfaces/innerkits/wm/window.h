@@ -73,8 +73,8 @@ struct SystemBarPropertyFlag {
     bool contentColorFlag;
     bool enableAnimationFlag;
     SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false),
-    enableAnimationFlag(false) {}
-}
+        enableAnimationFlag(false) {}
+};
 
 /**
  * @class IWindowLifeCycle
@@ -1715,7 +1715,7 @@ public:
     }
 
     /**
-     * @brief Set Specific System Bar(include status bar and nav bar) Properties
+     * @brief Set System Bar(include status bar and nav bar) Properties
      *
      * @param properties system bar properties
      * @param propertyFlags flags of system bar property
@@ -1726,11 +1726,11 @@ public:
     {
         return WMError::WM_OK;
     }
-
+    
     /**
      * @brief Get System Bar(include status bar and nav bar) Properties
      *
-     * @param properties system bar properties
+     * @param properties system bar properties got
      * @param propertyFlags flags of system bar property
      * @return WMError
      */
