@@ -1092,6 +1092,8 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         TLOGE(WmsLogTag::DMS, "SuspendBegin permission denied!");
         return false;
     }
+
+    gotScreenlockFingerprint_ = false;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SuspendBegin  reason: %{public}u", static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
@@ -1366,6 +1368,13 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
 
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) {
+        gotScreenlockFingerprint_ = false;
+        return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
+            DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+    }
+
     if (foldScreenController_ != nullptr) {
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
     } else {
@@ -1381,6 +1390,12 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (!notifyLockOrNot_) {
         return true;
     }
+
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) {
+        gotScreenlockFingerprint_ = false;
+    }
+
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
@@ -1503,10 +1518,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         isScreenLockSuspend_ = true;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend_  is true");
         if (needScreenOffNotify_) {
-            std::unique_lock <std::mutex> lock(screenOffMutex_);
-            screenOffCV_.notify_all();
-            needScreenOffNotify_ = false;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
+            ScreenOffCVNotify();
         }
     }
 
@@ -1516,12 +1528,26 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         isScreenLockSuspend_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
         if (needScreenOffNotify_) {
-            std::unique_lock <std::mutex> lock(screenOffMutex_);
-            screenOffCV_.notify_all();
-            needScreenOffNotify_ = false;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
+            ScreenOffCVNotify();
         }
     }
+
+    if (event == DisplayEvent::SCREEN_LOCK_FINGERPRINT) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
+        gotScreenOffNotify_ = true;
+        gotScreenlockFingerprint_ = true;
+        if (needScreenOffNotify_) {
+            ScreenOffCVNotify();
+        }
+    }
+}
+
+void ScreenSessionManager::ScreenOffCVNotify(void)
+{
+    std::unique_lock <std::mutex> lock(screenOffMutex_);
+    screenOffCV_.notify_all();
+    needScreenOffNotify_ = false;
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
 }
 
 ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
