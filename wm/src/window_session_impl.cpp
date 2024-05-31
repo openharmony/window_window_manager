@@ -825,29 +825,29 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     {
         std::unique_lock<std::shared_mutex> wlock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        NotifyUIBufferAvailable();
+        RegisterFrameLayoutCallback();
         WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::NotifyUIBufferAvailable()
+void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto promoteThis = weakThis.promote();
         if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr &&
-            promoteThis->bufferAvailablCallbackFlag_) {
+            promoteThis->enableSetBufferAvaliableCallback_) {
             // false: Make the function callable
             promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            promoteThis->UpdateBufferAvailableCallbackFlag(false);
+            promoteThis->UpdateBufferAvaliableCallbackEnable(false);
         }
     });
 }
 
-void WindowSessionImpl::UpdateBufferAvailableCallbackFlag(bool flag)
+void WindowSessionImpl::UpdateBufferAvaliableCallbackEnable(bool enable)
 {
-    bufferAvailablCallbackFlag_ = flag;
+    enableSetBufferAvaliableCallback_ = enable;
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,

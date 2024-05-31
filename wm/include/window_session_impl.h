@@ -253,8 +253,8 @@ protected:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    void UpdateBufferAvailableCallbackFlag(bool flag);
-    void NotifyUIBufferAvailable();
+    void UpdateBufferAvaliableCallbackEnable(bool enable);
+    void RegisterFrameLayoutCallback();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -397,7 +397,7 @@ private:
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
     sptr<WindowOption> windowOption_;
-    bool bufferAvailablCallbackFlag_ = true;
+    bool enableSetBufferAvaliableCallback_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS
