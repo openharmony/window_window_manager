@@ -46,6 +46,7 @@ config("window_native_kit_public_config") {
   include_dirs = [
     "window_napi",
   ]
+
 }
 
 ohos_shared_library("window_native_kit") {
