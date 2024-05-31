@@ -67,6 +67,14 @@ class RSSurfaceNode;
 class RSTransaction;
 class ISession;
 
+struct SystemBarPropertyFlag {
+    bool enableFlag;
+    bool backgroundColorFlag;
+    bool contentColorFlag;
+    SystemBarPropertyFlag() : enableFlag(false),
+        backgroundColorFlag(false), contentColorFlag(false) {}
+};
+
 /**
  * @class IWindowLifeCycle
  *
@@ -1701,6 +1709,32 @@ public:
      * @return WMError
      */
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Properties
+     *
+     * @param properties system bar properties
+     * @param propertyFlags flags of system bar property
+     * @return WMError
+     */
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get System Bar(include status bar and nav bar) Properties
+     *
+     * @param properties system bar properties
+     * @param propertyFlags flags of system bar property
+     * @return WMError
+     */
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
     {
         return WMError::WM_OK;
     }

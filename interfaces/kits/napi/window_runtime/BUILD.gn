@@ -40,6 +40,14 @@ config("window_native_kit_config") {
   ]
 }
 
+config("window_native_kit_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "window_napi",
+  ]
+}
+
 ohos_shared_library("window_native_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -59,6 +67,10 @@ ohos_shared_library("window_native_kit") {
   configs = [
     ":window_native_kit_config",
     "../../../../resources/config/build:coverage_flags",
+  ]
+
+  public_config = [
+    ":window_native_kit_public_config",
   ]
 
   deps = [
