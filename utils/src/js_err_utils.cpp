@@ -214,25 +214,25 @@ napi_value JsErrUtils::CreateJsValue(napi_env env, const T& value)
 
 std::string JsErrUtils::GetErrorMsg(const WMError& errorCode)
 {
-    return WM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) == WM_ERROR_TO_ERROR_MSG_MAP.end() ?
+    return WM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != WM_ERROR_TO_ERROR_MSG_MAP.end() ?
         WM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
 std::string JsErrUtils::GetErrorMsg(const WmErrorCode& errorCode)
 {
-    return WM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) == WM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
+    return WM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) != WM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
         WM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
 std::string JsErrUtils::GetErrorMsg(const DMError& errorCode)
 {
-    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) == DM_ERROR_TO_ERROR_MSG_MAP.end() ?
+    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
         DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
 std::string JsErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
 {
-    return DM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) == DM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
+    return DM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
         DM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 

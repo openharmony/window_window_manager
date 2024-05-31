@@ -718,6 +718,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SwitchUser();
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<uint64_t> windowIdList;
+            if (!data.ReadUInt64Vector(&windowIdList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to receive windowIdList in stub");
+                break;
+            }
+            SetVirtualScreenBlackList(screenId, windowIdList);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

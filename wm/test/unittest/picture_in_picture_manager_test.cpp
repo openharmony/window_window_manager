@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
+#include "singleton_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,6 +47,54 @@ void PictureInPictureManagerTest::TearDown()
 }
 
 namespace {
+
+/**
+ * @tc.name: ReportPiPStartWindow
+ * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
+{
+    int result = 0;
+    int32_t source = 0;
+    std::string errorReason = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    ASSERT_EQ(result, 0);
+    source = 1;
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    ASSERT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ReportPiPActionEvent
+ * @tc.desc: ReportPiPActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
+{
+    int result = 0;
+    std::string actionEvent = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
+    ASSERT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ReportPiPRatio
+ * @tc.desc: ReportPiPRatio/ReportPiPRestore
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, ReportPiPRatio, Function | SmallTest | Level2)
+{
+    int result = 0;
+    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(100, 120);
+    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
+}
+
 
 /**
  * @tc.name: PiPWindowState
@@ -251,6 +300,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::activeController_ = nullptr;
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
+    PictureInPictureManager::DoDestroy();
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
     ASSERT_EQ(result, 0);
@@ -261,10 +311,13 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
+    PictureInPictureManager::DoDestroy();
     const std::string ACTION_CLOSE = "close";
     const std::string ACTION_RESTORE = "restore";
+    const std::string ACTION_DESTROY = "destroy";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
+    PictureInPictureManager::DoActionEvent(ACTION_DESTROY, 0);
     ASSERT_EQ(result, 1);
 }
 
@@ -276,6 +329,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
 {
     int result = 0;
+
     std::string navId = "";
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::AutoStartPipWindow(navId);
@@ -293,6 +347,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     ASSERT_NE(navId, "");
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, "close");
 }
 
 }

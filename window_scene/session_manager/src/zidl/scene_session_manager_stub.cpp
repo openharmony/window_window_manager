@@ -234,14 +234,14 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
     }
 
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
     } else {
-        WLOGI("accept token is nullptr");
+        TLOGI(WmsLogTag::WMS_RECOVER, "accept token is nullptr");
     }
 
     sptr<ISession> sceneSession;
@@ -256,14 +256,14 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
 
 int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleRecoverAndReconnectSceneSession!");
+    TLOGI(WmsLogTag::WMS_RECOVER, "run");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-        WLOGFE("Failed to read scene session stage object or event channel object!");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
 
@@ -271,14 +271,14 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
     }
 
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
     } else {
-        WLOGI("accept token is nullptr");
+        TLOGI(WmsLogTag::WMS_RECOVER, "accept token is nullptr");
     }
 
     sptr<ISession> sceneSession;
@@ -293,8 +293,8 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
 
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSession!");
     auto persistentId = data.ReadInt32();
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -304,7 +304,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     MessageParcel& reply)
 {
     auto persistentId = data.ReadInt32();
-    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
