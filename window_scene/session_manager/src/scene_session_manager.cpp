@@ -4850,7 +4850,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
     auto screenProperties = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     for (auto& iter : screenProperties) {
         auto displayId = iter.first;
-        std::vector<std::string> privacyBundleList;
+        std::unordered_set<std::string> privacyBundleList;
         GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
 
         ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
