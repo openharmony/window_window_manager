@@ -583,9 +583,9 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
 {
     bool ret = false;
     {
-        std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            ret = uiContent_->ProcessKeyEvent(keyEvent, true);
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            ret = uiContent->ProcessKeyEvent(keyEvent, true);
         }
     }
     RefreshNoInteractionTimeoutMonitor();
@@ -1543,7 +1543,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
         TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
@@ -1554,9 +1553,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     if (version >= 10) {
         TLOGI(WmsLogTag::WMS_IMMS, "SetIgnoreViewSafeArea winId:%{public}u status:%{public}d",
             GetWindowId(), static_cast<int32_t>(status));
-        std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            uiContent_->SetIgnoreViewSafeArea(status);
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            uiContent->SetIgnoreViewSafeArea(status);
         }
     } else {
         TLOGI(WmsLogTag::WMS_IMMS, "SetWindowNeedAvoidFlag winId:%{public}u status:%{public}d",
@@ -2030,10 +2029,10 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
         isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
     } else {
-        std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
             WLOGFD("Transfer back event to uiContent");
-            isConsumed = uiContent_->ProcessBackPressed();
+            isConsumed = uiContent->ProcessBackPressed();
         } else {
             WLOGFE("There is no back event consumer");
         }
@@ -2148,12 +2147,12 @@ WMError WindowSceneSessionImpl::SetGrayScale(float grayScale)
         WLOGFE("invalid grayScale value: %{public}f", grayScale);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (uiContent_ == nullptr) {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->SetContentNodeGrayScale(grayScale);
+    uiContent->SetContentNodeGrayScale(grayScale);
     WLOGI("Set window gray scale success, grayScale: %{public}f", grayScale);
     return WMError::WM_OK;
 }
@@ -2242,10 +2241,10 @@ uint32_t WindowSceneSessionImpl::GetWindowFlags() const
 void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     {
-        std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
             WLOGFD("notify ace winId:%{public}u", GetWindowId());
-            uiContent_->UpdateConfiguration(configuration);
+            uiContent->UpdateConfiguration(configuration);
         }
     }
     if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
@@ -2581,14 +2580,14 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", GetWindowId(), level);
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (uiContent_ == nullptr) {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", GetWindowName().c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
     // notify memory level
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ArkUI:NotifyMemoryLevel");
-    uiContent_->NotifyMemoryLevel(level);
+    uiContent->NotifyMemoryLevel(level);
     WLOGFD("WindowSceneSessionImpl::NotifyMemoryLevel End!");
     return WMError::WM_OK;
 }
@@ -2675,9 +2674,9 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
     wptr<WindowSessionProperty> propertyToken(property_);
     wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTransitionController_);
 
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (uiContent_) {
-        uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
+        uiContent->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
             auto property = propertyToken.promote();
             auto animationTransitionController = animationTransitionControllerToken.promote();
             if (!property || !animationTransitionController) {
@@ -2838,9 +2837,9 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
     }
     WLOGFD("ArkUI:DumpInfo");
     {
-        std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            uiContent_->DumpInfo(params, info);
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            uiContent->DumpInfo(params, info);
         }
     }
     for (auto iter = info.begin(); iter != info.end();) {
@@ -2924,12 +2923,12 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
 WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 {
     WLOGFI("UpdateMaximizeMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (uiContent_ == nullptr) {
-        WLOGFE("UpdateMaximizeMode uiContent_ is null");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("UpdateMaximizeMode uiContent is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    uiContent_->UpdateMaximizeMode(mode);
+    uiContent->UpdateMaximizeMode(mode);
     property_->SetMaximizeMode(mode);
     return WSError::WS_OK;
 }
@@ -2952,12 +2951,12 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
-    if (uiContent_ == nullptr) {
-        WLOGFE("UpdateTitleInTargetPos uiContent_ is null");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("UpdateTitleInTargetPos uiContent is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    uiContent_->UpdateTitleInTargetPos(isShow, height);
+    uiContent->UpdateTitleInTargetPos(isShow, height);
     return WSError::WS_OK;
 }
 
