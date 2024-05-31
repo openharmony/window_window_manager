@@ -63,6 +63,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         parcel, reply, option);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
+            SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
+        parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
         parcel, reply, option);
     SceneSessionManager::GetInstance().OnRemoteRequest(
