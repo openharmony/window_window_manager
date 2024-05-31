@@ -142,7 +142,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
-    napi_get_named_property(env, optionObject, "nodeController", &nodeController);
+    napi_get_named_property(env, optionObject, "customUIController", &nodeController);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
