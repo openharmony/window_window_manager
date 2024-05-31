@@ -107,6 +107,7 @@ enum class DisplayEvent : uint32_t {
     KEYGUARD_DRAWN,
     SCREEN_LOCK_SUSPEND,
     SCREEN_LOCK_OFF,
+    SCREEN_LOCK_FINGERPRINT,
 };
 
 /**

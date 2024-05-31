@@ -41,6 +41,7 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void WindowSceneSessionImplTest2::SetUpTestCase() {}
@@ -55,6 +56,7 @@ void WindowSceneSessionImplTest2::SetUp()
 void WindowSceneSessionImplTest2::TearDown()
 {
     abilityContext_ = nullptr;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -322,6 +324,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
     } else {
         ASSERT_EQ(WMError::WM_OK, windowscenesession->SetAlpha(1.0));
     }
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Destroy(false));
 }
 
 /**
@@ -590,6 +593,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopWindowWithContext01, Function | Smal
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->GetTopWindowWithContext(context);
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Destroy(false));
 }
 
 /**
@@ -613,6 +617,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetMainWindowWithContext01, Function | Sma
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->GetMainWindowWithContext(context);
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Destroy(false));
 }
 
 /**
@@ -1542,6 +1547,7 @@ HWTEST_F(WindowSceneSessionImplTest2, TestGetUIContentWithId, Function | SmallTe
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->Destroy(true);
 }
 
 /**
