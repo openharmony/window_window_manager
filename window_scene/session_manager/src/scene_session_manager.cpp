@@ -4836,11 +4836,25 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     }
 
     std::vector<std::string> bundleListForNotify(privacyBundleList.begin(), privacyBundleList.end());
-    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !bundleListForNotify.empty());
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+        !bundleListForNotify.empty() || combinedExtWindowFlags_.privacyModeFlag);
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
     for (const auto& bundle : bundleListForNotify) {
         TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
               displayId, bundle.c_str());
+    }
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
+{
+    auto screenProperties = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    for (auto& iter : screenProperties) {
+        auto displayId = iter.first;
+        std::vector<std::string> privacyBundleList;
+        GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+
+        ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+            !privacyBundleList.empty() || combinedExtWindowFlags_.privacyModeFlag);
     }
 }
 
@@ -8249,6 +8263,9 @@ void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId
     }
     if (actions.hideNonSecureWindowsFlag) {
         HideNonSecureFloatingWindows();
+    }
+    if (actions.privacyModeFlag) {
+        UpdatePrivateStateAndNotifyForAllScreens();
     }
 }
 

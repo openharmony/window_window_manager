@@ -241,6 +241,7 @@ public:
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
+    void UpdatePrivateStateAndNotifyForAllScreens();
     void InitPersistentStorage();
     std::string GetSessionSnapshotFilePath(int32_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
