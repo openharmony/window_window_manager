@@ -82,6 +82,8 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
+    WSError NotifyHostWindowMode(WindowMode mode) override;
+    WindowMode GetMode() const override;
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
@@ -104,6 +106,7 @@ private:
 
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
+    std::atomic<WindowMode> hostWindowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;

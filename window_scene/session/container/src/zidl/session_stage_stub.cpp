@@ -71,6 +71,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleUpdateTitleInTargetPos),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
         &SessionStageStub::HandleNotifyDensityFollowHost),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HOST_WINDOW_MODE),
+        &SessionStageStub::HandleNotifyHostWindowMode),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE),
         &SessionStageStub::HandleNotifyWindowVisibilityChange),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE),
@@ -400,6 +402,14 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
 
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyHostWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "called");
+    WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
+    NotifyHostWindowMode(mode);
     return ERR_NONE;
 }
 
