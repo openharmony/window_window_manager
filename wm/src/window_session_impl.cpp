@@ -824,8 +824,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> wlock(uiContentMutex_);
-        NotifyUIBufferAvailable();
         uiContent_ = std::move(uiContent);
+        NotifyUIBufferAvailable();
         WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
