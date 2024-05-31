@@ -1684,31 +1684,30 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-   const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) 
-{
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) {
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
-       (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_ )){
-        current.contentColor_ = propertyIter->second.contentColor_；
+    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
+        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
+        current.contentColor_ = propertyIter->second.contentColor_;
         TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set status bar content color %{public}u",
         GetWindowId(), GetWindowName().c_str(), current.contentColor_);
-        return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR. current);
-      }
+        return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    }
     return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties,
-   std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "GetSystemBarProperties windowId:%{public}u", GetWindowId());
-    if(property_  != nullptr) {
+    if (property_ != nullptr) {
         auto curProperties = property_->GetSystemBarProperty();
         properties[WindowType::WINDOW_TYPE_STATUS_BAR] = curProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
         propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     } else {
-        TLOGI(WmsLogTag::WMS_IMMS, "inner property is null, windowId:%{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_IMMS, "inner property is null, windowId:%{public}u", GetWindowId());
     }
     return WMError::WM_OK;
 }
