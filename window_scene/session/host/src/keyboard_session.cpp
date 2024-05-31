@@ -164,8 +164,8 @@ WSError KeyboardSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction>
 
 void KeyboardSession::OnKeyboardPanelUpdated()
 {
-    if (!isKeyboardPanelEnabled_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
+    if (!IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground no need raise callingSession");
         return;
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
