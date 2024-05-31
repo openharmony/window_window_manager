@@ -875,6 +875,14 @@ bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
     return true;
 }
 
+void ConvertJSSystemBarStyleToSystemBarPropertiew(napi_env env, napi_value jsObject,
+    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromJs(env, jsObject, "statusBarContentColor",
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_, 
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag);
+}
+
 napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type)
 {
     napi_value objValue = nullptr;
