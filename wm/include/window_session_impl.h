@@ -397,7 +397,7 @@ private:
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
     sptr<WindowOption> windowOption_;
-    bool enableSetBufferAvaliableCallback_ = true;
+    bool enableSetBufferAvaliableCallback_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
