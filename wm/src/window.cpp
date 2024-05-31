@@ -207,7 +207,7 @@ sptr<Window> Window::GetWindowWithId(uint32_t windId)
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return WindowSceneSessionImpl::GetWindowWithId(windId);
     } else {
-        return windowImpl::GetWindowWithId(windId);
+        return WindowImpl::GetWindowWithId(windId);
     }
 }
 
