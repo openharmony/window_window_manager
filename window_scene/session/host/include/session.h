@@ -203,6 +203,8 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
+    void SetSessionOldRect(const WSRect& rect);
+    WSRect GetSessionOldRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -477,6 +479,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
+    WSRect oldWinRect_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
