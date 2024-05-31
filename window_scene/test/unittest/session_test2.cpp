@@ -1746,7 +1746,7 @@ HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
  * @tc.desc: GetFocused Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, GetFocused, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool result = session_->GetFocused();
@@ -1762,7 +1762,7 @@ HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
  * @tc.desc: UpdatePointerArea Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdatePointerArea, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 0, 0 };
@@ -1776,7 +1776,7 @@ HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
  * @tc.desc: UpdateSizeChangeReason Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -1789,7 +1789,7 @@ HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Lev
  * @tc.desc: UpdateDensity Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdateDensity, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdateDensity, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
@@ -1810,7 +1810,7 @@ HWTEST_F(WindowSessionTest, UpdateDensity, Function | SmallTest | Level2)
  * @tc.desc: windowEventChannel_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
