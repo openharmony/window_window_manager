@@ -1684,7 +1684,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) 
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -1692,8 +1692,9 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
     if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
         (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
         current.contentColor_ = propertyIter->second.contentColor_;
-        TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s set status bar content color %{public}u",
-        GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        TLOGI(WmsLogTag::WMS_IMMS,
+            "windowId:%{public}u %{public}s set status bar content color %{public}u",
+            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
         return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
     }
     return WMError::WM_OK;
