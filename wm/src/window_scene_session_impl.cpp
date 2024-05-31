@@ -1684,7 +1684,8 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) {
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) 
+{
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
