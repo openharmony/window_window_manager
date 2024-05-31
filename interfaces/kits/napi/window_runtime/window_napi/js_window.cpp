@@ -4800,6 +4800,7 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
     return g_jsWindowMap[windowName];
 }
 
+__attribute__((no_sanitize("cfi")))
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
 {
     std::string windowName = window->GetWindowName();
