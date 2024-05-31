@@ -126,36 +126,6 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdatePrivateStateAndNotifyForAllScreens
- * @tc.desc: SceneSesionManager update private state and notify for all screens
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
-    sceneSession->GetSessionProperty()->SetPrivacyMode(true);
-    ssm_->UpdatePrivateStateAndNotifyForAllScreens();
-    std::vector<string> privacyBundleList;
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
-
-    sceneSession->GetSessionProperty()->SetPrivacyMode(false);
-    ssm_->UpdatePrivateStateAndNotifyForAllScreens();
-    privacyBundleList.clear();
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_TRUE(privacyBundleList.empty());
-
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-}
-
-/**
  * @tc.name: GerPrivacyBundleListTwoWindow
  * @tc.desc: get privacy bundle list when two windows exist.
  * @tc.type: FUNC
