@@ -249,16 +249,19 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
         tp = SUB_TP;
     }
-    #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, tp.c_str());
-    #endif
+#endif
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_SUB);
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-        PowerMgr::PowerMgrClient::GetInstance().SuspendDevice();
+        ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
+            PowerStateChangeReason::POWER_BUTTON);
         ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
@@ -269,7 +272,10 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
         screenId_ = onScreenId;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+                PowerStateChangeReason::POWER_BUTTON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
@@ -282,11 +288,11 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
 
 void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination");
-    #ifdef TP_FEATURE_ENABLE
-    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
-    #endif
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
+#endif
     // on main screen
     auto taskScreenOnMain = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");

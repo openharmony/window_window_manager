@@ -205,11 +205,11 @@ WMError SceneSessionManagerProxy::GetSessionSnapshotById(int32_t persistentId, S
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Write persistentId failed");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),

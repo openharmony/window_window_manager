@@ -731,4 +731,10 @@ DMError ScreenManagerAdapter::SetVirtualScreenRefreshRate(ScreenId screenId, uin
 
     return displayManagerServiceProxy_->SetVirtualScreenRefreshRate(screenId, refreshInterval);
 }
+
+void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    INIT_PROXY_CHECK_RETURN();
+    displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList);
+}
 } // namespace OHOS::Rosen

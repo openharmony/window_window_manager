@@ -66,6 +66,7 @@ export class PiPContent extends ViewPU {
                 console.debug(TAG, 'XComponent onLoad done');
             }));
             XComponent.size({ width: '100%', height: '100%' });
+            XComponent.backgroundColor(Color.Transparent);
         }), XComponent);
         this.observeComponentCreation2((d, e) => {
             If.create();

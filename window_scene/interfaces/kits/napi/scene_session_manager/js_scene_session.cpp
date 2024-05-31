@@ -1141,22 +1141,16 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         WLOGFE("[NAPI]Failed to convert parameter to callbackType");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
     if (value == nullptr || !NapiIsCallable(env, value)) {
         WLOGFE("[NAPI]Invalid argument");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     if (!IsCallbackTypeSupported(cbType)) {
@@ -1170,8 +1164,6 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
@@ -1195,22 +1187,16 @@ napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool visible = false;
     if (!ConvertFromJsValue(env, argv[0], visible)) {
         WLOGFE("[NAPI]Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     session->UpdateNativeVisibility(visible);
@@ -2391,14 +2377,9 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 void JsSceneSession::OnPrepareClosePiPSession()
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]OnPrepareClosePiPSession");
-    std::shared_ptr<NativeReference> jsCallBack = nullptr;
-    {
-        std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
-        auto iter = jsCbMap_.find(PREPARE_CLOSE_PIP_SESSION);
-        if (iter == jsCbMap_.end()) {
-            return;
-        }
-        jsCallBack = iter-> second;
+    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PREPARE_CLOSE_PIP_SESSION);
+    if (jsCallBack == nullptr) {
+        return;
     }
     auto task = [jsCallBack, env = env_]() {
         if (!jsCallBack) {

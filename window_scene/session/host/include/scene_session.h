@@ -64,6 +64,7 @@ using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persist
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using HandleSecureSessionShouldHideCallback = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
+using ClearDisplayStatusBarTemporarilyFlags = std::function<void()>;
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
@@ -80,6 +81,7 @@ public:
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
         SpecificSessionDestroyCallback onDestroy_;
+        ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags_;
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;

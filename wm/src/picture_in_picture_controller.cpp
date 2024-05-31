@@ -51,7 +51,7 @@ namespace {
         "settingsdata/SETTINGSDATA?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
-static uint32_t GetPipPriority(uint32_t pipTemplateType)
+uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
 {
     if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
         TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
@@ -327,25 +327,11 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
                 currentPipOption->GetPipTemplate(), FAILED, "pipController is null");
             return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
         }
+        session->window_->SetTransparent(true);
         session->ResetExtController();
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
-        if (ret != WmErrorCode::WM_OK) {
-            session->curState_ = PiPWindowState::STATE_UNDEFINED;
-            TLOGE(WmsLogTag::WMS_PIP, "Window destroy failed, err:%{public}u", ret);
-            int32_t err = static_cast<int32_t>(ret);
-            if (session->pipLifeCycleListener_ != nullptr) {
-                session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
-            }
-            SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-                currentPipOption->GetPipTemplate(), FAILED, "Window destroy failed");
-            return WMError::WM_ERROR_PIP_DESTROY_FAILED;
-        }
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        PictureInPictureManager::RemoveActiveController(session);
-        PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
-        session->window_ = nullptr;
         session->curState_ = PiPWindowState::STATE_STOPPED;
         std::string navId = session->pipOption_->GetNavigationId();
         if (navId != "" && session->mainWindow_) {
@@ -362,6 +348,38 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     };
     if (handler_) {
         handler_->PostTask(task, "wms:StopPictureInPicture", 0);
+    } else {
+        return task();
+    }
+    return WMError::WM_OK;
+}
+
+WMError PictureInPictureController::DestroyPictureInPictureWindow()
+{
+    auto task = [weakThis = wptr(this)]() {
+        TLOGI(WmsLogTag::WMS_PIP, "destroy pip window");
+        auto session = weakThis.promote();
+        if (!session || !session->window_) {
+            TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
+            return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
+        if (ret != WmErrorCode::WM_OK) {
+            session->curState_ = PiPWindowState::STATE_UNDEFINED;
+            TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
+            int32_t err = static_cast<int32_t>(ret);
+            if (session->pipLifeCycleListener_ != nullptr) {
+                session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
+            }
+            return WMError::WM_ERROR_PIP_DESTROY_FAILED;
+        }
+        PictureInPictureManager::RemoveActiveController(session);
+        PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
+        session->window_ = nullptr;
+        return WMError::WM_OK;
+    };
+    if (handler_) {
+        handler_->PostTask(task, "wms:DestroyPictureInPicture", 0);
     } else {
         return task();
     }
@@ -443,10 +461,10 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         float newHeight = 0;
         mainWindowXComponentController_->GetGlobalPosition(posX, posY);
         mainWindowXComponentController_->GetSize(newWidth, newHeight);
-        if (windowRect_.width_ != static_cast<uint32_t>(newWidth) ||
-            windowRect_.height_ != static_cast<uint32_t>(newHeight) ||
-            windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY)) {
-            Rect r = {posX, posY, newWidth, newHeight};
+        bool isSizeChange = IsContentSizeChanged(newWidth, newHeight, posX, posY);
+        if (isSizeChange) {
+            Rect r = {static_cast<int32_t>(posX), static_cast<int32_t>(posY),
+                static_cast<uint32_t>(newWidth), static_cast<uint32_t>(newHeight)};
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
@@ -455,6 +473,13 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
+}
+
+bool PictureInPictureController::IsContentSizeChanged(float width, float height, float posX, float posY)
+{
+    return windowRect_.width_ != static_cast<uint32_t>(width) ||
+        windowRect_.height_ != static_cast<uint32_t>(height) ||
+        windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY);
 }
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()

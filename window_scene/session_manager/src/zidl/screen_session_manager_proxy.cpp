@@ -2455,4 +2455,33 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteUInt64Vector(windowIdList)) {
+        WLOGFE("Write windowIdList failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

@@ -1532,6 +1532,30 @@ HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, Function |
     ASSERT_NE(session, nullptr);
 }
 
+/**
+ * @tc.name: CheckFocusIsDownThroughBlockingType
+ * @tc.desc: SceneSesionManager test focus switch.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, CheckFocusIsDownThroughBlockingType, Function | SmallTest | Level3)
+{
+    SessionInfo requestInfo;
+    requestInfo.abilityName_ = "testInfo1a";
+    requestInfo.bundleName_ = "testInfo1b";
+    sptr<SceneSession> sessionRequest = new(std::nothrow) SceneSession(requestInfo, nullptr);
+    EXPECT_NE(sessionRequest, nullptr);
+    sessionRequest->SetZOrder(20);
+
+    SessionInfo focusedInfo;
+    focusedInfo.abilityName_ = "testInfo2a";
+    focusedInfo.bundleName_ = "testInfo2b";
+    sptr<SceneSession> sessionFocused = new(std::nothrow) SceneSession(focusedInfo, nullptr);
+    EXPECT_NE(sessionFocused, nullptr);
+    sessionFocused->SetZOrder(19);
+
+    bool ret = ssm_->CheckFocusIsDownThroughBlockingType(sessionRequest, sessionFocused, false);
+    ASSERT_FALSE(ret);
+}
 
 /**
  * @tc.name: RaiseWindowToTop

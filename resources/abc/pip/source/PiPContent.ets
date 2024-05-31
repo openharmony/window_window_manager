@@ -37,11 +37,12 @@ export struct PiPContent {
           pip.initXComponentController(this.xComponentController);
           console.debug(TAG, 'XComponent onLoad done');
         })
-        .size({ width: '100%', height: '100%' });
+        .size({ width: '100%', height: '100%' })
+        .backgroundColor(Color.Transparent);
       if (this.nodeController !== null) {
         NodeContainer(this.nodeController)
           .size({ width: '100%', height: '100%' });
-      }
+      }  
     }
     .size({ width: '100%', height: '100%' });
   }

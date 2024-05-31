@@ -650,7 +650,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, 
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 400, 400, 400, 400, 2.0, 2.0 }; // sizeLimits: 400, 400, 400, 400, 2.0, 2.0
+    WindowLimits sizeLimits = { 400, 400, 400, 400, 2.0, 2.0 }; // sizeLimits: 400, 400, 400, 400, 2.0, 2.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     Rect finalRect;
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
@@ -696,7 +696,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, 
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
     Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
@@ -732,7 +732,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, 
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
 
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
@@ -782,7 +782,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, 
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
     Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
@@ -821,7 +821,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, 
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
     Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
@@ -948,7 +948,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow05,
 
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
     Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
@@ -976,7 +976,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeBySizeLimits, Function 
 
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
-    WindowSizeLimits sizeLimits = { 800, 400, 800, 400, 2.0, 1.0 }; // sizeLimits: 800, 400, 800, 400, 2.0, 1.0
+    WindowLimits sizeLimits = { 800, 400, 800, 400, 2.0, 1.0 }; // sizeLimits: 800, 400, 800, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
     layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);

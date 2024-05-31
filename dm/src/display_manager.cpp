@@ -1843,4 +1843,9 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     WLOGFD("Convert ScreenId %{public}" PRIu64" To RsScreenId %{public}" PRIu64"", screenId, rsScreenId);
     return res;
 }
+
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList);
+}
 } // namespace OHOS::Rosen
