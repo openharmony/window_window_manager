@@ -1771,7 +1771,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, Function | Small
  * @tc.desc: SceneSesionManager update private state and notify for all screens
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.bundleName_ = "bundleName";
