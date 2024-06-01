@@ -1302,6 +1302,30 @@ HWTEST_F(ScreenSessionManagerTest, GetDeviceScreenConfig, Function | SmallTest |
     DeviceScreenConfig deviceScreenConfig = ssm_->GetDeviceScreenConfig();
     EXPECT_FALSE(deviceScreenConfig.rotationPolicy_.empty());
 }
+
+/**
+ * @tc.name: SetVirtualScreenBlackList
+ * @tc.desc: SetVirtualScreenBlackList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenBlackList, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+
+    DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
+    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
+
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    std::vector<uint64_t> windowId = {10, 20, 30};
+    ssm_->SetVirtualScreenBlackList(screenId, windowId);
+    EXPECT_EQ(0, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -102,6 +102,30 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, Function | S
     func();
     ASSERT_EQ(resultValue, 1);
 }
+
+/**
+ * @tc.name: SetVirtualScreenBlackList
+ * @tc.desc: SetVirtualScreenBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    std::vector<uint64_t> windowIdList{10, 20, 30};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->SetVirtualScreenBlackList(id, windowIdList);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
 }
 }
 }

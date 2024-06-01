@@ -4379,5 +4379,6 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     }
     std::vector<uint64_t> surfaceNodeIds;
     clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds);
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
 }
 } // namespace OHOS::Rosen
