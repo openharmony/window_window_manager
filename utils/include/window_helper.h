@@ -43,6 +43,11 @@ public:
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
+    static inline bool IsModalSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
     static inline bool IsDialogWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_DIALOG;
