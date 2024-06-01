@@ -52,7 +52,8 @@ public:
             FinishTraceForSyncTask();
         };
         AppExecFwk::EventQueue::Priority priority = AppExecFwk::EventQueue::Priority::IMMEDIATE;
-        if (getpid() == gettid()) {
+        static pid_t pid = getpid();
+        if (pid == gettid()) {
             priority = AppExecFwk::EventQueue::Priority::VIP;
         }
         handler_->PostSyncTask(std::move(syncTask), "wms:" + name, priority);
