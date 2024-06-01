@@ -4836,11 +4836,25 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     }
 
     std::vector<std::string> bundleListForNotify(privacyBundleList.begin(), privacyBundleList.end());
-    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !bundleListForNotify.empty());
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+        !bundleListForNotify.empty() || specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
     for (const auto& bundle : bundleListForNotify) {
         TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
               displayId, bundle.c_str());
+    }
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
+{
+    auto screenProperties = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    for (auto& iter : screenProperties) {
+        auto displayId = iter.first;
+        std::unordered_set<std::string> privacyBundleList;
+        GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+
+        ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+            !privacyBundleList.empty() || specialExtWindowHasPrivacyMode_.load());
     }
 }
 
@@ -8162,6 +8176,7 @@ void SceneSessionManager::CalculateCombinedExtWindowFlags()
     for (const auto& iter: extWindowFlagsMap_) {
         combinedExtWindowFlags_.bitData |= iter.second.bitData;
     }
+    specialExtWindowHasPrivacyMode_.store(combinedExtWindowFlags_.privacyModeFlag);
 }
 
 void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags,
@@ -8251,6 +8266,9 @@ void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId
     }
     if (actions.hideNonSecureWindowsFlag) {
         HideNonSecureFloatingWindows();
+    }
+    if (actions.privacyModeFlag) {
+        UpdatePrivateStateAndNotifyForAllScreens();
     }
 }
 

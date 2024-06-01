@@ -1767,6 +1767,25 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, Function | Small
 }
 
 /**
+ * @tc.name: UpdatePrivateStateAndNotifyForAllScreens
+ * @tc.desc: SceneSesionManager update private state and notify for all screens
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->UpdatePrivateStateAndNotifyForAllScreens();
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    std::unordered_set<std::string> privacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+}
+
+/**
  * @tc.name: GerPrivacyBundleListOneWindow
  * @tc.desc: get privacy bundle list when one window exist only.
  * @tc.type: FUNC
