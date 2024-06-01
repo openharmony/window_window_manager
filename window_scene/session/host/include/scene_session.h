@@ -331,6 +331,9 @@ private:
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
     WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+#ifdef DEVICE_STATUS_ENABLE
+    void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
+#endif // DEVICE_STATUS_ENABLE
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnMoveDragCallback(const SizeChangeReason& reason);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
