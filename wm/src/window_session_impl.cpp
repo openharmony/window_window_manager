@@ -690,7 +690,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
-    
+
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint]: [%{public}u, %{public}u, %{public}u]",
         rotation, deviceRotation, transformHint);
@@ -795,16 +795,19 @@ WMError WindowSessionImpl::SetUIContentByAbc(
         BackupAndRestoreType::NONE, ability);
 }
 
+void WindowSessionImpl::DestroyExistUIContent()
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
+        uiContent->Destroy();
+    }
+}
+
 WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
-    {
-        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-        if (uiContent) {
-            uiContent->Destroy();
-        }
-    }
+    DestroyExistUIContent();
     std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
@@ -817,17 +820,25 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     }
     switch (setUIContentType) {
         default:
-        case WindowSetUIContentType::DEFAULT:
+        case WindowSetUIContentType::DEFAULT: {
             if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
                 // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
+            } else {
+                auto routerStack = GetRestoredRouterStack();
+                auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+                if (!routerStack.empty() &&
+                    uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                    WLOGFD("Restore router stack succeed.");
+                    break;
+                }
             }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
+        }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
-                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -1248,8 +1259,7 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
-    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
-        WLOGFE("Invalid type %{public}d", type);
+    if (type == BackupAndRestoreType::NONE) {
         return "";
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1257,8 +1267,43 @@ std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
-    return uiContent->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
-        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
+}
+
+WMError WindowSessionImpl::SetRestoredRouterStack(std::string& routerStack)
+{
+    WLOGFD("Set restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    restoredRouterStack_ = routerStack;
+    return WMError::WM_OK;
+}
+
+std::string WindowSessionImpl::GetRestoredRouterStack()
+{
+    WLOGFD("Get restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    return std::move(restoredRouterStack_);
+}
+
+Ace::ContentInfoType WindowSessionImpl::GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
 }
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
@@ -1408,7 +1453,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    
+
     return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
         RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
 }

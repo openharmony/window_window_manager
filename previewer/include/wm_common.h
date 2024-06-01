@@ -754,9 +754,10 @@ struct MaximizeLayoutOption {
 };
 
 enum class BackupAndRestoreType: int32_t {
-    NONE = 0,           // no backup and restore
-    CONTINUATION = 1,   // distribute
-    APP_RECOVERY = 2,   // app recovery
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 }
 }

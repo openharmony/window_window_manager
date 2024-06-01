@@ -402,9 +402,10 @@ enum class WindowSetUIContentType: uint32_t {
  * @brief Enumerates restore type.
  */
 enum class BackupAndRestoreType: int32_t {
-    NONE = 0,           // no backup and restore
-    CONTINUATION = 1,   // distribute
-    APP_RECOVERY = 2,   // app recovery
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 
 /**
@@ -436,7 +437,7 @@ struct MainWindowInfo : public Parcelable {
         if (!parcel.WriteInt32(persistentId_)) {
             return false;
         }
-        
+
         if (!parcel.WriteInt32(bundleType_)) {
             return false;
         }
