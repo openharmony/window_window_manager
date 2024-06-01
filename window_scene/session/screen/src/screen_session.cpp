@@ -249,6 +249,16 @@ void ScreenSession::SetName(std::string name)
     name_ = name;
 }
 
+void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
+{
+    mirrorScreenType_ = mirrorType;
+}
+
+MirrorScreenType ScreenSession::GetMirrorScreenType()
+{
+    return mirrorScreenType_;
+}
+
 ScreenId ScreenSession::GetScreenId()
 {
     return screenId_;
