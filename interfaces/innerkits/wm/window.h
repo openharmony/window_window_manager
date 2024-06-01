@@ -1310,6 +1310,15 @@ public:
         return std::string();
     }
     /**
+     * @brief Set uiability restored router stack.
+     *
+     * @return WMError.
+     */
+    virtual WMError SetRestoredRouterStack(std::string& routerStack)
+    {
+        return WMError::WM_OK;
+    }
+    /**
      * @brief Get ui content object.
      *
      * @return UIContent object of ACE.
