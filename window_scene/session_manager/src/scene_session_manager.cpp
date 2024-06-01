@@ -4782,7 +4782,7 @@ void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 }
 
 bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
-    std::unordered_set<std::string>& privacyBundles)
+    const std::unordered_set<std::string>& privacyBundles)
 {
     bool needNotify = false;
     std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
@@ -4792,7 +4792,7 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
             needNotify = !privacyBundles.empty();
             break;
         }
-        auto lastPrivacyBundles = privacyBundleMap_[displayId];
+        const auto& lastPrivacyBundles = privacyBundleMap_[displayId];
         if (lastPrivacyBundles.size() != privacyBundles.size()) {
             TLOGD(WmsLogTag::WMS_MAIN, "privacy bundle list size is not equal, %{public}zu != %{public}zu.",
                   lastPrivacyBundles.size(), privacyBundles.size());
@@ -7229,6 +7229,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                     scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
             }
         }
+        UpdateDisplayRegion(displayInfo);
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task, "ProcessVirtualPixelRatioChange:DID:" + std::to_string(defaultDisplayId));
@@ -7264,6 +7265,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
             scnSession->SetRotation(displayInfo->GetRotation());
             scnSession->UpdateOrientation();
         }
+        UpdateDisplayRegion(displayInfo);
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
@@ -8453,20 +8455,51 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
 
 std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displayId)
 {
+    if (displayRegionMap_.find(displayId) != displayRegionMap_.end()) {
+        return std::make_shared<SkRegion>(displayRegionMap_[displayId]->getBounds());
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "can not find display info from mem, sync dispslay region from dms.");
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "get display object failed of display: %{public}" PRIu64, displayId);
         return nullptr;
     }
-    int32_t displayWidth = display->GetWidth();
-    int32_t displayHeight = display->GetHeight();
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get display info failed of display: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    int32_t displayWidth = displayInfo->GetWidth();
+    int32_t displayHeight = displayInfo->GetHeight();
     if (displayWidth == 0 || displayHeight == 0) {
         TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
         return nullptr;
     }
 
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
+    auto region = std::make_shared<SkRegion>(rect);
+    displayRegionMap_[displayId] = region;
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
     return std::make_shared<SkRegion>(rect);
+}
+
+void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayInfo)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "update display region failed, displayInfo is nullptr.");
+        return;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    int32_t displayWidth = displayInfo->GetWidth();
+    int32_t displayHeight = displayInfo->GetHeight();
+    if (displayWidth == 0 || displayHeight == 0) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
+        return;
+    }
+    SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
+    auto region = std::make_shared<SkRegion>(rect);
+    displayRegionMap_[displayId] = region;
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
