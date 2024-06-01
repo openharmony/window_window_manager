@@ -27,6 +27,7 @@ config("libwm_private_config") {
 
 config("libwm_public_config") {
   include_dirs = [
+    "../interfaces/innerkits",
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
     "../utils/include",
