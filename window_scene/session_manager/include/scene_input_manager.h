@@ -54,6 +54,8 @@ private:
     bool CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
         const std::vector<MMI::WindowInfo>& windowInfoList);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
+    void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
+        std::vector<MMI::WindowInfo>& windowInfoList);
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;

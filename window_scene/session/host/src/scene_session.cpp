@@ -2570,7 +2570,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
     float brightness = property->GetBrightness();
     if (std::abs(brightness - sceneSession->GetBrightness()) < std::numeric_limits<float>::epsilon()) {
         TLOGD(WmsLogTag::DEFAULT, "Session brightness do not change: [%{public}f]", brightness);
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_OK;
     }
     sceneSession->SetBrightness(brightness);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);

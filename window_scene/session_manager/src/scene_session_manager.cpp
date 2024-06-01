@@ -4781,6 +4781,40 @@ void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
     WindowChangedFunc_ = func;
 }
 
+bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
+    const std::unordered_set<std::string>& privacyBundles)
+{
+    bool needNotify = false;
+    std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
+    do {
+        if (privacyBundleMap_.find(displayId) == privacyBundleMap_.end()) {
+            TLOGD(WmsLogTag::WMS_MAIN, "can not find display[%{public}" PRIu64 "].", displayId);
+            needNotify = !privacyBundles.empty();
+            break;
+        }
+        const auto& lastPrivacyBundles = privacyBundleMap_[displayId];
+        if (lastPrivacyBundles.size() != privacyBundles.size()) {
+            TLOGD(WmsLogTag::WMS_MAIN, "privacy bundle list size is not equal, %{public}zu != %{public}zu.",
+                  lastPrivacyBundles.size(), privacyBundles.size());
+            needNotify = true;
+            break;
+        }
+        for (const auto& bundle : lastPrivacyBundles) {
+            if (privacyBundles.find(bundle) == privacyBundles.end()) {
+                needNotify = true;
+                break;
+            }
+        }
+    } while (false);
+
+    TLOGD(WmsLogTag::WMS_MAIN, "display[%{public}" PRIu64 "] need notify privacy state: %{public}d.",
+          displayId, needNotify);
+    if (needNotify) {
+        privacyBundleMap_[displayId] = privacyBundles;
+    }
+    return needNotify;
+}
+
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -4795,15 +4829,23 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
-    std::vector<std::string> privacyBundleList;
+    std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
+        return;
+    }
 
-    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !privacyBundleList.empty());
-    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, privacyBundleList);
+    std::vector<std::string> bundleListForNotify(privacyBundleList.begin(), privacyBundleList.end());
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !bundleListForNotify.empty());
+    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
+    for (const auto& bundle : bundleListForNotify) {
+        TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
+              displayId, bundle.c_str());
+    }
 }
 
 void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
-    std::vector<std::string>& privacyBundles)
+    std::unordered_set<std::string>& privacyBundles)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& item : sceneSessionMap_) {
@@ -4821,6 +4863,10 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         if (displayId != currentDisplayId) {
             continue;
         }
+        if (sceneSession->GetSessionInfo().bundleName_.empty()) {
+            TLOGW(WmsLogTag::WMS_MAIN, "bundle name is empty, wid = %{public}d.", item.first);
+            continue;
+        }
         bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
         if (isForeground && sceneSession->GetParentSession() != nullptr) {
@@ -4832,7 +4878,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
-            privacyBundles.push_back(sceneSession->GetSessionInfo().bundleName_);
+            privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
         }
     }
 }
@@ -7183,6 +7229,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                     scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
             }
         }
+        UpdateDisplayRegion(displayInfo);
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task, "ProcessVirtualPixelRatioChange:DID:" + std::to_string(defaultDisplayId));
@@ -7218,6 +7265,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
             scnSession->SetRotation(displayInfo->GetRotation());
             scnSession->UpdateOrientation();
         }
+        UpdateDisplayRegion(displayInfo);
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
@@ -8407,20 +8455,51 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
 
 std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displayId)
 {
+    if (displayRegionMap_.find(displayId) != displayRegionMap_.end()) {
+        return std::make_shared<SkRegion>(displayRegionMap_[displayId]->getBounds());
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "can not find display info from mem, sync dispslay region from dms.");
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "get display object failed of display: %{public}" PRIu64, displayId);
         return nullptr;
     }
-    int32_t displayWidth = display->GetWidth();
-    int32_t displayHeight = display->GetHeight();
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "get display info failed of display: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    int32_t displayWidth = displayInfo->GetWidth();
+    int32_t displayHeight = displayInfo->GetHeight();
     if (displayWidth == 0 || displayHeight == 0) {
         TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
         return nullptr;
     }
 
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
+    auto region = std::make_shared<SkRegion>(rect);
+    displayRegionMap_[displayId] = region;
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
     return std::make_shared<SkRegion>(rect);
+}
+
+void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayInfo)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "update display region failed, displayInfo is nullptr.");
+        return;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    int32_t displayWidth = displayInfo->GetWidth();
+    int32_t displayHeight = displayInfo->GetHeight();
+    if (displayWidth == 0 || displayHeight == 0) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
+        return;
+    }
+    SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
+    auto region = std::make_shared<SkRegion>(rect);
+    displayRegionMap_[displayId] = region;
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)

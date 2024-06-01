@@ -100,6 +100,7 @@ public:
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
     Ace::UIContent* GetUIContent() const override;
+    std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     void OnNewWant(const AAFwk::Want& want) override;
     WMError SetAPPWindowLabel(const std::string& label) override;
@@ -221,6 +222,8 @@ public:
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
 
@@ -247,12 +250,15 @@ protected:
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifyWindowStatusChange(WindowMode mode);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void UpdateBufferAvaliableCallbackEnable(bool enable);
+    void RegisterFrameLayoutCallback();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -260,7 +266,7 @@ protected:
     void RefreshNoInteractionTimeoutMonitor();
 
     sptr<ISession> hostSession_;
-    std::unique_ptr<Ace::UIContent> uiContent_;
+    std::shared_ptr<Ace::UIContent> uiContent_;
     mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
@@ -328,6 +334,8 @@ private:
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
 
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -363,6 +371,7 @@ private:
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
+    static std::mutex subWindowCloseListenersMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
@@ -378,6 +387,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
         windowTitleButtonRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
+    static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
@@ -395,6 +405,7 @@ private:
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
     sptr<WindowOption> windowOption_;
+    bool enableSetBufferAvaliableCallback_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
