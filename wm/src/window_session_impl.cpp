@@ -1002,8 +1002,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                     decorVisible = decorVisible && windowSystemConfig_.freeMultiWindowEnable_;
                 }
                 WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
-                uiContent_->UpdateDecorVisible(decorVisible, IsDecorEnable());
-                uiContent_->NotifyWindowMode(mode);
+                uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
+                uiContent->NotifyWindowMode(mode);
             }
         }
         NotifyModeChange(mode, IsDecorEnable());
