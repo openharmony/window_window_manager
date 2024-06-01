@@ -1780,7 +1780,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Fun
 
     ssm_->UpdatePrivateStateAndNotifyForAllScreens();
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    std::unordered_set<string> privacyBundleList;
+    std::unordered_set<std::string> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
