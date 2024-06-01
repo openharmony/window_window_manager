@@ -241,7 +241,6 @@ public:
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
-    void UpdatePrivateStateAndNotifyForAllScreens();
     void InitPersistentStorage();
     std::string GetSessionSnapshotFilePath(int32_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
@@ -474,6 +473,7 @@ private:
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
+    void UpdatePrivateStateAndNotifyForAllScreens();
 
     WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
                                       const sptr<SceneSession>& sceneSession);
@@ -583,6 +583,7 @@ private:
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
     std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
+    std::atomic_bool specialExtWindowHasPrivacyMode_ { false };
     bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
