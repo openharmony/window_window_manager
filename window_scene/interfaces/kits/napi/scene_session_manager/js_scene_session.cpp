@@ -153,6 +153,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
         JsSceneSession::SetTemporarilyShowWhenLocked);
+    BindNativeFunction(env, objValue, "setSkipDraw", moduleName,
+        JsSceneSession::SetSkipDraw);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1106,6 +1108,13 @@ napi_value JsSceneSession::SetTemporarilyShowWhenLocked(napi_env env, napi_callb
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetTemporarilyShowWhenLocked");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetTemporarilyShowWhenLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetSkipDraw");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSkipDraw(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2683,6 +2692,35 @@ napi_value JsSceneSession::OnSetTemporarilyShowWhenLocked(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     session->SetTemporarilyShowWhenLocked(isTemporarilyShowWhenLocked);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSkipDraw(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]argc is invalid : %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool skip = false;
+    if (!ConvertFromJsValue(env, argv[0], skip)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] session_ is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetSkipDraw(skip);
     return NapiGetUndefined(env);
 }
 
