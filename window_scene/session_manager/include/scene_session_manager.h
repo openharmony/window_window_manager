@@ -273,7 +273,7 @@ public:
     void NotifyRecoveringFinished();
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
-    void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::vector<std::string>& privacyBundles);
+    void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
@@ -483,7 +483,6 @@ private:
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void ReportWindowProfileInfos();
-    std::shared_ptr<SkRegion> GetDisplayRegion(DisplayId displayId);
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
@@ -553,10 +552,19 @@ private:
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
 
+    std::mutex privacyBundleMapMutex_;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleMap_;
+
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
+
+    // displayRegionMap_ stores the screen display area for AccessibilityNotification,
+    // the read and write operations must be performed in the same thread, current is in task thread.
+    std::unordered_map<DisplayId, std::shared_ptr<SkRegion>> displayRegionMap_;
+    std::shared_ptr<SkRegion> GetDisplayRegion(DisplayId displayId);
+    void UpdateDisplayRegion(const sptr<DisplayInfo>& displayInfo);
 
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
@@ -650,6 +658,7 @@ private:
     WindowStatus GetWindowStatus(WindowMode mode, SessionState sessionState,
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
+    bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
 };
 } // namespace OHOS::Rosen
 

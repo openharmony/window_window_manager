@@ -49,6 +49,7 @@ const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -65,7 +66,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener,
                          public IWindowNoInteractionListener,
-                         public IWindowRectChangeListener {
+                         public IWindowRectChangeListener,
+                         public ISubWindowCloseListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -90,7 +92,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
-    void CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
+    napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowStatusChange(WindowStatus windowstatus) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
@@ -99,6 +101,7 @@ public:
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnSubWindowClose(bool& terminateCloseProcess) override;
 
 private:
     uint32_t currentWidth_ = 0;

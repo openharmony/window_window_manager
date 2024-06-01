@@ -2203,6 +2203,19 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+void Session::SetSessionOldRect(const WSRect& rect)
+{
+    if (oldWinRect_ == rect) {
+        return;
+    }
+    oldWinRect_ = rect;
+}
+
+WSRect Session::GetSessionOldRect() const
+{
+    return oldWinRect_;
+}
+
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     auto property = GetSessionProperty();
