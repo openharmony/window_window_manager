@@ -43,10 +43,7 @@ config("window_native_kit_config") {
 config("window_native_kit_public_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "window_napi",
-  ]
-
+  include_dirs = [ "window_napi" ]
 }
 
 ohos_shared_library("window_native_kit") {
@@ -65,9 +62,7 @@ ohos_shared_library("window_native_kit") {
     "window_napi/js_window_utils.cpp",
   ]
 
-  public_configs = [
-    ":window_native_kit_public_config",
-  ]
+  public_configs = [ ":window_native_kit_public_config" ]
 
   configs = [
     ":window_native_kit_config",
