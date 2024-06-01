@@ -2393,7 +2393,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
