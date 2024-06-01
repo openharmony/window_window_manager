@@ -515,16 +515,16 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
+    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
+        return;
+    }
     RectChangeReason rectChangReason = RectChangeReason::UNDEFINED;
     if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
         rectChangReason = JS_SIZE_CHANGE_REASON.at(reason);
     }
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
-        return;
-    }
-    if (currentReason_ == RectChangeReason::MOVE && rectChangReason == RectChangeReason::DRAG_END) {
+    if (currentReason_ != RectChangeReason::DRAG && rectChangReason == RectChangeReason::DRAG_END) {
         rectChangReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
@@ -554,7 +554,6 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         napi_close_handle_scope(env, scope);
     };
-
     if (!eventHandler_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "get main event handler failed!");
         return;
