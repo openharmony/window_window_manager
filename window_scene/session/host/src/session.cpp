@@ -2203,17 +2203,17 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
-void Session::SetSessionOldRect(const WSRect& rect)
+void Session::SetSessionLastRect(const WSRect& rect)
 {
-    if (oldWinRect_ == rect) {
+    if (lastWinRect_ == rect) {
         return;
     }
-    oldWinRect_ = rect;
+    lastWinRect_ = rect;
 }
 
-WSRect Session::GetSessionOldRect() const
+WSRect Session::GetSessionLastRect() const
 {
-    return oldWinRect_;
+    return lastWinRect_;
 }
 
 void Session::SetSessionRequestRect(const WSRect& rect)
