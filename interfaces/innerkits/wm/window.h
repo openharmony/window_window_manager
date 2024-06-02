@@ -68,12 +68,10 @@ class RSTransaction;
 class ISession;
 
 struct SystemBarPropertyFlag {
-    bool enableFlag;
-    bool backgroundColorFlag;
-    bool contentColorFlag;
-    bool enableAnimationFlag;
-    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false),
-        enableAnimationFlag(false) {}
+    bool enableFlag = false;
+    bool backgroundColorFlag = false;
+    bool contentColorFlag = false;
+    bool enableAnimationFlag = false;
 };
 
 /**
