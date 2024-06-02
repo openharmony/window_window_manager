@@ -434,7 +434,6 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         WLOGFE("SceneSession property is nullptr");
         return {};
     }
-    
     Matrix3f tranform;
     WSRect windowRect = sceneSession->GetSessionRect();
     auto pid = sceneSession->GetCallingPid();
@@ -470,6 +469,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
+        .windowType = static_cast<int32_t>(windowType),
         .displayId = displayId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
