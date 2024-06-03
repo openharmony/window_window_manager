@@ -314,7 +314,7 @@ WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarPrope
 }
 
 WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     return WMError::WM_OK;
 }
