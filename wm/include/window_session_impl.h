@@ -289,6 +289,7 @@ protected:
     virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
+    void MakeSubOrDialogWindowDragableAndMoveble();
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -389,6 +390,7 @@ private:
     std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     KeyEventFilterFunc keyEventFilter_;
+    sptr<WindowOption> windowOption_;
 };
 } // namespace Rosen
 } // namespace OHOS

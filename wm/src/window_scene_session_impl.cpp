@@ -428,6 +428,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         ret = CreateAndConnectSpecificSession();
     }
     if (ret == WMError::WM_OK) {
+        MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
     }
@@ -1868,7 +1869,10 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (system::GetParameter("const.product.devicetype", "unknown") != "2in1") {
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if (!(isPC || isFreeMutiWindowMode)) {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1907,8 +1911,10 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    bool isValidWindow = isMainWindow || (isPC && (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDecorDialog));
     if (isValidWindow && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
