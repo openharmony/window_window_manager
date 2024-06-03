@@ -40,7 +40,6 @@ group("unittest") {
     ":ws_scene_session_dirty_manager_test",
     ":ws_scene_session_manager_lite_stub_test",
     ":ws_scene_session_manager_proxy_test",
-    ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
