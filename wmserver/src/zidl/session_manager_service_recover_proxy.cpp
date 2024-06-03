@@ -69,7 +69,7 @@ void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(
         return;
     }
 
-    if (!data.WriteRemoteObject(sessionManagerService)) {
+    if (isConnected && !data.WriteRemoteObject(sessionManagerService)) {
         WLOGFE("WriteRemoteObject failed");
         return;
     }
