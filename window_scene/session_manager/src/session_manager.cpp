@@ -51,8 +51,11 @@ public:
                 int32_t userId = data.ReadInt32();
                 int32_t screenId = data.ReadInt32();
                 bool isConnected = data.ReadBool();
-                auto sessionManagerService = data.ReadRemoteObject();
-                OnWMSConnectionChanged(userId, screenId, isConnected, sessionManagerService);
+                if (isConnected) {
+                    OnWMSConnectionChanged(userId, screenId, isConnected, data.ReadRemoteObject());
+                } else {
+                    OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
+                }
                 break;
             }
             default:
