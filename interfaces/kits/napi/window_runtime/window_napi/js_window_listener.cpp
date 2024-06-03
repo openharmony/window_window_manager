@@ -238,17 +238,23 @@ void JsWindowListener::AfterUnfocused()
 
 void JsWindowListener::AfterResumed()
 {
-    LifeCycleCallBack(LifeCycleEventType::RESUMED);
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::RESUMED);
+    }
 }
 
 void JsWindowListener::AfterPaused()
 {
-    LifeCycleCallBack(LifeCycleEventType::PAUSED);
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::PAUSED);
+    }
 }
 
 void JsWindowListener::AfterDestroyed()
 {
-    LifeCycleCallBack(LifeCycleEventType::DESTROYED);
+    if (caseType_ == CaseType::CASE_WINDOW) {
+        LifeCycleCallBack(LifeCycleEventType::DESTROYED);
+    }
 }
 
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
