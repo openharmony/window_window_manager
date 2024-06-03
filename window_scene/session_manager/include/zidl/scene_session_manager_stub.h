@@ -73,6 +73,7 @@ private:
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
     int HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply);
+    int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply);
     int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
     int HandleClearSession(MessageParcel &data, MessageParcel &reply);

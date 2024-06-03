@@ -104,6 +104,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
         &SceneSessionManagerStub::HandleGetSessionSnapshotById),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        &SceneSessionManagerStub::HandleGetUIContentRemoteObj),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
@@ -713,6 +715,17 @@ int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, M
     const WMError ret = GetSessionSnapshotById(persistentId, *snapshot);
     reply.WriteParcelable(snapshot.get());
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Called");
+    int32_t persistentId = data.ReadInt32();
+    sptr<IRemoteObject> uiContentRemoteObj;
+    const WSError& ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
+    reply.WriteRemoteObject(uiContentRemoteObj);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 

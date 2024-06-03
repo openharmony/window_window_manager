@@ -100,6 +100,19 @@ HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: WindowAdapter/GetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    sptr<IRemoteObject> remoteObj;
+    auto ret = windowAdapter.GetUIContentRemoteObj(1, remoteObj);
+    ASSERT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: CheckWindowId
  * @tc.desc: WindowAdapter/CheckWindowId
  * @tc.type: FUNC
