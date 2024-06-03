@@ -481,8 +481,8 @@ struct SystemUIStatusBarConfig {
 
 struct StatusBarConfig {
     bool showHide_ = false;
-    std::string contentColor_ = "#000000";
-    std::string backgroundColor_ = "#000000";
+    std::string contentColor_;
+    std::string backgroundColor_;
 };
 
 struct WindowImmersive {
@@ -493,7 +493,7 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-    std::string uiType_ = "pad";
+    std::string uiType_ = "phone";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
