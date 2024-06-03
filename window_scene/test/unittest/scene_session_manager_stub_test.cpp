@@ -274,32 +274,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWi
 }
 
 /**
- * @tc.name: HandleUpdateProperty
- * @tc.desc: test HandleUpdateProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateProperty, Function | SmallTest | Level2)
-{
-    if (stub_ == nullptr) {
-        return;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    data.WriteUint32(static_cast<uint32_t>(action));
-    bool isPropertyExit = false;
-    data.WriteBool(isPropertyExit);
-    stub_->HandleUpdateProperty(data, reply);
-
-    isPropertyExit = true;
-    data.WriteBool(isPropertyExit);
-    int res = stub_->HandleUpdateProperty(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleRequestFocusStatus
  * @tc.desc: test HandleRequestFocusStatus
  * @tc.type: FUNC

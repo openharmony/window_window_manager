@@ -577,13 +577,6 @@ WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>
     return WMError::WM_OK;
 }
 
-WMError WindowAdapter::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    return windowManagerServiceProxy_->UpdateSessionProperty(property, action);
-}
-
 WMError WindowAdapter::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);

@@ -164,10 +164,6 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
-    {
-        return WMError::WM_OK;
-    }
     virtual WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
     {
         return WSError::WS_OK;
