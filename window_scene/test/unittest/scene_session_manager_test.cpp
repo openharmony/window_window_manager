@@ -1552,9 +1552,7 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions001, Function | SmallTest | L
     info.bundleName_ = "test1";
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, sceneSession);
     std::vector<int32_t> clearFailedIds;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId()};
@@ -1575,17 +1573,13 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | L
     info1.bundleName_ = "test1";
     info1.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
-    if (sceneSession1 == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, sceneSession1);
     SessionInfo info2;
     info2.abilityName_ = "test1";
     info2.bundleName_ = "test1";
     info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
-    if (sceneSession2 == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, sceneSession2);
 
     std::vector<int32_t> clearFailedIds;
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
@@ -1608,9 +1602,7 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | L
     info.bundleName_ = "test1";
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, sceneSession);
     int32_t invalidPersistentId = -1;
     std::vector<int32_t> clearFailedIds;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
