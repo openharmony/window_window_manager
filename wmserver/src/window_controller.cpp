@@ -1862,9 +1862,6 @@ WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObjec
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (windowRoot_->CheckMultiDialogWindows(node->GetWindowType(), targetToken)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
 
     node->dialogTargetToken_ = targetToken;
 
