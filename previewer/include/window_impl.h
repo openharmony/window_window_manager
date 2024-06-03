@@ -86,6 +86,9 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
