@@ -40,8 +40,9 @@ namespace {
 }
 class MockWindow : public Window {
 public:
-    MockWindow() {};
-    ~MockWindow() {};
+    MockWindow() {}
+    ~MockWindow() {}
+    MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
     MOCK_METHOD0(Destroy, WMError());
 };
 
@@ -81,10 +82,13 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     sptr<MockWindow> mw = new MockWindow();
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new PipOption();
-    PictureInPictureController* pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
     pipControl->window_ = mw;
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(StartPipType::NULL_START));
 }
 
 /**
@@ -304,7 +308,7 @@ HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus03, Function 
     int32_t INDEX = 0;
     int32_t ret = resultSet->GetString(INDEX, value);
     ASSERT_NE(NativeRdb::E_OK,  ret);
-    pipControl->getSettingsAutoStartStatus(key, value);
+    ASSERT_EQ(ERR_OK, pipControl->getSettingsAutoStartStatus(key, value));
 }
 
 /**
