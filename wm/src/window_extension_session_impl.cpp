@@ -450,7 +450,6 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             rsTransaction->Begin();
         }
         RSSystemProperties::SetDrawTextAsBitmap(true);
-        RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
@@ -463,7 +462,6 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             window->rotationAnimationCount_--;
             if (window->rotationAnimationCount_ == 0) {
                 RSSystemProperties::SetDrawTextAsBitmap(false);
-                RSInterfaces::GetInstance().DisableCacheForRotation();
             }
         });
         if (wmRect != preRect) {
