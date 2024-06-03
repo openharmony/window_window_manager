@@ -3377,4 +3377,18 @@ bool SceneSession::IsTemporarilyShowWhenLocked() const
 {
     return isTemporarilyShowWhenLocked_.load();
 }
+
+void SceneSession::SetSkipDraw(bool skip)
+{
+    if (!surfaceNode_) {
+        WLOGFE("surfaceNode_ is null");
+        return;
+    }
+    surfaceNode_->SetSkipDraw(skip);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetSkipDraw(skip);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
 } // namespace OHOS::Rosen
