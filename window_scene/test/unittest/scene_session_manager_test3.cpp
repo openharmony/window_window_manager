@@ -614,7 +614,9 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
  */
 HWTEST_F(SceneSessionManagerTest3, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
 {
+    int ret = 0;
     ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
