@@ -7164,13 +7164,18 @@ WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
 
 WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
-    auto task = [this, persistentId, haveListener]() {
-        WLOGFI("UpdateSessionTouchOutsideListener persistentId: %{public}d haveListener:%{public}d",
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, haveListener, callingPid]() {
+        TLOGI(WmsLogTag::WMS_EVENT, "persistentId:%{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFD("sceneSession is nullptr.");
+            TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Permission denied");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
             touchOutsideListenerSessionSet_.insert(persistentId);
