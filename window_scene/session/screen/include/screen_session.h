@@ -50,6 +50,11 @@ public:
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
 };
 
+enum class MirrorScreenType : int32_t {
+    PHYSICAL_MIRROR = 0,
+    VIRTUAL_MIRROR = 1,
+};
+
 enum class ScreenState : int32_t {
     INIT,
     CONNECTION,
@@ -203,6 +208,9 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
 
+    void SetMirrorScreenType(MirrorScreenType mirrorType);
+    MirrorScreenType GetMirrorScreenType();
+
 private:
     Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
@@ -219,6 +227,7 @@ private:
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);

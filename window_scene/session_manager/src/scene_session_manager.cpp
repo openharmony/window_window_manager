@@ -2252,6 +2252,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
     sessionInfo.sessionState_ = (property->GetWindowState() == WindowState::STATE_SHOWN)
                                     ? SessionState::STATE_ACTIVE
                                     : SessionState::STATE_BACKGROUND;
+    sessionInfo.isPersistentRecover_ = true;
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
@@ -2298,7 +2299,6 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         }
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
-        info.isPersistentRecover_ = true;
         TLOGI(WmsLogTag::WMS_RECOVER, "callingSessionId = %{public}" PRIu32, property->GetCallingSessionId());
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
@@ -4836,11 +4836,25 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     }
 
     std::vector<std::string> bundleListForNotify(privacyBundleList.begin(), privacyBundleList.end());
-    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId, !bundleListForNotify.empty());
+    ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+        !bundleListForNotify.empty() || specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
     for (const auto& bundle : bundleListForNotify) {
         TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
               displayId, bundle.c_str());
+    }
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
+{
+    auto screenProperties = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    for (auto& iter : screenProperties) {
+        auto displayId = iter.first;
+        std::unordered_set<std::string> privacyBundleList;
+        GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+
+        ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
+            !privacyBundleList.empty() || specialExtWindowHasPrivacyMode_.load());
     }
 }
 
@@ -7150,13 +7164,18 @@ WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
 
 WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
-    auto task = [this, persistentId, haveListener]() {
-        WLOGFI("UpdateSessionTouchOutsideListener persistentId: %{public}d haveListener:%{public}d",
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, haveListener, callingPid]() {
+        TLOGI(WmsLogTag::WMS_EVENT, "persistentId:%{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFD("sceneSession is nullptr.");
+            TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Permission denied");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
             touchOutsideListenerSessionSet_.insert(persistentId);
@@ -7170,13 +7189,18 @@ WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persiste
 
 WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
 {
-    auto task = [this, persistentId, haveListener]() -> WSError {
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, haveListener, callingPid]() -> WSError {
         WLOGFI("UpdateSessionWindowVisibilityListener persistentId: %{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             WLOGFD("sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, neither register nor unreigster allowed by other process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
             windowVisibilityListenerSessionSet_.insert(persistentId);
@@ -8162,6 +8186,7 @@ void SceneSessionManager::CalculateCombinedExtWindowFlags()
     for (const auto& iter: extWindowFlagsMap_) {
         combinedExtWindowFlags_.bitData |= iter.second.bitData;
     }
+    specialExtWindowHasPrivacyMode_.store(combinedExtWindowFlags_.privacyModeFlag);
 }
 
 void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags,
@@ -8251,6 +8276,9 @@ void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId
     }
     if (actions.hideNonSecureWindowsFlag) {
         HideNonSecureFloatingWindows();
+    }
+    if (actions.privacyModeFlag) {
+        UpdatePrivateStateAndNotifyForAllScreens();
     }
 }
 

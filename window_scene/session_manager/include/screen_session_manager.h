@@ -142,8 +142,8 @@ public:
     bool InitAbstractScreenModesInfo(sptr<ScreenSession>& absScreen);
     std::vector<ScreenId> GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const;
 
-    sptr<ScreenSessionGroup> AddToGroupLocked(sptr<ScreenSession> newScreen);
-    sptr<ScreenSessionGroup> AddAsFirstScreenLocked(sptr<ScreenSession> newScreen);
+    sptr<ScreenSessionGroup> AddToGroupLocked(sptr<ScreenSession> newScreen, bool isUnique = false);
+    sptr<ScreenSessionGroup> AddAsFirstScreenLocked(sptr<ScreenSession> newScreen, bool isUnique = false);
     sptr<ScreenSessionGroup> AddAsSuccedentScreenLocked(sptr<ScreenSession> newScreen);
     sptr<ScreenSessionGroup> RemoveFromGroupLocked(sptr<ScreenSession> screen);
     sptr<ScreenSessionGroup> GetAbstractScreenGroup(ScreenId smsScreenId);
@@ -190,7 +190,7 @@ public:
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
 
-    //Fold Screen
+    // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 
@@ -202,8 +202,6 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
-    void SetNotifyLockOrNot(bool notifyLockOrNot);
-    bool GetNotifyLockOrNot();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
 
@@ -252,6 +250,10 @@ public:
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
+    // notify scb virtual screen change
+    void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
+    DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -271,8 +273,9 @@ private:
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
+    sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
+        ScreenProperty property);
     void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
-    DMError MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
@@ -291,9 +294,6 @@ private:
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
-
-    // notify scb virtual screen change
-    void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
 
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void ShowHelpInfo(std::string& dumpInfo);
@@ -371,7 +371,7 @@ private:
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
- 
+
     uint32_t defaultDpi {0};
     uint32_t defaultDeviceRotationOffset_ { 0 };
 
@@ -396,12 +396,11 @@ private:
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
 
-    //Fold Screen
+    // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;
     static void BootFinishedCallback(const char *key, const char *value, void *context);
     std::function<void()> foldScreenPowerInit_ = nullptr;
-    std::atomic<bool> notifyLockOrNot_ = true;
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();

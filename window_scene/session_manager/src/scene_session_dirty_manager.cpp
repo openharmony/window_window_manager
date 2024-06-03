@@ -252,11 +252,9 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             continue;
         }
         bool isModalSubWindow = false;
-        auto property = session->GetSessionProperty();
+        const auto& property = session->GetSessionProperty();
         if (property != nullptr) {
-            bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
-            bool isModal = property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
-            isModalSubWindow = isSubWindow && isModal;
+            isModalSubWindow = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
         }
         if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             const auto& parentSession = session->GetParentSession();
@@ -436,7 +434,6 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         WLOGFE("SceneSession property is nullptr");
         return {};
     }
-    
     Matrix3f tranform;
     WSRect windowRect = sceneSession->GetSessionRect();
     auto pid = sceneSession->GetCallingPid();
@@ -472,6 +469,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
+        .windowType = static_cast<int32_t>(windowType),
         .displayId = displayId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
