@@ -2741,6 +2741,15 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     return sessionStage_->SwitchFreeMultiWindow(enable);
 }
 
+WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
+}
+
 void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);

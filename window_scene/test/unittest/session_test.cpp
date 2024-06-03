@@ -1784,6 +1784,24 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillOnce(Return(WSError::WS_OK));
+    session_->sessionStage_ = mockSessionStage;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
+    Mock::VerifyAndClearExpectations(&mockSessionStage);
+}
+
+/**
  * @tc.name: TransferKeyEventForConsumed02
  * @tc.desc: windowEventChannel_ is not nullptr, keyEvent is nullptr
  * @tc.type: FUNC

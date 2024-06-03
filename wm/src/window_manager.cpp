@@ -1052,6 +1052,16 @@ WMError WindowManager::DumpSessionWithId(int32_t persistentId, std::vector<std::
     return ret;
 }
 
+WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetUIContentRemoteObj(windowId, uiContentRemoteObj);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
+            windowId, static_cast<uint32_t>(ret));
+    }
+    return ret;
+}
+
 WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigaionEnabled(enable);

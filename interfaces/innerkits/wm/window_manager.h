@@ -635,6 +635,15 @@ public:
     WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
 
     /**
+     * @brief Get uiContent remote object
+     *
+     * @param windowId windowId
+     * @param uiContentRemoteObj uiContentRemoteObj
+     * @return WM_OK if successfully retrieved uiContentRemoteObj
+     */
+    WMError GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj);
+
+    /**
      * @brief raise window to top by windowId
      *
      * @param persistentId this window to raise
