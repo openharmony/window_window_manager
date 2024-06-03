@@ -145,6 +145,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
+    BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsSceneSession::SetWaterMarkFlag);
     BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
@@ -1081,6 +1082,12 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]SetOffset");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetWaterMarkFlag(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetPipActionEvent(napi_env env, napi_callback_info info)
@@ -2447,6 +2454,54 @@ napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->SetOffset(static_cast<float>(offsetX), static_cast<float>(offsetY));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isWaterMarkAdded = false;
+    if (!ConvertFromJsValue(env, argv[0], isWaterMarkAdded)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]property is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t currFlag = session->GetSessionProperty()->GetWindowFlags();
+    if (isWaterMarkAdded) {
+        currFlag = currFlag | static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    } else {
+        currFlag = currFlag & ~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
+    }
+    property->SetSystemCalling(true);
+    property->SetWindowFlags(currFlag);
+    SceneSessionManager::GetInstance().SetWindowFlags(session, property);
     return NapiGetUndefined(env);
 }
 
