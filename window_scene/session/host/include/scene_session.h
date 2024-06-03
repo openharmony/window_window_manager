@@ -204,6 +204,7 @@ public:
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetRestoringRectForKeyboard(WSRect rect);
+    void SetSkipDraw(bool skip);
 
     int32_t GetCollaboratorType() const;
     sptr<IRemoteObject> GetSelfToken() const;
