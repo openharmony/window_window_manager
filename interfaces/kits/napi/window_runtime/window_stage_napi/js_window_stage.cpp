@@ -694,7 +694,7 @@ bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, Win
 
     bool isModal = false;
     if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        TLOGI(WmsLogTag::WMS_DIALOG, "isModal:%{public}d", isModal);
+        TLOGI(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
         if (isModal) {
             option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
         }

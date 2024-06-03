@@ -1892,6 +1892,22 @@ HWTEST_F(SceneSessionTest2, SetClientIdentityToken, Function | SmallTest | Level
     sceneSession->SetClientIdentityToken(token);
     ASSERT_EQ(sceneSession->GetClientIdentityToken(), token);
 }
+
+/**
+ * @tc.name: SetSkipDraw
+ * @tc.desc: SetSkipDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSkipDraw, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSkipDraw";
+    info.bundleName_ = "SetSkipDraw";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetSkipDraw(true);
+    sceneSession->SetSkipDraw(false);
+}
 }
 }
 }
