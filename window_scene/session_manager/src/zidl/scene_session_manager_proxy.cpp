@@ -288,42 +288,6 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSessionWithDetachC
     return static_cast<WSError>(ret);
 }
 
-WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
-        WLOGFE("Write PropertyChangeAction failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (property) {
-        if (!data.WriteBool(true) || !property->Write(data, action)) {
-            WLOGFE("Write property failed");
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
 WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
