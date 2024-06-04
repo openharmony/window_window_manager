@@ -907,6 +907,20 @@ HWTEST_F(sceneSessionManagerProxyTest, LockSession, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy = new SceneSessionManagerProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetUIContentRemoteObj(1, remoteObj));
+}
+
+/**
  * @tc.name: ClearSession
  * @tc.desc: normal function
  * @tc.type: FUNC

@@ -1507,6 +1507,17 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     return WMError::WM_OK;
 }
 
+WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr. Failed to get uiContentRemoteObj");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentRemoteObj = uiContent->GetRemoteObj();
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {

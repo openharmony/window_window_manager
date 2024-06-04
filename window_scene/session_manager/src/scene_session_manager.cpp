@@ -5957,6 +5957,21 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotById");
 }
 
+WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "PersistentId=%{public}d", persistentId);
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
+}
+
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {

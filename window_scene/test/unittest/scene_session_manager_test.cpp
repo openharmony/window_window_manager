@@ -620,6 +620,24 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotById, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: SceneSesionManager GetUIContentRemoteObj
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level3)
+{
+    sptr<IRemoteObject> remoteObj;
+    EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
+    SessionInfo info;
+    info.abilityName_ = "GetUIContentRemoteObj";
+    info.bundleName_ = "GetUIContentRemoteObj";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({65535, sceneSession});
+    EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: CalculateCombinedExtWindowFlags
  * @tc.desc: SceneSesionManager calculate combined extension window flags
  * @tc.type: FUNC

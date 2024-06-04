@@ -85,6 +85,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyDisplayMove),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
         &SessionStageStub::HandleSwitchFreeMultiWindow),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        &SessionStageStub::HandleGetUIContentRemoteObj),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
         &SessionStageStub::HandleNotifyKeyboardPanelInfoChange),
 };
@@ -400,6 +402,16 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
 
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::DEFAULT, "Called");
+    sptr<IRemoteObject> uiContentRemoteObj;
+    WSError errCode = GetUIContentRemoteObj(uiContentRemoteObj);
+    reply.WriteRemoteObject(uiContentRemoteObj);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
