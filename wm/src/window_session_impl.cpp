@@ -1003,6 +1003,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 }
                 WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
                 uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
+                uiContent->NotifyWindowMode(mode);
             }
         }
         NotifyModeChange(mode, IsDecorEnable());

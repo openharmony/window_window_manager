@@ -89,6 +89,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyHostWindowMode(WindowMode mode)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& infos)
     {

@@ -333,6 +333,27 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
 }
 
 /**
+ * @tc.name: NotifyHostWindowMode
+ * @tc.desc: NotifyHostWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyHostWindowMode, Function | SmallTest | Level1)
+{
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    auto res = extensionSession_->NotifyHostWindowMode(mode);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
+
+    extensionSession_->state_ = SessionState::STATE_CONNECT;
+    res = extensionSession_->NotifyHostWindowMode(mode);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    extensionSession_->sessionStage_ = mockSessionStage_;
+    EXPECT_CALL(*mockSessionStage_, NotifyHostWindowMode).Times(1).WillOnce(Return(WSError::WS_OK));
+    res = extensionSession_->NotifyHostWindowMode(mode);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TriggerBindModalUIExtension
  * @tc.desc: test function : TriggerBindModalUIExtension
  * @tc.type: FUNC
