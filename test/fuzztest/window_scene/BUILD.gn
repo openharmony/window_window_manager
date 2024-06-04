@@ -15,6 +15,7 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "patterndetachcallback_fuzzer:fuzztest",
     "scenesessionmgrlstubget_fuzzer:fuzztest",
     "scenesessionmgrlstubreg_fuzzer:fuzztest",
     "scenesessionmgrlstubset_fuzzer:fuzztest",
