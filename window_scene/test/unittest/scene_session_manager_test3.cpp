@@ -614,9 +614,8 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
  */
 HWTEST_F(SceneSessionManagerTest3, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
 {
-    int ret = 0;
+    ASSERT_NE(ssm_, nullptr);
     ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1071,10 +1070,9 @@ HWTEST_F(SceneSessionManagerTest3, InitUserInfo, Function | SmallTest | Level3)
 */
 HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | Level3)
 {
-    int ret = 0;
+    ASSERT_EQ(ret, 0);
     ssm_->NotifySwitchingUser(true);
     ssm_->NotifySwitchingUser(false);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
