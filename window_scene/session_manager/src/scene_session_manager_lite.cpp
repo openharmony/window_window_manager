@@ -221,7 +221,7 @@ WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& p
     return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
 }
 
-WMError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
+WSError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().RaiseWindowToTop(persistentId);
 }
