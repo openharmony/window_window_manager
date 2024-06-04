@@ -32,10 +32,16 @@ public:
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
+class FoundationDeathRecipientLite : public IRemoteObject::DeathRecipient {
+public:
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+};
+
 class SessionManagerLite {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
 public:
     using UserSwitchCallbackFunc = std::function<void()>;
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     void ClearSessionManagerProxy();
     void Clear();
 
@@ -50,6 +56,9 @@ public:
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
     void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
+    void OnFoundationDied();
+
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
 
 protected:
     SessionManagerLite() = default;
@@ -62,6 +71,9 @@ private:
     void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void DeleteAllSessionListeners();
     void ReregisterSessionListener() const;
+    void RegisterSMSRecoverListener();
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
+    WMError InitMockSMSProxy();
 
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
@@ -70,12 +82,17 @@ private:
     sptr<IScreenSessionManagerLite> screenSessionManagerLiteProxy_ = nullptr;
     sptr<SSMDeathRecipientLite> ssmDeath_ = nullptr;
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
+    sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
     std::recursive_mutex listenerLock_;
     std::vector<sptr<ISessionListener>> sessionListeners_;
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
+    int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
+    bool isFoundationListenerRegistered_ = false;
+    bool isWMSConnected_ = false;
+    WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
