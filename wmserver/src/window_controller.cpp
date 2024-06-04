@@ -252,10 +252,6 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_PARENT;
     }
 
-    if (windowRoot_->CheckMultiDialogWindows(property->GetWindowType(), token)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     if (!surfaceNode) {
         return WMError::WM_ERROR_NULLPTR;
     }
