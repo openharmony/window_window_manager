@@ -495,6 +495,38 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
     return PostSyncTask(task, "GetGlobalMaximizeMode");
 }
 
+static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
+{
+    if (MathHelper::NearZero(ratio)) {
+        return WSError::WS_OK;
+    }
+    auto limits = session->GetSessionProperty()->GetWindowLimits();
+    if (session->IsDecorEnable()) {
+        if (limits.minWidth_ && limits.maxHeight_ &&
+            MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr) /
+            SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
+            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        } else if (limits.minHeight_ && limits.maxWidth_ &&
+            MathHelper::GreatNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr) /
+            SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
+            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    } else {
+        if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
+            static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
+            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
+            static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
+            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::SetAspectRatio(float ratio)
 {
     auto task = [weakThis = wptr(this), ratio]() {
@@ -514,31 +546,9 @@ WSError SceneSession::SetAspectRatio(float ratio)
             vpr = display->GetVirtualPixelRatio();
             WLOGD("vpr = %{public}f", vpr);
         }
-        if (!MathHelper::NearZero(ratio)) {
-            auto limits = session->GetSessionProperty()->GetWindowLimits();
-            if (session->IsDecorEnable()) {
-                if (limits.minWidth_ && limits.maxHeight_ &&
-                    MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr) /
-                    SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
-                    WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-                    return WSError::WS_ERROR_INVALID_PARAM;
-                } else if (limits.minHeight_ && limits.maxWidth_ &&
-                    MathHelper::GreatNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr) /
-                    SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
-                    WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-                    return WSError::WS_ERROR_INVALID_PARAM;
-                }
-            } else {
-                if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
-                    static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
-                    WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-                    return WSError::WS_ERROR_INVALID_PARAM;
-                } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
-                    static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
-                    WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-                    return WSError::WS_ERROR_INVALID_PARAM;
-                }
-            }
+        WSError ret = CheckAspectRatioValid(session, ratio, vpr);
+        if (ret != WSError::WS_OK) {
+            return ret;
         }
         session->aspectRatio_ = ratio;
         if (session->moveDragController_) {
@@ -2362,6 +2372,44 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     return WSError::WS_OK;
 }
 
+static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    int32_t persistentId)
+{
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+    info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    info.callerPersistentId_ = persistentId;
+    info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
+    info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
+    info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+    info.requestCode = abilitySessionInfo->requestCode;
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.startSetting = abilitySessionInfo->startSetting;
+    info.callingTokenId_ = abilitySessionInfo->callingTokenId;
+    info.reuse = abilitySessionInfo->reuse;
+    info.processOptions = abilitySessionInfo->processOptions;
+    if (info.want != nullptr) {
+        info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
+        info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+        info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
+        TLOGI(WmsLogTag::WMS_LIFE, "want: screenId %{public}" PRIu64, info.screenId_);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
+        "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
+        "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
+        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+        info.windowMode, info.callerPersistentId_);
+    return info;
+}
+
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (!SessionPermission::VerifySessionPermission()) {
@@ -2403,39 +2451,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             }
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
-        SessionInfo info;
-        info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
-        info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
-        info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-        int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
-        info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
-        info.persistentId_ = abilitySessionInfo->persistentId;
-        info.callerPersistentId_ = session->GetPersistentId();
-        info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-        info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
-        info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
-        info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-        info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-        info.requestCode = abilitySessionInfo->requestCode;
-        info.callerToken_ = abilitySessionInfo->callerToken;
-        info.startSetting = abilitySessionInfo->startSetting;
-        info.callingTokenId_ = abilitySessionInfo->callingTokenId;
-        info.reuse = abilitySessionInfo->reuse;
-        info.processOptions = abilitySessionInfo->processOptions;
-        if (info.want != nullptr) {
-            info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
-            info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
-            info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
-            TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
-        }
-
-        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName:%{public}s, moduleName:%{public}s, "
-            "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
-            "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
-            "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
-            info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-            info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
-            info.windowMode, info.callerPersistentId_);
+        SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session->GetPersistentId());
         session->HandleCastScreenConnection(info, session);
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
