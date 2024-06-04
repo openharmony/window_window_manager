@@ -224,9 +224,12 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     if (sceneSession->GetSessionInfo().isSystem_) {
         sceneSession->SendPointerEventToUI(pointerEvent);
         // notify touchOutside and touchDown event
-        MMI::PointerEvent::PointerItem pointerItem;
-        if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-            sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            MMI::PointerEvent::PointerItem pointerItem;
+            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+                sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            }
         }
     } else {
         // transfer pointer event for move and drag
