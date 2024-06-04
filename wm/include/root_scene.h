@@ -89,6 +89,8 @@ public:
     {
         return uiContent_.get();
     }
+    
+    void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
     static sptr<RootScene> staticRootScene_;
 

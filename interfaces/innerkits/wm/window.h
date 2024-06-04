@@ -2036,6 +2036,14 @@ public:
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
 
+    /*
+     * @brief Set the Dvsync Switch
+     *
+     * @param dvsyncSwitch bool.
+     * @return * void
+     */
+
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
     /**
      * @brief Set whether to enable immersive mode.
      * @param enable the value true means to enable immersive mode, and false means the opposite.
