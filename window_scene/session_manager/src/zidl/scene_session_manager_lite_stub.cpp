@@ -85,6 +85,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
                    &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
         &SceneSessionManagerLiteStub::HandleGetWindowModeType),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
+        &SceneSessionManagerLiteStub::HandleGetMainWinodowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO),
         &SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS),
