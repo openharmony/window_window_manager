@@ -66,7 +66,6 @@ group("unittest") {
     ":ws_session_stage_stub_test",
     ":ws_session_stub_mock_test",
     ":ws_session_stub_test",
-    ":ws_session_test",
     ":ws_setting_observer_test",
     ":ws_sub_session_test",
     ":ws_system_session_test",
