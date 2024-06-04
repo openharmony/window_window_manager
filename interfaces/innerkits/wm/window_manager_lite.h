@@ -171,6 +171,14 @@ public:
      */
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
 
+    /**
+     * @brief raise window to top by windowId
+     *
+     * @param persistentId this window to raise
+     * @return WM_OK if raise success
+     */
+    WMError RaiseWindowToTop(int32_t persistentId);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
