@@ -852,18 +852,14 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto promoteThis = weakThis.promote();
-        if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr &&
-            promoteThis->enableSetBufferAvaliableCallback_) {
-            // false: Make the function callable
-            promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            promoteThis->UpdateBufferAvaliableCallbackEnable(false);
+        if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
+            bool setCallBackEnable = true;
+            if (promoteThis->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
+                // false: Make the function callable
+                promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+            }
         }
     });
-}
-
-void WindowSessionImpl::UpdateBufferAvaliableCallbackEnable(bool enable)
-{
-    enableSetBufferAvaliableCallback_ = enable;
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
