@@ -529,11 +529,17 @@ void PictureInPictureController::DoActionEvent(const std::string& actionName, in
     pipActionObserver_->OnActionEvent(actionName, status);
 }
 
-void PictureInPictureController::RestorePictureInPictureWindow()
+void PictureInPictureController::PreRestorePictureInPicture()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "PreRestorePictureInPicture is called");
+    curState_ = PiPWindowState::STATE_RESTORING;
     if (pipLifeCycleListener_) {
         pipLifeCycleListener_->OnRestoreUserInterface();
     }
+}
+
+void PictureInPictureController::RestorePictureInPictureWindow()
+{
     if (mainWindow_ == nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
@@ -550,7 +556,6 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         }
     }
     if (handler_) {
-        curState_ = PiPWindowState::STATE_RESTORING;
         auto stopTask = [weakThis = wptr(this)]() {
             auto controller = weakThis.promote();
             if (!controller) {
