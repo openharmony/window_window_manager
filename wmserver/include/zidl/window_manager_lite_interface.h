@@ -45,6 +45,7 @@ public:
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) = 0;
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
+    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
 };
 }
 }
