@@ -721,7 +721,7 @@ HWTEST_F(WindowSessionImplTwoTest, WindowSessionCreateCheck, Function | SmallTes
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     window->windowSessionMap_.insert(
         std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "nullWindow", 
+            "nullWindow",
             std::pair<int32_t, sptr<WindowSessionImpl>>(nullWindowTestId, nullptr)
         )
     );
@@ -730,7 +730,7 @@ HWTEST_F(WindowSessionImplTwoTest, WindowSessionCreateCheck, Function | SmallTes
     nullPropertyWindow->property_ = nullptr;
     window->windowSessionMap_.insert(
         std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "nullPropertyWindow", 
+            "nullPropertyWindow",
             std::pair<int32_t, sptr<WindowSessionImpl>>(nullPropertyId, nullPropertyWindow)
         )
     );
@@ -740,7 +740,7 @@ HWTEST_F(WindowSessionImplTwoTest, WindowSessionCreateCheck, Function | SmallTes
     displayWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FREEZE_DISPLAY);
     window->windowSessionMap_.insert(
         std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "displayWindow", 
+            "displayWindow",
             std::pair<int32_t, sptr<WindowSessionImpl>>(displayId, displayWindow)
         )
     );
@@ -752,7 +752,7 @@ HWTEST_F(WindowSessionImplTwoTest, WindowSessionCreateCheck, Function | SmallTes
     cameraWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     window->windowSessionMap_.insert(
         std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "cameraWindow", 
+            "cameraWindow",
             std::pair<int32_t, sptr<WindowSessionImpl>>(cameraId, cameraWindow)
         )
     );
@@ -998,7 +998,7 @@ HWTEST_F(WindowSessionImplTwoTest, RegisterWindowTitleButtonRectChangeListener, 
     auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    sptr<IWindowTitleButtonRectChangedListener> listener = 
+    sptr<IWindowTitleButtonRectChangedListener> listener =
         new (std::nothrow) MockWindowTitleButtonRectChangedListener();
     ASSERT_NE(listener, nullptr);
     window->RegisterWindowTitleButtonRectChangeListener(listener);
@@ -1014,7 +1014,7 @@ HWTEST_F(WindowSessionImplTwoTest, UnregisterWindowTitleButtonRectChangeListener
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener = 
+    sptr<IWindowTitleButtonRectChangedListener> listener =
         new (std::nothrow) MockWindowTitleButtonRectChangedListener();
     ASSERT_NE(listener, nullptr);
     window->UnregisterWindowTitleButtonRectChangeListener(listener);
@@ -1033,7 +1033,7 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyWindowTitleButtonRectChange, Function |
 {
     auto window = GetTestWindowImpl("NotifyWindowTitleButtonRectChange");
     ASSERT_NE(window, nullptr);
-    auto listeners = GetListenerList<IWindowTitleButtonRectChangedListener, 
+    auto listeners = GetListenerList<IWindowTitleButtonRectChangedListener,
         MockWindowTitleButtonRectChangedListener>();
     listeners.insert(listeners.begin(), nullptr);
     window->windowTitleButtonRectChangeListeners_.insert({window->GetPersistentId(), listeners});
@@ -1053,8 +1053,7 @@ HWTEST_F(WindowSessionImplTwoTest, RegisterWindowRectChangeListener, Function | 
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterWindowRectChangeListener(nullptr));
 
-    sptr<IWindowRectChangeListener> listener = 
-        new (std::nothrow) MockWindowRectChangeListener();
+    sptr<IWindowRectChangeListener> listener = new (std::nothrow) MockWindowRectChangeListener();
     ASSERT_NE(listener, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
 
