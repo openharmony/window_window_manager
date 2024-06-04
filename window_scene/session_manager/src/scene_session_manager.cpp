@@ -8447,10 +8447,12 @@ void SceneSessionManager::CacVisibleWindowNum()
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
+        if (curSession == nullptr) {
+            continue;
+        }
         bool isTargetWindow = (WindowHelper::IsMainWindow(curSession->GetWindowType()) ||
             curSession->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER);
-        if (curSession == nullptr || !isTargetWindow ||
-            curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        if (!isTargetWindow || curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
             continue;
         }
 
