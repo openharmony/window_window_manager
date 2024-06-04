@@ -41,8 +41,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
-        &SceneSessionManagerStub::HandleUpdateProperty),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
         &SceneSessionManagerStub::HandleRequestFocusStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
@@ -310,24 +308,6 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
-{
-    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = new (std::nothrow) WindowSessionProperty();
-        if (property != nullptr) {
-            property->Read(data, action);
-        }
-    } else {
-        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
-    }
-    const WMError& ret = UpdateSessionProperty(property, action);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

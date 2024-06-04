@@ -1258,120 +1258,6 @@ HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: UpdateSessionProperty
- * @tc.desc: SceneSesionManager update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, UpdateSessionProperty, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->UpdatePropertyRaiseEnabled(property, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty01
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty01, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty02
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty02, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
-    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty03
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty03, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
@@ -1381,17 +1267,13 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, Function | SmallTest | Le
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
     ssm_->HandleTurnScreenOn(scensession);
     bool requireLock = true;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
     requireLock = false;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 }
 
 /**
