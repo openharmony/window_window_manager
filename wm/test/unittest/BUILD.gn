@@ -216,21 +216,10 @@ ohos_unittest("wm_vsync_station_test") {
 ohos_unittest("wm_window_session_impl_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_session_impl_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
+  sources = [
+    "window_session_impl_test.cpp",
+    "window_session_impl_two_test.cpp",
   ]
-}
-
-ohos_unittest("wm_window_session_impl_two_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_session_impl_two_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
