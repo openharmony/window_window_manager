@@ -1730,6 +1730,35 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     return SetSpecificBarProperty(type, property);
 }
 
+WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
+        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
+        current.contentColor_ = propertyIter->second.contentColor_;
+        TLOGI(WmsLogTag::WMS_IMMS,
+            "windowId:%{public}u %{public}s set status bar content color %{public}u",
+            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u", GetWindowId());
+    if (property_ != nullptr) {
+        auto currProperties = property_->GetSystemBarProperty();
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = currProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
+    } else {
+        TLOGW(WmsLogTag::WMS_IMMS, "inner property is null, windowId:%{public}u", GetWindowId());
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
