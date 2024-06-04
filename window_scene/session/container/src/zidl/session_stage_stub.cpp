@@ -353,6 +353,14 @@ int SessionStageStub::HandleNotifyDensityFollowHost(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyHostWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "called");
+    WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
+    NotifyHostWindowMode(mode);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleNotifyDialogStateChange!");
@@ -402,14 +410,6 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
 
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleNotifyHostWindowMode(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "called");
-    WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
-    NotifyHostWindowMode(mode);
     return ERR_NONE;
 }
 
