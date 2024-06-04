@@ -132,11 +132,9 @@ HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonVisible, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTwoTest, GetSystemSessionConfig, Function | SmallTest | Level2)
 {
-    int rect = 0;
     auto window = GetTestWindowImpl("GetSystemSessionConfig");
     ASSERT_NE(window, nullptr);
     window->GetSystemSessionConfig();
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
@@ -545,7 +543,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyOccupiedAreaChangeInfo, Function | Smal
     listeners.insert(listeners.begin(), nullptr);
     window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
 
-    int rect = 0;
     sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -571,7 +568,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyOccupiedAreaChangeInfo, Function | Smal
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->NotifyOccupiedAreaChangeInfo(info);
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
@@ -590,7 +586,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyWindowStatusChange, Function | SmallTes
     listeners.insert(listeners.begin(), nullptr);
     window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
 
-    int rect = 0;
     WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
     window->state_ = WindowState::STATE_HIDDEN;
     window->property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
@@ -608,7 +603,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyWindowStatusChange, Function | SmallTes
 
     mode = WindowMode::WINDOW_MODE_PIP;
     window->NotifyWindowStatusChange(mode);
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
