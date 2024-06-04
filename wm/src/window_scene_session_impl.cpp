@@ -890,7 +890,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     }
     if (ret == WMError::WM_OK) {
         if (state_ == WindowState::STATE_HIDDEN) {
-            UpdateBufferAvaliableCallbackEnable(true);
+            enableSetBufferAvailableCallback_ = true;
         }
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
