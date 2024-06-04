@@ -1204,6 +1204,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
 }
 
 /**
+ * @tc.name: HandleGetUIContentRemoteObj
+ * @tc.desc: test HandleGetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(1);
+    int res = stub_->HandleGetUIContentRemoteObj(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleUpdateExtWindowFlags
  * @tc.desc: test HandleUpdateExtWindowFlags
  * @tc.type: FUNC

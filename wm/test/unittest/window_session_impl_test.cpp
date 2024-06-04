@@ -1953,6 +1953,27 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    WSError res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj end";
+}
+
+/**
  * @tc.name: RegisterExtensionAvoidAreaChangeListener
  * @tc.desc: RegisterExtensionAvoidAreaChangeListener Test
  * @tc.type: FUNC
