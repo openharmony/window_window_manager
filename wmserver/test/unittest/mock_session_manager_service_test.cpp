@@ -166,19 +166,8 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
 {
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
-}
-
-/**
- * @tc.name: NotifyWMSConnected
- * @tc.desc: NotifyWMSConnected
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, NotifyWMSConnected, Function | SmallTest | Level2)
-{
-    int ret = 0;
     MockSessionManagerService::GetInstance().NotifyWMSConnected(100, 0, true);
     MockSessionManagerService::GetInstance().NotifyWMSConnected(100, 0, false);
-    ASSERT_EQ(0, ret);
 }
 
 /**
