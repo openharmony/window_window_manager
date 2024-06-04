@@ -225,6 +225,7 @@ ohos_unittest("wm_window_session_impl_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+  ]
 }
 
 ohos_unittest("wm_window_session_impl_two_test") {
