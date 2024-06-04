@@ -739,13 +739,13 @@ void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, 
     newLimits.minRatio_ = customizedLimits.minRatio_;
 
     // calculate new limit ratio
-    float maxRatio = FLT_MAX;
-    float minRatio = 0.0f;
+    double maxRatio = FLT_MAX;
+    double minRatio = 0.0f;
     if (newLimits.minHeight_ != 0) {
-        maxRatio = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
+        maxRatio = static_cast<double>(newLimits.maxWidth_) / static_cast<double>(newLimits.minHeight_);
     }
     if (newLimits.maxHeight_ != 0) {
-        minRatio = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
+        minRatio = static_cast<double>(newLimits.minWidth_) / static_cast<double>(newLimits.maxHeight_);
     }
     if (!MathHelper::GreatNotEqual(minRatio, customizedLimits.maxRatio_) &&
         !MathHelper::GreatNotEqual(customizedLimits.maxRatio_, maxRatio)) {
@@ -759,20 +759,24 @@ void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, 
     // recalculate limit size by new ratio
     double newMaxWidthFloat = static_cast<double>(newLimits.maxHeight_) * maxRatio;
     uint32_t newMaxWidth = (newMaxWidthFloat > static_cast<double>(UINT32_MAX)) ? UINT32_MAX :
-        static_cast<uint32_t>(newMaxWidthFloat);
+        std::round(newMaxWidthFloat);
     newLimits.maxWidth_ = std::min(newMaxWidth, newLimits.maxWidth_);
 
     double newMinWidthFloat = static_cast<double>(newLimits.minHeight_) * minRatio;
     uint32_t newMinWidth = (newMinWidthFloat > static_cast<double>(UINT32_MAX)) ? UINT32_MAX :
-        static_cast<uint32_t>(newMinWidthFloat);
+        std::round(newMinWidthFloat);
     newLimits.minWidth_ = std::max(newMinWidth, newLimits.minWidth_);
 
-    uint32_t newMaxHeight = MathHelper::NearZero(minRatio) ? UINT32_MAX :
-        static_cast<uint32_t>(static_cast<double>(newLimits.maxWidth_) / minRatio);
+    double newMaxHeightFloat = MathHelper::NearZero(minRatio) ? UINT32_MAX :
+        static_cast<double>(newLimits.maxWidth_) / minRatio;
+    uint32_t newMaxHeight = (newMaxHeightFloat > static_cast<double>(UINT32_MAX)) ? UINT32_MAX :
+        std::round(newMaxHeightFloat);
     newLimits.maxHeight_ = std::min(newMaxHeight, newLimits.maxHeight_);
 
-    uint32_t newMinHeight = MathHelper::NearZero(maxRatio) ? UINT32_MAX :
-        static_cast<uint32_t>(static_cast<double>(newLimits.minWidth_) / maxRatio);
+    double newMinHeightFloat = MathHelper::NearZero(maxRatio) ? UINT32_MAX :
+        static_cast<double>(newLimits.minWidth_) / maxRatio;
+    uint32_t newMinHeight = (newMinHeightFloat > static_cast<double>(UINT32_MAX)) ? UINT32_MAX :
+        std::round(newMinHeightFloat);
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 }
 
