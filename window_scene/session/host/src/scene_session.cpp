@@ -495,48 +495,7 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
     return PostSyncTask(task, "GetGlobalMaximizeMode");
 }
 
-WSError SceneSession::SetAspectRatio(float ratio)
-{
-    auto task = [weakThis = wptr(this), ratio]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("[WMSCom] session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (!session->GetSessionProperty()) {
-            WLOGE("[WMSCom] SetAspectRatio failed because property is null");
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        WLOGFI("[WMSCom] ratio: %{public}f", ratio);
-        float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (display) {
-            vpr = display->GetVirtualPixelRatio();
-            WLOGD("vpr = %{public}f", vpr);
-        }
-        WSError ret = session->CheckAspectRatioValid(session, ratio, vpr);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        session->aspectRatio_ = ratio;
-        if (session->moveDragController_) {
-            session->moveDragController_->SetAspectRatio(ratio);
-        }
-        session->SaveAspectRatio(session->aspectRatio_);
-        WSRect fixedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s",
-            session->GetPersistentId(), fixedRect.ToString().c_str());
-        if (session->FixRectByAspectRatio(fixedRect)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
-                session->GetPersistentId(), fixedRect.ToString().c_str());
-            session->NotifySessionRectChange(fixedRect, SizeChangeReason::RESIZE);
-        }
-        return WSError::WS_OK;
-    };
-    return PostSyncTask(task, "SetAspectRatio");
-}
-
-WSError SceneSession::CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
+static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
 {
     if (MathHelper::NearZero(ratio)) {
         return WSError::WS_OK;
@@ -566,6 +525,47 @@ WSError SceneSession::CheckAspectRatioValid(const sptr<SceneSession>& session, f
         }
     }
     return WSError::WS_OK;
+}
+
+WSError SceneSession::SetAspectRatio(float ratio)
+{
+    auto task = [weakThis = wptr(this), ratio]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("[WMSCom] session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (!session->GetSessionProperty()) {
+            WLOGE("[WMSCom] SetAspectRatio failed because property is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        WLOGFI("[WMSCom] ratio: %{public}f", ratio);
+        float vpr = 1.5f; // 1.5f: default virtual pixel ratio
+        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (display) {
+            vpr = display->GetVirtualPixelRatio();
+            WLOGD("vpr = %{public}f", vpr);
+        }
+        WSError ret = CheckAspectRatioValid(session, ratio, vpr);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        session->aspectRatio_ = ratio;
+        if (session->moveDragController_) {
+            session->moveDragController_->SetAspectRatio(ratio);
+        }
+        session->SaveAspectRatio(session->aspectRatio_);
+        WSRect fixedRect = session->winRect_;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s",
+            session->GetPersistentId(), fixedRect.ToString().c_str());
+        if (session->FixRectByAspectRatio(fixedRect)) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
+                session->GetPersistentId(), fixedRect.ToString().c_str());
+            session->NotifySessionRectChange(fixedRect, SizeChangeReason::RESIZE);
+        }
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "SetAspectRatio");
 }
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -2372,6 +2372,44 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     return WSError::WS_OK;
 }
 
+static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    int32_t persistentId)
+{
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
+    info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    info.callerPersistentId_ = persistentId;
+    info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
+    info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
+    info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+    info.requestCode = abilitySessionInfo->requestCode;
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.startSetting = abilitySessionInfo->startSetting;
+    info.callingTokenId_ = abilitySessionInfo->callingTokenId;
+    info.reuse = abilitySessionInfo->reuse;
+    info.processOptions = abilitySessionInfo->processOptions;
+    if (info.want != nullptr) {
+        info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
+        info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+        info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
+        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName:%{public}s, moduleName:%{public}s, "
+        "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
+        "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
+        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+        info.windowMode, info.callerPersistentId_);
+    return info;
+}
+
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (!SessionPermission::VerifySessionPermission()) {
@@ -2413,7 +2451,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             }
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
-        SessionInfo info = session->MakeSessionInfo(abilitySessionInfo, session->GetPersistentId());
+        SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session->GetPersistentId());
         session->HandleCastScreenConnection(info, session);
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
@@ -2422,43 +2460,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
     };
     PostTask(task, "PendingSessionActivation");
     return WSError::WS_OK;
-}
-
-SessionInfo SceneSession::MakeSessionInfo(const sptr<AAFwk::SessionInfo> abilitySessionInfo, int32_t persistentId)
-{
-    SessionInfo info;
-    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
-    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
-    info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-    int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
-    info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
-    info.persistentId_ = abilitySessionInfo->persistentId;
-    info.callerPersistentId_ = persistentId;
-    info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
-    info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
-    info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-    info.requestCode = abilitySessionInfo->requestCode;
-    info.callerToken_ = abilitySessionInfo->callerToken;
-    info.startSetting = abilitySessionInfo->startSetting;
-    info.callingTokenId_ = abilitySessionInfo->callingTokenId;
-    info.reuse = abilitySessionInfo->reuse;
-    info.processOptions = abilitySessionInfo->processOptions;
-    if (info.want != nullptr) {
-        info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
-        info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
-        info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
-        TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: want: screenId %{public}" PRIu64, info.screenId_);
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "PendingSessionActivation: bundleName:%{public}s, moduleName:%{public}s, "
-        "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
-        "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
-        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
-        info.windowMode, info.callerPersistentId_);
-    return info;
 }
 
 void SceneSession::HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session)
