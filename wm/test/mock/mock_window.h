@@ -72,6 +72,16 @@ public:
     MOCK_METHOD0(OnWindowNoInteractionCallback, void());
 };
 
+class MockWindowTitleButtonRectChangedListener : public IWindowTitleButtonRectChangedListener {
+public:
+    MOCK_METHOD1(OnWindowTitleButtonRectChanged, void(const TitleButtonRect&));
+};
+
+class MockWindowRectChangeListener : public IWindowRectChangeListener {
+public:
+    MOCK_METHOD2(OnRectChange, void(Rect rect, WindowSizeChangeReason reason));
+};
+
 } // Rosen
 } // OHOS
 
