@@ -146,6 +146,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
+    windowOption_ = option;
 
     isIgnoreSafeArea_ = (WindowHelper::IsSubWindow(optionWindowType)) ? true : false;
 
@@ -171,6 +172,30 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+    }
+}
+
+void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
+{
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if (isFreeMutiWindowMode && windowOption_ != nullptr) {
+        if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            WLOGFD("isFreeMutiWindowMode create subwindow, title: %{public}s, decorEnable: %{public}d",
+                windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
+            property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
+            property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
+            subWindowTitle_ = windowOption_->GetSubWindowTitle();
+        }
+        bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+        if (isDialog) {
+            bool dialogDecorEnable = windowOption_->GetDialogDecorEnable();
+            property_->SetDecorEnable(dialogDecorEnable);
+            property_->SetDragEnabled(dialogDecorEnable);
+            dialogTitle_ = windowOption_->GetDialogTitle();
+            WLOGFD("isFreeMutiWindowMode create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+                dialogTitle_.c_str(), dialogDecorEnable);
+        }
     }
 }
 
@@ -718,10 +743,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if (isPC && (isSubWindow || isDialogWindow)) {
+    if ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent_->HideWindowTitleButton(true, true, true);
         return;
@@ -1676,7 +1703,9 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    if (!isPC) {
+    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+        windowSystemConfig_.freeMultiWindowEnable_;
+    if (!(isPC || isFreeMutiWindowMode)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
