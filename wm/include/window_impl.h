@@ -224,6 +224,7 @@ public:
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    virtual void UnregisterWindowDestroyedListener() override { notifyNativefunc_ = nullptr; }
     virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;

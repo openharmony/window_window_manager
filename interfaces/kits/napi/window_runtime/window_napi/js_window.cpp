@@ -86,6 +86,7 @@ JsWindow::JsWindow(const sptr<Window>& window)
 JsWindow::~JsWindow()
 {
     WLOGI(" deConstructorCnt:%{public}d", ++g_dtorCnt);
+    windowToken_->UnregisterWindowDestroyedListener();
     windowToken_ = nullptr;
 }
 
