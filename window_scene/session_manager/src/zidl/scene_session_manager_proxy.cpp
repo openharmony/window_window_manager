@@ -288,42 +288,6 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSessionWithDetachC
     return static_cast<WSError>(ret);
 }
 
-WMError SceneSessionManagerProxy::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
-        WLOGFE("Write PropertyChangeAction failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (property) {
-        if (!data.WriteBool(true) || !property->Write(data, action)) {
-            WLOGFE("Write property failed");
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
 WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
@@ -1222,6 +1186,34 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId
         WLOGFW("Read SessionSnapshot is null.");
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remoteObj = reply.ReadRemoteObject();
+    if (remoteObj == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "ReadRemoteObject failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uiContentRemoteObj = remoteObj;
+    return static_cast<WSError>(reply.ReadUint32());
 }
 
 WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject> &token,

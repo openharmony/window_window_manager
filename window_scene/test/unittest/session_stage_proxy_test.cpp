@@ -99,6 +99,19 @@ HWTEST_F(SessionStageProxyTest, HandleBackEvent, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: test function : GetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level1)
+{
+    ASSERT_NE(sessionStage_, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    WSError res = sessionStage_->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: MarkProcessed
  * @tc.desc: test function : MarkProcessed
  * @tc.type: FUNC
@@ -287,6 +300,18 @@ HWTEST_F(SessionStageProxyTest, NotifyDensityFollowHost, Function | SmallTest | 
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     ASSERT_EQ(WSError::WS_OK, sessionStage_->NotifyDensityFollowHost(true, 1.0f));
+}
+
+/**
+ * @tc.name: NotifyHostWindowMode
+ * @tc.desc: test function : NotifyHostWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyHostWindowMode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    ASSERT_EQ(WSError::WS_OK, sessionStage_->NotifyHostWindowMode(mode));
 }
 
 /**

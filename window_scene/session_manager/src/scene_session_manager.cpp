@@ -3101,44 +3101,6 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
 }
 
-WMError SceneSessionManager::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    if (property == nullptr) {
-        WLOGFE("property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
-        if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
-    }
-
-    bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    property->SetSystemCalling(isSystemCalling);
-    wptr<SceneSessionManager> weak = this;
-    auto task = [weak, property, action]() -> WMError {
-        auto weakSession = weak.promote();
-        if (weakSession == nullptr) {
-            WLOGFE("the session is nullptr");
-            return WMError::WM_DO_NOTHING;
-        }
-        if (property == nullptr) {
-            WLOGFE("the property is nullptr");
-            return WMError::WM_DO_NOTHING;
-        }
-        auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
-        if (sceneSession == nullptr) {
-            WLOGFW("the scene session is nullptr, persistentId: %{public}d", property->GetPersistentId());
-            return WMError::WM_DO_NOTHING;
-        }
-        WLOGD("UpdateSessionProperty Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
-        return weakSession->HandleUpdateProperty(property, action, sceneSession);
-    };
-    return taskScheduler_->PostSyncTask(task, "UpdateProperty");
-}
-
 WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
                                                        const sptr<SceneSession>& sceneSession)
 {
@@ -3179,167 +3141,6 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
         }
     }
     NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-}
-
-WMError SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        WLOGFI("sceneSession is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (property == nullptr) {
-        WLOGFI("property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    switch (action) {
-        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
-            sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
-            HandleTurnScreenOn(sceneSession);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
-            sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
-            HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
-            sceneSession->SetFocusable(property->GetFocusable());
-            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
-            sceneSession->SetTouchable(property->GetTouchable());
-            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
-            if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                WLOGW("only app main window can set brightness");
-                return WMError::WM_OK;
-            }
-            // @todo if sceneSession is inactive, return
-            SetBrightness(sceneSession, property->GetBrightness());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
-            sceneSession->SetRequestedOrientation(property->GetRequestedOrientation());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-            sceneSession->SetPrivacyMode(isPrivacyMode);
-            UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE: {
-            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-            sceneSession->SetPrivacyMode(isPrivacyMode);
-            UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
-                sceneSession->GetSessionProperty()->SetIsLayoutFullScreen(property->IsLayoutFullScreen());
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
-            auto systemBarProperties = property->GetSystemBarProperty();
-            for (auto iter : systemBarProperties) {
-                sceneSession->SetSystemBarProperty(iter.first, iter.second);
-            }
-            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS: {
-            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property, sceneSession);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS: {
-            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property, sceneSession);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS: {
-            HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property, sceneSession);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            SetWindowFlags(sceneSession, property);
-            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_MODE: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
-                ProcessWindowModeType();
-            }
-            NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                std::vector<Rect> touchHotAreas;
-                property->GetTouchHotAreas(touchHotAreas);
-                sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
-            if (property != nullptr && !property->GetSystemCalling()) {
-                WLOGFE("update decor enable permission denied!");
-                break;
-            }
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED: {
-            return UpdatePropertyDragEnabled(property, sceneSession);
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED: {
-            return UpdatePropertyRaiseEnabled(property, sceneSession);
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
-            HandleHideNonSystemFloatingWindows(property, sceneSession);
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetTextFieldPositionY(property->GetTextFieldPositionY());
-                sceneSession->GetSessionProperty()->SetTextFieldHeight(property->GetTextFieldHeight());
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetWindowMask(property->GetWindowMask());
-                sceneSession->GetSessionProperty()->SetIsShaped(property->GetIsShaped());
-                FlushWindowInfoToMMI();
-            }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST: {
-            return UpdateTopmostProperty(property, sceneSession);
-        }
-        default:
-            break;
-    }
-    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionProperty>& property,
@@ -5957,6 +5758,21 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotById");
 }
 
+WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "PersistentId=%{public}d", persistentId);
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
+}
+
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
@@ -7189,13 +7005,18 @@ WSError SceneSessionManager::UpdateSessionTouchOutsideListener(int32_t& persiste
 
 WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
 {
-    auto task = [this, persistentId, haveListener]() -> WSError {
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, haveListener, callingPid]() -> WSError {
         WLOGFI("UpdateSessionWindowVisibilityListener persistentId: %{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             WLOGFD("sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, neither register nor unreigster allowed by other process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
             windowVisibilityListenerSessionSet_.insert(persistentId);
@@ -8427,10 +8248,12 @@ void SceneSessionManager::CacVisibleWindowNum()
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
+        if (curSession == nullptr) {
+            continue;
+        }
         bool isTargetWindow = (WindowHelper::IsMainWindow(curSession->GetWindowType()) ||
             curSession->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER);
-        if (curSession == nullptr || !isTargetWindow ||
-            curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        if (!isTargetWindow || curSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
             continue;
         }
 

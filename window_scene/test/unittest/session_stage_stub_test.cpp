@@ -342,6 +342,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: HandleNotifyHostWindowMode
+ * @tc.desc: test function : HandleNotifyHostWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyHostWindowMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyHostWindowMode(data, reply));
+}
+
+/**
  * @tc.name: HandleUpdateOrientation
  * @tc.desc: test function : HandleUpdateOrientation
  * @tc.type: FUNC
@@ -404,6 +417,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTe
     MessageParcel reply;
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyDensityFollowHost(data, reply));
+}
+
+/**
+ * @tc.name: HandleGetUIContentRemoteObj
+ * @tc.desc: test function : HandleGetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleGetUIContentRemoteObj(data, reply));
 }
 
 /**

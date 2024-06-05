@@ -446,6 +446,18 @@ private:
 };
 
 /**
+ * @struct SystemBarPropertyFlag
+ *
+ * @brief Flag of system bar
+ */
+struct SystemBarPropertyFlag {
+    bool enableFlag = false;
+    bool backgroundColorFlag = false;
+    bool contentColorFlag = false;
+    bool enableAnimationFlag = false;
+};
+
+/**
  * @struct Rect
  *
  * @brief Window Rect.

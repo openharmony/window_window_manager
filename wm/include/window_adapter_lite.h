@@ -48,6 +48,7 @@ public:
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
+    virtual WMError RaiseWindowToTop(int32_t persistentId);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
