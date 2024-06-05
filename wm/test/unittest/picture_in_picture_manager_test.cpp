@@ -298,8 +298,10 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoPreRestore();
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
+    PictureInPictureManager::DoActionClose();
     PictureInPictureManager::DoDestroy();
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
@@ -308,14 +310,18 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::SetActiveController(pipController);
     result++;
 
+    PictureInPictureManager::DoPreRestore();
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
+    PictureInPictureManager::DoActionClose();
     PictureInPictureManager::DoDestroy();
     const std::string ACTION_CLOSE = "close";
+    const std::string ACTION_PRE_RESTORE = "pre_restore";
     const std::string ACTION_RESTORE = "restore";
     const std::string ACTION_DESTROY = "destroy";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
+    PictureInPictureManager::DoActionEvent(ACTION_PRE_RESTORE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_DESTROY, 0);
     ASSERT_EQ(result, 1);

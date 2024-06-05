@@ -510,6 +510,22 @@ HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: PreRestorePictureInPicture
+ * @tc.desc: PreRestorePictureInPicture
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, PreRestorePictureInPicture, Function | SmallTest | Level2)
+{
+    int result = 0;
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+
+    pipControl->PreRestorePictureInPicture();
+    ASSERT_EQ(result, 0);
+}
+
+/**
  * @tc.name: RestorePictureInPictureWindow
  * @tc.desc: RestorePictureInPictureWindow
  * @tc.type: FUNC
