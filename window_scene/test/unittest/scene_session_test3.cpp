@@ -16,14 +16,14 @@
 
 #include "display_manager.h"
 #include "input_event.h"
-#include "mock/mock_session_stage.h"
 #include "key_event.h"
+#include "mock/mock_session_stage.h"
 #include "pointer_event.h"
 
+#include "session/host/include/main_session.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
-#include "session/host/include/main_session.h"
 #include "window_helper.h"
 #include "wm_common.h"
 
@@ -75,6 +75,7 @@ HWTEST_F(SceneSessionTest3, Disconnect2, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     scensession->isActive_ = true;
@@ -101,6 +102,7 @@ HWTEST_F(SceneSessionTest3, UpdateActiveStatus1, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     scensession->isActive_ = true;
@@ -174,6 +176,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     result = scensession->SetAspectRatio(ratio);
@@ -200,6 +203,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
 
     float ratio = 0.1;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     WindowLimits limits;
@@ -234,6 +238,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
 
@@ -269,6 +274,7 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
@@ -306,6 +312,7 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | Small
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
@@ -332,6 +339,7 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | Smal
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
@@ -358,6 +366,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
@@ -387,6 +396,7 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
@@ -430,6 +440,7 @@ HWTEST_F(SceneSessionTest3, HandlePointerStyle1, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent), WSError::WS_ERROR_NULLPTR);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
