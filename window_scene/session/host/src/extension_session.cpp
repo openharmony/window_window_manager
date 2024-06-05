@@ -265,19 +265,6 @@ WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densi
     return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
 }
 
-WSError ExtensionSession::NotifyHostWindowMode(WindowMode mode)
-{
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
-    return sessionStage_->NotifyHostWindowMode(mode);
-}
-
 void ExtensionSession::TriggerBindModalUIExtension()
 {
     if (isFirstTriggerBindModal_ && extSessionEventCallback_ != nullptr &&
