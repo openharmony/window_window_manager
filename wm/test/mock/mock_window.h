@@ -24,6 +24,7 @@ class MockWindowChangeListener : public IWindowChangeListener {
 public:
     MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction));
+    MOCK_METHOD2(OnModeChange, void(WindowMode, bool));
 };
 
 class MockWindowLifeCycleListener : public IWindowLifeCycle {
@@ -33,10 +34,12 @@ public:
     MOCK_METHOD0(AfterFocused, void(void));
     MOCK_METHOD0(AfterUnfocused, void(void));
     MOCK_METHOD1(ForegroundFailed, void(int32_t));
+    MOCK_METHOD1(BackgroundFailed, void(int32_t));
     MOCK_METHOD0(AfterActive, void(void));
     MOCK_METHOD0(AfterInactive, void(void));
     MOCK_METHOD0(AfterResumed, void(void));
     MOCK_METHOD0(AfterPaused, void(void));
+    MOCK_METHOD0(AfterDestroyed, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -70,6 +73,8 @@ public:
 class MockWindowNoInteractionListener : public IWindowNoInteractionListener {
 public:
     MOCK_METHOD0(OnWindowNoInteractionCallback, void());
+    MOCK_METHOD1(SetTimeout, void(int64_t));
+    MOCK_CONST_METHOD0(GetTimeout, int64_t());
 };
 
 class MockWindowTitleButtonRectChangedListener : public IWindowTitleButtonRectChangedListener {
