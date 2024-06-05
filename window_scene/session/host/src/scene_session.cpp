@@ -367,6 +367,8 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->IsSessionValid()) {
+            TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+                session->GetPersistentId(), session->GetSessionState());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         if (isActive == session->isActive_) {
@@ -2601,6 +2603,8 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
         return WMError::WM_OK;
     }
     if (!sceneSession->IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            sceneSession->GetPersistentId(), sceneSession->GetSessionState());
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     float brightness = property->GetBrightness();

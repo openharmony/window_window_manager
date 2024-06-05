@@ -1597,6 +1597,8 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
     // Hide keyboard when app is cold started, if keyboard is showing and screen is unlocked.
     if (!sceneSession->IsSessionValid() && IsKeyboardForeground() &&
         !sceneSession->GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Session is invalid, id: %{public}d state: %{public}u",
+            persistentId, sceneSession->GetSessionState());
         sceneSession->RequestHideKeyboard(true);
     }
 }
