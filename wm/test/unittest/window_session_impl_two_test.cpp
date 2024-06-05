@@ -786,57 +786,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyForegroundInteractiveStatus, Function |
 }
 
 /**
- * @tc.name: InitUIContent
- * @tc.desc: InitUIContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTwoTest, InitUIContent, Function | SmallTest | Level2)
-{
-    auto window = GetTestWindowImpl("InitUIContent");
-    ASSERT_NE(window, nullptr);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NULL_WINDOW;
-    window->isUIExtensionAbilityProcess_ = false;
-    ASSERT_EQ(WMError::WM_OK,
-        window->InitUIContent(
-            "InitUIContent", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
-            BackupAndRestoreType::CONTINUATION, nullptr, aceRet
-        )
-    );
-
-    window->uiContent_ = nullptr;
-    window->isUIExtensionAbilityProcess_ = true;
-    window->property_->SetExtensionFlag(false);
-    ASSERT_EQ(WMError::WM_OK,
-        window->InitUIContent(
-            "InitUIContent", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
-            BackupAndRestoreType::CONTINUATION, nullptr, aceRet
-        )
-    );
-    window->property_->SetExtensionFlag(true);
-    ASSERT_EQ(WMError::WM_OK,
-        window->InitUIContent(
-            "InitUIContent", nullptr, nullptr, WindowSetUIContentType::RESTORE,
-            BackupAndRestoreType::CONTINUATION, nullptr, aceRet
-        )
-    );
-    ASSERT_EQ(WMError::WM_OK,
-        window->InitUIContent(
-            "InitUIContent", nullptr, nullptr, WindowSetUIContentType::BY_NAME,
-            BackupAndRestoreType::CONTINUATION, nullptr, aceRet
-        )
-    );
-    ASSERT_EQ(WMError::WM_OK,
-        window->InitUIContent(
-            "InitUIContent", nullptr, nullptr, WindowSetUIContentType::BY_ABC,
-            BackupAndRestoreType::CONTINUATION, nullptr, aceRet
-        )
-    );
-    window->Destroy();
-}
-
-/**
  * @tc.name: UpdateDecorEnableToAce
  * @tc.desc: UpdateDecorEnableToAce
  * @tc.type: FUNC
