@@ -56,7 +56,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return ret;                                                   \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 #define CHECK_PROXY_RETURN_IF_NULL(proxy)                                 \
     do {                                                                  \
@@ -64,7 +64,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return;                                                       \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
     std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token)
