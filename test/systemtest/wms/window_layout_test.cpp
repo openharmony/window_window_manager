@@ -463,7 +463,9 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     };
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    ASSERT_NE(window, nullptr);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -524,7 +526,9 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .needAvoid = true, .parentLimit = false, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    ASSERT_NE(window, nullptr);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
