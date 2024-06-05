@@ -228,6 +228,7 @@ public:
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
 protected:
     WMError Connect();
