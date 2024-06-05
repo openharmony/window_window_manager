@@ -8100,13 +8100,14 @@ void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId
 
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
-    auto task = [this, persistentId, shouldHide]() {
+    auto task = [this, persistentId, shouldHide, callingPid]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(persistentId);
         if (iter == sceneSessionMap_.end()) {
@@ -8114,8 +8115,15 @@ WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool
                 persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-
         auto sceneSession = iter->second;
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureSession: sceneSession is nullptr.");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "AddOrRemoveSecureSession: Permission denied");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
         sceneSession->SetShouldHideNonSecureWindows(shouldHide);
         return HandleSecureSessionShouldHide(sceneSession);
     };
