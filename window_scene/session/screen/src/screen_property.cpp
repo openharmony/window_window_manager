@@ -203,7 +203,7 @@ DisplayOrientation ScreenProperty::GetDisplayOrientation() const
 void ScreenProperty::UpdateXDpi()
 {
     if (phyWidth_ != UINT32_MAX) {
-        int32_t width = bounds_.rect_.width_;
+        int32_t width = phyBounds_.rect_.width_;
         xDpi_ = width * INCH_2_MM / phyWidth_;
     }
 }
@@ -211,7 +211,7 @@ void ScreenProperty::UpdateXDpi()
 void ScreenProperty::UpdateYDpi()
 {
     if (phyHeight_ != UINT32_MAX) {
-        int32_t height_ = bounds_.rect_.height_;
+        int32_t height_ = phyBounds_.rect_.height_;
         yDpi_ = height_ * INCH_2_MM / phyHeight_;
     }
 }
@@ -246,8 +246,8 @@ void ScreenProperty::CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight)
 
     phyWidth_ = phyWidth;
     phyHeight_ = phyHeight;
-    int32_t width_ = bounds_.rect_.width_;
-    int32_t height_ = bounds_.rect_.height_;
+    int32_t width_ = phyBounds_.rect_.width_;
+    int32_t height_ = phyBounds_.rect_.height_;
     xDpi_ = width_ * INCH_2_MM / phyWidth_;
     yDpi_ = height_ * INCH_2_MM / phyHeight_;
 }
