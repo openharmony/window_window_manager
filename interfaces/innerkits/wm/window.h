@@ -1148,6 +1148,11 @@ public:
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
     /**
+     * @brief Register window destroyed listener.
+     *
+     */
+    virtual void UnregisterWindowDestroyedListener() {}
+    /**
      * @brief Register Occupied Area Change listener.
      *
      * @param listener IOccupiedAreaChangeListener.
