@@ -58,6 +58,7 @@ public:
     {
         vsyncHandler_ = eventHandler;
     }
+    void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
 private:
     static void OnVsync(int64_t nanoTimestamp, int64_t frameCount, void* client);

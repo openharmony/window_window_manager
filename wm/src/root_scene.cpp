@@ -243,5 +243,15 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetFrameLayoutFinishCallback end");
 }
+
+void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (vsyncStation_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "set dvsync switch failed, vsyncStation is nullptr");
+        return;
+    }
+    vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
 } // namespace Rosen
 } // namespace OHOS

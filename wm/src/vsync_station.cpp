@@ -182,5 +182,19 @@ void VsyncStation::OnVsyncTimeOut()
     std::lock_guard<std::mutex> lock(mtx_);
     hasRequestedVsync_ = false;
 }
+
+void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
+        Init();
+    }
+    if (receiver_ != nullptr) {
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
+}
 }
 }
