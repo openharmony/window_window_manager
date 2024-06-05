@@ -917,6 +917,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
             NotifyAfterForeground();
+        } else {
+            NotifyAfterForeground(true, false);
         }
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
