@@ -2685,7 +2685,11 @@ WMError SceneSession::HandleActionUpdateFlags(const sptr<WindowSessionProperty>&
 WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (property != nullptr && !property->GetSystemCalling()) {
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property is null");
+        return false;
+    }
+    if (!property->GetSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "update mode permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
