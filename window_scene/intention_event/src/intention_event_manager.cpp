@@ -21,6 +21,7 @@
 #include "session_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
+#include <hitrace_meter.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -177,6 +178,8 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return false;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent receive id:%d action:%d",
+        pointerEvent->GetId(), pointerEvent->GetPointerAction());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
         pointerEvent->MarkProcessed();
@@ -188,6 +191,20 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         return false;
     }
     return true;
+}
+
+void SetPointerId(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto dispatchTimes = pointerEvent->GetDispatchTimes();
+    if (dispatchTimes > 0) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        auto pointerId = pointerEvent->GetPointerId();
+        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+        }
+    }
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(
@@ -205,16 +222,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         pointerEvent->MarkProcessed();
         return;
     }
-    auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    if (dispatchTimes > 0) {
-        MMI::PointerEvent::PointerItem pointerItem;
-        auto pointerId = pointerEvent->GetPointerId();
-        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
-            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-        }
-    }
+    SetPointerId(pointerEvent);
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
@@ -222,6 +230,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent Send id:%d action:%d",
+            pointerEvent->GetId(), pointerEvent->GetPointerAction());
         sceneSession->SendPointerEventToUI(pointerEvent);
         // notify touchOutside and touchDown event
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
@@ -282,6 +292,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         TLOGE(WmsLogTag::WMS_EVENT, "The key event is nullptr");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent receive id:%d",
+        keyEvent->GetId());
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         TLOGD(WmsLogTag::WMS_EVENT, "OnInputEvent is disabled temporarily");
         keyEvent->MarkProcessed();
@@ -340,6 +352,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent Send id:%d",
+        keyEvent->GetId());
     focusedSceneSession->SendKeyEventToUI(keyEvent);
 }
 

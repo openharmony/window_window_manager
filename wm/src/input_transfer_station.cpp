@@ -20,6 +20,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 #include "gtx_input_event_sender.h"
+#include <hitrace_meter.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -40,6 +41,8 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "InputTransferStation:keyEvent Receive id:%d",
+        keyEvent->GetId());
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
     static uint32_t eventId = 0;
     TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, InputTracking id:%{public}d, Receive keyEvent,"
@@ -71,6 +74,8 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "InputTransferStation:pointerEvent Receive id:%d action:%d",
+        pointerEvent->GetId(), pointerEvent->GetPointerAction());
     // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
     uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
