@@ -2686,7 +2686,7 @@ WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& 
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     if (property == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "property is null");
+        TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
         return false;
     }
     if (!property->GetSystemCalling()) {
