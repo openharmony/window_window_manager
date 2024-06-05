@@ -87,7 +87,6 @@ public:
                                           AAFwk::WantParams& reWantParams);
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
-    void NotifyRemoteReady() override;
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue = 1.0f);

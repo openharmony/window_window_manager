@@ -43,9 +43,6 @@ void SessionStubTestExtensionCode(sptr<Session> sessionStub, MessageParcel& parc
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         parcel, reply, option);
     sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         parcel, reply, option);
     sessionStub->OnRemoteRequest(
