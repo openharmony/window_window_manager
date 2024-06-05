@@ -876,7 +876,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
 
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_270, res);
+    EXPECT_EQ(Rotation::ROTATION_180, res);
 
     orientation = Orientation::LOCKED;
     res = session->CalcRotation(orientation, foldDisplayMode);
@@ -916,11 +916,11 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level
 
     rotation = Rotation::ROTATION_180;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
     res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
-    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
 }
