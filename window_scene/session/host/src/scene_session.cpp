@@ -2687,7 +2687,7 @@ WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& 
 {
     if (property == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
-        return false;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (!property->GetSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "update mode permission denied!");
