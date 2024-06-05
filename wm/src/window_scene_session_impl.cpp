@@ -832,6 +832,22 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
     }
 }
 
+void WindowSceneSessionImpl::PreLayout(const WindowType& type)
+{
+    const auto& requestRect = GetRequestRect();
+    TLOGI(WmsLogTag::WMS_LIFE, "Window show PreLayout [name: %{public}s, id: %{public}d, type: %{public}u],"
+        " state:%{public}u, requestState:%{public}u requestRect:%{public}s", property_->GetWindowName().c_str(),
+        GetPersistentId(), type, state_, requestState_, requestRect.ToString().c_str());
+    if ((requestRect.width_ != 0) && (requestRect.height_ != 0)) {
+        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE);
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            uiContent->Foreground();
+            uiContent->PreLayout();
+        }
+    }
+}
+
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     if (property_ == nullptr) {
@@ -888,6 +904,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession_->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        PreLayout();
         ret = static_cast<WMError>(hostSession_->Show(property_));
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
