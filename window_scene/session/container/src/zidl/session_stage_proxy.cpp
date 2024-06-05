@@ -200,6 +200,29 @@ WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remoteObj = reply.ReadRemoteObject();
+    if (remoteObj == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "ReadRemoteObject failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uiContentRemoteObj = remoteObj;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WSError SessionStageProxy::MarkProcessed(int32_t eventId)
 {
     return WSError::WS_DO_NOTHING;
@@ -647,6 +670,30 @@ WSError SessionStageProxy::NotifyDensityFollowHost(bool isFollowHost, float dens
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::NotifyHostWindowMode(WindowMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HOST_WINDOW_MODE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

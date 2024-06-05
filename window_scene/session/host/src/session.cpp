@@ -2203,17 +2203,17 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
-void Session::SetSessionOldRect(const WSRect& rect)
+void Session::SetSessionLastRect(const WSRect& rect)
 {
-    if (oldWinRect_ == rect) {
+    if (lastWinRect_ == rect) {
         return;
     }
-    oldWinRect_ = rect;
+    lastWinRect_ = rect;
 }
 
-WSRect Session::GetSessionOldRect() const
+WSRect Session::GetSessionLastRect() const
 {
-    return oldWinRect_;
+    return lastWinRect_;
 }
 
 void Session::SetSessionRequestRect(const WSRect& rect)
@@ -2741,6 +2741,15 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->SwitchFreeMultiWindow(enable);
+}
+
+WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
 }
 
 void Session::SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func)

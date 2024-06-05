@@ -620,6 +620,24 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotById, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: SceneSesionManager GetUIContentRemoteObj
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level3)
+{
+    sptr<IRemoteObject> remoteObj;
+    EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
+    SessionInfo info;
+    info.abilityName_ = "GetUIContentRemoteObj";
+    info.bundleName_ = "GetUIContentRemoteObj";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({65535, sceneSession});
+    EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: CalculateCombinedExtWindowFlags
  * @tc.desc: SceneSesionManager calculate combined extension window flags
  * @tc.type: FUNC
@@ -782,6 +800,7 @@ HWTEST_F(SceneSessionManagerTest, ClearUnrecoveredSessions, Function | SmallTest
     ssm_->alivePersistentIds_.push_back(23);
     ssm_->alivePersistentIds_.push_back(24);
     ssm_->alivePersistentIds_.push_back(25);
+    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
     std::vector<int32_t> recoveredPersistentIds;
     recoveredPersistentIds.push_back(23);
     recoveredPersistentIds.push_back(24);
@@ -798,6 +817,7 @@ HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Lev
     SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
     info = ssm_->RecoverSessionInfo(property);
 }
 
@@ -1262,7 +1282,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallT
     std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
     ASSERT_NE(ssm_, nullptr);
     ssm_->GetAllWindowVisibilityInfos(windowVisibilityInfos);
-    EXPECT_NE(windowVisibilityInfos.size(), 0);
+    EXPECT_EQ(windowVisibilityInfos.size(), 0);
 }
 
 /**

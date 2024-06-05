@@ -54,6 +54,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
+    WSError NotifyHostWindowMode(WindowMode mode) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyTransformChange(const Transform& transform) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
@@ -61,6 +62,7 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
 
 private:

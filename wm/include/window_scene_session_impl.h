@@ -139,6 +139,9 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
     void UpdateSubWindowState(const WindowType& type);
+    WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -210,22 +213,10 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
 
-    WMError HandleAlreadyShown(WindowType type);
-    WMError ShowWithValidDisplay(const sptr<Display>& display, bool withAnimation, WindowType type);
-    WMError HandleShowResult(WMError ret, WindowType type);
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;
     sptr<IKeyboardPanelInfoChangeListener> keyboardPanelInfoChangeListeners_ = nullptr;
-    void UpdateSessionInfo();
-    WMError HandleSubWindow(const sptr<ISessionStage>& iSessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
-    WMError HandleExtensionWindow(const sptr<ISessionStage>& iSessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
-    WMError HandleSystemWindow(const sptr<ISessionStage>& iSessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, int32_t& persistentId, sptr<Rosen::ISession>& session);
-    WMError InitializeCreate(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::string& identityToken);
 };
 } // namespace Rosen
 } // namespace OHOS

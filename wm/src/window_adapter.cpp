@@ -491,6 +491,12 @@ WMError WindowAdapter::DumpSessionWithId(int32_t persistentId, std::vector<std::
     return static_cast<WMError>(windowManagerServiceProxy_->DumpSessionWithId(persistentId, infos));
 }
 
+WMError WindowAdapter::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return static_cast<WMError>(windowManagerServiceProxy_->GetUIContentRemoteObj(persistentId, uiContentRemoteObj));
+}
+
 WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
     std::vector<sptr<RSWindowAnimationTarget>>& targets)
 {
@@ -575,13 +581,6 @@ WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>
         return WMError::WM_DO_NOTHING;
     }
     return WMError::WM_OK;
-}
-
-WMError WindowAdapter::UpdateSessionProperty(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    return windowManagerServiceProxy_->UpdateSessionProperty(property, action);
 }
 
 WMError WindowAdapter::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)

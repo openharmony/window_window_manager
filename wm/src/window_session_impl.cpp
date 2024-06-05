@@ -852,18 +852,14 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto promoteThis = weakThis.promote();
-        if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr &&
-            promoteThis->enableSetBufferAvaliableCallback_) {
-            // false: Make the function callable
-            promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            promoteThis->UpdateBufferAvaliableCallbackEnable(false);
+        if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
+            bool setCallBackEnable = true;
+            if (promoteThis->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
+                // false: Make the function callable
+                promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+            }
         }
     });
-}
-
-void WindowSessionImpl::UpdateBufferAvaliableCallbackEnable(bool enable)
-{
-    enableSetBufferAvaliableCallback_ = enable;
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -1003,6 +999,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 }
                 WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
                 uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
+                uiContent->NotifyWindowMode(mode);
             }
         }
         NotifyModeChange(mode, IsDecorEnable());
@@ -1505,6 +1502,17 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
     titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
     return WMError::WM_OK;
+}
+
+WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr. Failed to get uiContentRemoteObj");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentRemoteObj = uiContent->GetRemoteObj();
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(

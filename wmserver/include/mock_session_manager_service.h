@@ -81,7 +81,6 @@ private:
 
     static void WriteStringToFile(int32_t pid, const char* str);
 
-    sptr<IRemoteObject> sessionManagerService_;
     sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
 
