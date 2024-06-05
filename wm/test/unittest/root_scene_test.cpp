@@ -26,6 +26,8 @@
 
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
+#include "context_impl.h"
+#include "mock_ui_content.h"
 
 using namespace testing;
 using namespace testing::ext;
