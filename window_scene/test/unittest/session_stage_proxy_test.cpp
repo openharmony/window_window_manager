@@ -303,18 +303,6 @@ HWTEST_F(SessionStageProxyTest, NotifyDensityFollowHost, Function | SmallTest | 
 }
 
 /**
- * @tc.name: NotifyHostWindowMode
- * @tc.desc: test function : NotifyHostWindowMode
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, NotifyHostWindowMode, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE((sessionStage_ != nullptr));
-    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
-    ASSERT_EQ(WSError::WS_OK, sessionStage_->NotifyHostWindowMode(mode));
-}
-
-/**
  * @tc.name: SetPipActionEvent
  * @tc.desc: test function : SetPipActionEvent
  * @tc.type: FUNC

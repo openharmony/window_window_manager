@@ -715,18 +715,6 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
     return vpr;
 }
 
-WSError WindowExtensionSessionImpl::NotifyHostWindowMode(WindowMode mode)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "mode:%{public}d", static_cast<int32_t>(mode));
-    hostWindowMode_ = mode;
-    return WSError::WS_OK;
-}
-
-WindowMode WindowExtensionSessionImpl::GetMode() const
-{
-    return hostWindowMode_;
-}
-
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
     if (state_ != WindowState::STATE_SHOWN) {
