@@ -88,10 +88,6 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
-    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
-
     rect.width_ = MOCK_LEM_SUB_WIDTH;
     rect.height_ = MOCK_LEM_SUB_HEIGHT;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
@@ -109,10 +105,6 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     rootScene.uiContent_ = nullptr;
-    rootScene.UpdateConfiguration(configuration);
-
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -210,11 +202,45 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
     RootScene rootScene;
     
     rootScene.SetFrameLayoutFinishCallback(nullptr);
-
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
-    rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: LoadContent02
+ * @tc.desc: LoadContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, LoadContent02, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->LoadContent("a", nullptr, nullptr, nullptr);
+
+    AbilityRuntime::Context *context = new AbilityRuntime::ContextImpl();
+    ASSERT_NE(nullptr, context);
+    rootScene->uiContent_ = nullptr;
+    rootScene->LoadContent("a", nullptr, nullptr, context);
+
+    AbilityRuntime::Context *context1 = new AbilityRuntime::ContextImpl();
+    ASSERT_NE(nullptr, context1);
+    rootScene->LoadContent("a", nullptr, nullptr, context1);
+    ASSERT_EQ(1, rootScene->GetWindowId());
+
+    delete &context;
+    delete &context1;
+    rootScene->SetDisplayOrientation(0);
+
+    rootScene->vsyncStation_ = nullptr;
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+    NodeId nodeId = 0;
+    rootScene->vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+    rootScene->OnBundleUpdated("a");
+
+    std::function<void(const std::shared_ptr<AppExecFwk::Configuration> &)> callback;
+    rootScene->SetOnConfigurationUpdatedCallback(callback);
 }
 }
 } // namespace Rosen
