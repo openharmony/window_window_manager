@@ -35,19 +35,10 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+void MakeThingsPart01(MessageParcel& parcel)
 {
-    if (data == nullptr || size < DATA_MIN_SIZE) {
-        return false;
-    }
-    
-    MessageParcel parcel;
     MessageParcel reply;
     MessageOption option;
-
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
@@ -73,6 +64,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
         parcel, reply, option);
+}
+
+void MakeThingsPart02(MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
@@ -89,6 +87,21 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         parcel, reply, option);
+}
+
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < DATA_MIN_SIZE) {
+        return false;
+    }
+    
+    MessageParcel parcel;
+    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteBuffer(data, size);
+    parcel.RewindRead(0);
+
+    MakeThingsPart01(parcel);
+    MakeThingsPart02(parcel);
     return true;
 }
 } // namespace OHOS
