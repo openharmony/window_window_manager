@@ -916,10 +916,10 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+            NotifyAfterForeground();
         }
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
