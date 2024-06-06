@@ -48,6 +48,8 @@
 #include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
 #include "screen_snapshot_picker.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -84,6 +86,7 @@ static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.typ
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
+const unsigned int XCOLLIE_TIMEOUT_S = 10;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -927,10 +930,13 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
 
 void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenProperty& property)
 {
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("CreateScreenPropertyCallRS", XCOLLIE_TIMEOUT_S, nullptr,
+        nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
     auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
     auto screenRefreshRate = screenMode.GetScreenRefreshRate();
     auto screenCapability = rsInterface_.GetScreenCapability(screenId);
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     TLOGI(WmsLogTag::DMS, "Call RS interface end, create ScreenProperty begin");
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
