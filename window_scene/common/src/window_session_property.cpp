@@ -714,7 +714,7 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
             pipTemplateInfo.controlGroup.push_back(controlGroupId);
         } else {
             return;
-        } 
+        }
     }
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
