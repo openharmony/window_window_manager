@@ -8100,13 +8100,12 @@ void SceneSessionManager::HandleSpecialExtWindowFlagsChange(int32_t persistentId
 
 WSError SceneSessionManager::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
 {
-    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, shouldHide=%{public}u", persistentId, shouldHide);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, shouldHide, callingPid]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(persistentId);
