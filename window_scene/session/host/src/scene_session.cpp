@@ -3151,7 +3151,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
             TLOGE(WmsLogTag::WMS_PIP, "SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        if (callingPid != session->GetCallingPid) {
+        if (callingPid != session->GetCallingPid()) {
             TLOGW(WmsLogTag::WMS_PIP, "premission denied, not call by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
