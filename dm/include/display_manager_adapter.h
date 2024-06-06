@@ -86,6 +86,7 @@ public:
     virtual void SetFoldStatusLocked(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+    virtual void DisablePowerOffRenderControl(ScreenId screenId);
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
