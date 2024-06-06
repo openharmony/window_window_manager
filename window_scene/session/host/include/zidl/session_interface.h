@@ -76,7 +76,6 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual void NotifyRemoteReady() {}
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
