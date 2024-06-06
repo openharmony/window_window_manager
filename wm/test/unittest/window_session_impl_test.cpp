@@ -2386,6 +2386,36 @@ HWTEST_F(WindowSessionImplTest, UpdateOrientation, Function | SmallTest | Level2
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
+/**
+ * @tc.name: SetUiDvsyncSwitchSucc
+ * @tc.desc: SetUiDvsyncSwitch Test Succ
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetUiDvsyncSwitchSucc");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUiDvsyncSwitch(true);
+    window->SetUiDvsyncSwitch(false);
+}
+
+/**
+ * @tc.name: SetUiDvsyncSwitchErr
+ * @tc.desc: SetUiDvsyncSwitch Test Err
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetUiDvsyncSwitchErr");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->vsyncStation_ = nullptr;
+    window->SetUiDvsyncSwitch(true);
+    window->SetUiDvsyncSwitch(false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
