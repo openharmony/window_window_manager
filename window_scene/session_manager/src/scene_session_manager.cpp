@@ -1693,7 +1693,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         }
     }
     if (isColdStart) {
-        TLOGI(WmsLogTag::WMS_LIFE, "ColdStart, identityToken:%{public}s, bundleName:%{public}s",
+        TLOGI(WmsLogTag::WMS_MAIN, "ColdStart, identityToken:%{public}s, bundleName:%{public}s",
             scnSessionInfo->identityToken.c_str(), sessionInfo.bundleName_.c_str());
         scnSession->SetClientIdentityToken(scnSessionInfo->identityToken);
         scnSession->ResetSessionConnectState();
@@ -5865,7 +5865,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
         if (isColdStart) {
-            TLOGI(WmsLogTag::WMS_LIFE, "ColdStart, identityToken:%{public}s, bundleName:%{public}s",
+            TLOGI(WmsLogTag::WMS_MAIN, "ColdStart, identityToken:%{public}s, bundleName:%{public}s",
                 abilitySessionInfo->identityToken.c_str(), sessionInfo.bundleName_.c_str());
             scnSession->SetClientIdentityToken(abilitySessionInfo->identityToken);
             scnSession->ResetSessionConnectState();
