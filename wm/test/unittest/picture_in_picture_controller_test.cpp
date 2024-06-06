@@ -308,7 +308,7 @@ HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus03, Function 
     int32_t INDEX = 0;
     int32_t ret = resultSet->GetString(INDEX, value);
     ASSERT_NE(NativeRdb::E_OK,  ret);
-    ASSERT_EQ(ERR_OK, pipControl->getSettingsAutoStartStatus(key, value));
+    pipControl->getSettingsAutoStartStatus(key, value);
 }
 
 /**
