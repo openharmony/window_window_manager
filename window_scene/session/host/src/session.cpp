@@ -26,6 +26,7 @@
 #include <ui/rs_surface_node.h>
 #include "proxy/include/window_info.h"
 
+#include "common/include/session_permission.h"
 #include "anr_manager.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
@@ -363,6 +364,10 @@ void Session::NotifyDisconnect()
 
 void Session::NotifyExtensionDied()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
@@ -375,6 +380,10 @@ void Session::NotifyExtensionDied()
 
 void Session::NotifyExtensionTimeout(int32_t errorCode)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) in session(persistentId:%{public}d).",
         errorCode, persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
