@@ -59,7 +59,6 @@ private:
     int HandleNotifySessionBackground(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateTitleInTargetPos(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyHostWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
