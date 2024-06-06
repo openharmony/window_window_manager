@@ -225,11 +225,23 @@ HWTEST_F(RootSceneTest, LoadContent02, Function | SmallTest | Level3)
 
     AbilityRuntime::Context *context1 = new AbilityRuntime::ContextImpl();
     ASSERT_NE(nullptr, context1);
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene->LoadContent("a", nullptr, nullptr, context1);
     ASSERT_EQ(1, rootScene->GetWindowId());
 
-    delete &context;
-    delete &context1;
+    delete context;
+    delete context1;
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
     rootScene->SetDisplayOrientation(0);
 
     rootScene->vsyncStation_ = nullptr;
@@ -239,10 +251,50 @@ HWTEST_F(RootSceneTest, LoadContent02, Function | SmallTest | Level3)
     rootScene->vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
     rootScene->GetVSyncPeriod();
     rootScene->FlushFrameRate(0, true);
-    rootScene->OnBundleUpdated("a");
 
+    rootScene->uiContent_ = nullptr;
+    rootScene->OnBundleUpdated("a");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->OnBundleUpdated("a");
+}
+
+/**
+ * @tc.name: UpdateViewportConfig
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateViewportConfig, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
     std::function<void(const std::shared_ptr<AppExecFwk::Configuration> &)> callback;
     rootScene->SetOnConfigurationUpdatedCallback(callback);
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::DRAG;
+    rootScene->uiContent_ = nullptr;
+    rootScene->UpdateViewportConfig(rect, reason);
+
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rect.width_ = 340;
+    rect.height_ = 340;
+    rootScene->UpdateViewportConfig(rect, reason);
+}
+
+/**
+ * @tc.name: UpdateConfiguration01
+ * @tc.desc: UpdateConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfiguration01, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->uiContent_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    rootScene->UpdateConfiguration(configuration);
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->UpdateConfiguration(configuration);
 }
 }
 } // namespace Rosen
