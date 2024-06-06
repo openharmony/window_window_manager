@@ -266,7 +266,7 @@ HWTEST_F(RootSceneTest, UpdateConfiguration01, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, rootScene);
     rootScene->uiContent_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
-    ASSERT_NE(nullptr,configuration);
+    ASSERT_NE(nullptr, configuration);
     rootScene->UpdateConfiguration(configuration);
     rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene->UpdateConfiguration(configuration);
