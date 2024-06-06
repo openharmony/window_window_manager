@@ -1273,136 +1273,24 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetTitleButtonVisible01
- * @tc.desc: GetTitleButtonVisible
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetTitleButtonVisible01");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false };
-    bool hideMaximizeButton = false;
-    bool hideMinimizeButton = false;
-    bool hideSplitButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    ASSERT_EQ(hideMaximizeButton, true);
-    ASSERT_EQ(hideMinimizeButton, true);
-    ASSERT_EQ(hideSplitButton, true);
-}
-
-/**
- * @tc.name: GetTitleButtonVisible02
- * @tc.desc: GetTitleButtonVisible
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetTitleButtonVisible02");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { true, true, true };
-    bool hideMaximizeButton = false;
-    bool hideMinimizeButton = false;
-    bool hideSplitButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    ASSERT_EQ(hideMaximizeButton, false);
-    ASSERT_EQ(hideMinimizeButton, false);
-    ASSERT_EQ(hideSplitButton, false);
-}
-
-/**
- * @tc.name: GetTitleButtonVisible03
- * @tc.desc: GetTitleButtonVisible
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetTitleButtonVisible03");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false };
-    bool hideMaximizeButton = true;
-    bool hideMinimizeButton = true;
-    bool hideSplitButton = true;
-    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    ASSERT_EQ(hideMaximizeButton, true);
-    ASSERT_EQ(hideMinimizeButton, true);
-    ASSERT_EQ(hideSplitButton, true);
-}
-
-/**
- * @tc.name: SetTitleButtonVisible01
+ * @tc.name: SetTitleButtonVisible
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetTitleButtonVisible");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    WMError res = window->SetTitleButtonVisible(false, false, false);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 end";
-}
-
-/**
- * @tc.name: SetTitleButtonVisible02
- * @tc.desc: SetTitleButtonVisible
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible02, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetTitleButtonVisible");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WMError res = window->SetTitleButtonVisible(false, false, false);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 end";
-}
-
-/**
- * @tc.name: SetTitleButtonVisible03
- * @tc.desc: SetTitleButtonVisible
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 start";
-    sptr option = new WindowOption();
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: SetTitleButtonVisible start";
+    sptr option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetTitleButtonVisible");
     sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
+    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _));
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->windowSystemConfig_.uiType_ = "phone";
@@ -1411,7 +1299,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->windowSystemConfig_.uiType_ = "pc";
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: SetTitleButtonVisible end";
 }
 
 /**
