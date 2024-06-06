@@ -1848,4 +1848,9 @@ void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<ui
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList);
 }
+
+void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
+}
 } // namespace OHOS::Rosen
