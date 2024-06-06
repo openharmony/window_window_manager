@@ -282,8 +282,8 @@ private:
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();
-    void RecoverAllDisplayNodeChildrenInner();
-    void RemoveAllDisplayNodeChildrenInner(int32_t userId);
+    void ScbClientDeathCallback(int32_t deathScbPid);
+    void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -336,9 +336,7 @@ private:
     int32_t currentScbPId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
     mutable std::mutex currentUserIdMutex_;
-    mutable std::mutex displayNodeChildrenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
-    std::map<int32_t, std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>>> userDisplayNodeChildrenMap_;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
@@ -408,6 +406,22 @@ private:
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);
+
+private:
+    class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
+        public:
+            explicit ScbClientListenerDeathRecipient(int32_t scbPid)
+                : scbPid_(scbPid)
+            {}
+
+            void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override
+            {
+                ScreenSessionManager::GetInstance().ScbClientDeathCallback(scbPid_);
+            }
+
+        private:
+            int32_t scbPid_;
+    };
 };
 } // namespace OHOS::Rosen
 
