@@ -496,6 +496,8 @@ WSError Session::SetTouchable(bool touchable)
 {
     SetSystemTouchable(touchable);
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (touchable != GetSessionProperty()->GetTouchable()) {
@@ -636,12 +638,6 @@ bool Session::IsSessionValid() const
         return false;
     }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
-    if (!res) {
-        if (state_ == SessionState::STATE_DISCONNECT && sessionStage_) {
-            WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
-                GetPersistentId(), GetSessionState());
-        }
-    }
     return res;
 }
 
@@ -801,6 +797,8 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
         winRect_ = rect;
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
@@ -818,6 +816,8 @@ WSError Session::UpdateDensity()
 {
     WLOGFI("session update density: id: %{public}d.", GetPersistentId());
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage_ != nullptr) {
@@ -1071,6 +1071,8 @@ WSError Session::SetActive(bool active)
     TLOGI(WmsLogTag::WMS_LIFE, "new active: %{public}d, id: %{public}d, state: %{public}" PRIu32,
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (active == isActive_) {
@@ -2045,6 +2047,8 @@ WSError Session::UpdateFocus(bool isFocused)
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     sessionStage_->UpdateFocus(isFocused);
@@ -2274,6 +2278,8 @@ void Session::SetSnapshotScale(const float snapshotScale)
 WSError Session::ProcessBackEvent()
 {
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->HandleBackEvent();
@@ -2346,6 +2352,8 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
 {
     WLOGFD("Session update maximize mode, isMaximize: %{public}d", isMaximize);
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
@@ -2728,6 +2736,8 @@ WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
     WLOGFD("Session update title in target position, id: %{public}d, isShow: %{public}d, height: %{public}d",
         GetPersistentId(), isShow, height);
     if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->UpdateTitleInTargetPos(isShow, height);
@@ -2738,6 +2748,8 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->SwitchFreeMultiWindow(enable);
