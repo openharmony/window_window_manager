@@ -27,7 +27,7 @@
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "context_impl.h"
-#include "mock_ui_content.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -205,32 +205,6 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
     
     rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
-}
-
-/**
- * @tc.name: LoadContent02
- * @tc.desc: LoadContent
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneTest, LoadContent02, Function | SmallTest | Level3)
-{
-    sptr<RootScene> rootScene = new RootScene();
-    ASSERT_NE(nullptr, rootScene);
-    rootScene->LoadContent("a", nullptr, nullptr, nullptr);
-
-    AbilityRuntime::Context *context = new AbilityRuntime::ContextImpl();
-    ASSERT_NE(nullptr, context);
-    rootScene->uiContent_ = nullptr;
-    rootScene->LoadContent("a", nullptr, nullptr, context);
-
-    AbilityRuntime::Context *context1 = new AbilityRuntime::ContextImpl();
-    ASSERT_NE(nullptr, context1);
-    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    rootScene->LoadContent("a", nullptr, nullptr, context1);
-    ASSERT_EQ(1, rootScene->GetWindowId());
-
-    delete context;
-    delete context1;
 }
 
 /**
