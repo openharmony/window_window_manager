@@ -6576,7 +6576,7 @@ WSError SceneSessionManager::NotifyWindowExtensionVisibilityChange(int32_t pid, 
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (pid != IPCSkeleton::GetCallingRealPid() || uid != IPCSkeleton::GetCallingUid()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "pid and uid check failed!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "visibility change to %{public}s for pid: %{public}d, uid: %{public}d",
