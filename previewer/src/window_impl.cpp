@@ -1142,5 +1142,6 @@ bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
 }
+
 } // namespace Rosen
 } // namespace OHOS
