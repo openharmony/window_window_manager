@@ -3433,7 +3433,8 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
     enableImmersiveMode_ = enable;
     WindowMode mode = GetMode();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+	auto isPC = windowSystemConfig_.uiType_ == "pc";
+    if (!isPC || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
