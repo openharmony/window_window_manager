@@ -3849,6 +3849,30 @@ void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMod
     }
 }
 
+void ScreenSessionManager::ScbClientDeathCallback(int32_t deathScbPid)
+{
+    if (oldScbPids_.empty()) {
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "old scb: %{public}d death", deathScbPid);
+    oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), deathScbPid), oldScbPids_.end());
+}
+
+void ScreenSessionManager::AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient,
+    int32_t scbPid)
+{
+    sptr<ScbClientListenerDeathRecipient> scbClientDeathListener =
+        new (std::nothrow) ScbClientListenerDeathRecipient(scbPid);
+    if (scbClientDeathListener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "add scb: %{public}d death listener failed", scbPid);
+        return;
+    }
+    if (scbClient != nullptr && scbClient->AsObject() != nullptr) {
+        TLOGI(WmsLogTag::DMS, "add scb: %{public}d death listener", scbPid);
+        scbClient->AsObject()->AddDeathRecipient(scbClientDeathListener);
+    }
+}
+
 void ScreenSessionManager::SwitchUser()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -3864,18 +3888,20 @@ void ScreenSessionManager::SwitchUser()
             TLOGI(WmsLogTag::DMS, "switch user not change");
             return;
         }
-        auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
-        if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
-            oldScbPids_.emplace_back(currentScbPId_);
+        if (clientProxy_) {
+            auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
+            if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
+                oldScbPids_.emplace_back(currentScbPId_);
+            }
+            oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
         }
-        oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
         currentUserId_ = userId;
         currentScbPId_ = newScbPid;
         auto it = clientProxyMap_.find(currentUserId_);
         if (it != clientProxyMap_.end()) {
             clientProxy_ = it->second;
         }
-        if (clientProxy_ != nullptr) {
+        if (clientProxy_) {
             clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
     }
@@ -3902,85 +3928,23 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     screenEventTracker_.RecordEvent(oss.str());
     {
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
-        if (userId != currentUserId_ && currentUserId_ > 0) {
+        if (clientProxy_ != nullptr && userId != currentUserId_ && currentUserId_ > 0) {
             auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
             if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
                 oldScbPids_.emplace_back(currentScbPId_);
             }
             oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
+            clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
         currentUserId_ = userId;
         currentScbPId_ = newScbPid;
         clientProxy_ = client;
         clientProxyMap_[currentUserId_] = client;
-        clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
     }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     SetClientInner();
-}
-
-void ScreenSessionManager::RemoveAllDisplayNodeChildrenInner(int32_t userId)
-{
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap;
-    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(userId);
-    if (userDisplayNodeIter != userDisplayNodeChildrenMap_.end()) {
-        userDisplayNodeChildrenMap_.erase(userDisplayNodeIter);
-    }
-    TLOGI(WmsLogTag::DMS, "remove displayNode start");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode start");
-    for (const auto& iter : screenSessionMap_) {
-        auto displayNode = GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            TLOGE(WmsLogTag::DMS, "display node is null");
-            continue;
-        }
-        auto nodeChildren = displayNode->GetChildren();
-        std::vector<std::shared_ptr<RSBaseNode>> childrenList;
-        for (auto child : nodeChildren) {
-            auto childNode = RSNodeMap::Instance().GetNode(child);
-            if (childNode != nullptr) {
-                childrenList.push_back(childNode);
-                displayNode->RemoveChild(childNode);
-            }
-        }
-        displayNodeChildrenMap.emplace(iter.first, childrenList);
-    }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    userDisplayNodeChildrenMap_.emplace(userId, displayNodeChildrenMap);
-    TLOGI(WmsLogTag::DMS, "remove displayNode end");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode end");
-}
-
-void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
-{
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(currentUserId_);
-    if (userDisplayNodeIter == userDisplayNodeChildrenMap_.end()) {
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "recover displayNode start");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode start");
-    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap = userDisplayNodeIter->second;
-    for (const auto& iter : displayNodeChildrenMap) {
-        auto displayNode = GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            continue;
-        }
-        for (auto child : iter.second) {
-            displayNode->AddChild(child);
-        }
-    }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    TLOGI(WmsLogTag::DMS, "recover displayNode end");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode end");
+    AddScbClientDeathRecipient(client, newScbPid);
 }
 
 void ScreenSessionManager::SetClientInner()
