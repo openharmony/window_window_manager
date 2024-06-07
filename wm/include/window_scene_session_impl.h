@@ -212,7 +212,7 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayout(const WindowType& type);
+    void PreLayoutOnShow(WindowType type);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
