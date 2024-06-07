@@ -308,17 +308,6 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
-{
-    return WMError::WM_OK;
-}
-
-WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
-{
-    return WMError::WM_OK;
-}
-
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;
