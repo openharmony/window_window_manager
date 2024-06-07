@@ -211,7 +211,7 @@ void ScreenSessionManager::OnStart()
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    TLOGI(WmsLogTag::DMS, "RegisterScreenshotListener is called");
+    TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
         && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
@@ -234,7 +234,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    TLOGI(WmsLogTag::DMS, "UnregisterDisplayListener is called");
+    TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
         && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
