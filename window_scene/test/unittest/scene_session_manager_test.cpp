@@ -509,11 +509,16 @@ HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, Function | Sm
 */
 HWTEST_F(SceneSessionManagerTest, NotifyWindowExtensionVisibilityChange, Function | SmallTest | Level3)
 {
-    int32_t pid = 1;
-    int32_t uid = 32;
+    int32_t pid = getprocpid();
+    int32_t uid = getuid();
     bool isVisible = false;
     WSError result = ssm_->NotifyWindowExtensionVisibilityChange(pid, uid, isVisible);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    pid = INVALID_PID;
+    uid = INVALID_USER_ID;
+    result = ssm_->NotifyWindowExtensionVisibilityChange(pid, uid, isVisible);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**
