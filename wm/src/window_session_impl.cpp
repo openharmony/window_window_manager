@@ -503,7 +503,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
     if (reason == SizeChangeReason::DRAG_END) {
-        property->SetRequestRect(wmRect);
+        property_->SetRequestRect(wmRect);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u"
         "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.ToString().c_str(),
