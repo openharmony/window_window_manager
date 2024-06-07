@@ -454,7 +454,16 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             return;
         }
         int32_t duration = ANIMATION_TIME;
+        bool needSync = false;
         if (rsTransaction) {
+            // extract high 32 bits of SyncId as pid
+            auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
+            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->getHostPid()) {
+                needSync = true;
+            }
+        }
+
+        if (needSync) {
             duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
@@ -479,7 +488,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
         RSNode::CloseImplicitAnimation();
-        if (rsTransaction) {
+        if (needSync) {
             rsTransaction->Commit();
         } else {
             RSTransaction::FlushImplicitTransaction();
