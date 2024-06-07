@@ -261,6 +261,11 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             if (parentSession == nullptr) {
                 continue;
             }
+            auto iter = dialogMap.find(parentSession->GetPersistentId());
+            if (iter != dialogMap.end() && iter->second->GetSessionProperty() &&
+                iter->second->GetSessionProperty()->IsTopmost() && !property->IsTopmost()) {
+                continue;
+            }
             dialogMap[parentSession->GetPersistentId()] = session;
             WLOGFI("Add dialog session, id: %{public}d, parentId: %{public}d",
                 session->GetPersistentId(), parentSession->GetPersistentId());

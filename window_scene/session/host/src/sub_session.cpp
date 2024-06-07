@@ -184,4 +184,14 @@ void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
     uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
     RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
 }
+
+bool SubSession::IsTopmost() const
+{
+    bool isTopmost = false;
+    if (GetSessionProperty()) {
+        isTopmost = GetSessionProperty()->IsTopmost();
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
+    return isTopmost;
+}
 } // namespace OHOS::Rosen
