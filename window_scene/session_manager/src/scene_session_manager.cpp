@@ -6671,13 +6671,20 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
 
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Enter");
+    TLOGI(WmsLogTag::DEFAULT, "Session is going to foreground");
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    auto isUserTestMode = SessionPermission::CheckCallingIsUserTestMode(pid);
+    if (!SessionPermission::IsSACalling() && !isUserTestMode) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to foreground!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
     auto task = [this, &token]() {
         auto session = FindSessionByToken(token);
         if (session != nullptr) {
             return session->PendingSessionToForeground();
         }
-        TLOGE(WmsLogTag::WMS_LIFE, "PendingForeground: fail to find token");
+        TLOGE(WmsLogTag::DEFAULT, "PendingForeground: fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToForeground");
