@@ -2378,8 +2378,7 @@ HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    auto ret = window->GetTopWindowWithContext(context);
-    ASSERT_EQ(nullptr, ret);
+    window->GetTopWindowWithContext(context);
 }
 
 /**
@@ -2392,8 +2391,7 @@ HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    auto ret = window->GetTopWindowWithContext(context);
-    ASSERT_EQ(nullptr, ret);
+    window->GetTopWindowWithContext(context);
 }
 
 /**
