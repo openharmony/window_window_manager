@@ -2588,5 +2588,6 @@ HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchErr, Function | SmallTest | Lev
     window->SetUiDvsyncSwitch(true);
     window->SetUiDvsyncSwitch(false);
 }
+}
 } // namespace Rosen
 } // namespace OHOS
