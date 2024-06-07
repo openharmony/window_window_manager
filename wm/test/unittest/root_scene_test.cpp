@@ -298,5 +298,6 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
+}
 } // namespace Rosen
 } // namespace OHOS
