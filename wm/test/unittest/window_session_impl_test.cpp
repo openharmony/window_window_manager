@@ -35,6 +35,8 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
 void WindowSessionImplTest::SetUpTestCase()
@@ -52,6 +54,7 @@ void WindowSessionImplTest::SetUp()
 
 void WindowSessionImplTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
     abilityContext_ = nullptr;
 }
 
