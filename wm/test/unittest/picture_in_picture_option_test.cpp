@@ -117,6 +117,17 @@ HWTEST_F(PictureInPictureOptionTest, ContentSize, Function | SmallTest | Level2)
     ASSERT_EQ(width, w);
     ASSERT_EQ(height, h);
 }
+
+/**
+ * @tc.name: NodeController
+ * @tc.desc: SetNodeControllerRef/GetNodeControllerRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new PipOption();
+    option->SetNodeControllerRef(nullptr);
+    ASSERT_EQ(option->GetNodeControllerRef(), nullptr);
 }
 }
 }
