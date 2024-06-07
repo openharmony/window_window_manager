@@ -193,6 +193,8 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
     ASSERT_NE(WMError::WM_OK, errorCode);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    ASSERT_EQ(nullptr, option->GetNodeControllerRef());
+    ASSERT_EQ(nullptr, pipControl->GetCustomNodeController());
 }
 
 /**
