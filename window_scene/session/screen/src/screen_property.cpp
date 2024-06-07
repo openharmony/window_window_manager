@@ -24,6 +24,7 @@ constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
+constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -205,6 +206,7 @@ void ScreenProperty::UpdateXDpi()
     if (phyWidth_ != UINT32_MAX) {
         int32_t width = phyBounds_.rect_.width_;
         xDpi_ = width * INCH_2_MM / phyWidth_;
+        xDpi_ = std::floor(xDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
     }
 }
 
@@ -213,6 +215,7 @@ void ScreenProperty::UpdateYDpi()
     if (phyHeight_ != UINT32_MAX) {
         int32_t height_ = phyBounds_.rect_.height_;
         yDpi_ = height_ * INCH_2_MM / phyHeight_;
+        yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
     }
 }
 
@@ -250,6 +253,8 @@ void ScreenProperty::CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight)
     int32_t height_ = phyBounds_.rect_.height_;
     xDpi_ = width_ * INCH_2_MM / phyWidth_;
     yDpi_ = height_ * INCH_2_MM / phyHeight_;
+    xDpi_ = std::floor(xDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
+    yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
 }
 
 float ScreenProperty::GetXDpi()
