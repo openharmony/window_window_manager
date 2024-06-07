@@ -290,7 +290,7 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
 */
-HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     rootScene.vsyncStation_ = nullptr;
