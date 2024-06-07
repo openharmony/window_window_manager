@@ -737,4 +737,10 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
     INIT_PROXY_CHECK_RETURN();
     displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList);
 }
+
+void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN();
+    displayManagerServiceProxy_->DisablePowerOffRenderControl(screenId);
+}
 } // namespace OHOS::Rosen
