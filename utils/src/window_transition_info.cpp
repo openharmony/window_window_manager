@@ -262,7 +262,12 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     windowTransitionInfo->windowRect_.width_  = parcel.ReadUint32();
     windowTransitionInfo->windowRect_.height_  = parcel.ReadUint32();
     if (parcel.ReadBool()) {
-        windowTransitionInfo->abilityToken_ = parcel.ReadObject<IRemoteObject>();
+	auto readObject = parcel.ReadObject<IRemoteObject>();
+	if (readObject == nullptr) {
+		WLOGFE("readObject is nullptr.");
+		return nullptr;
+	}
+        windowTransitionInfo->abilityToken_ = readObject;
     }
     windowTransitionInfo->displayId_ = parcel.ReadUint64();
     windowTransitionInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
