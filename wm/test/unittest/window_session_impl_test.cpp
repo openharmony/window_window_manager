@@ -2560,6 +2560,62 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible03, Function | SmallTest | 
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
 }
+
+/*
+ * @tc.name: SetRestoredRouterStack_0100
+ * @tc.desc: basic function test of set or get restored router stack.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    std::string routerStack = "stackInfo:{}";
+    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
+    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
+        WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetRestoredRouterStack_0200
+ * @tc.desc: basic function test of set or get restored router stack.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, SetRestoredRouterStack_0200, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    std::string routerStack = "stackInfo:{}";
+    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
+    std::string gettedStack = window->GetRestoredRouterStack();
+    EXPECT_EQ(gettedStack, routerStack);
+    EXPECT_TRUE(window->GetRestoredRouterStack().empty());
+}
+
+/**
+ * @tc.name: GetAceContentInfoType_0100
+ * @tc.desc: basic function test of get ace content info type.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, GetAceContentInfoType_0100, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::CONTINUATION), Ace::ContentInfoType::CONTINUATION);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::APP_RECOVERY), Ace::ContentInfoType::APP_RECOVERY);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY),
+        Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::NONE), Ace::ContentInfoType::NONE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
