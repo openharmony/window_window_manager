@@ -4331,4 +4331,15 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds);
     rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
 }
+
+void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    rsInterface_.DisablePowerOffRenderControl(rsScreenId);
+}
 } // namespace OHOS::Rosen

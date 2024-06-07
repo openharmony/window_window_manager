@@ -591,6 +591,13 @@ public:
     */
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
 
+    /**
+     * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
+     *
+     * @param screenId ScreenId used in virtual screen.
+    */
+    void DisablePowerOffRenderControl(ScreenId screenId);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

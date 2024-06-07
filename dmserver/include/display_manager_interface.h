@@ -131,6 +131,7 @@ public:
         TRANS_ID_GET_SNAPSHOT_BY_PICKER,
         TRANS_ID_SWITCH_USER,
         TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST,
+        TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -275,6 +276,7 @@ public:
         return DMError::DM_OK;
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) {}
+    virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 };
 } // namespace OHOS::Rosen
 

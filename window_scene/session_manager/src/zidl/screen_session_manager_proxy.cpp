@@ -2484,4 +2484,29 @@ void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std
         return;
     }
 }
+
+void ScreenSessionManagerProxy::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

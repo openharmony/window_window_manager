@@ -189,6 +189,7 @@ public:
     bool IsScreenLockSuspend(void);
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
+    void DisablePowerOffRenderControl(ScreenId screenId) override;
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;

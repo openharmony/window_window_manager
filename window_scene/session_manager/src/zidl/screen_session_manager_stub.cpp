@@ -728,6 +728,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetVirtualScreenBlackList(screenId, windowIdList);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            DisablePowerOffRenderControl(screenId);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
