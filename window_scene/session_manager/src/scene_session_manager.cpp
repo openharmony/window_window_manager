@@ -6751,7 +6751,8 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
 {
-    auto task = [this, persistentId, haveListener]() {
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    auto task = [this, persistentId, haveListener, callingPid]() {
         TLOGI(WmsLogTag::WMS_IMMS,
             "UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
             persistentId, haveListener);
@@ -6759,6 +6760,10 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         if (sceneSession == nullptr) {
             TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
             return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Permission denied, not called by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
             avoidAreaListenerSessionSet_.insert(persistentId);
