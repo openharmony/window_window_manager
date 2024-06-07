@@ -96,7 +96,7 @@ WmErrorCode CjWindowRegisterManager::ProcessOccupiedAreaChangeRegister(
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IOccupiedAreaChangeListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
+    WmErrorCode ret;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {

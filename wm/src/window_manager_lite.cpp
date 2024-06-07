@@ -574,5 +574,14 @@ WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persist
     }
     return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
 }
+
+WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "raise window to top failed.");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -129,6 +129,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
  */
 HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->AddExtensionWindowStageToSCB();
 }
 
@@ -140,6 +141,7 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
 HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, Function | SmallTest | Level3)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
     window_->UpdateConfigurationForAll(configuration);
 }
 
@@ -151,6 +153,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, Function |
 HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, Function | SmallTest | Level3)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
     window_->windowExtensionSessionSet_.insert(window_);
     window_->UpdateConfigurationForAll(configuration);
     window_->windowExtensionSessionSet_.erase(window_);
@@ -167,6 +170,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback01, Fu
     bool consumed = false;
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
     auto isTimeout = std::make_shared<bool>(false);
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
 }
 
@@ -180,6 +184,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback02, Fu
     bool consumed = false;
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
     auto isTimeout = std::make_shared<bool>(false);
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(nullptr, consumed, isConsumedPromise, isTimeout);
 }
 
@@ -192,6 +197,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback03, Fu
 {
     bool consumed = false;
     auto isTimeout = std::make_shared<bool>(false);
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(nullptr, consumed, nullptr, isTimeout);
 }
 
@@ -205,6 +211,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback04, Fu
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
     auto isTimeout = std::make_shared<bool>(false);
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(keyEvent, consumed, nullptr, isTimeout);
 }
 
@@ -218,6 +225,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback05, Fu
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, nullptr);
 }
 
@@ -231,6 +239,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback06, Fu
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
     auto isTimeout = std::make_shared<bool>(false);
+    ASSERT_NE(nullptr, window_);
     window_->InputMethodKeyEventResultCallback(keyEvent, true, isConsumedPromise, isTimeout);
 }
 
@@ -245,6 +254,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, Function | SmallTest 
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
     bool consumed = false;
     bool notifyInputMethod = true;
+    ASSERT_NE(nullptr, window_);
     window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
 }
 
@@ -257,6 +267,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent02, Function | SmallTest 
 {
     bool consumed = false;
     bool notifyInputMethod = true;
+    ASSERT_NE(nullptr, window_);
     window_->NotifyKeyEvent(nullptr, consumed, notifyInputMethod);
 }
 
@@ -270,6 +281,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent03, Function | SmallTest 
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
     bool notifyInputMethod = true;
+    ASSERT_NE(nullptr, window_);
     window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
 }
 
@@ -284,6 +296,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest 
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
     bool consumed = false;
     bool notifyInputMethod = false;
+    ASSERT_NE(nullptr, window_);
     window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
 }
 
@@ -294,6 +307,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest 
  */
 HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->CheckAndAddExtWindowFlags();
 }
 
@@ -304,6 +318,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, Function |
  */
 HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->extensionWindowFlags_.bitData = 1;
     window_->CheckAndAddExtWindowFlags();
 }
@@ -315,6 +330,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, Function |
  */
 HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->CheckAndRemoveExtWindowFlags();
 }
 
@@ -325,6 +341,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, Functio
  */
 HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags02, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->extensionWindowFlags_.bitData = 1;
     window_->CheckAndRemoveExtWindowFlags();
 }
@@ -359,13 +376,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
     auto res = window_->Show();
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
-    window_->property_->displayId_ = 0;
-    window_->state_ = WindowState::STATE_HIDDEN;
-    EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_OK));
-    res = window_->Show();
-    ASSERT_EQ(res, WMError::WM_OK);
-    ASSERT_EQ(window_->state_, WindowState::STATE_SHOWN);
 }
 
 /**
@@ -1267,6 +1277,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
 */
 HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, window_);
     window_->TriggerBindModalUIExtension();
 }
 

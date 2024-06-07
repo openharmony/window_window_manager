@@ -248,6 +248,8 @@ WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& ke
 WSError SystemSession::ProcessBackEvent()
 {
     if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {

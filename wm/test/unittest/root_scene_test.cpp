@@ -26,6 +26,8 @@
 
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
+#include "context_impl.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -88,10 +90,6 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
-    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
-
     rect.width_ = MOCK_LEM_SUB_WIDTH;
     rect.height_ = MOCK_LEM_SUB_HEIGHT;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
@@ -109,10 +107,6 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     rootScene.uiContent_ = nullptr;
-    rootScene.UpdateConfiguration(configuration);
-
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -210,11 +204,72 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
     RootScene rootScene;
     
     rootScene.SetFrameLayoutFinishCallback(nullptr);
-
-    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_ = std::move(uiContent);
-    rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->SetDisplayOrientation(0);
+
+    rootScene->vsyncStation_ = nullptr;
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+    NodeId nodeId = 0;
+    rootScene->vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+
+    rootScene->uiContent_ = nullptr;
+    rootScene->OnBundleUpdated("a");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->OnBundleUpdated("a");
+}
+
+/**
+ * @tc.name: UpdateViewportConfig
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateViewportConfig, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    std::function<void(const std::shared_ptr<AppExecFwk::Configuration> &)> callback;
+    rootScene->SetOnConfigurationUpdatedCallback(callback);
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::DRAG;
+    rootScene->uiContent_ = nullptr;
+    rootScene->UpdateViewportConfig(rect, reason);
+
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rect.width_ = 340;
+    rect.height_ = 340;
+    rootScene->UpdateViewportConfig(rect, reason);
+}
+
+/**
+ * @tc.name: UpdateConfiguration01
+ * @tc.desc: UpdateConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfiguration01, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->uiContent_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, configuration);
+    rootScene->UpdateConfiguration(configuration);
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->UpdateConfiguration(configuration);
 }
 
 /**
@@ -242,7 +297,6 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
     rootScene.SetUiDvsyncSwitch(true);
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
-}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -86,6 +86,9 @@ JsWindow::JsWindow(const sptr<Window>& window)
 JsWindow::~JsWindow()
 {
     WLOGI(" deConstructorCnt:%{public}d", ++g_dtorCnt);
+    if (windowToken_ != nullptr) {
+        windowToken_->UnregisterWindowDestroyedListener();
+    }
     windowToken_ = nullptr;
 }
 
@@ -5358,6 +5361,7 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 }
 
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window)
+__attribute__((no_sanitize("cfi")))
 {
     std::string windowName = window->GetWindowName();
     // avoid repeatedly create js window when getWindow
