@@ -6572,10 +6572,14 @@ WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sce
 WSError SceneSessionManager::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("NotifyWindowExtensionVisibilityChange permission denied!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    WLOGFI("Notify WindowExtension visibility change to %{public}s for pid: %{public}d, uid: %{public}d",
+    if (pid != IPCSkeleton::GetCallingRealPid() || uid != IPCSkeleton::GetCallingUid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "pid and uid check failed!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "visibility change to %{public}s for pid: %{public}d, uid: %{public}d",
         visible ? "VISIBLE" : "INVISIBLE", pid, uid);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(INVALID_WINDOW_ID, pid, uid,
