@@ -1953,6 +1953,27 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    WSError res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj end";
+}
+
+/**
  * @tc.name: RegisterExtensionAvoidAreaChangeListener
  * @tc.desc: RegisterExtensionAvoidAreaChangeListener Test
  * @tc.type: FUNC
@@ -2387,6 +2408,157 @@ HWTEST_F(WindowSessionImplTest, UpdateOrientation, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: SetTitleButtonVisible01
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 end";
+}
+
+/**
+ * @tc.name: SetTitleButtonVisible02
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 end";
+}
+
+/**
+ * @tc.name: SetTitleButtonVisible03
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 start";
+    sptr option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.uiType_ = "phone";
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.uiType_ = "pc";
+    res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible01
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { false, false, false };
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideSplitButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, true);
+    ASSERT_EQ(hideMinimizeButton, true);
+    ASSERT_EQ(hideSplitButton, true);
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible02
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible02");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    // only not support WINDOW_MODE_SUPPORT_SPLIT
+    uint32_t modeSupportInfo = 1 | (1 << 1);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { true, true, true };
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideSplitButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, false);
+    ASSERT_EQ(hideMinimizeButton, false);
+    ASSERT_EQ(hideSplitButton, false);
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible03
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible03");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    // only not support WINDOW_MODE_SUPPORT_SPLIT
+    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { false, false, false };
+    bool hideMaximizeButton = true;
+    bool hideMinimizeButton = true;
+    bool hideSplitButton = true;
+    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, true);
+    ASSERT_EQ(hideMinimizeButton, true);
+    ASSERT_EQ(hideSplitButton, true);
+}
+
+/**
  * @tc.name: SetUiDvsyncSwitchSucc
  * @tc.desc: SetUiDvsyncSwitch Test Succ
  * @tc.type: FUNC
@@ -2415,7 +2587,6 @@ HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchErr, Function | SmallTest | Lev
     window->vsyncStation_ = nullptr;
     window->SetUiDvsyncSwitch(true);
     window->SetUiDvsyncSwitch(false);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

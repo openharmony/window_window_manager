@@ -709,7 +709,12 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         return;
     }
     for (uint32_t i = 0; i < size; i++) {
-        pipTemplateInfo.controlGroup.push_back(parcel.ReadUint32());
+        uint32_t controlGroupId = 0;
+        if (parcel.ReadUint32(controlGroupId)) {
+            pipTemplateInfo.controlGroup.push_back(controlGroupId);
+        } else {
+            return;
+        }
     }
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }

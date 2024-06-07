@@ -2668,6 +2668,33 @@ HWTEST_F(WindowTest, Test06, Function | SmallTest | Level2)
     parcel.WriteUint32(0);
     ASSERT_EQ(nullptr, KeyboardLayoutParams::Unmarshalling(parcel));
 }
+
+/**
+ * @tc.name: SetTitleButtonVisible
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(window, nullptr);
+    WMError res = window->SetTitleButtonVisible(true, true, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(false, true, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(true, false, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(true, true, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(false, false, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(false, true, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(true, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

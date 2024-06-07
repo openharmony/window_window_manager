@@ -213,6 +213,7 @@ public:
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
+    virtual void UnregisterWindowDestroyedListener() {}
     virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;

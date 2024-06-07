@@ -103,6 +103,8 @@ void MainSession::NotifyForegroundInteractiveStatus(bool interactive)
 {
     SetForegroundInteractiveStatus(interactive);
     if (!IsSessionValid() || !sessionStage_) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session or sessionStage is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return;
     }
     const auto& state = GetSessionState();

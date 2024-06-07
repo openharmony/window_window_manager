@@ -610,29 +610,29 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSessionOldRect
- * @tc.desc: check func SetSessionOldRect
+ * @tc.name: SetSessionLastRect
+ * @tc.desc: check func SetSessionLastRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetSessionOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetSessionLastRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionOldRect(rect);
-    ASSERT_EQ(rect, session_->oldWinRect_);
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->lastWinRect_);
 }
 
 /**
- * @tc.name: GetSessionOldRect
- * @tc.desc: check func GetSessionOldRect
+ * @tc.name: GetSessionLastRect
+ * @tc.desc: check func GetSessionLastRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetSessionOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetSessionLastRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionOldRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionOldRect());
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->GetSessionLastRect());
 }
 
 /**
@@ -1781,6 +1781,24 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillOnce(Return(WSError::WS_OK));
+    session_->sessionStage_ = mockSessionStage;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
+    Mock::VerifyAndClearExpectations(&mockSessionStage);
 }
 
 /**

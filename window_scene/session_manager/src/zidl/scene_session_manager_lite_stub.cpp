@@ -91,6 +91,8 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS),
         &SceneSessionManagerLiteStub::HandleClearMainSessions),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+        &SceneSessionManagerLiteStub::HandleRaiseWindowToTop),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -500,6 +502,14 @@ int SceneSessionManagerLiteStub::HandleClearMainSessions(MessageParcel& data, Me
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    WSError errCode = RaiseWindowToTop(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -624,10 +624,9 @@ HWTEST_F(ScreenSessionTest, screen_session_test004, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    RRect bounds;
-    RRect phyBounds;
+    ScreenProperty newProperty;
     int res = 0;
-    session->UpdatePropertyByFoldControl(bounds, phyBounds);
+    session->UpdatePropertyByFoldControl(newProperty);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 end";
 }

@@ -712,6 +712,18 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> remoteObj;
+    WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: GetFocusWindowInfo
  * @tc.desc: window GetFocusWindowInfo
  * @tc.type: FUNC

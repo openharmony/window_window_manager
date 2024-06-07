@@ -109,7 +109,7 @@ public:
     int32_t SetWindowSystemBarEnable(char** arr, uint32_t size);
     int32_t OnRegisterWindowCallback(std::string type, int64_t funcId);
     int32_t UnregisterWindowCallback(std::string type, int64_t funcId);
-    int32_t SetWindowSystemBarProperties(CBarProperties properties);
+    int32_t SetWindowSystemBarProperties(CBarProperties cProperties);
     ResWindow CheckWindow();
 private:
     sptr<Window> windowToken_;

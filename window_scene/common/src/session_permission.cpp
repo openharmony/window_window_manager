@@ -14,6 +14,7 @@
  */
 
 #include <accesstoken_kit.h>
+#include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
@@ -282,5 +283,39 @@ bool SessionPermission::IsStartedByUIExtension()
         });
     return extensionInfo != bundleInfo.extensionInfos.end();
 }
+
+bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get system ability mgr.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObject
+        = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (!remoteObject) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get app manager service.");
+        return false;
+    }
+    auto appMgrProxy = iface_cast<AppExecFwk::IAppMgr>(remoteObject);
+    if (!appMgrProxy || !appMgrProxy->AsObject()) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get app manager proxy.");
+        return false;
+    }
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    TLOGI(WmsLogTag::DEFAULT, "Checking user test mode");
+    bool isUserTestMode = false;
+    auto ret = appMgrProxy->CheckCallingIsUserTestMode(pid, isUserTestMode);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied! ret=%{public}d", ret);
+        return false;
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    return isUserTestMode;
+}
+
 } // namespace Rosen
 } // namespace OHOS
