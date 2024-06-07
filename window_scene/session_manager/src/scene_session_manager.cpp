@@ -6751,7 +6751,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
 {
-    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, haveListener, callingPid]() {
         TLOGI(WmsLogTag::WMS_IMMS,
             "UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
