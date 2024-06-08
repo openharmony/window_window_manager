@@ -311,6 +311,9 @@ public:
     void PendingClose();
 
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
