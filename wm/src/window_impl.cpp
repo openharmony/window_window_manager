@@ -840,6 +840,33 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
+WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
+        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
+        current.contentColor_ = propertyIter->second.contentColor_;
+        WLOGI("Window:%{public}u %{public}s set status bar content color %{public}u",
+            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+{
+    WLOGFD("Get SystemBarProperties");
+    if (property_ != nullptr) {
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    } else {
+        WLOGFE("inner property is null");
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;
