@@ -62,6 +62,7 @@
 #include "res_type.h"
 #include "res_sched_client.h"
 #endif
+#include "scene_system_ability_listener.h"
 
 #include "ability_start_setting.h"
 #include "anr_manager.h"
@@ -265,29 +266,45 @@ void SceneSessionManager::Init()
 void SceneSessionManager::InitScheduleUtils()
 {
 #ifdef RES_SCHED_ENABLE
+    SCBThreadInfo threadInfo = {
+        .scbPid_ = std::to_string(getprocpid()), .scbTid_ = std::to_string(getproctid()),
+        .scbUid_ = std::to_string(getuid()), .scbBundleName_ = SCENE_BOARD_BUNDLE_NAME
+    };
     std::unordered_map<std::string, std::string> payload {
-        { "pid", std::to_string(getprocpid()) },
-        { "tid", std::to_string(getproctid()) },
-        { "uid", std::to_string(getuid()) },
-        { "bundleName", SCENE_BOARD_BUNDLE_NAME },
+        { "pid", threadInfo.scbPid_ },
+        { "tid", threadInfo.scbTid_ },
+        { "uid", threadInfo.scbUid_ },
+        { "bundleName", threadInfo.scbBundleName_ },
     };
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
-    int64_t value = 0;
-    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
-    auto task = []() {
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 0, payload);
+    auto task = [threadInfo = std::move(threadInfo)]() mutable {
+        threadInfo.ssmThreadName_ = "OS_SceneSession";
+        threadInfo.ssmTid_ = std::to_string(gettid());
         const int32_t userInteraction = 2;
         std::unordered_map<std::string, std::string> payload{
-            {"pid", std::to_string(getpid())},
-            {"tid", std::to_string(gettid())},
-            {"uid", std::to_string(getuid())},
-            {"extType", "10002"},
-            {"cgroupPrio", "1"},
-            {"isSa", "0"},
-            {"threadName", "OS_SceneSession"}
+            { "pid", threadInfo.scbPid_ },
+            { "tid", threadInfo.ssmTid_ },
+            { "uid", threadInfo.scbUid_ },
+            { "extType", "10002" },
+            { "cgroupPrio", "1" },
+            { "isSa", "0" },
+            { "threadName", threadInfo.ssmThreadName_ }
         };
         uint32_t type = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, userInteraction, payload);
         TLOGI(WmsLogTag::WMS_LIFE, "set RES_TYPE_KEY_PERF_SCENE success");
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (!systemAbilityManager) {
+            TLOGE(WmsLogTag::WMS_MAIN, "failed to get system ability manager client");
+            return;
+        }
+        auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
+        int32_t ret = systemAbilityManager->SubscribeSystemAbility(RES_SCHED_SYS_ABILITY_ID, statusChangeListener);
+        if (ret != ERR_OK) {
+            TLOGI(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
+        }
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
 #endif
