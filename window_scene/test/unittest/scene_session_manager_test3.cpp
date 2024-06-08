@@ -1376,18 +1376,18 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
 */
 HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Level3)
 {
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, 10086);
 
     int32_t persistentId = INVALID_SESSION_ID;
     WMError result01 = ssm_->RequestFocusStatus(persistentId, true);
     EXPECT_EQ(result01, WMError::WM_OK);
+    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
     reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
 
     persistentId = 10000;
+    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
     reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
     WMError result02 = ssm_->RequestFocusStatus(persistentId, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
