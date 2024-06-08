@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
         cmdArgments.fileName << " as jpeg, width " << pixelMap->GetWidth() <<
         ", height " << pixelMap->GetHeight() << std::endl;
-    return 0;
+    _exit(0);
 }
 
 static bool GetScreenshotByCmdArgments(CmdArgments& cmdArgments, sptr<Display> display,
