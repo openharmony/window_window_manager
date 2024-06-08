@@ -50,6 +50,7 @@
 #include "screen_snapshot_picker.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
+#include "publish/screen_session_publish.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -194,6 +195,8 @@ void ScreenSessionManager::Init()
     } else {
         SetSensorSubscriptionEnabled();
     }
+    // publish init
+    ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
 }
 
@@ -1623,6 +1626,8 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
+        displayInfo->GetScreenId(), displayInfo->GetRotation());
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
