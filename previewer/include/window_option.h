@@ -225,6 +225,13 @@ public:
     void SetSubWindowTitle(const std::string& subWindowTitle);
 
     /**
+     * @brief Set subwindow topmost.
+     *
+     * @param isTopmost true means enable, default disabled.
+     */
+    void SetWindowTopmost(bool isTopmost);
+
+    /**
      * @brief Set only sceneboard supported.
      *
      * @param onlySupportSceneBoard only sceneboard supported.
@@ -378,6 +385,13 @@ public:
     */
     std::string GetSubWindowTitle() const;
 
+    /**
+     * @brief Get window topmost
+     *
+     * @return true means the window is topmost, otherwise not.
+    */
+    bool GetWindowTopmost() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     std::string windowName_ { "" };
@@ -392,6 +406,7 @@ private:
     bool keepScreenOn_ = { false };
     bool turnScreenOn_ = { false };
     bool isMainHandlerAvailable_ = { true };
+    bool isTopmost_ = false;
     DisplayId displayId_ { 0 };
     uint32_t parentId_ = INVALID_WINDOW_ID;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;

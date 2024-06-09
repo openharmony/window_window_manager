@@ -2062,8 +2062,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    if (!CheckSystemWindowPermission(property)) {
-        WLOGFE("create system window permission denied!");
+    if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
+        WLOGFE("create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
@@ -2202,6 +2202,26 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window, maybe parentSession is null or disconnected");
         return false;
     }
+    return true;
+}
+
+bool SceneSessionManager::CheckModalSubWindowPermission(const sptr<WindowSessionProperty>& property)
+{
+    WindowType type = property->GetWindowType();
+    if (!WindowHelper::IsSubWindow(type) || !property->IsTopmost()) {
+        return true;
+    }
+
+    if (!WindowHelper::IsModalSubWindow(type, property->GetWindowFlags())) {
+        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow has topmost");
+        return false;
+    }
+
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        return false;
+    }
+
     return true;
 }
 
