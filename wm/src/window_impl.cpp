@@ -849,6 +849,9 @@ WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarP
     if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
         (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
         current.contentColor_ = propertyIter->second.contentColor_;
+        current.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(propertyIter->second.settingFlag_) |
+            static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
         WLOGI("Window:%{public}u %{public}s set status bar content color %{public}u",
             GetWindowId(), GetWindowName().c_str(), current.contentColor_);
         return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
