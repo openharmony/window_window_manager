@@ -1176,14 +1176,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTes
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP); 
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowName("SetSystemBarProperties");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     std::map<WindowType, SystemBarProperty> properties;
     std::map<WindowType, SystemBarPropertyFlag> propertyFlags;
-    ASSERT_EQ(WMError::WM_OK,
-        window->SetSystemBarProperties(properties, propertyFlags)); 
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperties(properties, propertyFlags)); 
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty property;
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
