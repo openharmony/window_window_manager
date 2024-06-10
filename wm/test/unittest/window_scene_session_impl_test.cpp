@@ -1168,6 +1168,65 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest |
 }
 
 /*
+ * @tc.name: SetSystemBarProperties
+ * @tc.desc: SetSystemBarProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP); 
+    option->SetWindowName("SetSystemBarProperties");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    std::map<WindowType, SystemBarProperty> properties;
+    std::map<WindowType, SystemBarPropertyFlag> propertyFlags;
+    ASSERT_EQ(WMError::WM_OK,
+        window->SetSystemBarProperties(properties, propertyFlags)); 
+    SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty property;
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
+    SystemBarPropertyFlag propertyFlag;
+    propertyFlag.contentColorFlag = true;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = propertyFlag;
+    if (property.contentColor_ == current.contentColor_)
+    {
+        ASSERT_EQ(WMError::WM_OK,
+        window->SetSystemBarProperties(properties, propertyFlags));
+    } else {
+        current.contentColor_ = property.contentColor_;
+        propertyFlag.contentColorFlag = false;
+        property.contentColor_ = 0x000000FF;
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property
+        ASSERT_EQ(WMError::WM_OK,
+            window->SetSystemBarProperties(properties, propertyFlag));
+        std::map<WindowType, SystemBarProperty> properties_;
+        ASSERT_EQ(WMError::WM_OK,
+        window->GetSystemBarProperties(properties_));
+        ASSERT_EQ(properties_[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
+    }
+}
+
+/*
+ * @tc.name: GetSystemBarProperties
+ * @tc.desc: GetSystemBarProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetSystemBarProperties, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowName("GetSystemBarProperties");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    std::map<WindowType, SystemBarProperty> properties
+    ASSERT_EQ(WMError::WM_OK,
+        window->GetSystemBarProperties(properties));
+}
+
+/*
  * @tc.name: SpecificBarProperty
  * @tc.desc: SpecificBarProperty01 test
  * @tc.type: FUNC
