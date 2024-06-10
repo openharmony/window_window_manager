@@ -162,12 +162,13 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
         windowSystemConfig_.freeMultiWindowEnable_;
     if ((isPC || isFreeMutiWindowMode) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-            WLOGFD("create subwindow, title: %{public}s, decorEnable: %{public}d",
+           TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
             property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
             property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
@@ -179,7 +180,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
             property_->SetDecorEnable(dialogDecorEnable);
             property_->SetDragEnabled(dialogDecorEnable);
             dialogTitle_ = windowOption_->GetDialogTitle();
-            WLOGFD("create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+            TLOGI(WmsLogTag::WMS_LIFE, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
                 dialogTitle_.c_str(), dialogDecorEnable);
         }
     }
@@ -335,6 +336,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 
 void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "Called");
     auto displayId = property_->GetDisplayId();
     if (displayId == DISPLAY_ID_INVALID) {
         auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
@@ -353,6 +355,7 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
 
 WMError WindowSessionImpl::Connect()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "Called");
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Session is null!");
         return WMError::WM_ERROR_NULLPTR;
@@ -1817,6 +1820,7 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
 
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "Called id: %{public}d.", GetPersistentId());
     {
         std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
         ClearUselessListeners(displayMoveListeners_, persistentId);
@@ -1861,6 +1865,7 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
         subWindowCloseListeners_[GetPersistentId()] = nullptr;
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "Clear successfully, id: %{public}d.", GetPersistentId());
 }
 
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -2049,9 +2054,11 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
     } else {
         task();
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "Release uicontent successfully, id: %{public}d.", GetPersistentId());
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "successed with id: %{public}d.", GetPersistentId());
 }
 
 void WindowSessionImpl::NotifyAfterDestroy()
