@@ -572,7 +572,7 @@ private:
     RSInterfaces& rsInterface_;
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
-    bool isNeedRecover(const int32_t persistentId);
+    bool IsNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
@@ -660,6 +660,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
+    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property);
 };
 } // namespace OHOS::Rosen
 
