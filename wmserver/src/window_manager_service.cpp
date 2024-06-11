@@ -1402,7 +1402,7 @@ std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windo
     WLOGFI("XXX WindowManagerService::GetSnapshot");
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("window raise to app top permission denied!");
-        return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+        return nullptr;
     }
     auto task = [this, windowId]() {
         return widnowController_->GetSnapshot(windowId);
