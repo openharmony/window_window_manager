@@ -287,13 +287,13 @@ bool SessionPermission::IsStartedByUIExtension()
 bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to get system ability mgr.");
         return false;
     }
-    sptr<IRemoteObject> remoteObject
-        = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    sptr<IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (!remoteObject) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to get app manager service.");
         return false;
@@ -305,7 +305,7 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
     }
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    TLOGI(WmsLogTag::DEFAULT, "Checking user test mode");
+    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
     bool isUserTestMode = false;
     auto ret = appMgrProxy->CheckCallingIsUserTestMode(pid, isUserTestMode);
     if (ret != ERR_OK) {
