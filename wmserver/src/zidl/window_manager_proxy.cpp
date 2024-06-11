@@ -920,6 +920,16 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
     return map;
 }
 
+WMError WindowManagerProxy::GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    WLOGFI("XXX WindowManagerProxy::GetSnapshotByWindowId");
+    pixelMap = GetSnapshot(persistentId);
+    if (pixelMap == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
 {
     MessageParcel data;

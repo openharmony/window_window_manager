@@ -1399,7 +1399,15 @@ WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 
 std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windowId)
 {
-    return nullptr;
+    WLOGFI("XXX WindowManagerService::GetSnapshot");
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("window raise to app top permission denied!");
+        return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, windowId]() {
+        return widnowController_->GetSnapshot(windowId);
+    };
+    return PostSyncTask(tas, "GetSnapshot");
 }
 
 void WindowManagerService::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)

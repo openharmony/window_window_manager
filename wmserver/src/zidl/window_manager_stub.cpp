@@ -304,6 +304,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_SNAPSHOT: {
+            WLOGFE("XXX handle TRANS_ID_GET_SNAPSHOT");
             uint32_t windowId = data.ReadUint32();
             std::shared_ptr<Media::PixelMap> pixelMap = GetSnapshot(windowId);
             reply.WriteParcelable(pixelMap.get());
