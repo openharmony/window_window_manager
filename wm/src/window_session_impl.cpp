@@ -2047,9 +2047,14 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
 {
     auto task = [this]() {
+        {
+            std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+            if (uiContent != nullptr) {
+                uiContent->Destroy();
+            }
+        }
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         if (uiContent_ != nullptr) {
-            uiContent_->Destroy();
             uiContent_ = nullptr;
             TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
                 GetPersistentId());
