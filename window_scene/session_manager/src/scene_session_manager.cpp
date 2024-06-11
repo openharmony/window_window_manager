@@ -6697,7 +6697,7 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
 
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Session is going to foreground");
+    TLOGI(WmsLogTag::DEFAULT, "Enter");
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto isUserTestMode = SessionPermission::CheckCallingIsUserTestMode(pid);
     if (!SessionPermission::IsSACalling() && !isUserTestMode) {
