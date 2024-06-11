@@ -1001,7 +1001,7 @@ std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
         WLOGFE("WindowController::GetSnapshot takeSurfaceCapture failed");
         return nullptr;
     }
-    return callback->GetResult(SNAPHOT_TIMEOUT_MS);
+    return callback->GetResult(SNAPSHOT_TIMEOUT_MS);
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
