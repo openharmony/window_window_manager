@@ -3084,11 +3084,16 @@ void SceneSession::NotifyPiPWindowPrepareClose()
 WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
     WLOGFD("NotifySetLandscapeMultiWindow");
-    auto task = [weakThis = wptr(this), isLandscapeMultiWindow]() {
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [weakThis = wptr(this), isLandscapeMultiWindow, callingPid]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (callingPid != session->GetCallingPid()) {
+            WLOGFE("premission denied, not call by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->sessionChangeCallback_ &&
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_) {
