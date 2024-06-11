@@ -303,12 +303,11 @@ void BlockingFocusTest(sptr<SceneSessionManager> ssm_)
     sceneSession2->state_ = SessionState::STATE_INACTIVE;
     AnomalyDetection::FocusCheckProcess(0, 1);
 
-    sceneSession2->SetSystemTouchable(false);
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
     sceneSession2->isVisible_ = true;
     AnomalyDetection::FocusCheckProcess(0, 1);
 
+    sceneSession2->SetSystemTouchable(false);
+    AnomalyDetection::FocusCheckProcess(0, 1);
     ssm_->sceneSessionMap_.clear();
 }
 
