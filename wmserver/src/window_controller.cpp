@@ -987,6 +987,22 @@ void WindowController::RecordBootAnimationEvent() const
     }
 }
 
+std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("WindowController::GetSnapshot could not find window");
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(node->surfaceNode_, callback, 1.0, 1.0);
+    if (!ret) {
+        WLOGFE("WindowController::GetSnapshot takeSurfaceCapture failed");
+        return nullptr;
+    }
+    return callback->GetResult(SNAPHOT_TIMEOUT_MS);
+}
+
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
