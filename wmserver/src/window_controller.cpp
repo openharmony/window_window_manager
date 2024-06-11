@@ -33,6 +33,7 @@
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
 #include "persistent_storage.h"
+#include "surface_capture_future.h"
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_inner_manager.h"
