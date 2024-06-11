@@ -1708,6 +1708,47 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | Sma
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
+
+/**
+ * @tc.name: GetTopWindowId
+ * @tc.desc: get top window id by main window id.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "mainWin";
+    sessionInfo1.abilityName_ = "mainAbilityName";
+    sessionInfo1.persistentId_ = 100;
+    auto sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->SetCallingPid(65534);
+    ssm_->sceneSessionMap_.insert({100, sceneSession1});
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.bundleName_ = "subWin1";
+    sessionInfo2.abilityName_ = "subAbilityName1";
+    sessionInfo2.persistentId_ = 101;
+    auto sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    sceneSession2->SetCallingPid(65535);
+    ssm_->sceneSessionMap_.insert({101, sceneSession2});
+
+    SessionInfo sessionInfo3;
+    sessionInfo3.bundleName_ = "subWin2";
+    sessionInfo3.abilityName_ = "subAbilityName2";
+    sessionInfo3.persistentId_ = 102;
+    auto sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    ASSERT_NE(sceneSession3, nullptr);
+    sceneSession3->SetCallingPid(65534);
+    ssm_->sceneSessionMap_.insert({102, sceneSession3});
+
+    sceneSession1->AddSubSession(sceneSession2);
+    sceneSession1->AddSubSession(sceneSession3);
+    uint32_t topWinId;
+    ASSERT_NE(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
+        WMError::WM_ERROR_INVALID_WINDOW);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
