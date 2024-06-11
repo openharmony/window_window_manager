@@ -1067,7 +1067,9 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return;
     }
     sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
-    focusInfo = *info;
+    if (info != nullptr) {
+        focusInfo = *info;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
