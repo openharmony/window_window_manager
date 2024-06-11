@@ -6034,6 +6034,10 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
             WLOGFE("RegisterWindowManagerAgent permission denied!");
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
         }
+    } else if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE) {
+        if (!SessionPermission::IsSystemServiceCalling()) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
     }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
