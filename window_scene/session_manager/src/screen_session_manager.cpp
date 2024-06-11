@@ -1413,6 +1413,11 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
 
+void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
+{
+    rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
+}
+
 void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 {
     keyguardDrawnDone_ = flag;

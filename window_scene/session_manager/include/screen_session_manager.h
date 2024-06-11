@@ -205,6 +205,7 @@ public:
     FoldStatus GetFoldStatus() override;
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+    void SetScreenPowerForFold(ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
