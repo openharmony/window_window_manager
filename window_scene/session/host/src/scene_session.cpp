@@ -2433,6 +2433,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             session->systemConfig_.freeMultiWindowEnable_;
         if (!(isPC || isFreeMutiWindowMode) &&
             (session->GetAbilityInfo() != nullptr) && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
                 !(session->GetForegroundInteractiveStatus())) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
@@ -2444,7 +2445,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
                 "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
-            auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::STATE_FOREGROUND && sessionState != SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state:%{public}d, "
