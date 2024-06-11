@@ -131,3 +131,4 @@ HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Leve
 }
 }
 }
+}
