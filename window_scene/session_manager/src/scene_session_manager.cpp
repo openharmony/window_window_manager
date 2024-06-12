@@ -3718,6 +3718,12 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
         return false;
     }
 
+    if (WindowHelper::IsMainWindow(session->GetWindowType()) && !session->GetShowRecent() &&
+        state < SessionState::STATE_FOREGROUND && session->GetAttachState()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "MainWindow is at foreground, id: %{public}d", session->GetPersistentId());
+        return true;
+    }
+
     if (session->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
         WLOGFD("Window is at foreground, id: %{public}d", session->GetPersistentId());
         return true;
