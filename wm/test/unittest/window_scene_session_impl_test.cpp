@@ -1190,12 +1190,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTes
     propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = propertyFlag;
 	ASSERT_EQ(WMError::WM_OK,
 		window->SetSystemBarProperties(properties, propertyFlags));
-	if (property.contentColor_ != current.contentColor_) {
-		std::map<WindowType, SystemBarProperty> currProperties;
+    if (property.contentColor_ != current.contentColor_) {
+        std::map<WindowType, SystemBarProperty> currProperties;
         ASSERT_EQ(WMError::WM_OK,
 			window->GetSystemBarProperties(currProperties));
         ASSERT_EQ(currProperties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
-	} 
+    }
 }
 
 /*
