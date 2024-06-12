@@ -90,7 +90,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateOrientation, Function | SmallTest | 
 
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
