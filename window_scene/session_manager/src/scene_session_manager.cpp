@@ -1355,6 +1355,22 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+        if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+            TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
+                "abilityName: %{public}s, appIndex: %{public}d",
+                sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+                sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
+            auto sceneSession = GetSceneSessionByName(sessionInfo.bundleName_,
+                sessionInfo.moduleName_, sessionInfo.abilityName_, sessionInfo.appIndex_);
+            bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
+                sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
+            if (isSingleStart) {
+                NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
+                TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
+                    sessionInfo.persistentId_);
+                return sceneSession;
+            }
+        }
     }
 
     auto task = [this, sessionInfo, property]() {
