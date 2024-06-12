@@ -2250,6 +2250,10 @@ bool SceneSessionManager::CheckModalSubWindowPermission(const sptr<WindowSession
 bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property)
 {
     WindowType type = property->GetWindowType();
+    if (WindowHelper::IsUIExtensionWindow(type)) {
+        // UIExtension window disallowed.
+        return false;
+    }
     if (!WindowHelper::IsSystemWindow(type)) {
         // type is not system
         return true;
@@ -2313,7 +2317,7 @@ void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& aliv
     alivePersistentIds_ = alivePersistentIds;
 }
 
-bool SceneSessionManager::isNeedRecover(const int32_t persistentId)
+bool SceneSessionManager::IsNeedRecover(const int32_t persistentId)
 {
     auto it = std::find(alivePersistentIds_.begin(), alivePersistentIds_.end(), persistentId);
     if (it == alivePersistentIds_.end()) {
@@ -2323,16 +2327,30 @@ bool SceneSessionManager::isNeedRecover(const int32_t persistentId)
     return true;
 }
 
-WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
+WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property)
 {
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (property->GetParentPersistentId() > 0 && !isNeedRecover(property->GetParentPersistentId())) {
+    if (!CheckSystemWindowPermission(property)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "create system window permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!IsNeedRecover(property->GetParentPersistentId())) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
         return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
+{
+    auto propCheckRet = CheckSessionPropertyOnRecovery(property);
+    if (propCheckRet != WSError::WS_OK) {
+        return propCheckRet;
     }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
@@ -2447,12 +2465,9 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!isNeedRecover(property->GetPersistentId())) {
-        return WSError::WS_ERROR_INVALID_PARAM;
+    auto propCheckRet = CheckSessionPropertyOnRecovery(property);
+    if (propCheckRet != WSError::WS_OK) {
+        return propCheckRet;
     }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
