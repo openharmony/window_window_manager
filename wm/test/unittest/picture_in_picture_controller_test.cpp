@@ -443,7 +443,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     ASSERT_EQ(false, isSizeChange);
     pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);
-    bool isSizeChange = pipControl->IsContentSizeChanged(10, 10, 10, 10);
+    isSizeChange = pipControl->IsContentSizeChanged(10, 10, 10, 10);
     ASSERT_EQ(true, isSizeChange);
     pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);
