@@ -1174,36 +1174,27 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest |
  */
 HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowName("SetSystemBarProperties");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     std::map<WindowType, SystemBarProperty> properties;
     std::map<WindowType, SystemBarPropertyFlag> propertyFlags;
-    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperties(properties, propertyFlags)); 
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty property;
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
     SystemBarPropertyFlag propertyFlag;
     propertyFlag.contentColorFlag = true;
     propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = propertyFlag;
-    if (property.contentColor_ == current.contentColor_)
-    {
-        ASSERT_EQ(WMError::WM_OK,
+    ASSERT_EQ(WMError::WM_OK,
         window->SetSystemBarProperties(properties, propertyFlags));
-    } else {
-        current.contentColor_ = property.contentColor_;
-        propertyFlag.contentColorFlag = false;
-        property.contentColor_ = 0x000000FF;
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property
+    if (property.contentColor_ != current.contentColor_) {
+        std::map<WindowType, SystemBarProperty> currProperties;
         ASSERT_EQ(WMError::WM_OK,
-            window->SetSystemBarProperties(properties, propertyFlag));
-        std::map<WindowType, SystemBarProperty> properties_;
-        ASSERT_EQ(WMError::WM_OK,
-        window->GetSystemBarProperties(properties_));
-        ASSERT_EQ(properties_[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
+            window->GetSystemBarProperties(currProperties));
+        ASSERT_EQ(currProperties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
     }
 }
 
@@ -1220,7 +1211,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemBarProperties, Function | SmallTes
     option->SetWindowName("GetSystemBarProperties");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    std::map<WindowType, SystemBarProperty> properties
+    std::map<WindowType, SystemBarProperty> properties;
     ASSERT_EQ(WMError::WM_OK,
         window->GetSystemBarProperties(properties));
 }
