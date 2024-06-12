@@ -877,13 +877,13 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         bool res = (session != nullptr && session->GetWindowId() == subWindowId) ? true : false;
         return res;
     });
-    if (iter == subSession_.end()){
+    if (iter == subSession_.end()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Could not find subSession");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     sptr<SceneSession> subSession = *iter;
-    if (callingPid != subSession->GetCallingPid()){
+    if (callingPid != subSession->GetCallingPid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied, not call by the same process");
         return WSError::WS_ERROR_INVALID_CALLING; 
     }

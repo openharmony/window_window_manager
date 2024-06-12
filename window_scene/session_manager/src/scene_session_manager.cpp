@@ -8016,7 +8016,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    if (callingPid != targetSession->GetCallingPid()){
+    if (callingPid != targetSession->GetCallingPid()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WSError::WS_ERROR_INVALID_CALLING;
     }
