@@ -133,8 +133,9 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
                         GetProperty()->GetPersistentId());
                     return item.second.second;
                 } else if (WindowHelper::IsSubWindow(item.second.second->GetType()) &&
-                    isSessionMainWindow(item.second.second->GetParentId())) {
-                    // subwindow grandparent is mainwindow
+                    (IsSessionMainWindow(item.second.second->GetParentId()) ||
+                    item.second.second->GetProperty()->GetExtensionFlag())) {
+                    // subwindow's grandparent is mainwindow or subwindow's parent is an extension subwindow
                     return item.second.second;
                 }
         }
@@ -143,7 +144,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
-bool WindowSceneSessionImpl::isSessionMainWindow(uint32_t parentId)
+bool WindowSceneSessionImpl::IsSessionMainWindow(uint32_t parentId)
 {
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& item : windowSessionMap_) {
