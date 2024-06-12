@@ -400,6 +400,7 @@ ohos_unittest("ws_session_test") {
   sources = [
     "session_test.cpp",
     "session_test2.cpp",
+    "session_test3.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
