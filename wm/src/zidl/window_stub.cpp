@@ -74,6 +74,9 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_UPDATE_AVOID_AREA: {
             sptr<AvoidArea> avoidArea = data.ReadStrongParcelable<AvoidArea>();
+            if (avoidArea == nullptr) {
+                return -1;
+            }
             uint32_t type;
             if (!data.ReadUint32(type)) {
                 return -1;
