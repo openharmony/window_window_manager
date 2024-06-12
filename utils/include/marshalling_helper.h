@@ -63,6 +63,9 @@ public:
                 return false;
             }
             data[i] = parcel.ReadParcelable<T>();
+            if (data[i] == nullptr) {
+                return false;
+            }
         }
         return true;
     }
