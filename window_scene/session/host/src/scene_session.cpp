@@ -83,6 +83,8 @@ const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_
         &SceneSession::HandleActionUpdatePrivacyMode),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
         &SceneSession::HandleActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &SceneSession::HandleActionUpdateSnapshotSkip),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &SceneSession::HandleActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
@@ -1991,6 +1993,32 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetSnapshotSkip(bool isSkip)
+{
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::DEFAULT, "property is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
+        return;
+    }
+    bool lastSnapshotSkip = property->GetSnapshotSkip();
+    if (lastSnapshotSkip == isSkip) {
+        TLOGW(WmsLogTag::DEFAULT, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
+            "id: %{public}d", isSkip, GetPersistentId());
+        return;
+    }
+    property->SetSnapshotSkip(isSkip);
+    surfaceNode_->SetSkipLayer(isSkip);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetSkipLayer(isSkip);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
@@ -2638,6 +2666,13 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
     bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     sceneSession->SetPrivacyMode(isPrivacyMode);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    sceneSession->SetSnapshotSkip(property->GetSnapshotSkip());
     return WMError::WM_OK;
 }
 
