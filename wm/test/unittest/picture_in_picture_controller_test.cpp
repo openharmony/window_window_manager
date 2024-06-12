@@ -337,6 +337,7 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->mainWindow_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
 
     enable = false;
@@ -349,11 +350,14 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->pipOption_ = option;
 
     std::string navId = "";
+    pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
     navId = "navId";
     pipControl->mainWindow_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
     pipControl->mainWindow_ = mw;
+    pipControl->SetAutoStartEnabled(enable);
     ASSERT_EQ(result, 0);
 }
 
@@ -599,7 +603,13 @@ HWTEST_F(PictureInPictureControllerTest, RestorePictureInPictureWindow, Function
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
 
+    pipControl->mainWindow_ = nullptr;
+    pipControl->RestorePictureInPictureWindow();
+    ASSERT_EQ(result, 0);
+    pipControl->mainWindow_ = mw;
+
     std::string navId = "navId";
+    pipControl->RestorePictureInPictureWindow();
     ASSERT_EQ(result, 0);
 }
 
@@ -621,18 +631,23 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     pipControl->mainWindowXComponentController_ = nullptr;
+    pipControl->UpdateXComponentPositionAndSize();
     ASSERT_EQ(result, 0);
     pipControl->mainWindowXComponentController_ = xComponentController;
 
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 10;
+    pipControl->UpdateXComponentPositionAndSize();
     ASSERT_EQ(result, 0);
     pipControl->windowRect_.width_ = 0;
+    pipControl->UpdateXComponentPositionAndSize();
     ASSERT_EQ(result, 0);
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 0;
+    pipControl->UpdateXComponentPositionAndSize();
     ASSERT_EQ(result, 0);
     pipControl->windowRect_.width_ = 0;
+    pipControl->UpdateXComponentPositionAndSize();
     ASSERT_EQ(result, 0);
 }
 
@@ -686,7 +701,7 @@ HWTEST_F(PictureInPictureControllerTest, ResetExtController, Function | SmallTes
     EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     pipControl->ResetExtController();
-    ASSERT_EQ(result, 0);  
+    ASSERT_EQ(result, 0);
 }
 
 /**
@@ -739,14 +754,18 @@ HWTEST_F(PictureInPictureControllerTest, UpdatePiPSourceRect, Function | SmallTe
     
     pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->window_ = mw;
+    pipControl->UpdatePiPSourceRect();
     ASSERT_EQ(result, 0);
     pipControl->mainWindowXComponentController_ = xComponentController;
     pipControl->window_ = nullptr;
+    pipControl->UpdatePiPSourceRect();
     ASSERT_EQ(result, 0);
     pipControl->mainWindowXComponentController_ = nullptr;
+    pipControl->UpdatePiPSourceRect();
     ASSERT_EQ(result, 0);
     pipControl->mainWindowXComponentController_ = xComponentController;
     pipControl->window_ = mw;
+    pipControl->UpdatePiPSourceRect();
     ASSERT_EQ(result, 0);
 }
 
