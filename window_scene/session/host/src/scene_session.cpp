@@ -885,7 +885,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
     sptr<SceneSession> subSession = *iter;
     if (callingPid != subSession->GetCallingPid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied, not call by the same process");
-        return WSError::WS_ERROR_INVALID_CALLING; 
+        return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto task = [weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
