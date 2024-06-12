@@ -1400,10 +1400,6 @@ WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windowId)
 {
     WLOGFI("XXX WindowManagerService::GetSnapshot");
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("window raise to app top permission denied!");
-        return nullptr;
-    }
     auto task = [this, windowId]() {
         return windowController_->GetSnapshot(windowId);
     };
