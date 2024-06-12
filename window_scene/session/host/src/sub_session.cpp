@@ -103,10 +103,41 @@ WSError SubSession::Reconnect(const sptr<ISessionStage>& sessionStage, const spt
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (property == nullptr) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
         WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
-        if (ret == WSError::WS_OK) {
-            session->isActive_ = true;
-            session->UpdateSessionState(SessionState::STATE_FOREGROUND);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        auto windowState = property->GetWindowState();
+        TLOGI(WmsLogTag::WMS_RECOVER, "sub session reconnect, persistentId: %{public}d, windowState: %{public}d ",
+            session->GetPersistentId(), windowState);
+        switch (windowState) {
+            case WindowState::STATE_INITIAL: {
+                TLOGE(WmsLogTag::WMS_RECOVER, "invalid window state: STATE_INITIAL");
+                ret = WSError::WS_ERROR_INVALID_PARAM;
+                break;
+            }
+            case WindowState::STATE_CREATED:
+                break;
+            case WindowState::STATE_SHOWN: {
+                session->UpdateSessionState(SessionState::STATE_FOREGROUND);
+                session->UpdateActiveStatus(true);
+                break;
+            }
+            case WindowState::STATE_HIDDEN: {
+                session->UpdateSessionState(SessionState::STATE_BACKGROUND);
+                break;
+            }
+            default:
+                TLOGE(WmsLogTag::WMS_RECOVER, "invalid window state: %{public}u", windowState);
+                ret = WSError::WS_ERROR_INVALID_PARAM;
+                break;
+        }
+        if (ret != WSError::WS_OK) {
+            session->Session::Disconnect(false);
         }
         return ret;
     });
