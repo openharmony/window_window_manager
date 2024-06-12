@@ -1407,7 +1407,7 @@ std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windo
     auto task = [this, windowId]() {
         return windowController_->GetSnapshot(windowId);
     };
-    return PostSyncTask(tas, "GetSnapshot");
+    return PostSyncTask(task, "GetSnapshot");
 }
 
 void WindowManagerService::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)
