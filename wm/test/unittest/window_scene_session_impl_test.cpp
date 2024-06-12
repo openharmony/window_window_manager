@@ -1756,18 +1756,18 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: isSessionMainWindow
- * @tc.desc: isSessionMainWindow
+ * @tc.name: IsSessionMainWindow
+ * @tc.desc: IsSessionMainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, isSessionMainWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, IsSessionMainWindow, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("isSessionMainWindow");
+    option->SetWindowName("IsSessionMainWindow");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-    auto ret = windowSceneSessionImpl->isSessionMainWindow(0);
+    auto ret = windowSceneSessionImpl->IsSessionMainWindow(0);
     ASSERT_EQ(false, ret);
 }
 
