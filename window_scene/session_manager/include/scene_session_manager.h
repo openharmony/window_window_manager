@@ -373,6 +373,14 @@ private:
     void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
+    std::vector<sptr<SceneSession>> GetSubSceneSession(int32_t parentWindowId);
+    void RemoveDuplicateSubSession(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
+        std::vector<sptr<SceneSession>>& subSessions);
+    void SetSessionVisibilityInfo(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
+    void UpdateSubWindowVisibility(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
