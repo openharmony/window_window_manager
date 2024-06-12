@@ -1206,6 +1206,11 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
 
 WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "CheckWindowId permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    
     auto task = [this, windowId, &pid]() -> WMError {
         pid = INVALID_PID;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
