@@ -1382,13 +1382,11 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Le
     int32_t persistentId = INVALID_SESSION_ID;
     WMError result01 = ssm_->RequestFocusStatus(persistentId, true);
     EXPECT_EQ(result01, WMError::WM_OK);
-    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
-    reasonResult = ssm_->GetFocusChangeReason();
+    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
 
     persistentId = 10000;
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
+    FocusChangeReason reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
     WMError result02 = ssm_->RequestFocusStatus(persistentId, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
     reasonResult = ssm_->GetFocusChangeReason();
