@@ -3997,6 +3997,16 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
     FocusChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    const auto& sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
+        return WMError::WS_ERROR_INVALID_WINDOW;
+    }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != targetSession->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             RequestSessionFocus(persistentId, byForeground, reason);
@@ -8003,6 +8013,11 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != targetSession->GetCallingPid()){
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     targetSession->NotifyClick();
