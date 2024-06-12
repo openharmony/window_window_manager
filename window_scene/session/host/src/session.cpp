@@ -934,6 +934,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     callingPid_ = pid;
     callingUid_ = uid;
     bufferAvailable_ = true;
+    UpdateSessionState(SessionState::STATE_CONNECT);
     return WSError::WS_OK;
 }
 
