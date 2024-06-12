@@ -47,7 +47,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowOption> windowOption = new(std::nothrow)WindowOption();
     if (windowOption == nullptr) {
@@ -62,18 +61,25 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
 
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_DESTROY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_BACKGROUND),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(
         static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
         parcel, reply, option);

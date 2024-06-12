@@ -34,69 +34,94 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SessionStubTestUpdateCode(sptr<Session> sessionStub, MessageParcel& parcel,
-                               MessageParcel& reply, MessageOption& option)
+void SessionStubTestUpdateCode(sptr<Session> sessionStub, MessageParcel& parcel)
 {
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NEED_AVOID),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
         parcel, reply, option);
     return;
 }
 
-void SessionStubTestSetCode(sptr<Session> sessionStub, MessageParcel& parcel,
-                            MessageParcel& reply, MessageOption& option)
+void SessionStubTestSetCode(sptr<Session> sessionStub, MessageParcel& parcel)
 {
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_MARK_PROCESSED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKPRESSED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_PROCESS_POINT_DOWN_SESSION),
         parcel, reply, option);
@@ -110,12 +135,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     SessionInfo info;
     info.abilityName_ = "stubConnectFuzzTest";
@@ -125,8 +147,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
 
-    SessionStubTestUpdateCode(sessionStub, parcel, reply, option);
-    SessionStubTestSetCode(sessionStub, parcel, reply, option);
+    SessionStubTestUpdateCode(sessionStub, parcel);
+    SessionStubTestSetCode(sessionStub, parcel);
     return true;
 }
 } // namespace.OHOS
