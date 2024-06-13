@@ -127,6 +127,7 @@ ScreenSessionManager::ScreenSessionManager()
 
 void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
+    TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
     rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
