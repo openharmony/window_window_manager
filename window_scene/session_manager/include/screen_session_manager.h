@@ -413,6 +413,7 @@ private:
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);
+    bool IsDefaultMirrorMode(ScreenId screenId);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
