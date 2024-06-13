@@ -89,7 +89,8 @@ static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
 // debug for beta
-bool JudgeIsBeta(){
+bool JudgeIsBeta()
+{
     std::string betaName = OHOS::system::GetParameter("const.logsystem.versionType", "");
     std::string::size_type idx = betaName.find("beta");
     if (idx != std::string::npos) {
@@ -2012,7 +2013,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     TLOGI(WmsLogTag::DMS, "ENTER");
-    if(isBeta_){
+    if (isBeta_) {
         CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "hmos.screenrecorder");
     }
     if (clientProxy_ && option.missionIds_.size() > 0) {
