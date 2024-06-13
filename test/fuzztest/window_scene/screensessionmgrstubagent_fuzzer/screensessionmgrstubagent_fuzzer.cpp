@@ -33,16 +33,6 @@ namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
-{
-    size_t objectSize = sizeof(object);
-    if (objectSize > size) {
-        return 0;
-    }
-    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
-}
-
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -55,12 +45,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
+    parcel.RewindRead(0);
     std::shared_ptr<ScreenSessionManagerStub> screenStub = std::make_shared<ScreenSessionManagerStub>();
     screenStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IDisplayManager::DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     screenStub->OnRemoteRequest(
         static_cast<uint32_t>(
             Rosen::IDisplayManager::DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
