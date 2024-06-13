@@ -716,11 +716,11 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}d, windowRect:[%{public}d, %{public}d, \
-            %{public}u, %{public}u], orientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
+            %{public}u, %{public}u], displayOrientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
             rect.width_, rect.height_, orientation);
     } else {
         TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}d, windowRect:[%{public}d, %{public}d, \
-            %{public}u, %{public}u], orientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
+            %{public}u, %{public}u], displayOrientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
             rect.width_, rect.height_, orientation);
     }
 }
