@@ -903,6 +903,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession_->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        PreLayoutOnShow(type);
         ret = static_cast<WMError>(hostSession_->Show(property_));
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
