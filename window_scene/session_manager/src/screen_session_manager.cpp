@@ -1611,6 +1611,22 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen rotation locked from js permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->SetScreenRotationLockedFromJs(isLocked);
+    TLOGI(WmsLogTag::DMS, "isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
+}
+
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);

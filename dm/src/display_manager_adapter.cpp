@@ -256,6 +256,13 @@ DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
     return displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
 }
 
+DMError ScreenManagerAdapter::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    WLOGFI("DisplayManagerAdapter::SetScreenRotationLockedFromJs");
+    return displayManagerServiceProxy_->SetScreenRotationLockedFromJs(isLocked);
+}
+
 DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

@@ -109,6 +109,7 @@ public:
 
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     virtual DMError HasImmersiveWindow(bool& immersive) override;

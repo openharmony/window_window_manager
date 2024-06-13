@@ -489,6 +489,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS: {
+            bool isLocked = static_cast<bool>(data.ReadBool());
+            DMError ret = SetScreenRotationLockedFromJs(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED: {
             bool isLocked = false;
             DMError ret = IsScreenRotationLocked(isLocked);
