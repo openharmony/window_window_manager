@@ -434,6 +434,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
+    pipControl->curState_ = PiPWindowState::STATE_STARTED;
     pipControl->window_ = nullptr;
     pipControl->UpdateContentSize(width, height);
     ASSERT_EQ(result, 0);
