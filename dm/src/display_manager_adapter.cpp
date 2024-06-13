@@ -743,4 +743,16 @@ void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
     INIT_PROXY_CHECK_RETURN();
     displayManagerServiceProxy_->DisablePowerOffRenderControl(screenId);
 }
+
+DMError DisplayManagerAdapter::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->ProxyForFreeze(pidList, isProxy);
+}
+
+DMError DisplayManagerAdapter::ResetAllFreezeStatus()
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->ResetAllFreezeStatus();
+}
 } // namespace OHOS::Rosen

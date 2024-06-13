@@ -28,6 +28,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESS
                                           "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
+const static int32_t MAX_BUFF_SIZE = 100;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -733,6 +734,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisablePowerOffRenderControl(screenId);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_PROXY_FOR_FREEZE: {
+            ProcProxyForFreeze(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_RESET_ALL_FREEZE_STATUS: {
+            DMError ret = ResetAllFreezeStatus();
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -778,5 +788,21 @@ void ScreenSessionManagerStub::ProcGetVirtualScreenFlag(MessageParcel& data, Mes
     ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
     VirtualScreenFlag screenFlag = GetVirtualScreenFlag(screenId);
     reply.WriteUint32(static_cast<uint32_t>(screenFlag));
+}
+
+void ScreenSessionManagerStub::ProcProxyForFreeze(MessageParcel& data, MessageParcel& reply)
+{
+    std::set<int32_t> pidList;
+    int32_t size = data.ReadInt32();
+    if (size > MAX_BUFF_SIZE) {
+        WLOGFE("pid List size invalid: %{public}d", size);
+        size = MAX_BUFF_SIZE;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        pidList.insert(data.ReadInt32());
+    }
+    bool isProxy = data.ReadBool();
+    DMError ret = ProxyForFreeze(pidList, isProxy);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen
