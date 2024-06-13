@@ -599,6 +599,11 @@ DMError ScreenManager::SetScreenRotationLocked(bool isLocked)
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
 }
 
+DMError ScreenManager::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLockedFromJs(isLocked);
+}
+
 DMError ScreenManager::IsScreenRotationLocked(bool& isLocked)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().IsScreenRotationLocked(isLocked);
