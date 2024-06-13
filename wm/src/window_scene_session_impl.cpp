@@ -2586,9 +2586,8 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    surfaceNode_->SetSkipLayer(isSkip || property_->GetSystemPrivacyMode());
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
+    property_->SetSnapshotSkip(isSkip);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
 }
 
 std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
