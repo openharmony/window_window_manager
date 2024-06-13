@@ -135,14 +135,12 @@ SceneSession::~SceneSession()
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
-WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
     const std::string& identityToken)
 {
-    // Get pid and uid before posting task.
-    pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
-    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
         uid, identityToken]() {
         auto session = weakThis.promote();
@@ -162,7 +160,7 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
-        auto ret = session->Session::Connect(
+        auto ret = session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -170,7 +168,19 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
         session->NotifyPropertyWhenConnect();
         return ret;
     };
-    return PostSyncTask(task, "Connect");
+    return PostSyncTask(task, "ConnectInner");
+}
+
+WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+    const std::string& identityToken)
+{
+    // Get pid and uid before posting task.
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    return ConnectInner(sessionStage, eventChannel, surfaceNode, systemConfig,
+        property, token, pid, uid, identityToken);
 }
 
 WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -2950,12 +2960,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    bool needRemoveSession)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
     auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -2967,7 +2974,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating) {
-            TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionException: is terminating, return!");
+            TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating = true;
@@ -2994,8 +3001,17 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         }
         return WSError::WS_OK;
     };
-    PostLifeCycleTask(task, "NotifySessionException", LifeCycleTaskType::STOP);
+    PostLifeCycleTask(task, "NotifySessionExceptionInner", LifeCycleTaskType::STOP);
     return WSError::WS_OK;
+}
+
+WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+{
+    if (!SessionPermission::VerifySessionPermission()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession);
 }
 
 WSRect SceneSession::GetLastSafeRect() const

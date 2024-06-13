@@ -475,10 +475,8 @@ HWTEST_F(SceneSessionTest2, Connect, Function | SmallTest | Level2)
     SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     sptr<IRemoteObject> token;
-    int32_t pid = -1;
-    int32_t uid = -1;
     WSError res = scensession->Connect(sessionStage, eventChannel,
-        surfaceNode, systemConfig, property, token, pid, uid);
+        surfaceNode, systemConfig, property, token);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 /**
