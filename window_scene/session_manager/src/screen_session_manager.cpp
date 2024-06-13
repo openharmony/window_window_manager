@@ -1649,7 +1649,12 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             return;
         }
         for (auto& agent : agents) {
-            agent->OnDisplayChange(displayInfo, event);
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            if (freezedPidList_.count(agentPid) == 0) {
+                agent->OnDisplayChange(displayInfo, event);
+            } else {
+                TLOGI(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
+            }
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
@@ -4111,6 +4116,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         TLOGE(WmsLogTag::DMS, "dumper is nullptr");
         return -1;
     }
+    dumper->DumpFreezedPidList(freezedPidList_);
     dumper->DumpEventTracker(screenEventTracker_);
     dumper->ExcuteDumpCmd();
 
@@ -4299,6 +4305,48 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
         "PID", getpid(),
         "UID", getuid());
     TLOGI(WmsLogTag::DMS, "%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
+}
+
+DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    {
+        std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+        for (auto pid : pidList) {
+            if (isProxy) {
+                freezedPidList_.insert(pid);
+            } else {
+                freezedPidList_.erase(pid); // set删除不存在的元素不会引发异常
+            }
+        }
+    }
+    if (isProxy) {
+        return DMError::DM_OK;
+    }
+
+    // 进程解冻时刷新一次displaychange
+    sptr<ScreenSession> screenSession = GetScreenSession(GetDefaultScreenId());
+    if (!screenSession) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto task = [=] {
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        for (auto& agent : agents) {
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            if (pidList.count(agentPid) != 0) {
+                agent->OnDisplayChange(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_UNFREEZED);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged");
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::ResetAllFreezeStatus()
+{
+    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+    freezedPidList_.clear();
+    TLOGI(WmsLogTag::DMS, "freezedPidList_ has been clear.");
+    return DMError::DM_OK;
 }
 
 DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()

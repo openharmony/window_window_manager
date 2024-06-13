@@ -157,6 +157,8 @@ public:
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
+    DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
+    DMError ResetAllFreezeStatus() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

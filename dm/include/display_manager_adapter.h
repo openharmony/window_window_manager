@@ -87,6 +87,8 @@ public:
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
+    virtual DMError ResetAllFreezeStatus();
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

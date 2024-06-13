@@ -255,6 +255,8 @@ public:
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
+    DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
+    DMError ResetAllFreezeStatus() override;
 
 protected:
     ScreenSessionManager();
@@ -387,6 +389,9 @@ private:
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+
+    std::mutex freezedPidListMutex_;
+    std::set<int32_t> freezedPidList_;
 
     std::atomic<PowerStateChangeReason> prePowerStateChangeReason_ =
         PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
