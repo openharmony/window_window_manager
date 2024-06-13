@@ -424,10 +424,10 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     ASSERT_NE(nullptr, xComponentController);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
-    int32_t width = 10;
-    int32_t height = 20;
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     pipControl->window_ = nullptr;
+    int32_t width = 10;
+    int32_t height = 20;
     pipControl->UpdateContentSize(width, height);
     pipControl->window_ = mw;
 
