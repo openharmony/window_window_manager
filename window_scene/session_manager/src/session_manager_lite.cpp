@@ -200,6 +200,10 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
     }
     GetSceneSessionManagerLiteProxy();
     ReregisterSessionListener();
+    if (userSwitchCallbackFunc_) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "user switch");
+        userSwitchCallbackFunc_();
+    }
 }
 
 void SessionManagerLite::ReregisterSessionListener() const
