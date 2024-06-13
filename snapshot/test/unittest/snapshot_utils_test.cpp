@@ -28,6 +28,9 @@ namespace {
     constexpr int RGB565_PIXEL_BYTES = 2;
     constexpr int RGB888_PIXEL_BYTES = 3;
     constexpr int BPP = 4;
+    constexpr int RGBA8888BUF_SIZE = 10;
+    constexpr int RGB888BUF_SIZE = 10;
+    constexpr int RGB565BUF_SIZE = 10;
 }
 class SnapshotUtilsTest : public testing::Test {
 public:
@@ -98,6 +101,8 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName4));
     std::string fileName5 = "/data";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName5));
+    std::string fileName6 = "/data/local/tmp/test.png";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName6));
 }
 
 /**
@@ -107,7 +112,12 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
 {
-    ASSERT_FALSE(SnapShotUtils::RGBA8888ToRGB888(nullptr, nullptr, -1));
+    uint8_t rgba8888Buf[RGBA8888BUF_SIZE];
+    uint8_t rgb888Buf[RGB888BUF_SIZE];
+    EXPECT_FALSE(SnapShotUtils::RGBA8888ToRGB888(rgba8888Buf, nullptr, RGBA8888BUF_SIZE));
+    EXPECT_FALSE(SnapShotUtils::RGBA8888ToRGB888(nullptr, rgb888Buf, RGB888BUF_SIZE));
+    EXPECT_FALSE(SnapShotUtils::RGBA8888ToRGB888(rgba8888Buf, rgb888Buf, 0));
+    EXPECT_TRUE(SnapShotUtils::RGBA8888ToRGB888(rgba8888Buf, rgb888Buf, RGBA8888BUF_SIZE));
 }
 
 /**
@@ -117,7 +127,12 @@ HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, Function | SmallTest | Level3)
 {
-    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(nullptr, nullptr, -1));
+    uint8_t rgb565Buf[RGB565BUF_SIZE];
+    uint8_t rgb888Buf[RGB888BUF_SIZE];
+    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(rgb565Buf, nullptr, RGB565BUF_SIZE));
+    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(nullptr, rgb888Buf, RGB888BUF_SIZE));
+    EXPECT_FALSE(SnapShotUtils::RGB565ToRGB888(rgb565Buf, rgb888Buf, 0));
+    EXPECT_TRUE(SnapShotUtils::RGB565ToRGB888(rgb565Buf, rgb888Buf, RGB565BUF_SIZE));
 }
 
 /**
@@ -467,6 +482,23 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid08, Function | SmallTest | Level3)
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: CheckParamValid09
+ * @tc.desc: Check jpeg param whether valid width and height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, CheckParamValid09, Function | SmallTest | Level3)
+{
+    WriteToJpegParam paramInvalidWidthAndHeight = {
+        .width = 0,
+        .height = 0,
+        .stride = 0,
+        .format = Media::PixelFormat::RGBA_8888,
+        .data = nullptr
+    };
+    ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidWidthAndHeight));
 }
 
 /**
