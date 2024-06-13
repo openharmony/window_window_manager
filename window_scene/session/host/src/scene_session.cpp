@@ -878,7 +878,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         return res;
     });
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    if (iter != subSession_.end() && callingPid != (*subSession)->GetCallingPid()) {
+    if (subSession != subSession_.end() && callingPid != (*subSession)->GetCallingPid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied, not call by the same process");
         return WSError::WS_ERROR_INVALID_CALLING;
     }
