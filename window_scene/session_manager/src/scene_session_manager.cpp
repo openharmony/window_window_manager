@@ -4003,7 +4003,11 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    if (callingPid != sceneSession->GetCallingPid()) {
+    bool isSameBundleName  = false;
+    #ifdef RES_SCHED_ENABLE
+    isSameBundleName = SessionPermission::IsSameBundleNameAsCalling(SCENE_BOARD_BUNDLE_NAME);
+    #endif
+    if (!isSameBundleName && callingPid != sceneSession->GetCallingPid()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
