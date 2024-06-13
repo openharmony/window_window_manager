@@ -277,13 +277,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             return ret;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
-            session->snapshot_ = session->Snapshot();
-            if (session->scenePersistence_ && session->snapshot_) {
-                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
-            } else {
-                session->snapshot_.reset();
-            }
+            session->SaveSnapshot(true);
         }
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
@@ -341,13 +335,7 @@ WSError SceneSession::Disconnect(bool isFromClient)
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
         if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
-            session->snapshot_ = session->Snapshot();
-            if (session->scenePersistence_ && session->snapshot_) {
-                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
-            } else {
-                session->snapshot_.reset();
-            }
+            session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
         session->isTerminating = false;
