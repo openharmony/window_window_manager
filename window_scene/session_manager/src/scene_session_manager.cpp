@@ -2343,7 +2343,8 @@ bool SceneSessionManager::IsNeedRecover(const int32_t persistentId)
     return true;
 }
 
-WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property)
+WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property,
+    bool isSpecificSession)
 {
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
@@ -2353,7 +2354,8 @@ WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSes
         TLOGE(WmsLogTag::WMS_RECOVER, "create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!IsNeedRecover(property->GetParentPersistentId())) {
+    auto persistentId = isSpecificSession ? property->GetParentPersistentId() : property->GetPersistentId();
+    if (!IsNeedRecover(persistentId)) {
         TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
@@ -2364,7 +2366,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
-    auto propCheckRet = CheckSessionPropertyOnRecovery(property);
+    auto propCheckRet = CheckSessionPropertyOnRecovery(property, true);
     if (propCheckRet != WSError::WS_OK) {
         return propCheckRet;
     }
@@ -2481,7 +2483,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    auto propCheckRet = CheckSessionPropertyOnRecovery(property);
+    auto propCheckRet = CheckSessionPropertyOnRecovery(property, false);
     if (propCheckRet != WSError::WS_OK) {
         return propCheckRet;
     }
