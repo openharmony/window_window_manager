@@ -668,7 +668,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
-    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property);
+    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
 };
 } // namespace OHOS::Rosen
 
