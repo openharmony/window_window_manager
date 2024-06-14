@@ -88,12 +88,15 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
+
 bool JudgeIsBeta()
 {
     std::string betaName = OHOS::system::GetParameter("const.logsystem.versionType", "");
     return betaName.find("beta") != std::string::npos;
 }
-static bool g_isBeta = JudgeIsBeta();
+
+static const bool g_isBeta = JudgeIsBeta();
+
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -4323,7 +4326,7 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
     if (eventName != "CREATE_VIRTUAL_SCREEN") {
-        if (Permission::CheckIsCallingBundleName(bundleName) == false) {
+        if (!Permission::CheckIsCallingBundleName(bundleName)) {
             TLOGD(WmsLogTag::DMS, "BundleName not in whitelist!");
             return;
         }
