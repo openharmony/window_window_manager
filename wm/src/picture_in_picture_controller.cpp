@@ -37,7 +37,7 @@ namespace OHOS {
 namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
 namespace {
-    constexpr int32_t DELAY_ANIM = 500;
+    constexpr int32_t DELAY_ANIM = 50;
     constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
@@ -332,6 +332,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
+        DestroyPictureInPictureWindow();
         session->curState_ = PiPWindowState::STATE_STOPPED;
         std::string navId = session->pipOption_->GetNavigationId();
         if (navId != "" && session->mainWindow_) {
@@ -379,7 +380,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         return WMError::WM_OK;
     };
     if (handler_) {
-        handler_->PostTask(task, "wms:DestroyPictureInPicture", 0);
+        handler_->PostTask(task, "wms:DestroyPictureInPicture", DELAY_ANIM);
     } else {
         return task();
     }
@@ -571,6 +572,15 @@ void PictureInPictureController::RestorePictureInPictureWindow()
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
+}
+
+void PictureInPictureController::LocateSource()
+{
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
+        return;
+    }
+    UpdatePiPSourceRect();
 }
 
 void PictureInPictureController::UpdateXComponentPositionAndSize()
