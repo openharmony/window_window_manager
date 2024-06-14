@@ -129,6 +129,9 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
+    std::ostringstream oss;
+    oss << "SetScreenCorrection g_screenRotationOffSet : " << g_screenRotationOffSet;
+    screenEventTracker_.RecordEvent(oss.str());
     rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
