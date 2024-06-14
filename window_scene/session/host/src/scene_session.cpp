@@ -822,6 +822,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
+    this->RectCheckProcess();
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -861,6 +862,15 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("RaiseAboveTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto subSession = std::find_if(subSession_.begin(), subSession_.end(), [subWindowId](sptr<SceneSession> session) {
+        bool res = (session != nullptr && session->GetWindowId() == subWindowId) ? true : false;
+        return res;
+    });
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (subSession != subSession_.end() && callingPid != (*subSession)->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied, not call by the same process");
+        return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto task = [weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
