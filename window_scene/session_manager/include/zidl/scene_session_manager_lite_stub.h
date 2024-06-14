@@ -67,6 +67,8 @@ private:
     int HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply);
     int HandleClearMainSessions(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_STUB_H
