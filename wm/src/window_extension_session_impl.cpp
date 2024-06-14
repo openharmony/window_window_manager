@@ -62,6 +62,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     context_ = context;
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
+        MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
@@ -80,9 +81,10 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (uiContent_ != nullptr) {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent != nullptr) {
         WLOGFD("notify ace winId:%{public}u", GetWindowId());
-        uiContent_->UpdateConfiguration(configuration);
+        uiContent->UpdateConfiguration(configuration);
     }
 }
 
@@ -186,6 +188,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -195,6 +198,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
@@ -254,8 +258,9 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
 {
-    if (uiContent_) {
-        focusState ? uiContent_->Focus() : uiContent_->UnFocus();
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
+        focusState ? uiContent->Focus() : uiContent->UnFocus();
     }
     if (focusState) {
         NotifyWindowAfterFocused();
@@ -267,16 +272,18 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
 
 void WindowExtensionSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
 {
-    if (uiContent_) {
-        uiContent_->SetIsFocusActive(isFocusActive);
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
+        uiContent->SetIsFocusActive(isFocusActive);
     }
 }
 
 void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
 {
-    if (uiContent_) {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
         WLOGFD("Transfer backpressed event to uiContent");
-        isConsumed = uiContent_->ProcessBackPressed();
+        isConsumed = uiContent->ProcessBackPressed();
     }
     WLOGFD("Backpressed event is not cosumed");
 }
@@ -358,26 +365,32 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("WindowExtensionSessionImpl NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
-    if (uiContent_) {
-        uiContent_->Destroy();
+    {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent) {
+            uiContent->Destroy();
+        }
     }
-    std::unique_ptr<Ace::UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else {
-        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    {
+        std::unique_ptr<Ace::UIContent> uiContent;
+        if (ability != nullptr) {
+            uiContent = Ace::UIContent::Create(ability);
+        } else {
+            uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+        }
+        if (uiContent == nullptr) {
+            WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        uiContent->SetParentToken(token);
+        uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+        // make uiContent available after Initialize/Restore
+        std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+        uiContent_ = std::move(uiContent);
     }
-    if (uiContent == nullptr) {
-        WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    uiContent->SetParentToken(token);
-    uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
-    // make uiContent available after Initialize/Restore
-    uiContent_ = std::move(uiContent);
-
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (focusState_ != std::nullopt) {
-        focusState_.value() ? uiContent_->Focus() : uiContent_->UnFocus();
+        focusState_.value() ? uiContent->Focus() : uiContent->UnFocus();
     }
 
     uint32_t version = 0;
@@ -397,7 +410,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
-        uiContent_->Foreground();
+        uiContent->Foreground();
         UpdateTitleButtonVisibility();
     }
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
@@ -441,13 +454,21 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             return;
         }
         int32_t duration = ANIMATION_TIME;
-        if (rsTransaction) {
+        bool needSync = false;
+        if (rsTransaction && rsTransaction->GetSyncId() > 0) {
+            // extract high 32 bits of SyncId as pid
+            auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
+            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->getHostPid()) {
+                needSync = true;
+            }
+        }
+
+        if (needSync) {
             duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
         RSSystemProperties::SetDrawTextAsBitmap(true);
-        RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
@@ -460,7 +481,6 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             window->rotationAnimationCount_--;
             if (window->rotationAnimationCount_ == 0) {
                 RSSystemProperties::SetDrawTextAsBitmap(false);
-                RSInterfaces::GetInstance().DisableCacheForRotation();
             }
         });
         if (wmRect != preRect) {
@@ -468,7 +488,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
         RSNode::CloseImplicitAnimation();
-        if (rsTransaction) {
+        if (needSync) {
             rsTransaction->Commit();
         } else {
             RSTransaction::FlushImplicitTransaction();
@@ -480,44 +500,48 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
 WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
     int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    uiContent_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
+    uiContent->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int64_t elementId, const std::string& text,
     int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifySearchElementInfosByText error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifySearchElementInfosByText error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    uiContent_->SearchElementInfosByText(elementId, text, baseParent, infos);
+    uiContent->SearchElementInfosByText(elementId, text, baseParent, infos);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType,
     int64_t baseParent, Accessibility::AccessibilityElementInfo& info)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifyFindFocusedElementInfo error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifyFindFocusedElementInfo error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    uiContent_->FindFocusedElementInfo(elementId, focusType, baseParent, info);
+    uiContent->FindFocusedElementInfo(elementId, focusType, baseParent, info);
     return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& info)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifyFocusMoveSearch error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifyFocusMoveSearch error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    uiContent_->FocusMoveSearch(elementId, direction, baseParent, info);
+    uiContent->FocusMoveSearch(elementId, direction, baseParent, info);
     return WSError::WS_OK;
 }
 
@@ -525,11 +549,12 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int64_t elementId,
     const std::map<std::string, std::string>& actionAguments, int32_t action,
     int64_t baseParent)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifyExecuteAction error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifyExecuteAction error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    bool ret = uiContent_->NotifyExecuteAction(elementId, actionAguments, action, baseParent);
+    bool ret = uiContent->NotifyExecuteAction(elementId, actionAguments, action, baseParent);
     if (!ret) {
         WLOGFE("NotifyExecuteAction fail");
         return WSError::WS_ERROR_INTERNAL_ERROR;
@@ -540,11 +565,12 @@ WSError WindowExtensionSessionImpl::NotifyExecuteAction(int64_t elementId,
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("NotifyExecuteAction error, no uiContent_");
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFE("NotifyExecuteAction error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
-    uiContent_->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     return WSError::WS_OK;
 }
 

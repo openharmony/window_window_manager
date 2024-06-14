@@ -41,8 +41,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
-        &SceneSessionManagerStub::HandleUpdateProperty),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
         &SceneSessionManagerStub::HandleRequestFocusStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
@@ -76,6 +74,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
         &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO),
+        &SceneSessionManagerStub::HandleGetUnreliableWindowInfo),
 
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
         &SceneSessionManagerStub::HandleRegisterSessionListener),
@@ -100,6 +100,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
+        &SceneSessionManagerStub::HandleGetSessionSnapshotById),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        &SceneSessionManagerStub::HandleGetUIContentRemoteObj),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
@@ -230,14 +234,14 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
     }
 
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
     } else {
-        WLOGI("accept token is nullptr");
+        TLOGI(WmsLogTag::WMS_RECOVER, "accept token is nullptr");
     }
 
     sptr<ISession> sceneSession;
@@ -252,14 +256,14 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
 
 int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleRecoverAndReconnectSceneSession!");
+    TLOGI(WmsLogTag::WMS_RECOVER, "run");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-        WLOGFE("Failed to read scene session stage object or event channel object!");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
 
@@ -267,14 +271,14 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
-        WLOGFW("Property not exist!");
+        TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
     }
 
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
     } else {
-        WLOGI("accept token is nullptr");
+        TLOGI(WmsLogTag::WMS_RECOVER, "accept token is nullptr");
     }
 
     sptr<ISession> sceneSession;
@@ -289,8 +293,8 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
 
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "run HandleDestroyAndDisconnectSpcificSession!");
     auto persistentId = data.ReadInt32();
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -300,28 +304,10 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     MessageParcel& reply)
 {
     auto persistentId = data.ReadInt32();
-    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
-{
-    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = new (std::nothrow) WindowSessionProperty();
-        if (property != nullptr) {
-            property->Read(data, action);
-        }
-    } else {
-        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
-    }
-    const WMError& ret = UpdateSessionProperty(property, action);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
@@ -330,7 +316,7 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, Messa
     WLOGFI("run HandleRequestFocusStatus!");
     int32_t persistentId = data.ReadInt32();
     bool isFocused = data.ReadBool();
-    const WMError& ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
+    WMError ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -628,6 +614,24 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "run!");
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    int32_t windowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 windowId");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = GetUnreliableWindowInfo(windowId, infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<UnreliableWindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write unreliable window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("HandleSetSessionContinueState");
@@ -679,6 +683,28 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, Messa
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Handled!");
+    int32_t persistentId = data.ReadInt32();
+    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
+    const WMError ret = GetSessionSnapshotById(persistentId, *snapshot);
+    reply.WriteParcelable(snapshot.get());
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Called");
+    int32_t persistentId = data.ReadInt32();
+    sptr<IRemoteObject> uiContentRemoteObj;
+    const WSError& ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
+    reply.WriteRemoteObject(uiContentRemoteObj);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

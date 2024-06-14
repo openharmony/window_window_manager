@@ -74,6 +74,7 @@ enum class WSError : int32_t {
     WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED,
+    WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED,
 
     WS_ERROR_EDM_CONTROLLED = 2097215, // enterprise limit
 };
@@ -224,6 +225,10 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
+     *focus for setting focuable.
+     */
+    FOCUSABLE,
+    /**
      * focus change max.
      */
     MAX,
@@ -277,6 +282,7 @@ struct SessionInfo {
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
+    bool isModal_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -307,6 +313,7 @@ enum class SizeChangeReason : uint32_t {
     FLOATING_TO_FULL,
     PIP_START,
     PIP_SHOW,
+    PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     END,
 };
@@ -472,9 +479,23 @@ struct SystemUIStatusBarConfig {
     std::string immersiveStatusBarContentColor_ = "#ffffff";
 };
 
+struct StatusBarConfig {
+    bool showHide_ = false;
+    std::string contentColor_;
+    std::string backgroundColor_;
+};
+
+struct WindowImmersive {
+    StatusBarConfig desktopStatusBarConfig_;
+    StatusBarConfig leftRightStatusBarConfig_;
+    StatusBarConfig upDownStatusBarConfig_;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-
+    std::string uiType_ = "phone";
+    bool backgroundScreenLock_ = false;
+    std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
@@ -482,6 +503,7 @@ struct AppWindowSceneConfig {
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
+    WindowImmersive windowImmersive_;
 };
 
 struct DeviceScreenConfig {

@@ -157,6 +157,16 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ResetAllFreezeStatus() override
+    {
+        return DMError::DM_OK;
+    }
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
+    virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 };
 } // namespace Rosen
 } // namespace OHOS

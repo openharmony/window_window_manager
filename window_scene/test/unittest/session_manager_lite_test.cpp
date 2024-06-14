@@ -15,15 +15,13 @@
 
 #include <gtest/gtest.h>
 #include "session_manager.h"
-
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <ipc_skeleton.h>
-
+#include "session_manager_lite.h"
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
-#include "session_manager_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -230,6 +228,57 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy03, Function | 
     ASSERT_EQ(0, ret);
 }
 
+/**
+ * @tc.name: OnWMSConnectionChangedCallback
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
+{
+    SessionManagerLite sessionManagerLite;
+    sessionManagerLite.wmsConnectionChangedFunc_ = nullptr;
+    sessionManagerLite.OnWMSConnectionChangedCallback(0, 0, true);
+
+    int32_t userId = 2;
+    int32_t screenId = 0;
+    bool isConnected = true;
+    sessionManagerLite.currentWMSUserId_ = SYSTEM_USERID;
+    sessionManagerLite.OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
+
+    sessionManagerLite.destroyed_ = true;
+    sessionManagerLite.ClearSessionManagerProxy();
+
+    sptr<ISessionManagerService> sessionManagerService;
+    sessionManagerLite.RecoverSessionManagerService(sessionManagerService);
+    sessionManagerLite.RegisterUserSwitchListener([]() {});
+    sessionManagerLite.OnUserSwitch(sessionManagerService);
+    sessionManagerLite.Clear();
+
+    sessionManagerLite.isWMSConnected_ = true;
+    sessionManagerLite.currentWMSUserId_ = SYSTEM_USERID;
+    SessionManagerLite::WMSConnectionChangedCallbackFunc callbackFunc;
+    auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RegisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, Function | SmallTest | Level2)
+{
+    SessionManagerLite sessionManagerLite;
+    sessionManagerLite.OnFoundationDied();
+    FoundationDeathRecipientLite foundationDeathRecipientLite;
+    wptr<IRemoteObject> wptrDeath = nullptr;
+    foundationDeathRecipientLite.OnRemoteDied(wptrDeath);
+
+    SSMDeathRecipient sSMDeathRecipient;
+    sSMDeathRecipient.OnRemoteDied(wptrDeath);
+    SessionManagerLite::WMSConnectionChangedCallbackFunc callbackFunc;
+    auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 }

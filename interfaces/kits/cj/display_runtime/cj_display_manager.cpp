@@ -31,7 +31,7 @@ static void SetDisplayObject(sptr<Display> &obj, RetStruct &ret)
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
         return;
     }
-    int64_t *dataPtr = (int64_t *)ret.data;
+    int64_t *dataPtr = static_cast<int64_t*>(ret.data);
     if (dataPtr == nullptr) {
         TLOGE(WmsLogTag::DMS, "[SetDisplayObject] ERROR Failed to create dataPtr.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
@@ -44,7 +44,7 @@ static void SetDisplayObject(sptr<Display> &obj, RetStruct &ret)
 
 static void SetDisplaysArrayObject(std::vector<sptr<Display>> &list, RetStruct &ret)
 {
-    int64_t *displayImplIdList = (int64_t *)malloc(sizeof(int64_t) * list.size());
+    int64_t *displayImplIdList = static_cast<int64_t*>(malloc(sizeof(int64_t) * list.size()));
     if (displayImplIdList == nullptr) {
         TLOGE(WmsLogTag::DMS, "[SetDisplaysArrayObject] ERROR Failed to create displayImplIdList.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
@@ -67,7 +67,7 @@ static void SetDisplaysArrayObject(std::vector<sptr<Display>> &list, RetStruct &
     }
 }
 
-static void SetCRect(DMRect &row, CRect *ptr)
+static void SetCRect(const DMRect &row, CRect *ptr)
 {
     ptr->left = row.posX_;
     ptr->top = row.posY_;
@@ -78,7 +78,7 @@ static void SetCRect(DMRect &row, CRect *ptr)
 static CRect* CreateCreaseRects(std::vector<DMRect> &list)
 {
     int32_t number = static_cast<int32_t>(list.size());
-    CRect *result = (CRect*)malloc(sizeof(CRect) * number);
+    CRect *result = static_cast<CRect*>(malloc(sizeof(CRect) * number));
     if (result == nullptr) {
         return nullptr;
     }
@@ -90,12 +90,13 @@ static CRect* CreateCreaseRects(std::vector<DMRect> &list)
 
 static CFoldCreaseRegion* CreateCFoldCreaseRegionObject(sptr<FoldCreaseRegion> &foldCreaseRegion)
 {
-    CFoldCreaseRegion *region = (CFoldCreaseRegion*)malloc(sizeof(CFoldCreaseRegion));
+    CFoldCreaseRegion *region = static_cast<CFoldCreaseRegion*>(malloc(sizeof(CFoldCreaseRegion)));
     if (region == nullptr) {
         return nullptr;
     }
     int ret = memset_s(region, sizeof(CFoldCreaseRegion), 0, sizeof(CFoldCreaseRegion));
     if (ret != 0) {
+        free(region);
         return nullptr;
     }
     region->displayId = static_cast<uint32_t>(foldCreaseRegion->GetDisplayId());
@@ -105,6 +106,7 @@ static CFoldCreaseRegion* CreateCFoldCreaseRegionObject(sptr<FoldCreaseRegion> &
     region->creaseRects = CreateCreaseRects(creaseRects);
     if (region->creaseRects == nullptr) {
         TLOGE(WmsLogTag::DMS, "[CreateCreaseRects] ERROR Failed to create creaseRects.");
+        free(region);
         return nullptr;
     }
     return region;
@@ -119,7 +121,7 @@ RetStruct CJDisplayManager::GetDefaultDisplaySync()
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
         return ret;
     }
-    int64_t *displayImplId = (int64_t *)malloc(sizeof(int64_t));
+    int64_t *displayImplId = static_cast<int64_t*>(malloc(sizeof(int64_t)));
     if (displayImplId == nullptr) {
         TLOGE(WmsLogTag::DMS, "[GetDefaultDisplaySync] ERROR Failed to create displayImplId.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
@@ -153,7 +155,7 @@ RetStruct CJDisplayManager::HasPrivateWindow(uint32_t displayId)
         return ret;
     }
 
-    bool *hasPrivateWindow = (bool *)malloc(sizeof(bool));
+    bool *hasPrivateWindow = static_cast<bool*>(malloc(sizeof(bool)));
     if (hasPrivateWindow == nullptr) {
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
         return ret;
@@ -170,7 +172,7 @@ RetStruct CJDisplayManager::HasPrivateWindow(uint32_t displayId)
         return ret;
     }
     ret.code = static_cast<int32_t>(DmErrorCode::DM_OK);
-    ret.data = static_cast<void *>(hasPrivateWindow);
+    ret.data = static_cast<void*>(hasPrivateWindow);
     return ret;
 }
 

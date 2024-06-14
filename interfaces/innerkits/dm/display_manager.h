@@ -19,6 +19,7 @@
 #include <vector>
 #include <mutex>
 #include <pixel_map.h>
+#include <set>
 
 #include "display.h"
 #include "dm_common.h"
@@ -582,6 +583,37 @@ public:
      * @return convert success or not.
      */
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
+
+    /**
+     * @brief Set virtual screen black list to RS.
+     *
+     * @param screenId ScreenId used in virtual screen.
+     * @param windowIdList The windowId list to shield on cast screen.
+    */
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+
+    /**
+     * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
+     *
+     * @param screenId ScreenId used in virtual screen.
+    */
+    void DisablePowerOffRenderControl(ScreenId screenId);
+
+    /**
+     * @brief get to freeze status with specified pid list
+     *
+     * @param pidList Indicates the calling pid
+     * @param isProxy value is true indicates process status is freeze
+     * @param DM_OK means process status update success, others means update failed.
+    */
+    DMError ProxyForFreeze(std::set<int32_t> pidList, bool isProxy);
+
+    /**
+     * @brief reset all process freeze status
+     *
+     * @param DM_OK means process status update success, others means update failed.
+    */
+    DMError ResetAllFreezeStatus();
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 

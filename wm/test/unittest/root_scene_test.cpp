@@ -26,12 +26,17 @@
 
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
+#include "context_impl.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+const uint32_t MOCK_LEM_SUB_WIDTH = 340;
+const uint32_t MOCK_LEM_SUB_HEIGHT = 340;
+
 class RootSceneTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -81,6 +86,12 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     Rect rect;
+
+    rootScene.uiContent_ = nullptr;
+    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+
+    rect.width_ = MOCK_LEM_SUB_WIDTH;
+    rect.height_ = MOCK_LEM_SUB_HEIGHT;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -94,6 +105,8 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+
+    rootScene.uiContent_ = nullptr;
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -107,7 +120,15 @@ HWTEST_F(RootSceneTest, UpdateConfigurationForAll, Function | SmallTest | Level3
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+
+    auto prevStaticRootScene = RootScene::staticRootScene_;
     rootScene.UpdateConfigurationForAll(configuration);
+
+    sptr<RootScene> staticRootScene;
+    RootScene::staticRootScene_ = staticRootScene;
+    rootScene.UpdateConfigurationForAll(configuration);
+
+    RootScene::staticRootScene_ = prevStaticRootScene;
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
@@ -120,19 +141,6 @@ HWTEST_F(RootSceneTest, RegisterInputEventListener01, Function | SmallTest | Lev
 {
     RootScene rootScene;
     rootScene.RegisterInputEventListener();
-    ASSERT_EQ(1, rootScene.GetWindowId());
-}
-
-/**
- * @tc.name: RequestVsync
- * @tc.desc: RequestVsync Test
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneTest, RequestVsync, Function | SmallTest | Level3)
-{
-    RootScene rootScene;
-    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
-    rootScene.RequestVsync(vsyncCallback);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
@@ -158,6 +166,11 @@ HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
 {
     RootScene rootScene;
+
+    rootScene.vsyncStation_ = nullptr;
+    rootScene.GetVSyncPeriod();
+
+    rootScene.vsyncStation_ = std::make_shared<VsyncStation>(0);
     rootScene.GetVSyncPeriod();
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -172,8 +185,91 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
     RootScene rootScene;
     uint32_t rate = 120;
     bool isAnimatorStopped = true;
+
+    rootScene.vsyncStation_ = nullptr;
+    rootScene.FlushFrameRate(rate, isAnimatorStopped);
+
+    rootScene.vsyncStation_ = std::make_shared<VsyncStation>(0);
     rootScene.FlushFrameRate(rate, isAnimatorStopped);
     ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetFrameLayoutFinishCallback
+ * @tc.desc: SetFrameLayoutFinishCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    
+    rootScene.SetFrameLayoutFinishCallback(nullptr);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->SetDisplayOrientation(0);
+
+    rootScene->vsyncStation_ = nullptr;
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+    NodeId nodeId = 0;
+    rootScene->vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
+    rootScene->GetVSyncPeriod();
+    rootScene->FlushFrameRate(0, true);
+
+    rootScene->uiContent_ = nullptr;
+    rootScene->OnBundleUpdated("a");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->OnBundleUpdated("a");
+}
+
+/**
+ * @tc.name: UpdateViewportConfig
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateViewportConfig, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    std::function<void(const std::shared_ptr<AppExecFwk::Configuration> &)> callback;
+    rootScene->SetOnConfigurationUpdatedCallback(callback);
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::DRAG;
+    rootScene->uiContent_ = nullptr;
+    rootScene->UpdateViewportConfig(rect, reason);
+
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rect.width_ = 340;
+    rect.height_ = 340;
+    rootScene->UpdateViewportConfig(rect, reason);
+}
+
+/**
+ * @tc.name: UpdateConfiguration01
+ * @tc.desc: UpdateConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfiguration01, Function | SmallTest | Level3)
+{
+    sptr<RootScene> rootScene = new RootScene();
+    ASSERT_NE(nullptr, rootScene);
+    rootScene->uiContent_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, configuration);
+    rootScene->UpdateConfiguration(configuration);
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene->UpdateConfiguration(configuration);
 }
 }
 } // namespace Rosen

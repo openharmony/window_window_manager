@@ -55,6 +55,9 @@ void SessionManagerTest::TearDown()
 }
 
 namespace {
+constexpr int32_t MOCK_USER_ID_ZERO = 0;
+constexpr int32_t MOCK_SCREEN_ID_ZERO = 0;
+
 /**
  * @tc.name: OnRemoteRequest
  * @tc.desc: normal function
@@ -62,18 +65,23 @@ namespace {
  */
 HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
 {
-    uint32_t code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
-        SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     IPCObjectStub iPCObjectStub;
-    iPCObjectStub.OnRemoteRequest(code, data, reply, option);
+
+    uint32_t code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
+        SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
+    auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
+    ASSERT_NE(ret, 0);
+
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
         SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
-    auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
+    ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
+    ASSERT_NE(ret, 0);
+    
     code = 10;
-    iPCObjectStub.OnRemoteRequest(code, data, reply, option);
+    ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(0, ret);
 }
 
@@ -99,6 +107,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
 
     sptr<ISessionManagerService> sessionManagerService;
     sessionManager.RecoverSessionManagerService(sessionManagerService);
+    sessionManager.RegisterUserSwitchListener([]() {});
     sessionManager.OnUserSwitch(sessionManagerService);
     sessionManager.Clear();
 
@@ -108,6 +117,89 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: OnWMSConnectionChanged
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sptr<ISessionManagerService> sessionManagerService;
+
+    sessionManager.OnWMSConnectionChanged(MOCK_USER_ID_ZERO, MOCK_SCREEN_ID_ZERO, false, sessionManagerService);
+
+    sessionManager.currentWMSUserId_ = INVALID_UID + 100;
+    sessionManager.OnWMSConnectionChanged(MOCK_USER_ID_ZERO, MOCK_SCREEN_ID_ZERO, true, sessionManagerService);
+
+    ASSERT_NE(sessionManager.currentWMSUserId_, INVALID_UID);
+}
+
+/**
+ * @tc.name: ClearSessionManagerProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    
+    sessionManager.destroyed_ = true;
+    sessionManager.ClearSessionManagerProxy();
+    ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
+
+    sessionManager.destroyed_ = false;
+    sessionManager.sessionManagerServiceProxy_ = nullptr;
+    sessionManager.ClearSessionManagerProxy();
+    ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
+
+    sessionManager.destroyed_ = false;
+    sptr<ISessionManagerService> sessionManagerServiceProxy;
+    sessionManager.sessionManagerServiceProxy_ = sessionManagerServiceProxy;
+    sessionManager.ClearSessionManagerProxy();
+    ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverSessionManagerService
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    
+    bool funcInvoked = false;
+
+    sessionManager.RecoverSessionManagerService(nullptr);
+    ASSERT_EQ(funcInvoked, false);
+
+    sessionManager.windowManagerRecoverFunc_ = [&]()  {
+            funcInvoked = true;
+    };
+    sessionManager.RecoverSessionManagerService(nullptr);
+    ASSERT_EQ(funcInvoked, true);
+}
+
+/**
+ * @tc.name: OnUserSwitch
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    
+    bool funcInvoked = false;
+    sessionManager.userSwitchCallbackFunc_ = nullptr;
+    sessionManager.OnUserSwitch(nullptr);
+    ASSERT_EQ(funcInvoked, false);
+    sessionManager.userSwitchCallbackFunc_ = []() {};
+    sessionManager.OnUserSwitch(nullptr);
+    ASSERT_EQ(funcInvoked, false);
+}
+
 /**
  * @tc.name: RegisterWMSConnectionChangedListener
  * @tc.desc: normal function

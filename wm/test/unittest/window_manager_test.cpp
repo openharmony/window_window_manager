@@ -173,6 +173,34 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetSnapshotByWindowId01
+ * @tc.desc: Check GetSnapshotByWindowId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    int32_t windowId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError ret = windowManager.GetSnapshotByWindowId(windowId, pixelMap);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: GetUnreliableWindowInfo ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetUnreliableWindowInfo(windowId, infos));
+}
+
+/**
  * @tc.name: RegisterCameraFloatWindowChangedListener01
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
@@ -681,6 +709,18 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
     windowManager.pImpl_->gestureNavigationEnabledListeners_.push_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+}
+
+/**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> remoteObj;
+    WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**

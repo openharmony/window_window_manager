@@ -148,6 +148,7 @@ HWTEST_F(SCBSystemSessionTest, UpdateWindowMode, Function | SmallTest | Level1)
  */
 HWTEST_F(SCBSystemSessionTest, RegisterBufferAvailableCallback, Function | SmallTest | Level3)
 {
+    ASSERT_NE(scbSystemSession_, nullptr);
     scbSystemSession_->RegisterBufferAvailableCallback([]() {});
 }
 }

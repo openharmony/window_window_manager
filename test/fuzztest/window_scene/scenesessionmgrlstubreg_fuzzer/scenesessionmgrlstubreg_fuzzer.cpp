@@ -47,35 +47,40 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
-            SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID),
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID),
         parcel, reply, option);
     return true;
 }

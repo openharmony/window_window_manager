@@ -24,6 +24,30 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DISPLAY_RUNTIME, "JsDisplayListener"};
 }
 
+JsDisplayListener::JsDisplayListener(napi_env env) : env_(env)
+{
+    WLOGFI("Constructor execution");
+    napi_add_env_cleanup_hook(env_, CleanEnv, this);
+}
+
+JsDisplayListener::~JsDisplayListener()
+{
+    WLOGFI("Destructor execution");
+    napi_remove_env_cleanup_hook(env_, CleanEnv, this);
+    env_ = nullptr;
+}
+
+void JsDisplayListener::CleanEnv(void* obj)
+{
+    JsDisplayListener* thisObj = reinterpret_cast<JsDisplayListener*>(obj);
+    if (!thisObj) {
+        WLOGE("obj is nullptr");
+        return;
+    }
+    WLOGFI("env_ is invalid, set to nullptr");
+    thisObj->env_ = nullptr;
+}
+
 void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
     WLOGD("JsDisplayListener::AddCallback is called");

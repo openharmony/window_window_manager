@@ -299,6 +299,16 @@ std::string WindowOption::GetDialogTitle() const
     return dialogTitle_;
 }
 
+void WindowOption::SetWindowTopmost(bool isTopmost)
+{
+    isTopmost_ = isTopmost;
+}
+
+bool WindowOption::GetWindowTopmost() const
+{
+    return isTopmost_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

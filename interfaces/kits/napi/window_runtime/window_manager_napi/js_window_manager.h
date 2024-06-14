@@ -40,6 +40,7 @@ public:
     static napi_value RegisterWindowManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterWindowMangerCallback(napi_env env, napi_callback_info info);
     static napi_value GetTopWindow(napi_env env, napi_callback_info info);
+    static napi_value GetSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetLastWindow(napi_env env, napi_callback_info info);
     static napi_value SetWindowLayoutMode(napi_env env, napi_callback_info info);
     static napi_value SetGestureNavigationEnabled(napi_env env, napi_callback_info info);
@@ -56,6 +57,7 @@ private:
     napi_value OnUnregisterWindowManagerCallback(napi_env env, napi_callback_info info);
     static napi_value OnGetTopWindow(napi_env env, napi_callback_info info);
     static napi_value OnGetLastWindow(napi_env env, napi_callback_info info);
+    static napi_value OnGetSnapshot(napi_env env, napi_callback_info info);
     static napi_value OnSetWindowLayoutMode(napi_env env, napi_callback_info info);
     static napi_value OnSetGestureNavigationEnabled(napi_env env, napi_callback_info info);
     static napi_value OnSetWaterMarkImage(napi_env env, napi_callback_info info);

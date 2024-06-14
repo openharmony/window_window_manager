@@ -14,6 +14,7 @@
  */
 
 #include "session/screen/include/screen_session.h"
+#include <hisysevent.h>
 
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
@@ -248,6 +249,16 @@ void ScreenSession::SetName(std::string name)
     name_ = name;
 }
 
+void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
+{
+    mirrorScreenType_ = mirrorType;
+}
+
+MirrorScreenType ScreenSession::GetMirrorScreenType()
+{
+    return mirrorScreenType_;
+}
+
 ScreenId ScreenSession::GetScreenId()
 {
     return screenId_;
@@ -263,6 +274,12 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
+{
+    WLOGFI("set device default rotation offset: %{public}d", defaultRotationOffset);
+    property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
+}
+
 void ScreenSession::UpdatePropertyByActiveMode()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
@@ -274,10 +291,11 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
+void ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
-    property_.SetBounds(bounds);
-    property_.SetPhyBounds(phyBounds);
+    property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
+    property_.SetBounds(updatedProperty.GetBounds());
+    property_.SetPhyBounds(updatedProperty.GetPhyBounds());
 }
 
 void ScreenSession::UpdateDisplayState(DisplayState displayState)
@@ -492,6 +510,24 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+    ReportNotifyModeChange(displayOrientation);
+}
+
+void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
+{
+    int32_t vhMode = 1;
+    if (displayOrientation == DisplayOrientation::PORTRAIT_INVERTED ||
+        displayOrientation == DisplayOrientation::PORTRAIT) {
+        vhMode = 0;
+    }
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "VH_MODE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "MODE", vhMode);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportNotifyModeChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
 }
 
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
@@ -539,9 +575,6 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
-    if (isScreenLocked_ == isLocked) {
-        return;
-    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         isScreenLocked_ = isLocked;
@@ -564,6 +597,17 @@ bool ScreenSession::IsScreenRotationLocked()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return isScreenLocked_;
+}
+
+void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "isTouchEnabled:%{public}u", static_cast<uint32_t>(isTouchEnabled));
+    touchEnabled_.store(isTouchEnabled);
+}
+
+bool ScreenSession::IsTouchEnabled()
+{
+    return touchEnabled_.load();
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const

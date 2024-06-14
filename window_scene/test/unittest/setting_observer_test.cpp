@@ -31,6 +31,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SettingObserver> settingObserver_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void SettingObserverTest::SetUpTestCase()
@@ -49,6 +50,7 @@ void SettingObserverTest::SetUp()
 void SettingObserverTest::TearDown()
 {
     settingObserver_ = nullptr;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -88,6 +90,10 @@ HWTEST_F(SettingObserverTest, SetKey, Function | SmallTest | Level1)
  */
 HWTEST_F(SettingObserverTest, OnChange, Function | SmallTest | Level1)
 {
+    EXPECT_EQ(settingObserver_->update_, nullptr);
+    settingObserver_->SetKey("OnChange");
+    settingObserver_->OnChange();
+
     UpdateFunc func = [this](const std::string& key) {
         settingObserver_->SetKey(key);
     };

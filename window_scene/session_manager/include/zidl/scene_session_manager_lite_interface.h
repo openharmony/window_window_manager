@@ -62,13 +62,16 @@ public:
         TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND,
         //window manager message
         TRANS_ID_GET_FOCUS_SESSION_INFO,
-        TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
+        TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT = 22,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
+        TRANS_ID_GET_ALL_MAIN_WINDOW_INFO,
+        TRANS_ID_CLEAR_MAIN_SESSIONS,
+        TRANS_ID_RAISE_WINDOW_TO_TOP,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -97,6 +100,7 @@ public:
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
+    virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

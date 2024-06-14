@@ -35,6 +35,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
     if (sessionInfo_.isSystem_) {
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
+        config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
     WLOGFD("Create SCBSystemSession");
@@ -69,8 +70,10 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
         WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
-        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
+        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
+            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
             session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
@@ -117,7 +120,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
 {
     WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
-        NotifyRequestFocusStatusNotifyManager(true, false);
+        FocusChangeReason reason = FocusChangeReason::CLICK;
+        NotifyRequestFocusStatusNotifyManager(true, false, reason);
         NotifyClick();
     }
 }
@@ -139,7 +143,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         if (!isFocused_ && GetFocusable()) {
-            NotifyRequestFocusStatusNotifyManager(true, false);
+            FocusChangeReason reason = FocusChangeReason::CLICK;
+            NotifyRequestFocusStatusNotifyManager(true, false, reason);
             NotifyClick();
         }
     }

@@ -78,6 +78,7 @@ public:
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_GET_SESSION_SNAPSHOT,
+        TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID,
         TRANS_ID_SET_SESSION_CONTINUE_STATE,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_CLEAR_SESSION,
@@ -94,6 +95,7 @@ public:
         TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION,
 		TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION,
         TRANS_ID_GET_TOP_WINDOW_ID,
+        TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
@@ -105,6 +107,7 @@ public:
         TRANS_ID_GET_WINDOW_STATUS,
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
+        TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -143,6 +146,10 @@ public:
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
+    virtual WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
+    {
+        return WMError::WM_OK;
+    }
     virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override
     {
         return WSError::WS_OK;
@@ -179,6 +186,10 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
     }

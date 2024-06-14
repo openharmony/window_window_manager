@@ -50,6 +50,11 @@ public:
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
 };
 
+enum class MirrorScreenType : int32_t {
+    PHYSICAL_MIRROR = 0,
+    VIRTUAL_MIRROR = 1,
+};
+
 enum class ScreenState : int32_t {
     INIT,
     CONNECTION,
@@ -152,10 +157,12 @@ public:
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
+    void SetTouchEnabledFromJs(bool isTouchEnabled);
+    bool IsTouchEnabled();
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds);
+    void UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
@@ -199,6 +206,10 @@ public:
     void SetFoldScreen(bool isFold);
     void UpdateRotationAfterBoot(bool foldToExpand);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
+    void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
+
+    void SetMirrorScreenType(MirrorScreenType mirrorType);
+    MirrorScreenType GetMirrorScreenType();
 
 private:
     Rotation ConvertIntToRotation(int rotation);
@@ -210,13 +221,16 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
+    std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
+    void ReportNotifyModeChange(DisplayOrientation displayOrientation);
 };
 
 class ScreenSessionGroup : public ScreenSession {

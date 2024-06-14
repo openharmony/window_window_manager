@@ -21,9 +21,119 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
+    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
     constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 }
+
+const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
+        &WindowSessionProperty::WriteActionUpdateFocusable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
+        &WindowSessionProperty::WriteActionUpdateTouchable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS),
+        &WindowSessionProperty::WriteActionUpdateSetBrightness),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION),
+        &WindowSessionProperty::WriteActionUpdateOrientation),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE),
+        &WindowSessionProperty::WriteActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
+        &WindowSessionProperty::WriteActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &WindowSessionProperty::WriteActionUpdateSnapshotSkip),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
+        &WindowSessionProperty::WriteActionUpdateMaximizeState),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS),
+        &WindowSessionProperty::WriteActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS),
+        &WindowSessionProperty::WriteActionUpdateFlags),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE),
+        &WindowSessionProperty::WriteActionUpdateMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG),
+        &WindowSessionProperty::WriteActionUpdateAnimationFlag),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA),
+        &WindowSessionProperty::WriteActionUpdateTouchHotArea),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE),
+        &WindowSessionProperty::WriteActionUpdateDecorEnable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS),
+        &WindowSessionProperty::WriteActionUpdateWindowLimits),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED),
+        &WindowSessionProperty::WriteActionUpdateDragenabled),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED),
+        &WindowSessionProperty::WriteActionUpdateRaiseenabled),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS),
+        &WindowSessionProperty::WriteActionUpdateHideNonSystemFloatingWindows),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO),
+        &WindowSessionProperty::WriteActionUpdateTextfieldAvoidInfo),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK),
+        &WindowSessionProperty::WriteActionUpdateWindowMask),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
+        &WindowSessionProperty::WriteActionUpdateTopmost),
+};
+
+const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
+        &WindowSessionProperty::ReadActionUpdateFocusable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
+        &WindowSessionProperty::ReadActionUpdateTouchable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS),
+        &WindowSessionProperty::ReadActionUpdateSetBrightness),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION),
+        &WindowSessionProperty::ReadActionUpdateOrientation),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE),
+        &WindowSessionProperty::ReadActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
+        &WindowSessionProperty::ReadActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &WindowSessionProperty::ReadActionUpdateSnapshotSkip),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
+        &WindowSessionProperty::ReadActionUpdateMaximizeState),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
+        &WindowSessionProperty::ReadActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS),
+        &WindowSessionProperty::ReadActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS),
+        &WindowSessionProperty::ReadActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS),
+        &WindowSessionProperty::ReadActionUpdateSystemBar),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS),
+        &WindowSessionProperty::ReadActionUpdateFlags),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE),
+        &WindowSessionProperty::ReadActionUpdateMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG),
+        &WindowSessionProperty::ReadActionUpdateAnimationFlag),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA),
+        &WindowSessionProperty::ReadActionUpdateTouchHotArea),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE),
+        &WindowSessionProperty::ReadActionUpdateDecorEnable),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS),
+        &WindowSessionProperty::ReadActionUpdateWindowLimits),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED),
+        &WindowSessionProperty::ReadActionUpdateDragenabled),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED),
+        &WindowSessionProperty::ReadActionUpdateRaiseenabled),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS),
+        &WindowSessionProperty::ReadActionUpdateHideNonSystemFloatingWindows),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO),
+        &WindowSessionProperty::ReadActionUpdateTextfieldAvoidInfo),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK),
+        &WindowSessionProperty::ReadActionUpdateWindowMask),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
+        &WindowSessionProperty::ReadActionUpdateTopmost),
+};
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
@@ -98,6 +208,11 @@ void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
 {
     isSystemPrivacyMode_ = isSystemPrivate;
+}
+
+void WindowSessionProperty::SetSnapshotSkip(bool isSkip)
+{
+    isSnapshotSkip_ = isSkip;
 }
 
 void WindowSessionProperty::SetBrightness(float brightness)
@@ -188,6 +303,11 @@ bool WindowSessionProperty::GetPrivacyMode() const
 bool WindowSessionProperty::GetSystemPrivacyMode() const
 {
     return isSystemPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSnapshotSkip() const
+{
+    return isSnapshotSkip_;
 }
 
 float WindowSessionProperty::GetBrightness() const
@@ -603,7 +723,12 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         return;
     }
     for (uint32_t i = 0; i < size; i++) {
-        pipTemplateInfo.controlGroup.push_back(parcel.ReadUint32());
+        uint32_t controlGroupId = 0;
+        if (parcel.ReadUint32(controlGroupId)) {
+            pipTemplateInfo.controlGroup.push_back(controlGroupId);
+        } else {
+            return;
+        }
     }
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
@@ -614,7 +739,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
         return false;
     }
     if (isShaped_) {
-        if (!parcel.WriteParcelable(windowMask_)) {
+        if (!windowMask_->Marshalling(parcel)) {
             return false;
         }
     }
@@ -626,7 +751,7 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     bool isShaped = parcel.ReadBool();
     property->SetIsShaped(isShaped);
     if (isShaped) {
-        property->SetWindowMask(parcel.ReadParcelable<Media::PixelMap>());
+        property->SetWindowMask(std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel)));
     }
 }
 
@@ -641,6 +766,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
+        parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
@@ -685,6 +811,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
+    property->SetSnapshotSkip(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
@@ -719,6 +846,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetExtensionFlag(parcel.ReadBool());
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
+    if (keyboardLayoutParams == nullptr) {
+        delete property;
+        return nullptr;
+    }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     return property;
 }
@@ -743,6 +874,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     requestedOrientation_ = property->requestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
+    isSnapshotSkip_ = property->isSnapshotSkip_;
     brightness_ = property->brightness_;
     displayId_ = property->displayId_;
     parentId_ = property->parentId_;
@@ -770,166 +902,251 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
 {
-    bool ret = parcel.WriteUint32(static_cast<uint32_t>(persistentId_));
-    switch (action) {
-        case WSPropertyChangeAction::ACTION_UPDATE_MODE:
-            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(windowMode_));
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
-            ret = ret && parcel.WriteUint32(flags_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
-            ret = ret && MarshallingSystemBarMap(parcel);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-            ret = ret && parcel.WriteBool(focusable_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-            ret = ret && parcel.WriteBool(touchable_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION:
-            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-            ret = ret && parcel.WriteBool(turnScreenOn_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-            ret = ret && parcel.WriteBool(keepScreenOn_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-            ret = ret && parcel.WriteFloat(brightness_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
-            ret = ret && MarshallingTouchHotAreas(parcel);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
-            ret = ret && parcel.WriteUint32(animationFlag_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
-        case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
-            ret = ret && parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
-            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
-                parcel.WriteBool(isLayoutFullScreen_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO:
-            ret = ret && parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-            ret = ret && parcel.WriteBool(isSystemCalling_) && parcel.WriteBool(isDecorEnable_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS:
-            ret = ret && MarshallingWindowLimits(parcel);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
-            ret = ret && parcel.WriteBool(isSystemCalling_) && parcel.WriteBool(dragEnabled_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
-            ret = ret && parcel.WriteBool(isSystemCalling_) && parcel.WriteBool(raiseEnabled_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
-            ret = ret && parcel.WriteBool(hideNonSystemFloatingWindows_) &&
-                parcel.WriteBool(isFloatingWindowAppType_) && parcel.WriteBool(forceHide_);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
-            ret = ret && MarshallingWindowMask(parcel);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
-            ret = ret && parcel.WriteBool(topmost_);
-            break;
-        default:
-            break;
+    const auto funcIter = writeFuncMap_.find(static_cast<uint32_t>(action));
+    if (funcIter == writeFuncMap_.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
+        return false;
     }
-    return ret;
+    bool ret = parcel.WriteUint32(static_cast<uint32_t>(persistentId_));
+    return ret && (this->*(funcIter->second))(parcel);
+}
+
+bool WindowSessionProperty::WriteActionUpdateTurnScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(turnScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(keepScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
+{
+    return parcel.WriteBool(focusable_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateTouchable(Parcel& parcel)
+{
+    return parcel.WriteBool(touchable_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateSetBrightness(Parcel& parcel)
+{
+    return parcel.WriteFloat(brightness_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateOrientation(Parcel& parcel)
+{
+    return parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
+}
+
+bool WindowSessionProperty::WriteActionUpdatePrivacyMode(Parcel& parcel)
+{
+    return parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateSnapshotSkip(Parcel& parcel)
+{
+    return parcel.WriteBool(isSnapshotSkip_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateMaximizeState(Parcel& parcel)
+{
+    return parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
+        parcel.WriteBool(isLayoutFullScreen_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateSystemBar(Parcel& parcel)
+{
+    return MarshallingSystemBarMap(parcel);
+}
+
+bool WindowSessionProperty::WriteActionUpdateFlags(Parcel& parcel)
+{
+    return parcel.WriteUint32(flags_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateMode(Parcel& parcel)
+{
+    return parcel.WriteUint32(static_cast<uint32_t>(windowMode_));
+}
+
+bool WindowSessionProperty::WriteActionUpdateAnimationFlag(Parcel& parcel)
+{
+    return parcel.WriteUint32(animationFlag_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateTouchHotArea(Parcel& parcel)
+{
+    return MarshallingTouchHotAreas(parcel);
+}
+
+bool WindowSessionProperty::WriteActionUpdateDecorEnable(Parcel& parcel)
+{
+    return parcel.WriteBool(isDecorEnable_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateWindowLimits(Parcel& parcel)
+{
+    return MarshallingWindowLimits(parcel);
+}
+
+bool WindowSessionProperty::WriteActionUpdateDragenabled(Parcel& parcel)
+{
+    return parcel.WriteBool(dragEnabled_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateRaiseenabled(Parcel& parcel)
+{
+    return parcel.WriteBool(raiseEnabled_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateHideNonSystemFloatingWindows(Parcel& parcel)
+{
+    return parcel.WriteBool(hideNonSystemFloatingWindows_) &&
+        parcel.WriteBool(isFloatingWindowAppType_) && parcel.WriteBool(forceHide_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel)
+{
+    return parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateWindowMask(Parcel& parcel)
+{
+    return MarshallingWindowMask(parcel);
+}
+
+bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
+{
+    return parcel.WriteBool(topmost_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
-    SetPersistentId(parcel.ReadUint32());
-    switch (action) {
-        case WSPropertyChangeAction::ACTION_UPDATE_MODE:
-            SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
-            SetWindowFlags(parcel.ReadUint32());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
-        case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
-            UnMarshallingSystemBarMap(parcel, this);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-            SetFocusable(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-            SetTouchable(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION:
-            SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-            SetTurnScreenOn(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-            SetKeepScreenOn(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-            SetBrightness(parcel.ReadFloat());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
-            UnmarshallingTouchHotAreas(parcel, this);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
-            SetAnimationFlag(parcel.ReadUint32());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
-        case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
-            SetPrivacyMode(parcel.ReadBool());
-            SetSystemPrivacyMode(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
-            SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
-            SetIsLayoutFullScreen(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO:
-            SetTextFieldPositionY(parcel.ReadDouble());
-            SetTextFieldHeight(parcel.ReadDouble());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-            SetSystemCalling(parcel.ReadBool());
-            SetDecorEnable(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS:
-            UnmarshallingWindowLimits(parcel, this);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
-            SetSystemCalling(parcel.ReadBool());
-            SetDragEnabled(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
-            SetSystemCalling(parcel.ReadBool());
-            SetRaiseEnabled(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
-            SetHideNonSystemFloatingWindows(parcel.ReadBool());
-            SetFloatingWindowAppType(parcel.ReadBool());
-            SetForceHide(parcel.ReadBool());
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK:
-            UnmarshallingWindowMask(parcel, this);
-            break;
-        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
-            SetTopmost(parcel.ReadBool());
-            break;
-        default:
-            break;
+    const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
+    if (funcIter == readFuncMap_.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
+        return;
     }
+    SetPersistentId(parcel.ReadUint32());
+    (this->*(funcIter->second))(parcel);
+}
+
+void WindowSessionProperty::ReadActionUpdateTurnScreenOn(Parcel& parcel)
+{
+    SetTurnScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
+{
+    SetKeepScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
+{
+    SetFocusable(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateTouchable(Parcel& parcel)
+{
+    SetTouchable(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateSetBrightness(Parcel& parcel)
+{
+    SetBrightness(parcel.ReadFloat());
+}
+
+void WindowSessionProperty::ReadActionUpdateOrientation(Parcel& parcel)
+{
+    SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+}
+
+void WindowSessionProperty::ReadActionUpdatePrivacyMode(Parcel& parcel)
+{
+    SetPrivacyMode(parcel.ReadBool());
+    SetSystemPrivacyMode(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateSnapshotSkip(Parcel& parcel)
+{
+    SetSnapshotSkip(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateMaximizeState(Parcel& parcel)
+{
+    SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
+    SetIsLayoutFullScreen(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateSystemBar(Parcel& parcel)
+{
+    UnMarshallingSystemBarMap(parcel, this);
+}
+
+void WindowSessionProperty::ReadActionUpdateFlags(Parcel& parcel)
+{
+    SetWindowFlags(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateMode(Parcel& parcel)
+{
+    SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+}
+
+void WindowSessionProperty::ReadActionUpdateAnimationFlag(Parcel& parcel)
+{
+    SetAnimationFlag(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateTouchHotArea(Parcel& parcel)
+{
+    UnmarshallingTouchHotAreas(parcel, this);
+}
+
+void WindowSessionProperty::ReadActionUpdateDecorEnable(Parcel& parcel)
+{
+    SetDecorEnable(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowLimits(Parcel& parcel)
+{
+    UnmarshallingWindowLimits(parcel, this);
+}
+
+void WindowSessionProperty::ReadActionUpdateDragenabled(Parcel& parcel)
+{
+    SetDragEnabled(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateRaiseenabled(Parcel& parcel)
+{
+    SetRaiseEnabled(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateHideNonSystemFloatingWindows(Parcel& parcel)
+{
+    SetHideNonSystemFloatingWindows(parcel.ReadBool());
+    SetFloatingWindowAppType(parcel.ReadBool());
+    SetForceHide(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateTextfieldAvoidInfo(Parcel& parcel)
+{
+    SetTextFieldPositionY(parcel.ReadDouble());
+    SetTextFieldHeight(parcel.ReadDouble());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowMask(Parcel& parcel)
+{
+    UnmarshallingWindowMask(parcel, this);
+}
+
+void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
+{
+    SetTopmost(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -987,12 +1204,12 @@ bool WindowSessionProperty::GetExtensionFlag() const
     return isExtensionFlag_;
 }
 
-void WindowSessionProperty::SetWindowMask(const sptr<Media::PixelMap>& windowMask)
+void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)
 {
     windowMask_ = windowMask;
 }
 
-sptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
+std::shared_ptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
 {
     return windowMask_;
 }

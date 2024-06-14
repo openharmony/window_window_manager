@@ -42,21 +42,25 @@ void JsWindowListener::SetMainEventHandler()
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
-void JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
+napi_value JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
     WLOGFD("[NAPI]CallJsMethod methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("[NAPI]env_ nullptr or jsCallBack_ is nullptr");
-        return;
+        return nullptr;
     }
     napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
         WLOGFE("[NAPI]Failed to get method callback from object");
-        return;
+        return nullptr;
     }
     napi_value result = nullptr;
+    napi_value callResult = nullptr;
     napi_get_undefined(env_, &result);
-    napi_call_function(env_, result, method, argc, argv, nullptr);
+    napi_get_undefined(env_, &callResult);
+    napi_call_function(env_, result, method, argc, argv, &callResult);
+
+    return callResult;
 }
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
@@ -511,16 +515,16 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
+    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
+        return;
+    }
     RectChangeReason rectChangReason = RectChangeReason::UNDEFINED;
     if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
         rectChangReason = JS_SIZE_CHANGE_REASON.at(reason);
     }
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
-        return;
-    }
-    if (currentReason_ == RectChangeReason::MOVE && rectChangReason == RectChangeReason::DRAG_END) {
+    if (currentReason_ != RectChangeReason::DRAG && rectChangReason == RectChangeReason::DRAG_END) {
         rectChangReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
@@ -550,7 +554,6 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         napi_close_handle_scope(env, scope);
     };
-
     if (!eventHandler_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "get main event handler failed!");
         return;
@@ -560,6 +563,33 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     currentWidth_ = rect.width_;
     currentHeight_ = rect.height_;
     currentReason_ = rectChangReason;
+}
+
+void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
+{
+    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_] () mutable {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSubWindowClose");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("this listener or env is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        bool value = terminateCloseProcess;
+        napi_value returnValue = thisListener->CallJsMethod(SUB_WINDOW_CLOSE_CB.c_str(), nullptr, 0);
+        if (napi_get_value_bool(env, returnValue, &value) == napi_ok) {
+            terminateCloseProcess = value;
+        }
+        napi_close_handle_scope(env, scope);
+    };
+
+    if (!eventHandler_) {
+        WLOGFE("get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowRectListener::OnSubWindowClose",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
 } // namespace OHOS

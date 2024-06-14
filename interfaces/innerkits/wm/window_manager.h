@@ -27,6 +27,7 @@
 #include "focus_change_info.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -44,6 +45,11 @@ using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 struct VisibleWindowNumInfo {
     uint32_t displayId;
     uint32_t visibleWindowNum;
+};
+
+struct WindowSnapshotDataPack {
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError result = WMError::WM_OK;
 };
 
 /**
@@ -216,6 +222,45 @@ public:
     float scaleY_;
     std::string bundleName_;
     std::vector<Rect> touchHotAreas_;
+};
+
+/**
+ * @class UnreliableWindowInfo
+ *
+ * @brief Unreliable Window Info.
+ */
+class UnreliableWindowInfo : public Parcelable {
+public:
+    /**
+     * @brief Default construct of UnreliableWindowInfo.
+     */
+    UnreliableWindowInfo() = default;
+    /**
+     * @brief Default deconstruct of UnreliableWindowInfo.
+     */
+    ~UnreliableWindowInfo() = default;
+
+    /**
+     * @brief Marshalling UnreliableWindowInfo.
+     *
+     * @param parcel Package of UnreliableWindowInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    virtual bool Marshalling(Parcel& parcel) const override;
+    /**
+     * @brief Unmarshalling UnreliableWindowInfo.
+     *
+     * @param parcel Package of UnreliableWindowInfo.
+     * @return UnreliableWindowInfo object.
+     */
+    static UnreliableWindowInfo* Unmarshalling(Parcel& parcel);
+
+    int32_t windowId_ { 0 };
+    Rect windowRect_;
+    uint32_t zOrder_ { 0 };
+    float floatingScale_ { 1.0f };
+    float scaleX_ { 1.0f };
+    float scaleY_ { 1.0f };
 };
 
 /**
@@ -543,6 +588,14 @@ public:
      */
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
     /**
+     * @brief Get unreliable window info.
+     *
+     * @param infos Unreliable Window Info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetUnreliableWindowInfo(int32_t windowId,
+        std::vector<sptr<UnreliableWindowInfo>>& infos) const;
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
@@ -582,6 +635,15 @@ public:
     WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
 
     /**
+     * @brief Get uiContent remote object
+     *
+     * @param windowId windowId
+     * @param uiContentRemoteObj uiContentRemoteObj
+     * @return WM_OK if successfully retrieved uiContentRemoteObj
+     */
+    WMError GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj);
+
+    /**
      * @brief raise window to top by windowId
      *
      * @param persistentId this window to raise
@@ -607,6 +669,15 @@ public:
      * @return WM_OK means shift window focus success, others means failed.
     */
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+
+    /**
+     * @brief Get snapshot by window id.
+     *
+     * @param windowId Window id which want to snapshot.
+     * @param pixelMap Snapshot output pixel map.
+     * @return WM_OK means get snapshot success, others means failed.
+    */
+    WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Register visible main window num changed listener.
