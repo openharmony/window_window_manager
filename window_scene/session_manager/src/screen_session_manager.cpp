@@ -1234,7 +1234,8 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
         needScreenOffNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOffMutex_);
         if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(screenOffDelay_)) == std::cv_status::timeout) {
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout");
+            isScreenLockSuspend_ = false;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout, isScreenLockSuspend_ is false");
         }
     }
 }
