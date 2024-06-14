@@ -4231,27 +4231,50 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>
     return false;
 }
 
+bool SceneSessionManager::CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession)
+{
+    bool isFocusedMainSessionTopmost =
+        focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && focusedSession->IsTopmost();
+    auto parentSession = GetSceneSession(focusedSession->GetParentPersistentId());
+    bool isFocusedSessionParentTopmost = parentSession &&
+        parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && parentSession->IsTopmost();
+    if ((isFocusedMainSessionTopmost || isFocusedSessionParentTopmost) && sceneSession->IsAppSession() &&
+        (sceneSession->GetMissionId() != focusedSession->GetMissionId())) {
+        return true;
+    }
+    return false;
+}
+
+bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
+{
+    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+        (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsTopmost())) &&
+        (ProcessModalTopmostRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
+        ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "dialog or modal topmost subwindow get focused");
+            return true;
+    }
+    return false;
+}
+
 WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
     FocusChangeReason reason)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
     // dialog get focus
-    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-        SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
-        ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "dialog get focused");
-            return WSError::WS_DO_NOTHING;
+    if (CheckRequestFocusImmdediately(sceneSession)) {
+        return WSError::WS_DO_NOTHING;
     }
     // blocking-type session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (focusedSession) {
-        if (focusedSession->IsTopmost() && sceneSession->IsAppSession()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byForeground: %{public}d",  reason,
+            byForeground);
+        if (CheckTopmostWindowFocus(focusedSession, sceneSession)) {
             // return ok if focused session is topmost
             return WSError::WS_OK;
         }
-        TLOGD(WmsLogTag::WMS_FOCUS, "reason: %{public}d, byForeground: %{public}d",  reason,
-            byForeground);
         if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
             TLOGD(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
             return WSError::WS_DO_NOTHING;
@@ -5073,6 +5096,45 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         HandleKeepScreenOn(dialogSession, dialogSession->IsKeepScreenOn());
     }
+}
+
+WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
+{
+    // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub winodw request focus
+    sptr<SceneSession> mainSession = nullptr;
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        mainSession = sceneSession;
+    } else if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
+        mainSession = GetSceneSession(sceneSession->GetParentPersistentId());
+    }
+    if (mainSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "main window is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+
+    std::vector<sptr<SceneSession>> topmostVec;
+    for (auto subSession : mainSession->GetSubSession()) {
+        if (subSession && subSession->IsTopmost()) {
+            topmostVec.push_back(subSession);
+        }
+    }
+    if (std::find_if(topmostVec.begin(), topmostVec.end(),
+        [this](sptr<SceneSession>& iter) { return iter && iter->GetPersistentId() == focusedSessionId_; })
+        != topmostVec.end()) {
+            TLOGD(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId_);
+            return WSError::WS_OK;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    for (auto topmostSession : topmostVec) {
+        if (topmostSession == nullptr) {
+            continue;
+        }
+        // no need to consider order, since rule of zOrder
+        if (RequestSessionFocusImmediately(topmostSession->GetPersistentId()) == WSError::WS_OK) {
+            ret = WSError::WS_OK;
+        }
+    }
+    return ret;
 }
 
 WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
