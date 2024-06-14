@@ -997,7 +997,7 @@ std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(node->surfaceNode_, callback, 1.0, 1.0);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(node->surfaceNode_, callback);
     if (!ret) {
         WLOGFE("XXX WindowController::GetSnapshot takeSurfaceCapture failed");
         return nullptr;
