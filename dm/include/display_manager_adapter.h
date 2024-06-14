@@ -122,6 +122,7 @@ public:
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio);
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
     virtual DMError SetScreenRotationLocked(bool isLocked);
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked);
     virtual DMError IsScreenRotationLocked(bool& isLocked);
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

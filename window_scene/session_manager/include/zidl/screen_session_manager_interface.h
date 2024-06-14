@@ -60,6 +60,7 @@ public:
         return nullptr;
     }
     virtual DMError SetScreenRotationLocked(bool isLocked) override { return DMError::DM_OK; }
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override { return DMError::DM_OK; }
     virtual DMError IsScreenRotationLocked(bool& isLocked) override { return DMError::DM_OK; }
 
     // colorspace, gamut

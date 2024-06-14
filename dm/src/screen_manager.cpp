@@ -297,10 +297,6 @@ DMError ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 DMError ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("unregister display manager agent permission denied!");
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
     auto iter = std::find(screenListeners_.begin(), screenListeners_.end(), listener);
     if (iter == screenListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -597,6 +593,11 @@ ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
 DMError ScreenManager::SetScreenRotationLocked(bool isLocked)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
+}
+
+DMError ScreenManager::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLockedFromJs(isLocked);
 }
 
 DMError ScreenManager::IsScreenRotationLocked(bool& isLocked)

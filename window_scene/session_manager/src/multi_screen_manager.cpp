@@ -221,6 +221,7 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
         TLOGI(WmsLogTag::DMS, "virtual screen switch to mirror result: %{public}d", switchStatus);
     }
     if (!physicalScreenIds.empty()) {
+        screenGroupId = 1;
         switchStatus = PhysicalScreenMirrorSwitch(physicalScreenIds);
         TLOGI(WmsLogTag::DMS, "physical screen switch to mirror result: %{public}d", switchStatus);
     }
