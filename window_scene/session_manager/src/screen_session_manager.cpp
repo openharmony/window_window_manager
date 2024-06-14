@@ -4324,7 +4324,7 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
-    if (eventName.find("CREATE_VIRTUAL_SCREEN") != std::string::npos) {
+    if (eventName.find("CREATE_VIRTUAL_SCREEN") == std::string::npos) {
         if (Permission::CheckIsCallingBundleName(bundleName) == false) {
             TLOGD(WmsLogTag::DMS, "BundleName not in whitelist!");
             return;
