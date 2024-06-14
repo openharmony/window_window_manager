@@ -37,8 +37,6 @@
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
-// debug for beta
-static bool isBeta_;
 class RSInterfaces;
 
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {

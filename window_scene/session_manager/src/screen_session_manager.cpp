@@ -88,16 +88,12 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
-// debug for beta
 bool JudgeIsBeta()
 {
     std::string betaName = OHOS::system::GetParameter("const.logsystem.versionType", "");
-    std::string::size_type idx = betaName.find("beta");
-    if (idx != std::string::npos) {
-        return true;
-    }
-    return false;
+    return betaName.find("beta") != std::string::npos;
 }
+static bool g_isBeta = JudgeIsBeta();
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -1463,7 +1459,6 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
 {
-    isBeta_ = JudgeIsBeta();
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         TLOGI(WmsLogTag::DMS, "BootFinishedCallback boot animation finished");
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
@@ -2013,7 +2008,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     TLOGI(WmsLogTag::DMS, "ENTER");
-    if (isBeta_) {
+    if (g_isBeta) {
         CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "hmos.screenrecorder");
     }
     if (clientProxy_ && option.missionIds_.size() > 0) {
@@ -3114,7 +3109,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         auto res = GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
-            if (isBeta_) {
+            if (g_isBeta) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
         }
@@ -3166,7 +3161,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSnapshotByPicker(%" PRIu64")", displayId);
     auto pixelMap = GetScreenSnapshot(displayId);
     if (pixelMap != nullptr) {
-        if (isBeta_) {
+        if (g_isBeta) {
             CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
         }
     }
@@ -4308,8 +4303,7 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
-    std::string::size_type idx = eventName.find("CREATE_VIRTUAL_SCREEN");
-    if (idx != std::string::npos) {
+    if (eventName.find("CREATE_VIRTUAL_SCREEN") != std::string::npos) {
         if (Permission::CheckIsCallingBundleName(bundleName) == false) {
             TLOGD(WmsLogTag::DMS, "BundleName not in whitelist!");
             return;
