@@ -93,6 +93,10 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleClearMainSessions),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
         &SceneSessionManagerLiteStub::HandleRaiseWindowToTop),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        &SceneSessionManagerLiteStub::HandleRegisterCollaborator),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        &SceneSessionManagerLiteStub::HandleUnregisterCollaborator),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -512,6 +516,31 @@ int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, Mes
     auto persistentId = data.ReadInt32();
     WSError errCode = RaiseWindowToTop(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    sptr<IRemoteObject> collaboratorObject = data.ReadRemoteObject();
+    if (collaboratorObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaboratorObject is null.");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(collaboratorObject);
+    WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    WSError ret = UnregisterIAbilityManagerCollaborator(type);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
