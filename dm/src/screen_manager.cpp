@@ -201,10 +201,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
 ScreenManager::ScreenManager()
 {
     pImpl_ = new Impl();
+    WLOGFD("Create screenmanager instance");
 }
 
 ScreenManager::~ScreenManager()
 {
+    WLOGFD("Destroy screenmanager instance");
 }
 
 ScreenManager::Impl::~Impl()
