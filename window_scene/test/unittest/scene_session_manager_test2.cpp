@@ -1550,6 +1550,7 @@ HWTEST_F(SceneSessionManagerTest2, OnSessionStateChange, Function | SmallTest | 
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ssm_->OnSessionStateChange(100, SessionState::STATE_END);
     ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
@@ -1560,6 +1561,7 @@ HWTEST_F(SceneSessionManagerTest2, OnSessionStateChange, Function | SmallTest | 
     ssm_->OnSessionStateChange(0, SessionState::STATE_BACKGROUND);
 
     sptr<WindowSessionProperty> property_ = new WindowSessionProperty();
+    ASSERT_NE(nullptr, property_);
     property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     sceneSession->property_ = property_;
     ssm_->OnSessionStateChange(100, SessionState::STATE_END);
@@ -1585,6 +1587,7 @@ HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, Function | Small
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
     ssm_->ProcessSubSessionForeground(sceneSession);
 
     sptr<SceneSession> sub1 = nullptr;
