@@ -89,6 +89,7 @@ public:
         TRANS_ID_SCREEN_SET_COLOR_SPACE,
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
+        TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS,
         TRANS_ID_HAS_PRIVATE_WINDOW,
         TRANS_ID_GET_CUTOUT_INFO,
         TRANS_ID_HAS_IMMERSIVE_WINDOW,
@@ -161,6 +162,7 @@ public:
         return nullptr;
     }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
     // colorspace, gamut
