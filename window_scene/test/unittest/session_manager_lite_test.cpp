@@ -282,3 +282,4 @@ HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, Function 
 }
 }
 }
+}
