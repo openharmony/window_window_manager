@@ -36,7 +36,7 @@ private:
     static const std::map<uint32_t, SceneSessionManagerStubFunc> stubFuncMap_;
 
     int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
-    int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
     int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
@@ -71,6 +71,8 @@ private:
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
+    int HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply);
+    int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply);
     int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
     int HandleClearSession(MessageParcel &data, MessageParcel &reply);

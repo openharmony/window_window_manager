@@ -102,31 +102,37 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
             --zOrder;
             break;
         }
-        Rect rect = windowNode->GetWindowRect();
-        const std::string& windowName = windowNode->GetWindowName().size() <= WINDOW_NAME_MAX_LENGTH ?
-            windowNode->GetWindowName() : windowNode->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-        // std::setw is used to set the output width and different width values are set to keep the format aligned.
-        oss << std::left << std::setw(21) << windowName // 21 is width
-            << std::left << std::setw(10) << windowNode->GetDisplayId() // 10 is width
-            << std::left << std::setw(8) << windowNode->GetCallingPid() // 8 is width
-            << std::left << std::setw(6) << windowNode->GetWindowId() // 6 is width
-            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType()) // 5 is width
-            << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode()) // 5 is width
-            << std::left << std::setw(5) << windowNode->GetWindowFlags() // 5 is width
-            << std::left << std::setw(5) << --zOrder // 5 is width
-            << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->GetRequestedOrientation()) // 12 is width
-            << "[ "
-            << std::left << std::setw(5) << rect.posX_ // 5 is width
-            << std::left << std::setw(5) << rect.posY_ // 5 is width
-            << std::left << std::setw(5) << rect.width_ // 5 is width
-            << std::left << std::setw(5) << rect.height_ // 5 is width
-            << "]"
-            << std::endl;
+        --zOrder;
+        AppendWindowNodeInfo(windowNode, zOrder, oss);
     }
     oss << "Focus window: " << windowNodeContainer->GetFocusWindow() << std::endl;
     oss << "total window num: " << windowRoot_->GetTotalWindowNum()<< std::endl;
     dumpInfo.append(oss.str());
     return WMError::WM_OK;
+}
+
+void WindowDumper::AppendWindowNodeInfo(const sptr<WindowNode>& windowNode, int zOrder, std::ostringstream& oss)
+{
+    Rect rect = windowNode->GetWindowRect();
+    const std::string& windowName = windowNode->GetWindowName().size() <= WINDOW_NAME_MAX_LENGTH ?
+        windowNode->GetWindowName() : windowNode->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
+    // std::setw is used to set the output width and different width values are set to keep the format aligned.
+    oss << std::left << std::setw(21) << windowName                                                   // 21 is width
+        << std::left << std::setw(10) << windowNode->GetDisplayId()                                   // 10 is width
+        << std::left << std::setw(8) << windowNode->GetCallingPid()                                   // 8 is width
+        << std::left << std::setw(6) << windowNode->GetWindowId()                                     // 6 is width
+        << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType())            // 5 is width
+        << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode())            // 5 is width
+        << std::left << std::setw(5) << windowNode->GetWindowFlags()                                  // 5 is width
+        << std::left << std::setw(5) << zOrder                                                        // 5 is width
+        << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->GetRequestedOrientation()) // 12 is width
+        << "[ "
+        << std::left << std::setw(5) << rect.posX_     // 5 is width
+        << std::left << std::setw(5) << rect.posY_     // 5 is width
+        << std::left << std::setw(5) << rect.width_    // 5 is width
+        << std::left << std::setw(5) << rect.height_   // 5 is width
+        << "]"
+        << std::endl;
 }
 
 WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo)
@@ -175,6 +181,28 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         WLOGFE("invalid window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::ostringstream oss;
+    AppendSpecifiedWindowNodeInfo(node, oss);
+    dumpInfo.append(oss.str());
+    if (node->GetWindowToken() != nullptr) {
+        std::vector<std::string> resetParams;
+        resetParams.assign(params.begin() + 2, params.end()); // 2: params num
+        if (resetParams.empty()) {
+            WLOGI("do not dump ui info");
+            return WMError::WM_OK;
+        }
+        dumpInfoFuture_.ResetLock({});
+        node->GetWindowToken()->DumpInfo(resetParams);
+        auto infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
+        for (auto& info: infos) {
+            dumpInfo.append(info).append("\n");
+        }
+    }
+    return WMError::WM_OK;
+}
+
+void WindowDumper::AppendSpecifiedWindowNodeInfo(const sptr<WindowNode>& node, std::ostringstream& oss)
+{
     Rect rect = node->GetWindowRect();
     std::string isShown_ = node->startingWindowShown_ ? "true" : "false";
     std::string visibilityState = std::to_string(node->GetVisibilityState());
@@ -184,7 +212,6 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         node->GetWindowProperty()->GetPrivacyMode();
     bool isSnapshotSkip = node->GetWindowProperty()->GetSnapshotSkip();
     std::string isPrivacyMode = PrivacyMode ? "true" : "false";
-    std::ostringstream oss;
     oss << "WindowName: " << node->GetWindowName()  << std::endl;
     oss << "DisplayId: " << node->GetDisplayId() << std::endl;
     oss << "WinId: " << node->GetWindowId() << std::endl;
@@ -215,22 +242,6 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         }
     }
     oss << std::endl;
-    dumpInfo.append(oss.str());
-    if (node->GetWindowToken() != nullptr) {
-        std::vector<std::string> resetParams;
-        resetParams.assign(params.begin() + 2, params.end()); // 2: params num
-        if (resetParams.empty()) {
-            WLOGI("do not dump ui info");
-            return WMError::WM_OK;
-        }
-        dumpInfoFuture_.ResetLock({});
-        node->GetWindowToken()->DumpInfo(resetParams);
-        auto infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
-        for (auto& info: infos) {
-            dumpInfo.append(info).append("\n");
-        }
-    }
-    return WMError::WM_OK;
 }
 
 WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo)

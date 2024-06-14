@@ -29,13 +29,15 @@
 
 namespace OHOS::Rosen {
 namespace {
-    const ScreenId SCREEN_ID_MAIN = 0;
-    const ScreenId SCREEN_ID_SUB = 5;
-    #ifdef TP_FEATURE_ENABLE
-    const int32_t TP_TYPE = 12;
-    #endif
-    const std::string MAIN_TP = "0";
-    const std::string SUB_TP = "1";
+const ScreenId SCREEN_ID_MAIN = 0;
+const ScreenId SCREEN_ID_SUB = 5;
+#ifdef TP_FEATURE_ENABLE
+const int32_t TP_TYPE = 12;
+#endif
+const std::string MAIN_TP = "0";
+const std::string SUB_TP = "1";
+const int32_t REMOVE_DISPLAY_NODE = 0;
+const int32_t ADD_DISPLAY_NODE = 0;
 } // namespace
 
 DualDisplayPolicy::DualDisplayPolicy(std::recursive_mutex& displayInfoMutex,
@@ -238,6 +240,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);
+        AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
         return;
     }
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND;
@@ -246,62 +249,69 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
         tp = SUB_TP;
     }
-    #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, tp.c_str());
-    #endif
+#endif
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_SUB);
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
-        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-        PowerMgr::PowerMgrClient::GetInstance().SuspendDevice();
-        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
+        ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+        ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
+    AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
 
     auto taskScreenOn = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
         screenId_ = onScreenId;
         if (isScreenOn) {
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
+            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+            ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_ON);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
+    AddOrRemoveDisplayNodeToTree(onScreenId, ADD_DISPLAY_NODE);
     SendPropertyChangeResult(screenSession, onScreenId, reason);
 }
 
 void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination");
-    #ifdef TP_FEATURE_ENABLE
-    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
-    #endif
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
+#endif
     // on main screen
     auto taskScreenOnMain = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: 0");
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
         screenId_ = SCREEN_ID_MAIN;
         if (isScreenOn) {
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
+            ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
-
+    // on sub screen
     auto taskScreenOnSub = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: 1");
+        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
         screenId_ = SCREEN_ID_SUB;
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
+            PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
+        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnSub, "taskScreenOnSub");
+    AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, ADD_DISPLAY_NODE);
 }
 
 void DualDisplayPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
@@ -309,7 +319,7 @@ void DualDisplayPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSessi
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
+    screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
@@ -326,11 +336,38 @@ void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSessio
     if (screenId == SCREEN_ID_SUB) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
+    screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);
     screenId_ = screenId;
 }
+
+void DualDisplayPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command)
+{
+    TLOGI(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenId: %{public}" PRIu64 ", command: %{public}d",
+        screenId, command);
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenSession is null");
+        return;
+    }
+    std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
+        return;
+    }
+    if (command == ADD_DISPLAY_NODE) {
+        displayNode->AddDisplayNodeToTree();
+    } else if (command == REMOVE_DISPLAY_NODE) {
+        displayNode->RemoveDisplayNodeFromTree();
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "add or remove displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
+}
+
 } // namespace OHOS::Rosen

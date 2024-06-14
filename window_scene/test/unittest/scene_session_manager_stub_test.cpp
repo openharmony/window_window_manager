@@ -274,32 +274,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWi
 }
 
 /**
- * @tc.name: HandleUpdateProperty
- * @tc.desc: test HandleUpdateProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateProperty, Function | SmallTest | Level2)
-{
-    if (stub_ == nullptr) {
-        return;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    data.WriteUint32(static_cast<uint32_t>(action));
-    bool isPropertyExit = false;
-    data.WriteBool(isPropertyExit);
-    stub_->HandleUpdateProperty(data, reply);
-
-    isPropertyExit = true;
-    data.WriteBool(isPropertyExit);
-    int res = stub_->HandleUpdateProperty(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleRequestFocusStatus
  * @tc.desc: test HandleRequestFocusStatus
  * @tc.type: FUNC
@@ -659,6 +633,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAccessibilityWindowInfo, Function
 }
 
 /**
+ * @tc.name: HandleGetUnreliableWindowInfo
+ * @tc.desc: test HandleGetUnreliableWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t windowId = 0;
+    data.WriteInt32(windowId);
+
+    int res = stub_->HandleGetUnreliableWindowInfo(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetSessionContinueState
  * @tc.desc: test HandleSetSessionContinueState
  * @tc.type: FUNC
@@ -752,6 +743,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, Function | Small
     data.WriteBool(isLowResolution);
 
     int res = stub_->HandleGetSessionSnapshot(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetSessionSnapshotById
+ * @tc.desc: test HandleGetSessionSnapshotById
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = -1;
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleGetSessionSnapshotById(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1165,6 +1174,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
     data.WriteString("test_01");
 
     int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetUIContentRemoteObj
+ * @tc.desc: test HandleGetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(1);
+    int res = stub_->HandleGetUIContentRemoteObj(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

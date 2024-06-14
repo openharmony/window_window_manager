@@ -145,6 +145,59 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+
+    /**
+     * @brief Get all main window info.
+     *
+     * @param infos the all main window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
+
+    /**
+     * @brief Clear a specified set of sessions.
+     *
+     * @param persistentIds a vector of session persistentId.
+     * @return WM_OK means clear session success, others means clear failed.
+     */
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
+
+    /**
+     * @brief Clear a specified set of sessions.
+     *
+     * @param persistentIds a vector of session persistentId.
+     * @param clearFailedIds a vector of session persistentId which is clear failed.
+     * @return WM_OK means clear session success, others means clear failed.
+     */
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
+
+    /**
+     * @brief raise window to top by windowId
+     *
+     * @param persistentId this window to raise
+     * @return WM_OK if raise success
+     */
+    WMError RaiseWindowToTop(int32_t persistentId);
+    
+    /**
+     * @brief Register WMS connection status changed listener.
+     * @attention Callable only by u0 system user. A process only supports successful registration once.
+     * When the foundation service restarts, you need to re-register the listener.
+     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
+     *
+     * @param listener IWMSConnectionChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+
+    /**
+     * @brief Unregister WMS connection status changed listener.
+     * @attention Callable only by u0 system user.
+     *
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWMSConnectionChangedListener();
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -163,6 +216,7 @@ private:
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void OnRemoteDied();
+    void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
 };
 } // namespace Rosen
 } // namespace OHOS

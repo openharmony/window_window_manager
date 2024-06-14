@@ -37,49 +37,51 @@ constexpr size_t DATA_MIN_SIZE = 2;
 
 void SceneSessionMgrLsTest(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
 {
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_IS_VALID_SESSION_IDS),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS),
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
         parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
         parcel, reply, option);
     return;
@@ -97,7 +99,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     SceneSessionMgrLsTest(parcel, reply, option);
     return true;

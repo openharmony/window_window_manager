@@ -15,6 +15,8 @@
 
 #include "session/host/include/scene_persistence.h"
 
+#include <sys/stat.h>
+
 #include <hitrace_meter.h>
 #include <image_packer.h>
 #include <parameters.h>
@@ -65,8 +67,6 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
 {
     bundleName_ = bundleName;
     if (IsAstcEnabled()) {
-        oldSnapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
-            std::to_string(persistentId) + IMAGE_SUFFIX;
         snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
             std::to_string(persistentId) + ASTC_IMAGE_SUFFIX;
     } else {
@@ -82,9 +82,11 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
 ScenePersistence::~ScenePersistence()
 {
     remove(snapshotPath_.c_str());
-    if (IsAstcEnabled()) {
-        remove(oldSnapshotPath_.c_str());
-    }
+}
+
+std::shared_ptr<TaskScheduler> ScenePersistence::GetSnapshotScheduler() const
+{
+    return snapshotScheduler_;
 }
 
 bool ScenePersistence::IsAstcEnabled()
@@ -122,17 +124,8 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             option.quality = IMAGE_QUALITY;
         }
         option.numberHint = 1;
-        std::set<std::string> formats;
-        if (imagePacker.GetSupportedFormats(formats)) {
-            WLOGFE("Failed to get supported formats");
-            resetSnapshotCallback();
-            return;
-        }
 
         remove(scenePersistence->snapshotPath_.c_str());
-        if (IsAstcEnabled()) {
-            remove(scenePersistence->oldSnapshotPath_.c_str());
-        }
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
         imagePacker.StartPacking(scenePersistence->snapshotPath_, option);
         imagePacker.AddImage(*pixelMap);
@@ -184,22 +177,6 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
 
 std::string ScenePersistence::GetSnapshotFilePath()
 {
-    auto task = [weakThis = wptr(this)]() -> std::string {
-        auto scenePersistence = weakThis.promote();
-        if (scenePersistence == nullptr) {
-            WLOGFE("scenePersistence is nullptr");
-            return "";
-        }
-        return scenePersistence->snapshotPath_;
-    };
-    return snapshotScheduler_->PostSyncTask(task, "GetSnapshotFilePath");
-}
-
-std::string ScenePersistence::GetSnapshotFilePathFromAce()
-{
-    if (IsAstcEnabled() && IsSnapshotExisted(oldSnapshotPath_)) {
-        return oldSnapshotPath_;
-    }
     return snapshotPath_;
 }
 
@@ -214,11 +191,6 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     option.format = IMAGE_FORMAT;
     option.quality = IMAGE_QUALITY;
     option.numberHint = 1;
-    std::set<std::string> formats;
-    if (imagePacker.GetSupportedFormats(formats)) {
-        WLOGFE("Failed to get supported formats");
-        return;
-    }
 
     if (remove(updatedIconPath_.c_str())) {
         WLOGFD("Failed to delete old file");
@@ -240,20 +212,22 @@ std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize() const
     return snapshotSize_;
 }
 
-bool ScenePersistence::IsSnapshotExisted() const
+void ScenePersistence::SetHasSnapshot(bool hasSnapshot)
 {
-    if (IsAstcEnabled()) {
-        return IsSnapshotExisted(snapshotPath_) || IsSnapshotExisted(oldSnapshotPath_);
-    } else {
-        return IsSnapshotExisted(snapshotPath_);
-    }
+    hasSnapshot_ = hasSnapshot;
 }
 
-bool ScenePersistence::IsSnapshotExisted(const std::string& path) const
+bool ScenePersistence::HasSnapshot() const
 {
+    return hasSnapshot_;
+}
+
+bool ScenePersistence::IsSnapshotExisted() const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IsSnapshotExisted");
     struct stat buf;
-    if (stat(path.c_str(), &buf)) {
-        WLOGFD("Snapshot file %{public}s does not exist", path.c_str());
+    if (stat(snapshotPath_.c_str(), &buf)) {
+        WLOGFD("Snapshot file %{public}s does not exist", snapshotPath_.c_str());
         return false;
     }
     return S_ISREG(buf.st_mode);

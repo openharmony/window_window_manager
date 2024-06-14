@@ -63,6 +63,7 @@ private:
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
+    static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -86,6 +87,7 @@ private:
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -175,6 +177,8 @@ private:
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
+
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

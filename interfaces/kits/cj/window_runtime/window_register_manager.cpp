@@ -96,7 +96,7 @@ WmErrorCode CjWindowRegisterManager::ProcessOccupiedAreaChangeRegister(
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IOccupiedAreaChangeListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
+    WmErrorCode ret;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {
@@ -149,7 +149,6 @@ WmErrorCode CjWindowRegisterManager::ProcessWindowVisibilityChangeRegister(
 
 bool CjWindowRegisterManager::IsCallbackRegistered(std::string type, int64_t callbackObject)
 {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
     if (cjCbMap_.empty() || cjCbMap_.find(type) == cjCbMap_.end()) {
         TLOGI(WmsLogTag::WMS_SUB, "[WindowRegister]Method %{public}s has not been registerted", type.c_str());
         return false;

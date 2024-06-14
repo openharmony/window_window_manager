@@ -44,6 +44,23 @@ constexpr int32_t WINDOW_MAX_WIDTH = 1920;
         }                                                                                 \
     } while (0)
 
+#define CHECK_NAPI_ENV_RETURN_IF_NULL(env)               \
+    do {                                                 \
+        if ((env) == nullptr) {                          \
+            TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
+            return nullptr;                              \
+        }                                                \
+    } while (0)
+
+#define CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue) \
+    do {                                                       \
+        napi_create_object((env), &(objValue));                \
+        if ((objValue) == nullptr) {                           \
+            TLOGE(WmsLogTag::DEFAULT, "Failed to get object"); \
+            return nullptr;                                    \
+        }                                                      \
+    } while (0)
+
 enum class ApiWindowType : uint32_t {
     TYPE_BASE,
     TYPE_APP = TYPE_BASE,
@@ -252,21 +269,18 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
-struct SystemBarPropertyFlag {
-    bool enableFlag;
-    bool backgroundColorFlag;
-    bool contentColorFlag;
-    bool enableAnimationFlag;
-    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false),
-        enableAnimationFlag(false) {}
-};
-
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
         sptr<Window>& window);
+    bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         napi_env env, napi_callback_info info, sptr<Window>& window);
@@ -296,6 +310,9 @@ struct SystemBarPropertyFlag {
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
+    void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {

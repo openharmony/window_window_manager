@@ -25,7 +25,7 @@ public:
 
     enum class SessionManagerServiceMessage : uint32_t {
         TRANS_ID_GET_SCENE_SESSION_MANAGER = 0,
-        TRANS_ID_GET_SCENE_SESSION_MANAGER_LITE,
+        TRANS_ID_GET_SCENE_SESSION_MANAGER_LITE = 1,
     };
 
     virtual sptr<IRemoteObject> GetSceneSessionManager() = 0;

@@ -545,6 +545,32 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<Accessib
     return static_cast<WMError>(reply.ReadInt32());
 }
 
+WMError WindowManagerProxy::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<UnreliableWindowInfo>(reply, infos)) {
+        WLOGFE("read unreliable window infos failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WMError WindowManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     MessageParcel data;
@@ -579,6 +605,10 @@ WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<SystemConfig> config = reply.ReadParcelable<SystemConfig>();
+    if (config == nullptr) {
+        WLOGFE("Read SystemConfig failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     systemConfig = *config;
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
@@ -1037,7 +1067,9 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return;
     }
     sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
-    focusInfo = *info;
+    if (info != nullptr) {
+        focusInfo = *info;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

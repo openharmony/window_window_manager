@@ -1015,6 +1015,16 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return ret;
 }
 
+WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetUnreliableWindowInfo(windowId, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get unreliable window info failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
@@ -1038,6 +1048,16 @@ WMError WindowManager::DumpSessionWithId(int32_t persistentId, std::vector<std::
     WMError ret = SingletonContainer::Get<WindowAdapter>().DumpSessionWithId(persistentId, infos);
     if (ret != WMError::WM_OK) {
         WLOGFE("dump session with id failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetUIContentRemoteObj(windowId, uiContentRemoteObj);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
+            windowId, static_cast<uint32_t>(ret));
     }
     return ret;
 }
@@ -1173,6 +1193,11 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
         pImpl_->visibleWindowNumChangedListeners_.emplace_back(listener);
     }
     return ret;
+}
+
+WMError WindowManager::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return SingletonContainer::Get<WindowAdapter>().GetSnapshotByWindowId(windowId, pixelMap);
 }
 
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)

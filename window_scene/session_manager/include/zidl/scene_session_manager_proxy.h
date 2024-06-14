@@ -41,7 +41,6 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) override;
     WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback) override;
-    WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
@@ -59,8 +58,11 @@ public:
     WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
     void UnregisterSessionListener() override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override;
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
+    WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
@@ -85,6 +87,7 @@ public:
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
+    WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
     WSError LockSession(int32_t persistentId) override;
     WSError UnlockSession(int32_t persistentId) override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;

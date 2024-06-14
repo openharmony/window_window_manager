@@ -139,6 +139,9 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
     void UpdateSubWindowState(const WindowType& type);
+    WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -163,7 +166,7 @@ protected:
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
-    bool isSessionMainWindow(uint32_t parentId);
+    bool IsSessionMainWindow(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
@@ -209,6 +212,7 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
+    void PreLayoutOnShow(WindowType type);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

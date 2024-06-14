@@ -117,6 +117,11 @@ ohos_shared_library("scene_session") {
     defines += [ "SOC_PERF_ENABLE" ]
   }
 
+  if (device_status_enable) {
+    external_deps += [ "device_status:devicestatus_client" ]
+    defines += [ "DEVICE_STATUS_ENABLE" ]
+  }
+
   if (!defined(global_parts_info) ||
       defined(global_parts_info.inputmethod_imf)) {
     imf_enable = true
@@ -158,6 +163,7 @@ ohos_shared_library("screen_session") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
   ]

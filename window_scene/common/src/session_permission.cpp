@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-
 #include <accesstoken_kit.h>
+#include <app_mgr_client.h>
+#include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
@@ -23,6 +24,8 @@
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
 #include <input_method_controller.h>
+#include <singleton.h>
+#include <singleton_container.h>
 #include "common/include/session_permission.h"
 #include "window_manager_hilog.h"
 
@@ -34,7 +37,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Session
 sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
         WLOGFE("Failed to get system ability mgr.");
         return nullptr;
@@ -76,25 +79,24 @@ bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        WLOGFD("system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("not system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        WLOGFE("Not system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
     }
     return false;
 }
 
 bool SessionPermission::IsSystemCalling()
 {
-    const auto& tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    WLOGFD("tokenId:%{public}u, flag:%{public}u", tokenId, flag);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("tokenId: %{public}u, flag: %{public}u", tokenId, flag);
         return true;
     }
-    WLOGFD("tokenId: %{public}u, flag: %{public}u", tokenId, flag);
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
     return isSystemApp;
@@ -102,10 +104,10 @@ bool SessionPermission::IsSystemCalling()
 
 bool SessionPermission::IsSACalling()
 {
-    const auto& tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        WLOGFW("SA Called, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        WLOGFW("SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
@@ -115,43 +117,45 @@ bool SessionPermission::IsSACalling()
 bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    WLOGFI("VerifyCallingPermission permission %{public}s, callingTokenID:%{public}u",
+    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, CallingTokenID:%{public}u, ret:%{public}d",
+        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("verify AccessToken success");
+    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+        permissionName.c_str(), callerToken);
     return true;
 }
 
 bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName)
 {
-    WLOGFI("VerifyCallingPermission permission %{public}s, callingTokenID:%{public}u",
+    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, CallingTokenID:%{public}u, ret:%{public}d",
+        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("verify AccessToken success");
+    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+        permissionName.c_str(), callerToken);
     return true;
 }
 
 bool SessionPermission::VerifySessionPermission()
 {
     if (IsSACalling()) {
-        WLOGFI("this is SA Calling, Permission verification succeeded.");
+        WLOGFI("Is SA Call, Permission verified success.");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        WLOGFI("Permission verification succeeded.");
+        WLOGFI("MANAGE permission verified success.");
         return true;
     }
-    WLOGFE("Permission verification failed");
+    WLOGFW("Permission verified failed.");
     return false;
 }
 
@@ -169,10 +173,10 @@ bool SessionPermission::IsShellCall()
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFI("caller tokenType is shell, verify success");
+        WLOGFI("TokenType is Shell, verify success");
         return true;
     }
-    WLOGFI("Not shell called. tokenId:%{public}u, flag:%{public}u", callerToken, tokenType);
+    WLOGFI("Not Shell called. tokenId:%{public}u, type:%{public}u", callerToken, tokenType);
     return false;
 }
 
@@ -245,7 +249,7 @@ bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
         WLOGFI("verify bundle name success");
         return true;
     } else {
-        WLOGFE("verify bundle name failed, calling bundle name is %{public}s, but window bundle name is %{public}s",
+        WLOGFE("verify bundle name failed, calling bundle name %{public}s, but window bundle name %{public}s.",
             callingBundleName.c_str(), bundleName.c_str());
         return false;
     }
@@ -282,5 +286,27 @@ bool SessionPermission::IsStartedByUIExtension()
         });
     return extensionInfo != bundleInfo.extensionInfos.end();
 }
+
+bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
+{
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
+    bool isUserTestMode = false;
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "AppMgeClient is null!");
+        return false;
+    }
+    int32_t ret = appMgrClient->CheckCallingIsUserTestMode(pid, isUserTestMode);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied! ret=%{public}d", ret);
+        return false;
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    return isUserTestMode;
+}
+
 } // namespace Rosen
 } // namespace OHOS

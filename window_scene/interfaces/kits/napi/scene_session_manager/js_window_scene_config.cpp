@@ -44,6 +44,15 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "windowAnimation", CreateWindowAnimationValue(env, config));
     napi_set_named_property(env, objValue, "systemUIStatusBar", CreateSystemUIStatusBarValue(env,
         config.systemUIStatusBarConfig_));
+    napi_set_named_property(env, objValue, "uiType", CreateJsValue(env, config.uiType_));
+    napi_set_named_property(env, objValue, "backgroundScreenLock", CreateJsValue(env, config.backgroundScreenLock_));
+    napi_set_named_property(env, objValue, "rotationMode", CreateJsValue(env, config.rotationMode_));
+    napi_set_named_property(env, objValue, "desktopStatusBarConfig",
+        CreateWindowStatusBar(env, config.windowImmersive_.desktopStatusBarConfig_));
+    napi_set_named_property(env, objValue, "leftRightStatusBarConfig",
+        CreateWindowStatusBar(env, config.windowImmersive_.leftRightStatusBarConfig_));
+    napi_set_named_property(env, objValue, "upDownStatusBarConfig",
+        CreateWindowStatusBar(env, config.windowImmersive_.upDownStatusBarConfig_));
     return objValue;
 }
 
@@ -129,6 +138,25 @@ napi_value JsWindowSceneConfig::CreateSystemUIStatusBarValue(napi_env env,
         CreateJsValue(env, config.immersiveStatusBarBgColor_));
     napi_set_named_property(env, objValue, "immersiveStatusBarContentColor",
         CreateJsValue(env, config.immersiveStatusBarContentColor_));
+    return objValue;
+}
+
+napi_value JsWindowSceneConfig::CreateWindowStatusBar(napi_env env,
+    const StatusBarConfig& config)
+{
+    if (config.backgroundColor_.empty() || config.contentColor_.empty()) {
+        WLOGFE("[NAPI]WindowStatusBar is null!");
+        return NapiGetUndefined(env);
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("[NAPI]Object is null!");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "showHide", CreateJsValue(env, config.showHide_));
+    napi_set_named_property(env, objValue, "backgroundColor", CreateJsValue(env, config.backgroundColor_));
+    napi_set_named_property(env, objValue, "contentColor", CreateJsValue(env, config.contentColor_));
     return objValue;
 }
 

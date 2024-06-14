@@ -80,11 +80,11 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
     return 0;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
+void VsyncStation::FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType)
 {
     if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
         WLOGD("VsyncStation::FlushFrameRate %{public}d, linkerID = %{public}" PRIu64, rate, frameRateLinker_->GetId());
-        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
         frameRateLinker_->UpdateFrameRateRange(range, isAnimatorStopped);
     }
 }
@@ -101,6 +101,12 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
         }
         frameRateLinker_->SetEnable(enabled);
     }
+}
+
+void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
+{
+    RSDisplaySoloistManager& soloistManager = RSDisplaySoloistManager::GetInstance();
+    soloistManager.SetMainFrameRateLinkerEnable(enabled);
 }
 
 void VsyncStation::Init()
@@ -139,7 +145,7 @@ void VsyncStation::RemoveCallback()
     vsyncCallbacks_.clear();
 }
 
-void VsyncStation::VsyncCallbackInner(int64_t timestamp)
+void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 {
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks;
     {
@@ -154,16 +160,16 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
     }
     for (const auto& callback: vsyncCallbacks) {
         if (callback && callback->onCallback) {
-            callback->onCallback(timestamp);
+            callback->onCallback(timestamp, frameCount);
         }
     }
 }
 
-void VsyncStation::OnVsync(int64_t timestamp, void* client)
+void VsyncStation::OnVsync(int64_t timestamp, int64_t frameCount, void* client)
 {
     auto vsyncClient = static_cast<VsyncStation*>(client);
     if (vsyncClient) {
-        vsyncClient->VsyncCallbackInner(timestamp);
+        vsyncClient->VsyncCallbackInner(timestamp, frameCount);
         WindowFrameTraceImpl::GetInstance()->VsyncStopFrameTrace();
     } else {
         WLOGFE("VsyncClient is null");
@@ -175,6 +181,20 @@ void VsyncStation::OnVsyncTimeOut()
     WLOGD("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);
     hasRequestedVsync_ = false;
+}
+
+void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
+        Init();
+    }
+    if (receiver_ != nullptr) {
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
 }
 }
 }

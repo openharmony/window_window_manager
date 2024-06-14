@@ -29,6 +29,9 @@
 
 namespace OHOS {
 namespace Rosen {
+class WindowSessionProperty;
+using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
+using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -52,6 +55,7 @@ public:
     void SetRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
+    void SetSnapshotSkip(bool isSkip);
     void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
@@ -84,7 +88,7 @@ public:
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetExtensionFlag(bool isExtensionFlag);
-    void SetWindowMask(const sptr<Media::PixelMap>& windowMask);
+    void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
 
     bool GetIsNeedUpdateWindowMode() const;
@@ -105,6 +109,7 @@ public:
     Orientation GetRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
+    bool GetSnapshotSkip() const;
     float GetBrightness() const;
     int32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
@@ -131,7 +136,7 @@ public:
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     bool GetExtensionFlag() const;
-    sptr<Media::PixelMap> GetWindowMask() const;
+    std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
 
@@ -166,6 +171,50 @@ public:
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
+    bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
+    bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateFocusable(Parcel& parcel);
+    bool WriteActionUpdateTouchable(Parcel& parcel);
+    bool WriteActionUpdateSetBrightness(Parcel& parcel);
+    bool WriteActionUpdateOrientation(Parcel& parcel);
+    bool WriteActionUpdatePrivacyMode(Parcel& parcel);
+    bool WriteActionUpdateSnapshotSkip(Parcel& parcel);
+    bool WriteActionUpdateMaximizeState(Parcel& parcel);
+    bool WriteActionUpdateSystemBar(Parcel& parcel);
+    bool WriteActionUpdateFlags(Parcel& parcel);
+    bool WriteActionUpdateMode(Parcel& parcel);
+    bool WriteActionUpdateAnimationFlag(Parcel& parcel);
+    bool WriteActionUpdateTouchHotArea(Parcel& parcel);
+    bool WriteActionUpdateDecorEnable(Parcel& parcel);
+    bool WriteActionUpdateWindowLimits(Parcel& parcel);
+    bool WriteActionUpdateDragenabled(Parcel& parcel);
+    bool WriteActionUpdateRaiseenabled(Parcel& parcel);
+    bool WriteActionUpdateHideNonSystemFloatingWindows(Parcel& parcel);
+    bool WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel);
+    bool WriteActionUpdateWindowMask(Parcel& parcel);
+    bool WriteActionUpdateTopmost(Parcel& parcel);
+    void ReadActionUpdateTurnScreenOn(Parcel& parcel);
+    void ReadActionUpdateKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateFocusable(Parcel& parcel);
+    void ReadActionUpdateTouchable(Parcel& parcel);
+    void ReadActionUpdateSetBrightness(Parcel& parcel);
+    void ReadActionUpdateOrientation(Parcel& parcel);
+    void ReadActionUpdatePrivacyMode(Parcel& parcel);
+    void ReadActionUpdateSnapshotSkip(Parcel& parcel);
+    void ReadActionUpdateMaximizeState(Parcel& parcel);
+    void ReadActionUpdateSystemBar(Parcel& parcel);
+    void ReadActionUpdateFlags(Parcel& parcel);
+    void ReadActionUpdateMode(Parcel& parcel);
+    void ReadActionUpdateAnimationFlag(Parcel& parcel);
+    void ReadActionUpdateTouchHotArea(Parcel& parcel);
+    void ReadActionUpdateDecorEnable(Parcel& parcel);
+    void ReadActionUpdateWindowLimits(Parcel& parcel);
+    void ReadActionUpdateDragenabled(Parcel& parcel);
+    void ReadActionUpdateRaiseenabled(Parcel& parcel);
+    void ReadActionUpdateHideNonSystemFloatingWindows(Parcel& parcel);
+    void ReadActionUpdateTextfieldAvoidInfo(Parcel& parcel);
+    void ReadActionUpdateWindowMask(Parcel& parcel);
+    void ReadActionUpdateTopmost(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -183,6 +232,7 @@ private:
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
+    bool isSnapshotSkip_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
@@ -226,8 +276,10 @@ private:
     bool isExtensionFlag_ = false;
 
     bool isShaped_ = false;
-    sptr<Media::PixelMap> windowMask_ = nullptr;
+    std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -284,6 +336,8 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
+    std::string uiType_;
+    bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -317,6 +371,12 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
+        if (!parcel.WriteString(uiType_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportTypeFloatWindow_)) {
+            return false;
+        }
         return true;
     }
 
@@ -331,6 +391,10 @@ struct SystemSessionConfig : public Parcelable {
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        if (keyboardConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
         config->keyboardAnimationConfig_ = *keyboardConfig;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
         config->miniWidthOfMainWindow_ = parcel.ReadUint32();
@@ -340,7 +404,14 @@ struct SystemSessionConfig : public Parcelable {
         config->backgroundswitch = parcel.ReadBool();
         config->freeMultiWindowEnable_ = parcel.ReadBool();
         config->freeMultiWindowSupport_ = parcel.ReadBool();
-        config->freeMultiWindowConfig_ = *parcel.ReadParcelable<FreeMultiWindowConfig>();
+        sptr<FreeMultiWindowConfig> freeMultiWindowConfig = parcel.ReadParcelable<FreeMultiWindowConfig>();
+        if (freeMultiWindowConfig == nullptr) {
+            delete config;
+            return nullptr;
+        }
+        config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
+        config->uiType_ = parcel.ReadString();
+        config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
 };

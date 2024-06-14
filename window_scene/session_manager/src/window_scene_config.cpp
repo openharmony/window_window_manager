@@ -84,6 +84,18 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "configMainFloatingWindowAbove",                WindowSceneConfig::ValueType::UNDIFINED },
     { "backgroundswitch",                             WindowSceneConfig::ValueType::INTS },
     { "freeMultiWindow",                              WindowSceneConfig::ValueType::MAP },
+    { "uiType",                                       WindowSceneConfig::ValueType::STRING },
+    { "backgroundScreenLock",                         WindowSceneConfig::ValueType::STRING },
+    { "rotationMode",                                 WindowSceneConfig::ValueType::STRING },
+    { "immersive",                                    WindowSceneConfig::ValueType::MAP },
+    { "inDesktopStatusBarConfig",                     WindowSceneConfig::ValueType::MAP },
+    { "inSplitStatusBarConfig",                       WindowSceneConfig::ValueType::MAP },
+    { "upDownSplit",                                  WindowSceneConfig::ValueType::MAP },
+    { "leftRightSplit",                               WindowSceneConfig::ValueType::MAP },
+    { "showHide",                                     WindowSceneConfig::ValueType::STRING },
+    { "backgroundColor",                              WindowSceneConfig::ValueType::STRING },
+    { "contentColor",                                 WindowSceneConfig::ValueType::STRING },
+    { "supportTypeFloatWindow",                       WindowSceneConfig::ValueType::STRING },
 };
 
 std::vector<std::string> WindowSceneConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)

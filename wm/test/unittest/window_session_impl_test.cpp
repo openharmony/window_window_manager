@@ -19,6 +19,7 @@
 #include "mock_session.h"
 #include "window_session_impl.h"
 #include "mock_uicontent.h"
+#include "mock_window.h"
 #include "parameters.h"
 
 using namespace testing;
@@ -26,26 +27,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-
-class MockWindowChangeListener : public IWindowChangeListener {
-public:
-    MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction));
-};
-
-class MockWindowLifeCycleListener : public IWindowLifeCycle {
-public:
-    MOCK_METHOD0(AfterForeground, void(void));
-    MOCK_METHOD0(AfterBackground, void(void));
-    MOCK_METHOD0(AfterFocused, void(void));
-    MOCK_METHOD0(AfterUnfocused, void(void));
-    MOCK_METHOD1(ForegroundFailed, void(int32_t));
-    MOCK_METHOD0(AfterActive, void(void));
-    MOCK_METHOD0(AfterInactive, void(void));
-    MOCK_METHOD0(AfterResumed, void(void));
-    MOCK_METHOD0(AfterPaused, void(void));
-};
-
 class WindowSessionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -54,6 +35,8 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
 void WindowSessionImplTest::SetUpTestCase()
@@ -71,6 +54,7 @@ void WindowSessionImplTest::SetUp()
 
 void WindowSessionImplTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
     abilityContext_ = nullptr;
 }
 
@@ -301,6 +285,72 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
     ColorSpace colorSpace1 = window->GetColorSpace();
     ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: ColorSpace end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble01
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetSubWindowDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble01");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.uiType_ = "pc";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble02
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble02 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble02");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->windowSystemConfig_.uiType_ = "pc";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble02 end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble03
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble03 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetDialogDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble03");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->windowSystemConfig_.uiType_ = "phone";
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    ASSERT_EQ(false, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble03 end";
 }
 
 /**
@@ -1082,6 +1132,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<ISubWindowCloseListener> listener10 = nullptr;
+    res = window->RegisterSubWindowCloseListeners(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSubWindowCloseListeners(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
@@ -1317,9 +1373,18 @@ HWTEST_F(WindowSessionImplTest, NotifyKeyEvent, Function | SmallTest | Level2)
     int res = 0;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
-    window->NotifyKeyEvent(keyEvent, isConsumed);
+    bool notifyInputMethod = false;
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_VIRTUAL_MULTITASK);
+    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
+
+    notifyInputMethod = true;
+    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
+
     keyEvent = nullptr;
-    window->NotifyKeyEvent(keyEvent, isConsumed);
+    window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
     ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyKeyEvent end";
@@ -1516,6 +1581,10 @@ HWTEST_F(WindowSessionImplTest, Notify02, Function | SmallTest | Level2)
 
     res = window->NotifyWindowVisibility(true);
     ASSERT_EQ(res, WSError::WS_OK);
+    bool terminateCloseProcess = false;
+    window->NotifySubWindowClose(terminateCloseProcess);
+    ASSERT_EQ(terminateCloseProcess, false);
+
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: Notify02 end";
 }
@@ -1759,12 +1828,11 @@ HWTEST_F(WindowSessionImplTest, SetTopmost, Function | SmallTest | Level2)
     option->SetWindowName("SetTopmost");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    window->windowSystemConfig_.uiType_ = "phone";
     WMError res = window->SetTopmost(true);
-    if (!isPC) {
-        ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
-        return;
-    }
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+    window->windowSystemConfig_.uiType_ = "pc";
+    res = window->SetTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 
     window->property_->SetPersistentId(1);
@@ -1774,7 +1842,7 @@ HWTEST_F(WindowSessionImplTest, SetTopmost, Function | SmallTest | Level2)
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     res = window->SetTopmost(true);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1822,10 +1890,11 @@ HWTEST_F(WindowSessionImplTest, SetSubWindowModal, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetSubWindowModal");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    bool isModal = true;
-    window->SetSubWindowModal(isModal);
+    WMError res = window->SetSubWindowModal(true);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModaltest01 end";
 }
 
@@ -1884,6 +1953,27 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonArea, Function | SmallTest | Level
     WMError res = window->GetTitleButtonArea(titleButtonRect);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorHeighttest01 end";
+}
+
+/**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    WSError res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentRemoteObj end";
 }
 
 /**
@@ -2320,6 +2410,212 @@ HWTEST_F(WindowSessionImplTest, UpdateOrientation, Function | SmallTest | Level2
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
+/**
+ * @tc.name: SetTitleButtonVisible01
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible01 end";
+}
+
+/**
+ * @tc.name: SetTitleButtonVisible02
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible02 end";
+}
+
+/**
+ * @tc.name: SetTitleButtonVisible03
+ * @tc.desc: SetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetTitleButtonVisible03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 start";
+    sptr option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTitleButtonVisible");
+    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.uiType_ = "phone";
+    WMError res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.uiType_ = "pc";
+    res = window->SetTitleButtonVisible(false, false, false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTitleButtonVisible03 end";
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible01
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { false, false, false };
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideSplitButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, true);
+    ASSERT_EQ(hideMinimizeButton, true);
+    ASSERT_EQ(hideSplitButton, true);
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible02
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible02");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    // only not support WINDOW_MODE_SUPPORT_SPLIT
+    uint32_t modeSupportInfo = 1 | (1 << 1);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { true, true, true };
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideSplitButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, false);
+    ASSERT_EQ(hideMinimizeButton, false);
+    ASSERT_EQ(hideSplitButton, false);
+}
+
+/**
+ * @tc.name: GetTitleButtonVisible03
+ * @tc.desc: GetTitleButtonVisible
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetTitleButtonVisible03");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    // only not support WINDOW_MODE_SUPPORT_SPLIT
+    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetModeSupportInfo(modeSupportInfo);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // show Maximize, Minimize, Split buttons.
+    window->windowTitleVisibleFlags_ = { false, false, false };
+    bool hideMaximizeButton = true;
+    bool hideMinimizeButton = true;
+    bool hideSplitButton = true;
+    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    ASSERT_EQ(hideMaximizeButton, true);
+    ASSERT_EQ(hideMinimizeButton, true);
+    ASSERT_EQ(hideSplitButton, true);
+}
+
+/*
+ * @tc.name: SetRestoredRouterStack_0100
+ * @tc.desc: basic function test of set or get restored router stack.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    std::string routerStack = "stackInfo:{}";
+    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
+    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
+        WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetRestoredRouterStack_0200
+ * @tc.desc: basic function test of set or get restored router stack.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, SetRestoredRouterStack_0200, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    std::string routerStack = "stackInfo:{}";
+    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
+    std::string gettedStack = window->GetRestoredRouterStack();
+    EXPECT_EQ(gettedStack, routerStack);
+    EXPECT_TRUE(window->GetRestoredRouterStack().empty());
+}
+
+/**
+ * @tc.name: GetAceContentInfoType_0100
+ * @tc.desc: basic function test of get ace content info type.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest, GetAceContentInfoType_0100, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::CONTINUATION), Ace::ContentInfoType::CONTINUATION);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::APP_RECOVERY), Ace::ContentInfoType::APP_RECOVERY);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY),
+        Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY);
+    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::NONE), Ace::ContentInfoType::NONE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -159,7 +159,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    auto isPhone = windowSystemConfig_.uiType_ == "phone";
     if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
@@ -596,12 +596,19 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (setUIContentType) {
         default:
-        case WindowSetUIContentType::DEFAULT:
+        case WindowSetUIContentType::DEFAULT: {
+            auto routerStack = GetRestoredRouterStack();
+            auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+            if (!routerStack.empty() &&
+                uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                WLOGFI("Restore router stack succeed.");
+                break;
+            }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
+        }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
-                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -693,8 +700,7 @@ Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
 std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
-    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
-        WLOGFE("Invalid type %{public}d", type);
+    if (type == BackupAndRestoreType::NONE) {
         return "";
     }
 
@@ -702,8 +708,43 @@ std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
-        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
+}
+
+WMError WindowImpl::SetRestoredRouterStack(std::string& routerStack)
+{
+    WLOGFD("Set restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    restoredRouterStack_ = routerStack;
+    return WMError::WM_OK;
+}
+
+std::string WindowImpl::GetRestoredRouterStack()
+{
+    WLOGFD("Get restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    return std::move(restoredRouterStack_);
+}
+
+Ace::ContentInfoType WindowImpl::GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
@@ -797,6 +838,36 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
             static_cast<int32_t>(ret), property_->GetWindowId());
     }
     return ret;
+}
+
+WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
+        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
+        current.contentColor_ = propertyIter->second.contentColor_;
+        current.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(propertyIter->second.settingFlag_) |
+            static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        WLOGI("Window:%{public}u %{public}s set status bar content color %{public}u",
+            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+{
+    if (property_ != nullptr) {
+        WLOGI("Window:%{public}u", GetWindowId());
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    } else {
+        WLOGFE("inner property is null");
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -1045,7 +1116,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
-    WindowSizeLimits sizeLimits;
+    WindowLimits sizeLimits;
     sizeLimits.maxWidth_ = abilityInfo->maxWindowWidth;
     sizeLimits.maxHeight_ = abilityInfo->maxWindowHeight;
     sizeLimits.minWidth_ = abilityInfo->minWindowWidth;
@@ -2404,6 +2475,130 @@ WMError WindowImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<
     return WMError::WM_OK;
 }
 
+template <typename T>
+EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : lifecycleListeners_[GetWindowId()]) {
+            lifecycleListeners.push_back(listener);
+        }
+    }
+    return lifecycleListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : windowChangeListeners_[GetWindowId()]) {
+            windowChangeListeners.push_back(listener);
+        }
+    }
+    return windowChangeListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : avoidAreaChangeListeners_[GetWindowId()]) {
+            avoidAreaChangeListeners.push_back(listener);
+        }
+    }
+    return avoidAreaChangeListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto &listener : displayMoveListeners_) {
+            displayMoveListeners.push_back(listener);
+        }
+    }
+    return displayMoveListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IScreenshotListener>> screenshotListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : screenshotListeners_[GetWindowId()]) {
+            screenshotListeners.push_back(listener);
+        }
+    }
+    return screenshotListeners;
+}
+
+template <typename T>
+EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : touchOutsideListeners_[GetWindowId()]) {
+            touchOutsideListeners.push_back(listener);
+        }
+    }
+    return touchOutsideListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : dialogTargetTouchListeners_[GetWindowId()]) {
+            dialogTargetTouchListeners.push_back(listener);
+        }
+    }
+    return dialogTargetTouchListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IWindowDragListener, std::vector<sptr<IWindowDragListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IWindowDragListener>> windowDragListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto &listener : windowDragListeners_) {
+            windowDragListeners.push_back(listener);
+        }
+    }
+    return windowDragListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::GetListeners()
+{
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : occupiedAreaChangeListeners_[GetWindowId()]) {
+            occupiedAreaChangeListeners.push_back(listener);
+        }
+    }
+    return occupiedAreaChangeListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IDialogDeathRecipientListener, wptr<IDialogDeathRecipientListener>> WindowImpl::GetListener()
+{
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return dialogDeathRecipientListener_[GetWindowId()];
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -2463,6 +2658,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
+    ScheduleUpdateRectTask(rectToAce, lastOriRect, reason, rsTransaction, display);
+}
+
+void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastOriRect, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display)
+{
     auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
@@ -3483,6 +3684,112 @@ void WindowImpl::ClearListenersById(uint32_t winId)
     ClearUselessListeners(dialogDeathRecipientListener_, winId);
 }
 
+void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
+{
+    if (needNotifyListeners) {
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+    }
+    if (needNotifyUiContent) {
+        CALL_UI_CONTENT(Foreground);
+    }
+}
+
+void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
+{
+    if (needNotifyListeners) {
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+    }
+    if (needNotifyUiContent) {
+        CALL_UI_CONTENT(Background);
+    }
+}
+
+void WindowImpl::NotifyAfterFocused()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+    CALL_UI_CONTENT(Focus);
+}
+
+void WindowImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    // use needNotifyUinContent to separate ui content callbacks
+    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+    if (needNotifyUiContent) {
+        CALL_UI_CONTENT(UnFocus);
+    }
+}
+
+void WindowImpl::NotifyAfterResumed()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners);
+}
+
+void WindowImpl::NotifyAfterPaused()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
+}
+
+void WindowImpl::NotifyBeforeDestroy(std::string windowName)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (uiContent_ != nullptr) {
+        auto uiContent = std::move(uiContent_);
+        uiContent_ = nullptr;
+        uiContent->Destroy();
+    }
+    if (notifyNativefunc_) {
+        notifyNativefunc_(windowName);
+    }
+}
+
+void WindowImpl::NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window)
+{
+    auto uiContent = window->GetUIContent();
+    if (uiContent != nullptr) {
+        uiContent->Destroy();
+    }
+    if (window->GetNativeDestroyCallback()) {
+        window->GetNativeDestroyCallback()(window->GetWindowName());
+    }
+}
+
+void WindowImpl::NotifyAfterActive()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
+}
+
+void WindowImpl::NotifyAfterInactive()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
+}
+
+void WindowImpl::NotifyForegroundFailed(WMError ret)
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+}
+
+void WindowImpl::NotifyBackgroundFailed(WMError ret)
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER_WITH_PARAM(BackgroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+}
+
+bool WindowImpl::IsStretchableReason(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
+           reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
+           reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
+}
+
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -3887,5 +4194,14 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
+
+void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+        vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS

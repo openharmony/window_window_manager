@@ -39,9 +39,11 @@ private:
     WMError DumpAllWindowInfo(std::string& dumpInfo);
     WMError DumpScreenGroupWindowInfo(ScreenId screenGroupId, const sptr<WindowNodeContainer>& windowNodeContainer,
         std::string& dumpInfo);
+    void AppendWindowNodeInfo(const sptr<WindowNode>& windowNode, int zOrder, std::ostringstream& oss);
     bool IsValidDigitString(const std::string& windowIdStr);
     WMError DumpSpecifiedWindowInfo(uint32_t windowId, const std::vector<std::string>& params,
         std::string& dumpInfo);
+    void AppendSpecifiedWindowNodeInfo(const sptr<WindowNode>& node, std::ostringstream& oss);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode);

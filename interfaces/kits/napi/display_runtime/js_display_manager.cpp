@@ -266,7 +266,7 @@ DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, n
 {
     if (IfCallbackRegistered(env, type, value)) {
         WLOGFE("RegisterDisplayListenerWithType callback already registered!");
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return DMError::DM_OK;
     }
     std::unique_ptr<NativeReference> callbackRef;
     napi_ref result = nullptr;

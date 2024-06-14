@@ -87,6 +87,12 @@ const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLit
         &SceneSessionManagerLiteStub::HandleGetWindowModeType),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
         &SceneSessionManagerLiteStub::HandleGetMainWinodowInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO),
+        &SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS),
+        &SceneSessionManagerLiteStub::HandleClearMainSessions),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+        &SceneSessionManagerLiteStub::HandleRaiseWindowToTop),
 };
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -133,7 +139,9 @@ int SceneSessionManagerLiteStub::HandleIsValidSessionIds(MessageParcel &data, Me
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
     std::vector<bool> results;
+    WSError errCode = IsValidSessionIds(sessionIds, results);
     reply.WriteBoolVector(results);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -460,6 +468,50 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<MainWindowInfo> infos;
+    WMError errCode = GetAllMainWindowInfos(infos);
+    reply.WriteInt32(infos.size());
+    for (auto& info : infos) {
+        if (!reply.WriteParcelable(&info)) {
+            TLOGE(WmsLogTag::WMS_MAIN, "write main window info fail");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleClearMainSessions(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> persistentIds;
+    std::vector<int32_t> clearFailedIds;
+    if (!data.ReadInt32Vector(&persistentIds)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed to read persistentIds.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = ClearMainSessions(persistentIds, clearFailedIds);
+    if (!reply.WriteInt32Vector(clearFailedIds)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write clearFailedIds fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    WSError errCode = RaiseWindowToTop(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -2393,7 +2393,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -2449,6 +2449,118 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteUInt64Vector(windowIdList)) {
+        WLOGFE("Write windowIdList failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+DMError ScreenSessionManagerProxy::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("proxy for freeze: failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteInt32(pidList.size())) {
+        WLOGFE("proxy for freeze write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    for (auto it = pidList.begin(); it != pidList.end(); it++) {
+        if (!data.WriteInt32(*it)) {
+            WLOGFE("proxy for freeze write date: failed");
+            return DMError::DM_ERROR_WRITE_DATA_FAILED;
+        }
+    }
+    if (!data.WriteBool(isProxy)) {
+        WLOGFE("proxy for freeze write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_PROXY_FOR_FREEZE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("proxy for freeze send request: failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RESET_ALL_FREEZE_STATUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

@@ -19,6 +19,7 @@
 #include <iremote_broker.h>
 #include <pixel_map.h>
 #include <surface.h>
+#include <set>
 
 #include "display_cutout_controller.h"
 #include "display_info.h"
@@ -130,6 +131,10 @@ public:
         TRANS_ID_DEVICE_IS_CAPTURE,
         TRANS_ID_GET_SNAPSHOT_BY_PICKER,
         TRANS_ID_SWITCH_USER,
+        TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST,
+        TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL,
+        TRANS_ID_PROXY_FOR_FREEZE,
+        TRANS_ID_RESET_ALL_FREEZE_STATUS,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -273,6 +278,16 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ResetAllFreezeStatus()
+    {
+        return DMError::DM_OK;
+    }
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) {}
+    virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 };
 } // namespace OHOS::Rosen
 

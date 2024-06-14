@@ -109,8 +109,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         &SessionStub::HandleTransferExtensionData),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
-        &SessionStub::HandleNotifyRemoteReady),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON),
         &SessionStub::HandleNotifyAsyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
@@ -287,8 +285,12 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
 int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleTerminateSession");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -302,8 +304,12 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleSessionException");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -320,8 +326,12 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleChangeSessionVisibilityWithStatusBar");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -346,8 +356,12 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -532,13 +546,6 @@ int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel&
     }
     WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleNotifyRemoteReady!");
-    NotifyRemoteReady();
     return ERR_NONE;
 }
 

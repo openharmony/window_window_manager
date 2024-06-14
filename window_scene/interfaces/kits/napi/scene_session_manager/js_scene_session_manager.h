@@ -57,6 +57,7 @@ public:
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
+    static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
@@ -66,7 +67,6 @@ public:
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
     static napi_value PreloadInLakeApp(napi_env env, napi_callback_info info);
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
-    static napi_value ResetFocusedOnShow(napi_env env, napi_callback_info info);
     static napi_value RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
     static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
@@ -105,6 +105,7 @@ private:
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
+    napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
     napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos);
     napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo);
@@ -119,7 +120,6 @@ private:
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
-    napi_value OnResetFocusedOnShow(napi_env env, napi_callback_info info);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
@@ -159,6 +159,7 @@ private:
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

@@ -77,8 +77,8 @@ public:
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetAccessTokenId(uint32_t accessTokenId);
-    void SetSizeLimits(const WindowSizeLimits& sizeLimits);
-    void SetUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
+    void SetSizeLimits(const WindowLimits& sizeLimits);
+    void SetUpdatedSizeLimits(const WindowLimits& sizeLimits);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     void SetTransform(const Transform& trans);
     void ComputeTransform();
@@ -133,8 +133,8 @@ public:
     const Transform& GetZoomTransform() const;
     bool IsDisplayZoomOn() const;
     bool IsAnimateWindow() const;
-    WindowSizeLimits GetSizeLimits() const;
-    WindowSizeLimits GetUpdatedSizeLimits() const;
+    WindowLimits GetSizeLimits() const;
+    WindowLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
     const TransformHelper::Matrix4& GetWorldTransformMat() const;
     float GetAspectRatio() const;
@@ -223,8 +223,8 @@ private:
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ApiCompatibleVersion, apiCompatibleVersion, 0u);
-    WindowSizeLimits sizeLimits_;
-    WindowSizeLimits updatedSizeLimits_;
+    WindowLimits sizeLimits_;
+    WindowLimits updatedSizeLimits_;
     MaximizeMode maximizeMode_ { MaximizeMode::MODE_RECOVER };
 
     double textFieldPositionY_ = 0.0;

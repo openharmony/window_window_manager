@@ -25,12 +25,16 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
+constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
+constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 class SceneSessionDirtyManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 SceneSessionDirtyManager *manager_;
 SceneSessionManager *ssm_;
@@ -52,6 +56,7 @@ void SceneSessionDirtyManagerTest::SetUp()
 
 void SceneSessionDirtyManagerTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
     delete manager_;
     manager_ = nullptr;
 }
@@ -208,45 +213,32 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTramform, Function | SmallTes
     sessionInfo.moduleName_ = "sessionInfo";
     Matrix3f tranform;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     manager_->CalNotRotateTramform(nullptr, tranform);
-    sceneSession->GetSessionProperty()->SetDisplayId(0);
+    auto screenId = 0;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
     manager_->CalNotRotateTramform(sceneSession, tranform);
-    std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
     Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
-    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
-        std::make_pair(0, screenProperty0));
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTramform(sceneSession, tranform);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
+
+    screenProperty0.SetRotation(90.0f);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTramform(sceneSession, tranform);
-    ScreenProperty screenProperty1;
-    screenProperty1.SetRotation(90.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
-    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
-        std::make_pair(1, screenProperty1));
-    sceneSession->GetSessionProperty()->SetDisplayId(1);
+
+    screenProperty0.SetRotation(180.0f);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTramform(sceneSession, tranform);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
-    ScreenProperty screenProperty2;
-    screenProperty2.SetRotation(180.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
-    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
-        std::make_pair(2, screenProperty2));
-    sceneSession->GetSessionProperty()->SetDisplayId(2);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
-    ScreenProperty screenProperty3;
-    screenProperty3.SetRotation(270.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
-    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
-        std::make_pair(3, screenProperty3));
-    sceneSession->GetSessionProperty()->SetDisplayId(3);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
+
+    screenProperty0.SetRotation(270.0f);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTramform(sceneSession, tranform);
     ASSERT_EQ(ret, 0);
 }
@@ -345,6 +337,191 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
     sceneSession->SetSessionProperty(nullptr);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ConvertDegreeToMMIRotation
+ * @tc.desc: ConvertDegreeToMMIRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | SmallTest | Level2)
+{
+    MMI::Direction dirction = MMI::DIRECTION0;
+    dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::UNKNOWN);
+    ASSERT_EQ(dirction, MMI::DIRECTION0);
+    dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::UNKNOWN);
+    ASSERT_EQ(dirction, MMI::DIRECTION90);
+    dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::UNKNOWN);
+    ASSERT_EQ(dirction, MMI::DIRECTION180);
+    dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::UNKNOWN);
+    ASSERT_EQ(dirction, MMI::DIRECTION270);
+    dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::FULL);
+    ASSERT_EQ(dirction, MMI::DIRECTION90);
+    dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::FULL);
+    ASSERT_EQ(dirction, MMI::DIRECTION180);
+    dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::FULL);
+    ASSERT_EQ(dirction, MMI::DIRECTION270);
+    dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::FULL);
+    ASSERT_EQ(dirction, MMI::DIRECTION0);
+    dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::UNKNOWN);
+    ASSERT_EQ(dirction, MMI::DIRECTION0);
+    dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::FULL);
+    ASSERT_EQ(dirction, MMI::DIRECTION90);
+}
+
+/**
+ * @tc.name: GetDialogSessionMap
+ * @tc.desc: GetDialogSessionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest | Level2)
+{
+    std::map<int32_t, sptr<SceneSession>> sessionMap;
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sessionMap.emplace(1, nullptr);
+    auto sessionList = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(0, sessionList.size());
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    if (!sceneSession) {
+        GTEST_LOG_(INFO) << "sceneSession is nullptr";
+        return;
+    }
+    sessionMap.emplace(2, sceneSession);
+    auto sessionList2 = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(0, sessionList2.size());
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    if (!property) {
+        GTEST_LOG_(INFO) << "property is nullptr";
+        return;
+    }
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneSession->SetSessionProperty(property);
+    sptr<Session> session = new (std::nothrow) Session(info);
+    if (!session) {
+        GTEST_LOG_(INFO) << "session is nullptr";
+        return;
+    }
+    sceneSession->SetParentSession(session);
+    auto sessionList3 = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(1, sessionList3.size());
+}
+
+/**
+ * @tc.name: UpdatePointerAreas
+ * @tc.desc: UpdatePointerAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> pointerChangeAreas;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    if (!sceneSession || !property) {
+        return;
+    }
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetDragEnabled(false);
+    sceneSession->SetSessionProperty(property);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+    property->SetDragEnabled(true);
+    float vpr = 1.5f;
+    property->SetDisplayId(100);
+    int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
+    int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
+    WindowLimits limits;
+    limits.maxHeight_ = 1;
+    limits.minHeight_ = 0;
+    limits.maxWidth_ = 0;
+    limits.minWidth_ = 0;
+    property->SetWindowLimits(limits);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    std::vector<int32_t> compare2 = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
+        POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+        pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+    ASSERT_EQ(compare2, pointerChangeAreas);
+    limits.maxHeight_ = 0;
+    limits.minHeight_ = 0;
+    limits.maxWidth_ = 1;
+    limits.minWidth_ = 0;
+    property->SetWindowLimits(limits);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    std::vector<int32_t> compare3 = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+        POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,
+        POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx};
+    ASSERT_EQ(compare3, pointerChangeAreas);
+    limits.maxHeight_ = 1;
+    limits.minHeight_ = 0;
+    limits.maxWidth_ = 1;
+    limits.minWidth_ = 0;
+    property->SetWindowLimits(limits);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    std::vector<int32_t> compare4 = pointerChangeAreas = {pointerAreaSixteenPx, pointerAreaFivePx,
+        pointerAreaSixteenPx, pointerAreaFivePx, pointerAreaSixteenPx,
+        pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
+    ASSERT_EQ(compare4, pointerChangeAreas);
+}
+
+/**
+ * @tc.name: UpdatePrivacyMode
+ * @tc.desc: UpdatePrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    MMI::WindowInfo windowinfo;
+    auto tempProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = nullptr;
+    manager_->UpdatePrivacyMode(sceneSession, windowinfo);
+
+    sceneSession->property_ = tempProperty;
+    sceneSession->property_->isPrivacyMode_ = true;
+    sceneSession->property_->isSystemPrivacyMode_ = false;
+    manager_->UpdatePrivacyMode(sceneSession, windowinfo);
+
+    sceneSession->property_->isPrivacyMode_ = false;
+    sceneSession->property_->isSystemPrivacyMode_ = true;
+    manager_->UpdatePrivacyMode(sceneSession, windowinfo);
+
+    sceneSession->property_->isPrivacyMode_ = false;
+    sceneSession->property_->isSystemPrivacyMode_ = false;
+    manager_->UpdatePrivacyMode(sceneSession, windowinfo);
+}
+
+/**
+ * @tc.name: UpdateWindowFlags
+ * @tc.desc: UpdateWindowFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    MMI::WindowInfo windowinfo;
+    auto screenId = 0;
+    manager_->UpdateWindowFlags(screenId, sceneSession, windowinfo);
+
+    ScreenProperty screenProperty0;
+    screenProperty0.SetRotation(0.0f);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetTouchEnabledFromJs(true);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    manager_->UpdateWindowFlags(screenId, sceneSession, windowinfo);
+
+    screenSession->SetTouchEnabledFromJs(false);
+    manager_->UpdateWindowFlags(screenId, sceneSession, windowinfo);
 }
 
 } // namespace

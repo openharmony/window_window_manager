@@ -43,6 +43,11 @@ public:
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
+    static inline bool IsModalSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
     static inline bool IsDialogWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_DIALOG;
@@ -485,7 +490,7 @@ public:
         return isOk;
     }
 
-    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowSizeLimits& sizeLimits)
+    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowLimits& sizeLimits)
     {
         if (rect.height_ == 0) {
             return false;
@@ -532,7 +537,7 @@ public:
         return true;
     }
 
-    static bool IsAspectRatioSatisfiedWithSizeLimits(const WindowSizeLimits& sizeLimits, float ratio, float vpr)
+    static bool IsAspectRatioSatisfiedWithSizeLimits(const WindowLimits& sizeLimits, float ratio, float vpr)
     {
         /*
          * 1) Usually the size limits won't be empty after show window.

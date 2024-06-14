@@ -457,12 +457,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
 HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 {
     Utils::TestWindowInfo info = {
-        .name = "mainTile1",
-        .rect = {0, 0, 0, 0},
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
+        .name = "mainTile1", .rect = {0, 0, 0, 0}, .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true, .parentLimit = false,
         .parentId = INVALID_WINDOW_ID,
     };
 
@@ -508,12 +504,11 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (maxTileNum == 2) {
         ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
         ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
+    } else {
+        ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
+        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
+        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     }
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
-    ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
-    ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
 
@@ -526,13 +521,9 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
-        .name = "mainTileNegative1",
-        .rect = {-1, -100, -1, -100}, // -1, -100, -1, -100 is typical negative case nums
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
+        .name = "mainTileNegative1", .rect = {-1, -100, -1, -100}, // -1, -100, -1, -100 is typical negative case nums
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true, .parentLimit = false, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     if (window == nullptr) {
@@ -574,12 +565,11 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     if (maxTileNum == 2) {
         ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
         ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
+    } else {
+        ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
+        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
+        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     }
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
-    ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
-    ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
 

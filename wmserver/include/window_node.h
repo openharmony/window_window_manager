@@ -86,8 +86,8 @@ public:
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetPointerHotAreas(const std::vector<Rect>& rects);
-    void SetWindowSizeLimits(const WindowSizeLimits& sizeLimits);
-    void SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
+    void SetWindowSizeLimits(const WindowLimits& sizeLimits);
+    void SetWindowUpdatedSizeLimits(const WindowLimits& sizeLimits);
     void ComputeTransform();
     void SetTransform(const Transform& trans);
     void SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
@@ -131,11 +131,12 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     void GetPointerHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
-    WindowSizeLimits GetWindowSizeLimits() const;
-    WindowSizeLimits GetWindowUpdatedSizeLimits() const;
+    WindowLimits GetWindowSizeLimits() const;
+    WindowLimits GetWindowUpdatedSizeLimits() const;
     float GetAspectRatio() const;
     void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
     WindowVisibilityState GetVisibilityState() const;
+    bool GetTouchable() const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;

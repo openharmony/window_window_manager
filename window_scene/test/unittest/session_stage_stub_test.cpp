@@ -407,6 +407,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTe
 }
 
 /**
+ * @tc.name: HandleGetUIContentRemoteObj
+ * @tc.desc: test function : HandleGetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleGetUIContentRemoteObj(data, reply));
+}
+
+/**
  * @tc.name: HandleSetPipActionEvent
  * @tc.desc: test function : HandleSetPipActionEvent
  * @tc.type: FUNC

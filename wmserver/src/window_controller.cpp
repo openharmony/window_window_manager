@@ -47,7 +47,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Controller"};
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
+    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
     constexpr float MASKING_SURFACE_NODE_Z_ORDER = 9999;
 }
 
@@ -250,10 +250,6 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
 {
     if (!CheckParentWindowValid(property)) {
         return WMError::WM_ERROR_INVALID_PARENT;
-    }
-
-    if (windowRoot_->CheckMultiDialogWindows(property->GetWindowType(), token)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (!surfaceNode) {
@@ -1673,6 +1669,13 @@ WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<Accessibil
     return WMError::WM_OK;
 }
 
+WMError WindowController::GetUnreliableWindowInfo(int32_t windowId,
+    std::vector<sptr<UnreliableWindowInfo>>& infos) const
+{
+    windowRoot_->GetUnreliableWindowInfo(windowId, infos);
+    return WMError::WM_OK;
+}
+
 WMError WindowController::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     windowRoot_->GetVisibilityWindowInfo(infos);
@@ -1854,9 +1857,6 @@ WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObjec
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
-    }
-    if (windowRoot_->CheckMultiDialogWindows(node->GetWindowType(), targetToken)) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     node->dialogTargetToken_ = targetToken;

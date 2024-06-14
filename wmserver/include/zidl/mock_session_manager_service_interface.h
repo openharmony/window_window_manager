@@ -27,7 +27,7 @@ class IMockSessionManagerInterface : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockSessionManager");
     enum class MockSessionManagerServiceMessage : uint32_t {
-        TRANS_ID_GET_SESSION_MANAGER_SERVICE,
+        TRANS_ID_GET_SESSION_MANAGER_SERVICE = 0,
         TRANS_ID_GET_SCREEN_SESSION_MANAGER,
         TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE,
         TRANS_ID_REGISTER_SMS_RECOVER_LISTENER,

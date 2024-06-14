@@ -98,7 +98,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             focusSessionFlag = true;
             return false;
         }
-        if (focusSessionFlag && session->GetBlockingFocus() &&
+        if (focusSessionFlag && session->GetBlockingFocus() && session->GetSystemTouchable() &&
             SceneSessionManager::GetInstance().IsSessionVisible(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
