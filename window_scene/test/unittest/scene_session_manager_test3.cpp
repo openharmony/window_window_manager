@@ -1708,6 +1708,191 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | Sma
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
+
+/**
+ * @tc.name: ConfigWindowImmersive
+ * @tc.desc: ConfigWindowImmersive SwitchFreeMultiWindow
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, Function | SmallTest | Level3)
+{
+    WindowSceneConfig::ConfigItem immersiveConfig;
+    immersiveConfig.boolValue_ = false;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->ConfigWindowImmersive(immersiveConfig);
+
+    ASSERT_NE(ssm_->SwitchFreeMultiWindow(false), WSError::WS_OK);
+    SystemSessionConfig systemConfig;
+    systemConfig.freeMultiWindowSupport_ = true;
+    ssm_->SwitchFreeMultiWindow(false);
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: SceneSesionManager config decor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigDecor02, Function | SmallTest | Level3)
+{
+    WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->ConfigDecor(*item, false);
+    delete item;
+}
+
+/**
+ * @tc.name: UpdateRecoveredSessionInfo
+ * @tc.desc: SceneSessionManager load window scene xml
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateRecoveredSessionInfo02, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> recoveredPersistentIds;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    recoveredPersistentIds.push_back(0);
+    ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<KeyboardSession::SpecificSessionCallback> specificCallback;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+}
+
+/**
+ * @tc.name: ConfigAppWindowShadow
+ * @tc.desc: SceneSesionManager config app window shadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowShadow02, Function | SmallTest | Level3)
+{
+    WindowSceneConfig::ConfigItem item;
+    WindowSceneConfig::ConfigItem shadowConfig;
+    WindowShadowConfig outShadow;
+    std::vector<float> floatTest = {};
+    bool result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
+    ASSERT_EQ(result, false);
+
+    item.SetValue(floatTest);
+    shadowConfig.SetValue({{"radius", item}});
+    result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
+    ASSERT_EQ(result, false);
+
+    item.SetValue(new std::string(""));
+    shadowConfig.SetValue({{"", item}});
+    result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation
+ * @tc.desc: SceneSesionManager config window animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigWindowAnimation02, Function | SmallTest | Level3)
+{
+    WindowSceneConfig::ConfigItem windowAnimationConfig;
+    WindowSceneConfig::ConfigItem item;
+    std::vector<float> rotation = {0.1f, 0.2f, 0.3f, 0.4f};
+    ASSERT_NE(ssm_, nullptr);
+
+    item.SetValue(rotation);
+    item.SetValue({{"curve", item}});
+    windowAnimationConfig.SetValue({{"timing", item}});
+    ssm_->ConfigWindowAnimation(windowAnimationConfig);
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation
+ * @tc.desc: SceneSesionManager config start window animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigStartingWindowAnimation02, Function | SmallTest | Level3)
+{
+    std::vector<float> midFloat = {0.1f};
+    std::vector<int> midInt = {1};
+    ASSERT_NE(ssm_, nullptr);
+    WindowSceneConfig::ConfigItem middleFloat;
+    middleFloat.SetValue(midFloat);
+    ssm_->ConfigStartingWindowAnimation(middleFloat);
+    WindowSceneConfig::ConfigItem middleInt;
+    middleInt.SetValue(midInt);
+    ssm_->ConfigStartingWindowAnimation(middleInt);
+
+    WindowSceneConfig::ConfigItem curve;
+    curve.SetValue(midFloat);
+    curve.SetValue({{"curve", curve}});
+    ssm_->ConfigStartingWindowAnimation(curve);
+}
+
+/**
+ * @tc.name: ConfigMainWindowSizeLimits
+ * @tc.desc: call ConfigMainWindowSizeLimits and check the systemConfig_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigMainWindowSizeLimits02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int> maInt = {1, 2, 3, 4};
+    WindowSceneConfig::ConfigItem mainleInt;
+    mainleInt.SetValue(maInt);
+    mainleInt.SetValue({{"miniWidth", mainleInt}});
+    ssm_->ConfigMainWindowSizeLimits(mainleInt);
+    mainleInt.ClearValue();
+
+    std::vector<float> maFloat = {0.1f};
+    WindowSceneConfig::ConfigItem mainFloat;
+    mainFloat.SetValue(maFloat);
+    mainFloat.SetValue({{"miniWidth", mainFloat}});
+    ssm_->ConfigMainWindowSizeLimits(mainFloat);
+    mainFloat.ClearValue();
+
+    WindowSceneConfig::ConfigItem mainleInt02;
+    mainleInt02.SetValue(maInt);
+    mainleInt02.SetValue({{"miniHeight", mainleInt02}});
+    ssm_->ConfigMainWindowSizeLimits(mainleInt02);
+
+    WindowSceneConfig::ConfigItem mainFloat02;
+    mainFloat02.SetValue(maFloat);
+    mainFloat02.SetValue({{"miniHeight", mainFloat02}});
+    ssm_->ConfigMainWindowSizeLimits(mainFloat02);
+}
+
+/**
+ * @tc.name: ConfigSubWindowSizeLimits
+ * @tc.desc: call ConfigSubWindowSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int> subInt = {1, 2, 3, 4};
+    WindowSceneConfig::ConfigItem subleInt;
+    subleInt.SetValue(subInt);
+    subleInt.SetValue({{"miniWidth", subleInt}});
+    ssm_->ConfigSubWindowSizeLimits(subleInt);
+    subleInt.ClearValue();
+
+    std::vector<float> subFloat = {0.1f};
+    WindowSceneConfig::ConfigItem mainFloat;
+    mainFloat.SetValue(subFloat);
+    mainFloat.SetValue({{"miniWidth", mainFloat}});
+    ssm_->ConfigSubWindowSizeLimits(mainFloat);
+    mainFloat.ClearValue();
+
+    WindowSceneConfig::ConfigItem subleInt02;
+    subleInt02.SetValue(subInt);
+    subleInt02.SetValue({{"miniHeight", subleInt02}});
+    ssm_->ConfigSubWindowSizeLimits(subleInt02);
+
+    WindowSceneConfig::ConfigItem mainFloat02;
+    mainFloat02.SetValue(subFloat);
+    mainFloat02.SetValue({{"miniHeight", mainFloat02}});
+    ssm_->ConfigSubWindowSizeLimits(mainFloat02);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
