@@ -2352,10 +2352,16 @@ WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSes
         TLOGE(WmsLogTag::WMS_RECOVER, "create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto persistentId = isSpecificSession ? property->GetParentPersistentId() : property->GetPersistentId();
-    if (!IsNeedRecover(persistentId)) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
-        return WSError::WS_ERROR_INVALID_PARAM;
+    if (isSpecificSession) {
+        if (property->GetParentPersistentId() > 0 && !IsNeedRecover(property->GetParentPersistentId())) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    } else {
+        if (!IsNeedRecover(property->GetPersistentId())) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
     }
     return WSError::WS_OK;
 }
