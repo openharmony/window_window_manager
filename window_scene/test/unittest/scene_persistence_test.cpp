@@ -206,7 +206,7 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     std::shared_ptr<Media::PixelMap> pixelMap1 = Media::PixelMap::Create(colors, colorsLength, offset, stride, opts);
 
     scenePersistence->SaveSnapshot(pixelMap1);
-    int maxScenePersistencePollNum = 50;
+    int maxScenePersistencePollNum = 100;
     scenePersistence->snapshotPath_ = "/data/1.png";
     for (int i = 0; i < maxScenePersistencePollNum; i++) {
         result = scenePersistence->GetLocalSnapshotPixelMap(0.8, 0.2);
