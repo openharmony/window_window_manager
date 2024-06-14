@@ -422,10 +422,17 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
 }
 
+bool ScreenSessionManager::IsDefaultMirrorMode(ScreenId screenId)
+{
+    if (screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL && screenId != SCREEN_ID_PC_MAIN) {
+        return true;
+    }
+    return false;
+}
+
 void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
-    if (mirrorSession == nullptr || !phyMirrorEnable) {
+    if (mirrorSession == nullptr) {
         return;
     }
     std::shared_ptr<RSDisplayNode> displayNode = mirrorSession->GetDisplayNode();
@@ -465,7 +472,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
+    bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
@@ -916,11 +923,9 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
 
 sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
     ScreenId defScreenId = GetDefaultScreenId();
     TLOGI(WmsLogTag::DMS, "GetScreenSessionInner: screenId:%{public}" PRIu64 "", screenId);
-    if (phyMirrorEnable && screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL &&
-        screenId != SCREEN_ID_PC_MAIN) {
+    if (IsDefaultMirrorMode(screenId)) {
         return CreatePhysicalMirrorSessionInner(screenId, defScreenId, property);
     }
     std::string screenName = "UNKNOWN";
@@ -1613,6 +1618,22 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     }
     screenSession->SetScreenRotationLocked(isLocked);
     TLOGI(WmsLogTag::DMS, "SetScreenRotationLocked: isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen rotation locked from js permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->SetScreenRotationLockedFromJs(isLocked);
+    TLOGI(WmsLogTag::DMS, "isLocked: %{public}u", isLocked);
     return DMError::DM_OK;
 }
 

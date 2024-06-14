@@ -5778,49 +5778,71 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
+void SetWindowGrayScaleTask(const wptr<Window>& weakToken, double grayScale,
+    NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete)
+{
+    std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    execute = [weakToken, grayScale, err]() {
+        if (err == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "wm error code is null");
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "window is null");
+            *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *err = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGrayScale(static_cast<float>(grayScale)));
+        TLOGI(WmsLogTag::DEFAULT,
+            "Window [%{public}u, %{public}s] OnSetWindowGrayScale end, grayScale = %{public}f",
+            window->GetWindowId(), window->GetWindowName().c_str(), grayScale);
+    };
+
+    complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (err == nullptr) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        if (*err == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err), "Set window gray scale failed"));
+        }
+    };
+}
+
 napi_value JsWindow::OnSetWindowGrayScale(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {    // 1: the param num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to grayScale");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to grayScale");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double grayScale = 0.0;
     napi_get_value_double(env, nativeVal, &grayScale);
     constexpr double eps = 1e-6;
     if (grayScale < (MIN_GRAY_SCALE - eps) || grayScale > (MAX_GRAY_SCALE + eps)) {
-        WLOGFE("grayScale should be greater than or equal to 0.0, and should be smaller than or equal to 1.0");
+        TLOGE(WmsLogTag::DEFAULT,
+            "grayScale should be greater than or equal to 0.0, and should be smaller than or equal to 1.0");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, grayScale](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto window = weakToken.promote();
-            if (window == nullptr) {
-                WLOGFE("window is nullptr");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                return;
-            }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGrayScale(static_cast<float>(grayScale)));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Set window gray scale failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] OnSetWindowGrayScale end, grayScale = %{public}f",
-                window->GetWindowId(), window->GetWindowName().c_str(), grayScale);
-        };
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetWindowGrayScaleTask(weakToken, grayScale, execute, complete);
+
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowGrayScale",
-        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
