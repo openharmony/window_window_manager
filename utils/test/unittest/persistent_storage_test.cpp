@@ -68,7 +68,6 @@ HWTEST_F(PersistentStorageTest, HasKey, Function | SmallTest | Level3)
  */
 HWTEST_F(PersistentStorageTest, StorageOperate, Function | SmallTest | Level3)
 {
-    int ret = 0;
     const std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
     float ratio = 1;
     float ratioValue = 2;
@@ -97,8 +96,6 @@ HWTEST_F(PersistentStorageTest, StorageOperate, Function | SmallTest | Level3)
     PersistentStorage::Delete(keyName, PersistentStorageType::MAXIMIZE_STATE);
     auto result4 = PersistentStorage::HasKey(keyName, PersistentStorageType::MAXIMIZE_STATE);
     EXPECT_EQ(false, result4);
-
-    ASSERT_EQ(ret, 0);
 }
 
 }
