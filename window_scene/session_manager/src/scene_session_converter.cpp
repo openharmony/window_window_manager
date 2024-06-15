@@ -39,6 +39,7 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
             missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
             missionInfo.iconPath = ((*iter)->GetSessionInfo().abilityInfo)->iconPath;
             missionInfo.continuable = ((*iter)->GetSessionInfo().abilityInfo)->continuable;
+            missionInfo.unclearable = ((*iter)->GetSessionInfo().abilityInfo)->unclearableMission;
         } else {
             WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", (*iter)->GetPersistentId());
         }
@@ -68,6 +69,7 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
         missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;
         missionInfo.iconPath = (sceneSession->GetSessionInfo().abilityInfo)->iconPath;
         missionInfo.continuable = (sceneSession->GetSessionInfo().abilityInfo)->continuable;
+        missionInfo.unclearable = (sceneSession->GetSessionInfo().abilityInfo)->unclearableMission;
     } else {
         WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", sceneSession->GetPersistentId());
     }

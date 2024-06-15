@@ -35,6 +35,7 @@ public:
 class WindowAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
 public:
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
@@ -49,6 +50,7 @@ public:
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;

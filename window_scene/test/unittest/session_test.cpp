@@ -543,10 +543,9 @@ HWTEST_F(WindowSessionTest, Disconnect01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2)
 {
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = false;
@@ -554,7 +553,6 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    ASSERT_EQ(resultValue, 0);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session_->TerminateSessionNew(nullptr, needStartCaller, isFromBroker));
@@ -567,20 +565,17 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew02, Function | SmallTest | Level2)
 {
-    int res = 0;
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetTerminateSessionListenerNew(callback);
-    session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    res++;
-    ASSERT_EQ(res, 1);
+    auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**

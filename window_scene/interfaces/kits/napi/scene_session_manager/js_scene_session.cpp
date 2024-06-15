@@ -114,6 +114,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
     napi_set_named_property(env, objValue, "keyboardGravity",
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
+    napi_set_named_property(env, objValue, "isTopmost",
+        CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);

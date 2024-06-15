@@ -134,6 +134,20 @@ HWTEST_F(SubSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: IsTopmost
+ * @tc.desc: check func IsTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
+{
+    subSession_->GetSessionProperty()->SetTopmost(false);
+    ASSERT_EQ(false, subSession_->IsTopmost());
+
+    subSession_->GetSessionProperty()->SetTopmost(true);
+    ASSERT_EQ(true, subSession_->IsTopmost());
+}
+
+/**
  * @tc.name: Hide
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC

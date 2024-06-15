@@ -19,7 +19,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "../dm/dm_common.h"
+#include "dm_common.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -252,6 +252,13 @@ public:
     void SetDialogTitle(const std::string& dialogTitle);
 
     /**
+     * @brief Set window topmost.
+     *
+     * @param isTopmost true means enable, default disabled.
+     */
+    void SetWindowTopmost(bool isTopmost);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -419,6 +426,13 @@ public:
     */
     std::string GetDialogTitle() const;
 
+    /**
+     * @brief Get window topmost
+     *
+     * @return true means the window is topmost, otherwise not.
+    */
+    bool GetWindowTopmost() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -449,6 +463,7 @@ private:
     bool isExtensionTag_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
+    bool isTopmost_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

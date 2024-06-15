@@ -137,7 +137,7 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
 
 bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(VirtualScreenOption)) {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
     size_t startPos = 0;
@@ -178,7 +178,7 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
 
 bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(VirtualScreenOption)) {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
     size_t startPos = 0;
@@ -200,6 +200,7 @@ bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);
     screenManager.GetScreenById(screenId);
+    screenManager.DestroyVirtualScreen(screenId);
     return true;
 }
 

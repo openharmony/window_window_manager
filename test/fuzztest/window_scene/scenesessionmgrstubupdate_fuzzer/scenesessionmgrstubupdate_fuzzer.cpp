@@ -40,26 +40,32 @@ void MakeThingsPart01(MessageParcel& parcel)
     MessageParcel reply;
     MessageOption option;
 
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
@@ -70,19 +76,22 @@ void MakeThingsPart02(MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
-
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_TOUCHOUTSIDE_LISTENER),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
@@ -98,7 +107,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     MessageParcel parcel;
     parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     MakeThingsPart01(parcel);
     MakeThingsPart02(parcel);

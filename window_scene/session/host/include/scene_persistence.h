@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 
 #include <string>
-#include <sys/stat.h>
 
 #include <refbase.h>
 
@@ -42,6 +41,8 @@ public:
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath();
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
+    std::shared_ptr<TaskScheduler> GetSnapshotScheduler() const;
+
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::function<void()> resetSnapshotCallback = [](){});
     bool IsSavingSnapshot();
@@ -52,12 +53,9 @@ public:
     std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale) const;
 
 private:
-    bool IsSnapshotExisted(const std::string& path) const;
-
     static std::string snapshotDirectory_;
     std::string bundleName_;
     std::string snapshotPath_;
-    std::string oldSnapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
     bool hasSnapshot_ = false;
 

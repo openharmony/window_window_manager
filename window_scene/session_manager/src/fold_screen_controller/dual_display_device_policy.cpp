@@ -334,8 +334,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
 void DualDisplayDevicePolicy::ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus)
 {
     ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-    ScreenSessionManager::GetInstance().SetScreenPower(screenPowerStatus,
-        PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
+    ScreenSessionManager::GetInstance().SetScreenPowerForFold(screenPowerStatus);
 }
 
 void DualDisplayDevicePolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,

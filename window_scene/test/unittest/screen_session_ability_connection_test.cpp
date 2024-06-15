@@ -19,7 +19,7 @@
 #include <mutex>
 #include <chrono>
 
-#include "screen_snapshot_ability_connection.h"
+#include "connection/screen_session_ability_connection.h"
 #include "extension_manager_client.h"
 #include "ipc_skeleton.h"
 
@@ -32,7 +32,7 @@ constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
 
-class ScreenSnapshotAbilityConnectionTest : public testing::Test {
+class ScreenSessionAbilityConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -45,19 +45,19 @@ private:
     std::condition_variable connectedCv_;
 };
 
-void ScreenSnapshotAbilityConnectionTest::SetUpTestCase()
+void ScreenSessionAbilityConnectionTest::SetUpTestCase()
 {
 }
 
-void ScreenSnapshotAbilityConnectionTest::TearDownTestCase()
+void ScreenSessionAbilityConnectionTest::TearDownTestCase()
 {
 }
 
-void ScreenSnapshotAbilityConnectionTest::SetUp()
+void ScreenSessionAbilityConnectionTest::SetUp()
 {
 }
 
-void ScreenSnapshotAbilityConnectionTest::TearDown()
+void ScreenSessionAbilityConnectionTest::TearDown()
 {
 }
 
@@ -68,27 +68,28 @@ namespace {
  * @tc.desc: OnAbilityConnectDone func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityConnectDone, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone, Function | SmallTest | Level1)
 {
-    sptr<ScreenSnapshotAbilityConnection> abilityConnection(new(std::nothrow) ScreenSnapshotAbilityConnection());
-    ASSERT_NE(abilityConnection, nullptr);
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard",
         "com.ohos.sceneboard.systemdialog");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-        want, abilityConnection, nullptr, DEFAULT_VALUE);
+        want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
     ASSERT_EQ(resConnect, ERR_OK);
     {
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
+    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
 }
 
 /**
@@ -96,23 +97,24 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityConnectDone, Function | S
  * @tc.desc: OnAbilityDisconnectDone func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityDisconnectDone, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function | SmallTest | Level1)
 {
-    sptr<ScreenSnapshotAbilityConnection> abilityConnection(new(std::nothrow) ScreenSnapshotAbilityConnection());
-    ASSERT_NE(abilityConnection, nullptr);
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard",
         "com.ohos.sceneboard.systemdialog");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-        want, abilityConnection, nullptr, DEFAULT_VALUE);
+        want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
     ASSERT_EQ(resConnect, ERR_OK);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
 }
 
 /**
@@ -120,13 +122,14 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnAbilityDisconnectDone, Function 
  * @tc.desc: IsAbilityConnected func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotAbilityConnectionTest, IsAbilityConnected, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnected, Function | SmallTest | Level1)
 {
-    sptr<ScreenSnapshotAbilityConnection> abilityConnection(new(std::nothrow) ScreenSnapshotAbilityConnection());
-    ASSERT_NE(abilityConnection, nullptr);
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
 }
 
 /**
@@ -134,37 +137,38 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, IsAbilityConnected, Function | Sma
  * @tc.desc: SendMessageSync func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotAbilityConnectionTest, SendMessageSync, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, Function | SmallTest | Level1)
 {
-    sptr<ScreenSnapshotAbilityConnection> abilityConnection(new(std::nothrow) ScreenSnapshotAbilityConnection());
-    ASSERT_NE(abilityConnection, nullptr);
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard",
         "com.ohos.sceneboard.systemdialog");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-        want, abilityConnection, nullptr, DEFAULT_VALUE);
+        want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
     ASSERT_EQ(resConnect, ERR_OK);
     {
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), true);
+    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString16(Str8ToStr16("SA"));
     data.WriteString16(Str8ToStr16("ScreenSessionManager"));
-    abilityConnection->SendMessageSync(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
+    abilityConnectionStub->SendMessageSync(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
     EXPECT_EQ(reply.ReadInt32(), 0);
     EXPECT_EQ(reply.ReadInt32(), 0);
     EXPECT_EQ(reply.ReadInt32(), 0);
     EXPECT_EQ(reply.ReadInt32(), 0);
     EXPECT_EQ(reply.ReadInt32(), 0);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
 }
 
 /**
@@ -172,25 +176,25 @@ HWTEST_F(ScreenSnapshotAbilityConnectionTest, SendMessageSync, Function | SmallT
  * @tc.desc: OnRemoteDied func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotAbilityConnectionTest, OnRemoteDied, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied, Function | SmallTest | Level1)
 {
-    sptr<ScreenSnapshotAbilityConnection> abilityConnection(new(std::nothrow) ScreenSnapshotAbilityConnection());
-    ASSERT_NE(abilityConnection, nullptr);
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard",
         "com.ohos.sceneboard.systemdialog");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-        want, abilityConnection, nullptr, DEFAULT_VALUE);
+        want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
     IPCSkeleton::SetCallingIdentity(identity);
     ASSERT_EQ(resConnect, ERR_OK);
-    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnection);
+    auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
-    EXPECT_EQ(abilityConnection->IsAbilityConnected(), false);
-    abilityConnection.clear();
-    abilityConnection = nullptr;
+    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS

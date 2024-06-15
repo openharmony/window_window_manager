@@ -193,6 +193,11 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
     auto ret8 = WindowManagerLite::GetInstance().UnregisterWindowModeChangedListener(listener3);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret7);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret8);
+    sptr<IWMSConnectionChangedListener> listener4 = nullptr;
+    WMError res9 = WindowManagerLite::GetInstance().RegisterWMSConnectionChangedListener(listener4);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res9);
+    WMError res10 = WindowManagerLite::GetInstance().UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, res10);
 }
 
 /**
