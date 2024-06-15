@@ -14,6 +14,7 @@
  */
 
 #include <accesstoken_kit.h>
+#include <app_mgr_client.h>
 #include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
@@ -23,6 +24,8 @@
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
 #include <input_method_controller.h>
+#include <singleton.h>
+#include <singleton_container.h>
 #include "common/include/session_permission.h"
 #include "window_manager_hilog.h"
 
@@ -286,28 +289,16 @@ bool SessionPermission::IsStartedByUIExtension()
 
 bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
 {
-    sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get system ability mgr.");
-        return false;
-    }
-    sptr<IRemoteObject> remoteObject
-        = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
-    if (!remoteObject) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get app manager service.");
-        return false;
-    }
-    auto appMgrProxy = iface_cast<AppExecFwk::IAppMgr>(remoteObject);
-    if (!appMgrProxy || !appMgrProxy->AsObject()) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get app manager proxy.");
-        return false;
-    }
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    TLOGI(WmsLogTag::DEFAULT, "Checking user test mode");
+    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
     bool isUserTestMode = false;
-    auto ret = appMgrProxy->CheckCallingIsUserTestMode(pid, isUserTestMode);
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "AppMgeClient is null!");
+        return false;
+    }
+    int32_t ret = appMgrClient->CheckCallingIsUserTestMode(pid, isUserTestMode);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DEFAULT, "Permission denied! ret=%{public}d", ret);
         return false;

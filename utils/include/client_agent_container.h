@@ -21,9 +21,11 @@
 #include <set>
 #include "agent_death_recipient.h"
 #include "window_manager_hilog.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Rosen {
+constexpr int32_t INVALID_PID_ID = -1;
 template <typename T1, typename T2>
 class ClientAgentContainer {
 public:
@@ -34,6 +36,7 @@ public:
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
     std::set<sptr<T1>> GetAgentsByType(T2 type);
     void SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback);
+    int32_t GetAgentPid(const sptr<T1>& agent);
 
 private:
     void RemoveAgent(const sptr<IRemoteObject>& remoteObject);
@@ -54,6 +57,7 @@ private:
 
     std::recursive_mutex mutex_;
     std::map<T2, std::set<sptr<T1>>> agentMap_;
+    std::map<sptr<T1>, int32_t> agentPidMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
     std::function<void(const sptr<IRemoteObject>&)> deathCallback_;
 };
@@ -71,6 +75,7 @@ bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
         return false;
     }
     agentMap_[type].insert(agent);
+    agentPidMap_[agent] = IPCSkeleton::GetCallingPid();
     if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFI("failed to add death recipient");
     }
@@ -115,6 +120,12 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& age
         WLOGFD("could not find this agent");
         return false;
     }
+    auto agentPidIt = agentPidMap_.find(*iter);
+    if (agentPidIt != agentPidMap_.end()) {
+        int32_t agentPid = agentPidMap_[*iter];
+        agentPidMap_.erase(agentPidIt);
+        WLOGFD("agent pid: %{public}d unregistered", agentPid);
+    }
     agents.erase(iter);
     WLOGFD("agent unregistered");
     return true;
@@ -140,6 +151,21 @@ template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback)
 {
     deathCallback_ = callback;
+}
+
+template<typename T1, typename T2>
+int32_t ClientAgentContainer<T1, T2>::GetAgentPid(const sptr<T1>& agent)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (agent == nullptr) {
+        WLOGFE("agent is invalid");
+        return INVALID_PID_ID;
+    }
+    if (agentPidMap_.count(agent) == 0) {
+        WLOGFE("agent pid not found");
+        return INVALID_PID_ID;
+    }
+    return agentPidMap_[agent];
 }
 }
 }

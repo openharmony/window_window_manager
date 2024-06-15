@@ -45,6 +45,7 @@ public:
         DmErrorCode* errorCode = nullptr) override;
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
+    DMError SetScreenRotationLockedFromJs(bool isLocked) override;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;

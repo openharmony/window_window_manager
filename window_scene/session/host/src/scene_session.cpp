@@ -83,6 +83,8 @@ const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_
         &SceneSession::HandleActionUpdatePrivacyMode),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
         &SceneSession::HandleActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &SceneSession::HandleActionUpdateSnapshotSkip),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &SceneSession::HandleActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
@@ -275,13 +277,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             return ret;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
-            session->snapshot_ = session->Snapshot();
-            if (session->scenePersistence_ && session->snapshot_) {
-                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
-            } else {
-                session->snapshot_.reset();
-            }
+            session->SaveSnapshot(true);
         }
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
@@ -339,13 +335,7 @@ WSError SceneSession::Disconnect(bool isFromClient)
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
         if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
-            session->snapshot_ = session->Snapshot();
-            if (session->scenePersistence_ && session->snapshot_) {
-                const std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-                session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
-            } else {
-                session->snapshot_.reset();
-            }
+            session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
         session->isTerminating = false;
@@ -832,6 +822,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
+    Session::RectCheckProcess();
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -871,6 +862,15 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("RaiseAboveTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto subSession = std::find_if(subSession_.begin(), subSession_.end(), [subWindowId](sptr<SceneSession> session) {
+        bool res = (session != nullptr && session->GetWindowId() == subWindowId) ? true : false;
+        return res;
+    });
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (subSession != subSession_.end() && callingPid != (*subSession)->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied! id: %{public}d", subWindowId);
+        return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto task = [weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
@@ -1991,6 +1991,32 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetSnapshotSkip(bool isSkip)
+{
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::DEFAULT, "property is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
+        return;
+    }
+    bool lastSnapshotSkip = property->GetSnapshotSkip();
+    if (lastSnapshotSkip == isSkip) {
+        TLOGW(WmsLogTag::DEFAULT, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
+            "id: %{public}d", isSkip, GetPersistentId());
+        return;
+    }
+    property->SetSnapshotSkip(isSkip);
+    surfaceNode_->SetSkipLayer(isSkip);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetSkipLayer(isSkip);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
@@ -2433,7 +2459,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             session->systemConfig_.freeMultiWindowEnable_;
         if (!(isPC || isFreeMutiWindowMode) &&
             (session->GetAbilityInfo() != nullptr) && WindowHelper::IsMainWindow(session->GetWindowType())) {
-            if (!(session->GetForegroundInteractiveStatus())) {
+            auto sessionState = session->GetSessionState();
+            if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
+                !(session->GetForegroundInteractiveStatus())) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
                     session->GetForegroundInteractiveStatus());
                 return WSError::WS_ERROR_INVALID_OPERATION;
@@ -2443,7 +2471,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
                 "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
-            auto sessionState = session->GetSessionState();
             if (sessionState != SessionState::STATE_FOREGROUND && sessionState != SessionState::STATE_ACTIVE &&
                 !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state:%{public}d, "
@@ -2499,6 +2526,14 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON) {
+        if (!SessionPermission::IsSystemCalling()) {
+            return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        }
+    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE) {
+        if (!SessionPermission::IsSystemServiceCalling()) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
@@ -2633,6 +2668,13 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    sceneSession->SetSnapshotSkip(property->GetSnapshotSkip());
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
@@ -2690,7 +2732,7 @@ WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& 
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "update mode permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "update mode permission denied! id: %{public}d", sceneSession->GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (sceneSession->GetSessionProperty() != nullptr) {
@@ -3084,11 +3126,16 @@ void SceneSession::NotifyPiPWindowPrepareClose()
 WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
     WLOGFD("NotifySetLandscapeMultiWindow");
-    auto task = [weakThis = wptr(this), isLandscapeMultiWindow]() {
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [weakThis = wptr(this), isLandscapeMultiWindow, callingPid]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (callingPid != session->GetCallingPid()) {
+            WLOGFE("premission denied, not call by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->sessionChangeCallback_ &&
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_) {

@@ -51,9 +51,9 @@ WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
-    WLOGFI("In");
+    TLOGI(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {
-        WLOGFE("context is nullptr: %{public}u or sessionToken is nullptr: %{public}u",
+        TLOGE(WmsLogTag::WMS_LIFE, "context is nullptr: %{public}u or sessionToken is nullptr: %{public}u",
             context == nullptr, iSession == nullptr);
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -69,6 +69,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
+    TLOGI(WmsLogTag::WMS_LIFE, "Created %{public}d successfully.", GetPersistentId());
     return WMError::WM_OK;
 }
 
@@ -108,6 +109,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     CheckAndRemoveExtWindowFlags();
     if (hostSession_ != nullptr) {
         hostSession_->Disconnect();
+        TLOGI(WmsLogTag::WMS_LIFE, "Disconnected with host session, id: %{public}d.", GetPersistentId());
     }
     NotifyBeforeDestroy(GetWindowName());
     {
@@ -115,13 +117,16 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "Reset state, id: %{public}d.", GetPersistentId());
     hostSession_ = nullptr;
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.erase(this);
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "Erase windowExtensionSession in set, id: %{public}d.", GetPersistentId());
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
+    TLOGI(WmsLogTag::WMS_LIFE, "After NotifyAfterDestroy, id: %{public}d.", GetPersistentId());
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
@@ -129,6 +134,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
 
@@ -455,7 +461,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
         int32_t duration = ANIMATION_TIME;
         bool needSync = false;
-        if (rsTransaction) {
+        if (rsTransaction && rsTransaction->GetSyncId() > 0) {
             // extract high 32 bits of SyncId as pid
             auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
             if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->getHostPid()) {

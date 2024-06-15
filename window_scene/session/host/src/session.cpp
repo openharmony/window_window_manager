@@ -934,6 +934,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     callingPid_ = pid;
     callingUid_ = uid;
     bufferAvailable_ = true;
+    UpdateSessionState(SessionState::STATE_CONNECT);
     return WSError::WS_OK;
 }
 
@@ -1818,6 +1819,31 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
     }
     TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
     return nullptr;
+}
+
+void Session::SaveSnapshot(bool useSnapshotThread)
+{
+    if (scenePersistence_ == nullptr) {
+        return;
+    }
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->snapshot_ = session->Snapshot();
+        if (session->snapshot_ && session->scenePersistence_) {
+            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
+            session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        }
+    };
+    auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
+    if (!useSnapshotThread || snapshotScheduler == nullptr) {
+        task();
+        return;
+    }
+    snapshotScheduler->PostAsyncTask(task, "SaveSnapshot");
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)

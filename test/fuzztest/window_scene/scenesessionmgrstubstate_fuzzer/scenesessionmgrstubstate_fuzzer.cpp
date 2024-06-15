@@ -47,24 +47,32 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_LOCK_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_UNLOCK_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_RAISE_WINDOW_TO_TOP), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE), parcel, reply, option);
     return true;

@@ -104,6 +104,12 @@ int32_t ScreenProperty::GetPhyHeight() const
     return phyHeight_;
 }
 
+void ScreenProperty::SetDpiPhyBounds(uint32_t phyWidth, uint32_t phyHeight)
+{
+    dpiPhyWidth_ = phyWidth;
+    dpiPhyHeight_ = phyHeight;
+}
+
 void ScreenProperty::SetRefreshRate(uint32_t refreshRate)
 {
     refreshRate_ = refreshRate;
@@ -203,18 +209,18 @@ DisplayOrientation ScreenProperty::GetDisplayOrientation() const
 
 void ScreenProperty::UpdateXDpi()
 {
-    if (phyWidth_ != UINT32_MAX) {
+    if (dpiPhyWidth_ != UINT32_MAX) {
         int32_t width = phyBounds_.rect_.width_;
-        xDpi_ = width * INCH_2_MM / phyWidth_;
+        xDpi_ = width * INCH_2_MM / dpiPhyWidth_;
         xDpi_ = std::floor(xDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
     }
 }
 
 void ScreenProperty::UpdateYDpi()
 {
-    if (phyHeight_ != UINT32_MAX) {
+    if (dpiPhyHeight_ != UINT32_MAX) {
         int32_t height_ = phyBounds_.rect_.height_;
-        yDpi_ = height_ * INCH_2_MM / phyHeight_;
+        yDpi_ = height_ * INCH_2_MM / dpiPhyHeight_;
         yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
     }
 }

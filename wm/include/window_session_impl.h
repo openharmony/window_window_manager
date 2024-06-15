@@ -99,6 +99,7 @@ public:
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
+    WMError SetRestoredRouterStack(std::string& routerStack) override;
     Ace::UIContent* GetUIContent() const override;
     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -107,7 +108,7 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
-    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) override;
+    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType = 0) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -353,6 +354,9 @@ private:
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
+    inline void DestroyExistUIContent();
+    std::string GetRestoredRouterStack();
+    Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type);
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
@@ -409,6 +413,9 @@ private:
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
     sptr<WindowOption> windowOption_;
+
+    std::recursive_mutex routerStackMutex_;
+    std::string restoredRouterStack_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS

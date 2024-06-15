@@ -166,7 +166,7 @@ protected:
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
-    bool isSessionMainWindow(uint32_t parentId);
+    bool IsSessionMainWindow(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
@@ -212,6 +212,7 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
+    void PreLayoutOnShow(WindowType type);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
