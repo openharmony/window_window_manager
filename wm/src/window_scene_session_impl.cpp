@@ -74,27 +74,28 @@ constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
-const std::unordered_set<WindowType> VALID_SYSTEM_WINDOW_TYPE = {
-    WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-    WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
-    WindowType::WINDOW_TYPE_FLOAT_CAMERA,
-    WindowType::WINDOW_TYPE_DIALOG,
-    WindowType::WINDOW_TYPE_FLOAT,
-    WindowType::WINDOW_TYPE_SCREENSHOT,
-    WindowType::WINDOW_TYPE_VOICE_INTERACTION,
-    WindowType::WINDOW_TYPE_POINTER,
-    WindowType::WINDOW_TYPE_TOAST,
-    WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
-    WindowType::WINDOW_TYPE_SEARCHING_BAR,
-    WindowType::WINDOW_TYPE_PANEL,
-    WindowType::WINDOW_TYPE_VOLUME_OVERLAY,
-    WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR,
-    WindowType::WINDOW_TYPE_SYSTEM_TOAST,
-    WindowType::WINDOW_TYPE_SYSTEM_FLOAT,
-    WindowType::WINDOW_TYPE_PIP,
-    WindowType::WINDOW_TYPE_GLOBAL_SEARCH,
-    WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,
-    WindowType::WINDOW_TYPE_HANDWRITE
+const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
+    WindowType::WINDOW_TYPE_STATUS_BAR,
+    WindowType::WINDOW_TYPE_KEYGUARD,
+    WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+    WindowType::WINDOW_TYPE_LAUNCHER_RECENT,
+    WindowType::WINDOW_TYPE_LAUNCHER_DOCK,
+    WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
+    WindowType::WINDOW_TYPE_THEME_EDITOR,
+    WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+    WindowType::WINDOW_TYPE_SCENE_BOARD,
+    WindowType::WINDOW_TYPE_KEYBOARD_PANEL,
+    WindowType::WINDOW_TYPE_WALLPAPER,
+    WindowType::WINDOW_TYPE_DESKTOP
+};
+const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
+    WindowType::WINDOW_TYPE_APP_LAUNCHING,
+    WindowType::WINDOW_TYPE_DOCK_SLICE,
+    WindowType::WINDOW_TYPE_INCOMING_CALL,
+    WindowType::WINDOW_TYPE_BOOT_ANIMATION,
+    WindowType::WINDOW_TYPE_FREEZE_DISPLAY,
+    WindowType::WINDOW_TYPE_PLACEHOLDER,
+    WindowType::WINDOW_TYPE_SCB_DEFAULT
 };
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
@@ -112,7 +113,7 @@ WindowSceneSessionImpl::~WindowSceneSessionImpl()
 
 bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 {
-    if (VALID_SYSTEM_WINDOW_TYPE.find(type) == VALID_SYSTEM_WINDOW_TYPE.end()) {
+    if (INVALID_SYSTEM_WINDOW_TYPE.find(type) != INVALID_SYSTEM_WINDOW_TYPE.end()) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid type: %{public}u", type);
         return false;
     }
@@ -433,11 +434,15 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsSystemWindow(type)) {
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(type)) {
-                return WMError::WM_OK;
+                return WMError::WM_ERROR_INVALID_CALLING;
+            }
+            if (INVALID_SCB_WINDOW_TYPE.find(type) != INVALID_SCB_WINDOW_TYPE.end()) {
+                TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid SCB type: %{public}u", type);
+                return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             }
         } else if (!WindowHelper::IsSubWindow(type)) {
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
-            return WMError::WM_ERROR_INVALID_TYPE;
+            return WMError::WM_ERROR_INVALID_CALLING;
         }
         ret = CreateAndConnectSpecificSession();
     }
