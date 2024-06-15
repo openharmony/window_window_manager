@@ -1828,6 +1828,25 @@ HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsSystemSpecificSession
+ * @tc.desc: IsSystemSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsSystemSpecificSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsSystemSpecificSession";
+    info.bundleName_ = "IsSystemSpecificSession";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ASSERT_FALSE(sceneSession->IsSystemSpecificSession());
+    sceneSession->SetIsSystemSpecificSession(true);
+    ASSERT_TRUE(sceneSession->IsSystemSpecificSession());
+}
+
+/**
  * @tc.name: SetTemporarilyShowWhenLocked
  * @tc.desc:  * @tc.name: SetTemporarilyShowWhenLocked
  * @tc.type: FUNC
