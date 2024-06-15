@@ -1201,7 +1201,29 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this, std::placeholders::_1);
     specificCb->onCameraSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = std::bind(
+        &SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen, this, std::placeholders::_1, std::placeholders::_2);
     return specificCb;
+}
+
+void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "surfaceNodeId: %{public}" PRIu64, surfaceNodeId);
+    auto it = std::find(skipSurfaceNodeIds_.begin(), skipSurfaceNodeIds_.end(), surfaceNodeId);
+    if (isSkip) {
+        if (it == skipSurfaceNodeIds_.end()) {
+            skipSurfaceNodeIds_.push_back(surfaceNodeId);
+        } else {
+            return;
+        }
+    } else {
+        if (it != skipSurfaceNodeIds_.end()) {
+            skipSurfaceNodeIds_.erase(it);
+        } else {
+            return;
+        }
+    }
+    rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
 }
 
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()

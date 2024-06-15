@@ -3472,4 +3472,10 @@ void SceneSession::SetSkipDraw(bool skip)
     }
     RSTransaction::FlushImplicitTransaction();
 }
+
+void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    TLOGW(WmsLogTag::WMS_SCB, "in sceneSession, do nothing");
+    return;
+}
 } // namespace OHOS::Rosen
