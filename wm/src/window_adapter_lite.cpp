@@ -211,5 +211,17 @@ WMError WindowAdapterLite::ClearMainSessions(const std::vector<int32_t>& persist
     TLOGD(WmsLogTag::WMS_MAIN, "clear main sessions with failed ids.");
     return windowManagerServiceProxy_->ClearMainSessions(persistentIds, clearFailedIds);
 }
+
+WMError WindowAdapterLite::RaiseWindowToTop(int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return static_cast<WMError>(windowManagerServiceProxy_->RaiseWindowToTop(persistentId));
+}
+
+WMError WindowAdapterLite::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "register listener");
+    return SessionManagerLite::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
+}
 } // namespace Rosen
 } // namespace OHOS

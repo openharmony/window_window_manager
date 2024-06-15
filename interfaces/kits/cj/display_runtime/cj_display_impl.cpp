@@ -37,7 +37,7 @@ namespace {
 static thread_local std::map<uint64_t, sptr<DisplayImpl>> g_cjDisplayMap;
 std::recursive_mutex g_mutex;
 
-void SetCRect(DMRect &row, CRect *ptr)
+void SetCRect(const DMRect &row, CRect *ptr)
 {
     ptr->left = row.posX_;
     ptr->top = row.posY_;
@@ -48,7 +48,7 @@ void SetCRect(DMRect &row, CRect *ptr)
 CRect* CreateCBoundingRects(std::vector<DMRect> &bound)
 {
     int32_t number = static_cast<int32_t>(bound.size());
-    CRect *result = (CRect*)malloc(sizeof(CRect) * number);
+    CRect *result = static_cast<CRect*>(malloc(sizeof(CRect) * number));
     if (result == nullptr) {
         TLOGE(WmsLogTag::DMS, "[CreateCBoundingRects] memory failed.");
         return nullptr;
@@ -72,7 +72,7 @@ void SetCWaterfallDisplayAreaRects(WaterfallDisplayAreaRects &area, CCutoutInfo 
 
 CCutoutInfo* CreateCCutoutInfoObject(sptr<CutoutInfo> &cutoutInfo)
 {
-    CCutoutInfo *info = (CCutoutInfo*)malloc(sizeof(CCutoutInfo));
+    CCutoutInfo *info = static_cast<CCutoutInfo*>(malloc(sizeof(CCutoutInfo)));
     if (info == nullptr) {
         return nullptr;
     }
@@ -151,7 +151,7 @@ char* DisplayImpl::GetName()
     }
     auto name = info->GetName();
     int len = static_cast<int>(name.length());
-    char *retData = (char *)malloc(len + 1);
+    char *retData = static_cast<char*>(malloc(len + 1));
     if (retData == nullptr) {
         return nullptr;
     }

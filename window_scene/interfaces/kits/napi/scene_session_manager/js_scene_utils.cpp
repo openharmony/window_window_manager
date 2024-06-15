@@ -179,6 +179,10 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
         if (JS_SESSION_TO_WINDOW_TYPE_MAP.count(static_cast<JsSessionType>(windowType)) != 0) {
             sessionInfo.windowType_ = static_cast<uint32_t>(
                 JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(windowType)));
+        } else {
+            if (sessionInfo.isSystem_) {
+                sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SCB_DEFAULT);
+            }
         }
     }
     return true;
@@ -980,7 +984,6 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         CreateJsSessionRect(env, params.LandscapePanelRect_));
     napi_set_named_property(env, objValue, "portraitPanelRect",
         CreateJsSessionRect(env, params.PortraitPanelRect_));
-    
     return objValue;
 }
 

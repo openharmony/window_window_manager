@@ -156,6 +156,11 @@ void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
     onlySupportSceneBoard_ = onlySupportSceneBoard;
 }
 
+void WindowOption::SetWindowTopmost(bool isTopmost)
+{
+    isTopmost_ = isTopmost;
+}
+
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;
@@ -254,6 +259,11 @@ bool WindowOption::GetSubWindowDecorEnable() const
 std::string WindowOption::GetSubWindowTitle() const
 {
     return subWindowTitle_;
+}
+
+bool WindowOption::GetWindowTopmost() const
+{
+    return isTopmost_;
 }
 } // namespace Rosen
 } // namespace OHOS

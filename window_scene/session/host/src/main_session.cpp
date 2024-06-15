@@ -73,14 +73,18 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
         WindowState windowState = property->GetWindowState();
-        if (ret == WSError::WS_OK) {
-            if (windowState == WindowState::STATE_SHOWN) {
-                session->isActive_ = true;
-                session->UpdateSessionState(SessionState::STATE_ACTIVE);
-            } else {
-                session->isActive_ = false;
-                session->UpdateSessionState(SessionState::STATE_BACKGROUND);
+        if (windowState == WindowState::STATE_SHOWN) {
+            session->isActive_ = true;
+            session->UpdateSessionState(SessionState::STATE_ACTIVE);
+        } else {
+            session->isActive_ = false;
+            session->UpdateSessionState(SessionState::STATE_BACKGROUND);
+            if (session->scenePersistence_) {
+                session->scenePersistence_->SetHasSnapshot(true);
             }
         }
         return ret;
@@ -103,6 +107,8 @@ void MainSession::NotifyForegroundInteractiveStatus(bool interactive)
 {
     SetForegroundInteractiveStatus(interactive);
     if (!IsSessionValid() || !sessionStage_) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session or sessionStage is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return;
     }
     const auto& state = GetSessionState();

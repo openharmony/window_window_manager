@@ -258,11 +258,8 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
     auto taskScreenOff = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
-        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-        ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_OFF,
-            PowerStateChangeReason::POWER_BUTTON);
-        ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
+        ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
     AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
@@ -271,12 +268,9 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
         screenId_ = onScreenId;
         if (isScreenOn) {
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(false);
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-            ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::POWER_BUTTON);
+            ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_ON);
             PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
-            ScreenSessionManager::GetInstance().SetNotifyLockOrNot(true);
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
@@ -300,7 +294,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-                PowerStateChangeReason::POWER_BUTTON);
+                PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
             PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
@@ -313,7 +307,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
         screenId_ = SCREEN_ID_SUB;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
-            PowerStateChangeReason::POWER_BUTTON);
+            PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnSub, "taskScreenOnSub");
@@ -325,7 +319,7 @@ void DualDisplayPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSessi
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
+    screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
@@ -342,7 +336,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSessio
     if (screenId == SCREEN_ID_SUB) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_.GetBounds(), screenProperty_.GetPhyBounds());
+    screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,

@@ -35,6 +35,52 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
+void SceneSessionMgrLsSetTestCode(MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
+        parcel, reply, option);
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -42,46 +88,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
-            SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
-            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::
-            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
-        parcel, reply, option);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
-        parcel, reply, option);
+    SceneSessionMgrLsSetTestCode(parcel);
+
     return true;
 }
 } // namespace OHOS

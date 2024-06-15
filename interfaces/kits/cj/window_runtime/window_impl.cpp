@@ -497,7 +497,7 @@ int32_t CJWindowImpl::SetWaterMarkFlag(bool enable)
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WMError ret = WMError::WM_OK;
+    WMError ret;
     if (enable) {
         ret = windowToken_->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
     } else {
@@ -946,7 +946,7 @@ std::shared_ptr<Media::PixelMap> CJWindowImpl::Snapshot(int32_t* errCode)
     return pixelMap;
 }
 
-static uint32_t GetColorFromJs(const std::string colorStr, uint32_t defaultColor, bool& flag)
+static uint32_t GetColorFromJs(const std::string& colorStr, uint32_t defaultColor, bool& flag)
 {
     std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
     if (!std::regex_match(colorStr, pattern)) {

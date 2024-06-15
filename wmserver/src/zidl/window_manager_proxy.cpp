@@ -605,6 +605,10 @@ WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<SystemConfig> config = reply.ReadParcelable<SystemConfig>();
+    if (config == nullptr) {
+        WLOGFE("Read SystemConfig failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     systemConfig = *config;
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
@@ -1063,7 +1067,9 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return;
     }
     sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
-    focusInfo = *info;
+    if (info != nullptr) {
+        focusInfo = *info;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

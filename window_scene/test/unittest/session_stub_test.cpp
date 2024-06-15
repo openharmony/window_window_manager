@@ -166,8 +166,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(22, res);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(22, res);
-    res = session_->HandleNotifyRemoteReady(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionTimeout(data, reply);

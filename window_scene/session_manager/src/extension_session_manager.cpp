@@ -62,6 +62,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->parentToken = sessionInfo.rootToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
+    abilitySessionInfo->isModal = sessionInfo.isModal_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     }
@@ -73,6 +74,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
     auto task = [this, sessionInfo]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
         sptr<ExtensionSession> extensionSession = new ExtensionSession(sessionInfo);
+        extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
         WLOGFI("persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),

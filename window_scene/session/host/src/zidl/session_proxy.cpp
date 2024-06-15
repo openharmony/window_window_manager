@@ -72,7 +72,7 @@ WSError SessionProxy::Background(bool isFromClient)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("[WMSCom] WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -850,22 +850,6 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
     return static_cast<WSError>(ret);
 }
 
-void SessionProxy::NotifyRemoteReady()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return;
-    }
-}
-
 void SessionProxy::NotifySyncOn()
 {
     MessageParcel data;
@@ -1152,7 +1136,7 @@ void SessionProxy::SetCallingSessionId(const uint32_t callingSessionId)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
         return;
@@ -1215,6 +1199,9 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON) {
+        option.SetFlags(MessageOption::TF_ASYNC);
+    }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;

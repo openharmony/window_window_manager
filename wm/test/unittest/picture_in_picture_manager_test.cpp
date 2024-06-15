@@ -200,7 +200,14 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
+
+    PictureInPictureManager::autoStartController_ = nullptr;
+    PictureInPictureManager::mainWindowLifeCycleImpl_ = nullptr;
+    PictureInPictureManager::AttachAutoStartController(0, pipController1);
+    ASSERT_EQ(result, 1);
     PictureInPictureManager::autoStartController_ = pipController1;
+    PictureInPictureManager::AttachAutoStartController(0, pipController1);
+    ASSERT_EQ(result, 1);
     sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
     ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
     PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
@@ -227,9 +234,23 @@ HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | Smal
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
-    PictureInPictureManager::autoStartController_ = pipController1;
+    PictureInPictureManager::autoStartController_ = pipController;
     PictureInPictureManager::DetachAutoStartController(0, pipController1);
     ASSERT_EQ(result, 1);
+    PictureInPictureManager::autoStartController_ = pipController1;
+
+    sptr<Window> mainWindow = nullptr;
+    PictureInPictureManager::mainWindowLifeCycleImpl_ = nullptr;
+    PictureInPictureManager::DetachAutoStartController(0, pipController1);
+    ASSERT_EQ(result, 1);
+    mainWindow = PictureInPictureManager::GetCurrentWindow();
+    ASSERT_EQ(mainWindow, pipController->window_);
+    PictureInPictureManager::DetachAutoStartController(0, pipController1);
+    ASSERT_EQ(result, 1);
+    sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
+    ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
+    PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
+    PictureInPictureManager::DetachAutoStartController(0, pipController1);
 }
 
 /**
@@ -277,6 +298,8 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
 
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindow());
+    
     sptr<Window> window = nullptr;
     ASSERT_EQ(window, pipController->window_);
     PictureInPictureManager::SetActiveController(pipController);
@@ -298,8 +321,11 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoPreRestore();
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
+    PictureInPictureManager::DoActionClose();
+    PictureInPictureManager::DoDestroy();
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
     ASSERT_EQ(result, 0);
@@ -307,13 +333,20 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::SetActiveController(pipController);
     result++;
 
+    PictureInPictureManager::DoPreRestore();
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
+    PictureInPictureManager::DoActionClose();
+    PictureInPictureManager::DoDestroy();
     const std::string ACTION_CLOSE = "close";
+    const std::string ACTION_PRE_RESTORE = "pre_restore";
     const std::string ACTION_RESTORE = "restore";
+    const std::string ACTION_DESTROY = "destroy";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
+    PictureInPictureManager::DoActionEvent(ACTION_PRE_RESTORE, 0);
     PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
+    PictureInPictureManager::DoActionEvent(ACTION_DESTROY, 0);
     ASSERT_EQ(result, 1);
 }
 

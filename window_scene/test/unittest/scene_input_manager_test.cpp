@@ -23,6 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+constexpr int MAX_WINDOWINFO_NUM = 15;
 class SceneInputManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -243,6 +244,22 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest |
     EXPECT_FALSE(sceneSession->IsStartMoving());
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyMMIWindowPidChange end";
+}
+
+/**
+ * @tc.name: PrintWindowInfo
+ * @tc.desc: PrintWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, PrintWindowInfo, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
+    MMI::WindowInfo windowInfo;
+    windowInfoList.emplace_back(windowInfo);
+    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -605,6 +622,72 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, Function | SmallTest | Level3)
     result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
     ASSERT_TRUE(result);
     displayInfos[0].displayMode = MMI::DisplayMode::UNKNOWN;
+}
+
+/**
+ * @tc.name: CheckNeedUpdate
+ * @tc.desc: CheckNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, Function | SmallTest | Level3)
+{
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    int32_t focusId = 0;
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    SceneInputManager::GetInstance().lastFocusId_ = 0;
+    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
+    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
+    bool result = false;
+    
+    auto tempPixeMap = std::make_shared<Media::PixelMap>();
+    windowInfoList[0].pixelMap = static_cast<void*>(tempPixeMap.get());
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].pixelMap = nullptr;
+
+    windowInfoList[0].windowInputType = MMI::WindowInputType::TRANSMIT_ALL;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].windowInputType = SceneInputManager::GetInstance().lastWindowInfoList_[0].windowInputType;
+
+    windowInfoList[0].windowType = static_cast<int32_t>(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].windowType = SceneInputManager::GetInstance().lastWindowInfoList_[0].windowType;
+
+    windowInfoList[0].privacyMode = MMI::SecureFlag::PRIVACY_MODE;
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
+    ASSERT_TRUE(result);
+    windowInfoList[0].privacyMode = SceneInputManager::GetInstance().lastWindowInfoList_[0].privacyMode;
+}
+
+/**
+ * @tc.name: UpdateDisplayAndWindowInfo
+ * @tc.desc: UpdateDisplayAndWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayinfo;
+    displayInfos.emplace_back(displayinfo);
+    MMI::WindowInfo windowinfo;
+    windowInfoList.emplace_back(windowinfo);
+    windowinfo.defaultHotAreas = std::vector<MMI::Rect>(MMI::WindowInfo::DEFAULT_HOTAREA_COUNT + 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    windowinfo.defaultHotAreas = std::vector<MMI::Rect>();
+    windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM - 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM + 1);
+    SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    ASSERT_EQ(ret, 0);
 }
 }
 }

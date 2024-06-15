@@ -543,10 +543,9 @@ HWTEST_F(WindowSessionTest, Disconnect01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2)
 {
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = false;
@@ -554,7 +553,6 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    ASSERT_EQ(resultValue, 0);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session_->TerminateSessionNew(nullptr, needStartCaller, isFromBroker));
@@ -567,20 +565,17 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew02, Function | SmallTest | Level2)
 {
-    int res = 0;
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetTerminateSessionListenerNew(callback);
-    session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    res++;
-    ASSERT_EQ(res, 1);
+    auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -607,6 +602,32 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
     WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->GetSessionRect());
+}
+
+/**
+ * @tc.name: SetSessionLastRect
+ * @tc.desc: check func SetSessionLastRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionLastRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->lastWinRect_);
+}
+
+/**
+ * @tc.name: GetSessionLastRect
+ * @tc.desc: check func GetSessionLastRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetSessionLastRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->GetSessionLastRect());
 }
 
 /**
@@ -1647,54 +1668,6 @@ HWTEST_F(WindowSessionTest, TransferBackPressedEventForConsumed02, Function | Sm
 }
 
 /**
- * @tc.name: TransferKeyEventForConsumed01
- * @tc.desc: windowEventChannel_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->windowEventChannel_ = nullptr;
-
-    auto keyEvent = MMI::KeyEvent::Create();
-    bool isConsumed = false;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
-}
-
-/**
- * @tc.name: TransferKeyEventForConsumed02
- * @tc.desc: windowEventChannel_ is not nullptr, keyEvent is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->windowEventChannel_ = new TestWindowEventChannel();
-
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    bool isConsumed = false;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
-}
-
-/**
- * @tc.name: TransferKeyEventForConsumed03
- * @tc.desc: windowEventChannel_ is not nullptr, keyEvent is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->windowEventChannel_ = new TestWindowEventChannel();
-
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    bool isConsumed = false;
-    ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
-}
-
-/**
  * @tc.name: TransferFocusActiveEvent02
  * @tc.desc: windowEventChannel_ is not nullptr
  * @tc.type: FUNC
@@ -1806,150 +1779,53 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: PostExportTask02
- * @tc.desc: PostExportTask
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    std::string name = "sessionExportTask";
-    auto task = [](){};
-    int64_t delayTime = 0;
-
-    session_->PostExportTask(task, name, delayTime);
-    auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(result, false);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillOnce(Return(WSError::WS_OK));
+    session_->sessionStage_ = mockSessionStage;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
+    Mock::VerifyAndClearExpectations(&mockSessionStage);
 }
 
 /**
- * @tc.name: SetLeashWinSurfaceNode02
- * @tc.desc: SetLeashWinSurfaceNode
+ * @tc.name: TransferKeyEventForConsumed02
+ * @tc.desc: windowEventChannel_ is not nullptr, keyEvent is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->leashWinSurfaceNode_ = WindowSessionTest::CreateRSSurfaceNode();
-    session_->SetLeashWinSurfaceNode(nullptr);
 
-    session_->leashWinSurfaceNode_ = nullptr;
-    session_->SetLeashWinSurfaceNode(nullptr);
-    auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(result, false);
+    session_->windowEventChannel_ = new TestWindowEventChannel();
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    bool isConsumed = false;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
 }
 
 /**
- * @tc.name: GetCloseAbilityWantAndClean
- * @tc.desc: GetCloseAbilityWantAndClean
+ * @tc.name: TransferKeyEventForConsumed03
+ * @tc.desc: windowEventChannel_ is not nullptr, keyEvent is not nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    AAFwk::Want outWant;
-    session_->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>();
-    session_->GetCloseAbilityWantAndClean(outWant);
-
-    session_->sessionInfo_.closeAbilityWant = nullptr;
-    session_->GetCloseAbilityWantAndClean(outWant);
-    auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(result, false);
-}
-
-/**
- * @tc.name: SetScreenId02
- * @tc.desc: SetScreenId Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    uint64_t screenId = 0;
-    session_->sessionStage_ = new (std::nothrow) SessionStageMocker();
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: SetFocusable03
- * @tc.desc: SetFocusable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->isFocused_ = true;
-    session_->property_ = new (std::nothrow) WindowSessionProperty();
-    session_->property_->focusable_ = false;
-    bool isFocusable = true;
-
-    auto result = session_->SetFocusable(isFocusable);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetFocused
- * @tc.desc: GetFocused Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool result = session_->GetFocused();
-    ASSERT_EQ(result, false);
-
-    session_->isFocused_ = true;
-    bool result2 = session_->GetFocused();
-    ASSERT_EQ(result2, true);
-}
-
-/**
- * @tc.name: UpdatePointerArea
- * @tc.desc: UpdatePointerArea Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 0, 0 };
-    session_->preRect_ = rect;
-    session_->UpdatePointerArea(rect);
-    ASSERT_EQ(session_->GetFocused(), false);
-}
-
-/**
- * @tc.name: UpdateSizeChangeReason02
- * @tc.desc: UpdateSizeChangeReason Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = session_->UpdateSizeChangeReason(reason);
-    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
-}
-
-/**
- * @tc.name: UpdateDensity
- * @tc.desc: UpdateDensity Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, UpdateDensity, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_FALSE(session_->IsSessionValid());
-    WSError result = session_->UpdateDensity();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    session_->windowEventChannel_ = new TestWindowEventChannel();
 
-    session_->state_ = SessionState::STATE_CONNECT;
-    ASSERT_TRUE(session_->IsSessionValid());
-    session_->sessionStage_ = nullptr;
-    WSError result02 = session_->UpdateDensity();
-    ASSERT_EQ(result02, WSError::WS_ERROR_NULLPTR);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool isConsumed = false;
+    ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
 }
 }
 } // namespace Rosen

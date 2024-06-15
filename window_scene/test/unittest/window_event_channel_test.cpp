@@ -271,8 +271,10 @@ HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_TRUE((windowEventChannel_ != nullptr));
+    windowEventChannel_->PrintKeyEvent(keyEvent);
     windowEventChannel_->sessionStage_ = nullptr;
     windowEventChannel_->PrintKeyEvent(keyEvent);
+    windowEventChannel_->PrintKeyEvent(nullptr);
 }
 
 /**
@@ -285,6 +287,7 @@ HWTEST_F(WindowEventChannelTest, PrintPointerEvent, Function | SmallTest | Level
     auto pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     windowEventChannel_->PrintPointerEvent(pointerEvent);
+    windowEventChannel_->PrintPointerEvent(nullptr);
 }
 
 /**

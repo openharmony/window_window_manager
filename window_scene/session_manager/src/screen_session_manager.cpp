@@ -33,6 +33,7 @@
 
 #include "dm_common.h"
 #include "fold_screen_state_internel.h"
+#include "multi_screen_manager.h"
 #include "pipeline/rs_node_map.h"
 #include "scene_board_judgement.h"
 #include "session_permission.h"
@@ -46,7 +47,11 @@
 #include "screen_setting_helper.h"
 #include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
-#include "screen_snapshot_picker.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
+#include "connection/screen_snapshot_picker_connection.h"
+#include "connection/screen_cast_connection.h"
+#include "publish/screen_session_publish.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -74,6 +79,7 @@ const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+const ScreenId SCREEN_ID_PC_MAIN = 9;
 const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
@@ -81,7 +87,16 @@ constexpr int32_t BASE_USER_RANGE = 200000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
-static const  int32_t ROTATION_270 = 3;
+static const int32_t ROTATION_270 = 3;
+const unsigned int XCOLLIE_TIMEOUT_S = 10;
+
+bool JudgeIsBeta()
+{
+    std::string betaName = OHOS::system::GetParameter("const.logsystem.versionType", "");
+    return betaName.find("beta") != std::string::npos;
+}
+
+static const bool IS_BETA = JudgeIsBeta();
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -121,6 +136,7 @@ ScreenSessionManager::ScreenSessionManager()
 
 void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
+    TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
     rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
@@ -182,6 +198,12 @@ void ScreenSessionManager::Init()
         TLOGW(WmsLogTag::DMS, "Add thread %{public}s to watchdog failed.",
             SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD.c_str());
     }
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
+        std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
+        TLOGD(WmsLogTag::DMS, "defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
+        ScreenSceneConfig::SetCutoutSvgPath(GetDefaultScreenId(), defaultDisplayCutoutPath);
+    }
 
     RegisterScreenChangeListener();
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
@@ -189,6 +211,8 @@ void ScreenSessionManager::Init()
     } else {
         SetSensorSubscriptionEnabled();
     }
+    // publish init
+    ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
 }
 
@@ -209,7 +233,7 @@ void ScreenSessionManager::OnStart()
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    TLOGI(WmsLogTag::DMS, "RegisterScreenshotListener is called");
+    TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
         && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
@@ -232,7 +256,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
-    TLOGI(WmsLogTag::DMS, "UnregisterDisplayListener is called");
+    TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
         && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
@@ -274,11 +298,6 @@ void ScreenSessionManager::ConfigureScreenScene()
         std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
         TLOGD(WmsLogTag::DMS, "vtBoundary.size=%{public}u", static_cast<uint32_t>(vtBoundary.size()));
     }
-    if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
-        std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
-        TLOGD(WmsLogTag::DMS, "defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
-        ScreenSceneConfig::SetCutoutSvgPath(GetDefaultScreenId(), defaultDisplayCutoutPath);
-    }
     if (stringConfig.count("subDisplayCutoutPath") != 0) {
         std::string subDisplayCutoutPath = static_cast<std::string>(stringConfig["subDisplayCutoutPath"]);
         TLOGD(WmsLogTag::DMS, "subDisplayCutoutPath = %{public}s.", subDisplayCutoutPath.c_str());
@@ -295,6 +314,7 @@ void ScreenSessionManager::ConfigureScreenScene()
         deviceScreenConfig_.isRightPowerButton_ = isRightPowerButton;
     }
     ConfigureWaterfallDisplayCompressionParams();
+    ConfigureCastParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
@@ -325,6 +345,25 @@ void ScreenSessionManager::ConfigureDpi()
     }
 }
 
+void ScreenSessionManager::ConfigureCastParams()
+{
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    if (stringConfig.count("castBundleName") == 0) {
+        TLOGE(WmsLogTag::DMS, "not find cast bundleName in config xml");
+        return;
+    }
+    std::string castBundleName = static_cast<std::string>(stringConfig["castBundleName"]);
+    TLOGD(WmsLogTag::DMS, "castBundleName = %{public}s", castBundleName.c_str());
+    ScreenCastConnection::GetInstance().SetBundleName(castBundleName);
+    if (stringConfig.count("castAbilityName") == 0) {
+        TLOGE(WmsLogTag::DMS, "not find cast ability in config xml");
+        return;
+    }
+    std::string castAbilityName = static_cast<std::string>(stringConfig["castAbilityName"]);
+    TLOGD(WmsLogTag::DMS, "castAbilityName = %{public}s", castAbilityName.c_str());
+    ScreenCastConnection::GetInstance().SetAbilityName(castAbilityName);
+}
+
 void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
 {
     auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
@@ -345,14 +384,14 @@ void ScreenSessionManager::ConfigureScreenSnapshotParams()
     }
     std::string screenSnapshotBundleName = static_cast<std::string>(stringConfig["screenSnapshotBundleName"]);
     TLOGD(WmsLogTag::DMS, "screenSnapshotBundleName = %{public}s.", screenSnapshotBundleName.c_str());
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotBundleName(screenSnapshotBundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(screenSnapshotBundleName);
     if (stringConfig.count("screenSnapshotAbilityName") == 0) {
         TLOGE(WmsLogTag::DMS, "not find screen snapshot ability in config xml");
         return;
     }
     std::string screenSnapshotAbilityName = static_cast<std::string>(stringConfig["screenSnapshotAbilityName"]);
     TLOGD(WmsLogTag::DMS, "screenSnapshotAbilityName = %{public}s.", screenSnapshotAbilityName.c_str());
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotAbilityName(screenSnapshotAbilityName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(screenSnapshotAbilityName);
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
@@ -409,10 +448,17 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
 }
 
+bool ScreenSessionManager::IsDefaultMirrorMode(ScreenId screenId)
+{
+    if (screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL && screenId != SCREEN_ID_PC_MAIN) {
+        return true;
+    }
+    return false;
+}
+
 void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
-    if (mirrorSession == nullptr || !phyMirrorEnable) {
+    if (mirrorSession == nullptr) {
         return;
     }
     std::shared_ptr<RSDisplayNode> displayNode = mirrorSession->GetDisplayNode();
@@ -449,10 +495,29 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
+void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
+{
+    TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
+    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+        return;
+    }
+    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
+        ScreenCastConnection::GetInstance().CastDisconnectExtension();
+    }
+    if (isPlugIn) {
+        ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+    } else {
+        ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
+    }
+    ScreenCastConnection::GetInstance().CastDisconnectExtension();
+}
+
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
+    bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
@@ -468,12 +533,14 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+            PublishCastEvent(true);
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
+            PublishCastEvent(false);
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
@@ -869,55 +936,67 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     return screenSession->SetScreenColorTransform();
 }
 
+sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
+    ScreenProperty property)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
+        TLOGW(WmsLogTag::DMS, "mirror disabled by edm!");
+        return screenSession;
+    }
+    sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
+    if (defaultScreen == nullptr || defaultScreen->GetDisplayNode() == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screen null");
+        return screenSession;
+    }
+    NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
+    TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64 "", nodeId);
+    ScreenSessionConfig config = {
+        .screenId = screenId,
+        .defaultScreenId = defScreenId,
+        .mirrorNodeId = nodeId,
+        .property = property,
+    };
+    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
+    screenSession->SetName("CastEngine");
+    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
+    hdmiScreenCount_ = hdmiScreenCount_ + 1;
+    NotifyCaptureStatusChanged();
+    return screenSession;
+}
+
 sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property)
 {
-    bool phyMirrorEnable = ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror";
-    sptr<ScreenSession> session = nullptr;
     ScreenId defScreenId = GetDefaultScreenId();
     TLOGI(WmsLogTag::DMS, "GetScreenSessionInner: screenId:%{public}" PRIu64 "", screenId);
-    if (phyMirrorEnable && screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL) {
-        NodeId nodeId = 0;
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        auto sIt = screenSessionMap_.find(defScreenId);
-        if (sIt != screenSessionMap_.end() && sIt->second != nullptr && sIt->second->GetDisplayNode() != nullptr) {
-            nodeId = sIt->second->GetDisplayNode()->GetId();
-        }
-        TLOGI(WmsLogTag::DMS, "GetScreenSessionInner: nodeId:%{public}" PRIu64 "", nodeId);
-        ScreenSessionConfig config = {
-            .screenId = screenId,
-            .defaultScreenId = defScreenId,
-            .mirrorNodeId = nodeId,
-            .property = property,
-        };
-        session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
-        session->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
-        session->SetName("CastEngine");
-        session->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-        NotifyScreenChanged(session->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
-        hdmiScreenCount_ = hdmiScreenCount_ + 1;
-        NotifyCaptureStatusChanged();
-    } else {
-        std::string screenName = "UNKNOWN";
-        if (screenId == SCREEN_ID_MAIN) {
-            screenName = "SubScreen";
-        }
-        ScreenSessionConfig config = {
-            .screenId = screenId,
-            .defaultScreenId = defScreenId,
-            .name = screenName,
-            .property = property,
-        };
-        session = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    if (IsDefaultMirrorMode(screenId)) {
+        return CreatePhysicalMirrorSessionInner(screenId, defScreenId, property);
     }
-    return session;
+    std::string screenName = "UNKNOWN";
+    if (screenId == SCREEN_ID_MAIN) {
+        screenName = "SubScreen";
+    }
+    ScreenSessionConfig config = {
+        .screenId = screenId,
+        .defaultScreenId = defScreenId,
+        .name = screenName,
+        .property = property,
+    };
+    return new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
 }
 
 void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenProperty& property)
 {
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("CreateScreenPropertyCallRS", XCOLLIE_TIMEOUT_S, nullptr,
+        nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
     auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
     auto screenRefreshRate = screenMode.GetScreenRefreshRate();
     auto screenCapability = rsInterface_.GetScreenCapability(screenId);
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     TLOGI(WmsLogTag::DMS, "Call RS interface end, create ScreenProperty begin");
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
@@ -983,6 +1062,10 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
 
     sptr<ScreenSession> session = GetScreenSessionInner(screenId, property);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get screen session fail ScreenId: %{public}" PRIu64, screenId);
+        return session;
+    }
     session->RegisterScreenChangeListener(this);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
@@ -1060,9 +1143,6 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         usleep(SLEEP_10_MS);
     }
     lastWakeUpReason_ = reason;
-    if (!notifyLockOrNot_) {
-        return true;
-    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN, reason);
 }
 
@@ -1078,9 +1158,6 @@ bool ScreenSessionManager::WakeUpEnd()
         isMultiScreenCollaboration_ = false;
         return true;
     }
-    if (!notifyLockOrNot_) {
-        return true;
-    }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END,
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
@@ -1092,6 +1169,8 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         TLOGE(WmsLogTag::DMS, "SuspendBegin permission denied!");
         return false;
     }
+
+    gotScreenlockFingerprint_ = false;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SuspendBegin  reason: %{public}u", static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
@@ -1102,9 +1181,6 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
-        return true;
-    }
-    if (!notifyLockOrNot_) {
         return true;
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
@@ -1120,9 +1196,6 @@ bool ScreenSessionManager::SuspendEnd()
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendEnd");
     if (isMultiScreenCollaboration_) {
         isMultiScreenCollaboration_ = false;
-        return true;
-    }
-    if (!notifyLockOrNot_) {
         return true;
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
@@ -1213,7 +1286,8 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
         needScreenOffNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOffMutex_);
         if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(screenOffDelay_)) == std::cv_status::timeout) {
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout");
+            isScreenLockSuspend_ = false;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout, isScreenLockSuspend_ is false");
         }
     }
 }
@@ -1251,7 +1325,8 @@ void ScreenSessionManager::NotifyScreenshot(DisplayId displayId)
     }
 }
 
-bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "SetSpecifiedScreenPower permission denied!");
@@ -1277,7 +1352,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
     }
 
     rsInterface_.SetScreenPowerStatus(screenId, status);
-    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION || !notifyLockOrNot_) {
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
@@ -1334,11 +1409,13 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
                 status = ScreenPowerStatus::POWER_STATUS_OFF;
                 TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
             }
+            rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
         case ScreenPowerState::POWER_SUSPEND: {
             status = ScreenPowerStatus::POWER_STATUS_SUSPEND;
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
         default: {
@@ -1366,6 +1443,13 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
 
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) {
+        gotScreenlockFingerprint_ = false;
+        return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
+            DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+    }
+
     if (foldScreenController_ != nullptr) {
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
     } else {
@@ -1378,11 +1462,18 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
     buttonBlock_ = false;
-    if (!notifyLockOrNot_) {
-        return true;
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) {
+        gotScreenlockFingerprint_ = false;
     }
+
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+}
+
+void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
+{
+    rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
 }
 
 void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
@@ -1397,7 +1488,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
             TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
             ScreenSensorConnector::SubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && notifyLockOrNot_) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
@@ -1407,7 +1498,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
             TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
             ScreenSensorConnector::UnsubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && notifyLockOrNot_) {
+            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
@@ -1503,10 +1594,7 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         isScreenLockSuspend_ = true;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend_  is true");
         if (needScreenOffNotify_) {
-            std::unique_lock <std::mutex> lock(screenOffMutex_);
-            screenOffCV_.notify_all();
-            needScreenOffNotify_ = false;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
+            ScreenOffCVNotify();
         }
     }
 
@@ -1516,12 +1604,26 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         isScreenLockSuspend_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
         if (needScreenOffNotify_) {
-            std::unique_lock <std::mutex> lock(screenOffMutex_);
-            screenOffCV_.notify_all();
-            needScreenOffNotify_ = false;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
+            ScreenOffCVNotify();
         }
     }
+
+    if (event == DisplayEvent::SCREEN_LOCK_FINGERPRINT) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
+        gotScreenOffNotify_ = true;
+        gotScreenlockFingerprint_ = true;
+        if (needScreenOffNotify_) {
+            ScreenOffCVNotify();
+        }
+    }
+}
+
+void ScreenSessionManager::ScreenOffCVNotify(void)
+{
+    std::unique_lock <std::mutex> lock(screenOffMutex_);
+    screenOffCV_.notify_all();
+    needScreenOffNotify_ = false;
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ notify one");
 }
 
 ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
@@ -1567,6 +1669,22 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen rotation locked from js permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->SetScreenRotationLockedFromJs(isLocked);
+    TLOGI(WmsLogTag::DMS, "isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
+}
+
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
@@ -1587,6 +1705,8 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
+        displayInfo->GetScreenId(), displayInfo->GetRotation());
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
@@ -1603,7 +1723,12 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             return;
         }
         for (auto& agent : agents) {
-            agent->OnDisplayChange(displayInfo, event);
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            if (freezedPidList_.count(agentPid) == 0) {
+                agent->OnDisplayChange(displayInfo, event);
+            } else {
+                TLOGI(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
+            }
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
@@ -1951,10 +2076,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         TLOGE(WmsLogTag::DMS, "create virtual screen permission denied!");
         return SCREEN_ID_INVALID;
     }
-    TLOGI(WmsLogTag::DMS, "CreateVirtualScreen ENTER");
-
-    CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "ohos.screenrecorder");
-
+    TLOGI(WmsLogTag::DMS, "ENTER");
+    if (IS_BETA) {
+        CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "hmos.screenrecorder");
+    }
     if (clientProxy_ && option.missionIds_.size() > 0) {
         std::vector<uint64_t> surfaceNodeIds;
         clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
@@ -1963,30 +2088,31 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
     if (rsId == SCREEN_ID_INVALID) {
-        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsId is invalid");
+        TLOGI(WmsLogTag::DMS, "rsId is invalid");
         return SCREEN_ID_INVALID;
     }
-    TLOGI(WmsLogTag::DMS, "CreateVirtualScreen rsId: %{public}" PRIu64"", rsId);
+    TLOGI(WmsLogTag::DMS, "rsId: %{public}" PRIu64"", rsId);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
-        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen !ConvertToSmsScreenId(rsId, smsScreenId)");
+        TLOGI(WmsLogTag::DMS, "!ConvertToSmsScreenId(rsId, smsScreenId)");
         smsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
         auto screenSession = InitVirtualScreen(smsScreenId, rsId, option);
         if (screenSession == nullptr) {
-            TLOGI(WmsLogTag::DMS, "CreateVirtualScreen screenSession is nullptr");
+            TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
         screenSession->SetName(option.name_);
+        screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
         screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
-        TLOGI(WmsLogTag::DMS, "CreateVirtualScreen success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
-            smsScreenId, rsId);
         if (option.name_ == "CastEngine") {
             screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        TLOGI(WmsLogTag::DMS, "create success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
+            smsScreenId, rsId);
         if (displayManagerAgent == nullptr) {
             virtualScreenCount_ = virtualScreenCount_ + 1;
             NotifyCaptureStatusChanged();
@@ -2003,18 +2129,29 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
 {
     if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
         !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DMS, "set virtual screenSurface permission denied!");
+        TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS, "SetVirtualScreenSurface ENTER");
+    if (surface == nullptr) {
+        TLOGE(WmsLogTag::DMS, "surface is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "No such screen.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::DMS, "enter set virtual screen surface");
     ScreenId rsScreenId;
     int32_t res = -1;
     if (screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
         sptr<Surface> pSurface = Surface::CreateSurfaceAsProducer(surface);
-        res = rsInterface_.SetVirtualScreenSurface(rsScreenId, pSurface);
+        if (pSurface != nullptr) {
+            res = rsInterface_.SetVirtualScreenSurface(rsScreenId, pSurface);
+        }
     }
     if (res != 0) {
-        TLOGE(WmsLogTag::DMS, "SetVirtualScreenSurface failed in RenderService");
+        TLOGE(WmsLogTag::DMS, "fail to set virtual screen surface in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     return DMError::DM_OK;
@@ -2025,6 +2162,11 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenScaleMode(ScreenId screenId,
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "No such screen.");
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     ScreenId rsScreenId;
     if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
@@ -2042,42 +2184,46 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenScaleMode(ScreenId screenId,
 DMError ScreenSessionManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "SetVirtualMirrorScreenCanvasRotation denied!");
+        TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS, "SetVirtualMirrorScreenCanvasRotation ENTER");
-
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "No such screen.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::DMS, "enter set virtual mirror screen canvas rotation");
     bool res = false;
     ScreenId rsScreenId;
     if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-        TLOGE(WmsLogTag::DMS, "SetVirtualMirrorScreenCanvasRotation: No corresponding rsId");
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     res = rsInterface_.SetVirtualMirrorScreenCanvasRotation(rsScreenId, autoRotate);
     if (!res) {
-        TLOGE(WmsLogTag::DMS, "SetVirtualMirrorScreenCanvasRotation failed in RenderService");
+        TLOGE(WmsLogTag::DMS, "failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    TLOGI(WmsLogTag::DMS, "SetVirtualMirrorScreenCanvasRotation success");
+    TLOGI(WmsLogTag::DMS, "set virtual mirror screen canvas rotation success");
     return DMError::DM_OK;
 }
 
 DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "ResizeVirtualScreen permission denied!");
+        TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS, "ResizeVirtualScreen, screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", width: %{public}u, height: %{public}u.",
         screenId, width, height);
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ResizeVirtualScreen: no such screen.");
+        TLOGE(WmsLogTag::DMS, "No such screen.");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     ScreenId rsScreenId;
     if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-        TLOGE(WmsLogTag::DMS, "ResizeVirtualScreen: No corresponding rsId");
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.ResizeVirtualScreen(rsScreenId, width, height);
@@ -2101,16 +2247,10 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 
-    bool agentFound = false;
     for (auto &agentIter : screenAgentMap_) {
-        for (auto iter = agentIter.second.begin(); iter != agentIter.second.end(); iter++) {
-            if (*iter == screenId) {
-                iter = agentIter.second.erase(iter);
-                agentFound = true;
-                break;
-            }
-        }
-        if (agentFound) {
+        auto iter = std::find(agentIter.second.begin(), agentIter.second.end(), screenId);
+        if (iter != agentIter.second.end()) {
+            iter = agentIter.second.erase(iter);
             if (agentIter.first != nullptr && agentIter.second.empty()) {
                 screenAgentMap_.erase(agentIter.first);
             }
@@ -2136,7 +2276,6 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         }
     }
     screenIdManager_.DeleteScreenId(screenId);
-
     if (rsScreenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "DestroyVirtualScreen: No corresponding rsScreenId");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -2172,7 +2311,7 @@ DMError ScreenSessionManager::DisableMirror(bool disableOrNot)
 void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
 {
     auto mirrorScreen = GetScreenSession(screenId);
-    if (mirrorScreen != nullptr && mirrorScreen->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
+    if (mirrorScreen != nullptr) {
         mirrorScreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         NotifyScreenChanged(mirrorScreen->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
     }
@@ -2181,52 +2320,38 @@ void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
                                          ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS, "MakeMirror enter!");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "MakeMirror permission denied!");
+        TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
-        TLOGW(WmsLogTag::DMS, "MakeMirror was disabled by edm!");
+        TLOGW(WmsLogTag::DMS, "disabled by edm!");
         return DMError::DM_ERROR_INVALID_PERMISSION;
     }
 
-    TLOGI(WmsLogTag::DMS, "MakeMirror mainScreenId :%{public}" PRIu64"", mainScreenId);
+    TLOGI(WmsLogTag::DMS, "mainScreenId :%{public}" PRIu64"", mainScreenId);
     auto allMirrorScreenIds = GetAllValidScreenIds(mirrorScreenIds);
     auto iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
     if (iter != allMirrorScreenIds.end()) {
         allMirrorScreenIds.erase(iter);
     }
-    for (ScreenId screenId : mirrorScreenIds) {
-        auto screen = GetScreenSession(screenId);
-        if (screen == nullptr || screen->GetVirtualScreenFlag() != VirtualScreenFlag::CAST) {
-            continue;
-        }
-        OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
-    }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror start");
-    auto mainScreen = GetScreenSession(mainScreenId);
-    if (mainScreen == nullptr || allMirrorScreenIds.empty()) {
-        TLOGE(WmsLogTag::DMS, "MakeMirror fail. mainScreen :%{public}" PRIu64", screens size:%{public}u",
-            mainScreenId, static_cast<uint32_t>(allMirrorScreenIds.size()));
+    if (allMirrorScreenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "make mirror screen id empty");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SetMirror(mainScreenId, allMirrorScreenIds);
-    if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "MakeMirror set mirror failed.");
-        return ret;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror start");
+    for (ScreenId screenId : allMirrorScreenIds) {
+        OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
-    if (GetAbstractScreenGroup(mainScreen->groupSmsId_) == nullptr) {
-        TLOGE(WmsLogTag::DMS, "MakeMirror get screen group failed.");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    screenGroupId = mainScreen->groupSmsId_;
+    DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
+        allMirrorScreenIds, screenGroupId);
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
-        TLOGI(WmsLogTag::DMS, "MakeMirror notify scb end");
     }
+    TLOGI(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror end");
-    return DMError::DM_OK;
+    return makeResult;
 }
 
 DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
@@ -2353,12 +2478,12 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::MirrorUniqueSwitch(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds)
 {
-    TLOGI(WmsLogTag::DMS, "MirrorUniqueSwitch enter");
+    TLOGI(WmsLogTag::DMS, "enter");
     auto defaultScreen = GetDefaultScreenSession();
     if (!defaultScreen) {
-        TLOGE(WmsLogTag::DMS, "Default screen is nullptr");
+        TLOGE(WmsLogTag::DMS, "default screen is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     defaultScreen->groupSmsId_ = 1;
@@ -2367,49 +2492,26 @@ DMError ScreenSessionManager::MirrorUniqueSwitch(const std::vector<ScreenId>& sc
     if (iter != smsScreenGroupMap_.end()) {
         smsScreenGroupMap_.erase(iter);
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MirrorUniqueSwitch start");
-    ScreenId uniqueScreenId = screenIds[0];
-    TLOGI(WmsLogTag::DMS, "disconnect virtual screen end make unique screenId %{public}" PRIu64".", uniqueScreenId);
-    auto group = GetAbstractScreenGroup(defaultScreen->groupSmsId_);
-    if (group == nullptr) {
-        group = AddToGroupLocked(defaultScreen);
-        if (group == nullptr) {
-            TLOGE(WmsLogTag::DMS, "group is nullptr");
-            return DMError::DM_ERROR_NULLPTR;
-        }
-        NotifyScreenGroupChanged(defaultScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
-    }
-    Point point;
-    std::vector<Point> startPoints;
-    startPoints.insert(startPoints.begin(), screenIds.size(), point);
-    ChangeScreenGroup(group, screenIds, startPoints, true, ScreenCombination::SCREEN_UNIQUE);
-    auto uniqueScreen = GetScreenSession(uniqueScreenId);
-    if (uniqueScreen != nullptr && uniqueScreen->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
-        uniqueScreen->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
-        NotifyScreenChanged(uniqueScreen->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
-    }
-    // virtual screen create callback to notify scb
-    OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
-    TLOGI(WmsLogTag::DMS, "MirrorUniqueSwitch notify scb end");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MirrorUniqueSwitch end");
-    return DMError::DM_OK;
+    DMError uniqueSwitchRet = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(defaultScreen, screenIds);
+    TLOGI(WmsLogTag::DMS, "virtual screen unique switch result: %{public}d", uniqueSwitchRet);
+    return uniqueSwitchRet;
 }
 
 DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "MakeUniqueScreen permission denied!");
+        TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS, "MakeUniqueScreen enter!");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenIds.empty()) {
-        TLOGE(WmsLogTag::DMS, "MakeUniqueScreen screen is empty");
+        TLOGE(WmsLogTag::DMS, "screen is empty");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     ScreenId uniqueScreenId = screenIds[0];
     auto uniqueScreen = GetScreenSession(uniqueScreenId);
     if (uniqueScreen != nullptr && uniqueScreen->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
-        return MirrorUniqueSwitch(screenIds);
+        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
     }
     for (auto screenId : screenIds) {
         ScreenId rsScreenId = SCREEN_ID_INVALID;
@@ -2431,9 +2533,10 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
     }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
-        TLOGD(WmsLogTag::DMS, "MakeUniqueScreen flush data");
+        TLOGD(WmsLogTag::DMS, "flush data");
         transactionProxy->FlushImplicitTransaction();
     }
+    TLOGI(WmsLogTag::DMS, "end!");
     return DMError::DM_OK;
 }
 
@@ -2715,24 +2818,24 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     return screenSession;
 }
 
-sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen)
+sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen, bool isUnique)
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     sptr<ScreenSessionGroup> res;
     if (smsScreenGroupMap_.empty()) {
         TLOGI(WmsLogTag::DMS, "connect the first screen");
-        res = AddAsFirstScreenLocked(newScreen);
+        res = AddAsFirstScreenLocked(newScreen, isUnique);
     } else {
         res = AddAsSuccedentScreenLocked(newScreen);
     }
     return res;
 }
 
-sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<ScreenSession> newScreen)
+sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<ScreenSession> newScreen, bool isUnique)
 {
     ScreenId smsGroupScreenId(1);
     std::ostringstream buffer;
-    buffer<<"ScreenGroup_"<<smsGroupScreenId;
+    buffer << "ScreenGroup_" << smsGroupScreenId;
     std::string name = buffer.str();
     // default ScreenCombination is mirror
     isExpandCombination_ = system::GetParameter("persist.display.expand.enabled", "0") == "1";
@@ -2741,6 +2844,10 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
         screenGroup = new(std::nothrow) ScreenSessionGroup(smsGroupScreenId,
             SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_EXPAND);
         newScreen->SetScreenCombination(ScreenCombination::SCREEN_EXPAND);
+    } else if (isUnique) {
+        screenGroup = new(std::nothrow) ScreenSessionGroup(smsGroupScreenId,
+            SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_UNIQUE);
+        newScreen->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
     } else {
         screenGroup = new(std::nothrow) ScreenSessionGroup(smsGroupScreenId,
             SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_MIRROR);
@@ -3071,7 +3178,9 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         auto res = GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
-            CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
+            if (IS_BETA) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
         }
         isScreenShot_ = true;
         NotifyCaptureStatusChanged();
@@ -3094,14 +3203,14 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     ScreenId screenId = SCREEN_ID_INVALID;
     // get snapshot area frome Screenshot extension
     ConfigureScreenSnapshotParams();
-    if (ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension()) {
-        if (ScreenSnapshotPicker::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
+    if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {
+        if (ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
             TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
-            ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+            ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
             *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
             return nullptr;
         }
-        ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+        ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
     } else {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         TLOGE(WmsLogTag::DMS, "SnapshotPickerConnectExtension failed");
@@ -3120,8 +3229,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     DisplayId displayId = displayInfo->GetDisplayId();
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSnapshotByPicker(%" PRIu64")", displayId);
     auto pixelMap = GetScreenSnapshot(displayId);
-    if (pixelMap != nullptr) {
-        CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "ohos.screenshot");
+    if (pixelMap != nullptr && IS_BETA) {
+        CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
     }
     isScreenShot_ = true;
     NotifyCaptureStatusChanged();
@@ -3687,12 +3796,12 @@ uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
-    sptr<ScreenSession> defSession = GetDefaultScreenSession();
-    if (defSession != nullptr) {
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession != nullptr) {
         if (foldStatus == FoldStatus::FOLDED) {
-            defSession->SetDefaultDeviceRotationOffset(0);
+            screenSession->SetDefaultDeviceRotationOffset(0);
         } else {
-            defSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
+            screenSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
@@ -3831,14 +3940,28 @@ void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMod
     }
 }
 
-void ScreenSessionManager::SetNotifyLockOrNot(bool notifyLockOrNot)
+void ScreenSessionManager::ScbClientDeathCallback(int32_t deathScbPid)
 {
-    notifyLockOrNot_ = notifyLockOrNot;
+    if (oldScbPids_.empty()) {
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "old scb: %{public}d death", deathScbPid);
+    oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), deathScbPid), oldScbPids_.end());
 }
 
-bool ScreenSessionManager::GetNotifyLockOrNot()
+void ScreenSessionManager::AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient,
+    int32_t scbPid)
 {
-    return notifyLockOrNot_;
+    sptr<ScbClientListenerDeathRecipient> scbClientDeathListener =
+        new (std::nothrow) ScbClientListenerDeathRecipient(scbPid);
+    if (scbClientDeathListener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "add scb: %{public}d death listener failed", scbPid);
+        return;
+    }
+    if (scbClient != nullptr && scbClient->AsObject() != nullptr) {
+        TLOGI(WmsLogTag::DMS, "add scb: %{public}d death listener", scbPid);
+        scbClient->AsObject()->AddDeathRecipient(scbClientDeathListener);
+    }
 }
 
 void ScreenSessionManager::SwitchUser()
@@ -3856,18 +3979,20 @@ void ScreenSessionManager::SwitchUser()
             TLOGI(WmsLogTag::DMS, "switch user not change");
             return;
         }
-        auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
-        if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
-            oldScbPids_.emplace_back(currentScbPId_);
+        if (clientProxy_) {
+            auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
+            if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
+                oldScbPids_.emplace_back(currentScbPId_);
+            }
+            oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
         }
-        oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
         currentUserId_ = userId;
         currentScbPId_ = newScbPid;
         auto it = clientProxyMap_.find(currentUserId_);
         if (it != clientProxyMap_.end()) {
             clientProxy_ = it->second;
         }
-        if (clientProxy_ != nullptr) {
+        if (clientProxy_) {
             clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
     }
@@ -3894,85 +4019,23 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     screenEventTracker_.RecordEvent(oss.str());
     {
         std::lock_guard<std::mutex> lock(currentUserIdMutex_);
-        if (userId != currentUserId_ && currentUserId_ > 0) {
+        if (clientProxy_ != nullptr && userId != currentUserId_ && currentUserId_ > 0) {
             auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
             if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
                 oldScbPids_.emplace_back(currentScbPId_);
             }
             oldScbPids_.erase(std::remove(oldScbPids_.begin(), oldScbPids_.end(), newScbPid), oldScbPids_.end());
+            clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
         }
         currentUserId_ = userId;
         currentScbPId_ = newScbPid;
         clientProxy_ = client;
         clientProxyMap_[currentUserId_] = client;
-        clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
     }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     SetClientInner();
-}
-
-void ScreenSessionManager::RemoveAllDisplayNodeChildrenInner(int32_t userId)
-{
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap;
-    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(userId);
-    if (userDisplayNodeIter != userDisplayNodeChildrenMap_.end()) {
-        userDisplayNodeChildrenMap_.erase(userDisplayNodeIter);
-    }
-    TLOGI(WmsLogTag::DMS, "remove displayNode start");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode start");
-    for (const auto& iter : screenSessionMap_) {
-        auto displayNode = GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            TLOGE(WmsLogTag::DMS, "display node is null");
-            continue;
-        }
-        auto nodeChildren = displayNode->GetChildren();
-        std::vector<std::shared_ptr<RSBaseNode>> childrenList;
-        for (auto child : nodeChildren) {
-            auto childNode = RSNodeMap::Instance().GetNode(child);
-            if (childNode != nullptr) {
-                childrenList.push_back(childNode);
-                displayNode->RemoveChild(childNode);
-            }
-        }
-        displayNodeChildrenMap.emplace(iter.first, childrenList);
-    }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    userDisplayNodeChildrenMap_.emplace(userId, displayNodeChildrenMap);
-    TLOGI(WmsLogTag::DMS, "remove displayNode end");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RemoveAllDisplayNode end");
-}
-
-void ScreenSessionManager::RecoverAllDisplayNodeChildrenInner()
-{
-    std::lock_guard<std::mutex> lock(displayNodeChildrenMapMutex_);
-    auto userDisplayNodeIter = userDisplayNodeChildrenMap_.find(currentUserId_);
-    if (userDisplayNodeIter == userDisplayNodeChildrenMap_.end()) {
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "recover displayNode start");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode start");
-    std::map<ScreenId, std::vector<std::shared_ptr<RSBaseNode>>> displayNodeChildrenMap = userDisplayNodeIter->second;
-    for (const auto& iter : displayNodeChildrenMap) {
-        auto displayNode = GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            continue;
-        }
-        for (auto child : iter.second) {
-            displayNode->AddChild(child);
-        }
-    }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    TLOGI(WmsLogTag::DMS, "recover displayNode end");
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:RecoverAllDisplayNode end");
+    AddScbClientDeathRecipient(client, newScbPid);
 }
 
 void ScreenSessionManager::SetClientInner()
@@ -4129,6 +4192,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         TLOGE(WmsLogTag::DMS, "dumper is nullptr");
         return -1;
     }
+    dumper->DumpFreezedPidList(freezedPidList_);
     dumper->DumpEventTracker(screenEventTracker_);
     dumper->ExcuteDumpCmd();
 
@@ -4306,9 +4370,11 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");
-    if (Permission::CheckIsCallingBundleName(bundleName) == false) {
-        TLOGD(WmsLogTag::DMS, "BundleName not in whitelist!");
-        return;
+    if (eventName != "CREATE_VIRTUAL_SCREEN") {
+        if (!Permission::CheckIsCallingBundleName(bundleName)) {
+            TLOGD(WmsLogTag::DMS, "BundleName not in whitelist!");
+            return;
+        }
     }
     int32_t eventRet = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -4317,6 +4383,48 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
         "PID", getpid(),
         "UID", getuid());
     TLOGI(WmsLogTag::DMS, "%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
+}
+
+DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    {
+        std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+        for (auto pid : pidList) {
+            if (isProxy) {
+                freezedPidList_.insert(pid);
+            } else {
+                freezedPidList_.erase(pid); // set删除不存在的元素不会引发异常
+            }
+        }
+    }
+    if (isProxy) {
+        return DMError::DM_OK;
+    }
+
+    // 进程解冻时刷新一次displaychange
+    sptr<ScreenSession> screenSession = GetScreenSession(GetDefaultScreenId());
+    if (!screenSession) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto task = [=] {
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        for (auto& agent : agents) {
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            if (pidList.count(agentPid) != 0) {
+                agent->OnDisplayChange(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_UNFREEZED);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged");
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::ResetAllFreezeStatus()
+{
+    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+    freezedPidList_.clear();
+    TLOGI(WmsLogTag::DMS, "freezedPidList_ has been clear.");
+    return DMError::DM_OK;
 }
 
 DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()
@@ -4351,5 +4459,17 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     }
     std::vector<uint64_t> surfaceNodeIds;
     clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds);
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
+}
+
+void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    rsInterface_.DisablePowerOffRenderControl(rsScreenId);
 }
 } // namespace OHOS::Rosen

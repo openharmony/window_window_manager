@@ -32,16 +32,6 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
-{
-    size_t objectSize = sizeof(object);
-    if (objectSize > size) {
-        return 0;
-    }
-    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
-}
-
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -54,14 +44,15 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(Rosen::WindowManagerAgentStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
     sptr<WindowManagerAgent> wmStub = new (std::nothrow) WindowManagerAgent();
     if (wmStub == nullptr) {
         return false;
     }
+    parcel.RewindRead(0);
     wmStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS),
         parcel, reply, option);
+    parcel.RewindRead(0);
     wmStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS),
         parcel, reply, option);

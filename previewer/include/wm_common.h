@@ -78,6 +78,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_THEME_EDITOR,
     WINDOW_TYPE_NAVIGATION_INDICATOR,
     WINDOW_TYPE_HANDWRITE,
+    WINDOW_TYPE_SCENE_BOARD,
+    WINDOW_TYPE_KEYBOARD_PANEL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -86,8 +88,7 @@ enum class WindowType : uint32_t {
 
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 
-    WINDOW_TYPE_UI_EXTENSION = 3000,
-    WINDOW_TYPE_SCENE_BOARD
+    WINDOW_TYPE_UI_EXTENSION = 3000
 };
 
 /**
@@ -446,6 +447,18 @@ private:
 };
 
 /**
+ * @struct SystemBarPropertyFlag
+ *
+ * @brief Flag of system bar
+ */
+struct SystemBarPropertyFlag {
+    bool enableFlag = false;
+    bool backgroundColorFlag = false;
+    bool contentColorFlag = false;
+    bool enableAnimationFlag = false;
+};
+
+/**
  * @struct Rect
  *
  * @brief Window Rect.
@@ -742,9 +755,10 @@ struct MaximizeLayoutOption {
 };
 
 enum class BackupAndRestoreType: int32_t {
-    NONE = 0,           // no backup and restore
-    CONTINUATION = 1,   // distribute
-    APP_RECOVERY = 2,   // app recovery
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 }
 }

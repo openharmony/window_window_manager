@@ -57,6 +57,7 @@ public:
     WMError StartPictureInPicture(StartPipType startType);
     WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
     WMError StopPictureInPictureFromClient();
+    WMError DestroyPictureInPictureWindow();
     sptr<Window> GetPipWindow() const;
     uint32_t GetMainWindowId();
     void SetPipWindow(sptr<Window> window);
@@ -65,6 +66,7 @@ public:
     void UpdateContentSize(int32_t width, int32_t height);
     bool IsContentSizeChanged(float width, float height, float posX, float posY);
     void DoActionEvent(const std::string& actionName, int32_t status);
+    void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
     void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
     void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);

@@ -41,8 +41,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
         &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
-        &SceneSessionManagerStub::HandleUpdateProperty),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS),
         &SceneSessionManagerStub::HandleRequestFocusStatus),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
@@ -104,6 +102,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT_BY_ID),
         &SceneSessionManagerStub::HandleGetSessionSnapshotById),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
+        &SceneSessionManagerStub::HandleGetUIContentRemoteObj),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
@@ -311,30 +311,12 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
-{
-    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = new (std::nothrow) WindowSessionProperty();
-        if (property != nullptr) {
-            property->Read(data, action);
-        }
-    } else {
-        TLOGW(WmsLogTag::DEFAULT, "Property not exist!");
-    }
-    const WMError& ret = UpdateSessionProperty(property, action);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleRequestFocusStatus!");
     int32_t persistentId = data.ReadInt32();
     bool isFocused = data.ReadBool();
-    const WMError& ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
+    WMError ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -713,6 +695,17 @@ int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, M
     const WMError ret = GetSessionSnapshotById(persistentId, *snapshot);
     reply.WriteParcelable(snapshot.get());
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Called");
+    int32_t persistentId = data.ReadInt32();
+    sptr<IRemoteObject> uiContentRemoteObj;
+    const WSError& ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
+    reply.WriteRemoteObject(uiContentRemoteObj);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 

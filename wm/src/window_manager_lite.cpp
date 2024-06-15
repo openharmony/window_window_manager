@@ -54,6 +54,8 @@ public:
         windowDrawingContentInfos);
     void NotifyWindowModeChange(WindowModeType type);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void NotifyWMSConnected(int32_t userId, int32_t screenId);
+    void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -70,7 +72,34 @@ public:
     sptr<WindowManagerAgentLite> windowModeListenerAgent_;
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
     sptr<WindowManagerAgentLite> cameraWindowChangedListenerAgent_;
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener_;
 };
+
+void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnConnected(userId, screenId);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyWMSDisconnected(int32_t userId, int32_t screenId)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS disconnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        wmsConnectionChangedListener = wmsConnectionChangedListener_;
+    }
+    if (wmsConnectionChangedListener != nullptr) {
+        wmsConnectionChangedListener->OnDisconnected(userId, screenId);
+    }
+}
 
 void WindowManagerLite::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
@@ -573,6 +602,61 @@ WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persist
         return WMError::WM_OK;
     }
     return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
+}
+
+WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "raise window to top failed.");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
+{
+    int32_t clientUserId = GetUserIdByUid(getuid());
+    if (clientUserId != SYSTEM_USERID) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "Not u0 user, permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        if (pImpl_->wmsConnectionChangedListener_) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsConnectionChangedListener is already registered, do nothing");
+            return WMError::WM_OK;
+        }
+        pImpl_->wmsConnectionChangedListener_ = listener;
+    }
+    auto ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWMSConnectionChangedListener(
+        std::bind(&WindowManagerLite::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
+    if (ret != WMError::WM_OK) {
+        pImpl_->wmsConnectionChangedListener_ = nullptr;
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterWMSConnectionChangedListener()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Unregister enter");
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->wmsConnectionChangedListener_ = nullptr;
+    return WMError::WM_OK;
+}
+
+void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
+{
+    if (isConnected) {
+        pImpl_->NotifyWMSConnected(userId, screenId);
+    } else {
+        pImpl_->NotifyWMSDisconnected(userId, screenId);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

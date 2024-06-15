@@ -771,6 +771,15 @@ DMError DisplayManagerService::SetScreenRotationLocked(bool isLocked)
     return ScreenRotationController::SetScreenRotationLocked(isLocked);
 }
 
+DMError DisplayManagerService::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set screen rotation locked from js permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    return ScreenRotationController::SetScreenRotationLocked(isLocked);
+}
+
 void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
 {
     if (!isAutoRotationOpen_) {
