@@ -312,6 +312,7 @@ private:
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
+    void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -392,6 +393,7 @@ private:
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+    std::vector<ScreenId> mirrorScreenIds_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -417,6 +419,8 @@ private:
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);
     bool IsDefaultMirrorMode(ScreenId screenId);
+    void SetCastFromSettingData();
+    void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
