@@ -193,10 +193,12 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
-
+  if (!(is_linux && host_cpu == "arm64")) {
+    external_deps += [ "preferences:native_preferences" ]
+  }
+  
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
