@@ -2590,6 +2590,8 @@ HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchErr, Function | SmallTest | Lev
     window->vsyncStation_ = nullptr;
     window->SetUiDvsyncSwitch(true);
     window->SetUiDvsyncSwitch(false);
+}
+
 /*
  * @tc.name: SetRestoredRouterStack_0100
  * @tc.desc: basic function test of set or get restored router stack.
