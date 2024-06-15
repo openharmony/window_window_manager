@@ -45,8 +45,11 @@ public:
     static bool IsAttachedToSameWindow(uint32_t windowId);
     static sptr<Window> GetCurrentWindow();
 
+    static void DoPreRestore();
     static void DoRestore();
     static void DoClose(bool destroyWindow, bool needAnim);
+    static void DoActionClose();
+    static void DoDestroy();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void AutoStartPipWindow(std::string navigationId);
 private:

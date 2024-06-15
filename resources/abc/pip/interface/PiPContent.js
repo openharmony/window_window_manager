@@ -20,7 +20,7 @@ const TAG = 'PiPContent';
 export class PiPContent extends ViewPU {
     constructor(e, o, t, n = -1, i = void 0) {
         super(e, t, n);
-        "function" === typeof i && (this.paramsGenerator_ = i);
+        'function' === typeof i && (this.paramsGenerator_ = i);
         this.xComponentController = new XComponentController;
         this.xComponentId = 'pipContent';
         this.xComponentType = 'surface';
@@ -54,12 +54,13 @@ export class PiPContent extends ViewPU {
                 id: this.xComponentId,
                 type: this.xComponentType,
                 controller: this.xComponentController
-            }, "pipContent_XComponent");
+            }, 'pipContent_XComponent');
             XComponent.onLoad((() => {
                 pip.initXComponentController(this.xComponentController);
                 console.debug(TAG, 'XComponent onLoad done');
             }));
             XComponent.size({ width: '100%', height: '100%' });
+            XComponent.backgroundColor(Color.Transparent);
         }), XComponent);
         Stack.pop();
     }

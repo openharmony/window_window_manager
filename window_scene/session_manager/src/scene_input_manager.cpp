@@ -85,10 +85,24 @@ bool operator!=(const std::vector<float>& a, const std::vector<float>& b)
     }
     return false;
 }
-bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
+
+bool IsEqualWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 {
     if (a.id != b.id || a.pid != b.pid || a.uid != b.uid || a.agentWindowId != b.agentWindowId || a.flags != b.flags ||
         a.displayId != b.displayId || a.zOrder != b.zOrder) {
+        return false;
+    }
+
+    if (a.windowInputType != b.windowInputType || a.privacyMode != b.privacyMode ||
+        a.windowType != b.windowType || a.pixelMap != b.pixelMap) {
+        return false;
+    }
+    return true;
+}
+
+bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
+{
+    if (!IsEqualWindowInfo(a, b)) {
         return false;
     }
 
@@ -120,7 +134,6 @@ bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
     if (a.transform != b.transform) {
         return false;
     }
-
     return true;
 }
 
@@ -345,7 +358,8 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(static_cast<int>(e.zOrder)) + " ";
+            std::to_string(static_cast<int>(e.zOrder)) + "|" +
+            std::to_string(e.defaultHotAreas.size()) + " ";
     }
     if (lastIdList != idList) {
         windowEventID++;
@@ -373,6 +387,44 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
     MMI::InputManager::GetInstance()->SetCurrentUser(userId);
 }
 
+void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
+    std::vector<MMI::WindowInfo>& windowInfoList)
+{
+    if (windowInfoList.size() == 0) {
+        return;
+    }
+    int32_t windowBatchSize = MAX_WINDOWINFO_NUM;
+    if (windowInfoList[0].defaultHotAreas.size() > MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
+        windowBatchSize = MMI::InputManager::GetInstance()->GetWinSyncBatchSize(
+            static_cast<int32_t>(windowInfoList[0].defaultHotAreas.size()),
+            static_cast<int32_t>(displayInfos.size()));
+    }
+    windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
+    int32_t windowListSize = static_cast<int32_t>(windowInfoList.size());
+    if (windowListSize <= windowBatchSize) {
+        FlushFullInfoToMMI(displayInfos, windowInfoList);
+        return;
+    }
+    auto iterBegin = windowInfoList.begin();
+    auto iterEnd = windowInfoList.end();
+    auto iterNext = std::next(iterBegin, windowBatchSize);
+    FlushFullInfoToMMI(displayInfos, std::vector<MMI::WindowInfo>(iterBegin, iterNext));
+    while (iterNext != iterEnd) {
+        auto iterNewBegin = iterNext;
+        if (iterNewBegin->defaultHotAreas.size() <= MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
+            windowBatchSize = MAX_WINDOWINFO_NUM;
+        }
+        if (std::distance(iterNewBegin, iterEnd) <= windowBatchSize) {
+            iterNext = iterEnd;
+        } else {
+            iterNext = std::next(iterNewBegin, windowBatchSize);
+        }
+        std::map<uint64_t, std::vector<MMI::WindowInfo>> screenToWindowInfoList;
+        screenToWindowInfoList.emplace(DEFALUT_DISPLAYID, std::vector<MMI::WindowInfo>(iterNewBegin, iterNext));
+        FlushChangeInfoToMMI(screenToWindowInfoList);
+    }
+}
+
 void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush]() {
@@ -396,28 +448,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;
         }
-
-        windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
-        if (windowInfoList.size() <= MAX_WINDOWINFO_NUM) {
-            FlushFullInfoToMMI(displayInfos, windowInfoList);
-            return;
-        }
-
-        auto iterBegin = windowInfoList.begin();
-        auto iterEnd = windowInfoList.end();
-        auto iterNext = std::next(iterBegin, MAX_WINDOWINFO_NUM);
-        FlushFullInfoToMMI(displayInfos, std::vector<MMI::WindowInfo>(iterBegin, iterNext));
-        while (iterNext != iterEnd) {
-            auto iterNewBegin = iterNext;
-            if (std::distance(iterNewBegin, iterEnd) <= MAX_WINDOWINFO_NUM) {
-                iterNext = iterEnd;
-            } else {
-                iterNext = std::next(iterNewBegin, MAX_WINDOWINFO_NUM);
-            }
-            std::map<uint64_t, std::vector<MMI::WindowInfo>> screenToWindowInfoList;
-            screenToWindowInfoList.emplace(DEFALUT_DISPLAYID, std::vector<MMI::WindowInfo>(iterNewBegin, iterNext));
-            FlushChangeInfoToMMI(screenToWindowInfoList);
-        }
+        UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
     };
     if (eventHandler_) {
         eventHandler_->PostTask(task);

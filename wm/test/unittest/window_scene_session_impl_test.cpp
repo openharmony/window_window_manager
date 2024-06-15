@@ -63,6 +63,7 @@ public:
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -77,6 +78,7 @@ void WindowSceneSessionImplTest::SetUp()
 void WindowSceneSessionImplTest::TearDown()
 {
     abilityContext_ = nullptr;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
@@ -108,7 +110,9 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -128,10 +132,10 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, Function | SmallT
     ASSERT_NE(nullptr, session);
     std::string identityToken = "testToken";
     window->Create(abilityContext_, session);
+    window->Destroy(true);
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session, identityToken));
     window->property_->SetPersistentId(1);
-    window->Destroy(false);
-    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session, identityToken));
+    window->Destroy(true);
 }
 
 /**
@@ -159,6 +163,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     ASSERT_NE(nullptr, session);
 
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Destroy(true));
 }
 
 /**
@@ -188,6 +193,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -218,6 +224,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     if (parentSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentSceneSession->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentSceneSession->Destroy(true));
 }
 
 /**
@@ -248,6 +255,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -277,6 +285,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_NE(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -307,6 +316,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -337,6 +347,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -367,6 +378,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function
     if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_ERROR_INVALID_TYPE) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, parentscenesession_->CreateAndConnectSpecificSession());
     }
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -376,14 +388,12 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function
  */
 HWTEST_F(WindowSceneSessionImplTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RecoverAndReconnectSceneSession start";
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("RecoverAndReconnectSceneSession");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
 
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->RecoverAndReconnectSceneSession());
-    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest: RecoverAndReconnectSceneSession end";
 }
 
 /**
@@ -464,6 +474,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId01, Function | S
     ASSERT_EQ(WMError::WM_OK, parentscenesession->Create(abilityContext_, session));
     parentscenesession->hostSession_ = session;
     ASSERT_TRUE(nullptr != parentscenesession->FindParentSessionByParentId(1112));
+    ASSERT_EQ(WMError::WM_OK, parentscenesession->Destroy(true));
 }
 
 /**
@@ -493,6 +504,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
     ASSERT_EQ(WMError::WM_OK, parentscenesession->Create(abilityContext_, session));
     parentscenesession->hostSession_ = session;
     ASSERT_TRUE(nullptr != parentscenesession->FindParentSessionByParentId(1002));
+    ASSERT_EQ(WMError::WM_OK, parentscenesession->Destroy(true));
     
     sptr<WindowOption> option_ = new (std::nothrow) WindowOption();
     option_->SetWindowTag(WindowTag::MAIN_WINDOW);
@@ -508,6 +520,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
     parentscenesession_->hostSession_ = session_;
     parentscenesession_->property_->type_ = WindowType::WINDOW_TYPE_DIALOG;
     ASSERT_FALSE(parentscenesession_->FindMainWindowWithContext() == nullptr);
+    ASSERT_EQ(WMError::WM_OK, parentscenesession_->Destroy(true));
 }
 
 /**
@@ -537,6 +550,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTe
     ASSERT_FALSE(windowession->IsDecorEnable());
     windowession->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     windowession->DisableAppWindowDecor();
+    ASSERT_EQ(WMError::WM_OK, windowession->Destroy(true));
 }
 
 /**
@@ -886,6 +900,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest 
 
     window->property_->SetPersistentId(1);
     window->Show();
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /*
@@ -1187,6 +1202,61 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest |
     property.backgroundColor_ = 0x4C000000;
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/*
+ * @tc.name: SetSystemBarProperties
+ * @tc.desc: SetSystemBarProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowName("SetSystemBarProperties");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    std::map<WindowType, SystemBarProperty> properties;
+    std::map<WindowType, SystemBarPropertyFlag> propertyFlags;
+    SystemBarProperty current = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty property;
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
+    SystemBarPropertyFlag propertyFlag;
+    propertyFlag.contentColorFlag = true;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = propertyFlag;
+    ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperties(properties, propertyFlags));
+    if (property.contentColor_ != current.contentColor_) {
+        std::map<WindowType, SystemBarProperty> currProperties;
+        ASSERT_EQ(WMError::WM_OK,
+			window->GetSystemBarProperties(currProperties));
+        ASSERT_EQ(currProperties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
+    }
+}
+
+/*
+ * @tc.name: GetSystemBarProperties
+ * @tc.desc: GetSystemBarProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetSystemBarProperties, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowName("GetSystemBarProperties");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    std::map<WindowType, SystemBarProperty> properties;
+    ASSERT_EQ(WMError::WM_OK,
+        window->GetSystemBarProperties(properties));
 }
 
 /*
@@ -1740,18 +1810,18 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: isSessionMainWindow
- * @tc.desc: isSessionMainWindow
+ * @tc.name: IsSessionMainWindow
+ * @tc.desc: IsSessionMainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, isSessionMainWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, IsSessionMainWindow, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("isSessionMainWindow");
+    option->SetWindowName("IsSessionMainWindow");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-    auto ret = windowSceneSessionImpl->isSessionMainWindow(0);
+    auto ret = windowSceneSessionImpl->IsSessionMainWindow(0);
     ASSERT_EQ(false, ret);
 }
 

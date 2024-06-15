@@ -109,8 +109,6 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         &SessionStub::HandleTransferExtensionData),
-    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
-        &SessionStub::HandleNotifyRemoteReady),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON),
         &SessionStub::HandleNotifyAsyncOn),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
@@ -548,13 +546,6 @@ int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel&
     }
     WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleNotifyRemoteReady!");
-    NotifyRemoteReady();
     return ERR_NONE;
 }
 

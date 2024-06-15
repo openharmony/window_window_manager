@@ -23,6 +23,7 @@
 #include "wm_common.h"
 #include "extension_window.h"
 #include "ui_content.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -870,6 +871,11 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
+    if (option.GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return NapiGetUndefined(env);
+    }
     NapiAsyncTask::CompleteCallback complete =
         [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (weak == nullptr) {
@@ -930,6 +936,15 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
             option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
         }
     }
+    bool isTopmost = false;
+    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
+        if (!isModal && isTopmost) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
+            return false;
+        }
+        option.SetWindowTopmost(isTopmost);
+    }
+
     option.SetSubWindowTitle(title);
     option.SetSubWindowDecorEnable(decorEnabled);
     option.SetParentId(hostWindowId_);

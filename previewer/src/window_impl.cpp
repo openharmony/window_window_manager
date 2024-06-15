@@ -388,6 +388,17 @@ WMError WindowImpl::UpdateSystemBarProperty(bool status)
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     isIgnoreSafeArea_ = status;
@@ -800,11 +811,6 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
 int64_t WindowImpl::GetVSyncPeriod()
 {
     return 0;
-}
-
-void WindowImpl::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
-{
-    return;
 }
 
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)

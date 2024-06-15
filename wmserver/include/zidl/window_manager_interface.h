@@ -134,6 +134,10 @@ public:
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
     virtual WSError DumpSessionAll(std::vector<std::string> &infos) { return WSError::WS_OK; }
     virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) { return WSError::WS_OK; }
+    virtual WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
+    {
+        return WSError::WS_OK;
+    }
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
@@ -163,10 +167,6 @@ public:
         sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr)
     {
         return WSError::WS_OK;
-    }
-    virtual WMError UpdateSessionProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
-    {
-        return WMError::WM_OK;
     }
     virtual WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
     {

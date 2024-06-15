@@ -80,11 +80,11 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
     return 0;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate, bool isAnimatorStopped)
+void VsyncStation::FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType)
 {
     if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
         WLOGD("VsyncStation::FlushFrameRate %{public}d, linkerID = %{public}" PRIu64, rate, frameRateLinker_->GetId());
-        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate};
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
         frameRateLinker_->UpdateFrameRateRange(range, isAnimatorStopped);
     }
 }
@@ -181,6 +181,20 @@ void VsyncStation::OnVsyncTimeOut()
     WLOGD("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);
     hasRequestedVsync_ = false;
+}
+
+void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
+        Init();
+    }
+    if (receiver_ != nullptr) {
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
 }
 }
 }

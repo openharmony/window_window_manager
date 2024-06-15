@@ -614,6 +614,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
  */
 HWTEST_F(SceneSessionManagerTest3, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
 {
+    ASSERT_NE(ssm_, nullptr);
     ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
 }
 
@@ -1258,120 +1259,6 @@ HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: UpdateSessionProperty
- * @tc.desc: SceneSesionManager update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, UpdateSessionProperty, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->UpdatePropertyRaiseEnabled(property, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty01
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty01, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty02
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty02, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
-    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
- * @tc.name: HandleUpdateProperty03
- * @tc.desc: SceneSesionManager handle update property
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, HandleUpdateProperty03, Function | SmallTest | Level3)
-{
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action;
-    action = WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-    action = WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS;
-    ssm_->HandleUpdateProperty(property, action, scensession);
-}
-
-/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
@@ -1381,17 +1268,13 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, Function | SmallTest | Le
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
     ssm_->HandleTurnScreenOn(scensession);
     bool requireLock = true;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
     requireLock = false;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
-    WMError result = ssm_->UpdateSessionProperty(property, action);
-    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 }
 
 /**
@@ -1493,19 +1376,17 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
 */
 HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Level3)
 {
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, 10086);
 
     int32_t persistentId = INVALID_SESSION_ID;
     WMError result01 = ssm_->RequestFocusStatus(persistentId, true);
     EXPECT_EQ(result01, WMError::WM_OK);
-    reasonResult = ssm_->GetFocusChangeReason();
+    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
 
     persistentId = 10000;
-    reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
+    FocusChangeReason reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
     WMError result02 = ssm_->RequestFocusStatus(persistentId, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
     reasonResult = ssm_->GetFocusChangeReason();
@@ -1761,7 +1642,26 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, Function | Small
     ssm_->RegisterSessionStateChangeNotifyManagerFunc(scensession);
     ssm_->UpdatePrivateStateAndNotify(persistentId);
     auto displayId = scensession->GetSessionProperty()->GetDisplayId();
-    std::vector<string> privacyBundleList;
+    std::unordered_set<string> privacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotifyForAllScreens
+ * @tc.desc: SceneSesionManager update private state and notify for all screens
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->UpdatePrivateStateAndNotifyForAllScreens();
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    std::unordered_set<std::string> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
@@ -1784,7 +1684,7 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | Sma
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
-    std::vector<std::string> privacyBundleList;
+    std::unordered_set<std::string> privacyBundleList;
     sceneSession->GetSessionProperty()->isPrivacyMode_ = false;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
@@ -1801,7 +1701,6 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | Sma
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 1);
-    EXPECT_EQ(privacyBundleList.at(0), sessionInfo.bundleName_);
 
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);

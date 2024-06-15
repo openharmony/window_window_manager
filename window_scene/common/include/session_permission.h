@@ -37,6 +37,7 @@ public:
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);
     static bool IsSameBundleNameAsCalling(const std::string& bundleName);
     static bool IsStartedByUIExtension();
+    static bool CheckCallingIsUserTestMode(pid_t pid);
 };
 } // Rosen
 } // OHOS

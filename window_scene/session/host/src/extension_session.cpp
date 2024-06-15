@@ -228,14 +228,6 @@ WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams&
     return sessionStage_->NotifyTransferComponentDataSync(wantParams, reWantParams);
 }
 
-void ExtensionSession::NotifyRemoteReady()
-{
-    if (extSessionEventCallback_ != nullptr &&
-        extSessionEventCallback_->notifyRemoteReadyFunc_ != nullptr) {
-        extSessionEventCallback_->notifyRemoteReadyFunc_();
-    }
-}
-
 void ExtensionSession::NotifySyncOn()
 {
     if (extSessionEventCallback_ != nullptr &&

@@ -48,7 +48,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowOption> windowOption = new (std::nothrow) WindowOption();
     if (windowOption == nullptr) {
@@ -59,21 +58,28 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
 
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
         parcel, reply, option);
+    parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
         parcel, reply, option);
     return true;

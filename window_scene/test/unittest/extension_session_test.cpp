@@ -172,30 +172,6 @@ HWTEST_F(ExtensionSessionTest, TransferExtensionData, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: NotifyRemoteReady
- * @tc.desc: test function : NotifyRemoteReady
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionSessionTest, NotifyRemoteReady, Function | SmallTest | Level1)
-{
-    MockFunction<void()> mockNotifyRemoteReadyFunc;
-    extSessionEventCallback_->notifyRemoteReadyFunc_ = mockNotifyRemoteReadyFunc.AsStdFunction();
-    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyRemoteReadyFunc, Call()).Times(1);
-    extensionSession_->NotifyRemoteReady();
-
-    extSessionEventCallback_->notifyRemoteReadyFunc_ = nullptr;
-    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyRemoteReadyFunc, Call()).Times(0);
-    extensionSession_->NotifyRemoteReady();
-
-    extSessionEventCallback_ = nullptr;
-    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyRemoteReadyFunc, Call()).Times(0);
-    extensionSession_->NotifyRemoteReady();
-}
-
-/**
  * @tc.name: TransferComponentData
  * @tc.desc: test function : TransferComponentData
  * @tc.type: FUNC

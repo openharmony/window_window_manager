@@ -114,6 +114,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
     napi_set_named_property(env, objValue, "keyboardGravity",
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
+    napi_set_named_property(env, objValue, "isTopmost",
+        CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
@@ -153,6 +155,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
         JsSceneSession::SetTemporarilyShowWhenLocked);
+    BindNativeFunction(env, objValue, "setSkipDraw", moduleName,
+        JsSceneSession::SetSkipDraw);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1108,6 +1112,13 @@ napi_value JsSceneSession::SetTemporarilyShowWhenLocked(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSetTemporarilyShowWhenLocked(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetSkipDraw");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSkipDraw(env, info) : nullptr;
+}
+
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1141,22 +1152,16 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         WLOGFE("[NAPI]Failed to convert parameter to callbackType");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
     if (value == nullptr || !NapiIsCallable(env, value)) {
         WLOGFE("[NAPI]Invalid argument");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     if (!IsCallbackTypeSupported(cbType)) {
@@ -1170,8 +1175,6 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
@@ -1195,22 +1198,16 @@ napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool visible = false;
     if (!ConvertFromJsValue(env, argv[0], visible)) {
         WLOGFE("[NAPI]Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     session->UpdateNativeVisibility(visible);
@@ -2697,6 +2694,35 @@ napi_value JsSceneSession::OnSetTemporarilyShowWhenLocked(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     session->SetTemporarilyShowWhenLocked(isTemporarilyShowWhenLocked);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSkipDraw(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]argc is invalid : %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool skip = false;
+    if (!ConvertFromJsValue(env, argv[0], skip)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] session_ is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetSkipDraw(skip);
     return NapiGetUndefined(env);
 }
 

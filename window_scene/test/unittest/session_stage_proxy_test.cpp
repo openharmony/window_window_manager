@@ -99,6 +99,19 @@ HWTEST_F(SessionStageProxyTest, HandleBackEvent, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: test function : GetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level1)
+{
+    ASSERT_NE(sessionStage_, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    WSError res = sessionStage_->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: MarkProcessed
  * @tc.desc: test function : MarkProcessed
  * @tc.type: FUNC

@@ -144,6 +144,10 @@ napi_value JsWindowSceneConfig::CreateSystemUIStatusBarValue(napi_env env,
 napi_value JsWindowSceneConfig::CreateWindowStatusBar(napi_env env,
     const StatusBarConfig& config)
 {
+    if (config.backgroundColor_.empty() || config.contentColor_.empty()) {
+        WLOGFE("[NAPI]WindowStatusBar is null!");
+        return NapiGetUndefined(env);
+    }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {

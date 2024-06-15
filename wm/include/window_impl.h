@@ -224,6 +224,7 @@ public:
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    virtual void UnregisterWindowDestroyedListener() override { notifyNativefunc_ = nullptr; }
     virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
@@ -240,6 +241,8 @@ public:
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastOriRect, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display);
     void UpdateMode(WindowMode mode);
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -277,6 +280,7 @@ public:
     virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
+    WMError SetRestoredRouterStack(std::string& routerStack) override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -307,7 +311,12 @@ public:
     void PendingClose();
 
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -412,6 +421,8 @@ private:
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
+    std::string GetRestoredRouterStack();
+    Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -487,15 +498,9 @@ private:
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-    void HandleFloatingWindowTypes();
-    void HandleSystemAlarmWindow();
-    void HandleKeyguardWindow();
-    void HandleDraggingEffectWindow();
-    void HandleAppComponentWindow();
-    void HandleCommonFloatingWindows();
-    void HandleNonFocusableWindows();
-    void HandleDockSliceWindow();
-    void HandleSystemToastWindow();
+
+    std::recursive_mutex routerStackMutex_;
+    std::string restoredRouterStack_ = { "" };
 };
 } // namespace Rosen
 } // namespace OHOS
