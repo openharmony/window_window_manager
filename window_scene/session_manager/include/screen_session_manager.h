@@ -269,6 +269,7 @@ private:
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
     void ConfigureDpi();
+    void ConfigureCastParams();
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
@@ -284,6 +285,7 @@ private:
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
+    void PublishCastEvent(const bool &isPlugIn);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();

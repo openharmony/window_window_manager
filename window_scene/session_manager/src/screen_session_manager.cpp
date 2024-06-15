@@ -47,9 +47,10 @@
 #include "screen_setting_helper.h"
 #include "screen_session_dumper.h"
 #include "mock_session_manager_service.h"
-#include "screen_snapshot_picker.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
+#include "connection/screen_snapshot_picker_connection.h"
+#include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 
 namespace OHOS::Rosen {
@@ -313,6 +314,7 @@ void ScreenSessionManager::ConfigureScreenScene()
         deviceScreenConfig_.isRightPowerButton_ = isRightPowerButton;
     }
     ConfigureWaterfallDisplayCompressionParams();
+    ConfigureCastParams();
 
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
@@ -343,6 +345,25 @@ void ScreenSessionManager::ConfigureDpi()
     }
 }
 
+void ScreenSessionManager::ConfigureCastParams()
+{
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    if (stringConfig.count("castBundleName") == 0) {
+        TLOGE(WmsLogTag::DMS, "not find cast bundleName in config xml");
+        return;
+    }
+    std::string castBundleName = static_cast<std::string>(stringConfig["castBundleName"]);
+    TLOGD(WmsLogTag::DMS, "castBundleName = %{public}s", castBundleName.c_str());
+    ScreenCastConnection::GetInstance().SetBundleName(castBundleName);
+    if (stringConfig.count("castAbilityName") == 0) {
+        TLOGE(WmsLogTag::DMS, "not find cast ability in config xml");
+        return;
+    }
+    std::string castAbilityName = static_cast<std::string>(stringConfig["castAbilityName"]);
+    TLOGD(WmsLogTag::DMS, "castAbilityName = %{public}s", castAbilityName.c_str());
+    ScreenCastConnection::GetInstance().SetAbilityName(castAbilityName);
+}
+
 void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
 {
     auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
@@ -363,14 +384,14 @@ void ScreenSessionManager::ConfigureScreenSnapshotParams()
     }
     std::string screenSnapshotBundleName = static_cast<std::string>(stringConfig["screenSnapshotBundleName"]);
     TLOGD(WmsLogTag::DMS, "screenSnapshotBundleName = %{public}s.", screenSnapshotBundleName.c_str());
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotBundleName(screenSnapshotBundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(screenSnapshotBundleName);
     if (stringConfig.count("screenSnapshotAbilityName") == 0) {
         TLOGE(WmsLogTag::DMS, "not find screen snapshot ability in config xml");
         return;
     }
     std::string screenSnapshotAbilityName = static_cast<std::string>(stringConfig["screenSnapshotAbilityName"]);
     TLOGD(WmsLogTag::DMS, "screenSnapshotAbilityName = %{public}s.", screenSnapshotAbilityName.c_str());
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotAbilityName(screenSnapshotAbilityName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(screenSnapshotAbilityName);
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
@@ -474,6 +495,25 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
+void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
+{
+    TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
+    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+        return;
+    }
+    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
+        ScreenCastConnection::GetInstance().CastDisconnectExtension();
+    }
+    if (isPlugIn) {
+        ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+    } else {
+        ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
+    }
+    ScreenCastConnection::GetInstance().CastDisconnectExtension();
+}
+
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
@@ -493,12 +533,14 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+            PublishCastEvent(true);
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
+            PublishCastEvent(false);
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
@@ -3161,14 +3203,14 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     ScreenId screenId = SCREEN_ID_INVALID;
     // get snapshot area frome Screenshot extension
     ConfigureScreenSnapshotParams();
-    if (ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension()) {
-        if (ScreenSnapshotPicker::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
+    if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {
+        if (ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
             TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
-            ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+            ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
             *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
             return nullptr;
         }
-        ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+        ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
     } else {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         TLOGE(WmsLogTag::DMS, "SnapshotPickerConnectExtension failed");

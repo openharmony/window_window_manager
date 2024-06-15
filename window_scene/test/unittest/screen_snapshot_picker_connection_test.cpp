@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "screen_snapshot_picker.h"
+#include "connection/screen_snapshot_picker_connection.h"
 #include "screen_scene_config.h"
 
 using namespace testing;
@@ -23,7 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class ScreenSnapshotPickerTest : public testing::Test {
+class ScreenSnapshotPickerConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -31,19 +31,19 @@ public:
     void TearDown() override;
 };
 
-void ScreenSnapshotPickerTest::SetUpTestCase()
+void ScreenSnapshotPickerConnectionTest::SetUpTestCase()
 {
 }
 
-void ScreenSnapshotPickerTest::TearDownTestCase()
+void ScreenSnapshotPickerConnectionTest::TearDownTestCase()
 {
 }
 
-void ScreenSnapshotPickerTest::SetUp()
+void ScreenSnapshotPickerConnectionTest::SetUp()
 {
 }
 
-void ScreenSnapshotPickerTest::TearDown()
+void ScreenSnapshotPickerConnectionTest::TearDown()
 {
 }
 
@@ -54,15 +54,15 @@ namespace {
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerTest, SnapshotPickerConnectExtension, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension, Function | SmallTest | Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
     std::string bundleName = strConfig["screenSnapshotBundleName"];
     std::string abilityName = strConfig["screenSnapshotAbilityName"];
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotBundleName(bundleName);
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotAbilityName(abilityName);
-    auto ret = ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension();
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
     EXPECT_EQ(ret, false);
 }
 
@@ -71,7 +71,7 @@ HWTEST_F(ScreenSnapshotPickerTest, SnapshotPickerConnectExtension, Function | Sm
  * @tc.desc: GetScreenSnapshotRect func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerTest, GetScreenSnapshotRect, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, Function | SmallTest | Level1)
 {
     Media::Rect rect{};
     ScreenId screenId = SCREEN_ID_INVALID;
@@ -79,16 +79,16 @@ HWTEST_F(ScreenSnapshotPickerTest, GetScreenSnapshotRect, Function | SmallTest |
     auto strConfig = ScreenSceneConfig::GetStringConfig();
     std::string bundleName = strConfig["screenSnapshotBundleName"];
     std::string abilityName = strConfig["screenSnapshotAbilityName"];
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotBundleName(bundleName);
-    ScreenSnapshotPicker::GetInstance().SetScreenSnapshotAbilityName(abilityName);
-    auto ret = ScreenSnapshotPicker::GetInstance().SnapshotPickerConnectExtension();
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
     EXPECT_EQ(ret, false);
-    ScreenSnapshotPicker::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+    ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
     EXPECT_EQ(rect.top, 0);
     EXPECT_EQ(rect.left, 0);
     EXPECT_EQ(rect.width, 0);
     EXPECT_EQ(rect.height, 0);
-    ScreenSnapshotPicker::GetInstance().SnapshotPickerDisconnectExtension();
+    ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
 }
 
 }

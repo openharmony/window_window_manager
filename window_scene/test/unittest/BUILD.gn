@@ -51,6 +51,7 @@ group("unittest") {
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
+    ":ws_screen_session_ability_connection_test",
     ":ws_screen_session_manager_client_proxy_test",
     ":ws_screen_session_manager_client_stub_test",
     ":ws_screen_session_manager_client_test",
@@ -58,8 +59,7 @@ group("unittest") {
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_test",
-    ":ws_screen_snapshot_ability_connection_test",
-    ":ws_screen_snapshot_picker_test",
+    ":ws_screen_snapshot_picker_connection_test",
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
@@ -295,11 +295,11 @@ ohos_unittest("ws_screen_session_test") {
   external_deps = [ "c_utils:utils" ]
 }
 
-ohos_unittest("ws_screen_snapshot_ability_connection_test") {
+ohos_unittest("ws_screen_session_ability_connection_test") {
   module_out_path = module_out_path
 
   include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
-  sources = [ "screen_snapshot_ability_connection_test.cpp" ]
+  sources = [ "screen_session_ability_connection_test.cpp" ]
 
   deps = [
     ":ws_unittest_common",
@@ -316,11 +316,11 @@ ohos_unittest("ws_screen_snapshot_ability_connection_test") {
   ]
 }
 
-ohos_unittest("ws_screen_snapshot_picker_test") {
+ohos_unittest("ws_screen_snapshot_picker_connection_test") {
   module_out_path = module_out_path
 
   include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
-  sources = [ "screen_snapshot_picker_test.cpp" ]
+  sources = [ "screen_snapshot_picker_connection_test.cpp" ]
 
   deps = [
     ":ws_unittest_common",
