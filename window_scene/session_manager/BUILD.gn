@@ -204,6 +204,9 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager/src/zidl/screen_session_manager_client_proxy.cpp",
+    "src/connection/screen_cast_connection.cpp",
+    "src/connection/screen_session_ability_connection.cpp",
+    "src/connection/screen_snapshot_picker_connection.cpp",
     "src/fold_screen_controller/dual_display_device_policy.cpp",
     "src/fold_screen_controller/dual_display_policy.cpp",
     "src/fold_screen_controller/fold_screen_controller.cpp",
@@ -222,8 +225,6 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_session_dumper.cpp",
     "src/screen_session_manager.cpp",
     "src/screen_setting_helper.cpp",
-    "src/screen_snapshot_ability_connection.cpp",
-    "src/screen_snapshot_picker.cpp",
     "src/session_display_power_controller.cpp",
     "src/setting_observer.cpp",
     "src/setting_provider.cpp",
