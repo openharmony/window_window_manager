@@ -832,7 +832,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
-    this->RectCheckProcess();
+    Session::RectCheckProcess();
     auto task = [weakThis = wptr(this), rect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -879,7 +879,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
     });
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     if (subSession != subSession_.end() && callingPid != (*subSession)->GetCallingPid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied, not call by the same process");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied! id: %{public}d", subWindowId);
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto task = [weakThis = wptr(this), subWindowId]() {
@@ -2709,7 +2709,7 @@ WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& 
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "update mode permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "update mode permission denied! id: %{public}d", sceneSession->GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (sceneSession->GetSessionProperty() != nullptr) {
