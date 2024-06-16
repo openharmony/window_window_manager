@@ -7764,12 +7764,6 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
             return false;
         }
 
-        if (WindowHelper::IsMainWindow(pair.second->GetWindowType()) && !pair.second->GetShowRecent() &&
-            pair.second->GetSessionState() < SessionState::STATE_FOREGROUND && pair.second->GetAttachState()) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "MainWindow is at foreground, id: %{public}d", pair.second->GetPersistentId());
-            return false;
-        }
-
         if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(pair.second)) {
             return true;
         }
