@@ -1207,7 +1207,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
         if (!session->CheckGetAvoidAreaAvailable(type)) {
             TLOGI(WmsLogTag::WMS_IMMS, "check false, can not get avoid area. persistentId:%{public}d type:%{public}u",
-                session->GetPersistendId(), type);
+                session->GetPersistentId(), type);
             return {};
         }
 
