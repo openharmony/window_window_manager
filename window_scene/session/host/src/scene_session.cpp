@@ -1154,8 +1154,8 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
         TLOGI(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
         return;
     }
-    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+    if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        TLOGI(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
     }
     if (!GetSessionProperty()) {
@@ -1206,6 +1206,8 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         if (!session->CheckGetAvoidAreaAvailable(type)) {
+            TLOGI(WmsLogTag::WMS_IMMS, "check false, can not get avoid area. persistentId:%{public}d type:%{public}u",
+                session->GetPersistentId(), type);
             return {};
         }
 
