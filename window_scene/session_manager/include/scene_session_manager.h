@@ -333,7 +333,8 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-    
+    WMError UpdateDisplayHookInfo(uint_32 uid, uint_32 width, uint_32 height, flaot_t density, bool enable);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -516,6 +517,7 @@ private:
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
+    std::map<uint32_t, HookInfo> displayHookMap_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;

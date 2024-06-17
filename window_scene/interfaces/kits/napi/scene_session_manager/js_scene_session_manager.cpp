@@ -152,6 +152,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
+    BindNativeFunction(env, exportObj, "UpdateDisplayHookInfo", moduleName,
+        JsSceneSessionManager::UpdateDisplayHookInfo);
     return NapiGetUndefined(env);
 }
 
@@ -794,6 +796,13 @@ napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_ca
 }
 
 napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::UpdateDisplayHookInfo(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
@@ -2497,5 +2506,63 @@ std::shared_ptr<NativeReference> JsSceneSessionManager::GetJSCallback(const std:
         TLOGE(WmsLogTag::DEFAULT, "Find function name %{public}s, but callback is nullptr!", functionName.c_str());
     }
     return jsCallBack;
+}
+
+napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = 5;
+    napi_value argv[5] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_FIVE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t uid;
+    if (!ConvertFromJsValue(env, argv[0], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to uid");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t width;
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyEnterRecentTask(enterRecent);
+    return NapiGetUndefined(env);
+
+    uint32_t height;
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    double_t density = 1.0;
+    if (!ConvertFromJsValue(env, argv[ARGC_THREE], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable;
+    if (!ConvertFromJsValue(env, argv[ARGC_FOUR], enterRecent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<flaot_t>(density), enable);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

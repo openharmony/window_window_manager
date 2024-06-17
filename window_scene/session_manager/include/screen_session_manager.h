@@ -171,6 +171,7 @@ public:
     void NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
+    void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId screenId);
@@ -360,6 +361,7 @@ private:
     std::atomic<ScreenId> defaultRsScreenId_ { SCREEN_ID_INVALID };
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
+    std::map<uint32_t, DMHookInfo> displayHookMap_;
 
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;

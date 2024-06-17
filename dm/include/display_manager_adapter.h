@@ -89,6 +89,8 @@ public:
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
+    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo);
+
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

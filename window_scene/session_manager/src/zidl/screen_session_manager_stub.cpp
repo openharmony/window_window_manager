@@ -747,6 +747,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_RESET_ALL_FREEZE_STATUS: {
             DMError ret = ResetAllFreezeStatus();
             reply.WriteInt32(static_cast<int32_t>(ret));
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO: {
+            uint32_t uid = data.ReadUint32();
+            bool enable = data.ReadBool();
+            DMHookInfo hookInfo;
+            hookInfo.width_ = data.ReadUint32();
+            hookInfo.height_ = data.ReadUint32();
+            hookInfo.density_ = data.ReadFloat();
+            UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
         default:
