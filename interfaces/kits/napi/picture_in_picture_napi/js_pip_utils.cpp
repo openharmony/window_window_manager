@@ -151,7 +151,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("VideoPlayControlGroup", ExportVideoPlayControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoCallControlGroup", ExportVideoCallControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoMeetingControlGroup(env)),
-        DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoLiveControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoLiveControlGroup", ExportVideoLiveControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
