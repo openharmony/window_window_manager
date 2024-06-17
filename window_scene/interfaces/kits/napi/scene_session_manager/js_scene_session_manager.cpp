@@ -2522,7 +2522,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
     }
 
     uint32_t uid;
-    if (!ConvertFromJsValue(env, argv[0], enterRecent)) {
+    if (!ConvertFromJsValue(env, argv[0], uid)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to uid");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2530,7 +2530,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
     }
 
     uint32_t width;
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], enterRecent)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], width)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2540,7 +2540,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
     return NapiGetUndefined(env);
 
     uint32_t height;
-    if (!ConvertFromJsValue(env, argv[ARGC_TWO], enterRecent)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2548,7 +2548,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
     }
 
     double_t density = 1.0;
-    if (!ConvertFromJsValue(env, argv[ARGC_THREE], enterRecent)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_THREE], density)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2556,7 +2556,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
     }
 
     bool enable;
-    if (!ConvertFromJsValue(env, argv[ARGC_FOUR], enterRecent)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_FOUR], enable)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
