@@ -2562,7 +2562,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<flaot_t>(density), enable);
+    SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<float_t>(density), enable);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
