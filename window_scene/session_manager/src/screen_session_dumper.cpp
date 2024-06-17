@@ -29,7 +29,12 @@ constexpr int LINE_WIDTH = 30;
 
 static std::string GetProcessNameByPid(int32_t pid)
 {
-    std::ifstream infile("/proc/" + std::to_string(pid) + "/comm");
+    std::string filePath = "/proc/" + std::to_string(pid) + "/comm";
+    char tmpPath[PATH_MAX]  = { 0 };
+    if (!realpath(filePath.c_str(), tmpPath)) {
+        return "UNKNOWN";
+    }
+    std::ifstream infile(filePath);
     if (!infile.is_open()) {
         return "UNKNOWN";
     }
