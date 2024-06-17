@@ -2595,7 +2595,7 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-bool OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
+void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
