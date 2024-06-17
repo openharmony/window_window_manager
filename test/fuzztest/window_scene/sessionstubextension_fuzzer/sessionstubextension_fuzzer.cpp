@@ -61,6 +61,9 @@ void SessionStubTestExtensionCode(sptr<Session> sessionStub, MessageParcel& parc
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
         parcel, reply, option);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
+        parcel, reply, option);
     parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT),
         parcel, reply, option);
