@@ -261,6 +261,11 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             if (parentSession == nullptr) {
                 continue;
             }
+            auto iter = dialogMap.find(parentSession->GetPersistentId());
+            if (iter != dialogMap.end() && iter->second->GetSessionProperty() &&
+                iter->second->GetSessionProperty()->IsTopmost() && !property->IsTopmost()) {
+                continue;
+            }
             dialogMap[parentSession->GetPersistentId()] = session;
             WLOGFI("Add dialog session, id: %{public}d, parentId: %{public}d",
                 session->GetPersistentId(), parentSession->GetPersistentId());
@@ -469,14 +474,14 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
-        .windowType = static_cast<int32_t>(windowType),
         .displayId = displayId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .pointerChangeAreas = pointerChangeAreas,
         .zOrder = zOrder,
         .transform = transformData,
         .pixelMap = pixelMap,
-        .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_)
+        .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
+        .windowType = static_cast<int32_t>(windowType)
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &

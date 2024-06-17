@@ -34,19 +34,56 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
+void SessionStubBaseTest(sptr<Session> sessionStub, MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CONNECT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_DISCONNECT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_FOREGROUND),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKGROUND),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SHOW),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_HIDE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TERMINATE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_EXCEPTION),
+        parcel, reply, option);
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-    
+
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     SessionInfo info;
     info.abilityName_ = "stubConnectFuzzTest";
@@ -56,29 +93,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
 
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CONNECT),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_DISCONNECT),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_FOREGROUND),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKGROUND),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SHOW),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_HIDE),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TERMINATE),
-        parcel, reply, option);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_EXCEPTION),
-        parcel, reply, option);
+    SessionStubBaseTest(sessionStub, parcel);
+
     return true;
 }
 } // namespace.OHOS

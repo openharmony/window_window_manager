@@ -21,6 +21,7 @@
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -131,11 +132,9 @@ HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonVisible, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTwoTest, GetSystemSessionConfig, Function | SmallTest | Level2)
 {
-    int rect = 0;
     auto window = GetTestWindowImpl("GetSystemSessionConfig");
     ASSERT_NE(window, nullptr);
     window->GetSystemSessionConfig();
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
@@ -544,7 +543,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyOccupiedAreaChangeInfo, Function | Smal
     listeners.insert(listeners.begin(), nullptr);
     window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
 
-    int rect = 0;
     sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -570,7 +568,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyOccupiedAreaChangeInfo, Function | Smal
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->NotifyOccupiedAreaChangeInfo(info);
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
@@ -589,7 +586,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyWindowStatusChange, Function | SmallTes
     listeners.insert(listeners.begin(), nullptr);
     window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
 
-    int rect = 0;
     WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
     window->state_ = WindowState::STATE_HIDDEN;
     window->property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
@@ -607,7 +603,6 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyWindowStatusChange, Function | SmallTes
 
     mode = WindowMode::WINDOW_MODE_PIP;
     window->NotifyWindowStatusChange(mode);
-    ASSERT_EQ(rect, 0);
     window->Destroy();
 }
 
@@ -704,6 +699,315 @@ HWTEST_F(WindowSessionImplTwoTest, IsUserOrientation, Function | SmallTest | Lev
     ASSERT_TRUE(window->IsUserOrientation(Orientation::USER_ROTATION_LANDSCAPE));
     ASSERT_TRUE(window->IsUserOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED));
     ASSERT_TRUE(window->IsUserOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED));
+    window->Destroy();
+}
+
+/**
+ * @tc.name: WindowSessionCreateCheck
+ * @tc.desc: WindowSessionCreateCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, WindowSessionCreateCheck, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("WindowSessionCreateCheck");
+    ASSERT_NE(window, nullptr);
+
+    int32_t nullWindowTestId = 1001;
+    int32_t nullPropertyId = 1002;
+    int32_t displayId = 1003;
+    int32_t cameraId = 1004;
+    
+    window->windowSessionMap_.clear();
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    window->windowSessionMap_.insert(
+        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+            "nullWindow",
+            std::pair<int32_t, sptr<WindowSessionImpl>>(nullWindowTestId, nullptr)
+        )
+    );
+    auto nullPropertyWindow = GetTestWindowImpl("nullPropertyWindow");
+    ASSERT_NE(nullPropertyWindow, nullptr);
+    nullPropertyWindow->property_ = nullptr;
+    window->windowSessionMap_.insert(
+        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+            "nullPropertyWindow",
+            std::pair<int32_t, sptr<WindowSessionImpl>>(nullPropertyId, nullPropertyWindow)
+        )
+    );
+
+    auto displayWindow = GetTestWindowImpl("displayWindow");
+    ASSERT_NE(displayWindow, nullptr);
+    displayWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FREEZE_DISPLAY);
+    window->windowSessionMap_.insert(
+        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+            "displayWindow",
+            std::pair<int32_t, sptr<WindowSessionImpl>>(displayId, displayWindow)
+        )
+    );
+    ASSERT_EQ(window->WindowSessionCreateCheck(), WMError::WM_OK);
+
+    window->windowSessionMap_.clear();
+    auto cameraWindow = GetTestWindowImpl("cameraWindow");
+    ASSERT_NE(cameraWindow, nullptr);
+    cameraWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    window->windowSessionMap_.insert(
+        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+            "cameraWindow",
+            std::pair<int32_t, sptr<WindowSessionImpl>>(cameraId, cameraWindow)
+        )
+    );
+    ASSERT_EQ(window->WindowSessionCreateCheck(), WMError::WM_ERROR_REPEAT_OPERATION);
+    window->Destroy();
+    nullPropertyWindow->Destroy();
+    displayWindow->Destroy();
+    cameraWindow->Destroy();
+}
+
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: NotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("NotifyForegroundInteractiveStatus");
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyForegroundInteractiveStatus(true);
+    window->NotifyForegroundInteractiveStatus(false);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    window->NotifyForegroundInteractiveStatus(true);
+    window->state_ = WindowState::STATE_FROZEN;
+    window->NotifyForegroundInteractiveStatus(true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce
+ * @tc.desc: UpdateDecorEnableToAce
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, UpdateDecorEnableToAce, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("UpdateDecorEnableToAce");
+    ASSERT_NE(window, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    auto listeners = GetListenerList<IWindowChangeListener, MockWindowChangeListener>();
+    sptr<MockWindowChangeListener> nullListener;
+    listeners.insert(listeners.begin(), nullListener);
+    window->windowChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->UpdateDecorEnableToAce(false);
+
+    window->uiContent_ = nullptr;
+    window->UpdateDecorEnableToAce(false);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UpdateDecorEnable
+ * @tc.desc: UpdateDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, UpdateDecorEnable, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("UpdateDecorEnable");
+    ASSERT_NE(window, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->UpdateDecorEnable(true, WindowMode::WINDOW_MODE_UNDEFINED);
+
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->UpdateDecorEnable(true, WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    window->uiContent_ = nullptr;
+    window->UpdateDecorEnable(true, WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->UpdateDecorEnable(false, WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyModeChange
+ * @tc.desc: NotifyModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyModeChange, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("NotifyModeChange");
+    ASSERT_NE(window, nullptr);
+    auto listeners = GetListenerList<IWindowChangeListener, MockWindowChangeListener>();
+    sptr<MockWindowChangeListener> nullListener;
+    listeners.insert(listeners.begin(), nullListener);
+    window->windowChangeListeners_.insert({window->GetPersistentId(), listeners});
+
+    window->NotifyModeChange(WindowMode::WINDOW_MODE_FULLSCREEN, true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: SetRequestedOrientation
+ * @tc.desc: SetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, SetRequestedOrientation, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("SetRequestedOrientation");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetRequestedOrientation(Orientation::BEGIN);
+    window->SetRequestedOrientation(Orientation::END);
+    
+    window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    
+    window->property_->SetRequestedOrientation(Orientation::BEGIN);
+    window->SetRequestedOrientation(Orientation::BEGIN);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetRequestedOrientation
+ * @tc.desc: GetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, GetRequestedOrientation, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetRequestedOrientation");
+    ASSERT_NE(window, nullptr);
+    window->property_ = nullptr;
+    ASSERT_EQ(window->GetRequestedOrientation(), Orientation::UNSPECIFIED);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetContentInfo
+ * @tc.desc: GetContentInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, GetContentInfo, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetContentInfo");
+    ASSERT_NE(window, nullptr);
+    
+    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::CONTINUATION), "");
+    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::APP_RECOVERY), "");
+    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::NONE), "");
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->GetContentInfo(BackupAndRestoreType::NONE);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetDecorHeight
+ * @tc.desc: GetDecorHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, GetDecorHeight, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight");
+    ASSERT_NE(window, nullptr);
+    int32_t height = -1;
+    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+    
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(-1));
+    window->uiContent_ = std::move(uiContent);
+    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_DO_NOTHING);
+    height = 1;
+    window->GetDecorHeight(height);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetTitleButtonArea
+ * @tc.desc: GetTitleButtonArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonArea, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetTitleButtonArea");
+    ASSERT_NE(window, nullptr);
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    TitleButtonRect titleButtonRect;
+    ASSERT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_DO_NOTHING);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: RegisterWindowTitleButtonRectChangeListener
+ * @tc.desc: RegisterWindowTitleButtonRectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
+    ASSERT_NE(window, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    sptr<IWindowTitleButtonRectChangedListener> listener =
+        new (std::nothrow) MockWindowTitleButtonRectChangedListener();
+    ASSERT_NE(listener, nullptr);
+    window->RegisterWindowTitleButtonRectChangeListener(listener);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UnregisterWindowTitleButtonRectChangeListener
+ * @tc.desc: UnregisterWindowTitleButtonRectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, UnregisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
+    ASSERT_NE(window, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener> listener =
+        new (std::nothrow) MockWindowTitleButtonRectChangedListener();
+    ASSERT_NE(listener, nullptr);
+    window->UnregisterWindowTitleButtonRectChangeListener(listener);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyWindowTitleButtonRectChange
+ * @tc.desc: NotifyWindowTitleButtonRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyWindowTitleButtonRectChange, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("NotifyWindowTitleButtonRectChange");
+    ASSERT_NE(window, nullptr);
+    auto listeners = GetListenerList<IWindowTitleButtonRectChangedListener,
+        MockWindowTitleButtonRectChangedListener>();
+    listeners.insert(listeners.begin(), nullptr);
+    window->windowTitleButtonRectChangeListeners_.insert({window->GetPersistentId(), listeners});
+    TitleButtonRect titleButtonRect;
+    window->NotifyWindowTitleButtonRectChange(titleButtonRect);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: RegisterWindowRectChangeListener
+ * @tc.desc: RegisterWindowRectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("RegisterWindowRectChangeListener");
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterWindowRectChangeListener(nullptr));
+
+    sptr<IWindowRectChangeListener> listener = new (std::nothrow) MockWindowRectChangeListener();
+    ASSERT_NE(listener, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
+
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
     window->Destroy();
 }
 

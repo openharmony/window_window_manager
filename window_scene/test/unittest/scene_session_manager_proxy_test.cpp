@@ -361,42 +361,6 @@ HWTEST_F(
 }
 
 /**
- * @tc.name: UpdateSessionProperty
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionProperty, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    WSPropertyChangeAction action{};
-    sceneSessionManagerProxy_->UpdateSessionProperty(property, action);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-}
-
-/**
- * @tc.name: UpdateSessionProperty2
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionProperty2, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    sptr<WindowSessionProperty> property = nullptr;
-    WSPropertyChangeAction action{};
-    sceneSessionManagerProxy_->UpdateSessionProperty(property, action);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-}
-
-/**
  * @tc.name: UpdateSessionTouchOutsideListener
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -904,6 +868,20 @@ HWTEST_F(sceneSessionManagerProxyTest, LockSession, Function | SmallTest | Level
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->LockSession(0));
     sceneSessionManagerProxy_ = nullptr;
+}
+
+/**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy = new SceneSessionManagerProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetUIContentRemoteObj(1, remoteObj));
 }
 
 /**

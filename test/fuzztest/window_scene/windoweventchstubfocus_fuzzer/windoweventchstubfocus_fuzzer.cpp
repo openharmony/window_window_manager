@@ -45,27 +45,32 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowEventChannelStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowEventChannel> eventStub = new (std::nothrow) WindowEventChannel(nullptr);
     if (eventStub == nullptr) {
         return false;
     }
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_CLEAR_FOCUS),
         parcel, reply, option);

@@ -449,6 +449,21 @@ HWTEST_F(WindowOptionTest, SetDialogTitle, Function | SmallTest | Level3)
     std::string ret = option->GetDialogTitle();
     ASSERT_EQ(true, ret == "Test");
 }
+
+/**
+ * @tc.name: SetWindowTopmost
+ * @tc.desc: SetWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowTopmost(true);
+    ASSERT_EQ(true, option->GetWindowTopmost());
+    option->SetWindowTopmost(false);
+    ASSERT_EQ(false, option->GetWindowTopmost());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

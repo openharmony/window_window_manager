@@ -291,10 +291,11 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-void ScreenSession::UpdatePropertyByFoldControl(RRect bounds, RRect phyBounds)
+void ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
-    property_.SetBounds(bounds);
-    property_.SetPhyBounds(phyBounds);
+    property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
+    property_.SetBounds(updatedProperty.GetBounds());
+    property_.SetPhyBounds(updatedProperty.GetPhyBounds());
 }
 
 void ScreenSession::UpdateDisplayState(DisplayState displayState)

@@ -1540,6 +1540,10 @@ void WindowManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivat
 
 WMError WindowManagerService::SetGestureNavigaionEnabled(bool enable)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [this, enable]() {
         return windowRoot_->SetGestureNavigaionEnabled(enable);
     };

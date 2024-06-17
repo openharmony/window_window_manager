@@ -596,12 +596,19 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     switch (setUIContentType) {
         default:
-        case WindowSetUIContentType::DEFAULT:
+        case WindowSetUIContentType::DEFAULT: {
+            auto routerStack = GetRestoredRouterStack();
+            auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+            if (!routerStack.empty() &&
+                uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                WLOGFI("Restore router stack succeed.");
+                break;
+            }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
+        }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
-                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -693,8 +700,7 @@ Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
 std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
-    if (type != BackupAndRestoreType::CONTINUATION && type != BackupAndRestoreType::APP_RECOVERY) {
-        WLOGFE("Invalid type %{public}d", type);
+    if (type == BackupAndRestoreType::NONE) {
         return "";
     }
 
@@ -702,8 +708,43 @@ std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo(type == BackupAndRestoreType::CONTINUATION ?
-        Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
+}
+
+WMError WindowImpl::SetRestoredRouterStack(std::string& routerStack)
+{
+    WLOGFD("Set restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    restoredRouterStack_ = routerStack;
+    return WMError::WM_OK;
+}
+
+std::string WindowImpl::GetRestoredRouterStack()
+{
+    WLOGFD("Get restored router stack");
+    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    return std::move(restoredRouterStack_);
+}
+
+Ace::ContentInfoType WindowImpl::GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
@@ -797,6 +838,36 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
             static_cast<int32_t>(ret), property_->GetWindowId());
     }
     return ret;
+}
+
+WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
+        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
+        current.contentColor_ = propertyIter->second.contentColor_;
+        current.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(propertyIter->second.settingFlag_) |
+            static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        WLOGI("Window:%{public}u %{public}s set status bar content color %{public}u",
+            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+{
+    if (property_ != nullptr) {
+        WLOGI("Window:%{public}u", GetWindowId());
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR] = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    } else {
+        WLOGFE("inner property is null");
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -2587,6 +2658,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
+    ScheduleUpdateRectTask(rectToAce, lastOriRect, reason, rsTransaction, display);
+}
+
+void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastOriRect, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display)
+{
     auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
@@ -3800,21 +3877,30 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
-            HandleFloatingWindowTypes();
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
-        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
-            HandleSystemAlarmWindow();
+        }
+        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
+            property_->SetRequestRect(GetSystemAlarmWindowDefaultSize(property_->GetRequestRect()));
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
-        case WindowType::WINDOW_TYPE_KEYGUARD:
-            HandleKeyguardWindow();
+        }
+        case WindowType::WINDOW_TYPE_KEYGUARD: {
+            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
             break;
-        case WindowType::WINDOW_TYPE_DRAGGING_EFFECT:
-            HandleDraggingEffectWindow();
+        }
+        case WindowType::WINDOW_TYPE_DRAGGING_EFFECT: {
+            property_->SetWindowFlags(0);
             break;
-        case WindowType::WINDOW_TYPE_APP_COMPONENT:
-            HandleAppComponentWindow();
+        }
+        case WindowType::WINDOW_TYPE_APP_COMPONENT: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
             break;
+        }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
         case WindowType::WINDOW_TYPE_SYSTEM_FLOAT:
@@ -3824,74 +3910,29 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
-        case WindowType::WINDOW_TYPE_DIALOG:
-            HandleCommonFloatingWindows();
+        case WindowType::WINDOW_TYPE_DIALOG: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
+        }
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
-        case WindowType::WINDOW_TYPE_POINTER:
-            HandleNonFocusableWindows();
+        case WindowType::WINDOW_TYPE_POINTER: {
+            property_->SetFocusable(false);
             break;
-        case WindowType::WINDOW_TYPE_DOCK_SLICE:
-            HandleDockSliceWindow();
+        }
+        case WindowType::WINDOW_TYPE_DOCK_SLICE: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
-        case WindowType::WINDOW_TYPE_SYSTEM_TOAST:
-            HandleSystemToastWindow();
+        }
+        case WindowType::WINDOW_TYPE_SYSTEM_TOAST: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
             break;
+        }
         default:
             break;
     }
-}
-
-void WindowImpl::HandleFloatingWindowTypes()
-{
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property_->SetFocusable(false);
-}
-
-void WindowImpl::HandleSystemAlarmWindow()
-{
-    property_->SetRequestRect(GetSystemAlarmWindowDefaultSize(property_->GetRequestRect()));
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-}
-
-void WindowImpl::HandleKeyguardWindow()
-{
-    RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-}
-
-void WindowImpl::HandleDraggingEffectWindow()
-{
-    property_->SetWindowFlags(0);
-}
-
-void WindowImpl::HandleAppComponentWindow()
-{
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
-}
-
-void WindowImpl::HandleCommonFloatingWindows()
-{
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-}
-
-void WindowImpl::HandleNonFocusableWindows()
-{
-    property_->SetFocusable(false);
-}
-
-void WindowImpl::HandleDockSliceWindow()
-{
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property_->SetFocusable(false);
-}
-
-void WindowImpl::HandleSystemToastWindow()
-{
-    property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property_->SetTouchable(false);
-    property_->SetFocusable(false);
 }
 
 bool WindowImpl::IsWindowValid() const
@@ -4153,5 +4194,14 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
+
+void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+        vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS

@@ -543,10 +543,9 @@ HWTEST_F(WindowSessionTest, Disconnect01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2)
 {
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = false;
@@ -554,7 +553,6 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    ASSERT_EQ(resultValue, 0);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session_->TerminateSessionNew(nullptr, needStartCaller, isFromBroker));
@@ -567,20 +565,17 @@ HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, TerminateSessionNew02, Function | SmallTest | Level2)
 {
-    int res = 0;
-    int resultValue = 0;
     NotifyTerminateSessionFuncNew callback =
-        [&resultValue](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        resultValue = 1;
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
+    {
     };
 
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetTerminateSessionListenerNew(callback);
-    session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    res++;
-    ASSERT_EQ(res, 1);
+    auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -610,29 +605,29 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSessionOldRect
- * @tc.desc: check func SetSessionOldRect
+ * @tc.name: SetSessionLastRect
+ * @tc.desc: check func SetSessionLastRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetSessionOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetSessionLastRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionOldRect(rect);
-    ASSERT_EQ(rect, session_->oldWinRect_);
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->lastWinRect_);
 }
 
 /**
- * @tc.name: GetSessionOldRect
- * @tc.desc: check func GetSessionOldRect
+ * @tc.name: GetSessionLastRect
+ * @tc.desc: check func GetSessionLastRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetSessionOldRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetSessionLastRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionOldRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionOldRect());
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->GetSessionLastRect());
 }
 
 /**
@@ -1781,6 +1776,24 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
+}
+
+/**
+ * @tc.name: GetUIContentRemoteObj
+ * @tc.desc: GetUIContentRemoteObj Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillOnce(Return(WSError::WS_OK));
+    session_->sessionStage_ = mockSessionStage;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<IRemoteObject> remoteObj;
+    ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
+    Mock::VerifyAndClearExpectations(&mockSessionStage);
 }
 
 /**

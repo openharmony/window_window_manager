@@ -87,6 +87,9 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
@@ -167,7 +170,6 @@ public:
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     virtual int64_t GetVSyncPeriod() override;
-    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;

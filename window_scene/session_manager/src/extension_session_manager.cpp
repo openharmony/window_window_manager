@@ -74,6 +74,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
     auto task = [this, sessionInfo]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
         sptr<ExtensionSession> extensionSession = new ExtensionSession(sessionInfo);
+        extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
         WLOGFI("persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),

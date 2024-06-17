@@ -1051,8 +1051,10 @@ public:
      * @brief flush frame rate of linker.
      *
      * @param rate frame rate.
+     * @param isAnimatorStopped animator status.
+     * @param rateType frame rate type.
      */
-    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType) {}
     /**
      * @brief Update Configuration.
      *
@@ -1147,6 +1149,11 @@ public:
      * @param func Function to notify window destroyed.
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
+    /**
+     * @brief Register window destroyed listener.
+     *
+     */
+    virtual void UnregisterWindowDestroyedListener() {}
     /**
      * @brief Register Occupied Area Change listener.
      *
@@ -1303,6 +1310,15 @@ public:
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
     {
         return std::string();
+    }
+    /**
+     * @brief Set uiability restored router stack.
+     *
+     * @return WMError.
+     */
+    virtual WMError SetRestoredRouterStack(std::string& routerStack)
+    {
+        return WMError::WM_OK;
     }
     /**
      * @brief Get ui content object.
@@ -1726,6 +1742,30 @@ public:
     }
 
     /**
+     * @brief Set System Bar(include status bar and nav bar) Properties
+     *
+     * @param properties system bar properties
+     * @param propertyFlags flags of system bar property
+     * @return WMError
+     */
+    virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
+        const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    {
+        return WMError::WM_OK;
+    }
+    
+    /**
+     * @brief Get System Bar(include status bar and nav bar) Properties
+     *
+     * @param properties system bar properties got
+     * @return WMError
+     */
+    virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Set the single frame composer enabled flag of a window.
      *
      * @param enable true means the single frame composer is enabled, otherwise means the opposite.
@@ -2012,6 +2052,14 @@ public:
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
 
+    /*
+     * @brief Set the Dvsync Switch
+     *
+     * @param dvsyncSwitch bool.
+     * @return * void
+     */
+
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
     /**
      * @brief Set whether to enable immersive mode.
      * @param enable the value true means to enable immersive mode, and false means the opposite.

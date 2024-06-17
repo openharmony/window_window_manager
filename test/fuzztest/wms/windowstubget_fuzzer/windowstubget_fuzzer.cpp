@@ -47,7 +47,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowOption> windowOption = new(std::nothrow)WindowOption();
     if (windowOption == nullptr) {
@@ -61,13 +60,16 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (windowStub == nullptr) {
         return false;
     }
-
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_DUMP_INFO),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_CONSUME_KEY_EVENT),
         parcel, reply, option);
     return true;

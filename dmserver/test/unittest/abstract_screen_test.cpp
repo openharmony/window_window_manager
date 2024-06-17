@@ -469,11 +469,10 @@ HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
  */
 HWTEST_F(AbstractScreenTest, AbstractScreenGroup, Function | SmallTest | Level3)
 {
-    int res = 0;
     sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
     absScreenGroup_ = new AbstractScreenGroup(absScreenController,
         0, 0, name_, ScreenCombination::SCREEN_ALONE);
-    EXPECT_EQ(res, 0);
+    EXPECT_NE(absScreenController, nullptr);
 }
 }
 } // namespace Rosen
