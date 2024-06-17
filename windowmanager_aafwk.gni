@@ -29,6 +29,7 @@ multimodalinput_path = "//foundation/multimodalinput"
 sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
 ability_runtime_native_path = "${ability_runtime_path}/frameworks/native"
+1234
 
 declare_args() {
   efficiency_manager_enable = true
