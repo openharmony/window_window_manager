@@ -177,10 +177,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
     if (gravity != SessionGravity::SESSION_GRAVITY_DEFAULT &&
         gravity != SessionGravity::SESSION_GRAVITY_BOTTOM &&
         gravity != SessionGravity::SESSION_GRAVITY_FLOAT) {
@@ -227,10 +223,6 @@ WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint3
 
 void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
 {
-    if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission denied, id: %{public}d", callingSessionId);
-        return;
-    }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session id: %{public}d", callingSessionId);
     UpdateCallingSessionIdAndPosition(callingSessionId);
     if (keyboardCallback_ == nullptr || keyboardCallback_->onCallingSessionIdChange_ == nullptr) {
@@ -310,14 +302,6 @@ WSError KeyboardSession::CheckAdjustKeyboardLayoutParam(const KeyboardLayoutPara
 
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-    if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
-    WSError check = CheckAdjustKeyboardLayoutParam(params);
-    if (check != WSError::WS_OK) {
-        return check;
-    }
     auto task = [weakThis = wptr(this), params]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
