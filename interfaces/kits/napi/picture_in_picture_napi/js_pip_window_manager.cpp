@@ -62,8 +62,9 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
-    std::unordered_set<uint32_t> uniqueControlGroups(controlGroups.begin(), controlGroups.end());
-    for (auto control : uniqueControlGroups) {
+    std::set<uint32_t> uniqueControlGroups(controlGroups.begin(), controlGroups.end());
+    controlGroups.assign(uniqueControlGroups.begin(), uniqueControlGroups.enable());
+    for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
             TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, controlGroup not matches, controlGroup: %{public}u",
                 control);
