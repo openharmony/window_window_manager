@@ -636,7 +636,6 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
                 displayInfo->SetWidth(info.width_);
                 displayInfo->SetHeight(info.height_);
                 displayInfo->SetWidth(info.density_);
-
             }
             return displayInfo;
         }
