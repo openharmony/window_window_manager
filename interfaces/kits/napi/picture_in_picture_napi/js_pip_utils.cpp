@@ -105,10 +105,12 @@ static napi_value ExportVideoCallControlGroup(napi_env env)
     napi_create_object(env, &result);
     (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH));
-    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "HANG_UP_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_TOGGLE));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
+    (void)SetNamedProperty(env, result, "EXTERNAL_MUTE_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_EXTERNAL_MUTE_TOGGLE));  
     napi_object_freeze(env, result);
     return result;
 }
@@ -117,12 +119,26 @@ static napi_value ExportVideoMeetingControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
+    (void)SetNamedProperty(env, result, "HANG_UP_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_TOGGLE));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH));
+    (void)SetNamedProperty(env, result, "MICROPHONE_MUTE_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MICROPHONE_MUTE_TOGGLE));
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportVideoLiveControlGroup(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    (void)SetNamedProperty(env, result, "PAUSE_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_PAUSE_TOGGLE));
+    (void)SetNamedProperty(env, result, "EXTERNAL_MUTE_TOGGLE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_EXTERNAL_MUTE_TOGGLE));
     napi_object_freeze(env, result);
     return result;
 }
@@ -135,6 +151,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("VideoPlayControlGroup", ExportVideoPlayControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoCallControlGroup", ExportVideoCallControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoMeetingControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoLiveControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
