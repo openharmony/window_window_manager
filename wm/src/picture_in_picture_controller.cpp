@@ -153,6 +153,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
+    window_->SetTransparent(true);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
         int32_t err = static_cast<int32_t>(errCode);
@@ -332,7 +333,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        DestroyPictureInPictureWindow();
+        session->DestroyPictureInPictureWindow();
         session->curState_ = PiPWindowState::STATE_STOPPED;
         std::string navId = session->pipOption_->GetNavigationId();
         if (navId != "" && session->mainWindow_) {
@@ -545,7 +546,6 @@ void PictureInPictureController::RestorePictureInPictureWindow()
         TLOGI(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
     }
-    UpdatePiPSourceRect();
     std::string navId = pipOption_->GetNavigationId();
     if (navId != "") {
         auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
@@ -556,20 +556,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
         }
     }
-    if (handler_) {
-        auto stopTask = [weakThis = wptr(this)]() {
-            auto controller = weakThis.promote();
-            if (!controller) {
-                TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
-                return;
-            }
-            controller->StopPictureInPicture(true, StopPipType::NULL_STOP);
-        };
-        handler_->PostTask(stopTask, "wms:StopPictureInPicture_restore", DELAY_ANIM);
-    } else {
-        TLOGW(WmsLogTag::WMS_PIP, "StopPictureInPicture no delay while restore");
-        StopPictureInPicture(true, StopPipType::NULL_STOP);
-    }
+    StopPictureInPicture(true, StopPipType::NULL_STOP);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
