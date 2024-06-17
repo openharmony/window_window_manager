@@ -2352,9 +2352,38 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
     }
+    RegisterCastObserver(allMirrorScreenIds);
     TLOGI(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror end");
     return makeResult;
+}
+
+void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
+{
+    mirrorScreenIds_ = mirrorScreenIds;
+    TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
+    ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
+}
+
+void ScreenSessionManager::SetCastFromSettingData()
+{
+    bool enable;
+    bool ret = ScreenSettingHelper::GetSettingCast(enable);
+    if (!ret) {
+        TLOGW(WmsLogTag::DMS, "get setting cast failed, default enable");
+        enable = true;
+    } else {
+        TLOGI(WmsLogTag::DMS, "get setting cast success, enable: %{public}u", enable);
+    }
+    for (ScreenId screenId : mirrorScreenIds_) {
+        ScreenId rsScreenId;
+        if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+            TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+            continue;
+        }
+        rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, enable);
+    }
 }
 
 DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
@@ -2375,6 +2404,7 @@ DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScre
         TLOGE(WmsLogTag::DMS, "StopMirror failed.");
         return ret;
     }
+    ScreenSettingHelper::UnregisterSettingCastObserver();
 
     return DMError::DM_OK;
 }

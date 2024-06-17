@@ -37,6 +37,8 @@ public:
     void BindKeyboardSession(sptr<SceneSession> session) override;
     sptr<SceneSession> GetKeyboardSession() const override;
     void SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func);
+    void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNode();
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
