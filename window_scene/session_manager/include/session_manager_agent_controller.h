@@ -44,6 +44,7 @@ public:
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     void UpdateWindowDrawingContentInfo(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void NotifyGestureNavigationEnabledResult(bool enable);
 
 private:
     SessionManagerAgentController()
