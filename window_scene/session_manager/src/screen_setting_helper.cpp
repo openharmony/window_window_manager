@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
+sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -61,6 +62,46 @@ bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
         return false;
     }
     dpi = static_cast<uint32_t>(value);
+    return true;
+}
+
+void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFunc func)
+{
+    if (castObserver_) {
+        TLOGD(WmsLogTag::DMS, "setting cast observer is already registered");
+        return;
+    }
+    SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
+    ErrCode ret = castProvider.RegisterObserver(castObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "register setting cast observer failed, ret=%{public}d", ret);
+        castObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingCastObserver()
+{
+    if (castObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "castObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = castProvider.UnregisterObserver(castObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "unregister setting cast observer failed, ret=%{public}d", ret);
+    }
+    castObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
+{
+    SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = castProvider.GetBoolValue(key, enable);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed, ret=%{public}d", ret);
+        return false;
+    }
     return true;
 }
 } // namespace Rosen
