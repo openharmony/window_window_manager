@@ -54,6 +54,7 @@ enum class WSPropertyChangeAction : uint32_t {
     ACTION_UPDATE_TEXTFIELD_AVOID_INFO = 1 << 27,
     ACTION_UPDATE_WINDOW_MASK = 1 << 28,
     ACTION_UPDATE_TOPMOST = 1 << 29,
+    ACTION_UPDATE_SNAPSHOT_SKIP = 1 << 30,
 };
 
 enum class AreaType : uint32_t {

@@ -30,6 +30,10 @@ namespace PARAM_KEY {
     const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
     const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
+namespace {
+    constexpr int32_t MIN_DECOR_HEIGHT = 37;
+    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+}
 class SceneSession;
 
 using SpecificSessionCreateCallback =
@@ -189,6 +193,7 @@ public:
     WSError SetTurnScreenOn(bool turnScreenOn);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
+    void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -293,6 +298,9 @@ public:
 
     void SetCustomDecorHeight(int32_t height) override
     {
+        if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
+            return;
+        }
         customDecorHeight_ = height;
     }
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -365,6 +373,8 @@ private:
     WMError HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdatePrivacyMode(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);

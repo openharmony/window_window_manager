@@ -64,7 +64,11 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
-
+    WSError RaiseWindowToTop(int32_t persistentId) override;
+    WSError RegisterIAbilityManagerCollaborator(int32_t type,
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
+    
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

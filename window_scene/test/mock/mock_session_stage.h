@@ -59,6 +59,7 @@ public:
     MOCK_METHOD1(UpdateDisplayId, WSError(uint64_t displayId));
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
+    MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -44,12 +44,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(SessionManagerServiceStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
+    parcel.RewindRead(0);
     SessionManagerService::GetInstance()->OnRemoteRequest(
         static_cast<uint32_t>(
         Rosen::ISessionManagerService::SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER),
         parcel, reply, option);
+    parcel.RewindRead(0);
     SessionManagerService::GetInstance()->OnRemoteRequest(
         static_cast<uint32_t>(
         Rosen::ISessionManagerService::SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER_LITE),

@@ -175,6 +175,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    void SaveSnapshot(bool useSnapshotThread);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -203,8 +204,8 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
-    void SetSessionOldRect(const WSRect& rect);
-    WSRect GetSessionOldRect() const;
+    void SetSessionLastRect(const WSRect& rect);
+    WSRect GetSessionLastRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -410,6 +411,7 @@ public:
         uint32_t minHeight, uint32_t maxFloatingWindowSize);
     DetectTaskInfo GetDetectTaskInfo() const;
     void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
+    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
     void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
@@ -479,7 +481,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
-    WSRect oldWinRect_;
+    WSRect lastWinRect_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;

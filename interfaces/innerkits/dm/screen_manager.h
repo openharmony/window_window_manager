@@ -241,6 +241,14 @@ public:
     DMError SetScreenRotationLocked(bool isLocked);
 
     /**
+     * @brief Set screen rotation lock status from js.
+     *
+     * @param isLocked True means forbid to rotate screen, false means the opposite.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetScreenRotationLockedFromJs(bool isLocked);
+
+    /**
      * @brief Get screen rotation lock status.
      *
      * @param isLocked Query the rotation lock status.

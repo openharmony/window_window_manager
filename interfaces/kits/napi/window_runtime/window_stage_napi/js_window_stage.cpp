@@ -640,6 +640,13 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
+
+    if (option.GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
+        return NapiGetUndefined(env);
+    }
+
     NapiAsyncTask::CompleteCallback complete =
         [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakScene = weak.lock();
@@ -698,6 +705,15 @@ bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, Win
         if (isModal) {
             option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
         }
+    }
+
+    bool isTopmost = false;
+    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
+        if (!isModal && isTopmost) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
+            return false;
+        }
+        option.SetWindowTopmost(isTopmost);
     }
 
     return true;

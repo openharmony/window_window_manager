@@ -85,10 +85,24 @@ bool operator!=(const std::vector<float>& a, const std::vector<float>& b)
     }
     return false;
 }
-bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
+
+bool IsEqualWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 {
     if (a.id != b.id || a.pid != b.pid || a.uid != b.uid || a.agentWindowId != b.agentWindowId || a.flags != b.flags ||
         a.displayId != b.displayId || a.zOrder != b.zOrder) {
+        return false;
+    }
+
+    if (a.windowInputType != b.windowInputType || a.privacyMode != b.privacyMode ||
+        a.windowType != b.windowType || a.pixelMap != b.pixelMap) {
+        return false;
+    }
+    return true;
+}
+
+bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
+{
+    if (!IsEqualWindowInfo(a, b)) {
         return false;
     }
 
@@ -120,7 +134,6 @@ bool operator==(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
     if (a.transform != b.transform) {
         return false;
     }
-
     return true;
 }
 
@@ -387,7 +400,8 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Displa
             static_cast<int32_t>(displayInfos.size()));
     }
     windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
-    if (windowInfoList.size() <= windowBatchSize) {
+    int32_t windowListSize = static_cast<int32_t>(windowInfoList.size());
+    if (windowListSize <= windowBatchSize) {
         FlushFullInfoToMMI(displayInfos, windowInfoList);
         return;
     }

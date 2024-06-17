@@ -14,6 +14,8 @@
  */
 
 #include <accesstoken_kit.h>
+#include <app_mgr_client.h>
+#include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
@@ -22,6 +24,8 @@
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
 #include <input_method_controller.h>
+#include <singleton.h>
+#include <singleton_container.h>
 #include "common/include/session_permission.h"
 #include "window_manager_hilog.h"
 
@@ -282,5 +286,27 @@ bool SessionPermission::IsStartedByUIExtension()
         });
     return extensionInfo != bundleInfo.extensionInfos.end();
 }
+
+bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
+{
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
+    bool isUserTestMode = false;
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "AppMgeClient is null!");
+        return false;
+    }
+    int32_t ret = appMgrClient->CheckCallingIsUserTestMode(pid, isUserTestMode);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied! ret=%{public}d", ret);
+        return false;
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    return isUserTestMode;
+}
+
 } // namespace Rosen
 } // namespace OHOS

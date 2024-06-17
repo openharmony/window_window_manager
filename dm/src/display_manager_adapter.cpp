@@ -256,6 +256,13 @@ DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
     return displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
 }
 
+DMError ScreenManagerAdapter::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    WLOGFI("DisplayManagerAdapter::SetScreenRotationLockedFromJs");
+    return displayManagerServiceProxy_->SetScreenRotationLockedFromJs(isLocked);
+}
+
 DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -736,5 +743,23 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
 {
     INIT_PROXY_CHECK_RETURN();
     displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList);
+}
+
+void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN();
+    displayManagerServiceProxy_->DisablePowerOffRenderControl(screenId);
+}
+
+DMError DisplayManagerAdapter::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->ProxyForFreeze(pidList, isProxy);
+}
+
+DMError DisplayManagerAdapter::ResetAllFreezeStatus()
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->ResetAllFreezeStatus();
 }
 } // namespace OHOS::Rosen
