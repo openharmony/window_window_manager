@@ -765,6 +765,24 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     EXPECT_CALL(*(mw), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 }
+
+/**
+ * @tc.name: LocateSource
+ * @tc.desc: LocateSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    ASSERT_NE(nullptr, mw);
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipControl =
+        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->LocateSource();
+    pipControl->window_ = nullptr;
+    pipControl->LocateSource();
+}
 }
 }
 }
