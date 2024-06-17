@@ -333,7 +333,7 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-    WMError UpdateDisplayHookInfo(uint_32 uid, uint_32 width, uint_32 height, flaot_t density, bool enable);
+    WMError UpdateDisplayHookInfo(uint32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
 
 protected:
     SceneSessionManager();
