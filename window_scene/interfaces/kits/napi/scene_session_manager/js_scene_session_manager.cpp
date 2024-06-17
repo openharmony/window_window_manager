@@ -2536,8 +2536,6 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyEnterRecentTask(enterRecent);
-    return NapiGetUndefined(env);
 
     uint32_t height;
     if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
