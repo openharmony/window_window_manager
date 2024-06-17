@@ -1986,6 +1986,91 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
     sceneSession->SetSessionState(SessionState::STATE_END);
     ssm_->OnScreenshot(displayId);
 }
+
+/**
+ * @tc.name: OnSessionStateChange
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, OnSessionStateChange, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
+    ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
+    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
+    sceneSession->focusedOnShow_ = false;
+    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
+    ssm_->OnSessionStateChange(100, SessionState::STATE_BACKGROUND);
+    ssm_->OnSessionStateChange(0, SessionState::STATE_BACKGROUND);
+
+    sptr<WindowSessionProperty> property_ = new WindowSessionProperty();
+    ASSERT_NE(nullptr, property_);
+    property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    sceneSession->property_ = property_;
+    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
+    ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
+    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
+    ssm_->OnSessionStateChange(100, SessionState::STATE_BACKGROUND);
+    ssm_->OnSessionStateChange(0, SessionState::STATE_BACKGROUND);
+    ASSERT_NE(nullptr, ssm_);
+}
+
+/**
+ * @tc.name: ProcessSubSessionForeground
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->ProcessSubSessionForeground(sceneSession);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->ProcessSubSessionForeground(sceneSession);
+
+    sptr<SceneSession> sub1 = nullptr;
+    sptr<SceneSession> sub2 = new (std::nothrow) SceneSession(info, nullptr);
+    std::vector<sptr<SceneSession>> subs;
+    std::vector<sptr<SceneSession>> dialogs;
+    subs.push_back(sub1);
+    subs.push_back(sub2);
+    dialogs.push_back(sub1);
+    dialogs.push_back(sub2);
+    sceneSession->subSession_ = subs;
+    ssm_->ProcessSubSessionForeground(sceneSession);
+    sptr<SceneSession> sub3 = new (std::nothrow) SceneSession(info, nullptr);
+    sub3->state_ = SessionState::STATE_FOREGROUND;
+    subs.push_back(sub3);
+    dialogs.push_back(sub3);
+    sceneSession->subSession_ = subs;
+    ssm_->ProcessSubSessionForeground(sceneSession);
+    sptr<SceneSession> sub4 = new (std::nothrow) SceneSession(info, nullptr);
+    sub4->state_ = SessionState::STATE_FOREGROUND;
+    sub4->persistentId_ = 100;
+    subs.push_back(sub4);
+    dialogs.push_back(sub4);
+    sceneSession->subSession_ = subs;
+    ssm_->ProcessSubSessionForeground(sceneSession);
+
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->ProcessSubSessionForeground(sceneSession);
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    ssm_->ProcessSubSessionForeground(sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
