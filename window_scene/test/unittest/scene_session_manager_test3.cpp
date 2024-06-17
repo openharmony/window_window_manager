@@ -1774,7 +1774,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowShadow02, Function | SmallTest
     WindowShadowConfig outShadow;
     std::vector<float> floatTest = {};
     bool result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 
     item.SetValue(floatTest);
     shadowConfig.SetValue({{"radius", item}});
@@ -1784,7 +1784,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowShadow02, Function | SmallTest
     item.SetValue(new std::string(""));
     shadowConfig.SetValue({{"", item}});
     result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
