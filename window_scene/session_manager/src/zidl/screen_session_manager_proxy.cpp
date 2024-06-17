@@ -2594,4 +2594,44 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return false;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        WLOGFE("Write uid failed");
+        return false;
+    }
+
+    if (!data.WriteBool(enable)) {
+        WLOGFE("Write enable failed");
+        return false;
+    }
+
+    if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
+        !data.WriteFloat(hookInfo.density_)) {
+        WLOGFE("Write hookInfo failed");
+        return false;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("UpdateDisplayHookInfo SendRequest failed");
+        return false;
+    }
+}
 } // namespace OHOS::Rosen

@@ -506,6 +506,13 @@ bool DisplayManagerAdapter::ConvertScreenIdToRsScreenId(ScreenId screenId, Scree
     return displayManagerServiceProxy_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
 }
 
+void DisplayManagerAdapter::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
+
 DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

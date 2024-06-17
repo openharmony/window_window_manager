@@ -8985,4 +8985,27 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
     }
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::UpdateDisplayHookInfo(uint32_t uid, uint32_t width, uint32_t height, float_t density,
+    bool enable)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}d, height: %{public}d, \
+        density: %{public}f, bool: %{public}u", width, height, density, enable);
+    HookInfo HookInfo;
+    HookInfo.width_ = width;
+    HookInfo.height_ = height;
+    HookInfo.density_ = density;
+    if (enable) {
+        displayHookMap_[uid] = HookInfo;
+    } else {
+        displayHookMap_.erase(uid);
+    }
+
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = width;
+    dmHookInfo.height_ = height;
+    dmHookInfo.density_ = density;
+    SingletonContainer::Get<DisplayManager>().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen

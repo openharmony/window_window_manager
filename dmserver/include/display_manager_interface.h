@@ -136,6 +136,7 @@ public:
         TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL,
         TRANS_ID_PROXY_FOR_FREEZE,
         TRANS_ID_RESET_ALL_FREEZE_STATUS,
+        TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -143,6 +144,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
+    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;

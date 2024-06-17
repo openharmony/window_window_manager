@@ -177,7 +177,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
-
+constexpr size_t ARGC_FIVE = 5;
 
 class MainThreadScheduler {
 public:
