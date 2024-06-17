@@ -746,7 +746,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
                 TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is null");
                 continue;
             }
-            sceneSession->NotifySessionException(scnSessionInfo, false);
+            sceneSession->NotifySessionExceptionInner(scnSessionInfo, false);
         }
         removeFailRecoveredSession();
     };
@@ -1696,7 +1696,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (scnSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(scnSession);
         if (!PreHandleCollaborator(scnSession, persistentId)) {
-            scnSession->NotifySessionException(SetAbilitySessionInfo(scnSession), true);
+            scnSession->NotifySessionExceptionInner(SetAbilitySessionInfo(scnSession), true);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
     }
@@ -1746,7 +1746,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
-        scnSession->NotifySessionException(scnSessionInfo, true);
+        scnSession->NotifySessionExceptionInner(scnSessionInfo, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -2191,7 +2191,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        auto errCode = newSession->Connect(
+        auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
         systemConfig = systemConfig_;
         if (property) {
@@ -6181,6 +6181,14 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM) {
+        if (!SessionPermission::IsSACalling()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    }
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGD(WmsLogTag::DEFAULT, "permission denied");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -6206,6 +6214,14 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
         if (!SessionPermission::IsSystemCalling()) {
             WLOGFE("UnregisterWindowManagerAgent permission denied!");
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        }
+    }
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM) {
+        if (!SessionPermission::IsSACalling()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
@@ -8756,7 +8772,7 @@ void SceneSessionManager::removeFailRecoveredSession()
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", sessionId);
-        sceneSession->NotifySessionException(scnSessionInfo, true);
+        sceneSession->NotifySessionExceptionInner(scnSessionInfo, true);
     }
     failRecoveredPersistentIdSet_.clear();
 }

@@ -85,11 +85,11 @@ HWTEST_F(ExtensionSessionTest, Connect, Function | SmallTest | Level1)
     SystemSessionConfig sessionConfig;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
     auto res = extensionSession_->Connect(mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, nullptr,
-        nullptr, -1, -1, "");
+        nullptr, "");
     ASSERT_EQ(res, WSError::WS_OK);
 
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
-    res = extensionSession_->Connect(mockSessionStage_, nullptr, nullptr, sessionConfig, nullptr, nullptr, -1, -1, "");
+    res = extensionSession_->Connect(mockSessionStage_, nullptr, nullptr, sessionConfig, nullptr, nullptr, "");
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
