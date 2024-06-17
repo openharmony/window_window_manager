@@ -3461,9 +3461,10 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
     WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
     gestureNavigationEnabled_ = enable;
     auto task = [this, enable]() {
+        SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
             WLOGFE("callback func is null");
-            return WMError::WM_DO_NOTHING;
+            return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
             gestureNavigationEnabledChangeFunc_(enable);
