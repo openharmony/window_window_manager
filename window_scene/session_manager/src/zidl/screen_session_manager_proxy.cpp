@@ -2600,7 +2600,7 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("remote is nullptr");
-        return false;
+        return;
     }
 
     MessageOption option(MessageOption::TF_ASYNC);
@@ -2609,29 +2609,29 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return false;
+        return;
     }
 
     if (!data.WriteUint32(uid)) {
         WLOGFE("Write uid failed");
-        return false;
+        return;
     }
 
     if (!data.WriteBool(enable)) {
         WLOGFE("Write enable failed");
-        return false;
+        return;
     }
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_)) {
         WLOGFE("Write hookInfo failed");
-        return false;
+        return;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFW("UpdateDisplayHookInfo SendRequest failed");
-        return false;
+        return;
     }
 }
 } // namespace OHOS::Rosen
