@@ -323,20 +323,21 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
 
 void JsSceneSession::ProcessLandscapeMultiWindowRegister()
 {
-    WLOGFD("ProcessLandscapeMultiWindowRegister");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessLandscapeMultiWindowRegister");
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = std::bind(&JsSceneSession::SetLandscapeMultiWindow,
                                                                       this, std::placeholders::_1);
-    WLOGFD("ProcessLandscapeMultiWindowRegister success");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessLandscapeMultiWindowRegister success");
 }
 
 void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
-    WLOGFI("[NAPI]SetLandScapeMultiWindow, isLandscapeMultiWindow: %{public}u", isLandscapeMultiWindow);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]SetLandScapeMultiWindow, isLandscapeMultiWindow: %{public}u",
+        isLandscapeMultiWindow);
     std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(LANDSCAPE_MULTI_WINDOW_CB);
     if (jsCallBack == nullptr) {
         return;

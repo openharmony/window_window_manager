@@ -786,11 +786,11 @@ WSError SessionProxy::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isLandscapeMultiWindow)) {
-        WLOGFE("Write isLandscapeMultiWindow failed");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isLandscapeMultiWindow failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW),
