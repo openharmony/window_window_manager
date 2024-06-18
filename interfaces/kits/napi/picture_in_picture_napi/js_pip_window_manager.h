@@ -17,6 +17,7 @@
 #define OHOS_JS_PIP_WINDOW_MANAGER_H
 
 #include "js_runtime_utils.h"
+#include <unordered_set>
 #include <mutex>
 
 namespace OHOS {
