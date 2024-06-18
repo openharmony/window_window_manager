@@ -46,22 +46,26 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowExtensionClientStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
     sptr<IWindowExtensionCallback> componentCallback;
     sptr<WindowExtensionClientStubImpl> extensionStubClient =
         new (std::nothrow) WindowExtensionClientStubImpl(componentCallback);
     if (extensionStubClient == nullptr) {
         return false;
     }
+
+    parcel.RewindRead(0);
     extensionStubClient->OnRemoteRequest(
         static_cast<uint32_t>(IWindowExtensionClient::TRANS_ID_ON_WINDOW_READY),
         parcel, reply, option);
+    parcel.RewindRead(0);
     extensionStubClient->OnRemoteRequest(
         static_cast<uint32_t>(IWindowExtensionClient::TRANS_ID_ON_BACK_PRESS),
         parcel, reply, option);
+    parcel.RewindRead(0);
     extensionStubClient->OnRemoteRequest(
         static_cast<uint32_t>(IWindowExtensionClient::TRANS_ID_ON_KEY_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     extensionStubClient->OnRemoteRequest(
         static_cast<uint32_t>(IWindowExtensionClient::TRANS_ID_ON_POINTER_EVENT),
         parcel, reply, option);

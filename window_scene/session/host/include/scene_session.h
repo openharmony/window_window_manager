@@ -79,6 +79,7 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using SystemSessionBufferAvailableCallback = std::function<void()>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
+using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -96,6 +97,7 @@ public:
         OnOutsideDownEvent onOutsideDownEvent_;
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
+        SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
     };
 
     // callback for notify SceneBoard
@@ -133,6 +135,10 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
+        const std::string& identityToken = "") override;
+    WSError ConnectInner(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
@@ -163,6 +169,8 @@ public:
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
+    WSError NotifySessionExceptionInner(
+        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false);
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -193,6 +201,7 @@ public:
     WSError SetTurnScreenOn(bool turnScreenOn);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
+    void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -209,6 +218,7 @@ public:
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetRestoringRectForKeyboard(WSRect rect);
     void SetSkipDraw(bool skip);
+    virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
 
     int32_t GetCollaboratorType() const;
     sptr<IRemoteObject> GetSelfToken() const;
@@ -372,6 +382,8 @@ private:
     WMError HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdatePrivacyMode(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);

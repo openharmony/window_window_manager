@@ -33,14 +33,15 @@ struct WriteToJpegParam {
     const uint8_t *data;
 };
 
-struct CmdArgments {
-    bool isDisplayIdSet = false;
+struct CmdArguments {
     Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALID;
     std::string fileName;
-    bool isWidthSet = false;
+    std::string fileType;
     int32_t width = -1;
-    bool isHeightSet = false;
     int32_t height = -1;
+    bool isDisplayIdSet = false;
+    bool isWidthSet = false;
+    bool isHeightSet = false;
 };
 
 class SnapShotUtils {
@@ -49,8 +50,8 @@ public:
     ~SnapShotUtils() = default;
 
     static void PrintUsage(const std::string &cmdLine);
-    static bool CheckFileNameValid(const std::string &fileName);
-    static std::string GenerateFileName(int offset = 0);
+    static bool CheckFileNameValid(const std::string &fileName, std::string fileType = "jpeg");
+    static std::string GenerateFileName(std::string fileType, int offset = 0);
     static bool CheckWidthAndHeightValid(int32_t w, int32_t h);
     static bool RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t *rgb888Buf, int32_t size);
     static bool RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t *rgb888Buf, int32_t size);
@@ -59,10 +60,10 @@ public:
     static bool WriteToJpeg(int fd, const WriteToJpegParam &param);
     static bool WriteToJpegWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
     static bool WriteToJpegWithPixelMap(int fd, Media::PixelMap &pixelMap);
-    static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
+    static bool ProcessArgs(int argc, char * const argv[], CmdArguments& cmdArgments);
     static bool CheckWHValid(int32_t param);
     static bool CheckParamValid(const WriteToJpegParam &param);
-    static bool SaveSnapShot(const std::string &filename, Media::PixelMap &pixelMap);
+    static bool SaveSnapShot(const std::string &filename, Media::PixelMap &pixelMap, std::string fileType = "jpeg");
 private:
     static bool ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplayIdSet);
 };

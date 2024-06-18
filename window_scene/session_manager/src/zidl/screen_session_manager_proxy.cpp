@@ -1634,6 +1634,33 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLocked(bool isL
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteBool(isLocked)) {
+        WLOGFE("write isLocked failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError OHOS::Rosen::ScreenSessionManagerProxy::IsScreenRotationLocked(bool& isLocked)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -2508,5 +2535,63 @@ void ScreenSessionManagerProxy::DisablePowerOffRenderControl(ScreenId screenId)
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+DMError ScreenSessionManagerProxy::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("proxy for freeze: failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteInt32(pidList.size())) {
+        WLOGFE("proxy for freeze write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    for (auto it = pidList.begin(); it != pidList.end(); it++) {
+        if (!data.WriteInt32(*it)) {
+            WLOGFE("proxy for freeze write date: failed");
+            return DMError::DM_ERROR_WRITE_DATA_FAILED;
+        }
+    }
+    if (!data.WriteBool(isProxy)) {
+        WLOGFE("proxy for freeze write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_PROXY_FOR_FREEZE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("proxy for freeze send request: failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RESET_ALL_FREEZE_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

@@ -35,6 +35,48 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
+void WindowStubUpdateTest(sptr<WindowAgent> windowStub, MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM),
+        parcel, reply, option);
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -47,7 +89,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowOption> windowOption = new(std::nothrow)WindowOption();
     if (windowOption == nullptr) {
@@ -61,30 +102,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (windowStub == nullptr) {
         return false;
     }
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS),
-        parcel, reply, option);
-    windowStub->OnRemoteRequest(static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM),
-        parcel, reply, option);
+    
+    WindowStubUpdateTest(windowStub, parcel);
     return true;
 }
 } // namespace.OHOS

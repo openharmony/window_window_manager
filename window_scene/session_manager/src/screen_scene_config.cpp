@@ -53,6 +53,8 @@ enum XmlNodeElement {
     IS_RIGHT_POWER_BUTTON,
     SUPPORT_ROTATE_WITH_SCREEN,
     EXTERNAL_SCREEN_DEFAULT_MODE,
+    CAST_BUNDLE_NAME,
+    CAST_ABILITY_NAME
 };
 }
 
@@ -84,6 +86,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {IS_RIGHT_POWER_BUTTON, "isRightPowerButton"},
     {SUPPORT_ROTATE_WITH_SCREEN, "supportRotateWithSensor"},
     {EXTERNAL_SCREEN_DEFAULT_MODE, "externalScreenDefaultMode"},
+    {CAST_BUNDLE_NAME, "castBundleName"},
+    {CAST_ABILITY_NAME, "castAbilityName"}
 };
 
 
@@ -177,7 +181,9 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
         (xmlNodeMap_[SCREEN_SNAPSHOT_BUNDLE_NAME] == nodeName) ||
         (xmlNodeMap_[SCREEN_SNAPSHOT_ABILITY_NAME] == nodeName) ||
-        (xmlNodeMap_[EXTERNAL_SCREEN_DEFAULT_MODE] == nodeName);
+        (xmlNodeMap_[EXTERNAL_SCREEN_DEFAULT_MODE] == nodeName) ||
+        (xmlNodeMap_[CAST_BUNDLE_NAME] == nodeName) ||
+        (xmlNodeMap_[CAST_ABILITY_NAME] == nodeName);
     if (enableConfigCheck) {
         ReadEnableConfigInfo(currNode);
     } else if (numberConfigCheck) {

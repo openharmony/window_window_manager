@@ -241,7 +241,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     std::string identityToken = data.ReadString();
     SystemSessionConfig systemConfig;
     WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token,
-        -1, -1, identityToken);
+        identityToken);
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
