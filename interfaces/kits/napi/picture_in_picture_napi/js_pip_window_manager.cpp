@@ -36,7 +36,7 @@ namespace {
         PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH,
         PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON,
         PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH,
-        PiPControlGroup::VIDEO_CALL_EXTERNAL_MUTE_BUTTON,
+        PiPControlGroup::VIDEO_CALL_MUTE_BUTTON,
     };
     const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
         PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON,
@@ -46,7 +46,7 @@ namespace {
     };
     const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
         PiPControlGroup::VIDEO_LIVE_PAUSE_BUTTON,
-        PiPControlGroup::VIDEO_LIVE_EXTERNAL_MUTE_BUTTON,
+        PiPControlGroup::VIDEO_LIVE_MUTE_BUTTON,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
         {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
