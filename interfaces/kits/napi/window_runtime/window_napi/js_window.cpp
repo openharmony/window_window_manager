@@ -319,14 +319,14 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::EnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("EnableLandscapeMultiWindow");
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnEnableLandscapeMultiWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::DisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("DisableLandscapeMultiWindow");
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDisableLandscapeMultiWindow(env, info) : nullptr;
 }
@@ -2380,7 +2380,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
 
 napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("OnEnableLandscapeMultiWindow");
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "OnEnableLandscapeMultiWindow");
     WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -2411,6 +2411,7 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
 
 napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "OnDisableLandscapeMultiWindow");
     WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
