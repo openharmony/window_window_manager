@@ -2127,7 +2127,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
                         property->IsFloatingWindowAppType() && shouldHideNonSecureFloatingWindows_.load());
-    if (SessionHelper::IsSubWindow(property->GetWindowType())) {
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    if (SessionHelper::IsSubWindow(property->GetWindowType()) && !isSystemCalling) {
         auto parentSession = GetSceneSession(property->GetParentPersistentId());
         if (parentSession) {
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
@@ -2173,7 +2174,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property,
-                    &persistentId, &session, &systemConfig, token, pid, uid]() {
+                    &persistentId, &session, &systemConfig, token, pid, uid, isSystemCalling]() {
         if (property == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2193,6 +2194,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
+        newSession->SetIsSystemSpecificSession(isSystemCalling);
         systemConfig = systemConfig_;
         if (property) {
             persistentId = property->GetPersistentId();
@@ -8359,7 +8361,7 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
     auto subSessions = sceneSession->GetSubSession();
     bool shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
     for (const auto& subSession: subSessions) {
-        if (subSession) {
+        if (subSession && !subSession->IsSystemSpecificSession()) {
             subSession->NotifyForceHideChange(shouldHide);
             TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
                 "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),

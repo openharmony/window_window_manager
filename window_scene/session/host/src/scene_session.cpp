@@ -3462,6 +3462,16 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
     return isDisplayStatusBarTemporarily_.load();
 }
 
+bool SceneSession::IsSystemSpecificSession() const
+{
+    return isSystemSpecificSession_;
+}
+
+void SceneSession::SetIsSystemSpecificSession(bool isSystemSpecificSession)
+{
+    isSystemSpecificSession_ = isSystemSpecificSession;
+}
+
 void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked)
 {
     if (isTemporarilyShowWhenLocked_.load() == isTemporarilyShowWhenLocked) {
