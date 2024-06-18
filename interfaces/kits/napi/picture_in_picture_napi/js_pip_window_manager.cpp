@@ -42,7 +42,7 @@ namespace {
         PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON,
         PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH,
         PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH,
-        PiPControlGroup::VIDEO_MEETING_MICROPHONE_MUTE_BUTTON,
+        PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
         PiPControlGroup::VIDEO_LIVE_PAUSE_BUTTON,

@@ -125,8 +125,8 @@ static napi_value ExportVideoMeetingControlGroup(napi_env env)
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH));
-    (void)SetNamedProperty(env, result, "EXTERNAL_MUTE_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MICROPHONE_MUTE_BUTTON));
+    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
