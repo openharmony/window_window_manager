@@ -30,6 +30,7 @@
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
 #include <hisysevent.h>
+#include <power_mgr_client.h>
 
 #include "dm_common.h"
 #include "fold_screen_state_internel.h"
@@ -143,6 +144,11 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     oss << "SetScreenCorrection g_screenRotationOffSet : " << g_screenRotationOffSet;
     screenEventTracker_.RecordEvent(oss.str());
     rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
+    FoldScreenPowerInit();
+}
+
+void ScreenSessionManager::FoldScreenPowerInit()
+{
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
         #ifdef TP_FEATURE_ENABLE
@@ -172,7 +178,6 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
-
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 4.");
             #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
@@ -182,10 +187,18 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         } else {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Init, invalid active screen id");
         }
+        FixPowerStatus();
         foldScreenController_->SetOnBootAnimation(false);
-
         RegisterApplicationStateObserver();
     });
+}
+
+void ScreenSessionManager::FixPowerStatus()
+{
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        TLOGI(WmsLogTag::DMS, "Fix Screen Power State");
+    }
 }
 
 void ScreenSessionManager::Init()
