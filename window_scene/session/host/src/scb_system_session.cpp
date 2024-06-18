@@ -69,7 +69,11 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
 {
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
-        WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
             session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
