@@ -1711,13 +1711,13 @@ EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> WindowSe
 
 WMError WindowSessionImpl::RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener)
 {
-    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
-        WLOGFE("window type is not supported");
-        return WMError::WM_ERROR_INVALID_TYPE;
-    }
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
     subWindowCloseListeners_[GetPersistentId()] = listener;
@@ -1726,13 +1726,13 @@ WMError WindowSessionImpl::RegisterSubWindowCloseListeners(const sptr<ISubWindow
 
 WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener)
 {
-    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
-        WLOGFE("window type is not supported");
-        return WMError::WM_ERROR_INVALID_TYPE;
-    }
     if (listener == nullptr) {
         WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsSubWindow(GetType()) && !WindowHelper::IsSystemSubWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
     subWindowCloseListeners_[GetPersistentId()] = nullptr;
