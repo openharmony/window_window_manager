@@ -18,6 +18,7 @@
 #include <event_handler.h>
 #include <refbase.h>
 #include <power_mgr_client.h>
+#include <transaction/rs_sync_transaction_controller.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
 #include "window_manager_hilog.h"
@@ -37,7 +38,6 @@ namespace OHOS {
 namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
 namespace {
-    constexpr int32_t DELAY_ANIM = 50;
     constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
@@ -328,12 +328,18 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
                 currentPipOption->GetPipTemplate(), FAILED, "pipController is null");
             return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
         }
-        session->window_->SetTransparent(true);
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (syncTransactionController) {
+            syncTransactionController->OpenSyncTransaction();
+        }
         session->ResetExtController();
+        session->DestroyPictureInPictureWindow();
+        if (syncTransactionController) {
+            syncTransactionController->CloseSyncTransaction();
+        }
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        session->DestroyPictureInPictureWindow();
         session->curState_ = PiPWindowState::STATE_STOPPED;
         std::string navId = session->pipOption_->GetNavigationId();
         if (navId != "" && session->mainWindow_) {
@@ -381,7 +387,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         return WMError::WM_OK;
     };
     if (handler_) {
-        handler_->PostTask(task, "wms:DestroyPictureInPicture", DELAY_ANIM);
+        handler_->PostTask(task, "wms:DestroyPictureInPicture", 0);
     } else {
         return task();
     }
