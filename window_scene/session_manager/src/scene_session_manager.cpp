@@ -1707,7 +1707,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             isNewActive, scnSession->GetSessionState());
         if (isNewActive || scnSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
             scnSession->GetSessionState() == SessionState::STATE_END) {
-            TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
+            TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
             errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
         } else {
@@ -5369,10 +5369,6 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
             return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
         }
         sceneSession->SetSessionLabel(label);
-        if (sessionListener_ != nullptr) {
-            WLOGFI("OnSessionLabelChange id: %{public}d", sceneSession->GetPersistentId());
-            sessionListener_->OnSessionLabelChange(sceneSession->GetPersistentId(), label);
-        }
         WLOGFI("NotifySessionLabelUpdated, id: %{public}d, system: %{public}d", sceneSession->GetPersistentId(),
             sceneSession->GetSessionInfo().isSystem_);
         if (listenerController_ != nullptr && !sceneSession->GetSessionInfo().isSystem_) {
@@ -5400,10 +5396,6 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
             return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
         }
         sceneSession->SetSessionIcon(icon);
-        if (sessionListener_ != nullptr) {
-            WLOGFI("OnSessionIconChange id: %{public}d", sceneSession->GetPersistentId());
-            sessionListener_->OnSessionIconChange(sceneSession->GetPersistentId(), icon);
-        }
         WLOGFI("NotifySessionIconChanged, id: %{public}d, system: %{public}d", sceneSession->GetPersistentId(),
             sceneSession->GetSessionInfo().isSystem_);
         if (listenerController_ != nullptr &&
@@ -5962,35 +5954,6 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
         TLOGE(WmsLogTag::DEFAULT, "Find collaborator type %{public}d, but value is nullptr!", collaboratorType);
     }
     return collaborator;
-}
-
-WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
-{
-    WLOGFI("Enter");
-    if (sessionListener == nullptr) {
-        return WSError::WS_ERROR_INVALID_SESSION_LISTENER;
-    }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
-    auto task = [this, sessionListener]() {
-        sessionListener_ = sessionListener;
-        return WSError::WS_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, "RegisterSessionListener");
-}
-
-void SceneSessionManager::UnregisterSessionListener()
-{
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
-        return;
-    }
-    auto task = [this]() {
-        sessionListener_ = nullptr;
-    };
-    taskScheduler_->PostAsyncTask(task, "UnregisterSessionListener");
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
