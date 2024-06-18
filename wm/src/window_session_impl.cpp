@@ -1172,7 +1172,8 @@ WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
 
 WMError WindowSessionImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "SetLandscapeMultiWindow, isLandscapeMultiWindow:%{public}d", isLandscapeMultiWindow);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "SetLandscapeMultiWindow, isLandscapeMultiWindow:%{public}d",
+        isLandscapeMultiWindow);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;

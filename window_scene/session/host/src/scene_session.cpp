@@ -3160,8 +3160,8 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_(
                 isLandscapeMultiWindow);
         }
-        TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "NotifySetLandscapeMultiWindow, id: %{public}d, isLandscapeMultiWindow: %{public}u",
-            session->GetPersistentId(), isLandscapeMultiWindow);
+        TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "NotifySetLandscapeMultiWindow, id: %{public}d,"
+            "isLandscapeMultiWindow: %{public}u", session->GetPersistentId(), isLandscapeMultiWindow);
         return WSError::WS_OK;
     };
     PostTask(task, "NotifySetLandscapeMultiWindow");
