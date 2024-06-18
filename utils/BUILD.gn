@@ -195,7 +195,7 @@ ohos_shared_library("libwmutil") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
-  if (!(is_linux && host_cpu == "arm64")) {
+  if (host_cpu != "arm64") {
     external_deps += [ "preferences:native_preferences" ]
   }
 
