@@ -44,7 +44,7 @@ namespace Rosen {
 class GetKeyboardGravitySceneSession : public SceneSession {
 public:
     GetKeyboardGravitySceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
-        : SceneSession(info, specificCallback)
+        : SceneSession(info, specificCallback) 
     {
     }
 
@@ -54,7 +54,7 @@ public:
     }
 };
 
-class SceneSessionTest3 : public testing::Test {
+class SceneSessionTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -62,19 +62,19 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionTest3::SetUpTestCase()
+void SceneSessionTest5::SetUpTestCase()
 {
 }
 
-void SceneSessionTest3::TearDownTestCase()
+void SceneSessionTest5::TearDownTestCase()
 {
 }
 
-void SceneSessionTest3::SetUp()
+void SceneSessionTest5::SetUp()
 {
 }
 
-void SceneSessionTest3::TearDown()
+void SceneSessionTest5::TearDown()
 {
 }
 
@@ -84,7 +84,7 @@ namespace {
  * @tc.desc: Foreground01 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, Foreground01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, Foreground01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -105,7 +105,7 @@ HWTEST_F(SceneSessionTest3, Foreground01, Function | SmallTest | Level2)
  * @tc.desc: Foreground02 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, Foreground02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, Foreground02, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground02";
@@ -138,7 +138,7 @@ HWTEST_F(SceneSessionTest3, Foreground02, Function | SmallTest | Level2)
  * @tc.desc: BackgroundTask function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, BackgroundTask, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, BackgroundTask, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground02";
@@ -179,7 +179,7 @@ HWTEST_F(SceneSessionTest3, BackgroundTask, Function | SmallTest | Level2)
  * @tc.desc: FixKeyboardPositionByKeyboardPanel function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
@@ -211,7 +211,7 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | Small
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRectTask";
@@ -258,7 +258,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
  * @tc.desc: GetSystemAvoidArea function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetSystemAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "GetSystemAvoidArea";
@@ -309,7 +309,7 @@ HWTEST_F(SceneSessionTest3, GetSystemAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: GetSystemAvoidArea01 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetSystemAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "GetSystemAvoidArea01";
@@ -367,7 +367,7 @@ HWTEST_F(SceneSessionTest3, GetSystemAvoidArea01, Function | SmallTest | Level2)
  * @tc.desc: HandlePointerStyle function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, HandlePointerStyle, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, HandlePointerStyle, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "HandlePointerStyle";
@@ -401,7 +401,7 @@ HWTEST_F(SceneSessionTest3, HandlePointerStyle, Function | SmallTest | Level2)
  * @tc.desc: NotifyOutsideDownEvent function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, NotifyOutsideDownEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyOutsideDownEvent";
@@ -442,7 +442,7 @@ HWTEST_F(SceneSessionTest3, NotifyOutsideDownEvent, Function | SmallTest | Level
  * @tc.desc: TransferPointerEvent function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, TransferPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "TransferPointerEvent";
@@ -480,7 +480,7 @@ HWTEST_F(SceneSessionTest3, TransferPointerEvent, Function | SmallTest | Level2)
  * @tc.desc: TransferPointerEvent01 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, TransferPointerEvent01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "TransferPointerEvent01";
@@ -529,7 +529,7 @@ HWTEST_F(SceneSessionTest3, TransferPointerEvent01, Function | SmallTest | Level
  * @tc.desc: OnLayoutFullScreenChange function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, OnLayoutFullScreenChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "OnLayoutFullScreenChange";
@@ -556,7 +556,7 @@ HWTEST_F(SceneSessionTest3, OnLayoutFullScreenChange, Function | SmallTest | Lev
  * @tc.desc: UpdateSessionPropertyByAction function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateSessionPropertyByAction";
