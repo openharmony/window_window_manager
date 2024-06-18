@@ -267,8 +267,8 @@ void SceneSessionManager::InitScheduleUtils()
 {
 #ifdef RES_SCHED_ENABLE
     SCBThreadInfo threadInfo = {
-        .scbPid_ = std::to_string(getprocpid()), .scbTid_ = std::to_string(getproctid()),
-        .scbUid_ = std::to_string(getuid()), .scbBundleName_ = SCENE_BOARD_BUNDLE_NAME
+        .scbUid_ = std::to_string(getuid()), .scbPid_ = std::to_string(getprocpid()),
+        .scbTid_ = std::to_string(getproctid()), .scbBundleName_ = SCENE_BOARD_BUNDLE_NAME
     };
     std::unordered_map<std::string, std::string> payload {
         { "pid", threadInfo.scbPid_ },
