@@ -687,8 +687,11 @@ ohos_unittest("ws_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_base:session_info",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
   ]
 }
 
