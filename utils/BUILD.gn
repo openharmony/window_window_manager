@@ -195,10 +195,10 @@ ohos_shared_library("libwmutil") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
-  if (host_cpu != "arm64") {
+  if (!(is_linux && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
   }
-  
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
