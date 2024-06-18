@@ -2369,13 +2369,14 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
     return scenePersistence_;
 }
 
-void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                           const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!sessionStage_) {
-        WLOGFD("session stage is nullptr");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");
         return;
     }
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
 }
 
 WindowMode Session::GetWindowMode()
