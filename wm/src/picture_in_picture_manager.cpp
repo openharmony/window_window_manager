@@ -36,7 +36,6 @@ namespace {
         {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
         {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
         {ACTION_RESTORE, PictureInPictureManager::DoRestore},
-        {ACTION_DESTROY, PictureInPictureManager::DoDestroy},
         {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource}
     };
 }
