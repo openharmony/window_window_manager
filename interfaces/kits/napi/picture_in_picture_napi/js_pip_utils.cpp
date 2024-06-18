@@ -109,8 +109,8 @@ static napi_value ExportVideoCallControlGroup(napi_env env)
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
-    (void)SetNamedProperty(env, result, "EXTERNAL_MUTE_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_EXTERNAL_MUTE_BUTTON));  
+    (void)SetNamedProperty(env, result, "MUTE_BUTTON",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MUTE_BUTTON));  
     napi_object_freeze(env, result);
     return result;
 }
@@ -137,8 +137,8 @@ static napi_value ExportVideoLiveControlGroup(napi_env env)
     napi_create_object(env, &result);
     (void)SetNamedProperty(env, result, "PAUSE_BUTTON",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_PAUSE_BUTTON));
-    (void)SetNamedProperty(env, result, "EXTERNAL_MUTE_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_EXTERNAL_MUTE_BUTTON));
+    (void)SetNamedProperty(env, result, "MUTE_BUTTON",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_MUTE_BUTTON));
     napi_object_freeze(env, result);
     return result;
 }
