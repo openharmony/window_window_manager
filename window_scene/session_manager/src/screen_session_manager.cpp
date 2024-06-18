@@ -93,7 +93,7 @@ const unsigned int XCOLLIE_TIMEOUT_S = 10;
 
 bool JudgeIsBeta()
 {
-    std::string betaName = OHOS::system::GetParameter("const.logsystem.versionType", "");
+    std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
     return betaName.find("beta") != std::string::npos;
 }
 
