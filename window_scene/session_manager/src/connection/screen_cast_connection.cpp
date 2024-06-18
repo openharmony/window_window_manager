@@ -1,0 +1,92 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "connection/screen_cast_connection.h"
+
+#include "window_manager_hilog.h"
+
+namespace OHOS::Rosen {
+ScreenCastConnection &ScreenCastConnection::GetInstance()
+{
+    static ScreenCastConnection screenCastConnection;
+    return screenCastConnection;
+}
+
+bool ScreenCastConnection::CastConnectExtension()
+{
+    if (bundleName_ == "" || abilityName_ == "") {
+        TLOGE(WmsLogTag::DMS, "screen cast bundleName: %{public}s or abilityName: %{public}s is empty",
+            bundleName_.c_str(), abilityName_.c_str());
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "bundleName: %{public}s, abilityName: %{public}s",
+        bundleName_.c_str(), abilityName_.c_str());
+    if (abilityConnection_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "screen cast already connected");
+        return true;
+    }
+    abilityConnection_ = std::make_unique<ScreenSessionAbilityConnection>();
+    if (abilityConnection_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "connection is nullptr");
+        return false;
+    }
+    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "CastConnectExtension succeed");
+    return true;
+}
+
+void ScreenCastConnection::CastDisconnectExtension()
+{
+    if (abilityConnection_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability connect failed");
+        return;
+    }
+    abilityConnection_->ScreenSessionDisconnectExtension();
+    TLOGI(WmsLogTag::DMS, "CastDisconnectExtension exit");
+}
+
+void ScreenCastConnection::SetBundleName(const std::string &bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+void ScreenCastConnection::SetAbilityName(const std::string &abilityName)
+{
+    abilityName_ = abilityName;
+}
+
+std::string ScreenCastConnection::GetBundleName() const
+{
+    return bundleName_;
+}
+
+std::string ScreenCastConnection::GetAbilityName() const
+{
+    return abilityName_;
+}
+
+bool ScreenCastConnection::IsConnectedSync()
+{
+    if (abilityConnection_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
+        return false;
+    }
+    return abilityConnection_->IsConnectedSync();
+}
+} // namespace OHOS::Rosen

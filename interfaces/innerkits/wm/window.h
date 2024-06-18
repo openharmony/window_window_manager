@@ -1051,8 +1051,10 @@ public:
      * @brief flush frame rate of linker.
      *
      * @param rate frame rate.
+     * @param isAnimatorStopped animator status.
+     * @param rateType frame rate type.
      */
-    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType) {}
     /**
      * @brief Update Configuration.
      *

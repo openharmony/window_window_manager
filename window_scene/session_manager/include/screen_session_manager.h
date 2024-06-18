@@ -123,6 +123,7 @@ public:
         std::vector<ScreenColorGamut>& colorGamuts) override;
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
+    DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
@@ -257,6 +258,8 @@ public:
     DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
     void FixPowerStatus();
     void FoldScreenPowerInit();
+    DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
+    DMError ResetAllFreezeStatus() override;
 
 protected:
     ScreenSessionManager();
@@ -268,6 +271,7 @@ private:
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
     void ConfigureDpi();
+    void ConfigureCastParams();
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
@@ -283,6 +287,7 @@ private:
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
+    void PublishCastEvent(const bool &isPlugIn);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();
@@ -309,6 +314,7 @@ private:
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
+    void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -389,6 +395,10 @@ private:
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+    std::vector<ScreenId> mirrorScreenIds_;
+
+    std::mutex freezedPidListMutex_;
+    std::set<int32_t> freezedPidList_;
 
     std::atomic<PowerStateChangeReason> prePowerStateChangeReason_ =
         PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
@@ -410,6 +420,9 @@ private:
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);
+    bool IsDefaultMirrorMode(ScreenId screenId);
+    void SetCastFromSettingData();
+    void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -19,6 +19,7 @@
 #include <iremote_broker.h>
 #include <pixel_map.h>
 #include <surface.h>
+#include <set>
 
 #include "display_cutout_controller.h"
 #include "display_info.h"
@@ -88,6 +89,7 @@ public:
         TRANS_ID_SCREEN_SET_COLOR_SPACE,
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
+        TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS,
         TRANS_ID_HAS_PRIVATE_WINDOW,
         TRANS_ID_GET_CUTOUT_INFO,
         TRANS_ID_HAS_IMMERSIVE_WINDOW,
@@ -132,6 +134,8 @@ public:
         TRANS_ID_SWITCH_USER,
         TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST,
         TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL,
+        TRANS_ID_PROXY_FOR_FREEZE,
+        TRANS_ID_RESET_ALL_FREEZE_STATUS,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -158,6 +162,7 @@ public:
         return nullptr;
     }
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
     // colorspace, gamut
@@ -272,6 +277,14 @@ public:
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ResetAllFreezeStatus()
     {
         return DMError::DM_OK;
     }

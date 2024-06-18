@@ -861,8 +861,8 @@ WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarP
 
 WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
 {
-    WLOGFD("Get SystemBarProperties");
     if (property_ != nullptr) {
+        WLOGI("Window:%{public}u", GetWindowId());
         properties[WindowType::WINDOW_TYPE_STATUS_BAR] = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     } else {
         WLOGFE("inner property is null");
