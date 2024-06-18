@@ -44,7 +44,7 @@ namespace Rosen {
 class GetKeyboardGravitySceneSession : public SceneSession {
 public:
     GetKeyboardGravitySceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
-        : SceneSession(info, specificCallback) 
+        : SceneSession(info, specificCallback)
     {
     }
 
