@@ -654,52 +654,46 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
         keyboardSession->winRect_.ToString().c_str(), gravity);
 }
 
-WSError SceneSession::NotifyClientToUpdateRectTask(
-    wptr<SceneSession> weakThis, std::shared_ptr<RSTransaction> rsTransaction)
+WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto session = weakThis.promote();
-    if (!session) {
-        WLOGFE("session is null");
-        return WSError::WS_ERROR_DESTROYED_OBJECT;
-    }
     TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
-        session->GetPersistentId(), session->reason_, session->winRect_.ToString().c_str());
-    bool isMoveOrDrag = session->moveDragController_ &&
-        (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
-    if (isMoveOrDrag && session->reason_ == SizeChangeReason::UNDEFINED) {
+        GetPersistentId(), reason_, winRect_.ToString().c_str());
+    bool isMoveOrDrag = moveDragController_ &&
+        (moveDragController_->GetStartDragFlag() || moveDragController_->GetStartMoveFlag());
+    if (isMoveOrDrag && reason_ == SizeChangeReason::UNDEFINED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update!");
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError ret = WSError::WS_OK;
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
-        session->GetPersistentId(), session->winRect_.posX_,
-        session->winRect_.posY_, session->winRect_.width_, session->winRect_.height_, session->reason_);
+        GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
 
     if (isKeyboardPanelEnabled_) {
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
-            const auto& keyboardSession = session->GetKeyboardSession();
-            FixKeyboardPositionByKeyboardPanel(session, keyboardSession);
+        sptr<SceneSession> self(this);
+        if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+            const auto& keyboardSession = GetKeyboardSession();
+            FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
             if (keyboardSession != nullptr) {
-                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, session->reason_, rsTransaction);
+                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, rsTransaction);
             }
             if (ret != WSError::WS_OK) {
                 return ret;
             }
         }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            FixKeyboardPositionByKeyboardPanel(session->GetKeyboardPanelSession(), session);
+        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            FixKeyboardPositionByKeyboardPanel(GetKeyboardPanelSession(), self);
             return WSError::WS_OK;
         }
     }
 
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
-    if (session->reason_ == SizeChangeReason::UNDEFINED || session->reason_ == SizeChangeReason::MOVE ||
-        session->reason_ == SizeChangeReason::RESIZE) {
-        ret = session->Session::UpdateRect(session->winRect_, session->reason_, nullptr);
+    if (reason_ == SizeChangeReason::UNDEFINED || reason_ == SizeChangeReason::MOVE ||
+        reason_ == SizeChangeReason::RESIZE) {
+        ret = Session::UpdateRect(winRect_, reason_, nullptr);
     } else {
-        ret = session->Session::UpdateRect(session->winRect_, session->reason_, rsTransaction);
+        ret = Session::UpdateRect(winRect_, reason_, rsTransaction);
 #ifdef DEVICE_STATUS_ENABLE
         // When the drag is in progress, the drag window needs to be notified to rotate.
         if (rsTransaction != nullptr) {
@@ -715,7 +709,11 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
 {
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
-        WSError ret = session->NotifyClientToUpdateRectTask(weakThis, rsTransaction);
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
         if (ret == WSError::WS_OK) {
             if (session->specificCallback_ != nullptr) {
                 session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
