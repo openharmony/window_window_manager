@@ -14,7 +14,7 @@
  */
 
 import pip from '@ohos.pip';
-import { NodeController } from '@ohos.arkui.node'
+import { NodeController } from '@kit.ArkUI';
 
 const TAG: string = 'PiPContent';
 
