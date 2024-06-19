@@ -641,55 +641,6 @@ WSError SceneSessionManagerProxy::IsValidSessionIds(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
-{
-    WLOGFI("run SceneSessionManagerProxy::RegisterSessionListener");
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (sessionListener == nullptr) {
-        WLOGFE("sessionListener is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Write interfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteRemoteObject(sessionListener->AsObject())) {
-        WLOGFE("Write sessionListener failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER), data, reply,
-        option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
-}
-
-void SceneSessionManagerProxy::UnregisterSessionListener()
-{
-    WLOGFI("run SceneSessionManagerProxy::UnregisterSessionListener");
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("UnregisterSessionListener WriteInterfaceToken failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER), data, reply,
-        option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return;
-    }
-}
-
 WMError SceneSessionManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     MessageOption option;
