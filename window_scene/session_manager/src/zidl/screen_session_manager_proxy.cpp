@@ -2595,11 +2595,11 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
+void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGE("remote is nullptr");
         return;
     }
 
@@ -2608,29 +2608,29 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
     MessageParcel data;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE("WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteUint32(uid)) {
-        WLOGFE("Write uid failed");
+        TLOGE("Write uid failed");
         return;
     }
 
     if (!data.WriteBool(enable)) {
-        WLOGFE("Write enable failed");
+        TLOGE("Write enable failed");
         return;
     }
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_)) {
-        WLOGFE("Write hookInfo failed");
+        TLOGE("Write hookInfo failed");
         return;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("UpdateDisplayHookInfo SendRequest failed");
+        TLOGE("UpdateDisplayHookInfo SendRequest failed");
         return;
     }
 }

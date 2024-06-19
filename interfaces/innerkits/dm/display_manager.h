@@ -615,15 +615,6 @@ public:
     */
     DMError ResetAllFreezeStatus();
 
-    /**
-     * @brief hook diaplayinfo deepending on the window size.
-     *
-     * @param uid uid.
-     * @param enable add HookInfo or delete HookInfo.
-     * @param hookInfo display HookInfo.
-    */
-    void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo);
-
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:
