@@ -629,7 +629,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
         }
         if (displayId == displayInfo->GetDisplayId()) {
             TLOGD(WmsLogTag::DMS, "GetDisplayInfoById success");
-            std::shared_lock <std::shared_mutex> lock(hookInfoMutex_);
+            std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
             if (displayHookMap_.find(uid) != displayHookMap_.end()) {
                 auto info = displayHookMap_[uid];
                 TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}u, hookHeight: %{public}u,\
@@ -750,7 +750,7 @@ void ScreenSessionManager::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHo
         return;
     }
 
-    std::unique_lock <std::shared_mutex> lock(hookInfoMutex_);
+    std::unique_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (enable) {
         displayHookMap_[uid] = hookInfo;
     } else {
