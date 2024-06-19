@@ -213,7 +213,7 @@ void PictureInPictureManager::DoRestore()
 
 void PictureInPictureManager::DoLocateSource()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "DoGetSourceRect is called");
+    TLOGI(WmsLogTag::WMS_PIP, "DoLocateSource is called");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
