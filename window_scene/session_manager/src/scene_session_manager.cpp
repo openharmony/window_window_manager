@@ -2025,8 +2025,22 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(
         }
         EraseSceneSessionMapById(persistentId);
     } else {
-        // if terminate, set want to null. so start from recent, start a new one.
-        scnSession->SetSessionInfoWant(nullptr);
+        // if terminate, reset want. so start from recent, start a new one.
+        TLOGI(WmsLogTag::WMS_MAIN, "reset want: %{public}d", persistentId);
+        auto& sessionInfo = scnSession->GetSessionInfo();
+        if (sessionInfo.want != nullptr) {
+            const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
+            const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
+            auto want = std::make_shared<AAFwk::Want>();
+            if (want != nullptr) {
+                AppExecFwk::ElementName element;
+                element.SetBundleName(bundleName);
+                element.SetAbilityName(abilityName);
+                want->SetElement(element);
+                want->SetBundle(bundleName);
+                scnSession->SetSessionInfoWant(want);
+            }
+        }
     }
     if (listenerController_ != nullptr) {
         NotifySessionForCallback(scnSession, needRemoveSession);
