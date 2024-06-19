@@ -51,7 +51,6 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
-    void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo);
     bool IsFoldable();
     bool IsCaptured();
     FoldStatus GetFoldStatus();
@@ -1875,15 +1874,5 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
-}
-
-void DisplayManager::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
-{
-    pImpl_->UpdateDisplayHookInfo(uid, enable, hookInfo);
-}
-
-void DisplayManager::Impl::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 } // namespace OHOS::Rosen

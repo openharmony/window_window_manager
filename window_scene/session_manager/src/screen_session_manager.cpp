@@ -631,7 +631,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             TLOGD(WmsLogTag::DMS, "GetDisplayInfoById success");
             if (displayHookMap_.find(uid) != displayHookMap_.end()) {
                 auto info = displayHookMap_[uid];
-                TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}d, hookHeight: %{public}d,\
+                TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}u, hookHeight: %{public}u,\
                     hookDensity: %{public}f", info.width_, info.height_, info.density_);
                 displayInfo->SetWidth(info.width_);
                 displayInfo->SetHeight(info.height_);
@@ -742,7 +742,7 @@ bool ScreenSessionManager::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 }
 
-void ScreenSessionManager::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo& hookInfo)
+void ScreenSessionManager::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo permission denied!");
