@@ -2594,4 +2594,44 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        TLOGE(WmsLogTag::DMS, "Write uid failed");
+        return;
+    }
+
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return;
+    }
+
+    if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
+        !data.WriteFloat(hookInfo.density_)) {
+        TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
+        return;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

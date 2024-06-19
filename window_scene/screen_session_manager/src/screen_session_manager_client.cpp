@@ -481,4 +481,13 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
     }
     screenSession->SetScreenSceneDpi(virtualPixelRatio);
 }
+
+void ScreenSessionManagerClient::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
 } // namespace OHOS::Rosen
