@@ -250,11 +250,10 @@ std::map<ScreenId, ScreenProperty> ScreenSessionManagerClient::GetAllScreensProp
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     std::map<ScreenId, ScreenProperty> screensProperties;
     for (const auto& iter: screenSessionMap_) {
-        auto session = iter.second;
-        if (session == nullptr) {
+        if (iter.second == nullptr) {
             continue;
         }
-        screensProperties[iter.first] = session->GetScreenProperty();
+        screensProperties[iter.first] = iter.second->GetScreenProperty();
     }
     return screensProperties;
 }
@@ -389,6 +388,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         WLOGFI("oldScbPids size 0");
         return;
     }
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
@@ -441,6 +441,7 @@ DeviceScreenConfig ScreenSessionManagerClient::GetDeviceScreenConfig()
 
 sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const ScreenId id)
 {
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(id);
     if (iter == screenSessionMap_.end()) {
         return nullptr;
@@ -450,6 +451,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const Scree
 
 ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
 {
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.begin();
     if (iter != screenSessionMap_.end()) {
         return iter->first;
