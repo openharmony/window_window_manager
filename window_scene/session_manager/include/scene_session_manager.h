@@ -517,7 +517,6 @@ private:
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
-    std::map<uint32_t, HookInfo> displayHookMap_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
