@@ -24,7 +24,6 @@
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "session/host/include/session.h"
 #include "focus_change_info.h"
-#include "session_listener_interface.h"
 #include "window_manager.h"
 #include "zidl/window_manager_interface.h"
 #include "session_info.h"
