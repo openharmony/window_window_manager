@@ -558,6 +558,7 @@ void PictureInPictureController::LocateSource()
         TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
     }
+    window_->SetTransparent(true);
     UpdatePiPSourceRect();
     std::string navId = pipOption_->GetNavigationId();
     if (navId != "") {
