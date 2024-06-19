@@ -8957,15 +8957,20 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
+    TLOGI(WmsLogTag::WMS_IMMS, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
     enterRecent_.store(enterRecent);
     if (enterRecent) {
         SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_ENTER_RECENTS);
     } else {
         SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
+    TLOGI(WmsLogTag::WMS_IMMS, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
 
+    if (!enterRecent_.load()) {
+        bool needUpdate = false;
+        UpdateAvoidSessionAvoidArea(WindowType::WINDOW_TYPE_STATUS_BAR, needUpdate);
+    }
+    
     return WSError::WS_OK;
 }
 
