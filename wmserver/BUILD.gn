@@ -64,7 +64,6 @@ config("libmockwms_config") {
     # for scene session manager
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wmserver/include",
-    "../../../graphic/graphic_2d/rosen/modules/platform/image_native",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",

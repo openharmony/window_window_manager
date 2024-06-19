@@ -78,10 +78,6 @@ ohos_shared_library("libdms") {
     "safwk:system_ability_fwk",
   ]
 
-  if (defined(use_new_skia) && use_new_skia) {
-    include_dirs = [ "../../../../third_party/skia/src" ]
-  }
-
   defines = []
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
