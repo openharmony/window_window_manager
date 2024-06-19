@@ -3134,7 +3134,7 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (callingPid != session->GetCallingPid()) {
-            WLOGFE("permission denied, not call by the same process");
+            WLOGFE("premission denied, not call by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->sessionChangeCallback_ &&
