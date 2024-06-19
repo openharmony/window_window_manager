@@ -36,7 +36,7 @@ namespace {
         PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH,
         PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON,
         PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH,
-        PiPControlGroup::VIDEO_CALL_MUTE_BUTTON,
+        PiPControlGroup::VIDEO_CALL_MUTE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
         PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON,
@@ -46,7 +46,7 @@ namespace {
     };
     const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
         PiPControlGroup::VIDEO_LIVE_PAUSE_BUTTON,
-        PiPControlGroup::VIDEO_LIVE_MUTE_BUTTON,
+        PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
         {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
@@ -58,7 +58,7 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
+static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t>& controlGroups)
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
@@ -71,6 +71,9 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
             result.insert(*item);
             item++;
         }
+    }
+    if (controlGroups.size() > 3) {
+        return -1;
     }
     for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
