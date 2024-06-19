@@ -2599,7 +2599,7 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE("remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return;
     }
 
@@ -2608,29 +2608,29 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
     MessageParcel data;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteUint32(uid)) {
-        TLOGE("Write uid failed");
+        TLOGE(WmsLogTag::DMS, "Write uid failed");
         return;
     }
 
     if (!data.WriteBool(enable)) {
-        TLOGE("Write enable failed");
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
         return;
     }
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_)) {
-        TLOGE("Write hookInfo failed");
+        TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
         return;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
         data, reply, option) != ERR_NONE) {
-        TLOGE("UpdateDisplayHookInfo SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo SendRequest failed");
         return;
     }
 }
