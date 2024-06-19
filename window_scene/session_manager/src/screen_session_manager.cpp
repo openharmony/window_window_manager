@@ -224,7 +224,7 @@ void ScreenSessionManager::Init()
     RegisterScreenChangeListener();
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
-    } else {
+    } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
         SetSensorSubscriptionEnabled();
     }
     // publish init
