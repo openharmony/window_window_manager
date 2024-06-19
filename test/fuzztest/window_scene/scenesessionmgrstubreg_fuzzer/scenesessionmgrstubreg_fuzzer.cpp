@@ -56,12 +56,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT), parcel, reply, option);
     parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER), parcel, reply, option);
-    parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER), parcel, reply, option);
-    parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER), parcel, reply, option);
     parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
