@@ -153,7 +153,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
-    window_->SetTransparent(true);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
         int32_t err = static_cast<int32_t>(errCode);
@@ -548,20 +547,6 @@ void PictureInPictureController::PreRestorePictureInPicture()
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
-    if (mainWindow_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_PIP, "main window is nullptr");
-        return;
-    }
-    std::string navId = pipOption_->GetNavigationId();
-    if (navId != "") {
-        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
-        if (navController) {
-            navController->PushInPIP(handleId_);
-            TLOGI(WmsLogTag::WMS_PIP, "Push in pip handleId: %{public}d", handleId_);
-        } else {
-            TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
-        }
-    }
     StopPictureInPicture(true, StopPipType::NULL_STOP);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
@@ -574,6 +559,16 @@ void PictureInPictureController::LocateSource()
         return;
     }
     UpdatePiPSourceRect();
+    std::string navId = pipOption_->GetNavigationId();
+    if (navId != "") {
+        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+        if (navController) {
+            navController->PushInPIP(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Push in pip handleId: %{public}d", handleId_);
+        } else {
+            TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
+        }
+    }
 }
 
 void PictureInPictureController::UpdateXComponentPositionAndSize()
