@@ -560,9 +560,13 @@ HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, Function | SmallT
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
         ScreenScaleMode::FILL_MODE);
-    ASSERT_EQ(DMError::DM_OK, ret);
-    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, ret);
+        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+        ASSERT_EQ(DMError::DM_OK, ret);
+    }
 }
 
 /**
