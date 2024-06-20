@@ -1734,8 +1734,9 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, Function | SmallTest
  */
 HWTEST_F(SceneSessionManagerTest3, ConfigDecor02, Function | SmallTest | Level3)
 {
-    WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
     ASSERT_NE(ssm_, nullptr);
+    WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
+    ASSERT_NE(item, nullptr);
     ssm_->ConfigDecor(*item, false);
     delete item;
 }
