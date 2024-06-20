@@ -1084,8 +1084,8 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1 params num
             Ace::UIContent::ShowDumpHelp(infos);
             WLOGFD("Dump ArkUI help info");
-        } else if (RootScene::staticRootScene_->GetUIContent()) {
-            RootScene::staticRootScene_->GetUIContent()->DumpInfo(params, infos);
+        } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
+            uiContent->DumpInfo(params, infos);
             WLOGFD("Dump ArkUI element info");
         }
     };
