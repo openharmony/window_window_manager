@@ -58,7 +58,7 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t> controlGroups)
+static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& controlGroups)
 {
     auto item = controlGroups.begin();
     std::set<uint32_t> result;
