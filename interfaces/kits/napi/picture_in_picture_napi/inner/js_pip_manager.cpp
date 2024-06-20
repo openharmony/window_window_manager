@@ -99,19 +99,19 @@ napi_value JsPipManager::GetCustomUIController(napi_env env, napi_callback_info 
 
 napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::OnGetCustomUIController");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (pipWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]get customUIController start, winId: %{public}u", windowId);
     napi_ref ref = pipController->GetCustomNodeController();
     if (ref == nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid custom UI controller");

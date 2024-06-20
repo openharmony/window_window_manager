@@ -40,7 +40,7 @@ public:
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
     void SetNodeControllerRef(napi_ref ref);
-    napi_ref GetNodeControllerRef();
+    napi_ref GetNodeControllerRef() const;
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
