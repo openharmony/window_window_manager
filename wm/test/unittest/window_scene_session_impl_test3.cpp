@@ -979,4 +979,4 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover, Function | SmallTest | Level2)
 }
 }
 } // namespace Rosen
-} // namespace OHOSgit add .
+} // namespace OHOS
