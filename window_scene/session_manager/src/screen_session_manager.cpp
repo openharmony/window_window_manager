@@ -143,6 +143,7 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     std::ostringstream oss;
     oss << "SetScreenCorrection g_screenRotationOffSet : " << g_screenRotationOffSet;
     screenEventTracker_.RecordEvent(oss.str());
+    TLOGI(WmsLogTag::DMS, "SetScreenCorrection g_screenRotationOffSet : %{public}d", g_screenRotationOffSet);
     rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     FoldScreenPowerInit();
 }
