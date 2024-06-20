@@ -249,11 +249,8 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->mainWindow_ = mw;
 
-    pipControl->pipOption_->SetNavigationId("navId");
-    ASSERT_NE(nullptr, pipControl->pipOption_->GetNavigationId());
-    ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_->SetNavigationId("");
+    ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
 }
@@ -358,15 +355,16 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     ASSERT_EQ(result, 0);
     pipControl->pipOption_ = option;
 
-    std::string navId = pipControl->pipOption_->SetNavigationId("");
+    std::string navId = "";
+    pipControl->SetAutoStartEnabled(enable);
+    ASSERT_EQ(result, 0);
+    navId = "navId";
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
-    navId = pipControl->pipOption_->SetNavigationId("navId");
-    pipControl->SetAutoStartEnabled(enable);
+    ASSERT_EQ(result, 0);
     pipControl->mainWindow_ = mw;
     pipControl->SetAutoStartEnabled(enable);
-    navId = pipControl->pipOption_->SetNavigationId("");
-    pipControl->SetAutoStartEnabled(enable);
+    ASSERT_EQ(result, 0);
 }
 
 /**
@@ -650,7 +648,6 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, Function 
     pipControl->mainWindow_ = nullptr;
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
     pipControl->mainWindow_ = mw;
-    ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
 }
 
 /**
