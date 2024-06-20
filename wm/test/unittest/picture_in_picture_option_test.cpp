@@ -125,7 +125,7 @@ HWTEST_F(PictureInPictureOptionTest, ContentSize, Function | SmallTest | Level2)
  */
 HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Level2)
 {
-    sptr<PipOption> option = new PipOption();
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetNodeControllerRef(nullptr);
     ASSERT_EQ(option->GetNodeControllerRef(), nullptr);
 }

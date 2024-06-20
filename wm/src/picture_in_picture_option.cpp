@@ -52,7 +52,7 @@ void PipOption::SetNodeControllerRef(napi_ref ref)
     customNodeController_ = ref;
 }
 
-napi_ref PipOption::GetNodeControllerRef()
+napi_ref PipOption::GetNodeControllerRef() const
 {
     return customNodeController_;
 }
