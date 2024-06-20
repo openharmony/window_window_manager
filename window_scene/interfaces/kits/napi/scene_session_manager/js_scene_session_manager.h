@@ -75,6 +75,7 @@ public:
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
+    static napi_value NotifyStackEmpty(napi_env env, napi_callback_info info);
     static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
@@ -126,6 +127,7 @@ private:
     napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     napi_value OnReportData(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
