@@ -2568,7 +2568,7 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible03, Function | SmallTest | 
 */
 HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchSucc");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
@@ -2583,7 +2583,7 @@ HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Le
 */
 HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchErr");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
