@@ -135,8 +135,8 @@ static napi_value ExportVideoLiveControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    (void)SetNamedProperty(env, result, "PLAY_PAUSE_BUTTON",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE_BUTTON));
+    (void)SetNamedProperty(env, result, "PLAY_PAUSE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH));
     napi_object_freeze(env, result);
