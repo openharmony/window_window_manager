@@ -773,12 +773,11 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
  */
 HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Level2)
 {
-    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
+    auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new (std::nothrow) PipOption();
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     pipControl->LocateSource();
     pipControl->window_ = nullptr;
     pipControl->LocateSource();
