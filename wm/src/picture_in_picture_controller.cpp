@@ -757,6 +757,11 @@ std::string PictureInPictureController::GetPiPNavigationId()
     return pipOption_? pipOption_->GetNavigationId() : "";
 }
 
+napi_ref PictureInPictureController::GetCustomNodeController()
+{
+    return pipOption_ == nullptr ? nullptr : pipOption_->GetNodeControllerRef();
+}
+
 PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl(const sptr<Window> window)
 {
     mode_ = window ? window->GetMode() : WindowMode::WINDOW_MODE_UNDEFINED;
