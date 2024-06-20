@@ -118,8 +118,7 @@ static int32_t checkOptionParams(PipOption& option)
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, pipTemplateType not exists.");
         return -1;
     }
-    std::vector<std::uint32_t> controlGroups = option.GetControlGroup();
-    return checkControlsRules(option, pipTemplateType, controlGroups);
+    return checkControlsRules(option, pipTemplateType, option.GetControlGroup());
 }
 
 static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
