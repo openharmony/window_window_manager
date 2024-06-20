@@ -92,7 +92,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_single",
   ]
-  if (host_cpu != "arm64") {
+  if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
   }
   public_external_deps = [
