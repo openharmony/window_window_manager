@@ -91,6 +91,37 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     return NapiGetUndefined(env);
 }
 
+napi_value JsPipManager::GetCustomUIController(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnGetCustomUIController(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        return NapiGetUndefined(env);
+    }
+    napi_ref ref = pipController->GetCustomNodeController();
+    if (ref == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid custom UI controller");
+        return NapiGetUndefined(env);
+    }
+    napi_value uiController = nullptr;
+    napi_get_reference_value(env, ref, &uiController);
+    return uiController;
+}
+
 napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::JsPipManagerInit");
@@ -102,6 +133,7 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsPipManager.release(), JsPipManager::Finalizer, nullptr, nullptr);
     const char* moduleName = "JsPipManager";
     BindNativeFunction(env, exportObj, "initXComponentController", moduleName, JsPipManager::InitXComponentController);
+    BindNativeFunction(env, exportObj, "getCustomUIController", moduleName, JsPipManager::GetCustomUIController);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen
