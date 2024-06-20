@@ -82,6 +82,8 @@ public:
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
+    DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
+    DMError ResetAllFreezeStatus();
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
@@ -1852,5 +1854,25 @@ void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<ui
 void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
+}
+
+DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
+{
+    return pImpl_->ProxyForFreeze(pidList, isProxy);
+}
+
+DMError DisplayManager::Impl::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().ProxyForFreeze(pidList, isProxy);
+}
+
+DMError DisplayManager::ResetAllFreezeStatus()
+{
+    return pImpl_->ResetAllFreezeStatus();
+}
+
+DMError DisplayManager::Impl::ResetAllFreezeStatus()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
 } // namespace OHOS::Rosen

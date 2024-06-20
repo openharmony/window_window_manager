@@ -35,6 +35,49 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
+void SceneSessionMgrCreateTestCode(MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS), parcel, reply, option);
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -42,38 +85,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION_WITH_DETACH_CALLBACK),
-        parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION), parcel, reply, option);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS), parcel, reply, option);
+    SceneSessionMgrCreateTestCode(parcel);
+
     return true;
 }
 } // namespace OHOS

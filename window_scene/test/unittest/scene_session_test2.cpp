@@ -475,10 +475,8 @@ HWTEST_F(SceneSessionTest2, Connect, Function | SmallTest | Level2)
     SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     sptr<IRemoteObject> token;
-    int32_t pid = -1;
-    int32_t uid = -1;
     WSError res = scensession->Connect(sessionStage, eventChannel,
-        surfaceNode, systemConfig, property, token, pid, uid);
+        surfaceNode, systemConfig, property, token);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 /**
@@ -1825,6 +1823,25 @@ HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
     sceneSession->ClearExtWindowFlags();
     bool isRegister = true;
     sceneSession->UpdateRectChangeListenerRegistered(isRegister);
+}
+
+/**
+ * @tc.name: IsSystemSpecificSession
+ * @tc.desc: IsSystemSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsSystemSpecificSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsSystemSpecificSession";
+    info.bundleName_ = "IsSystemSpecificSession";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ASSERT_FALSE(sceneSession->IsSystemSpecificSession());
+    sceneSession->SetIsSystemSpecificSession(true);
+    ASSERT_TRUE(sceneSession->IsSystemSpecificSession());
 }
 
 /**

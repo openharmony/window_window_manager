@@ -80,6 +80,24 @@ HWTEST_F(RootSceneSessionTest, LoadContentFunc, Function | SmallTest | Level1)
     ASSERT_FALSE(rootSceneSession.IsVisible());
 }
 
+/**
+ * @tc.name: LoadContent
+ * @tc.desc: test function : LoadContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, LoadContent, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    std::string strTest("LoadContentFuncTest");
+    napi_env nativeEnv_ = nullptr;
+    napi_value nativeValue_ = nullptr;
+    AbilityRuntime::Context* conText_ = nullptr;
+    RootSceneSession::LoadContentFunc loadContentFunc_ = LoadContentFuncTest;
+    rootSceneSession.SetLoadContentFunc(loadContentFunc_);
+    rootSceneSession.LoadContent(strTest, nativeEnv_, nativeValue_, conText_);
+    ASSERT_FALSE(rootSceneSession.IsVisible());
+}
+
 }
 }
 }

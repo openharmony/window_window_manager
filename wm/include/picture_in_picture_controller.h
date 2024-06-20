@@ -68,6 +68,7 @@ public:
     void DoActionEvent(const std::string& actionName, int32_t status);
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
+    void LocateSource();
     void SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener);
     void SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
@@ -75,6 +76,7 @@ public:
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
+    napi_ref GetCustomNodeController();
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:

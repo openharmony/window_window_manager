@@ -74,6 +74,7 @@ public:
     ScreenId GetDefaultScreenId();
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
+    void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
     void SwitchingCurrentUser();

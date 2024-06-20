@@ -55,10 +55,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleSetSessionIcon),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_VALID_SESSION_IDS),
         &SceneSessionManagerStub::HandleIsValidSessionIds),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER),
-        &SceneSessionManagerStub::HandleRegisterSessionChangeListener),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER),
-        &SceneSessionManagerStub::HandleUnRegisterSessionChangeListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
         &SceneSessionManagerStub::HandlePendingSessionToForeground),
     std::make_pair(static_cast<uint32_t>(
@@ -316,7 +312,7 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, Messa
     WLOGFI("run HandleRequestFocusStatus!");
     int32_t persistentId = data.ReadInt32();
     bool isFocused = data.ReadBool();
-    const WMError& ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
+    WMError ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -381,26 +377,6 @@ int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, Messag
     data.ReadInt32Vector(&sessionIds);
     std::vector<bool> results;
     reply.WriteBoolVector(results);
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply)
-{
-    WLOGFI("run HandleRegisterSessionChangeListener!");
-    sptr<ISessionChangeListener> listener = iface_cast<ISessionChangeListener>(data.ReadRemoteObject());
-    if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION_LISTENER));
-        return ERR_NONE;
-    }
-    WSError errCode = RegisterSessionListener(listener);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleUnRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply)
-{
-    WLOGFI("run HandleUnRegisterSessionChangeListener!");
-    UnregisterSessionListener();
     return ERR_NONE;
 }
 

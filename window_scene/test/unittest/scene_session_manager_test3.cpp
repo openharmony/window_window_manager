@@ -1376,19 +1376,17 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
 */
 HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Level3)
 {
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    FocusChangeReason reasonResult = FocusChangeReason::DEFAULT;
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, 10086);
 
     int32_t persistentId = INVALID_SESSION_ID;
     WMError result01 = ssm_->RequestFocusStatus(persistentId, true);
     EXPECT_EQ(result01, WMError::WM_OK);
-    reasonResult = ssm_->GetFocusChangeReason();
+    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
 
     persistentId = 10000;
-    reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
+    FocusChangeReason reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
     WMError result02 = ssm_->RequestFocusStatus(persistentId, true, true, reasonInput);
     EXPECT_EQ(result02, WMError::WM_OK);
     reasonResult = ssm_->GetFocusChangeReason();
@@ -1893,6 +1891,47 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | Small
     mainFloat02.SetValue(subFloat);
     mainFloat02.SetValue({{"miniHeight", mainFloat02}});
     ssm_->ConfigSubWindowSizeLimits(mainFloat02);
+}
+
+/**
+ * @tc.name: GetTopWindowId
+ * @tc.desc: get top window id by main window id.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "mainWin";
+    sessionInfo1.abilityName_ = "mainAbilityName";
+    sessionInfo1.persistentId_ = 100;
+    auto sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->SetCallingPid(65534);
+    ssm_->sceneSessionMap_.insert({100, sceneSession1});
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.bundleName_ = "subWin1";
+    sessionInfo2.abilityName_ = "subAbilityName1";
+    sessionInfo2.persistentId_ = 101;
+    auto sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    sceneSession2->SetCallingPid(65535);
+    ssm_->sceneSessionMap_.insert({101, sceneSession2});
+
+    SessionInfo sessionInfo3;
+    sessionInfo3.bundleName_ = "subWin2";
+    sessionInfo3.abilityName_ = "subAbilityName2";
+    sessionInfo3.persistentId_ = 102;
+    auto sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    ASSERT_NE(sceneSession3, nullptr);
+    sceneSession3->SetCallingPid(65534);
+    ssm_->sceneSessionMap_.insert({102, sceneSession3});
+
+    sceneSession1->AddSubSession(sceneSession2);
+    sceneSession1->AddSubSession(sceneSession3);
+    uint32_t topWinId;
+    ASSERT_NE(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
+        WMError::WM_ERROR_INVALID_WINDOW);
 }
 }
 } // namespace Rosen

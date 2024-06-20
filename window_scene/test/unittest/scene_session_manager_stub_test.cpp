@@ -417,24 +417,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, Function | SmallT
 }
 
 /**
- * @tc.name: HandleUnRegisterSessionChangeListener
- * @tc.desc: test HandleUnRegisterSessionChangeListener
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUnRegisterSessionChangeListener, Function | SmallTest | Level2)
-{
-    if (stub_ == nullptr) {
-        return;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-
-    int res = stub_->HandleUnRegisterSessionChangeListener(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandlePendingSessionToForeground
  * @tc.desc: test HandlePendingSessionToForeground
  * @tc.type: FUNC

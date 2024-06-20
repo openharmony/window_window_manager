@@ -38,6 +38,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
+    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo) override {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
@@ -60,6 +61,7 @@ public:
         return nullptr;
     }
     virtual DMError SetScreenRotationLocked(bool isLocked) override { return DMError::DM_OK; }
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override { return DMError::DM_OK; }
     virtual DMError IsScreenRotationLocked(bool& isLocked) override { return DMError::DM_OK; }
 
     // colorspace, gamut
@@ -154,6 +156,14 @@ public:
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override
+    {
+        return DMError::DM_OK;
+    }
+    virtual DMError ResetAllFreezeStatus() override
     {
         return DMError::DM_OK;
     }
