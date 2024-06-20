@@ -30,12 +30,13 @@ namespace {
     const std::string ACTION_PRE_RESTORE = "pre_restore";
     const std::string ACTION_RESTORE = "restore";
     const std::string ACTION_DESTROY = "destroy";
+    const std::string ACTION_LOCATE_SOURCE = "locate_source";
 
     const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
         {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
         {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
         {ACTION_RESTORE, PictureInPictureManager::DoRestore},
-        {ACTION_DESTROY, PictureInPictureManager::DoDestroy}
+        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource}
     };
 }
 
@@ -210,6 +211,16 @@ void PictureInPictureManager::DoRestore()
     activeController_->RestorePictureInPictureWindow();
 }
 
+void PictureInPictureManager::DoLocateSource()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "DoLocateSource is called");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->LocateSource();
+}
+
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
     TLOGD(WmsLogTag::WMS_PIP, "DoClose is called");
@@ -230,16 +241,6 @@ void PictureInPictureManager::DoActionClose()
 {
     TLOGI(WmsLogTag::WMS_PIP, "DoActionClose is called");
     DoClose(true, false);
-}
-
-void PictureInPictureManager::DoDestroy()
-{
-    TLOGI(WmsLogTag::WMS_PIP, "DoDestroy is called");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!HasActiveController()) {
-        return;
-    }
-    activeController_->DestroyPictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)

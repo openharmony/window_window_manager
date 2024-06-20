@@ -18,6 +18,7 @@
 #include <event_handler.h>
 #include <refbase.h>
 #include <power_mgr_client.h>
+#include <transaction/rs_sync_transaction_controller.h>
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_option.h"
 #include "window_manager_hilog.h"
@@ -37,7 +38,6 @@ namespace OHOS {
 namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
 namespace {
-    constexpr int32_t DELAY_ANIM = 500;
     constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
@@ -327,8 +327,15 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
                 currentPipOption->GetPipTemplate(), FAILED, "pipController is null");
             return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
         }
-        session->window_->SetTransparent(true);
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (syncTransactionController) {
+            syncTransactionController->OpenSyncTransaction();
+        }
         session->ResetExtController();
+        session->DestroyPictureInPictureWindow();
+        if (syncTransactionController) {
+            syncTransactionController->CloseSyncTransaction();
+        }
         if (session->pipLifeCycleListener_ != nullptr) {
             session->pipLifeCycleListener_->OnPictureInPictureStop();
         }
@@ -540,10 +547,18 @@ void PictureInPictureController::PreRestorePictureInPicture()
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
+    StopPictureInPicture(true, StopPipType::NULL_STOP);
+    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
+    TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
+}
+
+void PictureInPictureController::LocateSource()
+{
     if (mainWindow_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_PIP, "main window is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
     }
+    window_->SetTransparent(true);
     UpdatePiPSourceRect();
     std::string navId = pipOption_->GetNavigationId();
     if (navId != "") {
@@ -555,22 +570,6 @@ void PictureInPictureController::RestorePictureInPictureWindow()
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
         }
     }
-    if (handler_) {
-        auto stopTask = [weakThis = wptr(this)]() {
-            auto controller = weakThis.promote();
-            if (!controller) {
-                TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
-                return;
-            }
-            controller->StopPictureInPicture(true, StopPipType::NULL_STOP);
-        };
-        handler_->PostTask(stopTask, "wms:StopPictureInPicture_restore", DELAY_ANIM);
-    } else {
-        TLOGW(WmsLogTag::WMS_PIP, "StopPictureInPicture no delay while restore");
-        StopPictureInPicture(true, StopPipType::NULL_STOP);
-    }
-    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
-    TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
 
 void PictureInPictureController::UpdateXComponentPositionAndSize()
