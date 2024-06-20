@@ -28,7 +28,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
-    constexpr MAX_CONTROL_GROUP_NUM = 3;
+    constexpr uint32_t MAX_CONTROL_GROUP_NUM = 3;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
