@@ -492,7 +492,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     session->property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     session->ClearDialogVector();
-    session->moveDragController_ = new MoveDragController(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = false;
     systemConfig.decorModeSupportInfo_ = 2;
