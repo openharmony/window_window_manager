@@ -58,6 +58,23 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
+static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& controlGroups)
+{
+    auto item = controlGroups.begin();
+    std::set<uint32_t> result;
+    while (item != controlGroups.end()) {
+        if (result.find(*item) != result.end()) {
+            TLOGE(WmsLogTag::WMS_PIP, "item  is found in result, item: %{public}u", *item);
+            item = controlGroups.erase(item);
+        } else {
+            TLOGE(WmsLogTag::WMS_PIP, "item not find in result, item: %{public}u", *item);
+            result.insert(*item);
+            item++;
+        }
+    }
+    return controlGroups;
+}
+
 static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType,
     std::vector<std::uint32_t>& controlGroups)
 {
@@ -89,23 +106,6 @@ static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType,
         }
     }
     return 0;
-}
-
-static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& controlGroups)
-{
-    auto item = controlGroups.begin();
-    std::set<uint32_t> result;
-    while (item != controlGroups.end()) {
-        if (result.find(*item) != result.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "item  is found in result, item: %{public}u", *item);
-            item = controlGroups.erase(item);
-        } else {
-            TLOGE(WmsLogTag::WMS_PIP, "item not find in result, item: %{public}u", *item);
-            result.insert(*item);
-            item++;
-        }
-    }
-    return controlGroups;
 }
 
 static int32_t checkOptionParams(PipOption& option)
