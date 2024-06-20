@@ -687,8 +687,11 @@ ohos_unittest("ws_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_base:session_info",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
   ]
 }
 
@@ -739,6 +742,7 @@ ohos_unittest("ws_scene_session_test") {
     "scene_session_test2.cpp",
     "scene_session_test3.cpp",
     "scene_session_test4.cpp",
+    "scene_session_test5.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
@@ -1234,6 +1238,7 @@ ohos_static_library("ws_unittest_common") {
   ]
 
   deps = [
+    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
