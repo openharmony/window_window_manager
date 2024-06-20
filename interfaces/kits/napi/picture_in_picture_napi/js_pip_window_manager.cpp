@@ -58,7 +58,7 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t>& controlGroups)
+static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType, std::vector<std::uint32_t>& controlGroups)
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
@@ -66,8 +66,10 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     std::set<uint32_t> result;
     while (item != controlGroups.end()) {
         if (result.find(*item) != result.end()) {
+            TLOGE(WmsLogTag::WMS_PIP, "item not find in result, item: %{public}u", *item);
             item = controlGroups.erase(item);
         } else {
+            TLOGE(WmsLogTag::WMS_PIP, "item id found in result, item: %{public}u", *item);
             result.insert(*item);
             item++;
         }
@@ -75,6 +77,7 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     if (controlGroups.size() > 3) {
         return -1;
     }
+    option.SetControlGroup(controlGroups);
     for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
             TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, controlGroup not matches, controlGroup: %{public}u",
@@ -113,7 +116,8 @@ static int32_t checkOptionParams(PipOption& option)
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, pipTemplateType not exists.");
         return -1;
     }
-    return checkControlsRules(pipTemplateType, option.GetControlGroup());
+    std::vector<std::uint32_t> controlGroups = option.GetControlGroup();
+    return checkControlsRules(option, pipTemplateType, controlGroups);
 }
 
 static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
