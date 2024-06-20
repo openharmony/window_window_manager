@@ -167,7 +167,7 @@ HWTEST_F(SceneSessionTest5, BackgroundTask, Function | SmallTest | Level2)
     session->scenePersistence_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
 
-    session->scenePersistence_ = new ScenePersistence("Foreground02", 1);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("Foreground02", 1);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
