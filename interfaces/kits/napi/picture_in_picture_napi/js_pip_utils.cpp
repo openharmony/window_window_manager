@@ -110,7 +110,7 @@ static napi_value ExportVideoCallControlGroup(napi_env env)
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MUTE_SWITCH));  
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MUTE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
