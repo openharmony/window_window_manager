@@ -2708,10 +2708,6 @@ WMError SceneSession::HandleActionUpdateFlags(const sptr<WindowSessionProperty>&
 WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "update mode permission denied! id: %{public}d", sceneSession->GetPersistentId());
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     if (sceneSession->GetSessionProperty() != nullptr) {
         sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
     }
