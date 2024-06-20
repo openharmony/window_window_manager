@@ -22,6 +22,7 @@
 #include "singleton_mocker.h"
 #include "screen_manager.cpp"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -509,9 +510,13 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag01, Function | SmallTest | Level
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
-    ASSERT_EQ(DMError::DM_OK, ret);
-    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, ret);
+        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+        ASSERT_EQ(DMError::DM_OK, ret);
+    }
 }
 
 /**
