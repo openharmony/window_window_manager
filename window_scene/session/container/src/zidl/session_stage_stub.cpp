@@ -220,13 +220,25 @@ int SessionStageStub::HandleNotifyTransferComponentDataSync(MessageParcel& data,
 
 int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleNotifyOccupiedAreaChangeInfo!");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "HandleNotifyOccupiedAreaChangeInfo!");
     sptr<OccupiedAreaChangeInfo> info(data.ReadParcelable<OccupiedAreaChangeInfo>());
     if (info == nullptr) {
-        WLOGFE("Occupied info is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Occupied info is nullptr");
         return ERR_INVALID_VALUE;
     }
-    NotifyOccupiedAreaChangeInfo(info);
+
+    bool hasRSTransaction = data.ReadBool();
+    if (hasRSTransaction) {
+        std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
+        if (!transaction) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "transaction unMarsh failed");
+            return ERR_INVALID_VALUE;
+        }
+        NotifyOccupiedAreaChangeInfo(info, transaction);
+    } else {
+        NotifyOccupiedAreaChangeInfo(info);
+    }
+
     return ERR_NONE;
 }
 

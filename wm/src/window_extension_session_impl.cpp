@@ -598,12 +598,13 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
-void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                                              const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY = %{public}f, KeyBoardHeight = %{public}d",
         info->textFieldPositionY_, info->rect_.height_);
     if (occupiedAreaChangeListener_) {
-        occupiedAreaChangeListener_->OnSizeChange(info);
+        occupiedAreaChangeListener_->OnSizeChange(info, rsTransaction);
     }
 }
 
