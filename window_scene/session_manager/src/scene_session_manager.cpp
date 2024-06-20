@@ -8957,20 +8957,25 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "NotifyEnterRecentTask: enterRecent: %{public}u", enterRecent);
+    TLOGI(WmsLogTag::WMS_IMMS, "enterRecent: %{public}u", enterRecent);
     enterRecent_.store(enterRecent);
     if (enterRecent) {
         SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_ENTER_RECENTS);
-    } else {
-        SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
+        return WSError::WS_OK;
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "NotifyEnterRecentTask: enterRecent_: %{public}u", enterRecent_.load());
 
-    if (!enterRecent_.load()) {
-        bool needUpdate = false;
-        UpdateAvoidSessionAvoidArea(WindowType::WINDOW_TYPE_STATUS_BAR, needUpdate);
-    }
-    
+    SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
+    auto task = [this]() {
+        for (auto persistentId : avoidAreaListenerSessionSet_) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
+                continue;
+            }
+            bool needUpdate = false;
+            UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "Exit enterRecent");
     return WSError::WS_OK;
 }
 
