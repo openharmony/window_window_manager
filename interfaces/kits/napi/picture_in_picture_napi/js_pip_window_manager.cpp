@@ -58,7 +58,7 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& controlGroups)
+static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t> controlGroups)
 {
     auto item = controlGroups.begin();
     std::set<uint32_t> result;
@@ -76,12 +76,12 @@ static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& con
 }
 
 static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType,
-    std::vector<std::uint32_t>& controlGroups)
+    std::vector<std::uint32_t> controlGroups)
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
     controlGroups = uniqueControls(controlGroups);
-    auto maxControlGroupNum = 3;
+    uint32_t maxControlGroupNum = 3;
     if (controlGroups.size() > maxControlGroupNum) {
         return -1;
     }
