@@ -6927,8 +6927,7 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
 {
     TLOGI(WmsLogTag::DEFAULT, "Enter");
     auto pid = IPCSkeleton::GetCallingRealPid();
-    auto isUserTestMode = SessionPermission::CheckCallingIsUserTestMode(pid);
-    if (!SessionPermission::IsSACalling() && !isUserTestMode) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::CheckCallingIsUserTestMode(pid)) {
         TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to foreground!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
