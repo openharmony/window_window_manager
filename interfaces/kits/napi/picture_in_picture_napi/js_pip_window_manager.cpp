@@ -28,6 +28,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
+    constexpr MAX_CONTROL_GROUP_NUM = 3;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
@@ -81,8 +82,7 @@ static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType,
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
     controlGroups = uniqueControls(controlGroups);
-    uint32_t maxControlGroupNum = 3;
-    if (controlGroups.size() > maxControlGroupNum) {
+    if (controlGroups.size() > MAX_CONTROL_GROUP_NUM) {
         return -1;
     }
     option.SetControlGroup(controlGroups);
