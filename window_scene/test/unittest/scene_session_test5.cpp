@@ -235,7 +235,7 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(weakThis, nullptr));
 
-    session->moveDragController_ = new MoveDragController(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
     session->moveDragController_->isStartDrag_ = true;
     session->moveDragController_->isStartMove_ = true;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
