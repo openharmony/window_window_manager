@@ -152,6 +152,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
+    BindNativeFunction(env, exportObj, "UpdateDisplayHookInfo", moduleName,
+        JsSceneSessionManager::UpdateDisplayHookInfo);
     return NapiGetUndefined(env);
 }
 
@@ -800,6 +802,13 @@ napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callb
     return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::UpdateDisplayHookInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
+}
+
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
@@ -1075,8 +1084,8 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1 params num
             Ace::UIContent::ShowDumpHelp(infos);
             WLOGFD("Dump ArkUI help info");
-        } else if (RootScene::staticRootScene_->GetUIContent()) {
-            RootScene::staticRootScene_->GetUIContent()->DumpInfo(params, infos);
+        } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
+            uiContent->DumpInfo(params, infos);
             WLOGFD("Dump ArkUI element info");
         }
     };
@@ -2056,8 +2065,8 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             return NapiGetUndefined(env);
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]OnRequestFocusStatus persistentId: %{public}d, isFocused: %{public}d, "
-        "byForeground: %{public}d, reason: %{public}d", persistentId, isFocused, byForeground, reason);
+    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]persistentId: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
+        "reason: %{public}d", persistentId, isFocused, byForeground, reason);
 
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     return NapiGetUndefined(env);
@@ -2497,5 +2506,61 @@ std::shared_ptr<NativeReference> JsSceneSessionManager::GetJSCallback(const std:
         TLOGE(WmsLogTag::DEFAULT, "Find function name %{public}s, but callback is nullptr!", functionName.c_str());
     }
     return jsCallBack;
+}
+
+napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = 5;
+    napi_value argv[5] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_FIVE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t uid;
+    if (!ConvertFromJsValue(env, argv[0], uid)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to uid");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t width;
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], width)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t height;
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    double_t density = 1.0;
+    if (!ConvertFromJsValue(env, argv[ARGC_THREE], density)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable;
+    if (!ConvertFromJsValue(env, argv[ARGC_FOUR], enable)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<float_t>(density), enable);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

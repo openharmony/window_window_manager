@@ -49,8 +49,6 @@ private:
     int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
     int HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
-    int HandleUnRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
     int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
     int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);

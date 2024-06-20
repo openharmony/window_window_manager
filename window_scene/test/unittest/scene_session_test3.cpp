@@ -370,10 +370,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
-    auto result = scensession->NotifyClientToUpdateRectTask(nullptr, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_DESTROYED_OBJECT);
-
-    result = scensession->NotifyClientToUpdateRectTask(scensession, nullptr);
+    auto result = scensession->NotifyClientToUpdateRectTask(nullptr);
     ASSERT_NE(result, WSError::WS_OK);
 }
 

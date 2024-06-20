@@ -27,10 +27,15 @@ public:
     static void RegisterSettingDpiObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
+    static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingCastObserver();
+    static bool GetSettingCast(bool& enable, const std::string& key = SETTING_CAST_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+    static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static sptr<SettingObserver> dpiObserver_;
+    static sptr<SettingObserver> castObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

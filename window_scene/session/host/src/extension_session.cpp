@@ -146,7 +146,7 @@ ExtensionSession::~ExtensionSession()
     channelDeath_ = nullptr;
 }
 
-WSError ExtensionSession::Connect(
+WSError ExtensionSession::ConnectInner(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
@@ -155,7 +155,8 @@ WSError ExtensionSession::Connect(
     // Get pid and uid before posting task.
     pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
     uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
-    auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
+    auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode,
+        &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_UIEXT, "session is null");
@@ -186,10 +187,23 @@ WSError ExtensionSession::Connect(
             }
         }
 
-        return session->Session::Connect(
+        return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
-    return PostSyncTask(task, "Connect");
+    return PostSyncTask(task, "ConnectInner");
+}
+
+WSError ExtensionSession::Connect(
+    const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+    const std::string& identityToken)
+{
+    // Get pid and uid before posting task.
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    return ConnectInner(sessionStage, eventChannel, surfaceNode, systemConfig,
+        property, token, pid, uid, identityToken);
 }
 
 WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)

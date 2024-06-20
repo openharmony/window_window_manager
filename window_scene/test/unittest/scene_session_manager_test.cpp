@@ -316,20 +316,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, Function | SmallTes
 }
 
 /**
- * @tc.name: RegisterSessionListener02
- * @tc.desc: SceneSesionManager register session listener
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, RegisterSessionListener02, Function | SmallTest | Level3)
-{
-    OHOS::MessageParcel data;
-    sptr<ISessionChangeListener> sessionListener = nullptr;
-    WSError result01 = ssm_->RegisterSessionListener(sessionListener);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION_LISTENER);
-    ssm_->UnregisterSessionListener();
-}
-
-/**
  * @tc.name: ClearDisplayStatusBarTemporarilyFlags
  * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
  * @tc.type: FUNC

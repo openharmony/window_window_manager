@@ -122,7 +122,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         static_cast<float>(moveTempProperty_.lastDownPointerPosX_);
     WSRect targetRect = {
         moveTempProperty_.lastDownPointerPosX_ - static_cast<int32_t>(newPosX),
-        0,
+        originalRect.posY_,
         windowRect.width_,
         windowRect.height_,
     };

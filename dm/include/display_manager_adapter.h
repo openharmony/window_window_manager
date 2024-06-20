@@ -87,6 +87,9 @@ public:
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
+    virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
+    virtual DMError ResetAllFreezeStatus();
+
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
@@ -120,6 +123,7 @@ public:
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio);
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
     virtual DMError SetScreenRotationLocked(bool isLocked);
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked);
     virtual DMError IsScreenRotationLocked(bool& isLocked);
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

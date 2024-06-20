@@ -109,12 +109,14 @@ public:
 
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
+    virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     virtual DMError HasImmersiveWindow(bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
+    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
@@ -157,6 +159,8 @@ public:
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
+    DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
+    DMError ResetAllFreezeStatus() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

@@ -447,6 +447,30 @@ HWTEST_F(WindowSessionTest2, Snapshot01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SaveSnapshot
+ * @tc.desc: SaveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SaveSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->scenePersistence_ = nullptr;
+    session_->snapshot_ = nullptr;
+    session_->SaveSnapshot(true);
+    EXPECT_EQ(session_->snapshot_, nullptr);
+
+    session_->scenePersistence_ = new ScenePersistence(session_->sessionInfo_.bundleName_, session_->persistentId_);
+    ASSERT_NE(session_->scenePersistence_->GetSnapshotScheduler(), nullptr);
+
+    session_->SaveSnapshot(false);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+
+    session_->SaveSnapshot(true);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+}
+
+/**
  * @tc.name: SetSessionStateChangeListenser
  * @tc.desc: SetSessionStateChangeListenser Test
  * @tc.type: FUNC

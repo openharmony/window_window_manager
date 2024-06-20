@@ -20,6 +20,8 @@
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
 #include "window_manager_hilog.h"
+#include "singleton_container.h"
+#include "screen_manager.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -194,8 +196,24 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
         return NapiGetUndefined(env);
     }
     screenSession_->SetScreenRotationLockedFromJs(isLocked);
+    NapiAsyncTask::CompleteCallback complete =
+        [isLocked](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<ScreenManager>().SetScreenRotationLockedFromJs(isLocked));
+            if (res == DmErrorCode::DM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+                WLOGFI("OnSetScreenRotationLocked success");
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(res),
+                                                  "JsScreenSession::OnSetScreenRotationLocked failed."));
+                WLOGFE("OnSetScreenRotationLocked failed");
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsScreenSession::OnSetScreenRotationLocked",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
-    return NapiGetUndefined(env);
+    return result;
 }
 
 napi_value JsScreenSession::SetTouchEnabled(napi_env env, napi_callback_info info)

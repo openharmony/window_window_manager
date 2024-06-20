@@ -1940,7 +1940,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterSubWindowCloseListeners(
-        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister subwindow close listener.
@@ -1949,7 +1949,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterSubWindowCloseListeners(
-        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.

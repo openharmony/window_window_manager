@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_STUB_H
-#define OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_STUB_H
+#ifndef TEST_FUZZTEST_SCREEN_SESSION_MANAGER_CLIENT_STUB_FUZZER_H
+#define TEST_FUZZTEST_SCREEN_SESSION_MANAGER_CLIENT_STUB_FUZZER_H
 
-#include "iremote_stub.h"
-#include "session_listener_interface.h"
+#define FUZZ_PROJECT_NAME "screensessionmanagerclientstub_fuzzer"
 
-namespace OHOS::Rosen {
-class SessionListenerStub : public IRemoteStub<ISessionChangeListener> {
-public:
-    SessionListenerStub() = default;
-    virtual ~SessionListenerStub() = default;
-};
-} // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_STUB_H
+#endif
