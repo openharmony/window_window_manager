@@ -7944,6 +7944,17 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
+{
+    auto scnSession = GetSceneSession(persistentId);
+    if (!scnSession) {
+        WLOGFE("session is nullptr");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::STACK_EMPTY);
+    return WSError::WS_OK;
+}
+
 void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
 {
     immersive = SceneSessionManager::GetInstance().UpdateImmersiveState();
