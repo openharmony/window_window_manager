@@ -593,9 +593,13 @@ HWTEST_F(ScreenManagerTest, IsCaptured02, Function | SmallTest | Level1)
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     bool isCapture = DisplayManager::GetInstance().IsCaptured();
-    ASSERT_TRUE(isCapture);
-    auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_FALSE(isCapture);
+    } else {
+        ASSERT_TRUE(isCapture);
+        auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+        ASSERT_EQ(DMError::DM_OK, ret);
+    }
 }
 
 /**
