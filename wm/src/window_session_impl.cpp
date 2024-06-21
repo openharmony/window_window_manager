@@ -125,7 +125,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
     } while (0)
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
-    do{                                                                        \
+    do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
             return;                                                            \
@@ -133,7 +133,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
     } while (false)
 
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
-    do{                                                                        \
+    do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
             return ret;                                                        \
@@ -1729,7 +1729,7 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
         WindowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
-                                        windowRectChangeListeners_[GetPersistentId()].empty()
+                                        windowRectChangeListeners_[GetPersistentId()].empty();
     }
     auto hostSession = GetHostSession();
     if (hostSession != nullptr && WindowRectChangeListenersEmpty) {
@@ -3125,7 +3125,7 @@ void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason r
         return;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
 }
 
