@@ -1299,7 +1299,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW)
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
 }
@@ -1443,7 +1443,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW)
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);
 }
@@ -1795,6 +1795,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 
     bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
         windowSystemConfig_.freeMultiWindowSupport_;
+
     if (isSwitchFreeMultiWindow || (WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad")) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
@@ -1858,7 +1859,7 @@ WMError WindowSceneSessionImpl::Minimize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW)
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     if (WindowHelper::IsMainWindow(GetType()) && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     } else {
@@ -1917,7 +1918,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     } else {
         auto hostSession = GetHostSession();
-        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW)
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FLOATING);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
@@ -1938,7 +1939,7 @@ WMError WindowSceneSessionImpl::Recover()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             WLOGFW("Recover fail, already MODE_RECOVER");
@@ -1973,7 +1974,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             WLOGFW("Recover fail, already MODE_RECOVER");
@@ -2168,7 +2169,7 @@ WMError WindowSceneSessionImpl::SetGlobalMaximizeMode(MaximizeMode mode)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession->SetGlobalMaximizeMode(mode);
         return WMError::WM_OK;
     } else {
@@ -2452,7 +2453,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession, )
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     enableDefaultAnimation_= needDefaultAnimation;
     hostSession->UpdateWindowAnimationFlag(needDefaultAnimation);
 }
@@ -3069,7 +3070,7 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
         return WMError::WM_DO_NOTHING;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(, WSError::WS_ERROR_INVALID_WINDOW);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyPiPWindowPrepareClose();
     return WMError::WM_OK;
 }
