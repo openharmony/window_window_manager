@@ -1013,7 +1013,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
     }
 
     if (IsWindowSessionInvalid()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WMError res = WindowHelper::IsMainWindow(type) ?
