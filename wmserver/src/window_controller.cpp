@@ -990,16 +990,15 @@ void WindowController::RecordBootAnimationEvent() const
 
 std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
 {
-    WLOGFE("XXX WindowController::GetSnapshot");
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
-        WLOGFE("XXX WindowController::GetSnapshot could not find window");
+        WLOGFE("WindowController::GetSnapshot could not find window");
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(node->surfaceNode_, callback);
     if (!ret) {
-        WLOGFE("XXX WindowController::GetSnapshot takeSurfaceCapture failed");
+        WLOGFE("WindowController::GetSnapshot takeSurfaceCapture failed");
         return nullptr;
     }
     return callback->GetResult(SNAPSHOT_TIMEOUT_MS);

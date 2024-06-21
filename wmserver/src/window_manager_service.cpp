@@ -1399,7 +1399,6 @@ WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 
 std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windowId)
 {
-    WLOGFI("XXX WindowManagerService::GetSnapshot");
     auto task = [this, windowId]() {
         return windowController_->GetSnapshot(windowId);
     };
