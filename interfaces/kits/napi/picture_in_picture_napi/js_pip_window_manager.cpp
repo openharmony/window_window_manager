@@ -68,7 +68,7 @@ static std::vector<std::uint32_t> uniqueControls(std::vector<std::uint32_t>& con
             TLOGE(WmsLogTag::WMS_PIP, "item  is found in result, item: %{public}u", *item);
             item = controlGroups.erase(item);
         } else {
-            TLOGE(WmsLogTag::WMS_PIP, "item not find in result, item: %{public}u", *item);
+            TLOGD(WmsLogTag::WMS_PIP, "item not find in result, item: %{public}u", *item);
             result.insert(*item);
             item++;
         }
