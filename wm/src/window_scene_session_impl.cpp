@@ -900,6 +900,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             property_->GetWindowName().c_str(), GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
 
     auto isDecorEnable = IsDecorEnable();
     UpdateDecorEnableToAce(isDecorEnable);
@@ -909,10 +911,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         TLOGD(WmsLogTag::WMS_LIFE, "window session is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
         if (WindowHelper::IsMainWindow(type)) {
-            auto hostSession = GetHostSession();
-            if (hostSession) {
-                hostSession->RaiseAppMainWindowToTop();
-            }
+            hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
         RefreshNoInteractionTimeoutMonitor();
@@ -931,8 +930,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         UpdateDensity();
     }
 
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WMError ret = UpdateAnimationFlagProperty(withAnimation);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, UpdateProperty failed, ret: %{public}d, name: %{public}s"
@@ -974,7 +971,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    if (property_ == nullptr || GetHostSession() == nullptr) {
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE,
             "Window hide failed, because of nullptr, property: %{public}d, id: %{public}d",
             property_ == nullptr, GetPersistentId());
@@ -1008,14 +1007,13 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
      * need to SetActive(false) for host session before background
      */
 
-    auto hostSession = GetHostSession();
-    if (WindowHelper::IsMainWindow(type) && hostSession) {
+    if (WindowHelper::IsMainWindow(type)) {
         res = static_cast<WMError>(SetActive(false));
         if (res != WMError::WM_OK) {
             return res;
         }
         res = static_cast<WMError>(hostSession->Background(true));
-    } else if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) && hostSession) {
+    } else if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type))) {
         res = static_cast<WMError>(hostSession->Hide());
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
@@ -1535,14 +1533,13 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    uint32_t windowId = GetWindowId();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     avoidArea = hostSession->GetAvoidAreaByType(type);
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
           "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
-          windowId, GetWindowName().c_str(), type, getAvoidAreaCnt_,
+          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
           avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
           avoidArea.bottomRect_.height_);
@@ -2027,6 +2024,8 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
@@ -2039,14 +2038,11 @@ WMError WindowSceneSessionImpl::Close()
         WindowPrepareTerminateHandler* handler = new(std::nothrow) WindowPrepareTerminateHandler();
         if (handler == nullptr) {
             WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
-            auto hostSession = GetHostSession();
-            CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-        wptr<ISession> hostSessionWptr = GetHostSession();
-        PrepareTerminateFunc func = [hostSessionWptr]() {
-            auto weakSession = hostSessionWptr.promote();
+        PrepareTerminateFunc func = [hostSession]() {
+            auto weakSession = hostSession.promote();
             if (weakSession == nullptr) {
                 WLOGFW("this session wptr is nullptr");
                 return;
@@ -2058,8 +2054,6 @@ WMError WindowSceneSessionImpl::Close()
         if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
             callback) != ERR_OK) {
             WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
-            auto hostSession = GetHostSession();
-            CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
@@ -2452,9 +2446,9 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
 
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
+    enableDefaultAnimation_= needDefaultAnimation;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-    enableDefaultAnimation_= needDefaultAnimation;
     hostSession->UpdateWindowAnimationFlag(needDefaultAnimation);
 }
 
@@ -3508,7 +3502,7 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
 
 WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, SetImmersiveModeEnabledState: %{public}u", GetWindowId(), enable);
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u", GetWindowId());
     if (GetHostSession() == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
