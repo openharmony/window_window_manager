@@ -1860,7 +1860,7 @@ WMError WindowSceneSessionImpl::Minimize()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     } else {
         WLOGFE("This window state is abnormal.");
