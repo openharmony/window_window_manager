@@ -1010,6 +1010,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    const auto type = GetType();
     WMError res = WindowHelper::IsMainWindow(type) ?
                   static_cast<WMError>(hostSession_->DrawingCompleted()) :
                   WMError::WM_ERROR_INVALID_WINDOW;
