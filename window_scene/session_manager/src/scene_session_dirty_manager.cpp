@@ -343,9 +343,6 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-            TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"
-                " CallingPid: %{public}d",
-                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
