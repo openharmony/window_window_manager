@@ -70,7 +70,7 @@ union WSColorParam {
 };
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
-    do{                                                                        \
+    do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
             return;                                                            \
@@ -78,7 +78,7 @@ union WSColorParam {
     } while (false)
 
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
-    do{                                                                        \
+    do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
             return ret;                                                        \
