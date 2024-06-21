@@ -940,9 +940,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return ret;
     }
     UpdateTitleButtonVisibility();
-    if (WindowHelper::IsMainWindow(type) && hostSession) {
+    if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
-    } else if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) && hostSession) {
+    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         PreLayoutOnShow(type);
         ret = static_cast<WMError>(hostSession->Show(property_));
     } else {
