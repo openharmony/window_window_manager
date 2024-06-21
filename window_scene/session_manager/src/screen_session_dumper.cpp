@@ -15,6 +15,7 @@
 #include "screen_session_dumper.h"
 
 #include <csignal>
+#include <fstream>
 
 #include "unique_fd.h"
 #include "screen_session_manager.h"
@@ -24,6 +25,23 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+}
+
+static std::string GetProcessNameByPid(int32_t pid)
+{
+    std::string filePath = "/proc/" + std::to_string(pid) + "/comm";
+    char tmpPath[PATH_MAX]  = { 0 };
+    if (!realpath(filePath.c_str(), tmpPath)) {
+        return "UNKNOWN";
+    }
+    std::ifstream infile(filePath);
+    if (!infile.is_open()) {
+        return "UNKNOWN";
+    }
+    std::string processName = "UNKNOWN";
+    std::getline(infile, processName);
+    infile.close();
+    return processName;
 }
 
 ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16string>& args)
@@ -92,6 +110,17 @@ void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
     for (const auto& info : recordInfos) {
         oss << std::left << "[" << tracker.formatTimestamp(info.timestamp).c_str()
             << "]: " << info.info.c_str() << std::endl;
+    }
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpFreezedPidList(std::set<int32_t> pidList)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS FREEZED PID LIST  --------------" << std::endl;
+    for (auto pid : pidList) {
+        oss << std::left << "[PID: " << pid  << "]: "
+            << " [" << GetProcessNameByPid(pid) << "]"<< std::endl;
     }
     dumpInfo_.append(oss.str());
 }

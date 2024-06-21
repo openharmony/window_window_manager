@@ -241,7 +241,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     std::string identityToken = data.ReadString();
     SystemSessionConfig systemConfig;
     WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token,
-        -1, -1, identityToken);
+        identityToken);
     reply.WriteParcelable(&systemConfig);
     if (property) {
         reply.WriteInt32(property->GetPersistentId());
@@ -515,7 +515,7 @@ int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data
 
 int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleSetLandscapeMultiWindow!");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "HandleSetLandscapeMultiWindow!");
     bool isLandscapeMultiWindow = data.ReadBool();
     const WSError errCode = SetLandscapeMultiWindow(isLandscapeMultiWindow);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

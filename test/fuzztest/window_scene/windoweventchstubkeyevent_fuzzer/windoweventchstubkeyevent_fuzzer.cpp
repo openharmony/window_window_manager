@@ -45,21 +45,24 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(WindowEventChannelStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
     sptr<WindowEventChannel> eventStub = new (std::nothrow) WindowEventChannel(nullptr);
     if (eventStub == nullptr) {
         return false;
     }
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
         parcel, reply, option);
+    parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
         parcel, reply, option);

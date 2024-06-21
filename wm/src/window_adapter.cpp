@@ -355,8 +355,12 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 
     ReregisterWindowManagerAgent();
 
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto& it : sessionRecoverCallbackFuncMap_) {
+    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        sessionRecoverCallbackFuncMap = sessionRecoverCallbackFuncMap_;
+    }
+    for (const auto& it : sessionRecoverCallbackFuncMap) {
         TLOGD(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32, it.first);
         auto ret = it.second();
         if (ret != WMError::WM_OK) {

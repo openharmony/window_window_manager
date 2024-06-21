@@ -854,13 +854,13 @@ WSError Session::UpdateOrientation()
     return sessionStage_->UpdateOrientation();
 }
 
-__attribute__((no_sanitize("cfi"))) WSError Session::Connect(const sptr<ISessionStage>& sessionStage,
+__attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
     sptr<IRemoteObject> token, int32_t pid, int32_t uid, const std::string& identityToken)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Connect session, id: %{public}d, state: %{public}u,"
+    TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating, pid);
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
@@ -934,6 +934,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     callingPid_ = pid;
     callingUid_ = uid;
     bufferAvailable_ = true;
+    UpdateSessionState(SessionState::STATE_CONNECT);
     return WSError::WS_OK;
 }
 
@@ -1820,6 +1821,31 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
     return nullptr;
 }
 
+void Session::SaveSnapshot(bool useSnapshotThread)
+{
+    if (scenePersistence_ == nullptr) {
+        return;
+    }
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->snapshot_ = session->Snapshot();
+        if (session->snapshot_ && session->scenePersistence_) {
+            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
+            session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        }
+    };
+    auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
+    if (!useSnapshotThread || snapshotScheduler == nullptr) {
+        task();
+        return;
+    }
+    snapshotScheduler->PostAsyncTask(task, "SaveSnapshot");
+}
+
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
@@ -2085,6 +2111,11 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+                surfaceNode_->MarkUifirstNode(false);
+            }
+        } else {
+            surfaceNode_->MarkUifirstNode(true);
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
@@ -2338,13 +2369,14 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
     return scenePersistence_;
 }
 
-void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                           const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!sessionStage_) {
-        WLOGFD("session stage is nullptr");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");
         return;
     }
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
 }
 
 WindowMode Session::GetWindowMode()

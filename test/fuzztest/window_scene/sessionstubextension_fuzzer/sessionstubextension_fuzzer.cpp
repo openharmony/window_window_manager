@@ -34,37 +34,51 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SessionStubTestExtensionCode(sptr<Session> sessionStub, MessageParcel& parcel,
-                                  MessageParcel& reply, MessageOption& option)
+void SessionStubTestExtensionCode(sptr<Session> sessionStub, MessageParcel& parcel)
 {
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION),
         parcel, reply, option);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT),
+        parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT),
         parcel, reply, option);
     return;
 }
 
-void SessionStubTestPipCode(sptr<Session> sessionStub, MessageParcel& parcel,
-                            MessageParcel& reply, MessageOption& option)
+void SessionStubTestPipCode(sptr<Session> sessionStub, MessageParcel& parcel)
 {
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE),
         parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         parcel, reply, option);
@@ -78,8 +92,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
@@ -93,8 +105,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
 
-    SessionStubTestExtensionCode(sessionStub, parcel, reply, option);
-    SessionStubTestPipCode(sessionStub, parcel, reply, option);
+    SessionStubTestExtensionCode(sessionStub, parcel);
+    SessionStubTestPipCode(sessionStub, parcel);
     return true;
 }
 } // namespace.OHOS

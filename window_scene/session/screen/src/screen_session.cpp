@@ -293,10 +293,9 @@ void ScreenSession::UpdatePropertyByActiveMode()
 
 void ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
+    property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetBounds(updatedProperty.GetBounds());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
-    property_.SetPhyWidth(updatedProperty.GetPhyWidth());
-    property_.SetPhyHeight(updatedProperty.GetPhyHeight());
 }
 
 void ScreenSession::UpdateDisplayState(DisplayState displayState)
@@ -700,7 +699,7 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 {
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
-    if (foldDisplayMode == FoldDisplayMode::FULL
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();

@@ -108,7 +108,7 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
-    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) override;
+    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType = 0) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -128,7 +128,8 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool notifyInputMethod = true) override;
-    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
+    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
 

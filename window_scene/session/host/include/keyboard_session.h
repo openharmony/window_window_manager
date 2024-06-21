@@ -17,6 +17,9 @@
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
 #include "session/host/include/system_session.h"
+#include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
+#include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {
 using OnGetSceneSessionCallback = std::function<sptr<SceneSession>(uint32_t callingSessionId)>;
@@ -43,6 +46,8 @@ public:
     sptr<SceneSession> GetKeyboardPanelSession() const override;
     SessionGravity GetKeyboardGravity() const override;
     void OnKeyboardPanelUpdated() override;
+    void OpenKeyboardSyncTransaction() override;
+    void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -54,17 +59,21 @@ private:
 
     int32_t GetStatusBarHeight();
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
-        const WSRect& occupiedArea);
-    void RaiseCallingSession();
-    void RestoreCallingSession();
+        const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void RaiseCallingSession(const WSRect& keyboardPanelRect,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UseFocusIdIfCallingSessionIdInvalid();
     void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
     void RelayoutKeyBoard();
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WSError CheckAdjustKeyboardLayoutParam(const KeyboardLayoutParams& params);
+    std::shared_ptr<RSTransaction> GetRSTransaction();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
+    bool isKeyboardSyncTransactionOpen_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

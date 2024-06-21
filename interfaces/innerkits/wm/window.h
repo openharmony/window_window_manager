@@ -1051,8 +1051,10 @@ public:
      * @brief flush frame rate of linker.
      *
      * @param rate frame rate.
+     * @param isAnimatorStopped animator status.
+     * @param rateType frame rate type.
      */
-    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped) {}
+    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType) {}
     /**
      * @brief Update Configuration.
      *
@@ -1938,7 +1940,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterSubWindowCloseListeners(
-        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister subwindow close listener.
@@ -1947,7 +1949,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterSubWindowCloseListeners(
-        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_OK; }
+        const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.
