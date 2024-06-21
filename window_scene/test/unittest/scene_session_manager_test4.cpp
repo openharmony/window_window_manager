@@ -548,21 +548,389 @@ HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | Small
 }
 
 /**
- * @tc.name: 
- * @tc.desc: 
+ * @tc.name: NotifyEnterRecentTask02
+ * @tc.desc: NotifyEnterRecentTask
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, NotifyEnterRecentTask02, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
+    EXPECT_EQ(ssm_->NotifyEnterRecentTask(false), WSError::WS_OK);
 }
 
 /**
- * @tc.name: 
- * @tc.desc: 
+ * @tc.name: GetWindowStatus
+ * @tc.desc: GetWindowStatus
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetWindowStatus, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    SessionState sessionState = SessionState::STATE_FOREGROUND;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    auto result = ssm_->GetWindowStatus(mode, sessionState, nullptr);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_UNDEFINED);
+
+    property->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    result = ssm_->GetWindowStatus(mode, sessionState, property);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_MAXIMIZE);
+
+    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    result = ssm_->GetWindowStatus(mode, sessionState, property);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FLOATING);
+
+    mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    result = ssm_->GetWindowStatus(mode, sessionState, property);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_SPLITSCREEN);
+}
+
+/**
+ * @tc.name: UpdateDisplayRegion
+ * @tc.desc: UpdateDisplayRegion
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, UpdateDisplayRegion, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdateDisplayRegion(nullptr);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetWidth(0);
+    ssm_->UpdateDisplayRegion(displayInfo);
+
+    displayInfo->SetWidth(1);
+    displayInfo->SetHeight(0);
+    ssm_->UpdateDisplayRegion(displayInfo);
+
+    displayInfo->SetHeight(1);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: removeFailRecoveredSession
+ * @tc.desc: removeFailRecoveredSession
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, removeFailRecoveredSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, nullptr));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession02));
+    ssm_->failRecoveredPersistentIdSet_.insert(1);
+    ssm_->failRecoveredPersistentIdSet_.insert(2);
+    ssm_->failRecoveredPersistentIdSet_.insert(3);
+    ssm_->removeFailRecoveredSession();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: GetCustomDecorHeight
+ * @tc.desc: GetCustomDecorHeight
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetCustomDecorHeight, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetCustomDecorHeight(50);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, nullptr));
+    EXPECT_EQ(0, ssm_->GetCustomDecorHeight(2));
+    EXPECT_EQ(50, ssm_->GetCustomDecorHeight(1));
+}
+
+/**
+ * @tc.name: IsVectorSame
+ * @tc.desc: IsVectorSame
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, IsVectorSame, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<VisibleWindowNumInfo> lastInfo;
+    std::vector<VisibleWindowNumInfo> currentInfo;
+    VisibleWindowNumInfo num;
+    lastInfo.push_back(num);
+    EXPECT_EQ(false, ssm_->IsVectorSame(lastInfo, currentInfo));
+    lastInfo.clear();
+
+    lastInfo.reserve(2);
+    VisibleWindowNumInfo oneNum;
+    oneNum.displayId = 0;
+    oneNum.visibleWindowNum = 3;
+    lastInfo.push_back(oneNum);
+    currentInfo.push_back(oneNum);
+    EXPECT_EQ(true, ssm_->IsVectorSame(lastInfo, currentInfo));
+
+    currentInfo.clear();
+    VisibleWindowNumInfo twoNum;
+    twoNum.displayId = 0;
+    twoNum.visibleWindowNum = 2;
+    currentInfo.push_back(twoNum);
+    EXPECT_EQ(false, ssm_->IsVectorSame(lastInfo, currentInfo));
+
+    currentInfo.clear();
+    twoNum.displayId = 1;
+    twoNum.visibleWindowNum = 3;
+    currentInfo.push_back(twoNum);
+    EXPECT_EQ(false, ssm_->IsVectorSame(lastInfo, currentInfo));
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfos
+ * @tc.desc: ReportWindowProfileInfos
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.isSystem_ = false;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ReportWindowProfileInfos();
+
+    ssm_->focusedSessionId_ = 123;
+    ssm_->ReportWindowProfileInfos();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfos02
+ * @tc.desc: ReportWindowProfileInfos
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.isSystem_ = false;
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    sceneSession->property_->type_ = WindowType::WINDOW_TYPE_MEDIA;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ReportWindowProfileInfos();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfos03
+ * @tc.desc: ReportWindowProfileInfos
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ReportWindowProfileInfos();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfos04
+ * @tc.desc: ReportWindowProfileInfos
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, nullptr));
+    ssm_->ReportWindowProfileInfos();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: CacVisibleWindowNum
+ * @tc.desc: CacVisibleWindowNum
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, CacVisibleWindowNum, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ASSERT_NE(sceneSession03, nullptr);
+    ASSERT_NE(sceneSession04, nullptr);
+    sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_WALLPAPER;
+    sceneSession01->SetVisible(true);
+    sceneSession02->state_ = SessionState::STATE_BACKGROUND;
+    sceneSession03->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    sceneSession04->property_->type_ = WindowType::WINDOW_TYPE_WALLPAPER;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
+    ssm_->sceneSessionMap_.insert(std::make_pair(5, nullptr));
+
+    ssm_->CacVisibleWindowNum();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+}
+
+/**
+ * @tc.name: GetAppMainSceneSession
+ * @tc.desc: GetAppMainSceneSession
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession;
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession, 0), WSError::WS_ERROR_INVALID_SESSION);
+
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+
+    sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_MEDIA;
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_ERROR_INVALID_CALLING);
+
+    sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    sceneSession01->property_->SetParentPersistentId(2);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateImmersiveState02
+ * @tc.desc: UpdateImmersiveState
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, UpdateImmersiveState02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession01;
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+
+    sceneSession02->property_ = nullptr;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(sceneSession02->property_, nullptr);
+    sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
+    EXPECT_EQ(true, ssm_->UpdateImmersiveState());
+    sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
+    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId
+ * @tc.desc: UpdateSessionDisplayId
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto result = ssm_->UpdateSessionDisplayId(0, 0);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sceneSession->sessionInfo_.screenId_ = 6;
+    result = ssm_->UpdateSessionDisplayId(1, 2);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    sceneSession->property_ = nullptr;
+    result = ssm_->UpdateSessionDisplayId(1, 2);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ClearSession
+ * @tc.desc: ClearSession
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, ClearSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(sceneSession));
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: OnScreenshot
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, OnScreenshot, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ASSERT_NE(sceneSession03, nullptr);
+    ASSERT_NE(sceneSession04, nullptr);
+    sceneSession02->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession03->SetSessionState(SessionState::STATE_ACTIVE);
+    sceneSession04->SetSessionState(SessionState::STATE_INACTIVE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
+    DisplayId displayId = 10;
+    ssm_->OnScreenshot(displayId);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 }
 } // namespace Rosen
