@@ -153,7 +153,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
-    BindNativeFunction(env, exportObj, "UpdateDisplayHookInfo", moduleName,
+    BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
         JsSceneSessionManager::UpdateDisplayHookInfo);
     return NapiGetUndefined(env);
 }
@@ -814,7 +814,7 @@ napi_value JsSceneSessionManager::UpdateDisplayHookInfo(napi_env env, napi_callb
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
+    return (me != nullptr) ? me->OnUpdateDisplayHookInfo(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
