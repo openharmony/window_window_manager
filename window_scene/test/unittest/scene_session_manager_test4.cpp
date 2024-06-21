@@ -555,6 +555,15 @@ HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | Small
 HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
 {
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
+{
+}
 }
 } // namespace Rosen
 } // namespace OHOS
