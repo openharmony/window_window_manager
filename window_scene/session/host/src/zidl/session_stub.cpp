@@ -161,6 +161,9 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
+        if (property == nullptr) {
+            return ERR_INVALID_DATA;
+        }
     } else {
         WLOGFW("[WMSCom] Property not exist!");
         property = new WindowSessionProperty();
@@ -195,6 +198,9 @@ int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
+        if (property == nullptr) {
+            return ERR_INVALID_DATA;
+        }
     } else {
         WLOGFW("Property not exist!");
         property = new WindowSessionProperty();
@@ -228,6 +234,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
+        if (property == nullptr) {
+            return ERR_INVALID_DATA;
+        }
     } else {
         WLOGFW("Property not exist!");
     }
@@ -235,6 +244,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
+        if (token == nullptr) {
+            return ERR_INVALID_DATA;
+        }
     } else {
         WLOGI("accept token is nullptr");
     }
@@ -590,6 +602,9 @@ int SessionStub::HandleTransferAccessibilityEvent(MessageParcel& data, MessagePa
 {
     sptr<Accessibility::AccessibilityEventInfoParcel> infoPtr =
         data.ReadStrongParcelable<Accessibility::AccessibilityEventInfoParcel>();
+    if (infoPtr == nullptr) {
+        return ERR_INVALID_DATA;
+    }
     int64_t uiExtensionIdLevel = 0;
     if (!data.ReadInt64(uiExtensionIdLevel)) {
         WLOGFE("read uiExtensionIdLevel error");
