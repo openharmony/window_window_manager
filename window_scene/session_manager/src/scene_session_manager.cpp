@@ -7948,7 +7948,7 @@ WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 {
     auto scnSession = GetSceneSession(persistentId);
     if (!scnSession) {
-        WLOGFE("session is nullptr");
+        TLOGE("session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::STACK_EMPTY);
