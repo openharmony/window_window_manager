@@ -78,6 +78,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create01, Function | SmallTest | Level3
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
@@ -116,6 +117,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
@@ -133,6 +135,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window_->hostSession_ = session;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
 }
@@ -768,6 +771,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, Function | SmallTest | Le
     preRect.height_ = 200;
     preRect.width_ = 200;
 
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetWindowRect(preRect);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     ASSERT_EQ(WSError::WS_OK, window_->UpdateRect(rect, reason));
@@ -1024,6 +1028,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent02, Function 
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
@@ -1114,7 +1119,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Func
  */
 HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
 {
-    ASSERT_NE(window_->property_, nullptr);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->persistentId_ = 12345;
 
     SessionInfo sessionInfo;
@@ -1135,7 +1140,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowExtensionSessionImplTest, Hide, Function | SmallTest | Level3)
 {
-    ASSERT_NE(window_->property_, nullptr);
+    ASSERT_NE(nullptr, window_->property_);
 
     SessionInfo sessionInfo;
     sptr<SessionMocker> mockHostSession = new (std::nothrow) SessionMocker(sessionInfo);
@@ -1178,6 +1183,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Hide, Function | SmallTest | Level3)
 HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
 
     auto isFollowHost = true;
@@ -1199,6 +1205,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | S
 HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
 
     auto isFollowHost = false;
@@ -1226,6 +1233,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | S
 HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
 
     auto isFollowHost = false;
@@ -1246,6 +1254,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | S
 HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost04, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
 
     auto isFollowHost = true;
@@ -1263,6 +1272,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost04, Function | S
 HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
 
     auto isFollowHost = true;
@@ -1371,6 +1381,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
@@ -1418,6 +1429,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, Function | SmallTes
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
@@ -1490,6 +1502,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
