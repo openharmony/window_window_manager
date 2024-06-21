@@ -1012,9 +1012,6 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    const auto type = GetType();
-    TLOGD(WmsLogTag::WMS_LIFE, "id:%{public}d, type:%{public}d, state:%{public}u, "
-        "requestState:%{public}u", GetPersistentId(), type, state_, requestState_);
     if (IsWindowSessionInvalid()) {
         TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1023,9 +1020,11 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
                   static_cast<WMError>(hostSession_->DrawingCompleted()) :
                   WMError::WM_ERROR_INVALID_WINDOW;
 
-    NotifyWindowStatusChange(GetMode());
-    TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
+    if (ret == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
         GetPersistentId(), type);
+    }
+
     return res;
 }
 
