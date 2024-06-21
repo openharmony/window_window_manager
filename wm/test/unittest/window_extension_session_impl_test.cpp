@@ -1280,7 +1280,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
  * @tc.name: GetVirtualPixelRatio01
  * @tc.desc: follow host density value
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | SmallTest | Level2)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -1294,7 +1294,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | Smal
  * @tc.name: GetVirtualPixelRatio02
  * @tc.desc: follow system density value
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | SmallTest | Level2)
 {
     auto systemDensity = 3.25;
@@ -1309,7 +1309,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | Smal
  * @tc.name: GetVirtualPixelRatio03
  * @tc.desc: hostDensityValue_ is nullptr
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | SmallTest | Level2)
 {
     auto systemDensity = 3.25;
@@ -1323,37 +1323,38 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | Smal
  * @tc.name: GetVirtualPixelRatio04
  * @tc.desc: GetVirtualPixelRatio04 test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | SmallTest | Level2)
 {
     ASSERT_EQ(1.0f, window_->GetVirtualPixelRatio(nullptr));
 }
 
 /**
-* @tc.name: HideNonSecureWindows01
-* @tc.desc: HideNonSecureWindows Test
-* @tc.type: FUNC
-*/
+ * @tc.name: HideNonSecureWindows01
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
  
 /**
-* @tc.name: HideNonSecureWindows02
-* @tc.desc: HideNonSecureWindows Test
-* @tc.type: FUNC
-*/
+ * @tc.name: HideNonSecureWindows02
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | SmallTest | Level3)
 {
+    window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
  
 /**
-* @tc.name: HideNonSecureWindows03
-* @tc.desc: HideNonSecureWindows Test
-* @tc.type: FUNC
-*/
+ * @tc.name: HideNonSecureWindows03
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | SmallTest | Level3)
 {
     window_->state_ = WindowState::STATE_SHOWN;
@@ -1361,10 +1362,10 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
 }
  
 /**
-* @tc.name: HideNonSecureWindows04
-* @tc.desc: HideNonSecureWindows Test
-* @tc.type: FUNC
-*/
+ * @tc.name: HideNonSecureWindows04
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
