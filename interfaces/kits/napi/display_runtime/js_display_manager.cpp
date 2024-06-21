@@ -336,13 +336,29 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
         if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-            WLOGFD("unregister displayListener, type: %{public}s ret: %{public}u", type.c_str(), ret);
         } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
-            WLOGFD("unregister privateWindowListener, ret: %{public}u", ret);
+        } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+        } else if (type == EVENT_FOLD_STATUS_CHANGED) {
+            sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
+        } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
+            sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
+        } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
+            sptr<DisplayManager::IFoldAngleListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldAngleListener(thisListener);
+        } else if (type == EVENT_CAPTURE_STATUS_CHANGED) {
+            sptr<DisplayManager::ICaptureStatusListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterCaptureStatusListener(thisListener);
+        } else {
+            ret = DMError::DM_ERROR_INVALID_PARAM;
         }
         jsCbMap_[type].erase(it++);
+        WLOGFI("unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
     }
     jsCbMap_.erase(type);
     return ret;
