@@ -1006,12 +1006,6 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
 
 WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
 {
-    if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE,
-            "failed, because of nullptr, id:%{public}d", GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
