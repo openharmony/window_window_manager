@@ -48,7 +48,7 @@ constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
     do{                                                                        \
         if ((hostSession) == nullptr) {                                        \
-            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                     \
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
             return ret;                                                        \
         }                                                                      \
     } while (false)
