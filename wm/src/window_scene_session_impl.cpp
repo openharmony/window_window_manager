@@ -1020,7 +1020,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
                   static_cast<WMError>(hostSession_->DrawingCompleted()) :
                   WMError::WM_ERROR_INVALID_WINDOW;
 
-    if (ret == WMError::WM_OK) {
+    if (res == WMError::WM_OK) {
         TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
         GetPersistentId(), type);
     }
