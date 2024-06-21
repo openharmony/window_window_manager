@@ -725,6 +725,7 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos02, Function | SmallT
     sceneSession->sessionInfo_.isSystem_ = false;
     sptr<Session> session = sptr<Session>::MakeSptr(info);
     ASSERT_NE(session, nullptr);
+    ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->type_ = WindowType::WINDOW_TYPE_MEDIA;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->ReportWindowProfileInfos();
