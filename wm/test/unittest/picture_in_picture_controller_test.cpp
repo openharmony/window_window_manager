@@ -134,9 +134,9 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->window_ = mw;
 
-    sptr<IPiPLifeCycle> listener = nullptr;
     pipControl->pipLifeCycleListener_ = nullptr;
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    sptr<IPiPLifeCycle> listener = nullptr;
     pipControl->SetPictureInPictureLifecycle(listener);
 
     EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
