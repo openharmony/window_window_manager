@@ -740,7 +740,7 @@ napi_value JsSceneSessionManager::UpdateSessionDisplayId(napi_env env, napi_call
 
 napi_value JsSceneSessionManager::NotifyStackEmpty(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyStackEmpty(env, info) : nullptr;
 }
@@ -2172,14 +2172,14 @@ napi_value JsSceneSessionManager::OnNotifyStackEmpty(napi_env env, napi_callback
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
-        TLOGE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t persistentId ;
     if (!ConvertFromJsValue(env, argv[0], persistentId)) {
-        TLOGE("[NAPI]Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
