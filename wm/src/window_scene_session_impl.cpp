@@ -1004,6 +1004,31 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
+WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
+{
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "failed, because of nullptr, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    const auto type = GetType();
+    TLOGD(WmsLogTag::WMS_LIFE, "id:%{public}d, type:%{public}d, state:%{public}u, "
+        "requestState:%{public}u", GetPersistentId(), type, state_, requestState_);
+    if (IsWindowSessionInvalid()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WMError res = WindowHelper::IsMainWindow(type) ?
+                  static_cast<WMError>(hostSession_->DrawingCompleted()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+
+    NotifyWindowStatusChange(GetMode());
+    TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
+        GetPersistentId(), type);
+    return res;
+}
+
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     if (WindowHelper::IsMainWindow(type)) {

@@ -2223,6 +2223,11 @@ Orientation SceneSession::GetRequestedOrientation() const
     return GetSessionProperty()->GetRequestedOrientation();
 }
 
+bool SceneSession::IsAnco() const
+{
+    return collaboratorType_ != static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE);
+}
+
 int32_t SceneSession::GetCollaboratorType() const
 {
     return collaboratorType_;
