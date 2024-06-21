@@ -269,6 +269,7 @@ protected:
     void RefreshNoInteractionTimeoutMonitor();
 
     sptr<ISession> hostSession_;
+    mutable std::mutex hostSessionMutex_;
     std::shared_ptr<Ace::UIContent> uiContent_;
     mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
