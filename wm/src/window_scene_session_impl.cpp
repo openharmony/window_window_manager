@@ -1016,7 +1016,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
 
     if (res == WMError::WM_OK) {
         TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
-        GetPersistentId(), type);
+            GetPersistentId(), type);
     }
 
     return res;
