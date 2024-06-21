@@ -223,6 +223,7 @@ public:
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
 
+    bool IsAnco() const override;
     int32_t GetCollaboratorType() const;
     sptr<IRemoteObject> GetSelfToken() const;
     WSRect GetLastSafeRect() const;

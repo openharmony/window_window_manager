@@ -804,6 +804,12 @@ public:
         return WMError::WM_OK;
     }
     /**
+     * @brief notify window first frame drawing completed.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyDrawingCompleted() { return WMError::WM_OK; }
+    /**
      * @brief move the window to (x, y)
      *
      * @param x

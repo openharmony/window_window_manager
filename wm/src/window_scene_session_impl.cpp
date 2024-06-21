@@ -1004,6 +1004,23 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
+WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto type = GetType();
+    WMError res = WindowHelper::IsMainWindow(type) ?
+                  static_cast<WMError>(hostSession_->DrawingCompleted()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+    if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
+            GetPersistentId(), type);
+    }
+    return res;
+}
+
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     if (WindowHelper::IsMainWindow(type)) {
