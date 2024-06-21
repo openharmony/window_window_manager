@@ -40,6 +40,7 @@ private:
     int HandleDisconnect(MessageParcel& data, MessageParcel& reply);
     int HandleShow(MessageParcel& data, MessageParcel& reply);
     int HandleHide(MessageParcel& data, MessageParcel& reply);
+    int HandleDrawingCompleted(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
