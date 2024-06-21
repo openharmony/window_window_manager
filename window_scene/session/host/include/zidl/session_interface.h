@@ -41,6 +41,7 @@ public:
     virtual WSError Disconnect(bool isFromClient = false) = 0;
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
+    virtual WSError DrawingCompleted() = 0;
 
     // scene session
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }

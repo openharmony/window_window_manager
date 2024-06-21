@@ -1075,6 +1075,22 @@ WSError Session::Hide()
     return WSError::WS_OK;
 }
 
+WSError Session::DrawingCompleted()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    if (!SessionPermission::IsSameBundleNameAsCalling("com.huawei.shell_assistant")) {
+        TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnDrawingCompleted();
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
