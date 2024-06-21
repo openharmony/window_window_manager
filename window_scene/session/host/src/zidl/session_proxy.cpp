@@ -166,7 +166,7 @@ WSError SessionProxy::Disconnect(bool isFromClient)
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
     const std::string& identityToken)
 {
     MessageParcel data;
@@ -786,11 +786,11 @@ WSError SessionProxy::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isLandscapeMultiWindow)) {
-        WLOGFE("Write isLandscapeMultiWindow failed");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isLandscapeMultiWindow failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW),

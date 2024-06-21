@@ -34,7 +34,7 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
-        int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
+        const std::string& identityToken = "") override;
     WSError UpdateActiveStatus(bool isActive) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) override;

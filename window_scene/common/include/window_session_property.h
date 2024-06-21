@@ -55,6 +55,7 @@ public:
     void SetRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
+    void SetSnapshotSkip(bool isSkip);
     void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
@@ -108,6 +109,7 @@ public:
     Orientation GetRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
+    bool GetSnapshotSkip() const;
     float GetBrightness() const;
     int32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
@@ -176,6 +178,7 @@ private:
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
     bool WriteActionUpdateOrientation(Parcel& parcel);
     bool WriteActionUpdatePrivacyMode(Parcel& parcel);
+    bool WriteActionUpdateSnapshotSkip(Parcel& parcel);
     bool WriteActionUpdateMaximizeState(Parcel& parcel);
     bool WriteActionUpdateSystemBar(Parcel& parcel);
     bool WriteActionUpdateFlags(Parcel& parcel);
@@ -197,6 +200,7 @@ private:
     void ReadActionUpdateSetBrightness(Parcel& parcel);
     void ReadActionUpdateOrientation(Parcel& parcel);
     void ReadActionUpdatePrivacyMode(Parcel& parcel);
+    void ReadActionUpdateSnapshotSkip(Parcel& parcel);
     void ReadActionUpdateMaximizeState(Parcel& parcel);
     void ReadActionUpdateSystemBar(Parcel& parcel);
     void ReadActionUpdateFlags(Parcel& parcel);
@@ -228,6 +232,7 @@ private:
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
+    bool isSnapshotSkip_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_

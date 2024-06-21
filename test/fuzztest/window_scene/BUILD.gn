@@ -15,6 +15,7 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "patterndetachcallback_fuzzer:fuzztest",
     "scenesessionmgrlstubget_fuzzer:fuzztest",
     "scenesessionmgrlstubreg_fuzzer:fuzztest",
     "scenesessionmgrlstubset_fuzzer:fuzztest",
@@ -24,6 +25,7 @@ group("fuzztest") {
     "scenesessionmgrstubstate_fuzzer:fuzztest",
     "scenesessionmgrstubupdate_fuzzer:fuzztest",
     "screensessionmanager_fuzzer:fuzztest",
+    "screensessionmanagerclientstub_fuzzer:fuzztest",
     "screensessionmgrstubagent_fuzzer:fuzztest",
     "screensessionmgrstubstate_fuzzer:fuzztest",
     "screensessionmgrstubwake_fuzzer:fuzztest",

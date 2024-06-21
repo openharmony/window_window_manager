@@ -35,46 +35,74 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrTestCode(MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
+void SceneSessionMgrGetTestCode(MessageParcel& parcel)
 {
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFOS), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFO_BY_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_RECT), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STATUS), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MODE_TYPE), parcel, reply, option);
+}
+
+void SceneSessionMgrDumpTestCode(MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_ALL), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_WITH_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_IS_VALID_SESSION_IDS), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_CHECK_WINDOW_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT), parcel, reply, option);
 }
@@ -86,14 +114,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     
     MessageParcel parcel;
-    MessageParcel reply;
-    MessageOption option;
 
     parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
-    SceneSessionMgrTestCode(parcel, reply, option);
+    SceneSessionMgrGetTestCode(parcel);
+    SceneSessionMgrDumpTestCode(parcel);
     return true;
 }
 } // namespace OHOS

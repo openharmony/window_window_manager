@@ -174,7 +174,7 @@ public:
 
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
-    FocusChangeReason GetFocusChangeReason() const;
+    FocusChangeReason GetFocusChangeReason() const {return focusChangeReason_;};
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
@@ -199,8 +199,6 @@ public:
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
-    WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
-    void UnregisterSessionListener() override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
@@ -333,7 +331,8 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-    
+    WMError UpdateDisplayHookInfo(uint32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -373,6 +372,14 @@ private:
     void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
+    std::vector<sptr<SceneSession>> GetSubSceneSession(int32_t parentWindowId);
+    void RemoveDuplicateSubSession(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
+        std::vector<sptr<SceneSession>>& subSessions);
+    void SetSessionVisibilityInfo(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
+    void UpdateSubWindowVisibility(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
@@ -386,6 +393,8 @@ private:
     WSError RequestFocusBasicCheck(int32_t persistentId);
     WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
         sptr<SceneSession>& focusedSession, bool includingAppSession);
 
@@ -488,6 +497,7 @@ private:
     void FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList);
     void NotifyAllAccessibilityInfo();
     void removeFailRecoveredSession();
+    void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
@@ -525,7 +535,7 @@ private:
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
-    FocusChangeReason changeReason_ = FocusChangeReason::DEFAULT;
+    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
@@ -572,14 +582,14 @@ private:
     RSInterfaces& rsInterface_;
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
-    bool isNeedRecover(const int32_t persistentId);
+    bool IsNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    sptr<ISessionChangeListener> sessionListener_;
+    WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
     void CheckAndNotifyWaterMarkChangedResult();
@@ -606,6 +616,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
+    std::vector<uint64_t> skipSurfaceNodeIds_;
 
     BrokerStates NotifyStartAbility(
         int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId = 0);
@@ -660,6 +671,8 @@ private:
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
+    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
 };
 } // namespace OHOS::Rosen
 

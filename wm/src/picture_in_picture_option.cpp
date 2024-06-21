@@ -47,6 +47,16 @@ void PipOption::SetControlGroup(std::vector<std::uint32_t> controlGroup)
     controlGroup_ = controlGroup;
 }
 
+void PipOption::SetNodeControllerRef(napi_ref ref)
+{
+    customNodeController_ = ref;
+}
+
+napi_ref PipOption::GetNodeControllerRef() const
+{
+    return customNodeController_;
+}
+
 void* PipOption::GetContext() const
 {
     return contextPtr_;

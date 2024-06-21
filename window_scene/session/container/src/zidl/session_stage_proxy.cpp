@@ -348,25 +348,38 @@ WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::Want
     return WSErrorCode::WS_OK;
 }
 
-void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                                     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteParcelable(info.GetRefPtr())) {
-        WLOGFE("occupied info write failed.");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "occupied info write failed.");
         return;
+    }
+
+    bool hasRSTransaction = rsTransaction != nullptr;
+    if (!data.WriteBool(hasRSTransaction)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write has transaction failed");
+        return;
+    }
+    if (hasRSTransaction) {
+        if (!data.WriteParcelable(rsTransaction.get())) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Write transaction sync Id failed");
+            return;
+        }
     }
 
     if (Remote()->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
         return;
     }
     return;

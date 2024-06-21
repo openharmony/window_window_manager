@@ -42,6 +42,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdatePrivacyMode),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
         &WindowSessionProperty::WriteActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &WindowSessionProperty::WriteActionUpdateSnapshotSkip),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &WindowSessionProperty::WriteActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
@@ -95,6 +97,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdatePrivacyMode),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
         &WindowSessionProperty::ReadActionUpdatePrivacyMode),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
+        &WindowSessionProperty::ReadActionUpdateSnapshotSkip),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
         &WindowSessionProperty::ReadActionUpdateMaximizeState),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
@@ -206,6 +210,11 @@ void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
     isSystemPrivacyMode_ = isSystemPrivate;
 }
 
+void WindowSessionProperty::SetSnapshotSkip(bool isSkip)
+{
+    isSnapshotSkip_ = isSkip;
+}
+
 void WindowSessionProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -294,6 +303,11 @@ bool WindowSessionProperty::GetPrivacyMode() const
 bool WindowSessionProperty::GetSystemPrivacyMode() const
 {
     return isSystemPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSnapshotSkip() const
+{
+    return isSnapshotSkip_;
 }
 
 float WindowSessionProperty::GetBrightness() const
@@ -737,7 +751,10 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     bool isShaped = parcel.ReadBool();
     property->SetIsShaped(isShaped);
     if (isShaped) {
-        property->SetWindowMask(std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel)));
+        Media::PixelMap* windowMask = Media::PixelMap::Unmarshalling(parcel);
+        if (windowMask != nullptr) {
+            property->SetWindowMask(std::shared_ptr<Media::PixelMap>(windowMask));
+        }
     }
 }
 
@@ -752,6 +769,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
+        parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
@@ -796,6 +814,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
+    property->SetSnapshotSkip(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
@@ -858,6 +877,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     requestedOrientation_ = property->requestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
+    isSnapshotSkip_ = property->isSnapshotSkip_;
     brightness_ = property->brightness_;
     displayId_ = property->displayId_;
     parentId_ = property->parentId_;
@@ -927,6 +947,11 @@ bool WindowSessionProperty::WriteActionUpdateOrientation(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdatePrivacyMode(Parcel& parcel)
 {
     return parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateSnapshotSkip(Parcel& parcel)
+{
+    return parcel.WriteBool(isSnapshotSkip_);
 }
 
 bool WindowSessionProperty::WriteActionUpdateMaximizeState(Parcel& parcel)
@@ -1046,6 +1071,11 @@ void WindowSessionProperty::ReadActionUpdatePrivacyMode(Parcel& parcel)
 {
     SetPrivacyMode(parcel.ReadBool());
     SetSystemPrivacyMode(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateSnapshotSkip(Parcel& parcel)
+{
+    SetSnapshotSkip(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateMaximizeState(Parcel& parcel)

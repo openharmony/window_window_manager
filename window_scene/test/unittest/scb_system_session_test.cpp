@@ -151,6 +151,37 @@ HWTEST_F(SCBSystemSessionTest, RegisterBufferAvailableCallback, Function | Small
     ASSERT_NE(scbSystemSession_, nullptr);
     scbSystemSession_->RegisterBufferAvailableCallback([]() {});
 }
+
+/**
+ * @tc.name: BindKeyboardSession01
+ * @tc.desc: check func BindKeyboardSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Level3)
+{
+    scbSystemSession_->BindKeyboardSession(nullptr);
+    int ret = 0;
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: BindKeyboardSession02
+ * @tc.desc: check func BindKeyboardSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> session = new SceneSession(info, callback);
+    scbSystemSession_->BindKeyboardSession(session);
+    int ret = 0;
+    ASSERT_EQ(0, ret);
+}
 }
 }
 }
