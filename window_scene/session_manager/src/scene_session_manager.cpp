@@ -7946,12 +7946,16 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
 
 WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 {
-    auto scnSession = GetSceneSession(persistentId);
-    if (!scnSession) {
-        TLOGE("session is nullptr");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::STACK_EMPTY);
+    TLOGI("NotifyStackEmpty, persistentId %{public}d", persistentId);
+    auto task = [this, persistentId]() {
+        auto scnSession = GetSceneSession(persistentId);
+        if (!scnSession) {
+            TLOGE("session is nullptr");
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::STACK_EMPTY);
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyStackEmpty:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
 
