@@ -2184,15 +2184,13 @@ napi_value JsSceneSessionManager::OnNotifyStackEmpty(napi_env env, napi_callback
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    WMError ret = SceneSessionManager::GetInstance().NotifyStackEmpty(persistentId);
-    if (ret != WMError::WM_OK) {
-        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-        TLOGE("[NAPI]Notify stack empty failed, return %{public}d", wmErrorCode);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
-            "Notify stack empty failed."));
-        return NapiGetUndefined(env);
+    WSErrorCode ret =
+        WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().NotifyStackEmpty(persistentId));
+    if (ret != WSErrorCode::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Notify stack empty failed");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "System is abnormal"));
     }
-    TLOGD("[NAPI]Notify stack empty succeed, return WmErrorCode::WM_OK");
     return NapiGetUndefined(env);
 }
 

@@ -7954,6 +7954,7 @@ WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::STACK_EMPTY);
+        return WSError::WS_OK;
     };
     taskScheduler_->PostAsyncTask(task, "NotifyStackEmpty:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
