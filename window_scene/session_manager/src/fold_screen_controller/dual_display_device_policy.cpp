@@ -33,8 +33,10 @@ namespace {
 
     #ifdef TP_FEATURE_ENABLE
     const int32_t TP_TYPE = 12;
+    const int32_t TP_TYPE_MAIN = 18;
     const std::string FULL_TP = "0";
     const std::string MAIN_TP = "1";
+    const std::string MAIN_TP_OFF = "1,1";
     #endif
 } // namespace
 
@@ -278,6 +280,9 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         auto taskScreenOnMainChangeScreenId = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
             screenId_ = SCREEN_ID_MAIN;
+            #ifdef TP_FEATURE_ENABLE
+            RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_MAIN, MAIN_TP_OFF.c_str());
+            #endif
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainChangeScreenId, "taskScreenOnMainChangeScreenId");
     }
