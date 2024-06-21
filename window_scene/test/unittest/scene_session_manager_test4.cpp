@@ -546,6 +546,15 @@ HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | Small
     std::vector<std::string> params_(5, "");
     ASSERT_EQ(ssm_->GetSpecifiedSessionDumpInfo(dumpInfo, params_, strId), WSError::WS_OK);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
+{
+}
 }
 } // namespace Rosen
 } // namespace OHOS
