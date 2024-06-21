@@ -1724,12 +1724,12 @@ WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRe
 WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
 {
     WMError ret = WMError::WM_OK;
-    bool WindowRectChangeListenersEmpty = false;
+    bool windowRectChangeListenersEmpty = false;
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
         WindowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
-                                        windowRectChangeListeners_[GetPersistentId()].empty();
+                                         windowRectChangeListeners_[GetPersistentId()].empty();
     }
     auto hostSession = GetHostSession();
     if (hostSession != nullptr && WindowRectChangeListenersEmpty) {
