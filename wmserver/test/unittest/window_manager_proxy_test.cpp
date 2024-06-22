@@ -123,7 +123,8 @@ HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
 HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
 {
     uint32_t windowId = INVALID_WINDOW_ID;
-    WMError err = windowManagerProxy_->GetSnapshotByWindowId(windowId);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError err = windowManagerProxy_->GetSnapshotByWindowId(windowId, pixelMap);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 
