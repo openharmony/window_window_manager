@@ -1968,29 +1968,36 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         agent->NotifyDisplayPowerEvent(event, status);
     }
 
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    if (screenSessionMap_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
-        return false;
-    }
-    // The on/off screen will send a notification based on the number of screens.
-    // The dual display device just notify the current screen usage
-    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-        ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
-        auto iter = screenSessionMap_.find(currentScreenId);
-        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-            iter->second->PowerStatusChange(event, status, reason);
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
+            return false;
         }
-        return true;
+        // The on/off screen will send a notification based on the number of screens.
+        // The dual display device just notify the current screen usage
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
+            auto iter = screenSessionMap_.find(currentScreenId);
+            if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+                iter->second->PowerStatusChange(event, status, reason);
+            }
+            return true;
+        }
     }
 
-    for (const auto& iter : screenSessionMap_) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]PowerStatusChange to screenID: %{public}" PRIu64, iter.first);
-        if (!iter.second) {
-            TLOGE(WmsLogTag::DMS, "[UL_POWER]screensession is nullptr");
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]no screenID");
+        return false;
+    }
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
             continue;
         }
-        iter.second->PowerStatusChange(event, status, reason);
+        screenSession->PowerStatusChange(event, status, reason);
     }
     return true;
 }
