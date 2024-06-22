@@ -282,7 +282,7 @@ struct SessionInfo {
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    bool isModal_ = false;
+    uint32_t uiExtensionUsage_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
