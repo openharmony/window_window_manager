@@ -1013,7 +1013,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
             return res;
         }
         res = static_cast<WMError>(hostSession->Background(true));
-    } else if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type))) {
+    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         res = static_cast<WMError>(hostSession->Hide());
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
