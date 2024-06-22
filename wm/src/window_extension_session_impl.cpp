@@ -699,6 +699,8 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
@@ -707,8 +709,6 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
