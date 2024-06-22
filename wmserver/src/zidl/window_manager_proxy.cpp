@@ -902,20 +902,20 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
     std::shared_ptr<Media::PixelMap> pixelMap(Media::PixelMap::Create(opts).release());
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return pixelMap;
+        return nullptr;
     }
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write windowId failed");
-        return pixelMap;
+        return nullptr;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SNAPSHOT),
         data, reply, option) != ERR_NONE) {
-        return pixelMap;
+        return nullptr;
     }
 
     std::shared_ptr<Media::PixelMap> map(reply.ReadParcelable<Media::PixelMap>());
     if (map == nullptr) {
-        return pixelMap;
+        return nullptr;
     }
     return map;
 }
