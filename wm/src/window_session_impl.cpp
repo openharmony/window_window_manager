@@ -1728,11 +1728,11 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-        WindowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
+        windowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
                                          windowRectChangeListeners_[GetPersistentId()].empty();
     }
     auto hostSession = GetHostSession();
-    if (hostSession != nullptr && WindowRectChangeListenersEmpty) {
+    if (hostSession != nullptr && windowRectChangeListenersEmpty) {
         hostSession->UpdateRectChangeListenerRegistered(false);
     }
     return ret;
