@@ -113,6 +113,20 @@ HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
+
+
+/**
+ * @tc.name: GetSnapshotByWindowId
+ * @tc.desc: test GetSnapshotByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+{
+    uint32_t windowId = INVALID_WINDOW_ID;
+    WMError err = windowManagerProxy_->GetSnapshotByWindowId(windowId);
+    ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
+}
+
 /**
  * @tc.name: NotifyWindowTransition
  * @tc.desc: test success

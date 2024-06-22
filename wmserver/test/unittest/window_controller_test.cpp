@@ -526,6 +526,17 @@ HWTEST_F(WindowControllerTest, GetEmbedNodeId, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: GetSnapshot
+ * @tc.desc: test GetSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, GetSnapshot, Function | SmallTest | Level3)
+{
+    int windowId = INVALID_WINDOW_ID;
+    ASSERT_EQ(nullptr, windowController_->GetSnapshot(windowId));
+}
+
+/**
  * @tc.name: BindDialogTarget
  * @tc.desc: Window controller bind dialog target
  * @tc.type: FUNC
