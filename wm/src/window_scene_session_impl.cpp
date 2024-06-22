@@ -2041,8 +2041,9 @@ WMError WindowSceneSessionImpl::Close()
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
             return WMError::WM_OK;
         }
-        PrepareTerminateFunc func = [hostSession]() {
-            auto weakSession = hostSession.promote();
+        wptr<ISession> hostSessionWptr = hostSession;
+        PrepareTerminateFunc func = [hostSessionWptr]() {
+            auto weakSession = hostSessionWptr.promote();
             if (weakSession == nullptr) {
                 WLOGFW("this session wptr is nullptr");
                 return;
@@ -3502,7 +3503,7 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
 
 WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
     if (GetHostSession() == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
