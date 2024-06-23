@@ -1041,21 +1041,15 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    const auto type = GetType();
-    if (WindowHelper::IsMainWindow(type)) {
-        auto hostSession = GetHostSession();
-        if (hostSession != nullptr) {
-            WMError res = static_cast<WMError>(hostSession->DrawingCompleted());
-            if (res == WMError::WM_OK) {
-                TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d", GetPersistentId());
-            } else {
-                TLOGE(WmsLogTag::WMS_LIFE, "fail id:%{public}d", GetPersistentId());
-            }
-            return res;
-        }
-        return WMError::WM_ERROR_NULLPTR;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    WMError res = WindowHelper::IsMainWindow(GetType()) ?
+                  static_cast<WMError>(hostSession->DrawingCompleted()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+    if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d", GetPersistentId());
     }
-    return WMError::WM_ERROR_INVALID_WINDOW;
+    return res;
 }
 
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
