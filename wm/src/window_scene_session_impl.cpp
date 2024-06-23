@@ -1042,14 +1042,20 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const auto type = GetType();
-    WMError res = WindowHelper::IsMainWindow(type) ?
-                  static_cast<WMError>(hostSession_->DrawingCompleted()) :
-                  WMError::WM_ERROR_INVALID_WINDOW;
-    if (res == WMError::WM_OK) {
-        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d, type:%{public}d",
-            GetPersistentId(), type);
+    if (WindowHelper::IsMainWindow(type)) {
+        auto hostSession = GetHostSession();
+        if (hostSession != nullptr) {
+            WMError res = static_cast<WMError>(hostSession->DrawingCompleted());
+            if (res == WMError::WM_OK) {
+                TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d", GetPersistentId());
+            } else {
+                TLOGE(WmsLogTag::WMS_LIFE, "fail id:%{public}d", GetPersistentId());
+            }
+            return res;
+        }
+        return WMError::WM_ERROR_NULLPTR;
     }
-    return res;
+    return WMError::WM_ERROR_INVALID_WINDOW;
 }
 
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
