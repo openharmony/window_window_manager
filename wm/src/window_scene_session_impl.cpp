@@ -1042,7 +1042,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WMError res = WindowHelper::IsMainWindow(GetType()) ?
                   static_cast<WMError>(hostSession->DrawingCompleted()) :
                   WMError::WM_ERROR_INVALID_WINDOW;
