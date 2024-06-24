@@ -59,12 +59,10 @@ namespace {
 
 std::mutex JsPipWindowManager::mutex_;
 
-static int32_t checkControlsRules(PipOption& option, uint32_t pipTemplateType,
-    std::vector<std::uint32_t> controlGroups)
+static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
 {
-    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
+    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplat     eType>(pipTemplateType));
     auto controls = iter->second;
-    option.uniqueControls();
     if (controlGroups.size() > MAX_CONTROL_GROUP_NUM) {
         return -1;
     }
@@ -106,7 +104,7 @@ static int32_t checkOptionParams(PipOption& option)
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, pipTemplateType not exists.");
         return -1;
     }
-    return checkControlsRules(option, pipTemplateType, option.GetControlGroup());
+    return checkControlsRules(pipTemplateType, option.GetControlGroup());
 }
 
 static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
@@ -124,7 +122,11 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
             TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
             return false;
         }
-        controls.push_back(controlType);
+        if (std::find(controls.begin(), controls.end()) != controls.end()) {
+            TLOGI(WmsLogTag::WMS_PIP, "The controlType already exists. controlType: %{public}u", controlType);
+        } else {
+            controls.push_back(controlType);
+        }  
     }
     return true;
 }

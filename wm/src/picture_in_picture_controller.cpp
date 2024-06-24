@@ -356,33 +356,25 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
-    auto task = [weakThis = wptr(this)]() {
-        TLOGI(WmsLogTag::WMS_PIP, "destroy pip window");
-        auto session = weakThis.promote();
-        if (!session || !session->window_) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
-            return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
-        if (ret != WmErrorCode::WM_OK) {
-            session->curState_ = PiPWindowState::STATE_UNDEFINED;
-            TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
-            int32_t err = static_cast<int32_t>(ret);
-            if (session->pipLifeCycleListener_ != nullptr) {
-                session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
-            }
-            return WMError::WM_ERROR_PIP_DESTROY_FAILED;
-        }
-        PictureInPictureManager::RemoveActiveController(session);
-        PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
-        session->window_ = nullptr;
-        return WMError::WM_OK;
-    };
-    if (handler_) {
-        handler_->PostTask(task, "wms:DestroyPictureInPicture", 0);
-    } else {
-        return task();
+    TLOGI(WmsLogTag::WMS_PIP, "destroy pip window");
+    auto session = weakThis.promote();
+    if (!session || !session->window_) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
+    if (ret != WmErrorCode::WM_OK) {
+        session->curState_ = PiPWindowState::STATE_UNDEFINED;
+        TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
+        int32_t err = static_cast<int32_t>(ret);
+        if (session->pipLifeCycleListener_ != nullptr) {
+            session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
+        }
+        return WMError::WM_ERROR_PIP_DESTROY_FAILED;
+    }
+    PictureInPictureManager::RemoveActiveController(session);
+    PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
+    session->window_ = nullptr;
     return WMError::WM_OK;
 }
 
