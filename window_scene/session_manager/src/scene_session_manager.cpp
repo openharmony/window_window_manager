@@ -7092,13 +7092,6 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
                 return needUpdate;
             }
         }
-    } else {
-        if (avoidArea.isEmptyAvoidArea()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "update avoid area is empty persistentId=%{public}d avoidAreaType=%{public}d",
-                persistentId, avoidAreaType);
-            needUpdate = false;
-            return needUpdate;
-        }
     }
     if (needUpdate ||
         avoidAreaType == AvoidAreaType::TYPE_SYSTEM || avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
