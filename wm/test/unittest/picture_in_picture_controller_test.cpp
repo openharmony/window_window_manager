@@ -213,6 +213,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
     ASSERT_NE(WMError::WM_OK, errorCode);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    option->SetNodeControllerRef(nullptr);
     ASSERT_EQ(nullptr, option->GetNodeControllerRef());
     ASSERT_EQ(nullptr, pipControl->GetCustomNodeController());
 }
@@ -784,8 +785,11 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+
+    pipControl->window_ = mw;
+    pipControl->mainWindow_ = nullptr;
     pipControl->LocateSource();
-    pipControl->window_ = nullptr;
+    pipControl->mainWindow_ = mw;
     pipControl->LocateSource();
 }
 }

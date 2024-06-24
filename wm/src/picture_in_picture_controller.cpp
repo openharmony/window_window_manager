@@ -137,7 +137,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
 
 WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType startType)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "ShowPictureInPictureWindow is called");
+    TLOGI(WmsLogTag::WMS_PIP, "ShowPictureInPictureWindow is called");
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;

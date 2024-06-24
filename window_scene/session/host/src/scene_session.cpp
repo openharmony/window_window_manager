@@ -3230,6 +3230,8 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         if (reason == SizeChangeReason::PIP_START) {
             session->SetSessionRequestRect(wsRect);
         }
+        TLOGI(WmsLogTag::WMS_PIP, "rect:[%%{public}d, %{public}d, %{public}u, %{public}u] reason: %{public}u",
+            wsRect->posX_, wsRect->posY_, wsRect->width_, wsRect->height_, static_cast<uint32_t>(reason));
         session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
     };
