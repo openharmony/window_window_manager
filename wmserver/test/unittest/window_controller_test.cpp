@@ -79,58 +79,69 @@ void WindowControllerTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: GetSnapshot
+ * @tc.desc: test GetSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, GetSnapshot, Function | SmallTest | Level3)
+{
+    int windowId = INVALID_WINDOW_ID;
+    ASSERT_EQ(nullptr, windowController_->GetSnapshot(windowId));
+}
+
+/**
  * @tc.name: StartingWindow
  * @tc.desc: Window controller starting window
  * @tc.type: FUNC
  */
 HWTEST_F(WindowControllerTest, StartingWindow, Function | SmallTest | Level3)
 {
-    // windowRoot_->windowNodeMap_.clear();
-    // windowController_->StartingWindow(nullptr, nullptr, 0, false);
-    // ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
+    windowRoot_->windowNodeMap_.clear();
+    windowController_->StartingWindow(nullptr, nullptr, 0, false);
+    ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
 
-    // transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
+    transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
 
-    // sptr<IRemoteObject> abilityTokenMocker = new IRemoteObjectMocker();
-    // transitionInfo_->SetAbilityToken(abilityTokenMocker);
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, true);
-    // ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
+    sptr<IRemoteObject> abilityTokenMocker = new IRemoteObjectMocker();
+    transitionInfo_->SetAbilityToken(abilityTokenMocker);
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, true);
+    ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
 
-    // windowRoot_->windowNodeMap_.clear();
-    // sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    // RemoteAnimation::windowAnimationController_ = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, true);
-    // ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    RemoteAnimation::windowAnimationController_ = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, true);
+    ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
 
-    // windowRoot_->windowNodeMap_.clear();
-    // windowRoot_->windowNodeMap_.insert(std::make_pair(node_->GetWindowId(), node_));
-    // node_->abilityToken_ = abilityTokenMocker;
-    // node_->stateMachine_.currState_ = WindowNodeState::SHOW_ANIMATION_PLAYING;
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
+    windowRoot_->windowNodeMap_.clear();
+    windowRoot_->windowNodeMap_.insert(std::make_pair(node_->GetWindowId(), node_));
+    node_->abilityToken_ = abilityTokenMocker;
+    node_->stateMachine_.currState_ = WindowNodeState::SHOW_ANIMATION_PLAYING;
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
 
-    // node_->stateMachine_.currState_ = WindowNodeState::STARTING_CREATED;
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    // node_->property_->modeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
-    // windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
-    // ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
+    node_->stateMachine_.currState_ = WindowNodeState::STARTING_CREATED;
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    node_->property_->modeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
+    ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
 
-    // // Cancel starting window
-    // windowController_->CancelStartingWindow(nullptr);
-    // windowController_->CancelStartingWindow(abilityTokenMocker);
+    // Cancel starting window
+    windowController_->CancelStartingWindow(nullptr);
+    windowController_->CancelStartingWindow(abilityTokenMocker);
 
-    // node_->startingWindowShown_ = true;
-    // windowController_->CancelStartingWindow(abilityTokenMocker);
-    // ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
+    node_->startingWindowShown_ = true;
+    windowController_->CancelStartingWindow(abilityTokenMocker);
+    ASSERT_EQ(0, windowRoot_->windowNodeMap_.size());
 
-    // windowRoot_->windowNodeMap_.clear();
-    // RemoteAnimation::windowAnimationController_ = nullptr;
+    windowRoot_->windowNodeMap_.clear();
+    RemoteAnimation::windowAnimationController_ = nullptr;
 }
 
 /**
@@ -523,17 +534,6 @@ HWTEST_F(WindowControllerTest, GetEmbedNodeId, Function | SmallTest | Level3)
     node1->SetWindowRect({50, 50, 50, 50});
     node3->SetWindowRect({0, 0, 200, 200});
     ASSERT_EQ(node3->GetWindowId(), windowController_->GetEmbedNodeId(windowNodes, node1));
-}
-
-/**
- * @tc.name: GetSnapshot
- * @tc.desc: test GetSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(WindowControllerTest, GetSnapshot, Function | SmallTest | Level3)
-{
-    int windowId = INVALID_WINDOW_ID;
-    ASSERT_EQ(nullptr, windowController_->GetSnapshot(windowId));
 }
 
 /**
