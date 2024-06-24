@@ -102,6 +102,12 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
+        if (session->systemConfig_.uiType_ == "pc") {
+            session->RestoreCallingSession();
+            if (session->GetSessionProperty()) {
+                session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+            }
+        }
         return ret;
     };
     PostTask(task, "Hide");
