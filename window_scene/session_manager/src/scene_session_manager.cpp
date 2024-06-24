@@ -3777,40 +3777,6 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::endl;
 }
 
-void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss,
-    const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap)
-{
-    oss << std::endl << "Current mission lists:" << std::endl;
-    oss << " MissionList Type #NORMAL" << std::endl;
-    for (const auto& elem : sceneSessionMap) {
-        auto curSession = elem.second;
-        if (curSession == nullptr) {
-            WLOGFW("curSession is nullptr");
-            continue;
-        }
-        if (curSession->GetSessionInfo().isSystem_ ||
-            curSession->GetWindowType() < WindowType::APP_MAIN_WINDOW_BASE ||
-            curSession->GetWindowType() >= WindowType::APP_MAIN_WINDOW_END) {
-            WLOGFW("No need to dump, id: %{public}d, system: %{public}d, windowType: %{public}d",
-                curSession->GetPersistentId(), curSession->GetSessionInfo().isSystem_, curSession->GetWindowType());
-            continue;
-        }
-
-        const auto& sessionInfo = curSession->GetSessionInfo();
-        std::string isActive = curSession->IsActive() ? "FOREGROUND" : "BACKGROUND";
-        oss << "    Mission ID #" << curSession->GetPersistentId() << "  mission name #" << "[#"
-            << sessionInfo.bundleName_ << ":" << sessionInfo.moduleName_ << ":" << sessionInfo.abilityName_
-            << "]" << "    lockedState #0" << std::endl;
-        oss << "    app name [" << sessionInfo.bundleName_ << "]" << std::endl;
-        oss << "    main name [" << sessionInfo.abilityName_ << "]" << std::endl;
-        oss << "    bundle name [" << sessionInfo.bundleName_ << "]" << std::endl;
-        oss << "    ability type [PAGE]" << std::endl;
-        oss << "    state #" << isActive.c_str() << std::endl;
-        oss << "    app state #" << isActive.c_str() << std::endl;
-        oss << "    callee connections:" << std::endl;
-    }
-}
-
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 {
     int32_t screenGroupId = 0;
@@ -3854,7 +3820,6 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
-    DumpAllAppSessionInfo(oss, sceneSessionMapCopy);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
