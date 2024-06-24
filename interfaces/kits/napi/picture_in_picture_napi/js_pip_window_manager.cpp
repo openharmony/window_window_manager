@@ -123,7 +123,8 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
             TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
             return false;
         }
-        if (std::find(controls.begin(), controls.end()) != controls.end()) {
+        auto iter = std::find(controls.begin(), controls.end(), controlType);
+        if (iter != controls.end()) {
             TLOGI(WmsLogTag::WMS_PIP, "The controlType already exists. controlType: %{public}u", controlType);
         } else {
             controls.push_back(controlType);
