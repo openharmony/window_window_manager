@@ -546,11 +546,15 @@ HWTEST_F(ScreenManagerTest, GetVirtualScreenFlag01, Function | SmallTest | Level
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
-    ASSERT_EQ(DMError::DM_OK, ret);
-    VirtualScreenFlag screenFlag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
-    ASSERT_EQ(VirtualScreenFlag::DEFAULT, screenFlag);
-    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    } else {
+        ASSERT_EQ(DMError::DM_OK, ret);
+        VirtualScreenFlag screenFlag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
+        ASSERT_EQ(VirtualScreenFlag::DEFAULT, screenFlag);
+        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+        ASSERT_EQ(DMError::DM_OK, ret);
+    }
 }
 
 /**
