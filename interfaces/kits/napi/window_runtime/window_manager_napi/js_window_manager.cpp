@@ -473,7 +473,7 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
     }
 
     bool dialogDecorEnable = false;
-    if (ParseJsValue(jsObject, env, "decorEnable", dialogDecorEnable)) {
+    if (ParseJsValue(jsObject, env, "decorEnabled", dialogDecorEnable)) {
         option.SetDialogDecorEnable(dialogDecorEnable);
     }
 
