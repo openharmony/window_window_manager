@@ -359,6 +359,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
             std::to_string(static_cast<int>(e.zOrder)) + "|" +
+            std::to_string(e.pid) + "|" +
             std::to_string(e.defaultHotAreas.size()) + " ";
     }
     if (lastIdList != idList) {
