@@ -61,7 +61,7 @@ std::mutex JsPipWindowManager::mutex_;
 
 static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
 {
-    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplat     eType>(pipTemplateType));
+    auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
     if (controlGroups.size() > MAX_CONTROL_GROUP_NUM) {
         return -1;
