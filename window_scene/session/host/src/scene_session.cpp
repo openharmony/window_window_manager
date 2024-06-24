@@ -2472,7 +2472,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
-        if (!(isPC || isFreeMutiWindowMode) && SessionPermission::IsSACalling()
+        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::IsSACalling()
             && WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
