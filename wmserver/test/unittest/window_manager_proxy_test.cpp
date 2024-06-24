@@ -113,8 +113,6 @@ HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
-
-
 /**
  * @tc.name: GetSnapshotByWindowId
  * @tc.desc: test GetSnapshotByWindowId
