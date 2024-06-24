@@ -17,7 +17,6 @@
 #define OHOS_PIP_OPTION_H
 #include <refbase.h>
 #include <string>
-#include <set>
 #include "xcomponent_controller.h"
 
 namespace OHOS {
@@ -37,7 +36,6 @@ public:
     std::string GetNavigationId() const;
     uint32_t GetPipTemplate();
     std::vector<std::uint32_t> GetControlGroup();
-    void uniqueControls();
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
 private:

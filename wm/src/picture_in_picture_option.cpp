@@ -73,21 +73,6 @@ std::vector<std::uint32_t> PipOption::GetControlGroup()
     return controlGroup_;
 }
 
-void PipOption::uniqueControls()
-{
-    auto item = controlGroup_.begin();
-    std::set<uint32_t> result;
-    while (item != controlGroup_.end()) {
-        if (result.find(*item) != result.end()) {
-            item = controlGroup_.erase(item);
-        } else {
-            result.insert(*item);
-            item++;
-        }
-    }
-    return controlGroups;
-}
-
 void PipOption::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
 {
     xComponentController_ = xComponentController;
