@@ -22,7 +22,7 @@
 #include "window.h"
 #include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
-#include "algorithm"
+#include <algorithm>
 
 namespace OHOS {
 namespace Rosen {
