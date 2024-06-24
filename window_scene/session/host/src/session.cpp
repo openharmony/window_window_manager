@@ -310,10 +310,9 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
 void Session::NotifyActivation()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnActivation();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnActivation();
         }
     }
 }
@@ -321,10 +320,9 @@ void Session::NotifyActivation()
 void Session::NotifyConnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnConnect();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnConnect();
         }
     }
 }
@@ -332,10 +330,9 @@ void Session::NotifyConnect()
 void Session::NotifyForeground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnForeground();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnForeground();
         }
     }
 }
@@ -343,10 +340,9 @@ void Session::NotifyForeground()
 void Session::NotifyBackground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnBackground();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnBackground();
         }
     }
 }
@@ -354,10 +350,9 @@ void Session::NotifyBackground()
 void Session::NotifyDisconnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnDisconnect();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnDisconnect();
         }
     }
 }
@@ -370,10 +365,9 @@ void Session::NotifyExtensionDied()
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnExtensionDied();
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnExtensionDied();
         }
     }
 }
@@ -387,10 +381,9 @@ void Session::NotifyExtensionTimeout(int32_t errorCode)
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionTimeout(errorCode:%{public}d) in session(persistentId:%{public}d).",
         errorCode, persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnExtensionTimeout(errorCode);
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnExtensionTimeout(errorCode);
         }
     }
 }
@@ -399,10 +392,9 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
     int64_t uiExtensionIdLevel)
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
     for (auto& listener : lifecycleListeners) {
-        if (!listener.expired()) {
-            listener.lock()->OnAccessibilityEvent(info, uiExtensionIdLevel);
+        if (auto listenerPtr = listener.lock() {
+            listenerPtr->OnAccessibilityEvent(info, uiExtensionIdLevel);
         }
     }
 }
