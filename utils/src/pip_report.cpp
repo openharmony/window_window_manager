@@ -56,7 +56,7 @@ void PiPReporter::SetCurrentPackageName(const std::string &packageName)
     packageName_ = packageName;
 }
 
-void PiPReporter::GetPackageName() const
+std::string PiPReporter::GetPackageName() const
 {
     std::lock_guard<std::mutex> lock(packageNameMutex_);
     return packageName_;
