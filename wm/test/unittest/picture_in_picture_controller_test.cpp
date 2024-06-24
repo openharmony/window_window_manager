@@ -266,9 +266,11 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
 HWTEST_F(PictureInPictureControllerTest, StartPictureInPictureInner, Function | SmallTest | Level2)
 {
     StartPipType startType = StartPipType::AUTO_START;
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     ASSERT_NE(WMError::WM_OK, pipControl->StartPictureInPictureInner(startType));
 }
@@ -555,9 +557,11 @@ HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | L
 {
     std::string actionName = " ";
     int32_t status = 0;
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     sptr<IPiPActionObserver> listener = nullptr;
 
     pipControl->pipActionObserver_ = nullptr;
@@ -574,9 +578,11 @@ HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | L
 HWTEST_F(PictureInPictureControllerTest, PreRestorePictureInPicture, Function | SmallTest | Level2)
 {
     sptr<IPiPLifeCycle> listener = nullptr;
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->pipLifeCycleListener_ = nullptr;
     pipControl->PreRestorePictureInPicture();
@@ -591,9 +597,11 @@ HWTEST_F(PictureInPictureControllerTest, PreRestorePictureInPicture, Function | 
  */
 HWTEST_F(PictureInPictureControllerTest, RestorePictureInPictureWindow, Function | SmallTest | Level2)
 {
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->mainWindow_ = nullptr;
     pipControl->RestorePictureInPictureWindow();
