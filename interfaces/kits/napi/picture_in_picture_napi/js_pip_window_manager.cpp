@@ -22,12 +22,14 @@
 #include "window.h"
 #include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
+#include <algorithm>
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
+    constexpr uint32_t MAX_CONTROL_GROUP_NUM = 3;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
@@ -36,17 +38,23 @@ namespace {
         PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH,
         PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON,
         PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH,
+        PiPControlGroup::VIDEO_CALL_MUTE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_MEETING_CONTROLS {
         PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON,
         PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH,
         PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH,
+        PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH,
+    };
+    const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
+        PiPControlGroup::VIDEO_PLAY_PAUSE,
+        PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
         {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
         {PiPTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
         {PiPTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
-        {PiPTemplateType::VIDEO_LIVE, {}},
+        {PiPTemplateType::VIDEO_LIVE, VIDEO_LIVE_CONTROLS},
     };
 }
 
@@ -56,6 +64,9 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
 {
     auto iter = TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType));
     auto controls = iter->second;
+    if (controlGroups.size() > MAX_CONTROL_GROUP_NUM) {
+        return -1;
+    }
     for (auto control : controlGroups) {
         if (controls.find(static_cast<PiPControlGroup>(control)) == controls.end()) {
             TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, controlGroup not matches, controlGroup: %{public}u",
@@ -112,7 +123,12 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
             TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
             return false;
         }
-        controls.push_back(controlType);
+        auto iter = std::find(controls.begin(), controls.end(), controlType);
+        if (iter != controls.end()) {
+            TLOGI(WmsLogTag::WMS_PIP, "The controlType already exists. controlType: %{public}u", controlType);
+        } else {
+            controls.push_back(controlType);
+        }
     }
     return true;
 }
