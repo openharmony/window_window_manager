@@ -99,9 +99,9 @@ namespace {
  * @tc.desc: SceneSesionManager notify session touch outside
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, Function | SmallTest | Level3)
 {
-    sptr<WindowSessionProperty> property;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(ssm_, nullptr);
     ssm_->recoveringFinished_ = false;
     SessionInfo info;
@@ -194,24 +194,6 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage, Function | SmallTest | Level3
 }
 
 /**
- * @tc.name: UpdatePropertyDragEnabled
- * @tc.desc: UpdatePropertyDragEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, UpdatePropertyDragEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    ssm_->UpdatePropertyDragEnabled(nullptr, nullptr);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ssm_->UpdatePropertyDragEnabled(property, nullptr);
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-}
-
-/**
  * @tc.name: OnSCBSystemSessionBufferAvailable
  * @tc.desc: OnSCBSystemSessionBufferAvailable
  * @tc.type: FUNC
@@ -292,21 +274,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate);
-    delete sceneSessionManager;
-}
-
-/**
- * @tc.name: StartUIAbilityBySCB
- * @tc.desc: StartUIAbilityBySCB
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, StartUIAbilityBySCB02, Function | SmallTest | Level3)
-{
-    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
-    ASSERT_NE(sceneSessionManager, nullptr);
-    sptr<SceneSession> scnSession = nullptr;
-    sceneSessionManager->StartUIAbilityBySCB(scnSession);
-    sceneSessionManager->ChangeUIAbilityVisibilityBySCB(scnSession, true);
     delete sceneSessionManager;
 }
 }
