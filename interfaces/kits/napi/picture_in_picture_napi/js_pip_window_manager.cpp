@@ -127,7 +127,7 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
             TLOGI(WmsLogTag::WMS_PIP, "The controlType already exists. controlType: %{public}u", controlType);
         } else {
             controls.push_back(controlType);
-        }  
+        }
     }
     return true;
 }
