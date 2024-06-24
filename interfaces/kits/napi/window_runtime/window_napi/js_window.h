@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace Rosen {
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
-std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName);
+std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
 void BindFunctions(napi_env env, napi_value object, const char *moduleName);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
