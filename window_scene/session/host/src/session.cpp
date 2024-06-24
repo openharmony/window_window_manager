@@ -311,7 +311,7 @@ void Session::NotifyActivation()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnActivation();
         }
     }
@@ -321,7 +321,7 @@ void Session::NotifyConnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnConnect();
         }
     }
@@ -331,7 +331,7 @@ void Session::NotifyForeground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnForeground();
         }
     }
@@ -341,7 +341,7 @@ void Session::NotifyBackground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnBackground();
         }
     }
@@ -351,7 +351,7 @@ void Session::NotifyDisconnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnDisconnect();
         }
     }
@@ -366,7 +366,7 @@ void Session::NotifyExtensionDied()
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyExtensionDied called in session(persistentId:%{public}d).", persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnExtensionDied();
         }
     }
@@ -382,7 +382,7 @@ void Session::NotifyExtensionTimeout(int32_t errorCode)
         errorCode, persistentId_);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnExtensionTimeout(errorCode);
         }
     }
@@ -393,7 +393,7 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock() {
+        if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnAccessibilityEvent(info, uiExtensionIdLevel);
         }
     }
