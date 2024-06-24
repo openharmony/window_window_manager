@@ -17,6 +17,7 @@
 
 #include <string>
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,7 +67,7 @@ static napi_value ExportPictureInPictureTemplateType(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "VIDEO_PLAY", static_cast<int32_t>(PiPTemplateType::VIDEO_PLAY));
@@ -82,7 +83,7 @@ static napi_value ExportPictureInPictureState(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "ABOUT_TO_START", static_cast<int32_t>(PiPState::ABOUT_TO_START));
@@ -100,7 +101,7 @@ static napi_value ExportVideoPlayControlGroup(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT",
@@ -116,7 +117,7 @@ static napi_value ExportVideoCallControlGroup(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
@@ -136,7 +137,7 @@ static napi_value ExportVideoMeetingControlGroup(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
@@ -156,7 +157,7 @@ static napi_value ExportVideoLiveControlGroup(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "VIDEO_PLAY_PAUSE",
