@@ -253,7 +253,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, tp.c_str());
 #endif
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_SUB);
-    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().isFoldScreenOn();
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
@@ -282,7 +282,7 @@ void DualDisplayPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> screenS
 
 void DualDisplayPolicy::ChangeScreenDisplayModeToCoordination()
 {
-    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().isFoldScreenOn();
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
