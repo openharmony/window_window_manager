@@ -911,15 +911,6 @@ HWTEST_F(SceneSessionManagerTest4, ClearSession, Function | SmallTest | Level3)
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(sceneSession));
 }
 
-/**
- * @tc.name: OnScreenshot
- * @tc.desc: OnScreenshot
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, OnScreenshot, Function | SmallTest | Level3)
-{
 
-}
-}
 } // namespace Rosen
 } // namespace OHOS
