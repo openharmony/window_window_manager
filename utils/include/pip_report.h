@@ -17,6 +17,7 @@
 #define WINDOW_WINDOW_MANAGER_PIP_REPORT_H
 
 #include <map>
+#include <mutex>
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
@@ -31,7 +32,9 @@ public:
     void ReportPiPRatio(int32_t windowWidth, int32_t windowHeight);
     void ReportPiPRestore();
 private:
+    std::string GetPackageName() const;
     std::string packageName_;
+    mutable std::mutex packageNameMutex_;
 };
 } // namespace OHOS::Rosen
 
