@@ -635,7 +635,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DMS, "GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    uint32_t uid = IPCSkeleton::GetCallingUid();
+    auto uid = IPCSkeleton::GetCallingUid();
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -653,8 +653,8 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
             if (displayHookMap_.find(uid) != displayHookMap_.end()) {
                 auto info = displayHookMap_[uid];
-                TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}u, hookHeight: %{public}u,\
-                    hookDensity: %{public}f", info.width_, info.height_, info.density_);
+                TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}u, hookHeight: %{public}u, "
+                    "hookDensity: %{public}f", info.width_, info.height_, info.density_);
                 displayInfo->SetWidth(info.width_);
                 displayInfo->SetHeight(info.height_);
                 displayInfo->SetWidth(info.density_);
@@ -768,7 +768,7 @@ bool ScreenSessionManager::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 }
 
-void ScreenSessionManager::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo permission denied!");
