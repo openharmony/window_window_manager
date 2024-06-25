@@ -104,7 +104,8 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_ERROR_INVALID_PARAM, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
     { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED},
+    { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
+    { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
 };
 
 enum class SessionState : uint32_t {
@@ -282,7 +283,7 @@ struct SessionInfo {
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    bool isModal_ = false;
+    uint32_t uiExtensionUsage_ = 0;
 };
 
 enum class SessionFlag : uint32_t {

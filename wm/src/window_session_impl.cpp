@@ -124,6 +124,22 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                                      \
     } while (0)
 
+#define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
+    do {                                                                       \
+        if ((hostSession) == nullptr) {                                        \
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
+#define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
+    do {                                                                       \
+        if ((hostSession) == nullptr) {                                        \
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
+            return ret;                                                        \
+        }                                                                      \
+    } while (false)
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
@@ -226,7 +242,7 @@ int32_t WindowSessionImpl::GetParentId() const
 
 bool WindowSessionImpl::IsWindowSessionInvalid() const
 {
-    bool res = ((hostSession_ == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
+    bool res = ((GetHostSession() == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
         WLOGW("[WMSLife] already destroyed or not created! id: %{public}d state_: %{public}u",
@@ -262,6 +278,7 @@ SystemSessionConfig WindowSessionImpl::GetSystemSessionConfig() const
 
 sptr<ISession> WindowSessionImpl::GetHostSession() const
 {
+    std::lock_guard<std::mutex> lock(hostSessionMutex_);
     return hostSession_;
 }
 
@@ -358,10 +375,8 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
 WMError WindowSessionImpl::Connect()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called");
-    if (hostSession_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Session is null!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     sptr<ISessionStage> iSessionStage(this);
     auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
@@ -369,7 +384,7 @@ WMError WindowSessionImpl::Connect()
     if (token) {
         property_->SetTokenState(true);
     }
-    auto ret = hostSession_->Connect(
+    auto ret = hostSession->Connect(
         iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_,
         token, identityToken_);
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
@@ -417,7 +432,9 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
         return WMError::WM_OK;
     }
 
-    WSError ret = hostSession_->Foreground(property_);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError ret = hostSession->Foreground(property_);
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
@@ -458,8 +475,11 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         WLOGFW("[WMSLife]session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (hostSession_ != nullptr) {
-        hostSession_->Disconnect();
+    {
+        auto hostSession = GetHostSession();
+        if (hostSession != nullptr) {
+            hostSession->Disconnect();
+        }
     }
     NotifyBeforeDestroy(GetWindowName());
     {
@@ -467,7 +487,10 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
-    hostSession_ = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(hostSessionMutex_);
+        hostSession_ = nullptr;
+    }
     {
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
@@ -1038,7 +1061,7 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
         }
     }
 
-    if (hostSession_) {
+    if (GetHostSession()) {
         property_->SetWindowMode(mode);
         property_->SetDecorEnable(hasDeco);
     }
@@ -1178,7 +1201,9 @@ WMError WindowSessionImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
     return WMError::WM_OK;
 }
 
@@ -1494,8 +1519,9 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
         }
         uiContent->SetContainerModalTitleHeight(decorHeightWithPx);
     }
-    if (hostSession_ != nullptr) {
-        hostSession_->SetCustomDecorHeight(decorHeight);
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        hostSession->SetCustomDecorHeight(decorHeight);
     }
     WLOGI("Set app window decor height success, height : %{public}d", decorHeight);
     return WMError::WM_OK;
@@ -1683,21 +1709,31 @@ EnableIfSame<T, IWindowRectChangeListener,
 
 WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
-    WMError ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-    if (hostSession_ != nullptr && ret == WMError::WM_OK) {
-        hostSession_->UpdateRectChangeListenerRegistered(true);
+    WMError ret = WMError::WM_OK;
+    {
+        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+        ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && ret == WMError::WM_OK) {
+        hostSession->UpdateRectChangeListenerRegistered(true);
     }
     return ret;
 }
 
 WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
-    WMError ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-    if (hostSession_ != nullptr && (windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
-        windowRectChangeListeners_[GetPersistentId()].empty())) {
-        hostSession_->UpdateRectChangeListenerRegistered(false);
+    WMError ret = WMError::WM_OK;
+    bool windowRectChangeListenersEmpty = false;
+    {
+        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+        ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
+        windowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
+                                         windowRectChangeListeners_[GetPersistentId()].empty();
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && windowRectChangeListenersEmpty) {
+        hostSession->UpdateRectChangeListenerRegistered(false);
     }
     return ret;
 }
@@ -2133,7 +2169,9 @@ WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
         WLOGFE("HostSession is invalid");
         return WSError::WS_DO_NOTHING;
     }
-    return hostSession_->MarkProcessed(eventId);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WSError::WS_DO_NOTHING);
+    return hostSession->MarkProcessed(eventId);
 }
 
 void WindowSessionImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
@@ -2267,10 +2305,11 @@ void WindowSessionImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d position [%{public}d %{public}d]",
         GetWindowName().c_str(), GetPersistentId(), posX, posY);
-    std::lock_guard<std::recursive_mutex> lockListener(dialogTargetTouchListenerMutex_);
-    if (hostSession_ != nullptr) {
-        hostSession_->ProcessPointDownSession(posX, posY);
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        hostSession->ProcessPointDownSession(posX, posY);
     }
+    std::lock_guard<std::recursive_mutex> lockListener(dialogTargetTouchListenerMutex_);
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
     for (auto& listener : dialogTargetTouchListener) {
         if (listener != nullptr) {
@@ -2863,7 +2902,9 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
         TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return hostSession_->UpdateSessionPropertyByAction(property_, action);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return hostSession->UpdateSessionPropertyByAction(property_, action);
 }
 
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
@@ -2990,8 +3031,9 @@ WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t perc
         property_->SetKeyboardSessionGravity(sessionGravity, percent);
     }
 
-    if (hostSession_ != nullptr) {
-        return static_cast<WMError>(hostSession_->SetKeyboardSessionGravity(
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        return static_cast<WMError>(hostSession->SetKeyboardSessionGravity(
             static_cast<SessionGravity>(gravity), percent));
     }
     return WMError::WM_OK;
@@ -3007,11 +3049,17 @@ WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemB
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                                     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFD("NotifyOccupiedAreaChangeInfo, safeHeight: %{public}u "
-           "occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u",
-           info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    bool hasRSTransaction = rsTransaction != nullptr;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "hasRSTransaction: %{public}d, safeHeight: %{public}u"
+        ", occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u", hasRSTransaction,
+        info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
     std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
@@ -3027,6 +3075,11 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             }
             listener->OnSizeChange(info);
         }
+    }
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    } else {
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 
@@ -3082,8 +3135,9 @@ void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason r
         WLOGFE("HostSession is invalid");
         return;
     }
-    auto wsReason = static_cast<SizeChangeReason>(reason);
-    hostSession_->UpdatePiPRect(rect, wsReason);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
 }
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)

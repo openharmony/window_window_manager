@@ -17,6 +17,7 @@
 
 #include <string>
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -65,6 +66,10 @@ static napi_value ExportPictureInPictureTemplateType(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
     (void)SetNamedProperty(env, result, "VIDEO_PLAY", static_cast<int32_t>(PiPTemplateType::VIDEO_PLAY));
     (void)SetNamedProperty(env, result, "VIDEO_CALL", static_cast<int32_t>(PiPTemplateType::VIDEO_CALL));
     (void)SetNamedProperty(env, result, "VIDEO_MEETING", static_cast<int32_t>(PiPTemplateType::VIDEO_MEETING));
@@ -77,6 +82,10 @@ static napi_value ExportPictureInPictureState(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
     (void)SetNamedProperty(env, result, "ABOUT_TO_START", static_cast<int32_t>(PiPState::ABOUT_TO_START));
     (void)SetNamedProperty(env, result, "STARTED", static_cast<int32_t>(PiPState::STARTED));
     (void)SetNamedProperty(env, result, "ABOUT_TO_STOP", static_cast<int32_t>(PiPState::ABOUT_TO_STOP));
@@ -91,6 +100,10 @@ static napi_value ExportVideoPlayControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
     (void)SetNamedProperty(env, result, "VIDEO_PREVIOUS_NEXT",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
     (void)SetNamedProperty(env, result, "FAST_FORWARD_BACKWARD",
@@ -103,12 +116,18 @@ static napi_value ExportVideoCallControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
     (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MICROPHONE_SWITCH));
     (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_HANG_UP_BUTTON));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_CAMERA_SWITCH));
+    (void)SetNamedProperty(env, result, "MUTE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_CALL_MUTE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
@@ -117,12 +136,34 @@ static napi_value ExportVideoMeetingControlGroup(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
     (void)SetNamedProperty(env, result, "HANG_UP_BUTTON",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_HANG_UP_BUTTON));
     (void)SetNamedProperty(env, result, "CAMERA_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_CAMERA_SWITCH));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MUTE_SWITCH));
+    (void)SetNamedProperty(env, result, "MICROPHONE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH));
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportVideoLiveControlGroup(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
+    (void)SetNamedProperty(env, result, "VIDEO_PLAY_PAUSE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE));
+    (void)SetNamedProperty(env, result, "MUTE_SWITCH",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH));
     napi_object_freeze(env, result);
     return result;
 }
@@ -135,6 +176,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("VideoPlayControlGroup", ExportVideoPlayControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoCallControlGroup", ExportVideoCallControlGroup(env)),
         DECLARE_NAPI_PROPERTY("VideoMeetingControlGroup", ExportVideoMeetingControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("VideoLiveControlGroup", ExportVideoLiveControlGroup(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);

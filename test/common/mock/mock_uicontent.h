@@ -104,6 +104,8 @@ public:
     MOCK_METHOD1(SetUIExtensionAbilityProcess, void(bool isUIExtensionAbilityProcess));
     MOCK_METHOD0(IsUIExtensionSubWindow, bool());
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
+    MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
+        int32_t action, int64_t baseParent));
 };
 } // namespace Ace
 } // namespace OHOS

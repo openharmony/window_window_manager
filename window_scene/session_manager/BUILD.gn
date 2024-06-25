@@ -50,12 +50,6 @@ config("session_manager_public_config") {
   ]
 }
 
-config("for_scene_session_manager_public_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [ "${resourceschedule_path}/ffrt/interfaces/kits" ]
-}
-
 ohos_shared_library("scene_session_manager") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -83,10 +77,7 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_stub.cpp",
   ]
 
-  public_configs = [
-    ":session_manager_public_config",
-    ":for_scene_session_manager_public_config",
-  ]
+  public_configs = [ ":session_manager_public_config" ]
 
   deps = [
     "${window_base_path}/dm:libdm",

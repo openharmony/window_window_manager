@@ -134,6 +134,20 @@ HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, Function | SmallTest | Leve
     bool enable1 = true;
     vsyncStation1->SetFrameRateLinkerEnable(enable1);
 }
+
+/**
+ * @tc.name: SetUiDvsyncSwitch
+ * @tc.desc: SetUiDvsyncSwitch Test
+ * @tc.type: FUNC
+*/
+HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, Function | SmallTest | Level3)
+{
+    NodeId nodeId = 0;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    ASSERT_NE(vsyncStation, nullptr);
+    vsyncStation->SetUiDvsyncSwitch(true);
+    vsyncStation->SetUiDvsyncSwitch(false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

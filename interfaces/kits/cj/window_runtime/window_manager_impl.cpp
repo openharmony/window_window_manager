@@ -134,6 +134,9 @@ int32_t WindowManagerImpl::FindWindow(std::string name, int64_t& windowId)
             return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         } else {
             sptr<CJWindowImpl> newWindow = CreateCjWindowObject(window);
+            if (newWindow == nullptr) {
+                return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            }
             windowId = newWindow->GetID();
             return WINDOW_SUCCESS;
         }

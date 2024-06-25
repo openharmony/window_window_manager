@@ -161,6 +161,9 @@ public:
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
+    virtual void OpenKeyboardSyncTransaction() {};
+    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
+        bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
@@ -206,7 +209,6 @@ public:
     void SetRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
-    void SetSelfToken(sptr<IRemoteObject> selfToken);
     void SetLastSafeRect(WSRect rect);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; };
     virtual bool IsTopmost() const { return false; };
@@ -220,8 +222,8 @@ public:
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
 
+    bool IsAnco() const override;
     int32_t GetCollaboratorType() const;
-    sptr<IRemoteObject> GetSelfToken() const;
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRect() const;
     std::string GetUpdatedIconPath() const;
@@ -433,8 +435,6 @@ private:
     static std::mutex enterSessionMutex_;
     mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    mutable std::shared_mutex selfTokenMutex_;
-    wptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;

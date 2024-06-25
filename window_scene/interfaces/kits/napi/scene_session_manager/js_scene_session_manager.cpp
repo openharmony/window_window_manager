@@ -133,6 +133,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
     BindNativeFunction(env, exportObj, "updateSessionDisplayId", moduleName,
         JsSceneSessionManager::UpdateSessionDisplayId);
+    BindNativeFunction(env, exportObj, "notifyStackEmpty", moduleName, JsSceneSessionManager::NotifyStackEmpty);
     BindNativeFunction(env, exportObj, "notifySwitchingUser", moduleName, JsSceneSessionManager::NotifySwitchingUser);
     BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
         JsSceneSessionManager::NotifySessionRecoverStatus);
@@ -152,7 +153,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
-    BindNativeFunction(env, exportObj, "UpdateDisplayHookInfo", moduleName,
+    BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
         JsSceneSessionManager::UpdateDisplayHookInfo);
     return NapiGetUndefined(env);
 }
@@ -739,6 +740,13 @@ napi_value JsSceneSessionManager::UpdateSessionDisplayId(napi_env env, napi_call
     return (me != nullptr) ? me->OnUpdateSessionDisplayId(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::NotifyStackEmpty(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyStackEmpty(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::NotifySwitchingUser(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "[NAPI]");
@@ -806,7 +814,7 @@ napi_value JsSceneSessionManager::UpdateDisplayHookInfo(napi_env env, napi_callb
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
+    return (me != nullptr) ? me->OnUpdateDisplayHookInfo(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2164,6 +2172,34 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnNotifyStackEmpty(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId ;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WSErrorCode ret =
+        WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().NotifyStackEmpty(persistentId));
+    if (ret != WSErrorCode::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Notify stack empty failed");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "System is abnormal"));
+    }
     return NapiGetUndefined(env);
 }
 

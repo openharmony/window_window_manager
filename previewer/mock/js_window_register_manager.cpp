@@ -46,7 +46,7 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<J
     }
     listener->SetIsDeprecatedInterface(true);
     sptr<IAvoidAreaChangedListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
+    WmErrorCode ret;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
     } else {
@@ -63,7 +63,7 @@ WmErrorCode JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindo
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IAvoidAreaChangedListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
+    WmErrorCode ret;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
     } else {

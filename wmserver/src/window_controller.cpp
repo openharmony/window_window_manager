@@ -33,6 +33,7 @@
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
 #include "persistent_storage.h"
+#include "surface_capture_future.h"
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_inner_manager.h"
@@ -985,6 +986,22 @@ void WindowController::RecordBootAnimationEvent() const
     if (ret != 0) {
         WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
+}
+
+std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(node->surfaceNode_, callback);
+    if (!ret) {
+        WLOGFE("takeSurfaceCapture failed");
+        return nullptr;
+    }
+    return callback->GetResult(SNAPSHOT_TIMEOUT_MS);
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)

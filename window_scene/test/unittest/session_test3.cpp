@@ -90,10 +90,10 @@ void WindowSessionTest3::TearDown()
 RSSurfaceNode::SharedPtr WindowSessionTest3::CreateRSSurfaceNode()
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTest2SurfaceNode";
+    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTest3SurfaceNode";
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
     if (surfaceNode == nullptr) {
-        GTEST_LOG_(INFO) << "WindowSessionTest2::CreateRSSurfaceNode surfaceNode is nullptr";
+        GTEST_LOG_(INFO) << "WindowSessionTest3::CreateRSSurfaceNode surfaceNode is nullptr";
     }
     return surfaceNode;
 }

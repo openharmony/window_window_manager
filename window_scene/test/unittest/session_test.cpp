@@ -1788,12 +1788,18 @@ HWTEST_F(WindowSessionTest, GetUIContentRemoteObj, Function | SmallTest | Level2
     ASSERT_NE(session_, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), GetUIContentRemoteObj(_)).WillRepeatedly(Return(WSError::WS_OK));
     session_->sessionStage_ = mockSessionStage;
     session_->state_ = SessionState::STATE_FOREGROUND;
     sptr<IRemoteObject> remoteObj;
     ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
+
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    ASSERT_EQ(WSError::WS_OK, session_->GetUIContentRemoteObj(remoteObj));
     Mock::VerifyAndClearExpectations(&mockSessionStage);
+
+    session_->sessionInfo_.isSystem_ = true;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->GetUIContentRemoteObj(remoteObj));
 }
 
 /**

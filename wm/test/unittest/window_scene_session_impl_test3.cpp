@@ -350,11 +350,9 @@ HWTEST_F(WindowSceneSessionImplTest3, NotifyPrepareClosePiPWindow, Function | Sm
     auto ret = windowSceneSessionImpl->NotifyPrepareClosePiPWindow();
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
-    auto ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
-    EXPECT_EQ(WmErrorCode::WM_OK, ret1);
+    EXPECT_EQ(WmErrorCode::WM_OK, windowSceneSessionImpl->KeepKeyboardOnFocus(true));
     windowSceneSessionImpl->property_ = nullptr;
-    ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
-    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, ret1);
+    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, windowSceneSessionImpl->KeepKeyboardOnFocus(true));
 }
 
 /**
