@@ -92,7 +92,7 @@ PictureInPictureController::~PictureInPictureController()
     remoteObj_ = nullptr;
 }
 
-WMError PictureInPictureController::CreatePictureInPictureWindow()
+WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType startType)
 {
     TLOGI(WmsLogTag::WMS_PIP, "CreatePictureInPictureWindow is called, mainWindow:%{public}u", mainWindowId_);
     sptr<PictureInPictureController> thisController = this;
@@ -110,6 +110,11 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
     mainWindowXComponentController_ = pipOption_->GetXComponentController();
     if (mainWindowXComponentController_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "mainWindowState:%{public}u", mainWindow_->GetWindowState());
+    if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     UpdateXComponentPositionAndSize();
@@ -137,7 +142,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow()
 
 WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType startType)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "ShowPictureInPictureWindow is called");
+    TLOGI(WmsLogTag::WMS_PIP, "startType:%{public}u", startType);
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -238,7 +243,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
 
 WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType)
 {
-    WMError errCode = CreatePictureInPictureWindow();
+    WMError errCode = CreatePictureInPictureWindow(StartPipType startType);
     if (errCode != WMError::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "Create pip window failed, err: %{public}u", errCode);
@@ -320,7 +325,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
 WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
 {
     if (window_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipController is null in stopping task");
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr in stop pip inner");
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
             pipOption_->GetPipTemplate(), FAILED, "pipController is null");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -354,9 +359,8 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
-    sptr<PictureInPictureController> thisController = this;
     if (window_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window_->Destroy());
@@ -369,6 +373,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
+    sptr<PictureInPictureController> thisController = this;
     PictureInPictureManager::RemoveActiveController(thisController);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;

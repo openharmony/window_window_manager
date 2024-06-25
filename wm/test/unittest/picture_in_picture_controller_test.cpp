@@ -199,20 +199,21 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     sptr<WindowOption> windowOption = nullptr;
 
     pipControl->pipOption_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    StartPipType startType = StartPipType::AUTO_START;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->pipOption_ = option;
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
 
     EXPECT_EQ(nullptr, windowOption);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     
     sptr<Window> window = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
     ASSERT_NE(WMError::WM_OK, errorCode);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow());
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     option->SetNodeControllerRef(nullptr);
     ASSERT_EQ(nullptr, option->GetNodeControllerRef());
     ASSERT_EQ(nullptr, pipControl->GetCustomNodeController());
