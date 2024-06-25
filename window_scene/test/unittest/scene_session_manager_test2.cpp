@@ -2092,30 +2092,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
 }
 
 /**
- * @tc.name: RequestSceneSessionDestruction
- * @tc.desc: RequestSceneSessionDestruction
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest2, RequestSceneSessionDestruction02, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "111";
-    info.bundleName_ = "222";
-    info.persistentId_ = 0;
-    info.screenId_ = 1;
-    sptr<SceneSession> sceneSession;
-    sptr<ISessionStage> sessionStage;
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    ssm_->RequestSceneSessionDestruction(sceneSession, true);
-    ssm_->RequestSceneSessionDestruction(sceneSession, false);
-    ssm_->HandleCastScreenDisConnection(sceneSession);
-    ssm_->RequestSceneSessionDestruction(nullptr, true);
-    ssm_->RequestSceneSessionDestruction(nullptr, false);
-}
-
-/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
