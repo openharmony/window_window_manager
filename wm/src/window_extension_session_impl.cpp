@@ -37,6 +37,22 @@ constexpr int32_t ANIMATION_TIME = 400;
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 }
 
+#define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
+    do {                                                                       \
+        if ((hostSession) == nullptr) {                                        \
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
+#define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
+    do {                                                                       \
+        if ((hostSession) == nullptr) {                                        \
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");                  \
+            return ret;                                                        \
+        }                                                                      \
+    } while (false)
+
 std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
 std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
@@ -58,7 +74,10 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         return WMError::WM_ERROR_NULLPTR;
     }
     SetDefaultDisplayIdIfNeed();
-    hostSession_ = iSession;
+    {
+        std::lock_guard<std::mutex> lock(hostSessionMutex_);
+        hostSession_ = iSession;
+    }
     context_ = context;
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
@@ -107,9 +126,12 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     CheckAndRemoveExtWindowFlags();
-    if (hostSession_ != nullptr) {
-        hostSession_->Disconnect();
-        TLOGI(WmsLogTag::WMS_LIFE, "Disconnected with host session, id: %{public}d.", GetPersistentId());
+    {
+        auto hostSession = GetHostSession();
+        if (hostSession != nullptr) {
+            hostSession->Disconnect();
+            TLOGI(WmsLogTag::WMS_LIFE, "Disconnected with host session, id: %{public}d.", GetPersistentId());
+        }
     }
     NotifyBeforeDestroy(GetWindowName());
     {
@@ -117,8 +139,11 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Reset state, id: %{public}d.", GetPersistentId());
-    hostSession_ = nullptr;
+    {
+        TLOGI(WmsLogTag::WMS_LIFE, "Reset state, id: %{public}d.", GetPersistentId());
+        std::lock_guard<std::mutex> lock(hostSessionMutex_);
+        hostSession_ = nullptr;
+    }
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.erase(this);
@@ -170,7 +195,9 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
-    return static_cast<WMError>(hostSession_->TransferAbilityResult(resultCode, want));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->TransferAbilityResult(resultCode, want));
 }
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
@@ -179,7 +206,9 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
-    return static_cast<WMError>(hostSession_->TransferExtensionData(wantParams));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->TransferExtensionData(wantParams));
 }
 
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
@@ -189,7 +218,9 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);
-    hostSession_->NotifyAsyncOn();
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyAsyncOn();
 }
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
@@ -220,17 +251,17 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
         return;
     }
     notifyTransferComponentDataForResultFunc_ = std::move(func);
-    hostSession_->NotifySyncOn();
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifySyncOn();
 }
 
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
     WLOGFD("called");
-    if (hostSession_ == nullptr) {
-        WLOGFE("hostSession_ is nullptr");
-        return;
-    }
-    hostSession_->TriggerBindModalUIExtension();
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->TriggerBindModalUIExtension();
 }
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
@@ -587,7 +618,9 @@ WMError WindowExtensionSessionImpl::TransferAccessibilityEvent(const Accessibili
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return static_cast<WMError>(hostSession_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->TransferAccessibilityEvent(info, uiExtensionIdLevel));
 }
 
 void WindowExtensionSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
@@ -598,12 +631,13 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
-void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
+                                                              const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY = %{public}f, KeyBoardHeight = %{public}d",
         info->textFieldPositionY_, info->rect_.height_);
     if (occupiedAreaChangeListener_) {
-        occupiedAreaChangeListener_->OnSizeChange(info);
+        occupiedAreaChangeListener_->OnSizeChange(info, rsTransaction);
     }
 }
 
@@ -624,10 +658,9 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     WLOGFI("Window Extension Session Get Avoid Area Type");
-    if (hostSession_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    avoidArea = hostSession_->GetAvoidAreaByType(type);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    avoidArea = hostSession->GetAvoidAreaByType(type);
     return WMError::WM_OK;
 }
 
@@ -667,6 +700,8 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
@@ -675,7 +710,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
-    WSError ret = hostSession_->Background();
+    WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
         state_ = WindowState::STATE_HIDDEN;

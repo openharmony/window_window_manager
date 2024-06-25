@@ -23,6 +23,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 class FoldScreenControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,6 +44,7 @@ void FoldScreenControllerTest::SetUpTestCase()
 
 void FoldScreenControllerTest::TearDownTestCase()
 {
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void FoldScreenControllerTest::SetUp()

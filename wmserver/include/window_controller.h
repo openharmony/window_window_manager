@@ -55,6 +55,7 @@ public:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
     WMError ProcessPointDown(uint32_t windowId, bool isPointDown);
+    std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();

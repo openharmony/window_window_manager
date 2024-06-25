@@ -18,7 +18,8 @@
 #include <cinttypes>
 #include <memory>
 #include <sstream>
-
+#include <parameter.h>
+#include <parameters.h>
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -38,6 +39,7 @@ constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
+static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 } //namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -60,7 +62,7 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
     if (NearEqual(degree, DIRECTION270)) {
         rotation = MMI::DIRECTION270;
     }
-    if (displayMode == MMI::DisplayMode::FULL) {
+    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
         switch (rotation) {
             case MMI::DIRECTION0:
                 rotation = MMI::DIRECTION90;
@@ -343,9 +345,6 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-            TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"
-                " CallingPid: %{public}d",
-                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {

@@ -225,7 +225,7 @@ void ScreenSessionManager::Init()
     RegisterScreenChangeListener();
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
-    } else {
+    } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
         SetSensorSubscriptionEnabled();
     }
     // publish init
@@ -934,6 +934,11 @@ DMError ScreenSessionManager::GetScreenColorGamut(ScreenId screenId, ScreenColor
 
 DMError ScreenSessionManager::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen color gamut  permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d",
         screenId, colorGamutIdx);
     if (screenId == SCREEN_ID_INVALID) {
@@ -963,6 +968,11 @@ DMError ScreenSessionManager::GetScreenGamutMap(ScreenId screenId, ScreenGamutMa
 
 DMError ScreenSessionManager::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen gamut map permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetScreenGamutMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
     if (screenId == SCREEN_ID_INVALID) {
@@ -978,6 +988,11 @@ DMError ScreenSessionManager::SetScreenGamutMap(ScreenId screenId, ScreenGamutMa
 
 DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set Screen color transform permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetScreenColorTransform::ScreenId: %{public}" PRIu64 "", screenId);
     if (screenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "SetScreenColorTransform screenId invalid");
@@ -1154,6 +1169,11 @@ void ScreenSessionManager::SetHdrFormats(ScreenId screenId, sptr<ScreenSession>&
 
 void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set Screen color spaces permission denied!");
+        return;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetColorSpaces %{public}" PRIu64, screenId);
     std::vector<GraphicCM_ColorSpaceType> rsColorSpace;
     auto status = rsInterface_.GetScreenSupportedColorSpaces(screenId, rsColorSpace);
@@ -1359,6 +1379,11 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
 
 int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen off delay time permission denied!");
+        return 0;
+    }
+
     if (delay < CV_WAIT_SCREENOFF_MS) {
         screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
     } else if (delay > CV_WAIT_SCREENOFF_MS_MAX) {
@@ -1766,6 +1791,11 @@ DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "update screen rotation property permission denied!");
+        return;
+    }
+
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen %{public}" PRIu64"",
@@ -1938,29 +1968,36 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         agent->NotifyDisplayPowerEvent(event, status);
     }
 
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    if (screenSessionMap_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
-        return false;
-    }
-    // The on/off screen will send a notification based on the number of screens.
-    // The dual display device just notify the current screen usage
-    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-        ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
-        auto iter = screenSessionMap_.find(currentScreenId);
-        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-            iter->second->PowerStatusChange(event, status, reason);
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
+            return false;
         }
-        return true;
+        // The on/off screen will send a notification based on the number of screens.
+        // The dual display device just notify the current screen usage
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
+            auto iter = screenSessionMap_.find(currentScreenId);
+            if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+                iter->second->PowerStatusChange(event, status, reason);
+            }
+            return true;
+        }
     }
 
-    for (const auto& iter : screenSessionMap_) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]PowerStatusChange to screenID: %{public}" PRIu64, iter.first);
-        if (!iter.second) {
-            TLOGE(WmsLogTag::DMS, "[UL_POWER]screensession is nullptr");
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]no screenID");
+        return false;
+    }
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
             continue;
         }
-        iter.second->PowerStatusChange(event, status, reason);
+        screenSession->PowerStatusChange(event, status, reason);
     }
     return true;
 }
@@ -2042,6 +2079,11 @@ DMError ScreenSessionManager::GetPixelFormat(ScreenId screenId, GraphicPixelForm
 
 DMError ScreenSessionManager::SetPixelFormat(ScreenId screenId, GraphicPixelFormat pixelFormat)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set pixel format  permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetPixelFormat::ScreenId: %{public}" PRIu64 ", pixelFormat %{public}d",
         screenId, pixelFormat);
     if (screenId == SCREEN_ID_INVALID) {
@@ -2083,6 +2125,11 @@ DMError ScreenSessionManager::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFor
 
 DMError ScreenSessionManager::SetScreenHDRFormat(ScreenId screenId, int32_t modeIdx)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen HDR format permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetScreenHDRFormat::ScreenId: %{public}" PRIu64 ", modeIdx %{public}d", screenId, modeIdx);
     if (screenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "SetScreenHDRFormat screenId invalid");
@@ -2123,6 +2170,11 @@ DMError ScreenSessionManager::GetScreenColorSpace(ScreenId screenId, GraphicCM_C
 
 DMError ScreenSessionManager::SetScreenColorSpace(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen color space permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     TLOGI(WmsLogTag::DMS, "SetScreenColorSpace::ScreenId: %{public}" PRIu64 ", colorSpace %{public}d",
         screenId, colorSpace);
     if (screenId == SCREEN_ID_INVALID) {
@@ -4507,6 +4559,11 @@ DMError ScreenSessionManager::GetAvailableArea(DisplayId displayId, DMRect& area
 
 void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "update available area permission denied!");
+        return;
+    }
+
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "can not get default screen now");

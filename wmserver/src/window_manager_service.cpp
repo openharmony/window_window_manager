@@ -1399,7 +1399,14 @@ WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 
 std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windowId)
 {
-    return nullptr;
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("permission denied!");
+        return nullptr;
+    }
+    auto task = [this, windowId]() {
+        return windowController_->GetSnapshot(windowId);
+    };
+    return PostSyncTask(task, "GetSnapshot");
 }
 
 void WindowManagerService::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)

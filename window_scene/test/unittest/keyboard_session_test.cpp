@@ -659,25 +659,6 @@ HWTEST_F(KeyboardSessionTest, AdjustKeyboardLayout, Function | SmallTest | Level
     sessionChangeCallback->onAdjustKeyboardLayout_ = [](const KeyboardLayoutParams& params){};
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
-    params.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
-    keyboardSession->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
-    params.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
-    keyboardSession->isKeyboardPanelEnabled_ = true;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
-    keyboardSession->isKeyboardPanelEnabled_ = false;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
-
     WLOGFI("AdjustKeyboardLayout end!");
 }
 

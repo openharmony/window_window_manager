@@ -271,6 +271,33 @@ HWTEST_F(RootSceneTest, UpdateConfiguration01, Function | SmallTest | Level3)
     rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene->UpdateConfiguration(configuration);
 }
+
+/**
+ * @tc.name: SetUiDvsyncSwitch
+ * @tc.desc: SetUiDvsyncSwitch Test
+ * @tc.type: FUNC
+*/
+HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    rootScene.SetUiDvsyncSwitch(true);
+    rootScene.SetUiDvsyncSwitch(false);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetUiDvsyncSwitch
+ * @tc.desc: SetUiDvsyncSwitch Test
+ * @tc.type: FUNC
+*/
+HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    rootScene.vsyncStation_ = nullptr;
+    rootScene.SetUiDvsyncSwitch(true);
+    rootScene.SetUiDvsyncSwitch(false);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
