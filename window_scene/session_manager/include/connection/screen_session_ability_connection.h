@@ -53,6 +53,7 @@ private:
 private:
     std::atomic<bool> isConnected_{false};
     sptr<IRemoteObject> remoteObject_;
+    std::mutex remoteObjectMutex_;
     sptr<ScreenSessionAbilityDeathRecipient> deathRecipient_;
     std::mutex connectedMutex_;
     std::condition_variable connectedCv_;

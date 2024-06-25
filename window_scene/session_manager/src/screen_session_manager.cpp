@@ -90,6 +90,7 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
+constexpr int32_t TRANS_CODE_ABILITY_CONNECT = 1005;
 
 bool JudgeIsBeta()
 {
@@ -519,20 +520,23 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
-    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
-        return;
-    }
-    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
-        ScreenCastConnection::GetInstance().CastDisconnectExtension();
-    }
     if (isPlugIn) {
+        if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+            TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+            return;
+        }
+        if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+            TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
+            ScreenCastConnection::GetInstance().CastDisconnectExtension();
+        }
+        MessageParcel data;
+        MessageParcel reply;
+        ScreenCastConnection::GetInstance().SendMessageToCastService(TRANS_CODE_ABILITY_CONNECT, data, reply);
         ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+        ScreenCastConnection::GetInstance().CastDisconnectExtension();
     } else {
         ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
     }
-    ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
@@ -554,14 +558,18 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            PublishCastEvent(true);
+            auto task = [this]() { PublishCastEvent(true); };
+            taskScheduler_->PostAsyncTask(task, "PublishCastEventTrue");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventTrue");
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            PublishCastEvent(false);
+            auto task = [this]() { PublishCastEvent(false); };
+            taskScheduler_->PostAsyncTask(task, "PublishCastEventFalse");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventFalse");
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
