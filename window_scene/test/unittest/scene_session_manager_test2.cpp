@@ -1526,7 +1526,6 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
         delete data;
         return;
     }
-    sceneSession->SetSelfToken(token);
     ssm_->sceneSessionMap_.insert({1000, sceneSession});
     ssm_->SetSessionContinueState(token, continueState);
     ASSERT_NE(sceneSession, nullptr);
