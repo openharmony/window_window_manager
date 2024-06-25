@@ -5324,34 +5324,36 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     wptr<Window> weakToken(windowToken_);
     if (!WindowHelper::IsMainWindow(weakToken->GetType())) {
         WLOGFE("[NAPI] maximize interface only support main Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    MaximizeLayoutOption option;
+    std::optional<MaximizePresentation> presentation;
+    if (argc == 1) {
+        int32_t nativeValue;
+        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            napi_get_value_int32(env, argv[0], &nativeValue));
+        presentation.emplace(static_cast<MaximizePresentation>(nativeValue));
+    }
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, errCode);
+    }
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        [weakToken, presentation](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnMaximize failed."));
                 return;
             }
-            WMError ret = weakWindow->Maximize(option);
+            WMError ret = weakWindow->Maximize(presentation);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Maximize failed."));
             }
-            WLOGI("[NAPI]Window [%{public}u, %{public}s] maximize end, ret = %{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     napi_value lastParam = (argc == 0) ? nullptr :

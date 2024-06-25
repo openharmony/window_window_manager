@@ -1816,6 +1816,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
         }
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+        hostSession->OnLayoutFullScreenChange(status);
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     };
@@ -1894,19 +1895,26 @@ WMError WindowSceneSessionImpl::Maximize()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::Maximize(MaximizeLayoutOption option)
+WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> presentation)
 {
-    if (option.dock != ShowType::HIDE || option.decor == ShowType::FORBIDDEN) {
-        WLOGE("[WMLayout] dock cannot be hide always! dock is not hide: %{public}d", option.dock != ShowType::HIDE);
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        WLOGFE("maximize fail, not main window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    MaximizePresentation maximizePresentation = presentation.value_or(MaximizePresentation::ENTER_IMMERSIVE);
+    switch (maximizePresentation) {
+        case MaximizePresentation::ENTER_IMMERSIVE:
+        case MaximizePresentation::EXIT_IMMERSIVE:
+            enableImmersiveMode_ = (static_cast<int32_t>(maximizePresentation)>>1) & 1;
+            break;
+        case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
+            break;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
+        maximizePresentation, enableImmersiveMode_);
     return SetLayoutFullScreen(enableImmersiveMode_);
 }
 
@@ -3530,6 +3538,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
     }
 
     enableImmersiveMode_ = enable;
+    hostSession_->OnLayoutFullScreenChange(enableImmersiveMode_);
     WindowMode mode = GetMode();
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     if (!isPC || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
