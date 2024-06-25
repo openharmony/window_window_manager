@@ -243,7 +243,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
 
 WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType)
 {
-    WMError errCode = CreatePictureInPictureWindow(StartPipType startType);
+    WMError errCode = CreatePictureInPictureWindow(startType);
     if (errCode != WMError::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "Create pip window failed, err: %{public}u", errCode);
