@@ -601,7 +601,7 @@ bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
     if (parcel.WriteUint32(limits_.maxWidth_) &&
         parcel.WriteUint32(limits_.maxHeight_) && parcel.WriteUint32(limits_.minWidth_) &&
         parcel.WriteUint32(limits_.minHeight_) && parcel.WriteFloat(limits_.maxRatio_) &&
-        parcel.WriteFloat(limits_.minRatio_)) {
+        parcel.WriteFloat(limits_.minRatio_) && parcel.WriteFloat(limits_.vpRatio_)) {
         return true;
     }
     return false;
@@ -610,7 +610,7 @@ bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property)
 {
     WindowLimits windowLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
-                                  parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat() };
+        parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetWindowLimits(windowLimits);
 }
 
