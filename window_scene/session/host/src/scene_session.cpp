@@ -2284,18 +2284,6 @@ void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo
     SetSessionInfoAbilityInfo(abilityInfo);
 }
 
-void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
-{
-    std::unique_lock<std::shared_mutex> lock(selfTokenMutex_);
-    selfToken_ = selfToken;
-}
-
-sptr<IRemoteObject> SceneSession::GetSelfToken() const
-{
-    std::shared_lock<std::shared_mutex> lock(selfTokenMutex_);
-    return selfToken_.promote();
-}
-
 void SceneSession::SetSessionState(SessionState state)
 {
     Session::SetSessionState(state);

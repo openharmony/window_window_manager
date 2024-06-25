@@ -1163,9 +1163,6 @@ HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
         new SceneSession::SpecificSessionCallback();
     scensession = new (std::nothrow) SceneSession(info, specificSession);
     EXPECT_NE(nullptr, scensession);
-    sptr<IRemoteObject> selftoken = scensession;
-    scensession->SetSelfToken(selftoken);
-    EXPECT_EQ(selftoken, scensession->GetSelfToken());
     scensession->SetSessionState(SessionState::STATE_DISCONNECT);
     scensession->UpdateSessionState(SessionState::STATE_CONNECT);
     scensession->isVisible_ = true;
