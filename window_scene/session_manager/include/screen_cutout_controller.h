@@ -43,6 +43,12 @@ private:
         std::vector<uint32_t> realNumVec);
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo);
     void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId);
+    void CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
+        uint32_t displayWidth);
+    void CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
+        uint32_t displayWidth, uint32_t displayHeight);
+    void CurrentRotation270(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
+        uint32_t displayHeight);
     bool IsDisplayRotationHorizontal(Rotation rotation);
     DMRect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
     Rotation ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation);
