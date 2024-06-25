@@ -1729,7 +1729,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             isNewActive, scnSession->GetSessionState());
         if (isNewActive || scnSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
             scnSession->GetSessionState() == SessionState::STATE_END) {
-            TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
+            TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
             errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
         } else {
@@ -6883,7 +6883,7 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
         if (pair.second == nullptr) {
             return false;
         }
-        return pair.second->GetAbilityToken() == token || pair.second->GetSelfToken() == token;
+        return pair.second->GetAbilityToken() == token || pair.second->AsObject() == token;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
@@ -7739,7 +7739,6 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         WLOGFE("abilitySessionInfo is nullptr");
         return;
     }
-    sceneSession->SetSelfToken(abilitySessionInfo->sessionToken);
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
         int32_t missionId = abilitySessionInfo->persistentId;
