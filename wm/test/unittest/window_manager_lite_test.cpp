@@ -448,7 +448,7 @@ HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2
 HWTEST_F(WindowManagerLiteTest, RaiseWindowToTop, Function | SmallTest | Level2)
 {
     auto ret = WindowManagerLite::GetInstance().RaiseWindowToTop(0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
