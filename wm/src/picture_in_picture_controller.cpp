@@ -319,77 +319,59 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
 
 WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
 {
-    auto task = [weakThis = wptr(this), currentStopType = stopType, currentPipOption = pipOption_]() {
-        auto session = weakThis.promote();
-        if (!session || !session->window_) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipController is null in stopping task");
-            SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-                currentPipOption->GetPipTemplate(), FAILED, "pipController is null");
-            return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-        }
-        auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (syncTransactionController) {
-            syncTransactionController->OpenSyncTransaction();
-        }
-        session->ResetExtController();
-        session->DestroyPictureInPictureWindow();
-        if (syncTransactionController) {
-            syncTransactionController->CloseSyncTransaction();
-        }
-        if (session->pipLifeCycleListener_ != nullptr) {
-            session->pipLifeCycleListener_->OnPictureInPictureStop();
-        }
-        session->curState_ = PiPWindowState::STATE_STOPPED;
-        std::string navId = session->pipOption_->GetNavigationId();
-        if (navId != "" && session->mainWindow_) {
-            auto navController = NavigationController::GetNavigationController(
-                session->mainWindow_->GetUIContent(), navId);
-            if (navController) {
-                navController->DeletePIPMode(session->handleId_);
-                TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", session->handleId_);
-            }
-        }
-        SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(currentStopType),
-            currentPipOption->GetPipTemplate(), PIP_SUCCESS, "pip window stop success");
-        return WMError::WM_OK;
-    };
-    if (handler_) {
-        handler_->PostTask(task, "wms:StopPictureInPicture", 0);
-    } else {
-        return task();
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipController is null in stopping task");
+        SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
+            pipOption_->GetPipTemplate(), FAILED, "pipController is null");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
+    auto syncTransactionController = RSSyncTransactionController::GetInstance();
+    if (syncTransactionController) {
+        syncTransactionController->OpenSyncTransaction();
+    }
+    ResetExtController();
+    DestroyPictureInPictureWindow();
+    if (syncTransactionController) {
+        syncTransactionController->CloseSyncTransaction();
+    }
+    if (pipLifeCycleListener_ != nullptr) {
+        pipLifeCycleListener_->OnPictureInPictureStop();
+    }
+    curState_ = PiPWindowState::STATE_STOPPED;
+    std::string navId = pipOption_->GetNavigationId();
+    if (navId != "" && mainWindow_) {
+        auto navController = NavigationController::GetNavigationController(
+            mainWindow_->GetUIContent(), navId);
+        if (navController) {
+            navController->DeletePIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+        }
+    }
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
+        pipOption_->GetPipTemplate(), PIP_SUCCESS, "pip window stop success");
     return WMError::WM_OK;
 }
 
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
-    auto task = [weakThis = wptr(this)]() {
-        TLOGI(WmsLogTag::WMS_PIP, "destroy pip window");
-        auto session = weakThis.promote();
-        if (!session || !session->window_) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
-            return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(session->window_->Destroy());
-        if (ret != WmErrorCode::WM_OK) {
-            session->curState_ = PiPWindowState::STATE_UNDEFINED;
-            TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
-            int32_t err = static_cast<int32_t>(ret);
-            if (session->pipLifeCycleListener_ != nullptr) {
-                session->pipLifeCycleListener_->OnPictureInPictureOperationError(err);
-            }
-            return WMError::WM_ERROR_PIP_DESTROY_FAILED;
-        }
-        PictureInPictureManager::RemoveActiveController(session);
-        PictureInPictureManager::RemovePipControllerInfo(session->window_->GetWindowId());
-        session->window_ = nullptr;
-        return WMError::WM_OK;
-    };
-    if (handler_) {
-        handler_->PostTask(task, "wms:DestroyPictureInPicture", 0);
-    } else {
-        return task();
+    sptr<PictureInPictureController> thisController = this;
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipController is null in destroy window");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window_->Destroy());
+    if (ret != WmErrorCode::WM_OK) {
+        curState_ = PiPWindowState::STATE_UNDEFINED;
+        TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
+        int32_t err = static_cast<int32_t>(ret);
+        if (pipLifeCycleListener_ != nullptr) {
+            pipLifeCycleListener_->OnPictureInPictureOperationError(err);
+        }
+        return WMError::WM_ERROR_PIP_DESTROY_FAILED;
+    }
+    PictureInPictureManager::RemoveActiveController(thisController);
+    PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
+    window_ = nullptr;
     return WMError::WM_OK;
 }
 
