@@ -73,31 +73,57 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect {
-                    .posX_ = displayWidth - rect.posY_ - rect.height_, .posY_ = rect.posX_,
-                    .width_ = rect.height_, .height_ = rect.width_ });
-            }
+            CurrentRotation90(displayBoundaryRects, finalVector, displayWidth);
             break;
         }
         case Rotation::ROTATION_180: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect { displayWidth - rect.posX_ - rect.width_,
-                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_});
-            }
+            CurrentRotation180(displayBoundaryRects, finalVector, displayWidth, displayHeight);
             break;
         }
         case Rotation::ROTATION_270: {
-            for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(
-                    DMRect { rect.posY_, displayHeight - rect.posX_ - rect.width_, rect.height_, rect.width_ });
-            }
+            CurrentRotation270(displayBoundaryRects, finalVector, displayHeight);
             break;
         }
         default:
             break;
     }
     boundaryRects = finalVector;
+}
+
+void ScreenCutoutController::CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects,
+    std::vector<DMRect>& finalVector, uint32_t displayWidth)
+{
+    for (DMRect rect : displayBoundaryRects) {
+        finalVector.emplace_back(DMRect {
+            .posX_ = displayWidth - rect.posY_ - rect.height_,
+            .posY_ = rect.posX_,
+            .width_ = rect.height_,
+            .height_ = rect.width_ });
+    }
+}
+
+void ScreenCutoutController::CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects,
+    std::vector<DMRect>& finalVector, uint32_t displayWidth, uint32_t displayHeight)
+{
+    for (DMRect rect : displayBoundaryRects) {
+        finalVector.emplace_back(DMRect {
+            displayWidth - rect.posX_ - rect.width_,
+            displayHeight - rect.posY_ - rect.height_,
+            rect.width_,
+            rect.height_});
+    }
+}
+
+void ScreenCutoutController::CurrentRotation270(const std::vector<DMRect>& displayBoundaryRects,
+    std::vector<DMRect>& finalVector, uint32_t displayHeight)
+{
+    for (DMRect rect : displayBoundaryRects) {
+        finalVector.emplace_back(DMRect {
+            rect.posY_,
+            displayHeight - rect.posX_ - rect.width_,
+            rect.height_,
+            rect.width_ });
+    }
 }
 
 void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo)
