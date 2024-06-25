@@ -740,19 +740,12 @@ public:
     }
 };
 
-/**
- * Maximize layout show type
- */
-enum ShowType : int32_t {
-    SHOW,     // normally show
-    HIDE,     // show when hover, but hide normally
-    FORBIDDEN // hide always
+enum class MaximizePresentation {
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set imersiveStateEnable
+    EXIT_IMMERSIVE = 1 << 0,        // imersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 1 << 1,        // imersiveStateEnable will be set as true
 };
 
-struct MaximizeLayoutOption {
-    ShowType decor = ShowType::HIDE;
-    ShowType dock = ShowType::HIDE;
-};
 
 enum class BackupAndRestoreType: int32_t {
     NONE = 0,                       // no backup and restore

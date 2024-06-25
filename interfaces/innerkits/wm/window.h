@@ -1423,12 +1423,15 @@ public:
     virtual WMError Maximize() { return WMError::WM_OK; }
 
     /**
-     * @brief maximize window with layoutOption.
+     * @brief maximize window with presentation enum.
      *
-     * @param option UI layout param.
+     * @param presentation the value means use presentation enum to layout when maximize window
      * @return WM_OK means maximize window ok, others means failed.
      */
-    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
