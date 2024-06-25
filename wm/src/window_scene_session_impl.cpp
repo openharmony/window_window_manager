@@ -873,7 +873,7 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 {
     const auto& requestRect = GetRequestRect();
-    TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u], requestRect:%{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
         UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE);
