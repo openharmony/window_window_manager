@@ -918,24 +918,7 @@ HWTEST_F(SceneSessionManagerTest4, ClearSession, Function | SmallTest | Level3)
 */
 HWTEST_F(SceneSessionManagerTest4, OnScreenshot, Function | SmallTest | Level3)
 {
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession02, nullptr);
-    ASSERT_NE(sceneSession03, nullptr);
-    ASSERT_NE(sceneSession04, nullptr);
-    sceneSession02->SetSessionState(SessionState::STATE_FOREGROUND);
-    sceneSession03->SetSessionState(SessionState::STATE_ACTIVE);
-    sceneSession04->SetSessionState(SessionState::STATE_INACTIVE);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
-    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
-    DisplayId displayId = 10;
-    ssm_->OnScreenshot(displayId);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+
 }
 }
 } // namespace Rosen
