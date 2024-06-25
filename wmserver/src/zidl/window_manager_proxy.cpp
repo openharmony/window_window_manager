@@ -896,10 +896,6 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
     MessageParcel reply;
     MessageOption option;
 
-    Media::InitializationOptions opts;
-    opts.size.width = 200;  // 200：default width
-    opts.size.height = 300; // 300：default height
-    std::shared_ptr<Media::PixelMap> pixelMap(Media::PixelMap::Create(opts).release());
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return nullptr;
