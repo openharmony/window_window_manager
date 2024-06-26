@@ -90,6 +90,8 @@ public:
     void SetExtensionFlag(bool isExtensionFlag);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
+    void SetCompatibleMode(bool compatibleMode);
+    void SetIsSupportRotation(bool isSupportRotation);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -139,6 +141,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
+    bool GetCompatibleMode() const;
+    bool GetIsSupportRotation() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
