@@ -1355,7 +1355,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         if (sceneSession != nullptr &&
             static_cast<OHOS::Rosen::WindowType>(sessionInfo.windowType_) == WindowType::WINDOW_TYPE_KEYGUARD) {
             TLOGI(WmsLogTag::WMS_MULTI_USER, "Register screen lock buffer available");
-            sceneSession->RegisterBufferAvailableCallback([this]() {
+            sceneSession->RegisterBufferAvailableCallback([this] {
                 this->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
             });
         }
