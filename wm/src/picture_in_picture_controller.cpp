@@ -94,8 +94,6 @@ PictureInPictureController::~PictureInPictureController()
 
 WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType startType)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "CreatePictureInPictureWindow is called, mainWindow:%{public}u", mainWindowId_);
-    sptr<PictureInPictureController> thisController = this;
     if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Create pip failed, invalid pipOption");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -112,7 +110,8 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "mainWindowState:%{public}u", mainWindow_->GetWindowState());
+    TLOGI(WmsLogTag::WMS_PIP, "CreatePictureInPictureWindow is called, mainWindow:%{public}u,
+        mainWindowState:%{public}u",mainWindowId_, mainWindow_->GetWindowState());
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -136,7 +135,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     }
     window_ = window;
     window_->UpdatePiPRect(windowRect_, WindowSizeChangeReason::PIP_START);
-    PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), thisController);
+    PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), this);
     return WMError::WM_OK;
 }
 
@@ -344,7 +343,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     }
     curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_->GetNavigationId();
-    if (navId != "" && mainWindow_) {
+    if (!navId.empty() && mainWindow_) {
         auto navController = NavigationController::GetNavigationController(
             mainWindow_->GetUIContent(), navId);
         if (navController) {
@@ -367,14 +366,12 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     if (ret != WmErrorCode::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
-        int32_t err = static_cast<int32_t>(ret);
         if (pipLifeCycleListener_ != nullptr) {
-            pipLifeCycleListener_->OnPictureInPictureOperationError(err);
+            pipLifeCycleListener_->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
-    sptr<PictureInPictureController> thisController = this;
-    PictureInPictureManager::RemoveActiveController(thisController);
+    PictureInPictureManager::RemoveActiveController(this);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
     return WMError::WM_OK;
