@@ -45,7 +45,7 @@ void TimerManager::Init()
     if (state_ != TimerMgrState::STATE_RUNNING) {
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
-            timerWorker_ = std::thread([this]() { this->OnThread(); };);
+            timerWorker_ = std::thread([this]() { this->OnThread(); });
         }
         state_ = TimerMgrState::STATE_RUNNING;
     } else {
