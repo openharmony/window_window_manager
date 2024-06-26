@@ -1770,7 +1770,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         UpdateWinRectForSystemBar(rect);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);\
+        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     UpdateSizeChangeReason(reason);
     if (isCompatibleMode) {
         HandleisCompatibleModeMoveDrag(rect, reason, isSupportRotation);
