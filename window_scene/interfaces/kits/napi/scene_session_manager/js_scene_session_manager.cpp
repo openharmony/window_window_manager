@@ -155,6 +155,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
         JsSceneSessionManager::UpdateDisplayHookInfo);
+    BindNativeFunction(env, exportObj, "setCompatibleMode", moduleName,
+        JsSceneSessionManager::SetCompatibleMode);
     return NapiGetUndefined(env);
 }
 
@@ -815,6 +817,13 @@ napi_value JsSceneSessionManager::UpdateDisplayHookInfo(napi_env env, napi_callb
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateDisplayHookInfo(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetCompatibleMode(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetCompatibleMode(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2597,6 +2606,47 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<float_t>(density), enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSetCompatibleMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_THERE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool supportRotation = false;
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], supportRotation)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to supportRotation");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().SetCompatibleMode(enable, supportRotation, persistentId);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

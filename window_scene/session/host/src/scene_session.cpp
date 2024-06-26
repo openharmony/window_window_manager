@@ -1715,6 +1715,34 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     return true;
 }
 
+void SceneSession::HandleisCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason, bool isSupportRotation) 
+{
+    if (reason != SizeChangeReason::MOVE) {
+        if (isSupportRotation && recentWidth_ > recentHeight_ &&
+            rect.width_ < compatibleLandscapeWidth_ - compatibleDragLimit_) {
+            rect.width_ = compatiblePortraitWidth_;
+            rect.height_ = compatiblePortraitHeight_;
+            SetSurfaceBounds(rect);
+            UpdateRect(rect, reason);
+            recentWidth_ = rect.width_;
+            recentHeight_ = rect.height_;            
+        } else if (isSupportRotation && recentWidth_ < recentHeight_ &&
+            rect.width_ > compatibleLandscapeWidth_ + compatibleDragLimit_) {
+            rect.width_ = compatibleLandscapeWidth_;
+            rect.height_ = compatibleLandscapeHeight_;
+            SetSurfaceBounds(rect);
+            UpdateRect(rect, reason);
+            recentWidth_ = rect.width_;
+            recentHeight_ = rect.height_;       
+        } else {
+            rect.width_ = recentWidth_;
+            rect.height_ = recentHeight_;
+        }
+    } else {
+        SetSurfaceBounds(rect);
+    }
+}
+
 void SceneSession::SetMoveDragCallback()
 {
     if (moveDragController_) {
@@ -1727,19 +1755,32 @@ void SceneSession::SetMoveDragCallback()
 
 void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 {
+    auto property = GetSessionProperty();
+    bool isCompatibleMode = property->GetCompatibleMode();
+    bool isSupportRotation = property->GetIsSupportRotation();
     WSRect rect = moveDragController_->GetTargetRect();
-    WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d",
-        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    if (recentWidth_ = 0 || recentHeight_ = 0) {
+        recentWidth_ = rect.width_;
+        recentHeight_ = rect.height_;
+    }
+    WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
+        "isCompatibleMode: %{public}d, isSupportRotation: %{public}d",
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleMode, isSupportRotation);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
         UpdateWinRectForSystemBar(rect);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
-    SetSurfaceBounds(rect);
+        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);\
     UpdateSizeChangeReason(reason);
-    if (reason != SizeChangeReason::MOVE) {
-        UpdateRect(rect, reason);
+    if (isCompatibleMode) {
+        HandleisCompatibleModeMoveDrag(rect, reason, isSupportRotation);
+    } else {
+        SetSurfaceBounds(rect);
+        if (reason != SizeChangeReason::MOVE) {
+            UpdateRect(rect, reason);
+        }
     }
+
     if (reason == SizeChangeReason::DRAG_END) {
         if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");

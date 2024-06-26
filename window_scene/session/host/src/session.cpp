@@ -891,7 +891,10 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     }
     callingPid_ = pid;
     callingUid_ = uid;
-
+    if (sessionProperty && property) {
+        property->SetCompatibleMode(sessionProperty->GetCompatibleMode());
+        property->SetIsSupportRotation(sessionProperty->GetIsSupportRotation());
+    }
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
@@ -2096,6 +2099,20 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     }
     sessionStage_->UpdateFocus(isFocused);
 
+    return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleMode(bool enable, bool supportRotation)
+{
+    WLOGFD("Session SetCompatibleMode enable: %{public}d, supportRotation: %{public}d", enable, supportRotation);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    
+    property->SetCompatibleMode(enable);
+    property->SetIsSupportRotation(supportRotation);
     return WSError::WS_OK;
 }
 
