@@ -1364,5 +1364,6 @@ HWTEST_F(SceneSessionManagerTest4, GetAccessibilityWindowInfo, Function | SmallT
     auto result = ssm_->GetAccessibilityWindowInfo(accessibilityInfo);
     EXPECT_EQ(result, WMError::WM_OK);
 }
+}
 } // namespace Rosen
 } // namespace OHOS
