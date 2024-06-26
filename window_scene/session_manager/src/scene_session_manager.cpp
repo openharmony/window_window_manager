@@ -1191,7 +1191,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
         return this->GetSceneSessionVectorByType(type, displayId);
     };
-    specificCb->onUpdateAvoidArea_ = [this](const int32_t& persistentId) {
+    specificCb->onUpdateAvoidArea_ = [this](const int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
     };
     specificCb->onWindowInfoUpdate_ = [this](int32_t persistentId, WindowUpdateType type) {
@@ -7177,7 +7177,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
     return taskScheduler_->PostAsyncTask(task);
 }
 
-void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
+void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
 {
     auto task = [this, persistentId]() {
         bool needUpdate = false;
