@@ -9040,4 +9040,17 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::SetCompatibleMode(bool enable, bool supportRotation, int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SetCompatibleMode enable: %{public}d, supportRotation: %{public}d, "
+        "persistentId: %{public}d", enable, supportRotation, persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window, persistentId:%{public}d", persistentId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    return sceneSession->SetCompatibleMode(enable, supportRotation);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen

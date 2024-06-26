@@ -802,7 +802,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
     TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton);
-    uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+    bool isCompatibleMode = property->GetCompatibleMode();
+    if (isCompatibleMode) {
+        uiContent->HideWindowTitleButton(hideSplitButton, true, hideMinimizeButton);
+    } else {
+        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+    }
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
