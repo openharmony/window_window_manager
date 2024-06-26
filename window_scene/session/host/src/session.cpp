@@ -1842,7 +1842,7 @@ void Session::SaveSnapshot(bool useSnapshotThread)
         }
         session->snapshot_ = session->Snapshot();
         if (session->snapshot_ && session->scenePersistence_) {
-            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
+            std::function<void()> func = [session]() { session->ResetSnapshot() };
             session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
         }
     };
