@@ -880,7 +880,6 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
-        state_ = WindowState::STATE_SHOWN;
         uiContent->Foreground();
         uiContent->PreLayout();
     }
