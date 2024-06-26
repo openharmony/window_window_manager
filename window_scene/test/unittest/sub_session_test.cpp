@@ -105,6 +105,22 @@ HWTEST_F(SubSessionTest, Reconnect01, Function | SmallTest | Level1)
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    
+    property->SetWindowState(WindowState::STATE_INITIAL);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+ 
+    property->SetWindowState(WindowState::STATE_CREATED);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
+ 
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
+ 
+    property->SetWindowState(WindowState::STATE_HIDDEN);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
