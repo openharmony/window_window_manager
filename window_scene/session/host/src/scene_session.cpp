@@ -406,6 +406,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE && session->moveDragController_ &&
             !session->moveDragController_->GetStartDragFlag() && session->IsFocused()) {
+            if (!session->IsMovableWindowType()) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
+                return WSError::WS_OK;
+            }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->moveDragController_->InitMoveDragProperty();
             if (session->IsFullScreenMovable()) {
