@@ -549,6 +549,7 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
+    std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler = nullptr;
 
 private:
     void HandleDialogForeground();

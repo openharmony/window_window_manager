@@ -69,7 +69,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_BACKGROUND, true },
 };
 static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
-std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
+
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
