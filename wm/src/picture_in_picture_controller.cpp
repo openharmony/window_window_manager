@@ -110,8 +110,8 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "CreatePictureInPictureWindow is called, mainWindow:%{public}u,
-        mainWindowState:%{public}u",mainWindowId_, mainWindow_->GetWindowState());
+    TLOGI(WmsLogTag::WMS_PIP, "CreatePiPWindow is called, mainWindow:%{public}u, mainWindowState:%{public}u",
+        mainWindowId_, mainWindow_->GetWindowState());
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
