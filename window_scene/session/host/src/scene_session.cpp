@@ -2284,18 +2284,6 @@ void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo
     SetSessionInfoAbilityInfo(abilityInfo);
 }
 
-void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
-{
-    std::unique_lock<std::shared_mutex> lock(selfTokenMutex_);
-    selfToken_ = selfToken;
-}
-
-sptr<IRemoteObject> SceneSession::GetSelfToken() const
-{
-    std::shared_lock<std::shared_mutex> lock(selfTokenMutex_);
-    return selfToken_.promote();
-}
-
 void SceneSession::SetSessionState(SessionState state)
 {
     Session::SetSessionState(state);
@@ -2459,7 +2447,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "The permission check failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    auto isSACalling = SessionPermission::IsSACalling();
+    auto task = [weakThis = wptr(this), abilitySessionInfo, isSACalling]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2472,7 +2461,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
-        if (!(isPC || isFreeMutiWindowMode) && WindowHelper::IsMainWindow(session->GetWindowType())) {
+        if (!(isPC || isFreeMutiWindowMode) && !isSACalling &&
+            WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
                 !(session->GetForegroundInteractiveStatus())) {
@@ -2545,10 +2535,6 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     } else if (action == WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON) {
         if (!SessionPermission::IsSystemCalling()) {
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
-        }
-    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE) {
-        if (!SessionPermission::IsSystemServiceCalling()) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
 
@@ -2790,6 +2776,10 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 {
     if (sceneSession->GetSessionProperty() != nullptr) {
         sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
+        WindowLimits windowLimits = sceneSession->GetSessionProperty()->GetWindowLimits();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
+            "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
+            windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     }
     return WMError::WM_OK;
 }

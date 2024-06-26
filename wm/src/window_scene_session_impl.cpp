@@ -828,7 +828,7 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     if (MathHelper::NearZero(virtualPixelRatio)) {
         return;
     }
-
+    newLimits.vpRatio_ = virtualPixelRatio;
     CalculateNewLimitsByRatio(newLimits, customizedLimits);
 
     property_->SetWindowLimits(newLimits);
@@ -3100,9 +3100,10 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
     windowLimits.minHeight_ = customizedLimits.minHeight_;
     windowLimits.maxWidth_ = customizedLimits.maxWidth_;
     windowLimits.maxHeight_ = customizedLimits.maxHeight_;
-    WLOGFI("GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
-        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    windowLimits.vpRatio_ = customizedLimits.vpRatio_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+        "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     return WMError::WM_OK;
 }
 
