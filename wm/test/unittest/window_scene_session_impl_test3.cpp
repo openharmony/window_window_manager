@@ -786,6 +786,40 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateWindowState, Function | SmallTest | 
     ASSERT_EQ(false, ret);
 }
 
+/**
+ * @tc.name: PreLayoutOnShow
+ * @tc.desc: PreLayoutOnShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("PreLayoutOnShow");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    window->hostSession_ = session;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+
+    Rect request = { 100, 100, 100, 100 };
+    window->property_->SetRequestRect(request);
+    window->PreLayoutOnShow(window->property_->GetWindowType());
+    Rect request = { 100, 100, 0, 100 };
+    window->property_->SetRequestRect(request);
+    window->PreLayoutOnShow(window->property_->GetWindowType());
+    Rect request = { 100, 100, 100, 0 };
+    window->property_->SetRequestRect(request);
+    window->PreLayoutOnShow(window->property_->GetWindowType());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
