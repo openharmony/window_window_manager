@@ -814,10 +814,10 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     Rect request = { 100, 100, 100, 100 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    Rect request = { 100, 100, 0, 100 };
+    request = { 100, 100, 0, 100 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    Rect request = { 100, 100, 100, 0 };
+    request = { 100, 100, 100, 0 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
 }
