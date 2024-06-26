@@ -5062,77 +5062,26 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate()
     SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(type);
 }
 
-void SceneSessionManager::ProcessModalSessionForeground(sptr<SceneSession>& sceneSession)
-{
-    std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
-    for (const auto& dialog : dialogVec) {
-        if (dialog == nullptr) {
-            TLOGD(WmsLogTag::WMS_DIALOG, "dialog is nullptr");
-            continue;
-        }
-        const auto& state = dialog->GetSessionState();
-        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            TLOGD(WmsLogTag::WMS_DIALOG, "dialog is not active");
-            continue;
-        }
-        auto dialogSession = GetSceneSession(dialog->GetPersistentId());
-        if (dialogSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_DIALOG, "dialogSession is null");
-            continue;
-        }
-        NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
-        if (dialog->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground_) {
-            needBlockNotifyUnfocusStatus_ = false;
-            needBlockNotifyFocusStatusUntilForeground_ = false;
-            NotifyFocusStatus(dialogSession, true);
-        }
-        HandleKeepScreenOn(dialogSession, dialogSession->IsKeepScreenOn());
-    }
-
-    std::vector<sptr<SceneSession>> topmostVec;
-    for (const auto& subSession : sceneSession->GetSubSession()) {
-        if (subSession && subSession->IsTopmost()) {
-            topmostVec.push_back(subSession);
-        }
-    }
-    for (auto& topmostSession : topmostVec) {
-        if (topmostSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_SUB, "topmost modal sub window is nullptr");
-            continue;
-        }
-        const auto& state = topmostSession->GetSessionState();
-        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            TLOGD(WmsLogTag::WMS_SUB, "topmost modal sub window is not active");
-            continue;
-        }
-        NotifyWindowInfoChange(topmostSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
-        if (topmostSession->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground_) {
-            needBlockNotifyUnfocusStatus_ = false;
-            needBlockNotifyFocusStatusUntilForeground_ = false;
-            NotifyFocusStatus(topmostSession, true);
-        }
-        HandleKeepScreenOn(topmostSession, topmostSession->IsKeepScreenOn());
-    }
-}
-
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFD("session is nullptr");
         return;
     }
+    std::vector<sptr<Session>> modalVec = sceneSession->GetDialogVector();
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
-            WLOGFD("sub session is nullptr");
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
         }
         if (subSession->IsTopmost()) {
+            modalVec.push_back(subSession);
             TLOGD(WmsLogTag::WMS_SUB, "sub session is topmost modal sub window");
             continue;
         }
         const auto& state = subSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            WLOGFD("sub session is not active");
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is not active");
             continue;
         }
         RequestSessionFocus(subSession->GetPersistentId(), true);
@@ -5140,7 +5089,29 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn());
     }
 
-    ProcessModalSessionForeground(sceneSession);
+    for (const auto& modal : modalVec) {
+        if (modal == nullptr) {
+            TLOGD(WmsLogTag::WMS_DIALOG, "dialog or topmost modal sub window is nullptr");
+            continue;
+        }
+        const auto& state = modal->GetSessionState();
+        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            TLOGD(WmsLogTag::WMS_DIALOG, "dialog or topmost modal sub window is not active");
+            continue;
+        }
+        auto modalSession = GetSceneSession(modal->GetPersistentId());
+        if (modalSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_DIALOG, "modalSession is null");
+            continue;
+        }
+        NotifyWindowInfoChange(modal->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+        if (modal->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground_) {
+            needBlockNotifyUnfocusStatus_ = false;
+            needBlockNotifyFocusStatusUntilForeground_ = false;
+            NotifyFocusStatus(modalSession, true);
+        }
+        HandleKeepScreenOn(modalSession, modalSession->IsKeepScreenOn());
+    }
 }
 
 WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
