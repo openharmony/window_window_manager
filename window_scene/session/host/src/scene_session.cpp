@@ -2778,6 +2778,10 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 {
     if (sceneSession->GetSessionProperty() != nullptr) {
         sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
+        WindowLimits windowLimits = sceneSession->GetSessionProperty()->GetWindowLimits();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
+            "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
+            windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     }
     return WMError::WM_OK;
 }
