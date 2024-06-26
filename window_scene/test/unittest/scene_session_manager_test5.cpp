@@ -146,9 +146,9 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDetachCallback, Function | SmallTes
     int32_t persistentId = 0;
     ASSERT_NE(ssm_, nullptr);
     sptr<IRemoteObject> callback = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(callback, nullptr);
     ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     sptr<WindowSessionProperty> property;
-    ASSERT_NE(ssm_, nullptr);
     ssm_->recoveringFinished_ = false;
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -314,7 +314,6 @@ HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | S
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(property, nullptr);
-
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     ssm_->HandleSpecificSystemBarProperty(type, property, sceneSession);
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -397,6 +396,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
     ASSERT_NE(property, nullptr);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(sceneSession, nullptr);
+    ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     ssm_->RequestAllAppSessionUnfocus();
 }
 
