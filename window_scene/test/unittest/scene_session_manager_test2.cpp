@@ -2109,7 +2109,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
     ASSERT_NE(ssm_, nullptr);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    property = new WindowSessionProperty();
+    property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
@@ -2123,7 +2123,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
 */
 HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest | Level3)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     ssm_->ClosePipWindowIfExist(WindowType::WINDOW_TYPE_PIP);
 
@@ -2142,7 +2142,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
 */
 HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetParentId(1);
     sptr<ISessionStage> sessionStage;
@@ -2150,8 +2150,9 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | 
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     sptr<ISession> session;
     sptr<IRemoteObject> token;
-    ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
+    auto result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
         surfaceNode, property, session, token);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -2172,7 +2173,7 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     ssm_->CacheSubSessionForRecovering(nullptr, property);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
 
-    property = new WindowSessionProperty();
+    property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     ssm_->CacheSubSessionForRecovering(nullptr, property);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
@@ -2211,7 +2212,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndReconnectSceneSession02, Function |
 */
 HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTest | Level3)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     ssm_->NotifyCreateToastSession(1, nullptr);
     SessionInfo Info;
