@@ -42,47 +42,65 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     }
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
-void ScreenSessionMgrClientStubTest(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
+void ScreenSessionMgrClientStubTest1(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
 {
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ROTATION_LOCKED_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED), parcel, reply, option);
+    return;
+}
+void ScreenSessionMgrClientStubTest2(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
+{
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_SHOT), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_SET_DISPLAY_NODE_SCREEN_ID), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_ON_SWITCH_USER_CMD), parcel, reply, option);
+    parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IScreenSessionManagerClient::
         ScreenSessionManagerClientMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM), parcel, reply, option);
@@ -100,9 +118,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     parcel.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
 
-    ScreenSessionMgrClientStubTest(parcel, reply, option);
+    ScreenSessionMgrClientStubTest1(parcel, reply, option);
+    ScreenSessionMgrClientStubTest2(parcel, reply, option);
     return true;
 }
 } // namespace.OHOS
