@@ -6992,6 +6992,10 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 
 WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("GetFocusSessionElement permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     auto task = [this, &element]() {
         WLOGFD("GetFocusSessionElement with focusedSessionId: %{public}d", focusedSessionId_);
         auto sceneSession = GetSceneSession(focusedSessionId_);
