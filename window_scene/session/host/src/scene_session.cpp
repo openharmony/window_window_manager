@@ -1715,7 +1715,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     return true;
 }
 
-void SceneSession::HandleisCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason, bool isSupportRotation) 
+void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason, bool isSupportRotation) 
 {
     if (reason != SizeChangeReason::MOVE) {
         if (isSupportRotation && recentWidth_ > recentHeight_ &&
@@ -1773,7 +1773,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     UpdateSizeChangeReason(reason);
     if (isCompatibleMode) {
-        HandleisCompatibleModeMoveDrag(rect, reason, isSupportRotation);
+        HandleCompatibleModeMoveDrag(rect, reason, isSupportRotation);
     } else {
         SetSurfaceBounds(rect);
         if (reason != SizeChangeReason::MOVE) {
