@@ -336,7 +336,7 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
     }
     sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [this](bool isLandscapeMultiWindow) {
         this->SetLandscapeMultiWindow(isLandscapeMultiWindow);
-        };
+    };
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessLandscapeMultiWindowRegister success");
 }
 
@@ -371,7 +371,7 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
     }
     sessionchangeCallback->onKeyboardGravityChange_ = [this](SessionGravity gravity) {
         this->OnKeyboardGravityChange(gravity);
-        };
+    };
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
@@ -406,7 +406,7 @@ void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
     }
     sessionchangeCallback->onAdjustKeyboardLayout_ = [this](const KeyboardLayoutParams& params) {
         this->OnAdjustKeyboardLayout(params);
-        };
+    };
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
@@ -885,7 +885,7 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
     sessionchangeCallback->OnSystemBarPropertyChange_ = [this](
         const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
             this->OnSystemBarPropertyChange(propertyMap);
-        };
+    };
     TLOGD(WmsLogTag::WMS_IMMS, "ProcessSystemBarPropertyChangeRegister success");
 }
 
@@ -898,7 +898,7 @@ void JsSceneSession::ProcessNeedAvoidRegister()
     }
     sessionchangeCallback->OnNeedAvoid_ = [this](bool status) {
         this->OnNeedAvoid(status);
-        };
+    };
     TLOGD(WmsLogTag::WMS_IMMS, "ProcessNeedAvoidRegister success");
 }
 
