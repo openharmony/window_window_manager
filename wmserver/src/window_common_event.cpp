@@ -63,7 +63,7 @@ void WindowCommonEvent::SubscriberEventInner(int retry)
     if (EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_)) {
         return;
     }
-    std::function<void()> func = [this](int retry) { this->SubscriberEventInner(retry); };
+    std::function<void()> func = [this, retry]() { this->SubscriberEventInner(retry); };
     // post task delay 500ms
     eventHandler_->PostTask(func, "wms:SubscriberEventInner", 500, AppExecFwk::EventQueue::Priority::HIGH);
 }
