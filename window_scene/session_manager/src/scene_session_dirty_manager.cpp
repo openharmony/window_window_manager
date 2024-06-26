@@ -263,9 +263,13 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             if (parentSession == nullptr) {
                 continue;
             }
+            bool isTopmostModalSubWindow = false;
+            if (property != nullptr && property->IsTopmost()) {
+                isTopmostModalSubWindow = true;
+            }
             auto iter = dialogMap.find(parentSession->GetPersistentId());
-            if (iter != dialogMap.end() && iter->second->GetSessionProperty() &&
-                iter->second->GetSessionProperty()->IsTopmost() && !property->IsTopmost()) {
+            if (iter != dialogMap.end() && iter->second != nullptr && iter->second->GetSessionProperty() &&
+                iter->second->GetSessionProperty()->IsTopmost() && isTopmostModalSubWindow == false) {
                 continue;
             }
             dialogMap[parentSession->GetPersistentId()] = session;
