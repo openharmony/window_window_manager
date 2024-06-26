@@ -191,8 +191,8 @@ void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOccl
 
 void WindowManagerService::InitWithRanderServiceAdded()
 {
-    auto windowVisibilityChangeCb = std::bind(&WindowManagerService::WindowVisibilityChangeCallback, this,
-        std::placeholders::_1);
+    auto windowVisibilityChangeCb = [this](std::shared_ptr<RSOcclusionData> occlusionData)
+        { this->WindowVisibilityChangeCallback(occlusionData); };
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
