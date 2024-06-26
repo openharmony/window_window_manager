@@ -45,8 +45,8 @@ class WindowEventChannel : public WindowEventChannelStub {
 public:
     explicit WindowEventChannel(sptr<ISessionStage> iSessionStage) : sessionStage_(iSessionStage)
     {
-        dispatchCallback_ = [this](int32_t eventId, int64_t actionTime) {
-            this->OnDispatchEventProcessed(eventId, actionTime); };
+        dispatchCallback_ = 
+            [this](int32_t eventId, int64_t actionTime) { this->OnDispatchEventProcessed(eventId, actionTime); };
     }
     ~WindowEventChannel() = default;
 
