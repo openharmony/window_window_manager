@@ -1176,47 +1176,47 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         WLOGFE("SpecificSessionCallback is nullptr");
         return nullptr;
     }
-    specificCb->onCreate_ = [this](const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property) { 
-        return this->RequestSceneSession(sessionInfo, property); 
+    specificCb->onCreate_ = [this](const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property) {
+        return this->RequestSceneSession(sessionInfo, property);
     };
-    specificCb->onDestroy_ = [this](const int32_t persistentId) { 
-        return this->DestroyAndDisconnectSpecificSessionInner(persistentId); 
+    specificCb->onDestroy_ = [this](const int32_t persistentId) {
+        return this->DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
-    specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] { 
-        this->ClearDisplayStatusBarTemporarilyFlags(); 
+    specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] {
+        this->ClearDisplayStatusBarTemporarilyFlags();
     };
-    specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) { 
-        this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing); 
+    specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
+        this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) { 
-        return this->GetSceneSessionVectorByType(type, displayId); 
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByType(type, displayId);
     };
-    specificCb->onUpdateAvoidArea_ = [this](const int32_t& persistentId) { 
-        this->UpdateAvoidArea(persistentId); 
+    specificCb->onUpdateAvoidArea_ = [this](const int32_t& persistentId) {
+        this->UpdateAvoidArea(persistentId);
     };
-    specificCb->onWindowInfoUpdate_ = [this](int32_t persistentId, WindowUpdateType type) { 
-        this->NotifyWindowInfoChange(persistentId, type); 
+    specificCb->onWindowInfoUpdate_ = [this](int32_t persistentId, WindowUpdateType type) {
+        this->NotifyWindowInfoChange(persistentId, type);
     };
-    specificCb->onWindowInputPidChangeCallback_ = [this](int32_t windowId, bool startMoving) { 
-        this->NotifyMMIWindowPidChange(windowId, startMoving); 
+    specificCb->onWindowInputPidChangeCallback_ = [this](int32_t windowId, bool startMoving) {
+        this->NotifyMMIWindowPidChange(windowId, startMoving);
     };
-    specificCb->onSessionTouchOutside_ = [this](int32_t persistentId) { 
-        this->NotifySessionTouchOutside(persistentId); 
+    specificCb->onSessionTouchOutside_ = [this](int32_t persistentId) {
+        this->NotifySessionTouchOutside(persistentId);
     };
-    specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) { 
-        return this->GetAINavigationBarArea(displayId); 
+    specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
+        return this->GetAINavigationBarArea(displayId);
     };
-    specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) { 
-        this->OnOutsideDownEvent(x, y); 
+    specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
+        this->OnOutsideDownEvent(x, y);
     };
-    specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) { 
-        return this->HandleSecureSessionShouldHide(sceneSession); 
+    specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) {
+        return this->HandleSecureSessionShouldHide(sceneSession);
     };
-    specificCb->onCameraSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) { 
-        this->UpdateCameraWindowStatus(accessTokenId, isShowing); 
+    specificCb->onCameraSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
+        this->UpdateCameraWindowStatus(accessTokenId, isShowing);
     };
-    specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) { 
-        this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip); 
+    specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
+        this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
     };
     return specificCb;
 }
@@ -1249,11 +1249,11 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
         TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSessionCallback is nullptr");
         return keyboardCb;
     }
-    keyboardCb->onGetSceneSession_ = [this](int32_t persistentId) { 
-        return this->GetSceneSession(persistentId); 
+    keyboardCb->onGetSceneSession_ = [this](int32_t persistentId) {
+        return this->GetSceneSession(persistentId);
     };
-    keyboardCb->onGetFocusedSessionId_ = [this] { 
-        return this->GetFocusedSessionId(); 
+    keyboardCb->onGetFocusedSessionId_ = [this] {
+        return this->GetFocusedSessionId();
     };
     keyboardCb->onCallingSessionIdChange_ = callingSessionIdChangeFunc_;
 
