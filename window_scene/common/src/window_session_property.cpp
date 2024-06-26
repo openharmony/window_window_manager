@@ -792,7 +792,29 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_);
+        parcel.WriteParcelable(&keyboardLayoutParams_) &&
+        parcel.WriteBool(compatibleMode_) &&
+        parcel.WriteBool(isSupportRotation_);
+}
+
+void WindowSessionProperty::SetCompatibleMode(bool compatibleMode)
+{
+    compatibleMode_ = compatibleMode;
+}
+
+bool WindowSessionProperty::GetCompatibleMode() const
+{
+    return compatibleMode_;
+}
+
+void WindowSessionProperty::SetIsSupportRotation(bool isSupportRotation)
+{
+    isSupportRotation_ = isSupportRotation;
+}
+
+bool WindowSessionProperty::GetIsSupportRotation() const
+{
+    return isSupportRotation_;
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -854,6 +876,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
+    property->SetCompatibleMode(parcel.ReadBool());
+    property->SetIsSupportRotation(parcel.ReadBool());
     return property;
 }
 
