@@ -209,8 +209,6 @@ void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, b
 
 WindowManagerLite::WindowManagerLite() : pImpl_(std::make_unique<Impl>(mutex_))
 {
-    auto windowChecker = std::make_shared<WindowChecker>();
-    MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker);
 }
 
 int32_t WindowChecker::CheckWindowId(int32_t windowId) const
