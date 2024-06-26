@@ -65,7 +65,7 @@ public:
     MoveDragController() : windowProperty_(new WindowProperty()), moveDragProperty_(new MoveDragProperty())
     {
         vsyncCallback_->onCallback =
-            static_cast<OnCallback>[this](int64_t timeStamp) { this->OnReceiveVsync(timeStamp); };
+            static_cast<OnCallback>([this](int64_t timeStamp) { this->OnReceiveVsync(timeStamp); });
     }
     ~MoveDragController() = default;
 
