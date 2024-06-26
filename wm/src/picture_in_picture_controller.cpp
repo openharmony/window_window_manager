@@ -323,10 +323,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
 
 WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
 {
+    uint32_t templateType = 0;
+    if (pipOption_ != nullptr) {
+        templateType = pipOption_->GetPipTemplate();
+    }
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr in stop pip inner");
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
-            pipOption_->GetPipTemplate(), FAILED, "pipController is null");
+            templateType, FAILED, "pipController is null");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     auto syncTransactionController = RSSyncTransactionController::GetInstance();
@@ -352,7 +356,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         }
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
-        pipOption_->GetPipTemplate(), PIP_SUCCESS, "pip window stop success");
+        templateType, PIP_SUCCESS, "pip window stop success");
     return WMError::WM_OK;
 }
 
