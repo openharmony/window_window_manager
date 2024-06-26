@@ -175,8 +175,9 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         if (session != nullptr) {
             session->RegisterSessionChangeCallback(sessionchangeCallback);
         }
-        sessionchangeCallback->clearCallbackFunc_ = std::bind(&JsSceneSession::ClearCbMap, this,
-            std::placeholders::_1, std::placeholders::_2);
+        sessionchangeCallback->clearCallbackFunc_ = [this](bool needRemove, int32_t persistentId) {
+            this->ClearCbMap(needRemove, persistentId);
+        };
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
     }
@@ -198,48 +199,51 @@ JsSceneSession::~JsSceneSession()
 void JsSceneSession::InitListenerFuncs()
 {
     listenerFunc_ = {
-        { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
-        { CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
-            &JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister },
-        { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
-        { BUFFER_AVAILABLE_CHANGE_CB,            &JsSceneSession::ProcessBufferAvailableChangeRegister},
-        { SESSION_EVENT_CB,                      &JsSceneSession::ProcessSessionEventRegister },
-        { SESSION_RECT_CHANGE_CB,                &JsSceneSession::ProcessSessionRectChangeRegister },
-        { CREATE_SUB_SESSION_CB,                 &JsSceneSession::ProcessCreateSubSessionRegister },
-        { BIND_DIALOG_TARGET_CB,                 &JsSceneSession::ProcessBindDialogTargetRegister },
-        { RAISE_TO_TOP_CB,                       &JsSceneSession::ProcessRaiseToTopRegister },
-        { RAISE_TO_TOP_POINT_DOWN_CB,            &JsSceneSession::ProcessRaiseToTopForPointDownRegister },
-        { BACK_PRESSED_CB,                       &JsSceneSession::ProcessBackPressedRegister },
-        { SESSION_FOCUSABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionFocusableChangeRegister },
-        { SESSION_TOUCHABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionTouchableChangeRegister },
-        { SESSION_TOP_MOST_CHANGE_CB,            &JsSceneSession::ProcessSessionTopmostChangeRegister },
-        { CLICK_CB,                              &JsSceneSession::ProcessClickRegister },
-        { TERMINATE_SESSION_CB,                  &JsSceneSession::ProcessTerminateSessionRegister },
-        { TERMINATE_SESSION_CB_NEW,              &JsSceneSession::ProcessTerminateSessionRegisterNew },
-        { TERMINATE_SESSION_CB_TOTAL,            &JsSceneSession::ProcessTerminateSessionRegisterTotal },
-        { SESSION_EXCEPTION_CB,                  &JsSceneSession::ProcessSessionExceptionRegister },
-        { UPDATE_SESSION_LABEL_CB,               &JsSceneSession::ProcessUpdateSessionLabelRegister },
-        { UPDATE_SESSION_ICON_CB,                &JsSceneSession::ProcessUpdateSessionIconRegister },
-        { SYSTEMBAR_PROPERTY_CHANGE_CB,          &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
-        { NEED_AVOID_CB,                         &JsSceneSession::ProcessNeedAvoidRegister },
-        { PENDING_SESSION_TO_FOREGROUND_CB,      &JsSceneSession::ProcessPendingSessionToForegroundRegister },
-        { PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
-            &JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister },
-        { CUSTOM_ANIMATION_PLAYING_CB,           &JsSceneSession::ProcessIsCustomAnimationPlaying },
-        { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, &JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister },
-        { SHOW_WHEN_LOCKED_CB,                   &JsSceneSession::ProcessShowWhenLockedRegister },
-        { REQUESTED_ORIENTATION_CHANGE_CB,       &JsSceneSession::ProcessRequestedOrientationChange },
-        { RAISE_ABOVE_TARGET_CB,                 &JsSceneSession::ProcessRaiseAboveTargetRegister },
-        { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister },
-        { WINDOW_DRAG_HOT_AREA_CB,               &JsSceneSession::ProcessWindowDragHotAreaRegister },
-        { TOUCH_OUTSIDE_CB,                      &JsSceneSession::ProcessTouchOutsideRegister },
-        { SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     &JsSceneSession::ProcessSessionInfoLockedStateChangeRegister },
-        { PREPARE_CLOSE_PIP_SESSION,             &JsSceneSession::ProcessPrepareClosePiPSessionRegister},
-        { LANDSCAPE_MULTI_WINDOW_CB,             &JsSceneSession::ProcessLandscapeMultiWindowRegister },
-        { CONTEXT_TRANSPARENT_CB,                &JsSceneSession::ProcessContextTransparentRegister },
-        { KEYBOARD_GRAVITY_CHANGE_CB,            &JsSceneSession::ProcessKeyboardGravityChangeRegister },
-        { ADJUST_KEYBOARD_LAYOUT_CB,             &JsSceneSession::ProcessAdjustKeyboardLayoutRegister },
-        { LAYOUT_FULL_SCREEN_CB,                 &JsSceneSession::ProcessLayoutFullScreenChangeRegister },
+        { PENDING_SCENE_CB, [](JsSceneSession* that) { that->ProcessPendingSceneSessionActivationRegister(); }},
+        { CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR, [](JsSceneSession* that) {
+            that->ProcessChangeSessionVisibilityWithStatusBarRegister(); }},
+        { SESSION_STATE_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSessionStateChangeRegister(); }},
+        { BUFFER_AVAILABLE_CHANGE_CB, [](JsSceneSession* that) { that->ProcessBufferAvailableChangeRegister(); }},
+        { SESSION_EVENT_CB, [](JsSceneSession* that) { that->ProcessSessionEventRegister(); }},
+        { SESSION_RECT_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSessionRectChangeRegister(); }},
+        { CREATE_SUB_SESSION_CB, [](JsSceneSession* that) { that->ProcessCreateSubSessionRegister(); }},
+        { BIND_DIALOG_TARGET_CB, [](JsSceneSession* that) { that->ProcessBindDialogTargetRegister(); }},
+        { RAISE_TO_TOP_CB, [](JsSceneSession* that) { that->ProcessRaiseToTopRegister(); }},
+        { RAISE_TO_TOP_POINT_DOWN_CB, [](JsSceneSession* that) { that->ProcessRaiseToTopForPointDownRegister(); }},
+        { BACK_PRESSED_CB, [](JsSceneSession* that) { that->ProcessBackPressedRegister(); }},
+        { SESSION_FOCUSABLE_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSessionFocusableChangeRegister(); }},
+        { SESSION_TOUCHABLE_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSessionTouchableChangeRegister(); }},
+        { SESSION_TOP_MOST_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSessionTopmostChangeRegister(); }},
+        { CLICK_CB, [](JsSceneSession* that) { that->ProcessClickRegister(); }},
+        { TERMINATE_SESSION_CB, [](JsSceneSession* that) { that->ProcessTerminateSessionRegister(); }},
+        { TERMINATE_SESSION_CB_NEW, [](JsSceneSession* that) { that->ProcessTerminateSessionRegisterNew(); }},
+        { TERMINATE_SESSION_CB_TOTAL, [](JsSceneSession* that) { that->ProcessTerminateSessionRegisterTotal(); }},
+        { SESSION_EXCEPTION_CB, [](JsSceneSession* that) { that->ProcessSessionExceptionRegister(); }},
+        { UPDATE_SESSION_LABEL_CB, [](JsSceneSession* that) { that->ProcessUpdateSessionLabelRegister(); }},
+        { UPDATE_SESSION_ICON_CB, [](JsSceneSession* that) { that->ProcessUpdateSessionIconRegister(); }},
+        { SYSTEMBAR_PROPERTY_CHANGE_CB, [](JsSceneSession* that) { that->ProcessSystemBarPropertyChangeRegister(); }},
+        { NEED_AVOID_CB, [](JsSceneSession* that) { that->ProcessNeedAvoidRegister(); }},
+        { PENDING_SESSION_TO_FOREGROUND_CB, [](JsSceneSession* that) {
+            that->ProcessPendingSessionToForegroundRegister(); }},
+        { PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB, [](JsSceneSession* that) {
+            that->ProcessPendingSessionToBackgroundForDelegatorRegister(); }},
+        { CUSTOM_ANIMATION_PLAYING_CB, [](JsSceneSession* that) { that->ProcessIsCustomAnimationPlaying(); }},
+        { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, [](JsSceneSession* that) {
+            that->ProcessSessionDefaultAnimationFlagChangeRegister(); }},
+        { SHOW_WHEN_LOCKED_CB, [](JsSceneSession* that) { that->ProcessShowWhenLockedRegister(); }},
+        { REQUESTED_ORIENTATION_CHANGE_CB, [](JsSceneSession* that) { that->ProcessRequestedOrientationChange(); }},
+        { RAISE_ABOVE_TARGET_CB, [](JsSceneSession* that) { that->ProcessRaiseAboveTargetRegister(); }},
+        { FORCE_HIDE_CHANGE_CB, [](JsSceneSession* that) { that->ProcessForceHideChangeRegister(); }},
+        { WINDOW_DRAG_HOT_AREA_CB, [](JsSceneSession* that) { that->ProcessWindowDragHotAreaRegister(); }},
+        { TOUCH_OUTSIDE_CB, [](JsSceneSession* that) { that->ProcessTouchOutsideRegister(); }},
+        { SESSIONINFO_LOCKEDSTATE_CHANGE_CB, [](JsSceneSession* that) {
+            that->ProcessSessionInfoLockedStateChangeRegister(); }},
+        { PREPARE_CLOSE_PIP_SESSION, [](JsSceneSession* that) { that->ProcessPrepareClosePiPSessionRegister(); }},
+        { LANDSCAPE_MULTI_WINDOW_CB, [](JsSceneSession* that) { that->ProcessLandscapeMultiWindowRegister(); }},
+        { CONTEXT_TRANSPARENT_CB, [](JsSceneSession* that) { that->ProcessContextTransparentRegister(); }},
+        { KEYBOARD_GRAVITY_CHANGE_CB, [](JsSceneSession* that) { that->ProcessKeyboardGravityChangeRegister(); }},
+        { ADJUST_KEYBOARD_LAYOUT_CB, [](JsSceneSession* that) { that->ProcessAdjustKeyboardLayoutRegister(); }},
+        { LAYOUT_FULL_SCREEN_CB, [](JsSceneSession* that) { that->ProcessLayoutFullScreenChangeRegister(); }},
     };
 }
 
@@ -333,8 +337,9 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = std::bind(&JsSceneSession::SetLandscapeMultiWindow,
-                                                                      this, std::placeholders::_1);
+    sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [this](bool isLandscapeMultiWindow) {
+        this->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    };                                                             
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessLandscapeMultiWindowRegister success");
 }
 
@@ -367,8 +372,9 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onKeyboardGravityChange_ = std::bind(&JsSceneSession::OnKeyboardGravityChange,
-                                                                this, std::placeholders::_1);
+    sessionchangeCallback->onKeyboardGravityChange_ = [this](SessionGravity gravity) {
+        this->OnKeyboardGravityChange(gravity);
+    };                                                            
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
@@ -401,8 +407,9 @@ void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onAdjustKeyboardLayout_ = std::bind(&JsSceneSession::OnAdjustKeyboardLayout,
-                                                               this, std::placeholders::_1);
+    sessionchangeCallback->onAdjustKeyboardLayout_ = [this](const KeyboardLayoutParams& params) {
+        this->OnAdjustKeyboardLayout(params);
+    };                                                           
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
@@ -413,8 +420,9 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onLayoutFullScreenChangeFunc_ = std::bind(&JsSceneSession::OnLayoutFullScreenChange,
-        this, std::placeholders::_1);
+    sessionchangeCallback->onLayoutFullScreenChangeFunc_ = [this](bool isLayoutFullScreen) {
+        this->OnLayoutFullScreenChange(isLayoutFullScreen);
+    };
     TLOGI(WmsLogTag::WMS_LAYOUT, "Register success");
 }
 
@@ -508,8 +516,9 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onWindowAnimationFlagChange_ = std::bind(
-        &JsSceneSession::OnDefaultAnimationFlagChange, this, std::placeholders::_1);
+    sessionchangeCallback->onWindowAnimationFlagChange_ = [this](bool isNeedDefaultAnimationFlag) {
+        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
+    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr");
@@ -599,8 +608,9 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
         TLOGE(WmsLogTag::WMS_DIALOG, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onBindDialogTarget_ = std::bind(&JsSceneSession::OnBindDialogTarget,
-        this, std::placeholders::_1);
+    sessionchangeCallback->onBindDialogTarget_ = [this](const sptr<SceneSession>& sceneSession) {
+        this->OnBindDialogTarget(sceneSession);
+    };
     TLOGD(WmsLogTag::WMS_DIALOG, "ProcessBindDialogTargetRegister success");
 }
 
@@ -625,7 +635,9 @@ void JsSceneSession::ProcessRaiseToTopRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onRaiseToTop_ = std::bind(&JsSceneSession::OnRaiseToTop, this);
+    sessionchangeCallback->onRaiseToTop_ = [this] {
+        this->OnRaiseToTop();
+    };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
 
@@ -650,8 +662,9 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onRaiseAboveTarget_ = std::bind(&JsSceneSession::OnRaiseAboveTarget,
-        this, std::placeholders::_1);
+    sessionchangeCallback->onRaiseAboveTarget_ = [this](int32_t subWindowId) {
+        this->OnRaiseAboveTarget(subWindowId);
+    };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
 
@@ -662,8 +675,9 @@ void JsSceneSession::ProcessSessionEventRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = std::bind(&JsSceneSession::OnSessionEvent,
-        this, std::placeholders::_1, std::placeholders::_2);
+    sessionchangeCallback->OnSessionEvent_ = [this](uint32_t eventId, const SessionEventParam& param) {
+        this->OnSessionEvent(eventId, param);
+    };
     WLOGFD("ProcessSessionEventRegister success");
 }
 
@@ -765,8 +779,9 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onSessionTopmostChange_ =
-        std::bind(&JsSceneSession::OnSessionTopmostChange, this, std::placeholders::_1);
+    sessionchangeCallback->onSessionTopmostChange_ = [this](bool topmost) {
+        this->OnSessionTopmostChange(topmost);
+    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
@@ -870,8 +885,10 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
         TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnSystemBarPropertyChange_ = std::bind(
-        &JsSceneSession::OnSystemBarPropertyChange, this, std::placeholders::_1);
+    sessionchangeCallback->OnSystemBarPropertyChange_ = [this](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
+            this->OnSystemBarPropertyChange(propertyMap);
+        };
     TLOGD(WmsLogTag::WMS_IMMS, "ProcessSystemBarPropertyChangeRegister success");
 }
 
@@ -882,8 +899,9 @@ void JsSceneSession::ProcessNeedAvoidRegister()
         TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnNeedAvoid_ = std::bind(
-        &JsSceneSession::OnNeedAvoid, this, std::placeholders::_1);
+    sessionchangeCallback->OnNeedAvoid_ = [this](bool status) {
+        this->OnNeedAvoid(status);
+    };    
     TLOGD(WmsLogTag::WMS_IMMS, "ProcessNeedAvoidRegister success");
 }
 
@@ -894,8 +912,9 @@ void JsSceneSession::ProcessIsCustomAnimationPlaying()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onIsCustomAnimationPlaying_ = std::bind(
-        &JsSceneSession::OnIsCustomAnimationPlaying, this, std::placeholders::_1);
+    sessionchangeCallback->onIsCustomAnimationPlaying_ = [this](bool status) {
+        this->OnIsCustomAnimationPlaying(status);
+    };
     WLOGFD("ProcessIsCustomAnimationPlaying success");
 }
 
@@ -906,8 +925,9 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_ = std::bind(
-        &JsSceneSession::OnShowWhenLocked, this, std::placeholders::_1);
+    sessionchangeCallback->OnShowWhenLocked_ = [this](bool showWhenLocked) {
+        this->OnShowWhenLocked(showWhenLocked);
+    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr");
@@ -924,8 +944,9 @@ void JsSceneSession::ProcessRequestedOrientationChange()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnRequestedOrientationChange_ = std::bind(
-        &JsSceneSession::OnReuqestedOrientationChange, this, std::placeholders::_1);
+    sessionchangeCallback->OnRequestedOrientationChange_ = [this](uint32_t orientation) {
+        this->OnReuqestedOrientationChange(orientation);
+    };
     WLOGFD("ProcessRequestedOrientationChange success");
 }
 
@@ -936,8 +957,9 @@ void JsSceneSession::ProcessForceHideChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnForceHideChange_ = std::bind(&JsSceneSession::OnForceHideChange,
-        this, std::placeholders::_1);
+    sessionchangeCallback->OnForceHideChange_ = [this](bool hide) {
+        this->OnForceHideChange(hide);
+    };
     WLOGFD("ProcessForceHideChangeRegister success");
 }
 
@@ -968,7 +990,7 @@ void JsSceneSession::ProcessTouchOutsideRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->OnTouchOutside_ = std::bind(&JsSceneSession::OnTouchOutside, this);
+    sessionchangeCallback->OnTouchOutside_ = [this] { this->OnTouchOutside(); };
     WLOGFD("ProcessTouchOutsideRegister success");
 }
 
@@ -2470,7 +2492,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         TLOGE(WmsLogTag::WMS_PIP, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onPrepareClosePiPSession_ = std::bind(&JsSceneSession::OnPrepareClosePiPSession, this);
+    sessionchangeCallback->onPrepareClosePiPSession_ = [this] { this->OnPrepareClosePiPSession(); };
     TLOGD(WmsLogTag::WMS_PIP, "ProcessPrepareClosePiPSessionRegister success");
 }
 

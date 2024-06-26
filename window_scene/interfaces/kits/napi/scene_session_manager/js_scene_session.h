@@ -191,7 +191,7 @@ private:
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    using Func = void(JsSceneSession::*)();
+    using Func = std::function<void(JsSceneSession* that)>;
     std::map<std::string, Func> listenerFunc_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
