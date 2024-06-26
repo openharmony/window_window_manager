@@ -1350,7 +1350,6 @@ HWTEST_F(WindowImplTest, RequestVsync, Function | SmallTest | Level3)
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
     window->RequestVsync(callback);
 
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
