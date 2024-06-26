@@ -1633,7 +1633,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    bool isCompatibleMode = property->GetCompatibleMode();
+    bool isCompatibleMode = property_->GetCompatibleMode();
     if (isCompatibleMode) {
         TLOGI(WmsLogTag::WMS_IMMS, "is not CompatibleMode, can not LayoutFullScreen");
         return WMError::WM_OK;
@@ -1921,7 +1921,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
 
-    bool isCompatibleMode = property->GetCompatibleMode();
+    bool isCompatibleMode = property_->GetCompatibleMode();
     if (isCompatibleMode) {
         WLOGFE("is not CompatibleMode, can not MaximizeFloating");
         return WMError::WM_ERROR_INVALID_WINDOW;
