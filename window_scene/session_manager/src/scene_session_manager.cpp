@@ -5787,7 +5787,7 @@ WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector
 }
 
 __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetAllAbilityInfos(
-    const AAFwk::Want &want, int32_t userId, std::vector<SCBAbilityInfo> &scbAbilityInfos)
+    const AAFwk::Want& want, int32_t userId, std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     if (bundleMgr_ == nullptr) {
         WLOGFE("bundleMgr_ is nullptr");
