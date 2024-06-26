@@ -45,8 +45,8 @@ class WindowEventChannel : public WindowEventChannelStub {
 public:
     explicit WindowEventChannel(sptr<ISessionStage> iSessionStage) : sessionStage_(iSessionStage)
     {
-        dispatchCallback_ = std::bind(&WindowEventChannel::OnDispatchEventProcessed, std::placeholders::_1,
-            std::placeholders::_2);
+        dispatchCallback_ = [this](int32_t eventId, int64_t actionTime)
+            { this->OnDispatchEventProcessed(eventId, actionTime); };
     }
     ~WindowEventChannel() = default;
 
