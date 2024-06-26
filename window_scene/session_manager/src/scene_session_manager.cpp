@@ -23,6 +23,8 @@
 #include <memory>
 #include <sstream>
 #include <unistd.h>
+#include <chrono>
+#include <condition_variable>
 
 #include <ability_context.h>
 #include <ability_info.h>
@@ -49,6 +51,9 @@
 #include "screen.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
+#include "matching_skills.h"
+#include "common_event_manager.h"
+#include "publish/scene_debug_subscriber.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -152,8 +157,21 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
+const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
+
+static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
+
+static std::shared_ptr<SceneDebugSubscriber> g_scbSubscriber(nullptr);
+
+static void UnSubscribe()
+{
+    if (g_scbSubscriber) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(g_scbSubscriber);
+    }
+}
+
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -220,6 +238,12 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
+    Subscribe();
+}
+
+SceneSessionManager::~SceneSessionManager()
+{
+    UnSubscribe();
 }
 
 void SceneSessionManager::Init()
@@ -3904,6 +3928,84 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::Publish(std::string cmd)
+{
+    auto task = [this, cmd]() {
+        static const std::string scbDebugEventListenerName = "com.ohos.sceneboard.debug.event.listener";
+        AAFwk::Want want;
+        want.SetAction(scbDebugEventListenerName);
+
+        EventFwk::CommonEventData commonEventData;
+        commonEventData.SetWant(want);
+        commonEventData.SetCode(0);
+        commonEventData.SetData(cmd);
+
+        EventFwk::CommonEventPublishInfo publishInfo;
+        publishInfo.SetSticky(false);
+        publishInfo.SetOrdered(false);
+
+        // publish the common event
+        bool ret = EventFwk::CommonEventManager::PublishCommonEvent(commonEventData, publishInfo, nullptr);
+        if (!ret) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "publish debug event to scene error.");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        return WSError::WS_OK;
+    };
+    return eventHandler_->PostSyncTask(task, "PublishSCBDumper") ? WSError::WS_OK : WSError::WS_ERROR_INVALID_OPERATION;
+}
+
+void SceneSessionManager::Subscribe()
+{
+    static const std::string scbDebugEventResponseName = "com.ohos.sceneboard.debug.event.response";
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(scbDebugEventResponseName);
+
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+
+    if (g_scbSubscriber == nullptr) {
+        g_scbSubscriber = std::make_shared<SceneDebugSubscriber>(subscribeInfo);
+    }
+
+    EventFwk::CommonEventManager::SubscribeCommonEvent(g_scbSubscriber);
+}
+
+void SceneSessionManager::GetDataFromSubScriber(std::string& dumpInfo)
+{
+    auto task = [this, &dumpInfo]() {
+        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
+        return WSError::WS_OK;
+    };
+    eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
+}
+
+static std::string JoinCommands(int size, const std::vector<std::string>& params)
+{
+    std::string cmd;
+    for (int i = 1; i < size; i++) { // 从1开始，0为-b
+        cmd += params[i];
+        cmd += ' ';
+    }
+    return cmd;
+}
+
+WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
+{
+    std::string cmd = JoinCommands(params.size(), params);
+
+    // publish data
+    WSError ret = Publish(cmd);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+
+    // get response event
+    GetDataFromSubScriber(dumpInfo);
+
+    return ret;
+}
+
 void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     if (dumpingSessionPid_ == INVALID_SESSION_ID) {
@@ -3931,6 +4033,9 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         }
         if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
             return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2:params num
+            return GetSCBDebugDumpInfo(dumpInfo, params);
         }
         return WSError::WS_ERROR_INVALID_OPERATION;
     };
