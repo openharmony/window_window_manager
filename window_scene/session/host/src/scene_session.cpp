@@ -1725,7 +1725,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
             SetSurfaceBounds(rect);
             UpdateRect(rect, reason);
             recentWidth_ = rect.width_;
-            recentHeight_ = rect.height_;            
+            recentHeight_ = rect.height_;
         } else if (isSupportRotation && recentWidth_ < recentHeight_ &&
             rect.width_ > compatibleLandscapeWidth_ + compatibleDragLimit_) {
             rect.width_ = compatibleLandscapeWidth_;
