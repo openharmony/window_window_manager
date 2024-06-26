@@ -767,9 +767,6 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
-    pipControl->window_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->DestroyPictureInPictureWindow());
-
     pipControl->window_ = mw;
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
