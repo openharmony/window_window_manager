@@ -363,8 +363,8 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
         pImpl_->wmsConnectionChangedListener_ = listener;
     }
     auto ret = SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
-        std::bind(&WindowManager::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        [this]((int32_t userId, int32_t screenId, bool isConnected))
+            { this->OnWMSConnectionChanged(userId, screenId, isConnected); };
     if (ret != WMError::WM_OK) {
         pImpl_->wmsConnectionChangedListener_ = nullptr;
     }
