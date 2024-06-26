@@ -1180,7 +1180,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->RequestSceneSession(sessionInfo, property); 
     };
     specificCb->onDestroy_ = [this](const int32_t persistentId) { 
-        return this->DestroyAndDisconnectSpecificSessionInner(spersistentId); 
+        return this->DestroyAndDisconnectSpecificSessionInner(persistentId); 
     };
     specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] { 
         this->ClearDisplayStatusBarTemporarilyFlags(); 
