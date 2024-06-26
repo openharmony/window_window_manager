@@ -346,7 +346,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         pipLifeCycleListener_->OnPictureInPictureStop();
     }
     curState_ = PiPWindowState::STATE_STOPPED;
-    std::string navId = pipOption_->GetNavigationId();
+    std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
     if (!navId.empty() && mainWindow_) {
         auto navController = NavigationController::GetNavigationController(
             mainWindow_->GetUIContent(), navId);
