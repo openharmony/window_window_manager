@@ -2110,6 +2110,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
@@ -2123,7 +2124,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
 HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(property, nullptr);
     ssm_->ClosePipWindowIfExist(WindowType::WINDOW_TYPE_PIP);
 
     SessionInfo info;
@@ -2142,7 +2143,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
 HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(property, nullptr);
     property->SetParentId(1);
     sptr<ISessionStage> sessionStage;
     sptr<IWindowEventChannel> eventChannel;
@@ -2167,10 +2168,12 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->CacheSubSessionForRecovering(nullptr, property);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
 
     property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     ssm_->CacheSubSessionForRecovering(nullptr, property);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
@@ -2209,7 +2212,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndReconnectSceneSession02, Function |
 HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(property, nullptr);
     ssm_->NotifyCreateToastSession(1, nullptr);
     SessionInfo Info;
     Info.persistentId_ = 1;
