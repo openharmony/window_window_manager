@@ -2534,10 +2534,6 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         if (!SessionPermission::IsSystemCalling()) {
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
         }
-    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE) {
-        if (!SessionPermission::IsSystemServiceCalling()) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
     }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
