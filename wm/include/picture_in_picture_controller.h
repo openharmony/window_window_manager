@@ -123,7 +123,7 @@ private:
     static sptr<IRemoteObject> remoteObj_;
     static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
     uint32_t GetPipPriority(uint32_t pipTemplateType);
-    WMError CreatePictureInPictureWindow();
+    WMError CreatePictureInPictureWindow(StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType);
