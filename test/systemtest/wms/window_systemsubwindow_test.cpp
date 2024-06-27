@@ -113,7 +113,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
-        if (baseWindow == nullptr){
+        if (baseWindow == nullptr) {
             continue;
         }
         struct Rect rect = {0, 0, 100, 200};
@@ -172,7 +172,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
-        if (baseWindow == nullptr){
+        if (baseWindow == nullptr) {
             continue;
         }
 
