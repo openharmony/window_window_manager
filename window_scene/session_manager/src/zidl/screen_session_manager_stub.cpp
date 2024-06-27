@@ -750,7 +750,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO: {
-            uint32_t uid = data.ReadUint32();
+            int32_t uid = data.ReadInt32();
             bool enable = data.ReadBool();
             DMHookInfo hookInfo;
             hookInfo.width_ = data.ReadUint32();

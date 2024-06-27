@@ -2212,11 +2212,11 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
-    if (!NearZero(density) && (GetSessionRect().height_ != 0)) {
-        uint32_t curWidth = static_cast<uint32_t>(GetSessionRect().width_ / density);
-        uint32_t curHeight = static_cast<uint32_t>(GetSessionRect().height_ / density);
+    if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
+        float curWidth = GetSessionRect().width_ / density;
+        float curHeight = GetSessionRect().height_ / density;
         float ratio = GetAspectRatio();
-        float actRatio = static_cast<float>(curWidth) / curHeight;
+        float actRatio = curWidth / curHeight;
         if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;

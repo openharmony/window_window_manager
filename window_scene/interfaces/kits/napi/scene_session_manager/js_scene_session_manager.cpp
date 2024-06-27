@@ -2557,7 +2557,7 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
 
-    uint32_t uid;
+    int32_t uid = 0;
     if (!ConvertFromJsValue(env, argv[0], uid)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to uid");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

@@ -2595,7 +2595,7 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo)
+void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2612,7 +2612,7 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(uint32_t uid,
         return;
     }
 
-    if (!data.WriteUint32(uid)) {
+    if (!data.WriteInt32(uid)) {
         TLOGE(WmsLogTag::DMS, "Write uid failed");
         return;
     }
