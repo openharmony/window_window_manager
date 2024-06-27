@@ -82,6 +82,10 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
         WLOGFE("rsId is invalid");
         return false;
     }
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is nullptr");
+        return false;
+    }
     if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
         if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine") {
             WLOGFI("HiCar or SuperLauncher or CastEngine, need to connect the screen");
