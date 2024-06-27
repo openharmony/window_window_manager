@@ -4808,10 +4808,6 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         if (displayId != currentDisplayId) {
             continue;
         }
-        if (sceneSession->GetSessionInfo().bundleName_.empty()) {
-            TLOGW(WmsLogTag::WMS_MAIN, "bundle name is empty, wid = %{public}d.", item.first);
-            continue;
-        }
         bool isForeground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
         if (isForeground && sceneSession->GetParentSession() != nullptr) {
@@ -4823,7 +4819,12 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
-            privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
+            if (!sceneSession->GetSessionInfo().bundleName_.empty()) {
+                privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
+            } else {
+                TLOGW(WmsLogTag::WMS_MAIN, "bundle name is empty, wid = %{public}d.", item.first);
+                privacyBundles.insert(sceneSession->GetWindowName());
+            }
         }
     }
 }
