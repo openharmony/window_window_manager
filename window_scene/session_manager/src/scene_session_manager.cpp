@@ -9048,9 +9048,10 @@ WMError SceneSessionManager::SetCompatibleMode(bool enable, bool supportRotation
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("could not find window, persistentId:%{public}d", persistentId);
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WMError::WS_ERROR_INVALID_WINDOW;
     }
-    return sceneSession->SetCompatibleMode(enable, supportRotation);
+    
+    sceneSession->SetCompatibleMode(enable, supportRotation);
     return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
