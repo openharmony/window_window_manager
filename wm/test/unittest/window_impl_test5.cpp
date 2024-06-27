@@ -34,9 +34,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    void CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect);
 
-    static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -58,28 +56,6 @@ void WindowImplTest5::TearDown()
     usleep(WAIT_SYNC_IN_NS);
 }
 
-void WindowImplTest5::CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("StretchableWindowTest");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowRect({ 1, 1, 1, 1 });
-    if (option == nullptr) {
-        window = nullptr;
-        return;
-    }
-    window = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    window->windowSystemConfig_.isStretchable_ = true;
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    window->UpdateRect(rect, true, WindowSizeChangeReason::UNDEFINED);
-    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect);
-}
-
 namespace {
 /**
  * @tc.name: IsAllowHaveSystemSubWindow
@@ -88,10 +64,10 @@ namespace {
  */
 HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("IsAllowHaveSystemSubWindow");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     EXPECT_EQ(window->IsAllowHaveSystemSubWindow(), false);
@@ -113,12 +89,12 @@ HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, Function | SmallTest | Lev
  */
 HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NotifyMemoryLevel");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowFlags(0));
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -141,10 +117,10 @@ HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, SetRequestedOrientation, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetRequestedOrientation");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     auto orientation = Orientation::BEGIN;
@@ -166,10 +142,10 @@ HWTEST_F(WindowImplTest5, SetRequestedOrientation, Function | SmallTest | Level1
  */
 HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetSystemAlarmWindowDefaultSize");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
     Rect defaultRect { 10, 10, 10, 10 };
@@ -188,10 +164,10 @@ HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, Function | SmallTest 
  */
 HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("CheckCameraFloatingWindowMultiCreated");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     auto type = WindowType::WINDOW_TYPE_FLOAT;
     EXPECT_EQ(window->CheckCameraFloatingWindowMultiCreated(type), false);
@@ -215,11 +191,11 @@ HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | Smal
  */
 HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetDefaultOption01");
     option->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->SetDefaultOption();
 
@@ -267,11 +243,11 @@ HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetDefaultOption02");
     option->SetWindowType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->SetDefaultOption();
 
@@ -313,10 +289,10 @@ HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, UpdateActiveStatus, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateActiveStatus");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
     bool isActive = true;
@@ -333,10 +309,10 @@ HWTEST_F(WindowImplTest5, UpdateActiveStatus, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NotifyForegroundInteractiveStatus");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
     bool interactive = false;
@@ -361,10 +337,10 @@ HWTEST_F(WindowImplTest5, NotifyForegroundInteractiveStatus, Function | SmallTes
  */
 HWTEST_F(WindowImplTest5, UpdateWindowState02, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateWindowState02");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -410,10 +386,10 @@ HWTEST_F(WindowImplTest5, UpdateWindowState02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, UpdateWindowStateUnfrozen, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateWindowStateUnfrozen");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->context_ = nullptr;
 
@@ -443,10 +419,10 @@ HWTEST_F(WindowImplTest5, UpdateWindowStateUnfrozen, Function | SmallTest | Leve
  */
 HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateFocusStatus");
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
     bool focused = true;
