@@ -473,6 +473,7 @@ protected:
         return ret;
     }
 
+    static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
