@@ -9048,7 +9048,7 @@ WMError SceneSessionManager::SetCompatibleMode(bool enable, bool supportRotation
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("could not find window, persistentId:%{public}d", persistentId);
-        return WMError::WS_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     
     sceneSession->SetCompatibleMode(enable, supportRotation);
