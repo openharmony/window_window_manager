@@ -431,12 +431,13 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         WLOGFE("Write persistentId info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(abilitySessionInfo->errorCode)) {
-        WLOGFE("Write erroCode info failed");
+    if (!data.WriteInt32(abilitySessionInfo->errorCode) ||
+        !data.WriteString(abilitySessionInfo->errorReason)) {
+        WLOGFE("Write error info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(abilitySessionInfo->errorReason)) {
-        WLOGFE("Write erroCode info failed");
+    if (!data.WriteString(abilitySessionInfo->identityToken)) {
+        WLOGFE("Write identity token info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
