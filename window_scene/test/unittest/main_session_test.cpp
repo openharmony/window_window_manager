@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <pointer_event.h>
 #include "session/host/include/main_session.h"
 
 #include "common/include/session_permission.h"
@@ -102,6 +103,10 @@ HWTEST_F(MainSessionTest, Reconnect01, Function | SmallTest | Level1)
 
     result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->SetWindowState(WindowState::STATE_HIDDEN);
+    result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -111,12 +116,22 @@ HWTEST_F(MainSessionTest, Reconnect01, Function | SmallTest | Level1)
  */
 HWTEST_F(MainSessionTest, NotifyForegroundInteractiveStatus01, Function | SmallTest | Level2)
 {
-    bool interactive = true;
-    mainSession_->NotifyForegroundInteractiveStatus(interactive);
+    mainSession_->isVisible_ = true;
+    mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
+    mainSession_->NotifyForegroundInteractiveStatus(true);
+    mainSession_->NotifyForegroundInteractiveStatus(false);
+    ASSERT_EQ(WSError::WS_OK, mainSession_->SetFocusable(false));
 
-    interactive = false;
-    mainSession_->NotifyForegroundInteractiveStatus(interactive);
+    mainSession_->isVisible_ = false;
+    mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
+    mainSession_->NotifyForegroundInteractiveStatus(true);
+    mainSession_->NotifyForegroundInteractiveStatus(false);
+    ASSERT_EQ(WSError::WS_OK, mainSession_->SetFocusable(false));
 
+    mainSession_->isVisible_ = false;
+    mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    mainSession_->NotifyForegroundInteractiveStatus(true);
+    mainSession_->NotifyForegroundInteractiveStatus(false);
     ASSERT_EQ(WSError::WS_OK, mainSession_->SetFocusable(false));
 }
 
@@ -165,6 +180,78 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, mainSession_->TransferKeyEvent(keyEvent));
 }
+
+
+/**
+ * @tc.name: ProcessPointDownSession01
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(100, 200));
+    mainSession_->ClearDialogVector();
+    EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
+}
+
+/**
+ * @tc.name: SetTopmost01
+ * @tc.desc: check func SetTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
+    EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
+}
+
+/**
+ * @tc.name: UpdatePointerArea01
+ * @tc.desc: check func UpdatePointerArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, UpdatePointerArea01, Function | SmallTest | Level1)
+{
+    WSRect Rect={0, 0, 50, 50};
+    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    mainSession_->UpdatePointerArea(Rect);
+    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    mainSession_->UpdatePointerArea(Rect);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch03
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+
+    mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    mainSession_->CheckPointerEventDispatch(pointerEvent);
+
+    mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
+    mainSession_->CheckPointerEventDispatch(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+    mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
+    mainSession_->CheckPointerEventDispatch(pointerEvent);
+}
+
+/**
+ * @tc.name: RectCheck03
+ * @tc.desc: check func RectCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
+{
+    mainSession_->RectCheck(0, 0);
+    mainSession_->RectCheck(0, 1000000000);
+    mainSession_->RectCheck(1000000000, 0);
+    mainSession_->RectCheck(1000000000, 1000000000);
+}
+
 }
 }
 }
