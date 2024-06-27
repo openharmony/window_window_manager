@@ -884,7 +884,7 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
     }
     sessionchangeCallback->OnSystemBarPropertyChange_ = [this](
         const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
-            this->OnSystemBarPropertyChange(propertyMap);
+        this->OnSystemBarPropertyChange(propertyMap);
     };
     TLOGD(WmsLogTag::WMS_IMMS, "ProcessSystemBarPropertyChangeRegister success");
 }
