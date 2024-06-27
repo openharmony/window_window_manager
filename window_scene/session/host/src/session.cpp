@@ -71,15 +71,15 @@ const std::map<SessionState, bool> DETACH_MAP = {
 static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
 } // namespace
 
-std::shared_ptr<AppExecFwk::EventHandler> Session::g_mainHandler;
+std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-    if (!g_mainHandler) {
+    if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
-        g_mainHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
 
     using type = std::underlying_type_t<MMI::WindowArea>;
@@ -1044,8 +1044,8 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    if (g_mainHandler) {
-        g_mainHandler->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
         });
     }
