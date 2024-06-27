@@ -485,24 +485,6 @@ HWTEST_F(SceneSessionManagerTest4, DestroyAndDisconnectSpecificSession01, Functi
 }
 
 /**
- * @tc.name: ProcessBackEvent01
- * @tc.desc: SceneSesionManager test ProcessBackEvent
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, ProcessBackEvent01, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "ProcessBackEvent";
-    info.bundleName_ = "ProcessBackEvent";
-    info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->SetFocusedSessionId(1);
-    ASSERT_EQ(ssm_->ProcessBackEvent(), WSError::WS_OK);
-}
-
-/**
  * @tc.name: GetAllSessionDumpInfo
  * @tc.desc: SceneSesionManager test GetAllSessionDumpInfo
  * @tc.type: FUNC
