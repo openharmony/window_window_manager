@@ -333,7 +333,8 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
-
+    void InitScheduleUtils();
+    
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -342,7 +343,6 @@ private:
     bool isKeyboardPanelEnabled_ = false;
     std::atomic<bool> enterRecent_ { false };
     void Init();
-    void InitScheduleUtils();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();

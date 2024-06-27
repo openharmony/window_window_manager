@@ -230,8 +230,6 @@ void SceneSessionManager::Init()
         WLOGFW("Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
     }
 
-    InitScheduleUtils();
-
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
