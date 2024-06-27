@@ -753,7 +753,7 @@ void WindowLayoutPolicyCascade::UpdateFloatingWindowSizeForStretchableWindow(con
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
     float scale = std::min(static_cast<float>(winRect.width_) / sizeLimits.minWidth_,
         static_cast<float>(winRect.height_) / sizeLimits.minHeight_);
-    if (scale == 0) {
+    if (MathHelper::NearZero(scale)) {
         WLOGE("invalid sizeLimits");
         return;
     }
