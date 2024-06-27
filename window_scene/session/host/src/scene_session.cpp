@@ -2961,9 +2961,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 }
 
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-    bool needRemoveSession)
+    bool needRemoveSession, bool isFromClient)
 {
-    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession]() {
+    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession, isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2972,6 +2972,13 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         if (abilitySessionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
+        }
+        if (SessionHelper::IsMainWindow(session->GetWindowType()) && isFromClient &&
+            !session->clientIdentityToken_.empty() &&
+            session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
+            TLOGE(WmsLogTag::WMS_LIFE, "client exception not matched: %{public}s, %{public}s",
+                session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
@@ -3011,7 +3018,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession);
+    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
 }
 
 WSRect SceneSession::GetLastSafeRect() const
