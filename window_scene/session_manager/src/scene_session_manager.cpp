@@ -1176,33 +1176,48 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         WLOGFE("SpecificSessionCallback is nullptr");
         return nullptr;
     }
-    specificCb->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSessionInner,
-        this, std::placeholders::_1);
-    specificCb->onClearDisplayStatusBarTemporarilyFlags_ =
-        std::bind(&SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags, this);
-    specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea, this, std::placeholders::_1);
-    specificCb->onWindowInfoUpdate_ = std::bind(&SceneSessionManager::NotifyWindowInfoChange,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onWindowInputPidChangeCallback_ = std::bind(&SceneSessionManager::NotifyMMIWindowPidChange,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onSessionTouchOutside_ = std::bind(&SceneSessionManager::NotifySessionTouchOutside,
-        this, std::placeholders::_1);
-    specificCb->onGetAINavigationBarArea_ = std::bind(&SceneSessionManager::GetAINavigationBarArea,
-        this, std::placeholders::_1);
-    specificCb->onOutsideDownEvent_ = std::bind(&SceneSessionManager::OnOutsideDownEvent,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onHandleSecureSessionShouldHide_ = std::bind(&SceneSessionManager::HandleSecureSessionShouldHide,
-        this, std::placeholders::_1);
-    specificCb->onCameraSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraWindowStatus,
-        this, std::placeholders::_1, std::placeholders::_2);
-    specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = std::bind(
-        &SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen, this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onCreate_ = [this](const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property) {
+        return this->RequestSceneSession(sessionInfo, property);
+    };
+    specificCb->onDestroy_ = [this](const int32_t persistentId) {
+        return this->DestroyAndDisconnectSpecificSessionInner(persistentId);
+    };
+    specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] {
+        this->ClearDisplayStatusBarTemporarilyFlags();
+    };
+    specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
+        this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByType(type, displayId);
+    };
+    specificCb->onUpdateAvoidArea_ = [this](const int32_t persistentId) {
+        this->UpdateAvoidArea(persistentId);
+    };
+    specificCb->onWindowInfoUpdate_ = [this](int32_t persistentId, WindowUpdateType type) {
+        this->NotifyWindowInfoChange(persistentId, type);
+    };
+    specificCb->onWindowInputPidChangeCallback_ = [this](int32_t windowId, bool startMoving) {
+        this->NotifyMMIWindowPidChange(windowId, startMoving);
+    };
+    specificCb->onSessionTouchOutside_ = [this](int32_t persistentId) {
+        this->NotifySessionTouchOutside(persistentId);
+    };
+    specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
+        return this->GetAINavigationBarArea(displayId);
+    };
+    specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
+        this->OnOutsideDownEvent(x, y);
+    };
+    specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) {
+        return this->HandleSecureSessionShouldHide(sceneSession);
+    };
+    specificCb->onCameraSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
+        this->UpdateCameraWindowStatus(accessTokenId, isShowing);
+    };
+    specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
+        this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
+    };
     return specificCb;
 }
 
@@ -1234,8 +1249,12 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
         TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSessionCallback is nullptr");
         return keyboardCb;
     }
-    keyboardCb->onGetSceneSession_ = std::bind(&SceneSessionManager::GetSceneSession, this, std::placeholders::_1);
-    keyboardCb->onGetFocusedSessionId_ = std::bind(&SceneSessionManager::GetFocusedSessionId, this);
+    keyboardCb->onGetSceneSession_ = [this](int32_t persistentId) {
+        return this->GetSceneSession(persistentId);
+    };
+    keyboardCb->onGetFocusedSessionId_ = [this] {
+        return this->GetFocusedSessionId();
+    };
     keyboardCb->onCallingSessionIdChange_ = callingSessionIdChangeFunc_;
 
     return keyboardCb;
@@ -1336,8 +1355,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         if (sceneSession != nullptr &&
             static_cast<OHOS::Rosen::WindowType>(sessionInfo.windowType_) == WindowType::WINDOW_TYPE_KEYGUARD) {
             TLOGI(WmsLogTag::WMS_MULTI_USER, "Register screen lock buffer available");
-            sceneSession->RegisterBufferAvailableCallback(std::bind(
-                &SceneSessionManager::OnSCBSystemSessionBufferAvailable, this, WindowType::WINDOW_TYPE_KEYGUARD));
+            sceneSession->RegisterBufferAvailableCallback([this] {
+                this->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
+            });
         }
     } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         sceneSession = new (std::nothrow) MainSession(sessionInfo, specificCb);
@@ -6770,8 +6790,9 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid,
 
 void SceneSessionManager::InitWithRenderServiceAdded()
 {
-    auto windowVisibilityChangeCb = std::bind(&SceneSessionManager::WindowLayerInfoChangeCallback, this,
-        std::placeholders::_1);
+    auto windowVisibilityChangeCb = [this](std::shared_ptr<RSOcclusionData> occlusiontionData) {
+        this->WindowLayerInfoChangeCallback(occlusiontionData);
+    };
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
@@ -7128,7 +7149,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
     return taskScheduler_->PostAsyncTask(task);
 }
 
-void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
+void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
 {
     auto task = [this, persistentId]() {
         bool needUpdate = false;
