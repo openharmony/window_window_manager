@@ -398,6 +398,60 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     ssm_->RequestSessionFocus(0, true, reason);
     ssm_->RequestSessionFocus(100, true, reason);
 }
+
+/**
+ * @tc.name: SetShiftFocusListener
+ * @tc.desc: SetShiftFocusListener
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    FocusChangeReason reason = FocusChangeReason::SPLIT_SCREEN;
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->ShiftFocus(scensession, reason);
+    info.isSystem_ = true;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ProcessShiftFocusFunc fun;
+    NotifySCBAfterUpdateFocusFunc func;
+    ssm_->SetShiftFocusListener(fun);
+    ssm_->SetSCBFocusedListener(func);
+    ssm_->SetSCBUnfocusedListener(func);
+    ProcessCallingSessionIdChangeFunc func1;
+    ssm_->SetCallingSessionIdSessionListenser(func1);
+    ProcessStartUIAbilityErrorFunc func2;
+    ssm_->SetStartUIAbilityErrorListener(func2);
+    ssm_->ShiftFocus(sceneSession, reason);
+}
+
+/**
+ * @tc.name: UpdateFocusStatus
+ * @tc.desc: UpdateFocusStatus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->UpdateFocusStatus(scensession, false);
+    ssm_->UpdateFocusStatus(scensession, true);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->UpdateFocusStatus(sceneSession, true);
+    ssm_->UpdateFocusStatus(sceneSession, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
