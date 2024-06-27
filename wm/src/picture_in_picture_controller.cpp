@@ -362,6 +362,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow is called");
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -411,6 +412,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
     } else {
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
         if (!pipOption_) {
+            TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
             return;
         }
         std::string navId = pipOption_->GetNavigationId();
@@ -542,6 +544,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 
 void PictureInPictureController::LocateSource()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "LocateSource is called");
     if (mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
@@ -562,6 +565,7 @@ void PictureInPictureController::LocateSource()
 
 void PictureInPictureController::UpdateXComponentPositionAndSize()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "UpdateXComponentPositionAndSize is called");
     if (!mainWindowXComponentController_) {
         TLOGE(WmsLogTag::WMS_PIP, "main window xComponent not set");
         return;
@@ -589,7 +593,7 @@ void PictureInPictureController::UpdateXComponentPositionAndSize()
 
 void PictureInPictureController::UpdatePiPSourceRect() const
 {
-    TLOGD(WmsLogTag::WMS_PIP, "UpdatePiPSourceRect is called");
+    TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPSourceRect is called");
     if (mainWindowXComponentController_ == nullptr || window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "xcomponent controller not valid");
         return;
@@ -622,7 +626,7 @@ void PictureInPictureController::ResetExtController()
 
 WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "SetXComponentController is called");
+    TLOGI(WmsLogTag::WMS_PIP, "SetXComponentController is called");
     pipXComponentController_ = xComponentController;
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when set XComponentController");
@@ -758,7 +762,7 @@ PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl
 
 void PictureInPictureController::PiPMainWindowListenerImpl::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "OnModeChange is called");
+    TLOGI(WmsLogTag::WMS_PIP, "OnModeChange is called");
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
         (mode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
         isValid_ = false;
@@ -771,7 +775,7 @@ void PictureInPictureController::PiPMainWindowListenerImpl::OnModeChange(WindowM
 
 void PictureInPictureController::PiPMainWindowListenerImpl::DelayReset()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "DelayReset is called");
+    TLOGI(WmsLogTag::WMS_PIP, "DelayReset is called");
     if (handler_ == nullptr) {
         TLOGW(WmsLogTag::WMS_PIP, "task is not append to queue");
         isValid_ = true;
