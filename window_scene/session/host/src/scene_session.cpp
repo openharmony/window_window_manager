@@ -1759,7 +1759,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isCompatibleMode = property->GetCompatibleMode();
     bool isSupportRotation = property->GetIsSupportRotation();
     WSRect rect = moveDragController_->GetTargetRect();
-    if (recentWidth_ = 0 || recentHeight_ = 0) {
+    if (recentWidth_ == 0 || recentHeight_ == 0) {
         recentWidth_ = rect.width_;
         recentHeight_ = rect.height_;
     }
