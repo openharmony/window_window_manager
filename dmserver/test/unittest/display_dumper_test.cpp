@@ -371,10 +371,11 @@ HWTEST_F(DisplayDumperTest, DumpScreenInfo02, Function | SmallTest | Level1)
     absScreen->modes_.clear();
     absScreen->modes_ = { { info } };
     absScreen->groupDmsId_ = SCREEN_ID_INVALID;
-    sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
+    sptr<AbstractScreenGroup> screenGroup = new AbstractScreenGroup(
+        DisplayManagerService::GetInstance().abstractScreenController_, 0, 0, name, ScreenCombination::SCREEN_ALONE);
     std::string dumpInfo;
     DMError result = displayDumper->DumpScreenInfo(screenGroup, dumpInfo);
-    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    EXPECT_EQ(result, DMError::DM_OK);
 }
 
 /**
@@ -485,6 +486,25 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo02, Function | SmallTest | Level1)
     std::string result = oss.str();
 
     EXPECT_EQ(result.size(), 109);
+}
+
+/**
+ * @tc.name: ShowIllegalArgsInfo
+ * @tc.desc: ShowIllegalArgsInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, ShowIllegalArgsInfo, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+
+    std::string dumpInfo = "DTtest";
+    DMError errCode = DMError::DM_OK;
+    displayDumper->ShowIllegalArgsInfo(dumpInfo, errCode);
+
+    EXPECT_NE(displayDumper, nullptr);
 }
 }
 }

@@ -13,26 +13,23 @@
  * limitations under the License.
  */
 
-#include "publish/scene_debug_subscriber.h"
-#include <sstream>
+#include "fold_screen_controller/screen_fold_data.h"
+
+#include "typec_port_info.h"
 
 namespace OHOS::Rosen {
-void SceneDebugSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
+void ScreenFoldData::SetInvalid()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    std::ostringstream oss;
-    oss << data.GetData() << std::endl;
-    s = oss.str();
-    valueReady_ = true;
-    cv_.notify_all();
+    currentScreenFoldStatus_ = ScreenFoldData::INVALID_VALUE;
 }
 
-std::string SceneDebugSubscriber::GetDebugDumpInfo(std::chrono::milliseconds const &time)
+bool ScreenFoldData::GetTypeCThermalWithUtil()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
-        return s;
-    }
-    return ""; // 超时返回空字符串
+    return TypeCPortInfo::GetTypeCThermal(typeCThermal_);
+}
+
+void ScreenFoldData::SetFocusedPkgName(const std::string& packageName)
+{
+    focusedPackageName_ = packageName;
 }
 } // namespace OHOS::Rosen
