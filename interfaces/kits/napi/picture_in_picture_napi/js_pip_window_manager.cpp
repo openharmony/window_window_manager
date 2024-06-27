@@ -47,6 +47,7 @@ namespace {
         PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
+        PiPControlGroup::VIDEO_PLAY_PAUSE,
         PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
