@@ -1907,8 +1907,10 @@ WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> pre
     MaximizePresentation maximizePresentation = presentation.value_or(MaximizePresentation::ENTER_IMMERSIVE);
     switch (maximizePresentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
+            enableImmersiveMode_ = true;
+            break;
         case MaximizePresentation::EXIT_IMMERSIVE:
-            enableImmersiveMode_ = (static_cast<int32_t>(maximizePresentation)>>1) & 1;
+            enableImmersiveMode_ = false;
             break;
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;

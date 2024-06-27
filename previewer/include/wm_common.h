@@ -742,8 +742,8 @@ public:
 
 enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set imersiveStateEnable
-    EXIT_IMMERSIVE = 1 << 0,        // imersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 1 << 1,        // imersiveStateEnable will be set as true
+    EXIT_IMMERSIVE = 1,        // imersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,        // imersiveStateEnable will be set as true
 };
 
 
