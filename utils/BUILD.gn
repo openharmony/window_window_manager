@@ -162,6 +162,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
+    "src/typec_port_info.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
   ]
