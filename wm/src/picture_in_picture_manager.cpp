@@ -88,7 +88,7 @@ sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(i
         TLOGE(WmsLogTag::WMS_PIP, "GetPipControllerInfo error, %{public}d not registered!", windowId);
         return nullptr;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "GetPipControllerInfo is called, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "windowId:%{public}d", windowId);
     return windowToControllerMap_[windowId];
 }
 
