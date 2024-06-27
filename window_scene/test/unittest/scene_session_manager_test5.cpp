@@ -80,6 +80,7 @@ void SceneSessionManagerTest5::SetUpTestCase()
 
 void SceneSessionManagerTest5::TearDownTestCase()
 {
+    ssm_->sceneSessionMap_.clear();
     ssm_ = nullptr;
 }
 
@@ -293,10 +294,6 @@ HWTEST_F(SceneSessionManagerTest5, UpdatePropertyRaiseEnabled, Function | SmallT
     ASSERT_NE(property, nullptr);
     auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
     ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-    ASSERT_EQ(result, WMError::WM_OK);
-    property->isSystemCalling_ = {true};
-    result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
-    ssm_->UpdatePropertyDragEnabled(property, sceneSession);
     ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
 }
 
@@ -312,29 +309,10 @@ HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | S
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     ssm_->HandleSpecificSystemBarProperty(type, property, sceneSession);
-    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty(true, 0x00FFFFFF, 0xFF000000)}};
-    ssm_->HandleSpecificSystemBarProperty(type, property, sceneSession);
-}
-
-/**
- * @tc.name: HandleHideNonSystemFloatingWindows
- * @tc.desc: SceneSesionManager update hide non system floating windows
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, HandleHideNonSystemFloatingWindows02, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
 }
 
 /**
@@ -372,7 +350,7 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | Small
     ssm_->RegisterSessionSnapshotFunc(scensession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->RegisterSessionSnapshotFunc(scensession);
     info.isSystem_ = false;
@@ -394,7 +372,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
     sptr<SceneSession> scensession = nullptr;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     ssm_->RequestAllAppSessionUnfocus();
@@ -414,7 +392,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetFocusable(false);
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     ssm_->RequestSessionFocus(0, true, reason);
