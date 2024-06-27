@@ -218,6 +218,8 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
     sessionInfo.abilityName_ = "privacyAbilityName";
     ASSERT_NE(nullptr, ssm_);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
@@ -231,20 +233,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->CheckWindowModeType();
     EXPECT_EQ(WindowModeType::WINDOW_MODE_OTHER, ret);
-    ASSERT_NE(nullptr, sceneSession);
-    ASSERT_NE(nullptr, sceneSession->property_);
-    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sceneSession->isVisible_ = true;
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->CheckWindowModeType();
-    EXPECT_EQ(WindowModeType::WINDOW_MODE_SPLIT, ret);
-    ASSERT_NE(nullptr, sceneSession);
-    ASSERT_NE(nullptr, sceneSession->property_);
-    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->CheckWindowModeType();
-    EXPECT_EQ(WindowModeType::WINDOW_MODE_SPLIT, ret);
 }
 
 /**
@@ -312,13 +300,52 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ASSERT_NE(nullptr, ssm_);
+    ssm_->lastWindowModeType_ = WindowModeType::WINDOW_MODE_FULLSCREEN;
     auto ret = ssm_->CheckWindowModeType();
     EXPECT_EQ(WindowModeType::WINDOW_MODE_FLOATING, ret);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifyRSSWindowModeTypeUpdate();
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->CheckWindowModeType();
     EXPECT_EQ(WindowModeType::WINDOW_MODE_FULLSCREEN, ret);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifyRSSWindowModeTypeUpdate();
+}
+
+/**
+ * @tc.name: CheckWindowModeType03
+ * @tc.desc: CheckWindowModeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "privacy.test.first";
+    sessionInfo.abilityName_ = "privacyAbilityName";
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->CheckWindowModeType();
+    EXPECT_EQ(WindowModeType::WINDOW_MODE_SPLIT, ret);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->CheckWindowModeType();
+    EXPECT_EQ(WindowModeType::WINDOW_MODE_SPLIT, ret);
 }
 }
 } // namespace Rosen
