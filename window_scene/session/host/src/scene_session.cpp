@@ -3446,7 +3446,6 @@ bool SceneSession::GetForceHideState() const
 
 void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "SetIsTemporarily:%{public}u", isTemporary);
     isDisplayStatusBarTemporarily_.store(isTemporary);
 }
 
