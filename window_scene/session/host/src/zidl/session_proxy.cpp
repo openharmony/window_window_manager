@@ -402,47 +402,47 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want))) {
-        WLOGFE("Write want info failed");
+        TLOGE("Write want info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
-            WLOGFE("Write ability info failed");
+            TLOGE("Write ability info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write ability info failed");
+            TLOGE("Write ability info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
     if (!data.WriteInt32(abilitySessionInfo->persistentId)) {
-        WLOGFE("Write persistentId info failed");
+        TLOGE("Write persistentId info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(abilitySessionInfo->errorCode) ||
         !data.WriteString(abilitySessionInfo->errorReason)) {
-        WLOGFE("Write error info failed");
+        TLOGE("Write error info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteString(abilitySessionInfo->identityToken)) {
-        WLOGFE("Write identity token info failed");
+        TLOGE("Write identity token info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
