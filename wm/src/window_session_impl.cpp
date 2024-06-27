@@ -60,6 +60,27 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t ANIMATION_TIME = 400;
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+
+Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -1311,43 +1332,20 @@ std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
-    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
+    return uiContent->GetContentInfo(GetAceContentInfoType(type));
 }
 
-WMError WindowSessionImpl::SetRestoredRouterStack(std::string& routerStack)
+WMError WindowSessionImpl::SetRestoredRouterStack(const std::string& routerStack)
 {
-    WLOGFD("Set restored router stack");
-    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
     restoredRouterStack_ = routerStack;
     return WMError::WM_OK;
 }
 
 std::string WindowSessionImpl::GetRestoredRouterStack()
 {
-    WLOGFD("Get restored router stack");
-    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
     return std::move(restoredRouterStack_);
-}
-
-Ace::ContentInfoType WindowSessionImpl::GetAceContentInfoType(BackupAndRestoreType type)
-{
-    auto contentInfoType = Ace::ContentInfoType::NONE;
-    switch (type) {
-        case BackupAndRestoreType::CONTINUATION:
-            contentInfoType = Ace::ContentInfoType::CONTINUATION;
-            break;
-        case BackupAndRestoreType::APP_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
-            break;
-        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
-            break;
-        case BackupAndRestoreType::NONE:
-            [[fallthrough]];
-        default:
-            break;
-    }
-    return contentInfoType;
 }
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
