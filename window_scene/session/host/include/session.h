@@ -473,6 +473,7 @@ protected:
         return ret;
     }
 
+    static std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
@@ -549,7 +550,6 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler = nullptr;
 
 private:
     void HandleDialogForeground();
