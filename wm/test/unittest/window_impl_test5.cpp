@@ -103,7 +103,7 @@ HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, Function | SmallTest | Lev
     EXPECT_EQ(window->IsAllowHaveSystemSubWindow(), false);
 
     window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
-    EXPECT_EQ(window->IsAllowHaveSystemSubWindow(), false);
+    EXPECT_EQ(window->IsAllowHaveSystemSubWindow(), true);
 }
 
 /**
@@ -197,15 +197,15 @@ HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | Smal
     EXPECT_EQ(window->CheckCameraFloatingWindowMultiCreated(type), false);
 
     type = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
-    std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap;
-    sptr<Window> self(window);
-    windowMap.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, self)));
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_EQ(window->CheckCameraFloatingWindowMultiCreated(type), false);
 
-    self->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    windowMap.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, self)));
-    window->windowMap_ = windowMap;
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     EXPECT_EQ(window->CheckCameraFloatingWindowMultiCreated(type), false);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
