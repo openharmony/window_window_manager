@@ -828,7 +828,7 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     if (MathHelper::NearZero(virtualPixelRatio)) {
         return;
     }
-
+    newLimits.vpRatio_ = virtualPixelRatio;
     CalculateNewLimitsByRatio(newLimits, customizedLimits);
 
     property_->SetWindowLimits(newLimits);
@@ -873,7 +873,7 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 {
     const auto& requestRect = GetRequestRect();
-    TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u], requestRect:%{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
         UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE);
@@ -3102,9 +3102,10 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
     windowLimits.minHeight_ = customizedLimits.minHeight_;
     windowLimits.maxWidth_ = customizedLimits.maxWidth_;
     windowLimits.maxHeight_ = customizedLimits.maxHeight_;
-    WLOGFI("GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
-        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    windowLimits.vpRatio_ = customizedLimits.vpRatio_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+        "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     return WMError::WM_OK;
 }
 

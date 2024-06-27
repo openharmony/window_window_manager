@@ -885,7 +885,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
     if (property == nullptr) {
         return;
     }
-    for (int i = 0; i < 13; i++) {
+    for (int i = 0; i < 55; i++) {
         struct Rect rect[i];
         property->touchHotAreas_.push_back(rect[i]);
     }
