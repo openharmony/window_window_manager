@@ -848,8 +848,7 @@ enum class PiPControlGroup : uint32_t {
     VIDEO_MEETING_END,
 
     VIDEO_LIVE_START = 400,
-    VIDEO_PLAY_PAUSE = 401,
-    VIDEO_LIVE_MUTE_SWITCH = 402,
+    VIDEO_LIVE_MUTE_SWITCH = 401,
     VIDEO_LIVE_END,
     END,
 };

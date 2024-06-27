@@ -439,5 +439,45 @@ HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2
     auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
+
+/**
+ * @tc.name: RaiseWindowToTop
+ * @tc.desc: RaiseWindowToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RaiseWindowToTop, Function | SmallTest | Level2)
+{
+    auto ret = WindowManagerLite::GetInstance().RaiseWindowToTop(0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: NotifyWMSConnected
+ * @tc.desc: NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = nullptr;
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
+    focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
+    ASSERT_NE(nullptr, focusChangeInfo);
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
+    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, false);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    WindowManagerLite::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
+    WindowManagerLite::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+    WindowManagerLite::GetInstance().OnRemoteDied();
+    WindowManagerLite::GetInstance().OnWMSConnectionChanged(0, 0, true);
+    WindowManagerLite::GetInstance().OnWMSConnectionChanged(0, 0, false);
+    WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
+    WindowManagerLite::GetInstance().UpdateWindowModeTypeInfo(windowModeType);
+    auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
 }
 }

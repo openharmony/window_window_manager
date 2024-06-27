@@ -42,6 +42,7 @@
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
+#include "fold_screen_controller/screen_fold_data.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -108,6 +109,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -335,6 +337,8 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
 
+    void SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float postureAngle);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -425,7 +429,7 @@ private:
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
-    void UpdateAvoidArea(const int32_t& persistentId);
+    void UpdateAvoidArea(const int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
@@ -589,7 +593,6 @@ private:
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    void ProcessModalSessionForeground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
@@ -675,9 +678,9 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
-    WSError Publish(std::string cmd);
-    void Subscribe();
     void GetDataFromSubScriber(std::string& dumpInfo);
+    void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
+    void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
 };
 } // namespace OHOS::Rosen
 
