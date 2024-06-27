@@ -9033,4 +9033,81 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
+
+void DisplayChangeListener::OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle)
+{
+    SceneSessionManager::GetInstance().SetFoldEventFromDMS(screenFoldInfo, angle);
+}
+
+void SceneSessionManager::SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float angle)
+{
+    if (screenFoldInfo.size() < ScreenFoldData::INIT_PARAM_NUMBER) {
+        TLOGI(WmsLogTag::DMS, "Error: Init param number is wrong.");
+        return;
+    }
+
+    // 0: current screen fold status, 1: next screen fold status
+    // 2: current screen fold status duration, 3: window rotation
+    ScreenFoldData screenFoldData(screenFoldInfo[0], screenFoldInfo[1], screenFoldInfo[2], screenFoldInfo[3], angle);
+
+    if (!screenFoldData.GetTypeCThermalWithUtil()) {
+        TLOGI(WmsLogTag::DMS, "Error: fail to get typeC thermal.");
+        return;
+    }
+
+    AppExecFwk::ElementName element;
+    WSError ret = GetFocusSessionElement(element);
+    if (ret != WSError::WS_OK) {
+        TLOGI(WmsLogTag::DMS, "Error: fail to get focused package name.");
+        return;
+    }
+    std::string packageName = element.GetURI();
+    screenFoldData.SetFocusedPkgName(packageName);
+
+    CheckAndReportScreenFoldStatusEvent(screenFoldData);
+}
+
+void SceneSessionManager::CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data)
+{
+    static ScreenFoldData lastScreenHalfFoldEvent;
+    if (data.nextScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
+        lastScreenHalfFoldEvent = data;
+        return;
+    }
+    if (data.currentScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
+        if (data.currentScreenFoldStatusDuration_ >= ScreenFoldData::HALF_FOLD_UE_TRIGGER) {
+            ReportScreenFoldStatusEvent(lastScreenHalfFoldEvent);
+        }
+        lastScreenHalfFoldEvent.SetInvalid();
+    }
+    ReportScreenFoldStatusEvent(data);
+}
+
+// report screen_fold_status event when it changes to fold/expand or stays 15s at half-fold
+void SceneSessionManager::ReportScreenFoldStatusEvent(const ScreenFoldData& data)
+{
+    if (data.currentScreenFoldStatus_ == ScreenFoldData::INVALID_VALUE) {
+        return;
+    }
+
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::FOLDSTATE_UE,
+        "FOLDSCREEN_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "PNAMEID", "OCCUPATION", "PVERSIONID", "OCCUPATION",
+        "LASTFOLDSTATE", data.currentScreenFoldStatus_,
+        "CURRENTFOLDSTATE", data.nextScreenFoldStatus_,
+        "STATE", -1,
+        "TIME", data.currentScreenFoldStatusDuration_,
+        "ROTATION", data.windowRotation_,
+        "PACKAGE", data.focusedPackageName_,
+        "ANGLE", data.postureAngle_,
+        "TYPECTHERMAL", data.typeCThermal_,
+        "SCREENTHERMAL", -1,
+        "SCANGLE", -1,
+        "ISTENT", -1);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret : %{public}d.", ret);
+    }
+}
 } // namespace OHOS::Rosen
