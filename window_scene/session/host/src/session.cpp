@@ -1841,7 +1841,7 @@ void Session::SaveSnapshot(bool useSnapshotThread)
             return;
         }
         session->snapshot_ = session->Snapshot();
-        if (!(session->snapshot_ && session->scenePersistence_) {
+        if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
         }
         std::function<void()> func = [weakThis]() {
