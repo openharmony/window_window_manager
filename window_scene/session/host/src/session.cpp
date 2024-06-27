@@ -1842,7 +1842,13 @@ void Session::SaveSnapshot(bool useSnapshotThread)
         }
         session->snapshot_ = session->Snapshot();
         if (session->snapshot_ && session->scenePersistence_) {
-            std::function<void()> func = [session]() { session->ResetSnapshot(); };
+            std::function<void()> func = [weakThis]() {
+                auto session = weakThis.promote();
+                if (session == nullptr) {
+                    return;
+                }
+                session->ResetSnapshot(); 
+            };
             session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
         }
     };
