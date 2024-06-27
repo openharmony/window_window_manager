@@ -953,8 +953,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+            state_ = WindowState::STATE_SHOWN;
         }
-        state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, WindowHelper::IsMainWindow(type));
         RefreshNoInteractionTimeoutMonitor();
