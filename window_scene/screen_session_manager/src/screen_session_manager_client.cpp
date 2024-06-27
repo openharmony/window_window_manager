@@ -490,4 +490,11 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
     }
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
+
+void ScreenSessionManagerClient::OnFoldStatusChangeReportUE(const std::vector<int32_t>& screenFoldInfo, float angle)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnFoldStatusChangeUE(screenFoldInfo, angle);
+    }
+}
 } // namespace OHOS::Rosen
