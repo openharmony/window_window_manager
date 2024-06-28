@@ -117,7 +117,7 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
     napi_valuetype type;
     napi_typeof(env, controlGroup, &type);
     if (type == napi_undefined && templateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
-        TLOGI(WmsLogTag::WMS_PIP, "controls is null");
+        TLOGI(WmsLogTag::WMS_PIP, "controls is undefined");
         controls.push_back(static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE));
     }
     uint32_t size = 0;
