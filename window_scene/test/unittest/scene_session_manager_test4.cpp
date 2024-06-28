@@ -1533,7 +1533,7 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallT
     ASSERT_NE(sceneSession->scenePersistence_, nullptr);
     struct RSSurfaceNodeConfig config;
     sceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
-    ASSERT_NE(sceneSession->surfaceNode_, nullptr); 
+    ASSERT_NE(sceneSession->surfaceNode_, nullptr);
     sceneSession->bufferAvailable_ = true;
     result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
     EXPECT_EQ(result, nullptr);
