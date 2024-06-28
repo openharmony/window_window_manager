@@ -74,6 +74,9 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
         case ScreenSessionManagerClientMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM: {
             return HandleSetVirtualPixelRatioSystem(data, reply);
         }
+        case ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGE_REPORT_UE: {
+            return HandleOnFoldStatusChangeReportUE(data, reply);
+        }
         default: {
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -230,6 +233,15 @@ int ScreenSessionManagerClientStub::HandleSetVirtualPixelRatioSystem(MessageParc
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     float virtualPixelRatio = data.ReadFloat();
     SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnFoldStatusChangeReportUE(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> screenFoldInfo;
+    data.ReadInt32Vector(&screenFoldInfo);
+    float angle = data.ReadFloat();
+    OnFoldStatusChangeReportUE(screenFoldInfo, angle);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
