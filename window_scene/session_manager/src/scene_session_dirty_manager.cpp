@@ -307,7 +307,7 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
 
     if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
         type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-            WLOGFI("[EventDispatch] NotifyWindowInfoChange wid = %{public}d, WindowUpdateType = %{public}d",
+            WLOGFD("[EventDispatch] wid = %{public}d, winType = %{public}d",
                 sceneSession->GetWindowId(), static_cast<int>(type));
     }
     sessionDirty_.store(true);
