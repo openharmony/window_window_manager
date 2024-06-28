@@ -604,9 +604,9 @@ private:
     bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteObject) { this->DestroySpecificSession(remoteObject); });
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);

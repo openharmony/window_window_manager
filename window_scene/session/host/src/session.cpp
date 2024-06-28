@@ -1842,10 +1842,18 @@ void Session::SaveSnapshot(bool useSnapshotThread)
             return;
         }
         session->snapshot_ = session->Snapshot();
-        if (session->snapshot_ && session->scenePersistence_) {
-            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-            session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        if (!(session->snapshot_ && session->scenePersistence_)) {
+            return;
         }
+        std::function<void()> func = [weakThis]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+                return;
+            }
+            session->ResetSnapshot();
+        };
+        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
     auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
     if (!useSnapshotThread || snapshotScheduler == nullptr) {

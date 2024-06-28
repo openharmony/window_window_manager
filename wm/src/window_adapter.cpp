@@ -424,7 +424,7 @@ bool WindowAdapter::InitSSMProxy()
         // U0 system user needs to subscribe OnUserSwitch event
         int32_t clientUserId = GetUserIdByUid(getuid());
         if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
-            SessionManager::GetInstance().RegisterUserSwitchListener(std::bind(&WindowAdapter::OnUserSwitch, this));
+            SessionManager::GetInstance().RegisterUserSwitchListener([this]() { this->OnUserSwitch(); });
             isRegisteredUserSwitchListener_ = true;
         }
         isProxyValid_ = true;
