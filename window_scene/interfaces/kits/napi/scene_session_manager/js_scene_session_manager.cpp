@@ -155,6 +155,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
         JsSceneSessionManager::UpdateDisplayHookInfo);
+    BindNativeFunction(env, exportObj, "initScheduleUtils", moduleName,
+        JsSceneSessionManager::InitScheduleUtils);
     return NapiGetUndefined(env);
 }
 
@@ -515,6 +517,20 @@ napi_value JsSceneSessionManager::InitUserInfo(napi_env env, napi_callback_info 
     TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]Init user info");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnInitUserInfo(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::InitScheduleUtils(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnInitScheduleUtils(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnInitScheduleUtils(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    SceneSessionManager::GetInstance().InitScheduleUtils();
+    return NapiGetUndefined(env);
 }
 
 void JsSceneSessionManager::Finalizer(napi_env env, void* data, void* hint)
