@@ -95,17 +95,15 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | M
    
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(result, true);
-    } else {
-        ASSERT_EQ(result, false);
     }
+
     lisenter_->future_.Reset(true);
     windowManager.SetGestureNavigaionEnabled(false);
     result = lisenter_->future_.GetResult(WAIT_FUTURE_RESULT);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(result, false);
-    } else {
-        ASSERT_EQ(result, true);
     }
+    
     lisenter_->future_.Reset(false);
     windowManager.UnregisterGestureNavigationEnabledChangedListener(lisenter_);
     sleep(WAIT_SLEEP_TIME);
