@@ -68,7 +68,6 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
-std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
