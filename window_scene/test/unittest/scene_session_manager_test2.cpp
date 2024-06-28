@@ -156,7 +156,7 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigaionEnabled, Function | SmallT
     ASSERT_NE(callbackFunc_, nullptr);
 
     WMError result00 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result00, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(result00, WMError::WM_OK);
 
     ssm_->SetGestureNavigationEnabledChangeListener(callbackFunc_);
     WMError result01 = ssm_->SetGestureNavigaionEnabled(true);
@@ -171,7 +171,7 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigaionEnabled, Function | SmallT
 
     ssm_->SetGestureNavigationEnabledChangeListener(nullptr);
     WMError result03 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result03, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(result03, WMError::WM_OK);
 }
 
 /**
