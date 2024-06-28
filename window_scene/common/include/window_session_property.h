@@ -141,7 +141,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
-    bool SetCompatibleModeInPc() const;
+    bool GetCompatibleModeInPc() const;
     bool GetIsSupportRotation() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
