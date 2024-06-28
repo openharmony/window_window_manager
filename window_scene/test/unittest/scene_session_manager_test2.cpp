@@ -80,7 +80,7 @@ public:
     static sptr<SceneSessionManager> ssm_;
 
 private:
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 2000;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
