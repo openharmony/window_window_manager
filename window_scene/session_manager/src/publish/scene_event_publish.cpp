@@ -15,12 +15,12 @@
 
 #include "publish/scene_event_publish.h"
 #include <sstream>
-#include <want.h>
+
+#include "common_event_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
-#include "window_manager_hilog.h"
 #include "matching_skills.h"
-#include "common_event_manager.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 static const std::string TIME_OUT("timeout");
