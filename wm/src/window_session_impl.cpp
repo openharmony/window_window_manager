@@ -724,8 +724,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
 
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint]: [%{public}u, %{public}u, %{public}u]",
-        rotation, deviceRotation, transformHint);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint, virtualPixelRatio]: [%{public}u, "
+        "%{public}u, %{public}u, %{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
@@ -802,8 +802,8 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
     TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton);
-    bool isCompatibleMode = property_->GetCompatibleMode();
-    if (isCompatibleMode) {
+    bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
+    if (isCompatibleModeInPc) {
         uiContent->HideWindowTitleButton(hideSplitButton, true, hideMinimizeButton);
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
