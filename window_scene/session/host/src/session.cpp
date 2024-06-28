@@ -2098,17 +2098,18 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     return WSError::WS_OK;
 }
 
-WSError Session::SetCompatibleMode(bool enable, bool supportRotation)
+WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
-    WLOGFD("Session SetCompatibleMode enable: %{public}d, supportRotation: %{public}d", enable, supportRotation);
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
+        enable, isSupportDragInPcCompatibleMode);
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     
-    property->SetCompatibleMode(enable);
-    property->SetIsSupportRotation(supportRotation);
+    property->SetCompatibleModeInPc(enable);
+    property->SetIsSupportRotation(isSupportDragInPcCompatibleMode);
     return WSError::WS_OK;
 }
 
