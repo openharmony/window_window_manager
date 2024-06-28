@@ -110,7 +110,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "called, mainWindow:%{public}u, mainWindowState:%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "mainWindow:%{public}u, mainWindowState:%{public}u",
         mainWindowId_, mainWindow_->GetWindowState());
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
@@ -141,7 +141,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
 
 WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType startType)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called, startType:%{public}u", startType);
+    TLOGI(WmsLogTag::WMS_PIP, "startType:%{public}u", startType);
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -290,7 +290,7 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
 
 WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called, destroyWindow: %{public}u", destroyWindow);
+    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);
@@ -399,7 +399,7 @@ void PictureInPictureController::SetPipWindow(sptr<Window> window)
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called, enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
+    TLOGI(WmsLogTag::WMS_PIP, "enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
@@ -486,7 +486,7 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
     }
     std::string value;
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
-    TLOGI(WmsLogTag::WMS_PIP, "called, getSettingsAutoStartStatus, value=%{public}s", value.c_str());
+    TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
     }
@@ -601,7 +601,7 @@ void PictureInPictureController::UpdatePiPSourceRect() const
     mainWindowXComponentController_->GetGlobalPosition(posX, posY);
     mainWindowXComponentController_->GetSize(width, height);
     Rect rect = { posX, posY, width, height };
-    TLOGI(WmsLogTag::WMS_PIP, "called, result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+    TLOGI(WmsLogTag::WMS_PIP, "result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::RECOVER);
 }
