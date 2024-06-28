@@ -4189,25 +4189,7 @@ void ScreenSessionManager::SetClientInner()
         float phyWidth = 0.0f;
         float phyHeight = 0.0f;
         bool isReset = true;
-        if (foldScreenController_ != nullptr) {
-            FoldDisplayMode displayMode = GetFoldDisplayMode();
-            TLOGI(WmsLogTag::DMS, "fold screen with screenId = %{public}u", displayMode);
-            if (displayMode == FoldDisplayMode::MAIN) {
-                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
-                phyWidth = phyBounds.rect_.width_;
-                phyHeight = phyBounds.rect_.height_;
-            } else if (displayMode == FoldDisplayMode::FULL) {
-                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
-                phyWidth = phyBounds.rect_.height_;
-                phyHeight = phyBounds.rect_.width_;
-            } else {
-                isReset = false;
-            }
-        } else {
-            auto remoteScreenMode = rsInterface_.GetScreenActiveMode(iter.first);
-            phyWidth = remoteScreenMode.GetScreenWidth();
-            phyHeight = remoteScreenMode.GetScreenHeight();
-        }
+        GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, iter.first);
         auto localRotation = iter.second->GetRotation();
         TLOGI(WmsLogTag::DMS, "phyWidth = :%{public}f, phyHeight = :%{public}f, localRotation = :%{public}u",
             phyWidth, phyHeight, localRotation);
@@ -4219,6 +4201,33 @@ void ScreenSessionManager::SetClientInner()
         }
         clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
             iter.second->GetRSScreenId(), iter.second->GetName());
+    }
+}
+
+void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight,
+                                                     bool& isReset, const ScreenId& screenid)
+{
+    if (foldScreenController_ != nullptr) {
+        FoldDisplayMode displayMode = GetFoldDisplayMode();
+        TLOGI(WmsLogTag::DMS, "fold screen with screenId = %{public}u", displayMode);
+        if (displayMode == FoldDisplayMode::MAIN) {
+            auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
+            phyWidth = phyBounds.rect_.width_;
+            phyHeight = phyBounds.rect_.height_;
+        } else if (displayMode == FoldDisplayMode::FULL) {
+            auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
+            phyWidth = phyBounds.rect_.width_;
+            phyHeight = phyBounds.rect_.height_;
+            if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+                std::swap(phyWidth, phyHeight);
+            }
+        } else {
+            isReset = false;
+        }
+    } else {
+        auto remoteScreenMode = rsInterface_.GetScreenActiveMode(screenid);
+        phyWidth = remoteScreenMode.GetScreenWidth();
+        phyHeight = remoteScreenMode.GetScreenHeight();
     }
 }
 
