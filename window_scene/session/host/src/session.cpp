@@ -2695,6 +2695,18 @@ float Session::GetOffsetY() const
     return offsetY_;
 }
 
+void Session::SetExitSplitOnBackground(bool isExitSplitOnBackground)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d， isExitSplitOnBackground: %{public}d",
+        persistentId_, isExitSplitOnBackground);
+    isExitSplitOnBackground_ = isExitSplitOnBackground;
+}
+
+bool Session::IsExitSplitOnBackground() const
+{
+    return isExitSplitOnBackground_;
+}
+
 void Session::SetBounds(const WSRectF& bounds)
 {
     bounds_ = bounds;
