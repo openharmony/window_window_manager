@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
+#include "mock_uicontent.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,6 +36,7 @@ public:
     void TearDown() override;
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
@@ -95,6 +96,7 @@ HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowFlags(0));
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -102,9 +104,8 @@ HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    int32_t level = 1;
     EXPECT_CALL(*content, NotifyMemoryLevel(_)).Times(1).WillOnce(Return());
-    window->NotifyMemoryLevel(level);
+    window->NotifyMemoryLevel(1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(*content, Destroy());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
