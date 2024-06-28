@@ -4714,7 +4714,7 @@ void SceneSessionManager::DeleteStateDetectTask()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto iter : sceneSessionMap_) {
         auto& session = iter.second;
-        if (session->GetDetectTaskInfo().taskState != DetectTaskState::NO_TASK) {
+        if (session && session->GetDetectTaskInfo().taskState != DetectTaskState::NO_TASK) {
             taskScheduler_->GetEventHandler()->RemoveTask(session->GetWindowDetectTaskName());
             DetectTaskInfo detectTaskInfo;
             session->SetDetectTaskInfo(detectTaskInfo);
@@ -9020,6 +9020,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
             continue;
         }
         sceneSession->Clear();
+        TLOGD(WmsLogTag::WMS_MAIN, "Clear succeed: session id:%{public}d.", persistentId);
     }
     return WMError::WM_OK;
 }
