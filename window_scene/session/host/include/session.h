@@ -150,19 +150,6 @@ public:
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info);
-    virtual WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info);
-    virtual WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent);
-    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
-        int64_t timeMs);
-
     virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,

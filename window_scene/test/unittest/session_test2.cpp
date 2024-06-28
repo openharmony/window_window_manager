@@ -1661,7 +1661,6 @@ HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
     WSRectF bounds;
     session_->SetBounds(bounds);
     session_->GetBounds();
-    session_->TransferAccessibilityHoverEvent(50, 100, 50, 50, 500);
     session_->UpdateTitleInTargetPos(true, 100);
     session_->SetNotifySystemSessionPointerEventFunc(nullptr);
     session_->SetNotifySystemSessionKeyEventFunc(nullptr);
