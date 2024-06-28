@@ -117,7 +117,11 @@ HWTEST_F(AbstractScreenTest, RSTree, Function | SmallTest | Level3)
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, true);
+    absScreen_->UpdateRSTree(surfaceNode, true);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, false);
     absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
     absScreen_->rsDisplayNode_ = nullptr;
@@ -473,6 +477,67 @@ HWTEST_F(AbstractScreenTest, AbstractScreenGroup, Function | SmallTest | Level3)
     absScreenGroup_ = new AbstractScreenGroup(absScreenController,
         0, 0, name_, ScreenCombination::SCREEN_ALONE);
     EXPECT_NE(absScreenController, nullptr);
+}
+
+/**
+ * @tc.name: AddSurfaceNode
+ * @tc.desc: AddSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, AddSurfaceNode, Function | SmallTest | Level3)
+{
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    DMError ret = absScreen_->AddSurfaceNode(surfaceNode, true);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+
+    ret = absScreen_->AddSurfaceNode(surfaceNode, true);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    ret = absScreen_->AddSurfaceNode(surfaceNode, true, false);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    ret = absScreen_->AddSurfaceNode(surfaceNode, false);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    absScreen_->rsDisplayNode_ = nullptr;
+    ret = absScreen_->AddSurfaceNode(surfaceNode, false);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    surfaceNode = nullptr;
+    ret = absScreen_->AddSurfaceNode(surfaceNode, false);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RemoveSurfaceNode
+ * @tc.desc: RemoveSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, Function | SmallTest | Level3)
+{
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    DMError ret = absScreen_->RemoveSurfaceNode(surfaceNode);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ret = absScreen_->RemoveSurfaceNode(surfaceNode);
+    ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+
+    absScreen_->rsDisplayNode_ = nullptr;
+    ret = absScreen_->RemoveSurfaceNode(surfaceNode);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    surfaceNode = nullptr;
+    ret = absScreen_->RemoveSurfaceNode(surfaceNode);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 }
 } // namespace Rosen

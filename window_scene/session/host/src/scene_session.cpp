@@ -3224,10 +3224,16 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         if (reason == SizeChangeReason::PIP_START) {
             session->SetSessionRequestRect(wsRect);
         }
+        TLOGI(WmsLogTag::WMS_PIP, "rect:%{public}s, reason: %{public}u", wsRect.ToString().c_str(),
+            static_cast<uint32_t>(reason));
         session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
     };
-    PostTask(task, "UpdatePiPRect");
+    if (mainHandler_ != nullptr) {
+        mainHandler_->PostTask(std::move(task), "wms:UpdatePiPRect", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        PostTask(task, "UpdatePiPRect");
+    }
     return WSError::WS_OK;
 }
 
