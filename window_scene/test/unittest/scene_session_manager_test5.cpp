@@ -51,6 +51,9 @@ public:
 
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest5::ssm_ = nullptr;
@@ -92,6 +95,7 @@ void SceneSessionManagerTest5::SetUp()
 void SceneSessionManagerTest5::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
