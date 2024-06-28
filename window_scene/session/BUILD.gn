@@ -136,6 +136,10 @@ ohos_shared_library("scene_session") {
     defines += [ "IMF_ENABLE" ]
   }
 
+  if (build_variant == "root") {
+    defines += [ "ACCESSIBILITY_DUMP_FOR_TEST" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
