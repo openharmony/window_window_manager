@@ -888,7 +888,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     callingPid_ = pid;
     callingUid_ = uid;
     if (sessionProperty && property) {
-        property->SetCompatibleMode(sessionProperty->GetCompatibleMode());
+        property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportRotation(sessionProperty->GetIsSupportRotation());
     }
     UpdateSessionState(SessionState::STATE_CONNECT);
