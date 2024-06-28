@@ -213,7 +213,9 @@ void WindowManagerService::InitWithAbilityManagerServiceAdded()
         wmsHandler_ = new WindowManagerServiceHandler();
     }
     WLOGI("RegisterWindowManagerServiceHandler");
-    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
+    bool animaEnabled = RemoteAnimation::CheckAnimationController();
+    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(
+        wmsHandler_, animaEnabled) != ERR_OK) {
         WLOGFE("RegisterWindowManagerServiceHandler failed");
     }
 }
