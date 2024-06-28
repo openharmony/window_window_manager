@@ -1930,6 +1930,28 @@ HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, Function | SmallTest | Level3
     ASSERT_NE(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
         WMError::WM_ERROR_INVALID_WINDOW);
 }
+
+/**
+ * @tc.name: NotifyStackEmpty
+ * @tc.desc: SceneSesionManager notify stack empty
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, NotifyStackEmpty, Function | SmallTest | Level3)
+{
+    WSError ret;
+    int32_t persistentId = 10086;
+    ret = ssm_->NotifyStackEmpty(persistentId);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    SessionInfo info;
+    info.abilityName_ = "SceneSessionManagerTest3";
+    info.bundleName_ = "NotifyStackEmpty";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({10086, sceneSession});
+    ret = ssm_->NotifyStackEmpty(persistentId);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

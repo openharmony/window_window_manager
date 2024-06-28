@@ -68,17 +68,17 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
-static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
-std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 } // namespace
+
+std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-    if (!g_mainHandler) {
+    if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
-        g_mainHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
 
     using type = std::underlying_type_t<MMI::WindowArea>;
@@ -1043,8 +1043,8 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    if (g_mainHandler) {
-        g_mainHandler->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
         });
     }
@@ -1841,10 +1841,18 @@ void Session::SaveSnapshot(bool useSnapshotThread)
             return;
         }
         session->snapshot_ = session->Snapshot();
-        if (session->snapshot_ && session->scenePersistence_) {
-            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-            session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        if (!(session->snapshot_ && session->scenePersistence_)) {
+            return;
         }
+        std::function<void()> func = [weakThis]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+                return;
+            }
+            session->ResetSnapshot();
+        };
+        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
     auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
     if (!useSnapshotThread || snapshotScheduler == nullptr) {
@@ -2492,8 +2500,8 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = g_deviceType == "2in1";
-    bool isPhone = g_deviceType == "phone";
+    bool isPc = systemConfig_.uiType_ == "pc";
+    bool isPhone = systemConfig_.uiType_ == "phone";
     if (!isPc && !isPhone) {
         TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
             "persistentId:%{public}d", persistentId_);

@@ -880,6 +880,8 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
+        state_ = WindowState::STATE_SHOWN;
+        requestState_ = WindowState::STATE_SHOWN;
         uiContent->Foreground();
         uiContent->PreLayout();
     }
@@ -952,9 +954,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+            state_ = WindowState::STATE_SHOWN;
+            requestState_ = WindowState::STATE_SHOWN;
         }
-        state_ = WindowState::STATE_SHOWN;
-        requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, WindowHelper::IsMainWindow(type));
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",

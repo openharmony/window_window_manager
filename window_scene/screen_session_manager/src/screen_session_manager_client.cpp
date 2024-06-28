@@ -82,6 +82,10 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
         WLOGFE("rsId is invalid");
         return false;
     }
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is nullptr");
+        return false;
+    }
     if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
         if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine") {
             WLOGFI("HiCar or SuperLauncher or CastEngine, need to connect the screen");
@@ -489,5 +493,12 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
         return;
     }
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
+
+void ScreenSessionManagerClient::OnFoldStatusChangeReportUE(const std::vector<int32_t>& screenFoldInfo, float angle)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnFoldStatusChangeUE(screenFoldInfo, angle);
+    }
 }
 } // namespace OHOS::Rosen

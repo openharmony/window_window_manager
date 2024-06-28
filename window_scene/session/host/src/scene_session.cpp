@@ -404,8 +404,12 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
-        if (event == SessionEvent::EVENT_START_MOVE && session->moveDragController_ &&
-            !session->moveDragController_->GetStartDragFlag() && session->IsFocused()) {
+        if (event == SessionEvent::EVENT_START_MOVE) {
+            if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
+                session->IsFocused() && session->IsMovableWindowType())) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
+                return WSError::WS_OK;
+            }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->moveDragController_->InitMoveDragProperty();
             if (session->IsFullScreenMovable()) {
@@ -2949,9 +2953,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 }
 
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-    bool needRemoveSession)
+    bool needRemoveSession, bool isFromClient)
 {
-    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession]() {
+    auto task = [weakThis = wptr(this), abilitySessionInfo, needRemoveSession, isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2960,6 +2964,13 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         if (abilitySessionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
+        }
+        if (SessionHelper::IsMainWindow(session->GetWindowType()) && isFromClient &&
+            !session->clientIdentityToken_.empty() &&
+            session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
+            TLOGE(WmsLogTag::WMS_LIFE, "client exception not matched: %{public}s, %{public}s",
+                session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
@@ -2999,7 +3010,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession);
+    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
 }
 
 WSRect SceneSession::GetLastSafeRect() const
@@ -3220,10 +3231,16 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         if (reason == SizeChangeReason::PIP_START) {
             session->SetSessionRequestRect(wsRect);
         }
+        TLOGI(WmsLogTag::WMS_PIP, "rect:%{public}s, reason: %{public}u", wsRect.ToString().c_str(),
+            static_cast<uint32_t>(reason));
         session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
     };
-    PostTask(task, "UpdatePiPRect");
+    if (mainHandler_ != nullptr) {
+        mainHandler_->PostTask(std::move(task), "wms:UpdatePiPRect", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        PostTask(task, "UpdatePiPRect");
+    }
     return WSError::WS_OK;
 }
 

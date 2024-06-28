@@ -105,7 +105,7 @@ std::set<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agentMap_.count(type) == 0) {
-        WLOGFI("no such type of agent registered! type:%{public}u", type);
+        WLOGFD("no such type of agent registered! type:%{public}u", type);
         return std::set<sptr<T1>>();
     }
     return agentMap_.at(type);

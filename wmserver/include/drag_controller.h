@@ -64,7 +64,8 @@ class MoveDragController : public RefBase {
 public:
     MoveDragController() : windowProperty_(new WindowProperty()), moveDragProperty_(new MoveDragProperty())
     {
-        vsyncCallback_->onCallback = std::bind(&MoveDragController::OnReceiveVsync, this, std::placeholders::_1);
+        vsyncCallback_->onCallback =
+            [this](int64_t timeStamp, int64_t _) { this->OnReceiveVsync(timeStamp); };
     }
     ~MoveDragController() = default;
 
