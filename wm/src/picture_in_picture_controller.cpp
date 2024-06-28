@@ -399,7 +399,7 @@ void PictureInPictureController::SetPipWindow(sptr<Window> window)
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
-    TLOGI(WmsLogTag::WMS_PIP,"called, enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
+    TLOGI(WmsLogTag::WMS_PIP, "called, enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
