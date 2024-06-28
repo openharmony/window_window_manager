@@ -460,13 +460,6 @@ private:
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
-    int32_t recentWidth_ = 0;
-    int32_t recentHeight_ = 0;
-    const int32_t compatiblePortraitWidth_ = 585;
-    const int32_t compatiblePortraitHeight_ = 1268;
-    const int32_t compatibleLandscapeWidth_ = 1447;
-    const int32_t compatibleLandscapeHeight_ = 965;
-    const int32_t compatibleDragLimit_ = 430;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
