@@ -108,7 +108,7 @@ static int32_t checkOptionParams(PipOption& option)
     return checkControlsRules(pipTemplateType, option.GetControlGroup());
 }
 
-static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls,
+static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t>& controls,
     uint32_t templateType)
 {
     if (controlGroup == nullptr) {
