@@ -42,6 +42,7 @@
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
+#include "fold_screen_controller/screen_fold_data.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -108,6 +109,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -334,7 +336,8 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
-    
+    void SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float postureAngle);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -600,9 +603,9 @@ private:
     bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteObject) { this->DestroySpecificSession(remoteObject); });
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
@@ -673,6 +676,9 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
+
+    void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
+    void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
 };
 } // namespace OHOS::Rosen
 
