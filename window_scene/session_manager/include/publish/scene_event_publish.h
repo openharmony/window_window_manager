@@ -18,13 +18,14 @@
 
 #include <chrono>
 #include <condition_variable>
-#include <want.h>
+
 #include <common_event_data.h>
 #include <common_event_publish_info.h>
-#include "interfaces/include/ws_common.h"
-#include "interfaces/include/ws_common_inner.h"
 #include "common_event_manager.h"
 #include "common/include/task_scheduler.h"
+#include "interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common_inner.h"
+#include <want.h>
 
 namespace OHOS::Rosen {
 class SceneEventPublish : public EventFwk::CommonEventSubscriber {

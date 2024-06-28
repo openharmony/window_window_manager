@@ -3938,15 +3938,6 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::GetDataFromSubScriber(std::string& dumpInfo)
-{
-    auto task = [this, &dumpInfo]() {
-        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
-        return WSError::WS_OK;
-    };
-    eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
-}
-
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
 {
     std::string cmd = SceneEventPublish::JoinCommands(params, params.size());
@@ -3958,7 +3949,11 @@ WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const st
     }
 
     // get response event
-    GetDataFromSubScriber(dumpInfo);
+    auto task = [this, &dumpInfo]() {
+        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
+        return WSError::WS_OK;
+    };
+    eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
 
     return WSError::WS_OK;
 }
