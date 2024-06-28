@@ -237,7 +237,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             property->SetWindowRect(rect);
         }
         property->SetCollaboratorType(reply.ReadInt32());
-        property->SetCompatibleMode(reply.ReadBool());
+        property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetIsSupportRotation(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();

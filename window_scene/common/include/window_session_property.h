@@ -90,8 +90,8 @@ public:
     void SetExtensionFlag(bool isExtensionFlag);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
-    void SetCompatibleMode(bool compatibleMode);
-    void SetIsSupportRotation(bool isSupportRotation);
+    void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetIsSupportRotation(bool isSupportDragInPcCompatibleMode);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -141,7 +141,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
-    bool GetCompatibleMode() const;
+    bool SetCompatibleModeInPc() const;
     bool GetIsSupportRotation() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -284,6 +284,8 @@ private:
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    bool compatibleModeInPc_ = false;
+    bool isSupportDragInPcCompatibleMode_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

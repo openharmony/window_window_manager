@@ -1746,7 +1746,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
         } else {
             if (isVertical) {
                 rect.width_ = compatibleInPcPortraitWidth;
-                rect.height_ = compatibleInPcLandscapeHeight;
+                rect.height_ = compatibleInPcPortraitHeight;
             } else {
                 rect.width_ = compatibleInPcLandscapeWidth;
                 rect.height_ = compatibleInPcLandscapeHeight;
@@ -1774,10 +1774,6 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportRotation();
     WSRect rect = moveDragController_->GetTargetRect();
-    if (recentWidth_ == 0 || recentHeight_ == 0) {
-        recentWidth_ = rect.width_;
-        recentHeight_ = rect.height_;
-    }
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc,

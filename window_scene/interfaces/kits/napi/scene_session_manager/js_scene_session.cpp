@@ -163,8 +163,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
         JsSceneSession::CloseKeyboardSyncTransaction);
-    BindNativeFunction(env, objValue, "setCompatibleMode", moduleName,
-        JsSceneSession::SetCompatibleMode);
+    BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
+        JsSceneSession::SetCompatibleModeInPc);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1149,11 +1149,11 @@ napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetSkipDraw(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetCompatibleMode(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleMode");
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetCompatibleMode(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2867,7 +2867,7 @@ napi_value JsSceneSession::OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, na
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetCompatibleMode(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
