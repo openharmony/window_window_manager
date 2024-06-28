@@ -223,6 +223,8 @@ public:
     void SetOffset(float x, float y);
     float GetOffsetX() const;
     float GetOffsetY() const;
+    void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    bool IsExitSplitOnBackground() const;
     void SetBounds(const WSRectF& bounds);
     WSRectF GetBounds();
     void SetRotation(Rotation rotation);
@@ -491,6 +493,7 @@ protected:
     Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
+    bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 

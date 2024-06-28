@@ -1639,6 +1639,9 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             scnSession = GetSceneSession(persistentId);
         }
         auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
+        if (ret == WSError::WS_OK) {
+            scnSession->SetExitSplitOnBackground(false);
+        }
         scnSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
         return ret;
     };
