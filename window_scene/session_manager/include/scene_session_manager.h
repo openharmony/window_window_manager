@@ -42,6 +42,7 @@
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
+#include "fold_screen_controller/screen_fold_data.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -108,6 +109,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -178,6 +180,7 @@ public:
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
+    WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
@@ -332,17 +335,18 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-    WMError UpdateDisplayHookInfo(uint32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
+    WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
+    void InitScheduleUtils();
+    void SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float postureAngle);
 
 protected:
     SceneSessionManager();
-    virtual ~SceneSessionManager() = default;
+    virtual ~SceneSessionManager();
 
 private:
     bool isKeyboardPanelEnabled_ = false;
     std::atomic<bool> enterRecent_ { false };
     void Init();
-    void InitScheduleUtils();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
@@ -424,7 +428,7 @@ private:
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
-    void UpdateAvoidArea(const int32_t& persistentId);
+    void UpdateAvoidArea(const int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
@@ -472,7 +476,6 @@ private:
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession);
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
-    void DumpAllAppSessionInfo(std::ostringstream& oss, const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap);
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
@@ -589,7 +592,6 @@ private:
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    void ProcessModalSessionForeground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
@@ -602,9 +604,9 @@ private:
     bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteObject) { this->DestroySpecificSession(remoteObject); });
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
-        std::bind(&SceneSessionManager::DestroyExtensionSession, this, std::placeholders::_1));
+        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
@@ -675,6 +677,8 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
+    void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
+    void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
 };
 } // namespace OHOS::Rosen
 

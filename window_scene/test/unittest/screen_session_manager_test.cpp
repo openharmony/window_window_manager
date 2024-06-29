@@ -1282,7 +1282,6 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenBlackList, Function | SmallTe
     }
     std::vector<uint64_t> windowId = {10, 20, 30};
     ssm_->SetVirtualScreenBlackList(screenId, windowId);
-    EXPECT_EQ(0, 0);
 }
 }
 } // namespace Rosen

@@ -293,6 +293,7 @@ public:
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
+    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
@@ -473,6 +474,7 @@ protected:
         return ret;
     }
 
+    static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;

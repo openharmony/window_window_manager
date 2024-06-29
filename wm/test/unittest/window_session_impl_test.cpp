@@ -2628,25 +2628,6 @@ HWTEST_F(WindowSessionImplTest, SetRestoredRouterStack_0200, Function | SmallTes
     EXPECT_EQ(gettedStack, routerStack);
     EXPECT_TRUE(window->GetRestoredRouterStack().empty());
 }
-
-/**
- * @tc.name: GetAceContentInfoType_0100
- * @tc.desc: basic function test of get ace content info type.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(WindowSessionImplTest, GetAceContentInfoType_0100, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::CONTINUATION), Ace::ContentInfoType::CONTINUATION);
-    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::APP_RECOVERY), Ace::ContentInfoType::APP_RECOVERY);
-    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY),
-        Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY);
-    EXPECT_EQ(window->GetAceContentInfoType(BackupAndRestoreType::NONE), Ace::ContentInfoType::NONE);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

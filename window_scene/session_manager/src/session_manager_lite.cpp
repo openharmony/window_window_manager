@@ -90,7 +90,7 @@ public:
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        TLOGI(WmsLogTag::WMS_RECOVER, "called");
+        TLOGI(WmsLogTag::DEFAULT, "called");
         auto ret = SceneSessionManagerLiteProxy::RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -100,7 +100,7 @@ public:
     }
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        TLOGI(WmsLogTag::WMS_RECOVER, "called");
+        TLOGI(WmsLogTag::DEFAULT, "called");
         auto ret = SceneSessionManagerLiteProxy::UnRegisterSessionListener(listener);
         SessionManagerLite::GetInstance().DeleteSessionListener(listener);
         return ret;
@@ -168,7 +168,7 @@ void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& liste
             return (item && item->AsObject() == listener->AsObject());
         });
     if (it != sessionListeners_.end()) {
-        TLOGW(WmsLogTag::WMS_RECOVER, "listener was already added, do not add again");
+        TLOGW(WmsLogTag::DEFAULT, "listener was already added, do not add again");
         return;
     }
     sessionListeners_.emplace_back(listener);
@@ -218,7 +218,7 @@ void SessionManagerLite::ReregisterSessionListener() const
     for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "RegisterSessionListener failed, ret = %{public}" PRId32, ret);
+            TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}" PRId32, ret);
         }
     }
 }

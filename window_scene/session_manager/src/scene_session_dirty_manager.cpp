@@ -263,9 +263,13 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             if (parentSession == nullptr) {
                 continue;
             }
+            bool isTopmostModalSubWindow = false;
+            if (property != nullptr && property->IsTopmost()) {
+                isTopmostModalSubWindow = true;
+            }
             auto iter = dialogMap.find(parentSession->GetPersistentId());
-            if (iter != dialogMap.end() && iter->second->GetSessionProperty() &&
-                iter->second->GetSessionProperty()->IsTopmost() && !property->IsTopmost()) {
+            if (iter != dialogMap.end() && iter->second != nullptr && iter->second->GetSessionProperty() &&
+                iter->second->GetSessionProperty()->IsTopmost() && isTopmostModalSubWindow == false) {
                 continue;
             }
             dialogMap[parentSession->GetPersistentId()] = session;
@@ -303,7 +307,7 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
 
     if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
         type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-            WLOGFI("[EventDispatch] NotifyWindowInfoChange wid = %{public}d, WindowUpdateType = %{public}d",
+            WLOGFD("[EventDispatch] wid = %{public}d, winType = %{public}d",
                 sceneSession->GetWindowId(), static_cast<int>(type));
     }
     sessionDirty_.store(true);
@@ -345,9 +349,6 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-            TLOGI(WmsLogTag::WMS_EVENT, "Change agentId, dialogId: %{public}d, parentId: %{public}d"
-                " CallingPid: %{public}d",
-                iter->second->GetPersistentId(), sceneSessionValue->GetPersistentId(), windowInfo.pid);
         }
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {

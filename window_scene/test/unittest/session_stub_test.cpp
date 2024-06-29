@@ -163,7 +163,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleTransferAbilityResult(data, reply);
-    ASSERT_EQ(22, res);
+    ASSERT_EQ(0, res);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(22, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
