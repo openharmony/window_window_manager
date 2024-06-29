@@ -26,6 +26,7 @@
 #include "window_event_channel_base.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -164,11 +165,11 @@ HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Hide
- * @tc.desc: check func Reconnect
+ * @tc.name: Hide01
+ * @tc.desc: check func Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, Hide, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, Hide01, Function | SmallTest | Level1)
 {
     subSession_->Hide();
     subSession_->GetMissionId();
@@ -177,6 +178,80 @@ HWTEST_F(SubSessionTest, Hide, Function | SmallTest | Level1)
     subSession_->UpdatePointerArea(rect);
     subSession_->RectCheck(50, 100);
     ASSERT_EQ(WSError::WS_OK, subSession_->ProcessPointDownSession(50, 100));
+}
+
+/**
+ * @tc.name: Hide02
+ * @tc.desc: check func Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Hide02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionProperty(property);
+    auto result = subSession_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Show01
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show01, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = nullptr;
+    ASSERT_EQ(nullptr, property);
+    
+    ASSERT_TRUE(subSession_ != nullptr);
+    ASSERT_EQ(WSError::WS_OK, subSession_->Show(property));
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    ASSERT_NE(nullptr, winPropSrc);
+    uint32_t animationFlag = 1;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc->GetAnimationFlag();
+    ASSERT_NE(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->Show(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Show03
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show03, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    ASSERT_NE(nullptr, winPropSrc);
+    uint32_t animationFlag = 3;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc->GetAnimationFlag();
+    ASSERT_EQ(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->Show(property);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 }
 }
