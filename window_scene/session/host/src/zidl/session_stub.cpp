@@ -273,6 +273,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.width_);
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
+        reply.WriteBool(property->GetFullScreenStart());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
