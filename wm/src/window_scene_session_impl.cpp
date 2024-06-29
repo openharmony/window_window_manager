@@ -3502,7 +3502,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange()
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS, "get display info by displayId %{public}" PRIu64 " failed.", displayId);
+        TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
     }
     float density = GetVirtualPixelRatio(displayInfo);
