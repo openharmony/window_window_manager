@@ -236,6 +236,7 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    SubWindowModalType GetSubWindowModalType();
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
