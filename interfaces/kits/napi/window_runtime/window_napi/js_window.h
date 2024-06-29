@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace Rosen {
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
-std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName);
+std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
 void BindFunctions(napi_env env, napi_value object, const char *moduleName);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
@@ -161,6 +161,7 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value HideWindowFunction(napi_env env, napi_callback_info info);

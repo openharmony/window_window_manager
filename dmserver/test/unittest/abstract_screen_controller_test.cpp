@@ -553,6 +553,31 @@ HWTEST_F(AbstractScreenControllerTest, SetOrientation01, Function | SmallTest | 
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, absController_->SetOrientation(1, orientation, true));
 }
 /**
+ * @tc.name: SetOrientation
+ * @tc.desc: SetOrientation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetOrientation02, Function | SmallTest | Level3)
+{
+    absController_->dmsScreenMap_[1]->isScreenGroup_ = false;
+
+    Orientation orientation = Orientation::BEGIN;
+    bool isFromWindow = true;
+    DMError ret = absController_->SetOrientation(1, orientation, isFromWindow);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    orientation = Orientation::VERTICAL;
+    ret = absController_->SetOrientation(1, orientation, isFromWindow);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    isFromWindow = false;
+    ret = absController_->SetOrientation(1, orientation, isFromWindow);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    ret = absController_->SetOrientation(1, orientation, isFromWindow, false);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+/**
  * @tc.name: SetRotation
  * @tc.desc: SetRotation test
  * @tc.type: FUNC
@@ -857,12 +882,18 @@ HWTEST_F(AbstractScreenControllerTest, NotifyScreenGroupChanged, Function | Smal
  */
 HWTEST_F(AbstractScreenControllerTest, SetScreenPowerForAll, Function | SmallTest | Level3)
 {
+    ASSERT_EQ(false, absController_->SetScreenPowerForAll(ScreenPowerState::POWER_ON,
+        PowerStateChangeReason::POWER_BUTTON));
+
     for (uint32_t i = 0; i < screenVec.size(); ++i) {
         if (screenVec[i] != nullptr && screenVec[i]->type_ == ScreenType::REAL) {
             screenVec[i]->type_ = ScreenType::UNDEFINED;
         }
     }
     ASSERT_EQ(false, absController_->SetScreenPowerForAll(ScreenPowerState::INVALID_STATE,
+        PowerStateChangeReason::POWER_BUTTON));
+
+    ASSERT_EQ(false, absController_->SetScreenPowerForAll(ScreenPowerState::POWER_OFF,
         PowerStateChangeReason::POWER_BUTTON));
 }
 /**
@@ -969,6 +1000,137 @@ HWTEST_F(AbstractScreenControllerTest, ConvertToDmsScreenId, Function | SmallTes
 {
     ScreenId rsScreenId = 7;
     ASSERT_TRUE(absController_->screenIdManager_.ConvertToDmsScreenId(rsScreenId));
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToScreen
+ * @tc.desc: AddSurfaceNodeToScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, AddSurfaceNodeToScreen, Function | SmallTest | Level3)
+{
+    ScreenId dmsScreenId = 7;
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
+    DMError ret = absController_->AddSurfaceNodeToScreen(dmsScreenId, surfaceNode, true);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    dmsScreenId = 1;
+    ret = absController_->AddSurfaceNodeToScreen(dmsScreenId, surfaceNode, true);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetScreenSupportedColorGamuts
+ * @tc.desc: GetScreenSupportedColorGamuts test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    std::vector<ScreenColorGamut> colorGamuts;
+    DMError ret = absController_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
+
+    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
+/**
+ * @tc.name: GetScreenColorGamut
+ * @tc.desc: GetScreenColorGamut test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, GetScreenColorGamut, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    ScreenColorGamut colorGamut;
+    DMError ret = absController_->GetScreenColorGamut(screenId, colorGamut);
+    
+    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
+/**
+ * @tc.name: SetScreenColorGamut
+ * @tc.desc: SetScreenColorGamut test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenColorGamut, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    int32_t colorGamutIdx = 1;
+    DMError ret = absController_->SetScreenColorGamut(screenId, colorGamutIdx);
+    
+    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
+/**
+ * @tc.name: GetScreenGamutMap
+ * @tc.desc: GetScreenGamutMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, GetScreenGamutMap, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    ScreenGamutMap gamutMap;
+    DMError ret = absController_->GetScreenGamutMap(screenId, gamutMap);
+    
+    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
+/**
+ * @tc.name: SetScreenGamutMap
+ * @tc.desc: SetScreenGamutMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenGamutMap, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    ScreenGamutMap gamutMap = {};
+    DMError ret = absController_->SetScreenGamutMap(screenId, gamutMap);
+    
+    ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
+/**
+ * @tc.name: SetScreenColorTransform
+ * @tc.desc: SetScreenColorTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenColorTransform, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    DMError ret = absController_->SetScreenColorTransform(screenId);
+    
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: StopScreens
+ * @tc.desc: StopScreens test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, StopScreens, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> screenIds = {7};
+    ScreenCombination stopCombination = ScreenCombination::SCREEN_ALONE;
+    DMError ret = absController_->StopScreens(screenIds, stopCombination);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    screenIds[0] = 2;
+    ret = absController_->StopScreens(screenIds, stopCombination);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    absController_->dmsScreenMap_[2]->groupDmsId_=2;
+    ret = absController_->StopScreens(screenIds, stopCombination);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    absController_->dmsScreenMap_[2]->groupDmsId_=5;
+    ret = absController_->StopScreens(screenIds, stopCombination);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    absController_->dmsScreenMap_[2]->groupDmsId_=2;
+    stopCombination = ScreenCombination::SCREEN_MIRROR;
+    ret = absController_->StopScreens(screenIds, stopCombination);
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 }
 } // namespace Rosen

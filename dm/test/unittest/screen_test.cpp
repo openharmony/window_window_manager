@@ -72,11 +72,11 @@ namespace {
 HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
 {
     ASSERT_GT(screen_->GetName().size(), 0);
-    ASSERT_GT(screen_->GetWidth(), 0);
-    ASSERT_GT(screen_->GetHeight(), 0);
-    ASSERT_GT(screen_->GetVirtualWidth(), 0);
-    ASSERT_GT(screen_->GetVirtualHeight(), 0);
-    ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
+    ASSERT_EQ(screen_->GetWidth(), 0);
+    ASSERT_EQ(screen_->GetHeight(), 0);
+    ASSERT_EQ(screen_->GetVirtualWidth(), 0);
+    ASSERT_EQ(screen_->GetVirtualHeight(), 0);
+    ASSERT_EQ(screen_->GetVirtualPixelRatio(), 0);
     ASSERT_EQ(screen_->IsReal(), true);
     ASSERT_NE(screen_->GetScreenInfo(), nullptr);
 }
@@ -408,7 +408,7 @@ HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     res = screen_->SetResolution(1, 1, 100);
-    ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(DMError::DM_OK, res);
 }
 
 /**

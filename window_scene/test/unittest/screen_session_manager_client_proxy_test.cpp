@@ -23,13 +23,27 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 class ScreenSessionManagerClientProxyTest : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     sptr<IRemoteObjectMocker> iRemoteObjectMocker_;
     sptr<ScreenSessionManagerClientProxy> screenSessionManagerClientProxy_;
 };
+
+void ScreenSessionManagerClientProxyTest::SetUpTestCase()
+{
+}
+
+void ScreenSessionManagerClientProxyTest::TearDownTestCase()
+{
+    usleep(SLEEP_TIME_IN_US);
+}
 
 void ScreenSessionManagerClientProxyTest::SetUp()
 {

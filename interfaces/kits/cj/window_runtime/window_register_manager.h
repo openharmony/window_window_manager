@@ -56,8 +56,7 @@ private:
         bool isRegister);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
-    using Func = WmErrorCode(CjWindowRegisterManager::*)(sptr<CjWindowListener>,
-        sptr<Window> window, bool);
+    using Func = std::function<WmErrorCode(sptr<CjWindowListener>, sptr<Window>, bool)>;
     std::map<std::string, std::map<int64_t, sptr<CjWindowListener>>> cjCbMap_;
     mutable std::shared_mutex mtx_;
     std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
