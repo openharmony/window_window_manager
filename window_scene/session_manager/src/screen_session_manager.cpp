@@ -78,6 +78,7 @@ const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC_MAIN = 9;
@@ -89,6 +90,7 @@ static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.typ
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
+static const int32_t AUTO_ROTATE_OFF = 0;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
 
 bool JudgeIsBeta()
@@ -226,6 +228,7 @@ void ScreenSessionManager::Init()
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
     } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
+        // 多屏设备只要有屏幕亮,GetScreenPower获取的任意一块屏幕状态均是ON
         SetSensorSubscriptionEnabled();
     }
     // publish init
@@ -1609,6 +1612,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         TLOGI(WmsLogTag::DMS, "BootFinishedCallback boot animation finished");
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
+        that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
@@ -1620,6 +1624,22 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
 void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit)
 {
     foldScreenPowerInit_ = foldScreenPowerInit;
+}
+
+void ScreenSessionManager::SetRotateLockedFromSettingData()
+{
+    uint32_t autoRotateStatus = AUTO_ROTATE_OFF;  // 0代表自动旋转关闭,1代表自动旋转打开
+    bool islocked = true;
+    // ret为true表示从数据库读到了值，并赋给了autoRotateStatus
+    bool ret = ScreenSettingHelper::GetSettingValue(autoRotateStatus, SETTING_LOCKED_KEY);
+    TLOGI(WmsLogTag::DMS, "get autoRotateStatus from settingdata: %{public}u", autoRotateStatus);
+    if (autoRotateStatus) {
+        islocked =false;
+    }
+    if (ret) {
+        TLOGI(WmsLogTag::DMS, "get islocked success");
+        SetScreenRotationLockedFromJs(islocked);
+    }
 }
 
 void ScreenSessionManager::RegisterSettingDpiObserver()
