@@ -86,7 +86,7 @@ namespace {
 HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
 {
     MainSession* pMainSession = nullptr;
-    sptr<SpecificSessionCallback> pSpecificCallback = nullptr;
+    sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
 
     SessionInfo info;
     info.persistentId_ = -1;
