@@ -40,9 +40,11 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName) const;
 
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
+    mutable std::shared_mutex jsCbMapMutex_;
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     void VerifyCallerToken(SessionInfo& info);
