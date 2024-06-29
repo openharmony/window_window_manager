@@ -457,6 +457,25 @@ void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& are
     }
 }
 
+SubWindowModalType SceneSession::GetSubWindowModalType()
+{
+    SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
+        return;
+    }
+    auto windowType = property->GetWindowType();
+    if (WindowHelper::IsDialogWindow(windowType)) {
+        modalType = SubWindowModalType::TYPE_DIALOG;
+    } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
+        modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+    } else if (WindowHelper::IsSubWindow(windowType)) {
+        modalType = SubWindowModalType::TYPE_NORMAL;
+    }
+    return modalType;
+}
+
 void SceneSession::SetSessionEventParam(SessionEventParam param)
 {
     sessionEventParam_ = param;
