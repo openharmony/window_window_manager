@@ -111,7 +111,6 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.persistentId_ = 0;
     pMainSession = new MainSession(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
-
 }
 
 
