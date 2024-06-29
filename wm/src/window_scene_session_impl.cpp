@@ -3115,7 +3115,7 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
     windowLimits.maxWidth_ = customizedLimits.maxWidth_;
     windowLimits.maxHeight_ = customizedLimits.maxHeight_;
     windowLimits.vpRatio_ = customizedLimits.vpRatio_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
         "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", GetWindowId(), windowLimits.minWidth_,
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     return WMError::WM_OK;
