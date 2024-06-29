@@ -167,6 +167,8 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     bool Write(Parcel& parcel, WSPropertyChangeAction action);
     void Read(Parcel& parcel, WSPropertyChangeAction action);
+    void SetFullScreenStart(bool fullScreenStart);
+    bool GetFullScreenStart() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -274,6 +276,7 @@ private:
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
     bool isExtensionFlag_ = false;
+    bool fullScreenStart_ = false;
 
     bool isShaped_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;

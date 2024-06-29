@@ -668,8 +668,14 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         property_->SetModeSupportInfo(modeSupportInfo);
         auto isPhone = windowSystemConfig_.uiType_ == "phone";
         auto isPad = windowSystemConfig_.uiType_ == "pad";
-        if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone && !isPad) {
-            SetFullScreen(true);
+        bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
+            windowSystemConfig_.freeMultiWindowEnable_;
+        bool onlySupportFullScreen = (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+            ((!isPhone && !isPad) || isFreeMutiWindowMode);
+        if (onlySupportFullScreen || property_->GetFullScreenStart()) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
+                onlySupportFullScreen, property_->GetFullScreenStart());
+            SetLayoutFullScreen(true);
         }
         // get orientation configuration
         OHOS::AppExecFwk::DisplayOrientation displayOrientation =
