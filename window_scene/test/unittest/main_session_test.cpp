@@ -77,6 +77,44 @@ RSSurfaceNode::SharedPtr MainSessionTest::CreateRSSurfaceNode()
 }
 
 namespace {
+
+/**
+ * @tc.name: MainSession01
+ * @tc.desc: check func MainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
+{
+    MainSession* pMainSession = nullptr;
+    sptr<SpecificSessionCallback> pSpecificCallback = nullptr;
+
+    SessionInfo info;
+    info.persistentId_ = -1;
+    info.abilityName_ = "";
+    info.moduleName_ = "";
+    info.bundleName_ = "";
+    pMainSession = new MainSession(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+    info.persistentId_ = 0;
+    pMainSession = new MainSession(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+    info.persistentId_ = -1;
+    info.abilityName_ = "MainSession01";
+    info.moduleName_ = "MainSession02";
+    info.bundleName_ = "MainSession03";
+    pSpecificCallback = new MainSession::SpecificSessionCallback;
+    pMainSession = new MainSession(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+    info.persistentId_ = 0;
+    pMainSession = new MainSession(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+}
+
+
 /**
  * @tc.name: Reconnect01
  * @tc.desc: check func Reconnect
