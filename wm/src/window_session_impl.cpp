@@ -1293,10 +1293,7 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
         return WMError::WM_ERROR_NULLPTR;
     }
     property_->SetBrightness(brightness);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
 }
 
 float WindowSessionImpl::GetBrightness() const
