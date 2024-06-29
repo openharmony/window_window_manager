@@ -238,7 +238,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetCompatibleModeInPc(reply.ReadBool());
-        property->SetIsSupportRotation(reply.ReadBool());
+        property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
