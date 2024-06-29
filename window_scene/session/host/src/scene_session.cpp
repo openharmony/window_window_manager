@@ -1719,6 +1719,15 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     return true;
 }
 
+void SceneSession::InitCompatibleModeInPcWindowStyle(WSRect& rect)
+{
+    if (rect.width_ < rect.height_) {
+        compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_PORTRAIT;
+    } else {
+        compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_LANDSCAPE;
+    }
+}
+
 void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
     bool isSupportDragInPcCompatibleMode)
 {
@@ -1727,9 +1736,8 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     const int32_t compatibleInPcLandscapeWidth = 1447;
     const int32_t compatibleInPcLandscapeHeight = 965;
     const int32_t compatibleInPcDragLimit = 430;
-    bool isVertical = false;
-    if (rect.width_ < rect.height_) {
-        isVertical = true;
+    if (compatibleModeInPcWindowStyle_ == CompatibleModeInPcWindowStyle::WINDOW_UNDEFINE) {
+        InitCompatibleModeInPcWindowStyle(rect);
     }
 
     if (reason != SizeChangeReason::MOVE) {
