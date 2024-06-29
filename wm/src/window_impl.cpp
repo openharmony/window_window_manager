@@ -2989,8 +2989,8 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        WLOGFE("get displayInfo failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-            property_->GetWindowId());
+        TLOGE(WmsLogTag::WMS_MAIN, "get displayInfo failed displayId:%{public}" PRIu64", window id:%{public}u",
+            property_->GetDisplayId(), property_->GetWindowId());
         return;
     }
     float vpr = display->GetVirtualPixelRatio();
