@@ -1719,15 +1719,6 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     return true;
 }
 
-void SceneSession::InitCompatibleModeInPcWindowStyle(WSRect& rect)
-{
-    if (rect.width_ < rect.height_) {
-        compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_PORTRAIT;
-    } else {
-        compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_LANDSCAPE;
-    }
-}
-
 void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
     bool isSupportDragInPcCompatibleMode)
 {
@@ -1736,31 +1727,27 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     const int32_t compatibleInPcLandscapeWidth = 1447;
     const int32_t compatibleInPcLandscapeHeight = 965;
     const int32_t compatibleInPcDragLimit = 430;
-    if (compatibleModeInPcWindowStyle_ == CompatibleModeInPcWindowStyle::WINDOW_UNDEFINE) {
-        InitCompatibleModeInPcWindowStyle(rect);
-    }
+    WSRect windowRect = GetSessionRect();
+    auto windowWidth = windowRect.width_;
+    auto windowHeight = windowRect.height_;
 
     if (reason != SizeChangeReason::MOVE) {
-        if (isSupportDragInPcCompatibleMode &&
-            compatibleModeInPcWindowStyle_ == CompatibleModeInPcWindowStyle::WINDOW_LANDSCAPE &&
+        if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
             rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
-            compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_PORTRAIT;
-        } else if (isSupportDragInPcCompatibleMode &&
-            compatibleModeInPcWindowStyle_ == CompatibleModeInPcWindowStyle::WINDOW_PORTRAIT &&
+        } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
             rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcLandscapeWidth;
             rect.height_ = compatibleInPcLandscapeHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
-            compatibleModeInPcWindowStyle_ = CompatibleModeInPcWindowStyle::WINDOW_LANDSCAPE;
         } else {
-            if (compatibleModeInPcWindowStyle_ == CompatibleModeInPcWindowStyle::WINDOW_PORTRAIT) {
+            if (windowWidth < windowHeight) {
                 rect.width_ = compatibleInPcPortraitWidth;
                 rect.height_ = compatibleInPcPortraitHeight;
             } else {
