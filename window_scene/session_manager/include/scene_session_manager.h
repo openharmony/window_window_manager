@@ -180,6 +180,7 @@ public:
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
+    WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
@@ -340,7 +341,7 @@ public:
 
 protected:
     SceneSessionManager();
-    virtual ~SceneSessionManager() = default;
+    virtual ~SceneSessionManager();
 
 private:
     bool isKeyboardPanelEnabled_ = false;
@@ -676,7 +677,6 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
-
     void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
     void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
 };

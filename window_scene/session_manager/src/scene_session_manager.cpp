@@ -23,6 +23,7 @@
 #include <memory>
 #include <sstream>
 #include <unistd.h>
+#include <chrono>
 
 #include <ability_context.h>
 #include <ability_info.h>
@@ -49,6 +50,7 @@
 #include "screen.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
+#include "publish/scene_event_publish.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -152,8 +154,14 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
+const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
+
+static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
+
+static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
+
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -220,6 +228,12 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
+    SceneEventPublish::Subscribe(g_scbSubscriber);
+}
+
+SceneSessionManager::~SceneSessionManager()
+{
+    SceneEventPublish::UnSubscribe(g_scbSubscriber);
 }
 
 void SceneSessionManager::Init()
@@ -3921,6 +3935,26 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
+{
+    std::string cmd = SceneEventPublish::JoinCommands(params, params.size());
+
+    // publish data
+    bool ret = eventHandler_->PostSyncTask([this, cmd] { return g_scbSubscriber->Publish(cmd); }, "PublishSCBDumper");
+    if (!ret) {
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+
+    // get response event
+    auto task = [this, &dumpInfo]() {
+        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
+        return WSError::WS_OK;
+    };
+    eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
+
+    return WSError::WS_OK;
+}
+
 void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     if (dumpingSessionPid_ == INVALID_SESSION_ID) {
@@ -3948,6 +3982,9 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         }
         if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
             return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2:params num
+            return GetSCBDebugDumpInfo(dumpInfo, params);
         }
         return WSError::WS_ERROR_INVALID_OPERATION;
     };
