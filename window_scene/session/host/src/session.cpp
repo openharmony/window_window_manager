@@ -889,7 +889,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     callingUid_ = uid;
     if (sessionProperty && property) {
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
-        property->SetIsSupportRotation(sessionProperty->GetIsSupportRotation());
+        property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
     }
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
@@ -2109,7 +2109,7 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     }
     
     property->SetCompatibleModeInPc(enable);
-    property->SetIsSupportRotation(isSupportDragInPcCompatibleMode);
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     return WSError::WS_OK;
 }
 

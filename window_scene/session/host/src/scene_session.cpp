@@ -1771,8 +1771,12 @@ void SceneSession::SetMoveDragCallback()
 void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 {
     auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "property is null");
+        return;
+    }
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
-    bool isSupportDragInPcCompatibleMode = property->GetIsSupportRotation();
+    bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",

@@ -768,12 +768,12 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
-void WindowSessionProperty::SetIsSupportRotation(bool isSupportDragInPcCompatibleMode)
+void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
 }
 
-bool WindowSessionProperty::GetIsSupportRotation() const
+bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 {
     return isSupportDragInPcCompatibleMode_;
 }
@@ -877,7 +877,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
-    property->SetIsSupportRotation(parcel.ReadBool());
+    property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     return property;
 }
 
