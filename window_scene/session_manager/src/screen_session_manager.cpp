@@ -2445,13 +2445,13 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         }
     }
     screenIdManager_.DeleteScreenId(screenId);
+    virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
+    NotifyCaptureStatusChanged();
     if (rsScreenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "DestroyVirtualScreen: No corresponding rsScreenId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
-    virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
-    NotifyCaptureStatusChanged();
     return DMError::DM_OK;
 }
 
@@ -4064,14 +4064,15 @@ void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
 void ScreenSessionManager::NotifyCaptureStatusChanged()
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
+    bool isCapture = IsCaptured();
+    isScreenShot_ = false;
     if (agents.empty()) {
         TLOGI(WmsLogTag::DMS, "agents is empty");
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyCaptureStatusChanged(IsCaptured());
+        agent->NotifyCaptureStatusChanged(isCapture);
     }
-    isScreenShot_ = false;
 }
 
 void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
