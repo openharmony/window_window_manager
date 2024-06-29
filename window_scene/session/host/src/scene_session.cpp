@@ -406,7 +406,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
-                session->IsFocused() && session->IsMovableWindowType())) {
+                session->IsFocused() && session->IsMovableWindowType() &&
+                session->moveDragController_->HasPointDown())) {
                 TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
                 return WSError::WS_OK;
             }

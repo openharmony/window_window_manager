@@ -491,11 +491,17 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect)
 {
     bool needNotifyEvent = true;
-    uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
     int32_t winX = pointerItem.GetWindowX();
     int32_t winY = pointerItem.GetWindowY();
+    int32_t titleBarHeight = 0;
+    WMError ret = GetDecorHeight(titleBarHeight);
+    if (ret != WMError::WM_OK || titleBarHeight <= 0) {
+        titleBarHeight = static_cast<int32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
+    } else {
+        titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
+    }
     bool isMoveArea = (0 <= winX && winX <= static_cast<int32_t>(rect.width_)) &&
-        (0 <= winY && winY <= static_cast<int32_t>(titleBarHeight));
+        (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
     auto dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
