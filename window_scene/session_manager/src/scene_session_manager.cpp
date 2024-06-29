@@ -3451,7 +3451,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
-    if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr) {
+    if (GetDisplayBrightness() != brightness && eventHandler_ != nullptr &&
+        GetFocusedSessionId() == sceneSession->GetPersistentId()) {
         bool setBrightnessRet = false;
         if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
             auto task = []() {
