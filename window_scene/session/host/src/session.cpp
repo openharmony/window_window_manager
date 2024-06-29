@@ -880,18 +880,17 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 
     SetSessionProperty(property);
     if (property) {
-        Rect rect = {
-            winRect_.posX_,
-            winRect_.posY_,
-            static_cast<uint32_t>(winRect_.width_),
-            static_cast<uint32_t>(winRect_.height_)
-        };
+        Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
+            static_cast<uint32_t>(winRect_.height_)};
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
     }
     callingPid_ = pid;
     callingUid_ = uid;
-
+    if (sessionProperty && property) {
+        property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
+        property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+    }
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
@@ -2104,6 +2103,21 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     }
     sessionStage_->UpdateFocus(isFocused);
 
+    return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
+        enable, isSupportDragInPcCompatibleMode);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    
+    property->SetCompatibleModeInPc(enable);
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     return WSError::WS_OK;
 }
 

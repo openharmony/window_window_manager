@@ -660,7 +660,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
                     "hookDensity: %{public}f", info.width_, info.height_, info.density_);
                 displayInfo->SetWidth(info.width_);
                 displayInfo->SetHeight(info.height_);
-                displayInfo->SetWidth(info.density_);
+                displayInfo->SetVirtualPixelRatio(info.density_);
             }
             return displayInfo;
         }

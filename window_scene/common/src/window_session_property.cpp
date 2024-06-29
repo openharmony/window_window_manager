@@ -758,6 +758,26 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     }
 }
 
+void WindowSessionProperty::SetCompatibleModeInPc(bool compatibleModeInPc)
+{
+    compatibleModeInPc_ = compatibleModeInPc;
+}
+
+bool WindowSessionProperty::GetCompatibleModeInPc() const
+{
+    return compatibleModeInPc_;
+}
+
+void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
+{
+    isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
+}
+
+bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
+{
+    return isSupportDragInPcCompatibleMode_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -792,7 +812,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_);
+        parcel.WriteParcelable(&keyboardLayoutParams_) &&
+        parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteBool(isSupportDragInPcCompatibleMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -854,6 +876,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
+    property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     return property;
 }
 
