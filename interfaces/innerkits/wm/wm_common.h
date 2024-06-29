@@ -1083,6 +1083,15 @@ public:
         return nullptr;
     }
 };
+
+/**
+ * @brief Window style in PC CompatibleMode.
+ */
+enum class CompatibleModeInPcWindowStyle : uint32_t {
+    WINDOW_UNDEFINE = 0,
+    WINDOW_PORTRAIT,
+    WINDOW_LANDSCAPE,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
