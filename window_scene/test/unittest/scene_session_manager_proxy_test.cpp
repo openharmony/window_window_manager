@@ -539,10 +539,10 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionWindowVisibilityListener001,
 }
 
 /**
-+ * @tc.name: UpdateModalExtensionRect
-+ * @tc.desc: normal function
-+ * @tc.type: FUNC
-+ */
+ * @tc.name: UpdateModalExtensionRect
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
