@@ -279,6 +279,16 @@ bool WindowOption::GetExtensionTag() const
     return isExtensionTag_;
 }
 
+void WindowOption::SetUIExtensionUsage(uint32_t uiExtensionUsage)
+{
+    uiExtensionUsage_ = uiExtensionUsage;
+}
+
+uint32_t WindowOption::GetUIExtensionUsage() const
+{
+    return uiExtensionUsage_;
+}
+
 void WindowOption::SetDialogDecorEnable(bool decorEnable)
 {
     dialogDecorEnable_ = decorEnable;

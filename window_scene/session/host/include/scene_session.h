@@ -321,6 +321,12 @@ public:
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void RemoveModalUIExtension(int32_t persistentId);
+    bool HasModalUIExtension();
+    void UpdateModalUIExtension(int32_t persistentId, int32_t pid, const Rect& windowRect);
+    ExtensionWindowEventInfo GetModalUIExtension();
+    Vector2f GetTranslateXY(bool useUIExtension);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -457,6 +463,8 @@ private:
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
+    std::shared_mutex modalUIExtensionInfoListMutex_;
+    std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;

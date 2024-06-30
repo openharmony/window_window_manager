@@ -539,6 +539,45 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionWindowVisibilityListener001,
 }
 
 /**
++ * @tc.name: UpdateModalExtensionRect
++ * @tc.desc: normal function
++ * @tc.type: FUNC
++ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    Rect rect { 1, 2, 3, 4 };
+    sceneSessionManagerProxy->UpdateModalExtensionRect(persistentId, parentId, rect);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
+ * @tc.name: ProcessModalExtensionPointDown
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    sceneSessionManagerProxy->ProcessModalExtensionPointDown(persistentId, parentId, 0, 0);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: normal function
  * @tc.type: FUNC
