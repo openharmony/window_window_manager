@@ -1544,7 +1544,7 @@ WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId
 
 void SceneSessionManagerProxy::UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect)
 {
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -1585,7 +1585,7 @@ void SceneSessionManagerProxy::UpdateModalExtensionRect(int32_t persistentId, in
 void SceneSessionManagerProxy::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
     int32_t posX, int32_t posY)
 {
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
