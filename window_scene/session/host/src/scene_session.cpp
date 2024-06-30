@@ -1208,6 +1208,77 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     return false;
 }
 
+void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, pid=%{public}d", GetPersistentId(),
+        extensionInfo.persistentId, extensionInfo.pid);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        modalUIExtensionInfoList_.push_back(extensionInfo);
+    }
+    NotifySessionInfoChange();
+}
+
+void SceneSession::UpdateModalUIExtension(int32_t persistentId, int32_t pid, const Rect& windowRect)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
+        "Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        persistentId, pid, windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        auto iter = std::find_if(modalUIExtensionInfoList_.begin(), modalUIExtensionInfoList_.end(),
+            [persistentId, pid](const ExtensionWindowEventInfo& extensionInfo) {
+            return extensionInfo.persistentId == persistentId && extensionInfo.pid == pid;
+        });
+        if (iter == modalUIExtensionInfoList_.end()) {
+            return;
+        }
+        iter->windowRect = windowRect;
+    }
+    NotifySessionInfoChange();
+}
+
+void SceneSession::RemoveModalUIExtension(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d", GetPersistentId(), persistentId);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        auto iter = std::find_if(modalUIExtensionInfoList_.begin(), modalUIExtensionInfoList_.end(),
+            [persistentId](const ExtensionWindowEventInfo& extensionInfo) {
+            return extensionInfo.persistentId == persistentId;
+        });
+        if (iter == modalUIExtensionInfoList_.end()) {
+            return;
+        }
+        modalUIExtensionInfoList_.erase(iter, modalUIExtensionInfoList_.end());
+    }
+    NotifySessionInfoChange();
+}
+
+bool SceneSession::HasModalUIExtension()
+{
+    std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+    return !modalUIExtensionInfoList_.empty();
+}
+
+ExtensionWindowEventInfo SceneSession::GetModalUIExtension()
+{
+    std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+    return modalUIExtensionInfoList_.back();
+}
+
+Vector2f SceneSession::GetTranslateXY(bool useUIExtension)
+{
+    WSRect windowRect = GetSessionRect();
+    if (useUIExtension && HasModalUIExtension()) {
+        auto rect = GetModalUIExtension().windowRect;
+        windowRect.posX_ = rect.posX_;
+        windowRect.posY_ = rect.posY_;
+    }
+    Vector2f translateXY(windowRect.posX_, windowRect.posY_);
+    return translateXY;
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {

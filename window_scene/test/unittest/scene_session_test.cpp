@@ -789,6 +789,41 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ModalUIExtension
+ * @tc.desc: ModalUIExtension
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalUIExtension";
+    info.bundleName_ = "ModalUIExtension";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    ExtensionWindowEventInfo extensionInfo;
+    extensionInfo.persistentId = 12345;
+    extensionInfo.pid = 1234;
+    extensionInfo.windowRect = { 1, 2, 3, 4 };
+    sceneSession->AddModalUIExtension(extensionInfo);
+    EXPECT_TRUE(sceneSession->HasModalUIExtension());
+
+    auto getInfo = sceneSession->GetModalUIExtension();
+    EXPECT_EQ(getInfo.persistentId, extensionInfo.persistentId);
+    EXPECT_EQ(getInfo.pid, extensionInfo.pid);
+    EXPECT_EQ(getInfo.windowRect, extensionInfo.windowRect);
+
+    Rect windowRect = { 5, 6, 7, 8 };
+    sceneSession->UpdateModalUIExtension(extensionInfo.persistentId, extensionInfo.pid, windowRect);
+    getInfo = sceneSession->GetModalUIExtension();
+    EXPECT_EQ(getInfo.windowRect, windowRect);
+
+    sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+}
+
+/**
  * @tc.name: NotifySessionRectChange
  * @tc.desc: NotifySessionRectChange
  * @tc.type: FUNC

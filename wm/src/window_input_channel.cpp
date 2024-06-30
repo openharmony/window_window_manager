@@ -113,7 +113,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         return;
     }
     if (window_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr, id:%{public}d", pointerEvent->GetId());
         return;
     }
     auto action = pointerEvent->GetPointerAction();
