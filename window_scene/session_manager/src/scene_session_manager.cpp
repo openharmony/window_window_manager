@@ -8253,18 +8253,33 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("GetVisibilityWindowInfo permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
+//    if (!SessionPermission::IsSystemCalling()) {
+//        WLOGFE("GetVisibilityWindowInfo permission denied!");
+//        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+//    }
     auto task = [this, &infos]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
             sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
             if (session == nullptr) {
                 continue;
             }
-            infos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
-                session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType()));
+            WSRect hostRect = session->GetSessionRect();
+            Rect rect = {
+                    hostRect.posX_,
+                    hostRect.posY_,
+                    static_cast<uint32_t>(hostRect.width_),
+                    static_cast<uint32_t>(hostRect.height_)
+            };
+            auto windowStatus = GetWindowStatus(session->GetWindowMode(), session->GetSessionState(),
+                                           session->GetSessionProperty());
+            auto windowVisibilityInfo = new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
+                                                                 session->GetCallingUid(),
+                                                                 session->GetVisibilityState(),
+                                                                 session->GetWindowType(),
+                                                                 rect, session->GetSessionInfo().bundleName_,
+                                                                 session->GetSessionInfo().abilityName_,
+                                                                 windowStatus);
+            infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
     };
