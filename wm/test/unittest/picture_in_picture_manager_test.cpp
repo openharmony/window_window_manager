@@ -386,9 +386,9 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
  */
 HWTEST_F(PictureInPictureManagerTest, RemoveActiveControllerUnLocked, Function | SmallTest | Level2)
 {
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController =
-        new PictureInPictureController(option, nullptr, 100, nullptr);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::RemoveActiveControllerUnLocked(pipController);
