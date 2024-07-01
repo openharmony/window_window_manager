@@ -59,8 +59,6 @@ private:
     std::map<std::string, Func> registerFunc_;
     std::map<std::string, Func> unRegisterFunc_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    std::mutex mtx_;
-    static std::mutex pipMutex_;
 
 public:
     class PiPLifeCycleImpl : public IPiPLifeCycle {

@@ -46,7 +46,7 @@ std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::aut
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 std::shared_mutex PictureInPictureManager::controllerMapMutex_;
-std::shared_mutex PictureInPictureManager::mutex_;
+std::mutex PictureInPictureManager::mutex_;
 
 PictureInPictureManager::PictureInPictureManager()
 {
@@ -63,7 +63,7 @@ bool PictureInPictureManager::IsSupportPiP()
 
 bool PictureInPictureManager::ShouldAbortPipStart()
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     return activeController_ != nullptr && activeController_->GetControllerState() == PiPWindowState::STATE_STARTING;
 }
 
@@ -99,7 +99,7 @@ bool PictureInPictureManager::HasActiveController()
 
 bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return false;
     }
@@ -111,14 +111,13 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
 void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::unique_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     activeController_ = pipController;
 }
 
 void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureController> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::unique_lock<std::shared_mutex> lock(mutex_);
     if (HasActiveController() && pipController.GetRefPtr() == activeController_.GetRefPtr()) {
         activeController_ = nullptr;
     }
@@ -173,7 +172,7 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
 bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called %{public}u", windowId);
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return false;
     }
@@ -182,7 +181,7 @@ bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 
 sptr<Window> PictureInPictureManager::GetCurrentWindow()
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return nullptr;
     }
@@ -192,7 +191,7 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
 void PictureInPictureManager::DoPreRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -202,7 +201,7 @@ void PictureInPictureManager::DoPreRestore()
 void PictureInPictureManager::DoRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -212,7 +211,7 @@ void PictureInPictureManager::DoRestore()
 void PictureInPictureManager::DoLocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -222,7 +221,7 @@ void PictureInPictureManager::DoLocateSource()
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -244,7 +243,7 @@ void PictureInPictureManager::DoActionClose()
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
