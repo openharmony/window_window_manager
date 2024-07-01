@@ -314,7 +314,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         if (pipLifeCycleListener_) {
             pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        PictureInPictureManager::RemoveActiveController(this);
+        PictureInPictureManager::RemoveActiveController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
