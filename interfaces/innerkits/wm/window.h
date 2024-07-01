@@ -1315,7 +1315,7 @@ public:
      */
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
     {
-        return std::string();
+        return {};
     }
     /**
      * @brief Set uiability restored router stack.
@@ -1759,7 +1759,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    
+
     /**
      * @brief Get System Bar(include status bar and nav bar) Properties
      *
