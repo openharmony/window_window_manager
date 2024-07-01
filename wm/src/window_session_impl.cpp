@@ -887,7 +887,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
                 auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
                 if (!routerStack.empty() &&
                     uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
-                    WLOGFD("Restore router stack succeed.");
+                    TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                     break;
                 }
             }
