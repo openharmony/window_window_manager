@@ -120,6 +120,17 @@ enum class WindowModeType : uint8_t {
 };
 
 /**
+ * @brief Enumerates modal of sub session.
+ */
+enum class SubWindowModalType : uint32_t {
+    TYPE_UNDEFINED = 0,
+    TYPE_NORMAL,
+    TYPE_DIALOG,
+    TYPE_WINDOW_MODALITY,
+    TYPE_APPLICATION_MODALITY,
+};
+
+/**
  * @brief Enumerates mode supported of window.
  */
 enum WindowModeSupport : uint32_t {
