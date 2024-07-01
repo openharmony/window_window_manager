@@ -23,6 +23,7 @@
 #include <memory>
 #include <sstream>
 #include <unistd.h>
+#include <chrono>
 
 #include <ability_context.h>
 #include <ability_info.h>
@@ -49,6 +50,7 @@
 #include "screen.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
+#include "publish/scene_event_publish.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -152,8 +154,14 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
+const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
+
+static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
+
+static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
+
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -220,6 +228,12 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
+    SceneEventPublish::Subscribe(g_scbSubscriber);
+}
+
+SceneSessionManager::~SceneSessionManager()
+{
+    SceneEventPublish::UnSubscribe(g_scbSubscriber);
 }
 
 void SceneSessionManager::Init()
@@ -679,7 +693,7 @@ bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::C
 
 void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "Set enable input event: %{public}u", enabled);
+    TLOGI(WmsLogTag::WMS_RECOVER, "enabled: %{public}u", enabled);
     enableInputEvent_ = enabled;
 }
 
@@ -693,7 +707,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
     for (const auto& persistentId : alivePersistentIds_) {
         auto it = std::find(recoveredPersistentIds.begin(), recoveredPersistentIds.end(), persistentId);
         if (it == recoveredPersistentIds.end()) {
-            TLOGI(WmsLogTag::WMS_RECOVER, "Clear unrecovered session with persistentId=%{public}d", persistentId);
+            TLOGI(WmsLogTag::WMS_RECOVER, "persistentId=%{public}d", persistentId);
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
         }
@@ -702,8 +716,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
 
 void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "Number of persistentIds recovered = %{public}zu. CurrentUserId = "
-           "%{public}d",
+    TLOGI(WmsLogTag::WMS_RECOVER, "Number of persistentIds recovered = %{public}zu. CurrentUserId = %{public}d",
         recoveredPersistentIds.size(), currentUserId_);
 
     auto task = [this, recoveredPersistentIds]() {
@@ -718,12 +731,12 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             if (sceneSession == nullptr) {
                 continue;
             }
-            TLOGD(WmsLogTag::WMS_RECOVER, "recovered persistentId = %{public}d", persistentId);
             const auto& abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
             if (!abilitySessionInfo) {
-                TLOGW(WmsLogTag::WMS_RECOVER, "abilitySessionInfo is null");
+                TLOGW(WmsLogTag::WMS_RECOVER, "abilitySessionInfo is null, persistentId = %{public}d", persistentId);
                 continue;
             }
+            TLOGD(WmsLogTag::WMS_RECOVER, "recovered persistentId = %{public}d", persistentId);
             abilitySessionInfos.emplace_back(*abilitySessionInfo);
         }
         std::vector<int32_t> unrecoverableSessionIds;
@@ -734,16 +747,16 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
         for (const auto& sessionId : unrecoverableSessionIds) {
             auto sceneSession = GetSceneSession(sessionId);
             if (sceneSession == nullptr) {
-                TLOGW(WmsLogTag::WMS_RECOVER, "There is no session corresponding to sessionId = %{public}d ",
+                TLOGW(WmsLogTag::WMS_RECOVER, "There is no session corresponding to persistentId = %{public}d ",
                     sessionId);
                 continue;
             }
-            TLOGI(WmsLogTag::WMS_RECOVER, "unrecoverable sessionId = %{public}d", sessionId);
             const auto& scnSessionInfo = SetAbilitySessionInfo(sceneSession);
             if (!scnSessionInfo) {
-                TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is null");
+                TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is null, persistentId = %{public}d", sessionId);
                 continue;
             }
+            TLOGI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId = %{public}d", sessionId);
             sceneSession->NotifySessionExceptionInner(scnSessionInfo, false);
         }
         removeFailRecoveredSession();
@@ -2534,7 +2547,7 @@ void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
 void SceneSessionManager::NotifySessionUnfocusedToClient(int32_t persistentId)
 {
     if (listenerController_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_RECOVER, "NotifySessionUnfocused persistentId = %{public}" PRId32, persistentId);
+        TLOGI(WmsLogTag::WMS_RECOVER, "persistentId = %{public}" PRId32, persistentId);
         listenerController_->NotifySessionUnfocused(persistentId);
     }
 }
@@ -3922,6 +3935,26 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
+{
+    std::string cmd = SceneEventPublish::JoinCommands(params, params.size());
+
+    // publish data
+    bool ret = eventHandler_->PostSyncTask([this, cmd] { return g_scbSubscriber->Publish(cmd); }, "PublishSCBDumper");
+    if (!ret) {
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+
+    // get response event
+    auto task = [this, &dumpInfo]() {
+        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
+        return WSError::WS_OK;
+    };
+    eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
+
+    return WSError::WS_OK;
+}
+
 void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     if (dumpingSessionPid_ == INVALID_SESSION_ID) {
@@ -3949,6 +3982,9 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         }
         if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
             return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2:params num
+            return GetSCBDebugDumpInfo(dumpInfo, params);
         }
         return WSError::WS_ERROR_INVALID_OPERATION;
     };
@@ -8747,18 +8783,18 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
 
 void SceneSessionManager::removeFailRecoveredSession()
 {
-    for (const auto& sessionId : failRecoveredPersistentIdSet_) {
-        auto sceneSession = GetSceneSession(sessionId);
+    for (const auto& persistentId : failRecoveredPersistentIdSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "not exist session corresponding to sessionId = %{public}d", sessionId);
+            TLOGW(WmsLogTag::WMS_RECOVER, "not exist session corresponding to persistentId = %{public}d", persistentId);
             continue;
         }
         const auto &scnSessionInfo = SetAbilitySessionInfo(sceneSession);
         if (!scnSessionInfo) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is nullptr");
+            TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is nullptr, persistentId = %{public}d", persistentId);
             continue;
         }
-        TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", sessionId);
+        TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId = %{public}d", persistentId);
         sceneSession->NotifySessionExceptionInner(scnSessionInfo, true);
     }
     failRecoveredPersistentIdSet_.clear();

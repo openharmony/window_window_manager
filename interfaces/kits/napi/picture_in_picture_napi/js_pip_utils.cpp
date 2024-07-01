@@ -160,6 +160,8 @@ static napi_value ExportVideoLiveControlGroup(napi_env env)
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
         return nullptr;
     }
+    (void)SetNamedProperty(env, result, "VIDEO_PLAY_PAUSE",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE));
     (void)SetNamedProperty(env, result, "MUTE_SWITCH",
         static_cast<uint32_t>(PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH));
     napi_object_freeze(env, result);

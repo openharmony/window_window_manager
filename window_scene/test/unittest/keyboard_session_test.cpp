@@ -696,12 +696,13 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
     ASSERT_TRUE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, false));
 
     property->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+
     keyboardSession->systemConfig_.uiType_ = "phone";
     ASSERT_FALSE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    bool result = !(system::GetParameter("const.product.devicetype", "unknown") == "phone" ||
-         system::GetParameter("const.product.devicetype", "unknown") == "tablet");
+    bool result = !(sceneSession->GetSystemConfig().uiType_ == "phone" ||
+        sceneSession->GetSystemConfig().uiType_ == "tablet");
     ASSERT_EQ(result, keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
 
     WLOGFI("CheckIfNeedRaiseCallingSession end!");

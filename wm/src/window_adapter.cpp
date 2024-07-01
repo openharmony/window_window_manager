@@ -316,7 +316,7 @@ bool WindowAdapter::InitWMSProxy()
 void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "RegisterSessionRecoverCallbackFunc persistentId = %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_RECOVER, "persistentId = %{public}d", persistentId);
     std::lock_guard<std::mutex> lock(mutex_);
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
@@ -383,7 +383,7 @@ void WindowAdapter::ReregisterWindowManagerAgent()
             it.first, static_cast<uint64_t>(it.second.size()));
         for (auto& agent : it.second) {
             if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_RECOVER, "Reregister window manager agent failed");
+                TLOGE(WmsLogTag::WMS_RECOVER, "failed");
             }
         }
     }
@@ -712,6 +712,7 @@ void WindowAdapter::RecoverAndConnectSpecificSession(const sptr<ISessionStage>& 
     sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     INIT_PROXY_CHECK_RETURN();
+    TLOGI(WmsLogTag::WMS_RECOVER, "called");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
@@ -744,14 +745,14 @@ WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>
     sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-    WLOGFD("RecoverAndReconnectSceneSession");
+    TLOGI(WmsLogTag::WMS_RECOVER, "called");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     auto ret = wmsProxy->RecoverAndReconnectSceneSession(
         sessionStage, eventChannel, surfaceNode, session, property, token);
     if (ret != WSError::WS_OK) {
-        WLOGFE("RecoverAndReconnectSceneSession failed, ret = %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}d", ret);
         return WMError::WM_DO_NOTHING;
     }
     return WMError::WM_OK;

@@ -421,6 +421,7 @@ private:
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
+    void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();

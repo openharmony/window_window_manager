@@ -1190,8 +1190,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, window->SetSystemBarProperties(properties, propertyFlags));
     if (property.contentColor_ != current.contentColor_) {
         std::map<WindowType, SystemBarProperty> currProperties;
-        ASSERT_EQ(WMError::WM_OK,
-			window->GetSystemBarProperties(currProperties));
+        ASSERT_EQ(WMError::WM_OK, window->GetSystemBarProperties(currProperties));
         ASSERT_EQ(currProperties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_, property.contentColor_);
     }
 }
@@ -1210,8 +1209,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemBarProperties, Function | SmallTes
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     std::map<WindowType, SystemBarProperty> properties;
-    ASSERT_EQ(WMError::WM_OK,
-        window->GetSystemBarProperties(properties));
+    ASSERT_EQ(WMError::WM_OK, window->GetSystemBarProperties(properties));
 }
 
 /*
@@ -1427,7 +1425,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
     if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
     } else {
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+        window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
         ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
     }
