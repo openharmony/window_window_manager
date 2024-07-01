@@ -2983,14 +2983,14 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "get display failed displayId:%{public}" PRIu64", window id:%{public}u",
-            property_->GetDisplayId(), property_->GetWindowId());
+        WLOGFE("get display failed displayId:%{public}" PRIu64 ", window id:%{public}u, moveDragProperty targetDisplayId:%{public}u",
+            property_->GetDisplayId(), property_->GetWindowId(), moveDragProperty_->targetDisplayId_);
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "get displayInfo failed displayId:%{public}" PRIu64", window id:%{public}u",
-            property_->GetDisplayId(), property_->GetWindowId());
+        WLOGFE("get display info failed displayId:%{public}" PRIu64 ", window id:%{public}u, moveDragProperty targetDisplayId:%{public}u",
+            property_->GetDisplayId(), property_->GetWindowId(), moveDragProperty_->targetDisplayId_);
         return;
     }
     float vpr = display->GetVirtualPixelRatio();
