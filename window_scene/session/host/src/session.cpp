@@ -68,17 +68,17 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
-static std::string g_deviceType = system::GetParameter("const.product.devicetype", "unknown");
-std::shared_ptr<AppExecFwk::EventHandler> g_mainHandler;
 } // namespace
+
+std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = new WindowSessionProperty();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-    if (!g_mainHandler) {
+    if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
-        g_mainHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
 
     using type = std::underlying_type_t<MMI::WindowArea>;
@@ -880,19 +880,18 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 
     SetSessionProperty(property);
     if (property) {
-        Rect rect = {
-            winRect_.posX_,
-            winRect_.posY_,
-            static_cast<uint32_t>(winRect_.width_),
-            static_cast<uint32_t>(winRect_.height_)
-        };
+        Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
+            static_cast<uint32_t>(winRect_.height_)};
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
     callingPid_ = pid;
     callingUid_ = uid;
-
+    if (sessionProperty && property) {
+        property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
+        property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+    }
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
@@ -911,7 +910,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_RECOVER, "Reconnect session with: persistentId=%{public}d, windowState=%{public}u"
+    TLOGI(WmsLogTag::WMS_RECOVER, "session with: persistentId=%{public}d, windowState=%{public}u"
         " callingPid:%{public}d", property->GetPersistentId(),
         static_cast<uint32_t>(property->GetWindowState()), pid);
     if (sessionStage == nullptr || eventChannel == nullptr) {
@@ -1044,8 +1043,8 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    if (g_mainHandler) {
-        g_mainHandler->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
         });
     }
@@ -1842,10 +1841,18 @@ void Session::SaveSnapshot(bool useSnapshotThread)
             return;
         }
         session->snapshot_ = session->Snapshot();
-        if (session->snapshot_ && session->scenePersistence_) {
-            std::function<void()> func = std::bind(&Session::ResetSnapshot, session);
-            session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        if (!(session->snapshot_ && session->scenePersistence_)) {
+            return;
         }
+        std::function<void()> func = [weakThis]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+                return;
+            }
+            session->ResetSnapshot();
+        };
+        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
     auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
     if (!useSnapshotThread || snapshotScheduler == nullptr) {
@@ -2097,6 +2104,21 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     }
     sessionStage_->UpdateFocus(isFocused);
 
+    return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
+        enable, isSupportDragInPcCompatibleMode);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    
+    property->SetCompatibleModeInPc(enable);
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     return WSError::WS_OK;
 }
 
@@ -2493,8 +2515,8 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = g_deviceType == "2in1";
-    bool isPhone = g_deviceType == "phone";
+    bool isPc = systemConfig_.uiType_ == "pc";
+    bool isPhone = systemConfig_.uiType_ == "phone";
     if (!isPc && !isPhone) {
         TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
             "persistentId:%{public}d", persistentId_);

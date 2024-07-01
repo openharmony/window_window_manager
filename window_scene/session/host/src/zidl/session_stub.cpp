@@ -274,6 +274,8 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
+        reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -341,6 +343,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->errorCode = data.ReadInt32();
     abilitySessionInfo->errorReason = data.ReadString();
+    abilitySessionInfo->identityToken = data.ReadString();
     const WSError& errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

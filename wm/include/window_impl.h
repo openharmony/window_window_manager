@@ -280,7 +280,7 @@ public:
     virtual WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
-    WMError SetRestoredRouterStack(std::string& routerStack) override;
+    WMError SetRestoredRouterStack(const std::string& routerStack) override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -421,7 +421,6 @@ private:
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
     std::string GetRestoredRouterStack();
-    Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -498,8 +497,7 @@ private:
     bool escKeyEventTriggered_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    std::recursive_mutex routerStackMutex_;
-    std::string restoredRouterStack_ = { "" };
+    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };
 } // namespace Rosen
 } // namespace OHOS

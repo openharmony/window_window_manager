@@ -197,6 +197,57 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen03, Function | 
 }
 
 /**
+ * @tc.name: CheckIfNeedConnectScreen04
+ * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen04, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    ScreenId screenId = 0;
+    ScreenId rsId = 0;
+    std::string name = "HiCar";
+    screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
+    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: CheckIfNeedConnectScreen05
+ * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen05, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    ScreenId screenId = 0;
+    ScreenId rsId = 0;
+    std::string name = "SuperLauncher";
+    screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
+    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: CheckIfNeedConnectScreen06
+ * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen06, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    ScreenId screenId = 0;
+    ScreenId rsId = 0;
+    std::string name = "CastEngine";
+    screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
+    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: OnPowerStatusChanged
  * @tc.desc: OnPowerStatusChanged test
  * @tc.type: FUNC
@@ -420,6 +471,18 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode, Function | SmallTes
     screenSessionManagerClient_->OnUpdateFoldDisplayMode(FoldDisplayMode::MAIN);
     auto ret3 = screenSessionManagerClient_->GetFoldDisplayMode();
     EXPECT_EQ(FoldDisplayMode::MAIN, ret3);
+}
+
+/**
+ * @tc.name: GetScreenSessionById
+ * @tc.desc: GetScreenSessionById test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetScreenSessionById, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    sptr<ScreenSession> ret = screenSessionManagerClient_->GetScreenSessionById(screenId);
+    EXPECT_EQ(nullptr, ret);
 }
 } // namespace Rosen
 } // namespace OHOS

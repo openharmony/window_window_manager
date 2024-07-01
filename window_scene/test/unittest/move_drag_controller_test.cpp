@@ -686,7 +686,7 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect001, Function | SmallTes
     moveDragController->SetStartMoveFlag(true);
     moveDragController->CalcFirstMoveTargetRect(windowRect, true);
     WSRect targetRect = moveDragController->GetTargetRect();
-    ASSERT_EQ(targetRect.posX_, -1);
+    ASSERT_EQ(targetRect.posX_, 0);
 }
 
 /**
