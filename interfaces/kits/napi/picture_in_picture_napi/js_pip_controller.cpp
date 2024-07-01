@@ -184,11 +184,11 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]OnSetAutoStartEnabled error, controller is nullptr");
         return NapiGetUndefined(env);
     }
-    std::lock_guard<std::mutex> lock(mtx_);
     pipController_->SetAutoStartEnabled(enable);
     return NapiGetUndefined(env);
 }
@@ -222,12 +222,12 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     if (pipController_ == nullptr) {
         errMsg = "OnUpdateContentSize error, controller is nullptr";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
-    std::lock_guard<std::mutex> lock(mtx_);
     pipController_->UpdateContentSize(width, height);
     return NapiGetUndefined(env);
 }
