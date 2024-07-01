@@ -230,8 +230,8 @@ public:
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
-    void SetExitSplitOnBackground(bool isExitSplitOnBackground);
-    bool IsExitSplitOnBackground() const;
+    virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    virtual bool IsExitSplitOnBackground() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
