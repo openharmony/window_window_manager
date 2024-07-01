@@ -50,8 +50,10 @@ public:
 
     sptr<ISessionManagerService> GetSessionManagerServiceProxy();
 
+#ifndef USE_ADAPTER_LITE
     void SaveSessionListener(const sptr<ISessionListener>& listener);
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
+#endif
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
     void OnWMSConnectionChanged(
@@ -85,7 +87,9 @@ private:
     sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
     std::recursive_mutex listenerLock_;
+#ifndef USE_ADAPTER_LITE
     std::vector<sptr<ISessionListener>> sessionListeners_;
+#endif
     std::recursive_mutex mutex_;
     bool destroyed_ = false;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
