@@ -57,6 +57,8 @@ group("unittest") {
     ":ws_screen_session_manager_client_proxy_test",
     ":ws_screen_session_manager_client_stub_test",
     ":ws_screen_session_manager_client_test",
+    ":ws_screen_session_manager_lite_proxy_test",
+    ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_proxy_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
@@ -502,6 +504,29 @@ ohos_unittest("ws_screen_session_manager_client_test") {
   sources = [ "screen_session_manager_client_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_lite_proxy_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/dm_lite:libdm_lite",
+    "${window_base_path}/wmserver:sms",
+  ]
+}
+
+ohos_unittest("ws_screen_session_manager_lite_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_lite_stub_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/wmserver:sms",
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_stub_test") {
