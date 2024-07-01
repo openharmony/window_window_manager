@@ -262,7 +262,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
 
-    void ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo);
+    void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
 
 protected:
     ScreenSessionManager();

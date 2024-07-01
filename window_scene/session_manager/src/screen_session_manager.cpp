@@ -4730,7 +4730,7 @@ void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
     rsInterface_.DisablePowerOffRenderControl(rsScreenId);
 }
 
-void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo)
+void ScreenSessionManager::ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo)
 {
     if (clientProxy_) {
         auto screenInfo = GetDefaultScreenSession();
@@ -4738,9 +4738,9 @@ void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_
         if (screenInfo != nullptr) {
             rotation = static_cast<int32_t>(screenInfo->GetRotation());
         }
-        screenFoldInfo.emplace_back(rotation);
+        screenFoldInfo.emplace_back(std::to_string(rotation));
 
-        clientProxy_->OnFoldStatusChangeReportUE(screenFoldInfo, angle);
+        clientProxy_->OnFoldStatusChangedReportUE(screenFoldInfo);
     }
 }
 } // namespace OHOS::Rosen

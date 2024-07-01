@@ -9073,60 +9073,72 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     return WMError::WM_OK;
 }
 
-void DisplayChangeListener::OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle)
+void DisplayChangeListener::OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo)
 {
-    SceneSessionManager::GetInstance().SetFoldEventFromDMS(screenFoldInfo, angle);
+    SceneSessionManager::GetInstance().ReportScreenFoldStatusChange(screenFoldInfo);
 }
 
-void SceneSessionManager::SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float angle)
+WMError SceneSessionManager::ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo)
 {
-    if (screenFoldInfo.size() < ScreenFoldData::INIT_PARAM_NUMBER) {
-        TLOGI(WmsLogTag::DMS, "Error: Init param number is wrong.");
-        return;
+    ScreenFoldData screenFoldData;
+    WMError ret = MakeScreenFoldData(screenFoldInfo, screenFoldData);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    return CheckAndReportScreenFoldStatus(screenFoldData);
+}
+
+WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo,
+    ScreenFoldData& screenFoldData)
+{
+    if (screenFoldInfo.size() < ScreenFoldData::DMS_PARAM_NUMBER) {
+        TLOGI(WmsLogTag::DMS, "Error: Init DMS param number is wrong.");
+        return WMError::WM_DO_NOTHING;
     }
 
-    // 0: current screen fold status, 1: next screen fold status
-    // 2: current screen fold status duration, 3: window rotation
-    ScreenFoldData screenFoldData(screenFoldInfo[0], screenFoldInfo[1], screenFoldInfo[2], screenFoldInfo[3], angle);
-
+    screenFoldData.currentScreenFoldStatus_ = std::stoi(screenFoldInfo[0]); // 0: current screen fold status
+    screenFoldData.nextScreenFoldStatus_ = std::stoi(screenFoldInfo[1]); // 1: next screen fold status
+    screenFoldData.currentScreenFoldStatusDuration_ = std::stoi(screenFoldInfo[2]); // 2: current duration
+    screenFoldData.postureAngle_ = std::atof(screenFoldInfo[3].c_str()); // 3: posture angle (type: float)
+    screenFoldData.screenRotation_ = std::stoi(screenFoldInfo[4]); // 4: screen rotation
     if (!screenFoldData.GetTypeCThermalWithUtil()) {
         TLOGI(WmsLogTag::DMS, "Error: fail to get typeC thermal.");
-        return;
+        return WMError::WM_DO_NOTHING;
     }
-
     AppExecFwk::ElementName element;
     WSError ret = GetFocusSessionElement(element);
     if (ret != WSError::WS_OK) {
         TLOGI(WmsLogTag::DMS, "Error: fail to get focused package name.");
-        return;
+        return WMError::WM_DO_NOTHING;
     }
-    std::string packageName = element.GetURI();
-    screenFoldData.SetFocusedPkgName(packageName);
-
-    CheckAndReportScreenFoldStatusEvent(screenFoldData);
+    screenFoldData.SetFocusedPkgName(element.GetURI());
+    return WMError::WM_OK;
 }
 
-void SceneSessionManager::CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data)
+WMError SceneSessionManager::CheckAndReportScreenFoldStatus(const ScreenFoldData& data)
 {
-    static ScreenFoldData lastScreenHalfFoldEvent;
+    static ScreenFoldData lastScreenHalfFoldData;
     if (data.nextScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
-        lastScreenHalfFoldEvent = data;
-        return;
+        lastScreenHalfFoldData = data;
+        return WMError::WM_DO_NOTHING;
     }
+    WMError lastScreenHalfFoldReportRet = WMError::WM_OK;
     if (data.currentScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
-        if (data.currentScreenFoldStatusDuration_ >= ScreenFoldData::HALF_FOLD_UE_TRIGGER) {
-            ReportScreenFoldStatusEvent(lastScreenHalfFoldEvent);
+        if (data.currentScreenFoldStatusDuration_ >= ScreenFoldData::HALF_FOLD_REPORT_TRIGGER_DURATION) {
+            lastScreenHalfFoldReportRet = ReportScreenFoldStatus(lastScreenHalfFoldData);
         }
-        lastScreenHalfFoldEvent.SetInvalid();
+        lastScreenHalfFoldData.SetInvalid();
     }
-    ReportScreenFoldStatusEvent(data);
+    WMError currentScreenFoldStatusReportRet = ReportScreenFoldStatus(data);
+    return (currentScreenFoldStatusReportRet == WMError::WM_OK) ? lastScreenHalfFoldReportRet :
+        currentScreenFoldStatusReportRet;
 }
 
 // report screen_fold_status event when it changes to fold/expand or stays 15s at half-fold
-void SceneSessionManager::ReportScreenFoldStatusEvent(const ScreenFoldData& data)
+WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 {
     if (data.currentScreenFoldStatus_ == ScreenFoldData::INVALID_VALUE) {
-        return;
+        return WMError::WM_DO_NOTHING;
     }
 
     int32_t ret = HiSysEventWrite(
@@ -9138,7 +9150,7 @@ void SceneSessionManager::ReportScreenFoldStatusEvent(const ScreenFoldData& data
         "CURRENTFOLDSTATE", data.nextScreenFoldStatus_,
         "STATE", -1,
         "TIME", data.currentScreenFoldStatusDuration_,
-        "ROTATION", data.windowRotation_,
+        "ROTATION", data.screenRotation_,
         "PACKAGE", data.focusedPackageName_,
         "ANGLE", data.postureAngle_,
         "TYPECTHERMAL", data.typeCThermal_,
@@ -9146,7 +9158,9 @@ void SceneSessionManager::ReportScreenFoldStatusEvent(const ScreenFoldData& data
         "SCANGLE", -1,
         "ISTENT", -1);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret : %{public}d.", ret);
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d.", ret);
+        return WMError::WM_DO_NOTHING;
     }
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
