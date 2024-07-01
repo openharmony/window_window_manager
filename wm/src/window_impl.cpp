@@ -2983,15 +2983,13 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
     if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64 ", window id:%{public}u, \
-            moveDragProperty targetDisplayId:%{public}u", property_->GetDisplayId(),
+        WLOGFE("get display failed window id:%{public}u, moveDragProperty targetDisplayId:%{public}u",
             property_->GetWindowId(), moveDragProperty_->targetDisplayId_);
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64 ", window id:%{public}u, \
-            moveDragProperty targetDisplayId:%{public}u", property_->GetDisplayId(),
+        WLOGFE("get display info failed window id:%{public}u, moveDragProperty targetDisplayId:%{public}u",
             property_->GetWindowId(), moveDragProperty_->targetDisplayId_);
         return;
     }
