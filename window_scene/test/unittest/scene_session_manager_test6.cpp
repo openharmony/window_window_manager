@@ -347,6 +347,36 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
     ret = ssm_->CheckWindowModeType();
     EXPECT_EQ(WindowModeType::WINDOW_MODE_SPLIT, ret);
 }
+
+/**
+ * @tc.name: GetSceeSessionPrivacyModeBundles
+ * @tc.desc: GetSceeSessionPrivacyModeBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetSceeSessionPrivacyModeBundles, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = 0;
+    std::unordered_set<std::string> privacyBundles;
+    ssm_->GetSceeSessionPrivacyModeBundles(displayId, privacyBundles);
+    SessionInfo sessionInfoFirst;
+    sessionInfoFirst.bundleName_ = "";
+    sessionInfoFirst.abilityName_ = "privacyAbilityName";
+    sptr<SceneSession> sceneSessionFirst = ssm_->CreatSceneSession(sessionInfoFirst, nullptr);
+    ASSERT_NE(sceneSessionFirst, nullptr);
+    ssm_->GetSceeSessionPrivacyModeBundles(displayId, privacyBundles);
+    sceneSessionFirst->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, ssm_->sceneSessionFirst->property_);
+    sceneSessionFirst->property_->SetDisplayId(0);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->GetSceeSessionPrivacyModeBundles(displayId, privacyBundles);
+    sessionInfoFirst.bundleName_ = "privacy.test.first";
+    sessionInfoFirst.bundleName_ = "privacy.test.first";
+    sessionInfoFirst.state_ = SessionState::STATE_CONNECT;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->GetSceeSessionPrivacyModeBundles(displayId, privacyBundles);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
