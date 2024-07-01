@@ -463,7 +463,7 @@ SubWindowModalType SceneSession::GetSubWindowModalType()
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
-        return;
+        return modalType;
     }
     auto windowType = property->GetWindowType();
     if (WindowHelper::IsDialogWindow(windowType)) {
