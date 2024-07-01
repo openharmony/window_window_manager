@@ -65,6 +65,19 @@ bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
     return true;
 }
 
+bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& key)
+{
+    SettingProvider& settingData = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    int32_t getValue;
+    ErrCode ret = settingData.GetIntValue(key, getValue);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "get setting value failed, ret=%{public}d", ret);
+        return false;
+    }
+    value = static_cast<uint32_t>(getValue);
+    return true;
+}
+
 void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFunc func)
 {
     if (castObserver_) {

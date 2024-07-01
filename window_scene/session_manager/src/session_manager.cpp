@@ -336,7 +336,7 @@ void SessionManager::RegisterUserSwitchListener(const UserSwitchCallbackFunc& ca
 
 void SessionManager::OnFoundationDied()
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died enter");
+    TLOGI(WmsLogTag::WMS_RECOVER, "enter");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     isFoundationListenerRegistered_ = false;
     isRecoverListenerRegistered_ = false;

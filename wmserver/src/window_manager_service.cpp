@@ -191,8 +191,8 @@ void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOccl
 
 void WindowManagerService::InitWithRanderServiceAdded()
 {
-    auto windowVisibilityChangeCb = std::bind(&WindowManagerService::WindowVisibilityChangeCallback, this,
-        std::placeholders::_1);
+    auto windowVisibilityChangeCb =
+        [this](std::shared_ptr<RSOcclusionData> occlusionData) { this->WindowVisibilityChangeCallback(occlusionData); };
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
@@ -213,7 +213,9 @@ void WindowManagerService::InitWithAbilityManagerServiceAdded()
         wmsHandler_ = new WindowManagerServiceHandler();
     }
     WLOGI("RegisterWindowManagerServiceHandler");
-    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
+    bool animaEnabled = RemoteAnimation::CheckAnimationController();
+    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(
+        wmsHandler_, animaEnabled) != ERR_OK) {
         WLOGFE("RegisterWindowManagerServiceHandler failed");
     }
 }
