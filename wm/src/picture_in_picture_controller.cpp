@@ -314,7 +314,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         if (pipLifeCycleListener_) {
             pipLifeCycleListener_->OnPictureInPictureStop();
         }
-        PictureInPictureManager::RemoveActiveControllerUnLocked(weakRef_);
+        PictureInPictureManager::RemoveActiveController(this);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
@@ -376,7 +376,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
-    PictureInPictureManager::RemoveActiveControllerUnLocked(this);
+    PictureInPictureManager::RemoveActiveController(this);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
     return WMError::WM_OK;
