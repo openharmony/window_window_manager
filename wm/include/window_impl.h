@@ -30,7 +30,7 @@
 #include "prepare_terminate_callback_stub.h"
 #include "input_transfer_station.h"
 #include "vsync_station.h"
-#include "window.h"
+#include "wm/window.h"
 #include "window_property.h"
 #include "window_transition_info.h"
 #include "wm_common_inner.h"
