@@ -1137,8 +1137,8 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetExitSplitOnBackground(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI] In");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    TLOGD(WmsLogTag::WMS_DEFAULT, "[NAPI] In");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetExitSplitOnBackground(env, info) : nullptr;
 }
 
