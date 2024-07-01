@@ -2286,7 +2286,7 @@ Orientation SceneSession::GetRequestedOrientation() const
 
 bool SceneSession::IsAnco() const
 {
-    return collaboratorType_ != static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
+    return collaboratorType_ == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
 int32_t SceneSession::GetCollaboratorType() const
