@@ -324,9 +324,9 @@ public:
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
-    void UpdateModalUIExtension(int32_t persistentId, int32_t pid, const Rect& windowRect);
-    ExtensionWindowEventInfo GetModalUIExtension();
-    Vector2f GetTranslateXY(bool useUIExtension);
+    void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
+    Vector2f GetPosition(bool useUIExtension);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);

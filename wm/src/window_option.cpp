@@ -281,7 +281,11 @@ bool WindowOption::GetExtensionTag() const
 
 void WindowOption::SetUIExtensionUsage(uint32_t uiExtensionUsage)
 {
-    uiExtensionUsage_ = uiExtensionUsage;
+    if (uiExtensionUsage < static_cast<uint32_t>(UIExtensionUsage::UIEXTENSION_USAGE_END)) {
+        uiExtensionUsage_ = uiExtensionUsage;
+    } else {
+        uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
+    }
 }
 
 uint32_t WindowOption::GetUIExtensionUsage() const

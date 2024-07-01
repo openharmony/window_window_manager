@@ -525,18 +525,18 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest |
 }
 
 /**
- * @tc.name: UpdateModalInfo
- * @tc.desc: UpdateModalInfo
+ * @tc.name: UpdateModalExtensionWindowInfo
+ * @tc.desc: UpdateModalExtensionWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionWindowInfo, Function | SmallTest | Level2)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
     MMI::WindowInfo windowInfo;
-    manager_->UpdateModalInfo(nullptr, windowInfo);
+    manager_->UpdateModalExtensionWindowInfo(nullptr, windowInfo);
     EXPECT_TRUE(windowInfo.defaultHotAreas.empty());
     EXPECT_TRUE(windowInfo.pointerHotAreas.empty());
 
@@ -546,7 +546,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalInfo, Function | SmallTest | L
     };
     sceneSession->AddModalUIExtension(extensionInfo);
     sceneSession->SetSessionRect({ 5, 6, 7, 8 });
-    manager_->UpdateModalInfo(sceneSession, windowInfo);
+    manager_->UpdateModalExtensionWindowInfo(sceneSession, windowInfo);
     EXPECT_EQ(windowInfo.agentWindowId, extensionInfo.persistentId);
     EXPECT_EQ(windowInfo.pid, extensionInfo.pid);
     MMI::Rect resultRect { 0, 0, 7, 8 };
@@ -563,11 +563,11 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalInfo, Function | SmallTest | L
 }
 
 /**
- * @tc.name: UpdateModalExtensionWindowInfo
- * @tc.desc: UpdateModalExtensionWindowInfo
+ * @tc.name: AddModalExtensionWindowInfo
+ * @tc.desc: AddModalExtensionWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | SmallTest | Level2)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -576,7 +576,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionWindowInfo, Function 
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::WindowInfo windowInfo;
     windowInfoList.emplace_back(windowInfo);
-    manager_->UpdateModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr);
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr);
     EXPECT_EQ(windowInfoList.size(), 1);
 
     ExtensionWindowEventInfo extensionInfo = {
@@ -584,13 +584,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionWindowInfo, Function 
         .pid = 1234
     };
     sceneSession->AddModalUIExtension(extensionInfo);
-    manager_->UpdateModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
     ASSERT_EQ(windowInfoList.size(), 2);
     EXPECT_TRUE(windowInfoList[1].defaultHotAreas.empty());
 
     Rect windowRect {1, 1, 7, 8};
-    sceneSession->UpdateModalUIExtension(12345, 1234, windowRect);
-    manager_->UpdateModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
+    extensionInfo.windowRect = windowRect;
+    sceneSession->UpdateModalUIExtension(extensionInfo);
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
     ASSERT_EQ(windowInfoList.size(), 3);
     EXPECT_EQ(windowInfoList[2].defaultHotAreas.size(), 1);
 }

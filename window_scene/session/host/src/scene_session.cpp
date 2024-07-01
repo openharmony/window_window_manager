@@ -1219,21 +1219,22 @@ void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extension
     NotifySessionInfoChange();
 }
 
-void SceneSession::UpdateModalUIExtension(int32_t persistentId, int32_t pid, const Rect& windowRect)
+void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
         "Rect:[%{public}d %{public}d %{public}d %{public}d]",
-        persistentId, pid, windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        extensionInfo.persistentId, extensionInfo.pid, extensionInfo.windowRect.posX_,
+        extensionInfo.windowRect.posY_, extensionInfo.windowRect.width_, extensionInfo.windowRect.height_);
     {
         std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
         auto iter = std::find_if(modalUIExtensionInfoList_.begin(), modalUIExtensionInfoList_.end(),
-            [persistentId, pid](const ExtensionWindowEventInfo& extensionInfo) {
-            return extensionInfo.persistentId == persistentId && extensionInfo.pid == pid;
+            [extensionInfo](const ExtensionWindowEventInfo& eventInfo) {
+            return extensionInfo.persistentId == eventInfo.persistentId && extensionInfo.pid == eventInfo.pid;
         });
         if (iter == modalUIExtensionInfoList_.end()) {
             return;
         }
-        iter->windowRect = windowRect;
+        iter->windowRect = extensionInfo.windowRect;
     }
     NotifySessionInfoChange();
 }
@@ -1261,22 +1262,22 @@ bool SceneSession::HasModalUIExtension()
     return !modalUIExtensionInfoList_.empty();
 }
 
-ExtensionWindowEventInfo SceneSession::GetModalUIExtension()
+ExtensionWindowEventInfo SceneSession::GetLastModalUIExtensionEventInfo()
 {
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
     return modalUIExtensionInfoList_.back();
 }
 
-Vector2f SceneSession::GetTranslateXY(bool useUIExtension)
+Vector2f SceneSession::GetPosition(bool useUIExtension)
 {
     WSRect windowRect = GetSessionRect();
     if (useUIExtension && HasModalUIExtension()) {
-        auto rect = GetModalUIExtension().windowRect;
+        auto rect = GetLastModalUIExtensionEventInfo().windowRect;
         windowRect.posX_ = rect.posX_;
         windowRect.posY_ = rect.posY_;
     }
-    Vector2f translateXY(windowRect.posX_, windowRect.posY_);
-    return translateXY;
+    Vector2f position(windowRect.posX_, windowRect.posY_);
+    return position;
 }
 
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)

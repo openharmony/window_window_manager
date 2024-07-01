@@ -112,7 +112,7 @@ void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sce
     float width = screenProperty.GetBounds().rect_.GetWidth();
     float height = screenProperty.GetBounds().rect_.GetHeight();
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
-    Vector2f offset = sceneSession->GetTranslateXY(useUIExtension);
+    Vector2f offset = sceneSession->GetPosition(useUIExtension);
     Vector2f translate = offset;
     float rotate = 0.0f;
     switch (displayRotation) {
@@ -157,7 +157,7 @@ void SceneSessionDirtyManager::CalTramform(const sptr<SceneSession> sceneSession
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
-        Vector2f translate = sceneSession->GetTranslateXY(useUIExtension);
+        Vector2f translate = sceneSession->GetPosition(useUIExtension);
         tranform = tranform.Translate(translate);
         tranform = tranform.Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY());
         tranform = tranform.Inverse();
@@ -328,13 +328,14 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
     }
 }
 
-void SceneSessionDirtyManager::UpdateModalInfo(const sptr<SceneSession> sceneSession, MMI::WindowInfo& windowInfo)
+void SceneSessionDirtyManager::UpdateModalExtensionWindowInfo(const sptr<SceneSession> sceneSession,
+    MMI::WindowInfo& windowInfo)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
-    auto extensionInfo = sceneSession->GetModalUIExtension();
+    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     windowInfo.agentWindowId = extensionInfo.persistentId;
     windowInfo.pid = extensionInfo.pid;
     std::vector<MMI::Rect> touchHotAreas;
@@ -350,7 +351,7 @@ void SceneSessionDirtyManager::UpdateModalInfo(const sptr<SceneSession> sceneSes
     windowInfo.pointerHotAreas = touchHotAreas;
 }
 
-void SceneSessionDirtyManager::UpdateModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
     MMI::WindowInfo windowInfo, const sptr<SceneSession> sceneSession)
 {
     if (sceneSession == nullptr) {
@@ -358,10 +359,9 @@ void SceneSessionDirtyManager::UpdateModalExtensionWindowInfo(std::vector<MMI::W
         return;
     }
 
-    auto extensionInfo = sceneSession->GetModalUIExtension();
+    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     windowInfo.id = extensionInfo.persistentId;
-    if (extensionInfo.windowRect.posX_ != 0 || extensionInfo.windowRect.posY_ != 0 ||
-        extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
+    if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         MMI::Rect windowRect = {
             .x = extensionInfo.windowRect.posX_,
             .y = extensionInfo.windowRect.posY_,
