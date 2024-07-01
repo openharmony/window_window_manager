@@ -251,5 +251,63 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSetDisplayNodeScreenId, Fun
     int ret = screenSessionManagerClientStub_->HandleOnSetDisplayNodeScreenId(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleSwitchUserCallback
+ * @tc.desc: HandleSwitchUserCallback test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleSwitchUserCallback, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    std::vector<int32_t> oldScbPids {0, 1};
+    data.WriteInt32Vector(oldScbPids);
+    int32_t currentScbPid = 1;
+    data.WriteInt32(currentScbPid);
+
+    int ret = screenSessionManagerClientStub_->HandleSwitchUserCallback(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnUpdateFoldDisplayMode
+ * @tc.desc: HandleOnUpdateFoldDisplayMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnUpdateFoldDisplayMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    data.WriteUint32(static_cast<uint32_t>(foldDisplayMode));
+
+    int ret = screenSessionManagerClientStub_->HandleOnUpdateFoldDisplayMode(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleSetVirtualPixelRatioSystem
+ * @tc.desc: HandleSetVirtualPixelRatioSystem test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleSetVirtualPixelRatioSystem, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    float virtualPixelRatio = 1.0f;
+    data.WriteFloat(virtualPixelRatio);
+
+    int ret = screenSessionManagerClientStub_->HandleSetVirtualPixelRatioSystem(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS
