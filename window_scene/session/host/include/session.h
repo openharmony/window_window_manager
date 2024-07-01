@@ -223,8 +223,6 @@ public:
     void SetOffset(float x, float y);
     float GetOffsetX() const;
     float GetOffsetY() const;
-    void SetExitSplitOnBackground(bool isExitSplitOnBackground);
-    bool IsExitSplitOnBackground() const;
     void SetBounds(const WSRectF& bounds);
     WSRectF GetBounds();
     void SetRotation(Rotation rotation);
@@ -232,6 +230,8 @@ public:
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
+    void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    bool IsExitSplitOnBackground() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
