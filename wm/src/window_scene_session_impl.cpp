@@ -730,12 +730,12 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null");
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null");
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
