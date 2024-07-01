@@ -730,10 +730,12 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is nullptr");
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is nullptr");
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
@@ -1339,12 +1341,12 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        WLOGFE("get displayInfo failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        WLOGFE("get displayInfo failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
@@ -2634,12 +2636,12 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr) {
-            WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+            WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo == nullptr) {
-            WLOGFE("get displayInfo failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+            WLOGFE("get displayInfo failed displayId:%{public}" PRIu64, property_->GetDisplayId());
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(
