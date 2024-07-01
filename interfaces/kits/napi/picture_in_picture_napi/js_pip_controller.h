@@ -79,7 +79,6 @@ public:
         void OnPipListenerCallback(PiPState state, int32_t errorCode);
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-        std::mutex mtx_;
     };
 
     class PiPActionObserverImpl : public IPiPActionObserver {
@@ -91,7 +90,6 @@ public:
     private:
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-        std::mutex mtx_;
     };
 };
 } // namespace Rosen

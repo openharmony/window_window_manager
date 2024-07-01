@@ -431,7 +431,6 @@ void JsPipController::PiPLifeCycleImpl::OnPictureInPictureOperationError(int32_t
 
 void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PiPState state, int32_t errorCode)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     TLOGI(WmsLogTag::WMS_PIP, "OnPipListenerCallback is called, state: %{public}d", static_cast<int32_t>(state));
     auto jsCallback = jsCallBack_;
     std::string error = std::to_string(errorCode);
@@ -450,7 +449,6 @@ void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PiPState state, in
 
 void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
