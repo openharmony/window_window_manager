@@ -457,7 +457,7 @@ void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& are
     }
 }
 
-SubWindowModalType SceneSession::GetSubWindowModalType()
+SubWindowModalType SceneSession::GetSubWindowModalType() const
 {
     SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
     auto property = GetSessionProperty();
