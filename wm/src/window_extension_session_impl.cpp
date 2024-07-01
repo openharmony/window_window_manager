@@ -680,12 +680,12 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WindowExtensionSessionImpl::Show display is null!");
+        TLOGE(WmsLogTag::WMS_LIFE, "display is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WindowExtensionSessionImpl::Show display info is null!");
+        TLOGE(WmsLogTag::WMS_LIFE, "display info is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     float density = GetVirtualPixelRatio(displayInfo);
