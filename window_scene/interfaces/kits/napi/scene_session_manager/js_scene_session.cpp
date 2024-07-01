@@ -2457,7 +2457,7 @@ napi_value JsSceneSession::OnSetExitSplitOnBackground(napi_env env, napi_callbac
 
     bool isExitSplitOnBackground = false;
     if (!ConvertFromJsValue(env, argv[0], isExitSplitOnBackground)) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, [NAPI]Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
