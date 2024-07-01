@@ -2622,6 +2622,17 @@ void Session::SetNeedSnapshot(bool needSnapshot)
     needSnapshot_ = needSnapshot;
 }
 
+void Session::SetExitSplitOnBackground(bool isExitSplitOnBackground)
+{
+    TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d， SetExitSplitOnBackground not implement");
+}
+
+bool Session::IsExitSplitOnBackground() const
+{
+    TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d， IsExitSplitOnBackground not implement");
+    return false;
+}
+
 void Session::SetFloatingScale(float floatingScale)
 {
     floatingScale_ = floatingScale;
@@ -2693,18 +2704,6 @@ float Session::GetOffsetX() const
 float Session::GetOffsetY() const
 {
     return offsetY_;
-}
-
-void Session::SetExitSplitOnBackground(bool isExitSplitOnBackground)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d， isExitSplitOnBackground: %{public}d",
-        persistentId_, isExitSplitOnBackground);
-    isExitSplitOnBackground_ = isExitSplitOnBackground;
-}
-
-bool Session::IsExitSplitOnBackground() const
-{
-    return isExitSplitOnBackground_;
 }
 
 void Session::SetBounds(const WSRectF& bounds)
