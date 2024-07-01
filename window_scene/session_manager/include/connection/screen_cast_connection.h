@@ -33,13 +33,14 @@ public:
     std::string GetBundleName() const;
     std::string GetAbilityName() const;
     bool IsConnectedSync();
+    int32_t SendMessageToCastService(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
 
 private:
     explicit ScreenCastConnection() = default;
     ~ScreenCastConnection() = default;
 
 private:
-    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_;
+    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ = nullptr;
     std::string bundleName_{""};
     std::string abilityName_{""};
 };

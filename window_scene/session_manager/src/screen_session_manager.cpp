@@ -78,6 +78,7 @@ const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC_MAIN = 9;
@@ -89,7 +90,9 @@ static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.typ
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
+static const int32_t AUTO_ROTATE_OFF = 0;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
+constexpr int32_t TRANS_CODE_ABILITY_CONNECT = 1005;
 
 bool JudgeIsBeta()
 {
@@ -226,6 +229,7 @@ void ScreenSessionManager::Init()
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
     } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
+        // 多屏设备只要有屏幕亮,GetScreenPower获取的任意一块屏幕状态均是ON
         SetSensorSubscriptionEnabled();
     }
     // publish init
@@ -519,20 +523,23 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
-    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
-        return;
-    }
-    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
-        ScreenCastConnection::GetInstance().CastDisconnectExtension();
-    }
     if (isPlugIn) {
+        if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+            TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+            return;
+        }
+        if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+            TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
+            ScreenCastConnection::GetInstance().CastDisconnectExtension();
+        }
+        MessageParcel data;
+        MessageParcel reply;
+        ScreenCastConnection::GetInstance().SendMessageToCastService(TRANS_CODE_ABILITY_CONNECT, data, reply);
         ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+        ScreenCastConnection::GetInstance().CastDisconnectExtension();
     } else {
         ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
     }
-    ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
@@ -554,14 +561,18 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            PublishCastEvent(true);
+            auto task = [this]() { PublishCastEvent(true); };
+            taskScheduler_->PostAsyncTask(task, "PublishCastEventTrue");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventTrue");
         }
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            PublishCastEvent(false);
+            auto task = [this]() { PublishCastEvent(false); };
+            taskScheduler_->PostAsyncTask(task, "PublishCastEventFalse");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventFalse");
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
@@ -657,7 +668,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
                     "hookDensity: %{public}f", info.width_, info.height_, info.density_);
                 displayInfo->SetWidth(info.width_);
                 displayInfo->SetHeight(info.height_);
-                displayInfo->SetWidth(info.density_);
+                displayInfo->SetVirtualPixelRatio(info.density_);
             }
             return displayInfo;
         }
@@ -1609,6 +1620,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         TLOGI(WmsLogTag::DMS, "BootFinishedCallback boot animation finished");
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
+        that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
@@ -1620,6 +1632,22 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
 void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit)
 {
     foldScreenPowerInit_ = foldScreenPowerInit;
+}
+
+void ScreenSessionManager::SetRotateLockedFromSettingData()
+{
+    uint32_t autoRotateStatus = AUTO_ROTATE_OFF;  // 0代表自动旋转关闭,1代表自动旋转打开
+    bool islocked = true;
+    // ret为true表示从数据库读到了值，并赋给了autoRotateStatus
+    bool ret = ScreenSettingHelper::GetSettingValue(autoRotateStatus, SETTING_LOCKED_KEY);
+    TLOGI(WmsLogTag::DMS, "get autoRotateStatus from settingdata: %{public}u", autoRotateStatus);
+    if (autoRotateStatus) {
+        islocked =false;
+    }
+    if (ret) {
+        TLOGI(WmsLogTag::DMS, "get islocked success");
+        SetScreenRotationLockedFromJs(islocked);
+    }
 }
 
 void ScreenSessionManager::RegisterSettingDpiObserver()
@@ -2425,13 +2453,13 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         }
     }
     screenIdManager_.DeleteScreenId(screenId);
+    virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
+    NotifyCaptureStatusChanged();
     if (rsScreenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "DestroyVirtualScreen: No corresponding rsScreenId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
-    virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
-    NotifyCaptureStatusChanged();
     return DMError::DM_OK;
 }
 
@@ -4044,14 +4072,15 @@ void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
 void ScreenSessionManager::NotifyCaptureStatusChanged()
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
+    bool isCapture = IsCaptured();
+    isScreenShot_ = false;
     if (agents.empty()) {
         TLOGI(WmsLogTag::DMS, "agents is empty");
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyCaptureStatusChanged(IsCaptured());
+        agent->NotifyCaptureStatusChanged(isCapture);
     }
-    isScreenShot_ = false;
 }
 
 void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)

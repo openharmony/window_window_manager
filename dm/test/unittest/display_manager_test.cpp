@@ -784,6 +784,22 @@ HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener01, Function | Small
 }
 
 /**
+ * @tc.name: RegisterDisplayUpdateListener01
+ * @tc.desc: RegisterDisplayUpdateListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterDisplayUpdateListener01, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayUpdateListener> listener = nullptr;
+    auto ret = DisplayManager::GetInstance().RegisterDisplayUpdateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IDisplayUpdateListener();
+    ret = DisplayManager::GetInstance().RegisterDisplayUpdateListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterDisplayUpdateListener(listener));
+    listener.clear();
+}
+
+/**
  * @tc.name: IsCaptured01
  * @tc.desc: IsCaptured01 fun
  * @tc.type: FUNC

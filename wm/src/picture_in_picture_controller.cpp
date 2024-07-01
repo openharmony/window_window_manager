@@ -110,7 +110,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "CreatePiPWindow is called, mainWindow:%{public}u, mainWindowState:%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "mainWindow:%{public}u, mainWindowState:%{public}u",
         mainWindowId_, mainWindow_->GetWindowState());
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
@@ -188,7 +188,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
 
 WMError PictureInPictureController::StartPictureInPicture(StartPipType startType)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     std::lock_guard<std::mutex> lock(mutex_);
     if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
@@ -290,7 +290,7 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
 
 WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "StopPictureInPicture is called, destroyWindow: %{public}u", destroyWindow);
+    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);
@@ -362,6 +362,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -398,8 +399,7 @@ void PictureInPictureController::SetPipWindow(sptr<Window> window)
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
-    TLOGI(WmsLogTag::WMS_PIP,
-        "SetAutoStartEnabled called, enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
+    TLOGI(WmsLogTag::WMS_PIP, "enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
@@ -411,6 +411,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
     } else {
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
         if (!pipOption_) {
+            TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
             return;
         }
         std::string navId = pipOption_->GetNavigationId();
@@ -479,7 +480,6 @@ bool PictureInPictureController::IsContentSizeChanged(float width, float height,
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "PipMainWindowLifeCycleImpl AfterBackground is called");
     if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         TLOGI(WmsLogTag::WMS_PIP, "disable auto start as screen is off");
         return;
@@ -526,7 +526,7 @@ void PictureInPictureController::DoActionEvent(const std::string& actionName, in
 
 void PictureInPictureController::PreRestorePictureInPicture()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "PreRestorePictureInPicture is called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
     if (pipLifeCycleListener_) {
         pipLifeCycleListener_->OnRestoreUserInterface();
@@ -542,6 +542,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 
 void PictureInPictureController::LocateSource()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
@@ -589,7 +590,6 @@ void PictureInPictureController::UpdateXComponentPositionAndSize()
 
 void PictureInPictureController::UpdatePiPSourceRect() const
 {
-    TLOGD(WmsLogTag::WMS_PIP, "UpdatePiPSourceRect is called");
     if (mainWindowXComponentController_ == nullptr || window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "xcomponent controller not valid");
         return;
@@ -608,7 +608,7 @@ void PictureInPictureController::UpdatePiPSourceRect() const
 
 void PictureInPictureController::ResetExtController()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "ResetExtController is called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (mainWindowXComponentController_ == nullptr || pipXComponentController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "error when resetExtController, one of the xComponentController is null");
         return;
@@ -622,7 +622,7 @@ void PictureInPictureController::ResetExtController()
 
 WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "SetXComponentController is called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     pipXComponentController_ = xComponentController;
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when set XComponentController");
@@ -758,7 +758,7 @@ PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl
 
 void PictureInPictureController::PiPMainWindowListenerImpl::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "OnModeChange is called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
         (mode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
         isValid_ = false;
@@ -771,7 +771,7 @@ void PictureInPictureController::PiPMainWindowListenerImpl::OnModeChange(WindowM
 
 void PictureInPictureController::PiPMainWindowListenerImpl::DelayReset()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "DelayReset is called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (handler_ == nullptr) {
         TLOGW(WmsLogTag::WMS_PIP, "task is not append to queue");
         isValid_ = true;

@@ -361,8 +361,8 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     property_->SetSessionInfo(info);
     property_->SetWindowState(state_);
     TLOGI(WmsLogTag::WMS_RECOVER,
-        "Recover and reconnect sceneSession with: bundleName=%{public}s, moduleName=%{public}s, "
-        "abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, persistentId=%{public}d, windowState=%{public}d",
+        "bundleName=%{public}s, moduleName=%{public}s, abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, "
+        "persistentId=%{public}d, windowState=%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
         GetPersistentId(), state_);
     sptr<ISessionStage> iSessionStage(this);
@@ -1634,6 +1634,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
         return WMError::WM_OK;
     }
+
+    if (property_->GetCompatibleModeInPc()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not LayoutFullScreen");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(status);
     auto hostSession = GetHostSession();
@@ -1915,6 +1921,12 @@ WMError WindowSceneSessionImpl::Maximize(MaximizeLayoutOption option)
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
+
+    if (property_->GetCompatibleModeInPc()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not MaximizeFloating");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3103,7 +3115,7 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
     windowLimits.maxWidth_ = customizedLimits.maxWidth_;
     windowLimits.maxHeight_ = customizedLimits.maxHeight_;
     windowLimits.vpRatio_ = customizedLimits.vpRatio_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u"
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
         "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", GetWindowId(), windowLimits.minWidth_,
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     return WMError::WM_OK;

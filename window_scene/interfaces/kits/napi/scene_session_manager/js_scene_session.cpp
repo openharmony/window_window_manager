@@ -163,6 +163,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
         JsSceneSession::CloseKeyboardSyncTransaction);
+    BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
+        JsSceneSession::SetCompatibleModeInPc);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -275,10 +277,6 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
 void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason)
 {
     WLOGFI("[NAPI]OnWindowDragHotArea");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(WINDOW_DRAG_HOT_AREA_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -286,7 +284,7 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
         return;
     }
     WSRect rect = session->GetSessionTargetRect();
-    auto task = [jsCallBack, env = env_, type, reason, rect]() {
+    auto task = [jsCallBack = GetJSCallback(WINDOW_DRAG_HOT_AREA_CB), env = env_, type, reason, rect]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -344,12 +342,8 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]SetLandScapeMultiWindow, isLandscapeMultiWindow: %{public}u",
         isLandscapeMultiWindow);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(LANDSCAPE_MULTI_WINDOW_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [isLandscapeMultiWindow, jsCallBack, env = env_]() {
+    auto task = [isLandscapeMultiWindow, jsCallBack = GetJSCallback(LANDSCAPE_MULTI_WINDOW_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -378,12 +372,8 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
 void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "[NAPI] gravity: %{public}u", gravity);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(KEYBOARD_GRAVITY_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [gravity, jsCallBack, env = env_]() {
+    auto task = [gravity, jsCallBack = GetJSCallback(KEYBOARD_GRAVITY_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -425,12 +415,7 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
 
 void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 {
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(LAYOUT_FULL_SCREEN_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [isLayoutFullScreen, jsCallBack, env = env_]() {
+    auto task = [isLayoutFullScreen, jsCallBack = GetJSCallback(LAYOUT_FULL_SCREEN_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange jsCallBack is nullptr");
             return;
@@ -444,12 +429,7 @@ void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 
 void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(ADJUST_KEYBOARD_LAYOUT_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [params, jsCallBack, env = env_]() {
+    auto task = [params, jsCallBack = GetJSCallback(ADJUST_KEYBOARD_LAYOUT_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout jsCallBack is nullptr");
             return;
@@ -467,12 +447,8 @@ void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
 void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
 {
     WLOGFI("[NAPI]OnSessionInfoLockedStateChange, state: %{public}u", lockedState);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSIONINFO_LOCKEDSTATE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [lockedState, jsCallBack, env = env_]() {
+    auto task = [lockedState, jsCallBack = GetJSCallback(SESSIONINFO_LOCKEDSTATE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -528,12 +504,13 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag)
 {
     WLOGFI("[NAPI]OnDefaultAnimationFlagChange, flag: %{public}u", isNeedDefaultAnimationFlag);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [isNeedDefaultAnimationFlag, jsCallBack, env = env_]() {
+    auto task = [isNeedDefaultAnimationFlag,
+        jsCallBack = GetJSCallback(NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB), env = env_]() {
+        if (!jsCallBack) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionDefaultAnimationFlagObj = CreateJsValue(env, isNeedDefaultAnimationFlag);
         napi_value argv[] = {jsSessionDefaultAnimationFlagObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -847,12 +824,12 @@ void JsSceneSession::ProcessContextTransparentRegister()
 void JsSceneSession::OnSessionEvent(uint32_t eventId, const SessionEventParam& param)
 {
     WLOGFI("[NAPI]OnSessionEvent, eventId: %{public}d", eventId);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_EVENT_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [eventId, param, jsCallBack, env = env_]() {
+    auto task = [eventId, param, jsCallBack = GetJSCallback(SESSION_EVENT_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionStateObj = CreateJsValue(env, eventId);
         napi_value jsSessionParamObj = CreateJsSessionEventParam(env, param);
         napi_value argv[] = {jsSessionStateObj, jsSessionParamObj};
@@ -963,12 +940,8 @@ void JsSceneSession::ProcessForceHideChangeRegister()
 void JsSceneSession::OnForceHideChange(bool hide)
 {
     WLOGFI("[NAPI]OnForceHideChange, hide: %{public}u", hide);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(FORCE_HIDE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [hide, jsCallBack, env = env_]() {
+    auto task = [hide, jsCallBack = GetJSCallback(FORCE_HIDE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -994,12 +967,7 @@ void JsSceneSession::ProcessTouchOutsideRegister()
 void JsSceneSession::OnTouchOutside()
 {
     WLOGFI("[NAPI]OnTouchOutside");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(TOUCH_OUTSIDE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(TOUCH_OUTSIDE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1164,6 +1132,13 @@ napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetSkipDraw");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSkipDraw(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -1481,16 +1456,15 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
         WLOGFE("[NAPI]sceneSession is nullptr");
         return;
     }
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(CREATE_SUB_SESSION_CB);
-    if (jsCallBack == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "Can't find callback, id: %{public}d", sceneSession->GetPersistentId());
-        return;
-    }
 
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]OnCreateSubSession, id: %{public}d, parentId: %{public}d",
         sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
-    auto task = [this, weakSession, jsCallBack, env = env_]() {
+    auto task = [this, weakSession, jsCallBack = GetJSCallback(CREATE_SUB_SESSION_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]root session or target session or env is nullptr");
@@ -1518,13 +1492,13 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
     }
 
     TLOGI(WmsLogTag::WMS_DIALOG, "OnBindDialogTarget, id: %{public}d", sceneSession->GetPersistentId());
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(BIND_DIALOG_TARGET_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
     wptr<SceneSession> weakSession(sceneSession);
-    auto task = [this, weakSession, jsCallBack, env = env_]() {
+    auto task = [this, weakSession, jsCallBack = GetJSCallback(BIND_DIALOG_TARGET_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
             WLOGFE("[NAPI]root session or target session or env is nullptr");
@@ -1550,14 +1524,9 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_STATE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Not find sessionStateChangeCallback, id: %{public}d", session->GetPersistentId());
-        return;
-    }
 
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
-    auto task = [state, jsCallBack, env = env_]() {
+    auto task = [state, jsCallBack = GetJSCallback(SESSION_STATE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1571,14 +1540,8 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
 
 void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 {
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(BUFFER_AVAILABLE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        TLOGW(WmsLogTag::DEFAULT, "[NAPI]Not found bufferAvailableChange key in jsCbMap_");
-        return;
-    }
-
     WLOGFD("[NAPI]OnBufferAvailableChange, state: %{public}u", isBufferAvailable);
-    auto task = [isBufferAvailable, jsCallBack, env = env_]() {
+    auto task = [isBufferAvailable, jsCallBack = GetJSCallback(BUFFER_AVAILABLE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1597,12 +1560,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         return;
     }
     WLOGFD("[NAPI]OnSessionRectChange");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_RECT_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [rect, reason, jsCallBack, env = env_]() {
+    auto task = [rect, reason, jsCallBack = GetJSCallback(SESSION_RECT_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1620,12 +1579,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
 void JsSceneSession::OnRaiseToTop()
 {
     WLOGFI("[NAPI]OnRaiseToTop");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(RAISE_TO_TOP_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(RAISE_TO_TOP_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1639,12 +1594,8 @@ void JsSceneSession::OnRaiseToTop()
 void JsSceneSession::OnRaiseToTopForPointDown()
 {
     WLOGFI("[NAPI]OnRaiseToTopForPointDown");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(RAISE_TO_TOP_POINT_DOWN_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(RAISE_TO_TOP_POINT_DOWN_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1658,12 +1609,7 @@ void JsSceneSession::OnRaiseToTopForPointDown()
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 {
     WLOGFI("[NAPI]OnRaiseAboveTarget");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(RAISE_ABOVE_TARGET_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [jsCallBack, env = env_, subWindowId]() {
+    auto task = [jsCallBack = GetJSCallback(RAISE_ABOVE_TARGET_CB), env = env_, subWindowId]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1682,12 +1628,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_FOCUSABLE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [isFocusable, jsCallBack, env = env_]() {
+    auto task = [isFocusable, jsCallBack = GetJSCallback(SESSION_FOCUSABLE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1702,11 +1643,8 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 void JsSceneSession::OnSessionTouchableChange(bool touchable)
 {
     WLOGFI("[NAPI]OnSessionTouchableChange, state: %{public}u", touchable);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_TOUCHABLE_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-    auto task = [touchable, jsCallBack, env = env_]() {
+
+    auto task = [touchable, jsCallBack = GetJSCallback(SESSION_TOUCHABLE_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1721,12 +1659,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
 void JsSceneSession::OnSessionTopmostChange(bool topmost)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]OnSessionTopmostChange, state: %{public}u", topmost);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_TOP_MOST_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [topmost, jsCallBack, env = env_]() {
+    auto task = [topmost, jsCallBack = GetJSCallback(SESSION_TOP_MOST_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
             return;
@@ -1741,12 +1674,7 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 void JsSceneSession::OnClick()
 {
     WLOGFD("[NAPI]OnClick");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(CLICK_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(CLICK_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1760,12 +1688,8 @@ void JsSceneSession::OnClick()
 void JsSceneSession::OnContextTransparent()
 {
     WLOGFD("[NAPI]OnContextTransparent");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(CONTEXT_TRANSPARENT_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(CONTEXT_TRANSPARENT_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1898,13 +1822,8 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PENDING_SCENE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
     napi_env& env_ref = env_;
-    auto task = [sessionInfo, jsCallBack, env_ref]() {
+    auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SCENE_CB), env_ref]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -1930,12 +1849,8 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
 void JsSceneSession::OnBackPressed(bool needMoveToBackground)
 {
     WLOGFI("[NAPI]OnBackPressed needMoveToBackground %{public}d", needMoveToBackground);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(BACK_PRESSED_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [needMoveToBackground, jsCallBack, env = env_]() {
+    auto task = [needMoveToBackground, jsCallBack = GetJSCallback(BACK_PRESSED_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -1951,13 +1866,9 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), info.persistentId_);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(TERMINATE_SESSION_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, jsCallBack, env = env_]() {
+    auto task = [sessionInfo, jsCallBack = GetJSCallback(TERMINATE_SESSION_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -1981,15 +1892,11 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(TERMINATE_SESSION_CB_NEW);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
     if (isFromBroker == true) {
         needStartCaller = true;
     }
-    auto task = [needStartCaller, jsCallBack, env = env_]() {
+    auto task = [needStartCaller, jsCallBack = GetJSCallback(TERMINATE_SESSION_CB_NEW), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2009,12 +1916,8 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, terminateType = %{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), static_cast<int32_t>(terminateType));
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(TERMINATE_SESSION_CB_TOTAL);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [terminateType, jsCallBack, env = env_]() {
+    auto task = [terminateType, jsCallBack = GetJSCallback(TERMINATE_SESSION_CB_TOTAL), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2033,12 +1936,8 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
 void JsSceneSession::UpdateSessionLabel(const std::string &label)
 {
     WLOGFI("[NAPI]run UpdateSessionLabel");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(UPDATE_SESSION_LABEL_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [label, jsCallBack, env = env_]() {
+    auto task = [label, jsCallBack = GetJSCallback(UPDATE_SESSION_LABEL_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -2087,12 +1986,8 @@ void JsSceneSession::ProcessUpdateSessionIconRegister()
 void JsSceneSession::UpdateSessionIcon(const std::string &iconPath)
 {
     WLOGFI("[NAPI]run UpdateSessionIcon");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(UPDATE_SESSION_ICON_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [iconPath, jsCallBack, env = env_]() {
+    auto task = [iconPath, jsCallBack = GetJSCallback(UPDATE_SESSION_ICON_CB), env = env_]() {
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -2112,13 +2007,9 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SESSION_EXCEPTION_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, needRemoveSession, jsCallBack, env = env_]() {
+    auto task = [sessionInfo, needRemoveSession, jsCallBack = GetJSCallback(SESSION_EXCEPTION_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2143,14 +2034,9 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PENDING_SESSION_TO_FOREGROUND_CB);
-    if (jsCallBack == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find pending session to foreground callback");
-        return;
-    }
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, jsCallBack, env = env_]() {
+    auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SESSION_TO_FOREGROUND_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2174,14 +2060,10 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB);
-    if (jsCallBack == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find pending session to background for delegator callback");
-        return;
-    }
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [sessionInfo, jsCallBack, env = env_]() {
+    auto task = [sessionInfo,
+        jsCallBack = GetJSCallback(PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2204,13 +2086,12 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnSystemBarPropertyChange");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SYSTEMBAR_PROPERTY_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]fail to find systemBar property change  callback");
-        return;
-    }
 
-    auto task = [jsCallBack, propertyMap, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(SYSTEMBAR_PROPERTY_CHANGE_CB), propertyMap, env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
         if (jsSessionStateObj == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]jsSessionStateObj is nullptr");
@@ -2225,12 +2106,12 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
 void JsSceneSession::OnNeedAvoid(bool status)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(NEED_AVOID_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, needAvoid = status, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(NEED_AVOID_CB), needAvoid = status, env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionStateObj = CreateJsValue(env, needAvoid);
         napi_value argv[] = {jsSessionStateObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -2241,12 +2122,12 @@ void JsSceneSession::OnNeedAvoid(bool status)
 void JsSceneSession::OnIsCustomAnimationPlaying(bool status)
 {
     WLOGFI("[NAPI]OnIsCustomAnimationPlaying %{public}d", status);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(CUSTOM_ANIMATION_PLAYING_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, isPlaying = status, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(CUSTOM_ANIMATION_PLAYING_CB), isPlaying = status, env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionStateObj = CreateJsValue(env, isPlaying);
         napi_value argv[] = {jsSessionStateObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -2257,12 +2138,12 @@ void JsSceneSession::OnIsCustomAnimationPlaying(bool status)
 void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 {
     WLOGFI("[NAPI]OnShowWhenLocked %{public}d", showWhenLocked);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(SHOW_WHEN_LOCKED_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, flag = showWhenLocked, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(SHOW_WHEN_LOCKED_CB), flag = showWhenLocked, env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionStateObj = CreateJsValue(env, flag);
         napi_value argv[] = {jsSessionStateObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -2273,12 +2154,12 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
 {
     WLOGFI("[NAPI]OnReuqestedOrientationChange %{public}u", orientation);
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
 
-    auto task = [jsCallBack, rotation = orientation, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB), rotation = orientation, env = env_]() {
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
         napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
         napi_value argv[] = {jsSessionRotationObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -2496,11 +2377,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 void JsSceneSession::OnPrepareClosePiPSession()
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]OnPrepareClosePiPSession");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(PREPARE_CLOSE_PIP_SESSION);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(PREPARE_CLOSE_PIP_SESSION), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_PIP, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2874,6 +2751,44 @@ napi_value JsSceneSession::OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, na
     }
     session->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
     WLOGFI("[NAPI]OnSetSkipSelfWhenShowOnVirtualScreen end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isSupportDragInPcCompatibleMode = false;
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], isSupportDragInPcCompatibleMode)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to isSupportDragInPcCompatibleMode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode);
     return NapiGetUndefined(env);
 }
 
