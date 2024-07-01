@@ -560,7 +560,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         pointerEvent->MarkProcessed();
     }
     if (isPointDown || isPointUp) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d, windowId:%{public}u, pointId:%{public}d, "
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "InputTracking id:%{public}d, windowId:%{public}u, pointId:%{public}d, "
             "sourceType:%{public}d, pointPos:[%{public}d, %{public}d], "
             "winRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
             "needNotifyEvent:%{public}d",
@@ -579,13 +579,13 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
     }
 
     if (GetHostSession() == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        TLOGW(WmsLogTag::WMS_EVENT, "invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        TLOGW(WmsLogTag::WMS_INPUT_KEY_FLOW, "invalid pointerEvent, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
         return;
     }
