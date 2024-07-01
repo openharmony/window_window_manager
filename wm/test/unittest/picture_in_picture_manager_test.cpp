@@ -378,33 +378,6 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, "close");
 }
-
-/**
- * @tc.name: RemoveActiveControllerUnLocked
- * @tc.desc: RemoveActiveControllerUnLocked
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, RemoveActiveControllerUnLocked, Function | SmallTest | Level2)
-{
-    auto option = sptr<PipOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    PictureInPictureManager::activeController_ = nullptr;
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    PictureInPictureManager::RemoveActiveControllerUnLocked(pipController);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
-
-    PictureInPictureManager::SetActiveController(pipController);
-    ASSERT_TRUE(PictureInPictureManager::HasActiveController());
-    ASSERT_TRUE(PictureInPictureManager::IsActiveController(pipController));
-    ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
-    ASSERT_FALSE(PictureInPictureManager::IsAttachedToSameWindow(1));
-    PictureInPictureManager::RemoveActiveControllerUnLocked(pipController);
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
-}
-
 }
 }
 }

@@ -119,16 +119,6 @@ void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureContro
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    if (!IsActiveController(pipController)) {
-        return;
-    }
-    activeController_ = nullptr;
-}
-
-void PictureInPictureManager::RemoveActiveControllerUnLocked(wptr<PictureInPictureController> pipController)
-{
-    TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::unique_lock<std::shared_mutex> lock(mutex_);
     if (HasActiveController() && pipController.GetRefPtr() == activeController_.GetRefPtr()) {
         activeController_ = nullptr;
     }
