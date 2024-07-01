@@ -1206,11 +1206,11 @@ HWTEST_F(WindowSessionImplTwoTest, NotifyDisplayMove02, Function | SmallTest | L
     };
     window_ = GetTestWindowImpl("NotifyDisplayMove02");
     sptr<IDisplayMoveListener> displayMoveListener = new (std::nothrow) MockIDisplayMoveListener();
-    window_->RegisterDisplayMoveListener(displayMoveListener);
+    EXPECT_EQ(window_->RegisterDisplayMoveListener(displayMoveListener), WMError::WM_OK);
     int32_t posX = 100;
     int32_t posY = 100;
     window_->NotifyTouchDialogTarget(posX, posY);
-    window_->UnregisterDisplayMoveListener(displayMoveListener);
+    EXPECT_EQ(window_->UnregisterDisplayMoveListener(displayMoveListener), WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove02 end";
 }
 
