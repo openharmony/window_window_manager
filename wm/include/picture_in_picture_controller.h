@@ -23,7 +23,7 @@
 #include <mutex>
 #include <ability_context.h>
 #include "picture_in_picture_option.h"
-#include "window.h"
+#include "wm/window.h"
 #include "wm_common.h"
 #include "picture_in_picture_interface.h"
 #include "xcomponent_controller.h"
