@@ -40,6 +40,7 @@ public:
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
     static void SetActiveController(sptr<PictureInPictureController> pipController);
     static void RemoveActiveController(wptr<PictureInPictureController> pipController);
+    static void RemoveActiveControllerUnLocked(wptr<PictureInPictureController> pipController);
     static void AttachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
     static void DetachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
     static bool IsAttachedToSameWindow(uint32_t windowId);
@@ -62,7 +63,7 @@ private:
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
     static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
     static std::shared_mutex controllerMapMutex_;
-    static std::recursive_mutex mutex_;
+    static std::shared_mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
