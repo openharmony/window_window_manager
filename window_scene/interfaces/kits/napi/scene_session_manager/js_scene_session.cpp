@@ -2445,8 +2445,8 @@ napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::OnSetExitSplitOnBackground(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         WLOGFE("[NAPI]Argc count is invalid: %{public}zu", argc);
