@@ -68,6 +68,14 @@ public:
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
         WindowType winType) : windowId_(winId), pid_(pid), uid_(uid), visibilityState_(visibilityState),
         windowType_(winType) {};
+
+    WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
+                         WindowType winType, Rect rect, std::string bundleName, std::string abilityName,
+                         WindowStatus windowStatus) : windowId_(winId), pid_(pid), uid_(uid),
+                                                  visibilityState_(visibilityState),
+                                                  windowType_(winType), rect_(rect), bundleName_(bundleName),
+                                                  abilityName_(abilityName), windowStatus_(windowStatus) {};
+
     /**
      * @brief Deconstruct of WindowVisibilityInfo.
      */
@@ -88,11 +96,40 @@ public:
      */
     static WindowVisibilityInfo* Unmarshalling(Parcel& parcel);
 
+    const uint32_t& GetWindowId() const
+    {
+        return windowId_;
+    }
+
+    const Rect& GetRect() const
+    {
+        return rect_;
+    }
+
+    const std::string& GetBundleName() const
+    {
+        return bundleName_;
+    }
+
+    const std::string& GetAbilityName() const
+    {
+        return abilityName_;
+    }
+
+    WindowStatus GetWindowStatus() const
+    {
+        return windowStatus_;
+    }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
     WindowVisibilityState visibilityState_ = WINDOW_LAYER_STATE_MAX;
     WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
+    Rect rect_ = {0, 0, 0, 0};
+    std::string bundleName_;
+    std::string abilityName_;
+    WindowStatus windowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H
