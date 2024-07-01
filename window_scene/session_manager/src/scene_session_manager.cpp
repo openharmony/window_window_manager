@@ -8300,7 +8300,8 @@ void SceneSessionManager::UpdateModalExtensionRect(int32_t persistentId, int32_t
     auto task = [this, persistentId, parentId, pid, rect]() {
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            parentSession->UpdateModalUIExtension(persistentId, pid, rect);
+            ExtensionWindowEventInfo extensionInfo {persistentId, pid, rect};
+            parentSession->UpdateModalUIExtension(extensionInfo);
         }
     };
     taskScheduler_->PostAsyncTask(task, "UpdateModalExtensionRect");
@@ -8316,7 +8317,7 @@ void SceneSessionManager::ProcessModalExtensionPointDown(int32_t persistentId, i
     auto task = [this, persistentId, parentId, pid, posX, posY]() {
         auto parentSession = GetSceneSession(parentId);
         if (parentSession && parentSession->HasModalUIExtension()) {
-            auto modalUIExtension = parentSession->GetModalUIExtension();
+            auto modalUIExtension = parentSession->GetLastModalUIExtensionEventInfo();
             if ((modalUIExtension.pid == pid) && (modalUIExtension.persistentId == persistentId)) {
                 parentSession->ProcessPointDownSession(posX, posY);
             }

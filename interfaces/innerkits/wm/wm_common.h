@@ -649,7 +649,8 @@ struct Rect {
 enum class UIExtensionUsage : uint32_t {
     MODAL = 0,
     EMBEDDED,
-    CONSTRAINED_EMBEDDED
+    CONSTRAINED_EMBEDDED,
+    UIEXTENSION_USAGE_END
 };
 
 /**
