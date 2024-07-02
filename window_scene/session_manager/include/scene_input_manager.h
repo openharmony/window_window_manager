@@ -47,7 +47,6 @@ protected:
 
 private:
     void Init();
-    void UpdateFocusedSessionId(int32_t focusedSessionId);
     void FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
         const std::vector<MMI::WindowInfo>& windowInfoList);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
@@ -64,7 +63,6 @@ private:
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
     int32_t currentUserId_ { -1 };
-    int32_t focusedSessionId_ { -1 };
     std::atomic<bool> isUserBackground_ = false;
 };
 }//Rosen
