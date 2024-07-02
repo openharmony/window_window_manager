@@ -217,7 +217,6 @@ void SingleDisplayFoldPolicy::ReportFoldDisplayModeChange(FoldDisplayMode displa
         "DISPLAY_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_DISPLAY_MODE", mode);
-
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "ReportFoldDisplayModeChange Write HiSysEvent error, ret: %{public}d", ret);
     }
@@ -233,7 +232,6 @@ void SingleDisplayFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "POWER_OFF_SCREEN", offScreen,
         "POWER_ON_SCREEN", onScreen);
-
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "ReportFoldStatusChangeBegin Write HiSysEvent error, ret: %{public}d", ret);
     }
