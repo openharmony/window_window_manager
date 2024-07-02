@@ -341,7 +341,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest |
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, -1);
 }
 
 /**
