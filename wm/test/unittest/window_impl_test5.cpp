@@ -27,6 +27,21 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+class MockOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
+public:
+    MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockMmiPointerEvent : public MMI::PointerEvent {
+public:
+    MockMmiPointerEvent(): MMI::PointerEvent(0) {}
+};
+
+class MockWindowDragLister : public IWindowDragListener {
+public:
+    MOCK_METHOD3(OnDrag, void(int32_t x, int32_t y, DragEvent event));
+};
 
 class WindowImplTest5 : public testing::Test {
 public:
@@ -439,6 +454,182 @@ HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterListener
+ * @tc.desc: UnregisterListener | RegisterListener desc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IOccupiedAreaChangeListener>(listener1));
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    window->UnregisterOccupiedAreaChangeListener(listener2);
+    window->RegisterOccupiedAreaChangeListener(nullptr);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: Close
+ * @tc.desc: Close test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, Close, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("Close");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_EQ(window->Close(), WMError::WM_OK);
+
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = context;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->Close();
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: GetVSyncPeriod
+ * @tc.desc: GetVSyncPeriod test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, GetVSyncPeriod, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetVSyncPeriod");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->SetWindowState(WindowState::STATE_DESTROYED);
+    ASSERT_EQ(window->GetWindowState(), WindowState::STATE_DESTROYED);
+    SingletonContainer::GetInstance().destroyed_ = true;
+    ASSERT_EQ(window->GetVSyncPeriod(), 0);
+
+    SingletonContainer::GetInstance().destroyed_ = false;
+    window->vsyncStation_ = std::make_shared<VsyncStation>(1);
+    window->GetVSyncPeriod();
+
+    window->vsyncStation_ = nullptr;
+    ASSERT_EQ(window->GetVSyncPeriod(), 0);
+}
+
+/**
+ * @tc.name: RequestVsync02
+ * @tc.desc: RequestVsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, RequestVsync02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("RequestVsync02");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_CREATED;
+    std::shared_ptr<VsyncCallback> callback = std::make_shared<VsyncCallback>();
+
+    SingletonContainer::GetInstance().destroyed_ = true;
+    window->RequestVsync(callback);
+
+    SingletonContainer::GetInstance().destroyed_ = false;
+    window->vsyncStation_ = std::make_shared<VsyncStation>(1);
+    window->RequestVsync(callback);
+
+    window->vsyncStation_ = nullptr;
+    window->RequestVsync(callback);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: ConsumePointerEvent02
+ * @tc.desc: ConsumePointerEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ConsumePointerEvent02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    Rect rect { 0, 0, 10u, 10u };
+    window->property_->SetWindowRect(rect);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockMmiPointerEvent>();
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    window->ConsumePointerEvent(pointerEvent);
+
+    item.SetPointerId(0);
+    item.SetDisplayX(15);
+    item.SetDisplayY(15);
+    pointerEvent->AddPointerItem(item);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->ConsumePointerEvent(pointerEvent);
+
+    item.SetDisplayX(5);
+    item.SetDisplayY(5);
+    pointerEvent->UpdatePointerItem(0, item);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->ConsumePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    window->ConsumePointerEvent(pointerEvent);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->ConsumePointerEvent(pointerEvent);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window->ConsumePointerEvent(pointerEvent);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    window->ConsumePointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: PerfLauncherHotAreaIfNeed
+ * @tc.desc: PerfLauncherHotAreaIfNeed test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, PerfLauncherHotAreaIfNeed, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("PerfLauncherHotAreaIfNeed");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockMmiPointerEvent>();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    pointerEvent->SetPointerId(0);
+
+    SingletonContainer::GetInstance().destroyed_ = true;
+    window->PerfLauncherHotAreaIfNeed(pointerEvent);
+
+    SingletonContainer::GetInstance().destroyed_ = false;
+    window->PerfLauncherHotAreaIfNeed(pointerEvent);
 }
 }
 } // namespace Rosen
