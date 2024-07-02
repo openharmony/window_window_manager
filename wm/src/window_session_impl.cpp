@@ -187,6 +187,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -2707,17 +2708,17 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            WLOGFI("InputTracking id:%{public}d, WindowSessionImpl::NotifyPointerEvent",
+            TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d",
                 pointerEvent->GetId());
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
             pointerEvent->GetId(), pointerEvent->GetPointerAction());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
-            WLOGFI("UI content dose not consume this pointer event");
+            TLOGI(WmsLogTag::WMS_EVENT, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
         }
     } else {
-        WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_EVENT, "pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
     }
 }

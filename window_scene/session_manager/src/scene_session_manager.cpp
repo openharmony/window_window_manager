@@ -2148,6 +2148,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             if (oldFlags.privacyModeFlag) {
                 UpdatePrivateStateAndNotify(parentId);
             }
+            sceneSession->RemoveModalUIExtension(persistentId);
         } else {
             ExtensionWindowFlags actions;
             actions.SetAllActive();
@@ -8293,10 +8294,49 @@ void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
 
-void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-    int32_t parentId)
+void SceneSessionManager::UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect)
 {
-    auto task = [this, sessionStage, persistentId, parentId]() {
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_UIEXT, "pid=%{public}d, persistentId=%{public}d, parentId=%{public}d, "
+        "Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
+
+    auto task = [this, persistentId, parentId, pid, rect]() {
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession) {
+            ExtensionWindowEventInfo extensionInfo {persistentId, pid, rect};
+            parentSession->UpdateModalUIExtension(extensionInfo);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateModalExtensionRect");
+}
+
+void SceneSessionManager::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
+    int32_t posX, int32_t posY)
+{
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_UIEXT, "pid=%{public}d, persistentId=%{public}d, parentId=%{public}d, "
+        "posX:%{public}d posY:%{public}d",
+        pid, persistentId, parentId, posX, posY);
+    auto task = [this, persistentId, parentId, pid, posX, posY]() {
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession && parentSession->HasModalUIExtension()) {
+            auto modalUIExtension = parentSession->GetLastModalUIExtensionEventInfo();
+            if ((modalUIExtension.pid == pid) && (modalUIExtension.persistentId == persistentId)) {
+                parentSession->ProcessPointDownSession(posX, posY);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "ProcessModalExtensionPointDown");
+}
+
+void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
+    int32_t parentId, UIExtensionUsage usage)
+{
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, usage=%{public}u, pid=%{public}d",
+        persistentId, parentId, usage, pid);
+    auto task = [this, sessionStage, persistentId, parentId, usage, pid]() {
         if (sessionStage == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
             return;
@@ -8313,6 +8353,16 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
             TLOGE(WmsLogTag::WMS_UIEXT, "failed to add death recipient");
             return;
         }
+
+        auto parentSession = GetSceneSession(parentId);
+        if (usage == UIExtensionUsage::MODAL && parentSession) {
+            ExtensionWindowEventInfo extensionInfo {
+                .persistentId = persistentId,
+                .pid = pid,
+            };
+            parentSession->AddModalUIExtension(extensionInfo);
+        }
+
         TLOGD(WmsLogTag::WMS_UIEXT, "add extension window stage Id: %{public}d, parent Id: %{public}d",
             persistentId, parentId);
     };
