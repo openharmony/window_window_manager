@@ -149,6 +149,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
+    BindNativeFunction(env, objValue, "setExitSplitOnBackground", moduleName,
+        JsSceneSession::SetExitSplitOnBackground);
     BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsSceneSession::SetWaterMarkFlag);
     BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
@@ -1100,6 +1102,13 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]SetOffset");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetExitSplitOnBackground(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI] In");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetExitSplitOnBackground(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetWaterMarkFlag(napi_env env, napi_callback_info info)
@@ -2315,6 +2324,37 @@ napi_value JsSceneSession::OnSetOffset(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->SetOffset(static_cast<float>(offsetX), static_cast<float>(offsetY));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetExitSplitOnBackground(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isExitSplitOnBackground = false;
+    if (!ConvertFromJsValue(env, argv[0], isExitSplitOnBackground)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetExitSplitOnBackground(isExitSplitOnBackground);
     return NapiGetUndefined(env);
 }
 
