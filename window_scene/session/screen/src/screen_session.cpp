@@ -1288,7 +1288,11 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshot");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, scaleX, scaleY);
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleX,
+        .scaleY = scaleY,
+    };
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, config);
     if (!ret) {
         WLOGFE("get screen snapshot TakeSurfaceCapture failed");
         return nullptr;

@@ -1810,7 +1810,13 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
     scenePersistence_->SetHasSnapshot(true);
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = scaleParam == 0.0f ? snapshotScale_ : scaleParam;
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scaleValue, scaleValue);
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleValue,
+        .scaleY = scaleValue,
+        .useDma = true,
+        .useCurWindow = false,
+    };
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
