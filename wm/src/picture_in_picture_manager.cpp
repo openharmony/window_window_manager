@@ -243,13 +243,13 @@ void PictureInPictureManager::DoActionClose()
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!HasActiveController()) {
-        return;
-    }
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!HasActiveController()) {
+            return;
+        }
         activeController_->DoActionEvent(actionName, status);
         return;
     }
