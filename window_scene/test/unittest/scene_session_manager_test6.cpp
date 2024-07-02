@@ -347,7 +347,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
  * @tc.name: GetSceneSessionPrivacyModeBundles
  * @tc.desc: GetSceneSessionPrivacyModeBundles
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -381,7 +381,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, Function |
  * @tc.name: GetSceneSessionPrivacyModeBundles01
  * @tc.desc: GetSceneSessionPrivacyModeBundles
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
@@ -419,7 +419,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, Function
  * @tc.name: GetSceneSessionPrivacyModeBundles02
  * @tc.desc: GetSceneSessionPrivacyModeBundles
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles02, Function | SmallTest | Level3)
 {
     DisplayId displayId = 0;
@@ -444,7 +444,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles02, Function
  * @tc.name: RegisterWindowManagerAgent
  * @tc.desc: RegisterWindowManagerAgent
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, RegisterWindowManagerAgent, Function | SmallTest | Level3)
 {
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
@@ -482,7 +482,7 @@ HWTEST_F(SceneSessionManagerTest6, RegisterWindowManagerAgent, Function | SmallT
  * @tc.name: OnSessionStateChange
  * @tc.desc: OnSessionStateChange
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | Level3)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
@@ -518,7 +518,7 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | 
  * @tc.name: OnSessionStateChange01
  * @tc.desc: OnSessionStateChange01
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange01, Function | SmallTest | Level3)
 {
     SessionState state = SessionState::STATE_BACKGROUND;
@@ -547,7 +547,7 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange01, Function | SmallTest 
  * @tc.name: OnSessionStateChange02
  * @tc.desc: OnSessionStateChange02
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange02, Function | SmallTest | Level3)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
@@ -574,7 +574,7 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange02, Function | SmallTest 
  * @tc.name: SetWindowFlags
  * @tc.desc: SetWindowFlags
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, SetWindowFlags, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
@@ -587,12 +587,12 @@ HWTEST_F(SceneSessionManagerTest6, SetWindowFlags, Function | SmallTest | Level3
     auto ret = ssm_->SetWindowFlags(sceneSession, property);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
-//===============================================================
+
 /**
  * @tc.name: ProcessSubSessionForeground
  * @tc.desc: ProcessSubSessionForeground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, ProcessSubSessionForeground, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession = nullptr;
@@ -623,13 +623,13 @@ HWTEST_F(SceneSessionManagerTest6, ProcessSubSessionForeground, Function | Small
     subSession->SetSessionState(SessionState::STATE_INACTIVE);
     ASSERT_NE(nullptr, ssm_);
     ssm_->ProcessSubSessionForeground(sceneSession);
-}//6
+}
 
 /**
  * @tc.name: ProcessModalTopmostRequestFocusImmdediately
  * @tc.desc: ProcessModalTopmostRequestFocusImmdediately
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, ProcessModalTopmostRequestFocusImmdediately, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
@@ -651,13 +651,13 @@ HWTEST_F(SceneSessionManagerTest6, ProcessModalTopmostRequestFocusImmdediately, 
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->ProcessModalTopmostRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
-}//3
+}
 
 /**
  * @tc.name: GetAbilityInfosFromBundleInfo
  * @tc.desc: GetAbilityInfosFromBundleInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetAbilityInfosFromBundleInfo, Function | SmallTest | Level3)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
@@ -678,13 +678,13 @@ HWTEST_F(SceneSessionManagerTest6, GetAbilityInfosFromBundleInfo, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
     EXPECT_EQ(WSError::WS_OK, ret);
-}//4
+}
 
 /**
  * @tc.name: NotifyCompleteFirstFrameDrawing
  * @tc.desc: NotifyCompleteFirstFrameDrawing
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -714,13 +714,13 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing, Function | S
     ASSERT_NE(nullptr, ssm_->taskScheduler_);
     ASSERT_NE(nullptr, ssm_);
     ssm_->NotifyCompleteFirstFrameDrawing(1);
-}//6
+}
 
 /**
  * @tc.name: CheckAndNotifyWaterMarkChangedResult
  * @tc.desc: CheckAndNotifyWaterMarkChangedResult
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -757,7 +757,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult, Functio
  * @tc.name: CheckAndNotifyWaterMarkChangedResult01
  * @tc.desc: CheckAndNotifyWaterMarkChangedResult01
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult01, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -786,13 +786,13 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult01, Funct
     sceneSession->isRSVisible_ = true;
     ASSERT_NE(nullptr, ssm_);
     ssm_->CheckAndNotifyWaterMarkChangedResult();
-}//6
+}
 
 /**
  * @tc.name: CheckAndNotifyWaterMarkChangedResult02
  * @tc.desc: CheckAndNotifyWaterMarkChangedResult02
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -808,7 +808,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult02, Funct
  * @tc.name: FillWindowInfo
  * @tc.desc: FillWindowInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, FillWindowInfo, Function | SmallTest | Level3)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
@@ -842,7 +842,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo, Function | SmallTest | Level3
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
-}//3
+}
 }
 } // namespace Rosen
 } // namespace OHOS
