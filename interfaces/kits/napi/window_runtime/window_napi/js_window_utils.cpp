@@ -484,7 +484,7 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
     napi_set_named_property(env, objValue, "enableStatusBarAnimation",
                             CreateJsValue(env, status.enableAnimation_));
     napi_set_named_property(env, objValue, "enableNavigationBarAnimation",
-                            CreateJsValue(env, nav.enableAnimation_));
+                            CreateJsValue(env, navi.enableAnimation_));
     return objValue;
 }
 
