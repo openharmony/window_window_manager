@@ -59,6 +59,11 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
     }
 }
 
+bool MoveDragController::HasPointDown()
+{
+    return hasPointDown_;
+}
+
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
     if (flag && (!hasPointDown_ || isStartDrag_)) {
