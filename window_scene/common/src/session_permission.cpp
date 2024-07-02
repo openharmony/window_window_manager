@@ -118,10 +118,10 @@ bool SessionPermission::IsSACallingByCallerToken(const uint32_t callerToken)
 {
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        WLOGFW("SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
+        TLOGW("SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
         return true;
     }
-    WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
+    TLOGI("Not SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
     return false;
 }
 
