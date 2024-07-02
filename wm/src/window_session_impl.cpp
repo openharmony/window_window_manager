@@ -966,7 +966,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         if (!isSystembarPropertiesSet_) {
             SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
         }
-    } else if (isIgnoreSafeAreaNeedNotify_) {
+    } else if (isIgnoreSafeAreaNeedNotify_ || isSubWindow) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
     }
 
