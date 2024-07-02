@@ -78,7 +78,7 @@ HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
  * @tc.desc: test function : IsSACallingByCallerToken
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsSACallingByCallerToken, Function | SmallTest | Level1)
 {
     const uint32_t callerToken = 1000;
     bool result = SessionPermission::IsSACallingByCallerToken(callerToken);
