@@ -813,41 +813,6 @@ HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateModalExtensionRect
- * @tc.desc: SceneSesionManager update modal extension rect
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, UpdateModalExtensionRect, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateModalExtensionRect";
-    info.bundleName_ = "UpdateModalExtensionRect";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    int32_t persistentId = 12345;
-    Rect rect { 1, 2, 3, 4 };
-    ssm_->UpdateModalExtensionRect(persistentId, sceneSession->GetPersistentId(), rect);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
-}
-
-/**
- * @tc.name: ProcessModalExtensionPointDown
- * @tc.desc: SceneSesionManager process modal extension point down
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, ProcessModalExtensionPointDown, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "ProcessModalExtensionPointDown";
-    info.bundleName_ = "ProcessModalExtensionPointDown";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    int32_t persistentId = 12345;
-    ssm_->ProcessModalExtensionPointDown(persistentId, sceneSession->GetPersistentId(), 0, 0);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
-}
-
-/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: SceneSesionManager hide non-secure windows by scene session
  * @tc.type: FUNC

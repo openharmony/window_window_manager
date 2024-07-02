@@ -119,9 +119,7 @@ public:
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage);
-    virtual void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect);
-    virtual void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId, int32_t posX, int32_t posY);
+        int32_t parentId);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
     virtual WMError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
         uint32_t extWindowActions);

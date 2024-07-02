@@ -655,25 +655,6 @@ struct Rect {
 };
 
 /**
- * @brief UIExtension usage
- */
-enum class UIExtensionUsage : uint32_t {
-    MODAL = 0,
-    EMBEDDED,
-    CONSTRAINED_EMBEDDED,
-    UIEXTENSION_USAGE_END
-};
-
-/**
- * @brief UIExtension info for event
- */
-struct ExtensionWindowEventInfo {
-    int32_t persistentId  = 0;
-    int32_t pid = -1;
-    Rect windowRect {0, 0, 0, 0};
-};
-
-/**
  * @struct KeyboardPanelInfo
  *
  * @brief Info of keyboard panel

@@ -54,9 +54,8 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
-    void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform,
-        bool useUIExtension = false) const;
-    void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform, bool useUIExtension = false) const;
+    void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
+    void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
     void UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
@@ -68,9 +67,6 @@ private:
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
         MMI::WindowInfo& windowInfo) const;
-    void UpdateModalExtensionWindowInfo(const sptr<SceneSession> sceneSession, MMI::WindowInfo& windowInfo);
-    void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
-        const sptr<SceneSession> sceneSession);
 
     std::mutex mutexlock_;
     FlushWindowInfoCallback flushWindowInfoCallback_;

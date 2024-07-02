@@ -811,7 +811,6 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
@@ -870,7 +869,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
-    property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -1231,16 +1229,6 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
-}
-
-void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
-{
-    uiExtensionUsage_ = uiExtensionUsage;
-}
-
-UIExtensionUsage WindowSessionProperty::GetUIExtensionUsage() const
-{
-    return uiExtensionUsage_;
 }
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)

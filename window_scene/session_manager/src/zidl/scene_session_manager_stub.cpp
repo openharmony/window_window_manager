@@ -139,10 +139,6 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetVisibilityWindowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB),
         &SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB),
-        &SceneSessionManagerStub::HandleUpdateModalExtensionRect),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB),
-        &SceneSessionManagerStub::HandleProcessModalExtensionPointDown),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION),
         &SceneSessionManagerStub::HandleAddOrRemoveSecureSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
@@ -875,31 +871,7 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
     }
     int32_t persistentId = data.ReadInt32();
     int32_t parentId = data.ReadInt32();
-    UIExtensionUsage usage = static_cast<UIExtensionUsage>(data.ReadUint32());
-    AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage);
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t persistentId = data.ReadInt32();
-    int32_t parentId = data.ReadInt32();
-    int32_t rectX = data.ReadInt32();
-    int32_t rectY = data.ReadInt32();
-    int32_t rectWidth = data.ReadInt32();
-    int32_t rectHeight = data.ReadInt32();
-    Rect windowRect{rectX, rectY, rectWidth, rectHeight};
-    UpdateModalExtensionRect(persistentId, parentId, windowRect);
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t persistentId = data.ReadInt32();
-    int32_t parentId = data.ReadInt32();
-    int32_t posX = data.ReadInt32();
-    int32_t posY = data.ReadInt32();
-    ProcessModalExtensionPointDown(persistentId, parentId, posX, posY);
+    AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId);
     return ERR_NONE;
 }
 

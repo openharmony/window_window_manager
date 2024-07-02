@@ -309,10 +309,7 @@ public:
     void FlushWindowInfoToMMI(const bool forceFlush = false);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage) override;
-    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override;
-    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
-        int32_t posX, int32_t posY) override;
+        int32_t parentId) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
     WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
