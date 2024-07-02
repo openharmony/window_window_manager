@@ -61,6 +61,7 @@ private:
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
+    static napi_value SetExitSplitOnBackground(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
@@ -89,6 +90,7 @@ private:
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);
+    napi_value OnSetExitSplitOnBackground(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);

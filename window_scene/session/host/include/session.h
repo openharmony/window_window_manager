@@ -230,6 +230,8 @@ public:
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
+    virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    virtual bool IsExitSplitOnBackground() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
@@ -492,6 +494,7 @@ protected:
     Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
+    std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
