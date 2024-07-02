@@ -3574,12 +3574,13 @@ WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSession
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property modeUSupportInfo permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
-    if (sceneSession->GetSessionProperty() != nullptr) {
-        sceneSession->GetSessionProperty()->SetModeSupportInfo(property->GetModeSupportInfo());
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+       sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
     }
     return WMError::WM_OK;
 }
