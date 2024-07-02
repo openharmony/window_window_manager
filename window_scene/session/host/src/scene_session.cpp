@@ -2523,7 +2523,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
         auto callingTokenId = abilitySessionInfo->callingTokenId;
-        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::isSACallingByCallerToken(callingTokenId) &&
+        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::IsSACallingByCallerToken(callingTokenId) &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
