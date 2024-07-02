@@ -116,6 +116,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
     napi_set_named_property(env, objValue, "isTopmost",
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
+    napi_set_named_property(env, objValue, "subWindowModalType",
+        CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
