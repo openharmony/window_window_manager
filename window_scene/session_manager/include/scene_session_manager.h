@@ -260,7 +260,6 @@ public:
     void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
-    RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void RegisterWindowChanged(const WindowChangedFunc& func);
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
@@ -681,11 +680,10 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
-    int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
-
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+    RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 };
 } // namespace OHOS::Rosen
 

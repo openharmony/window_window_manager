@@ -69,7 +69,6 @@ private:
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError CheckAdjustKeyboardLayoutParam(const KeyboardLayoutParams& params);
     std::shared_ptr<RSTransaction> GetRSTransaction();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
