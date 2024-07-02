@@ -261,7 +261,6 @@ void AbstractScreen::UpdateRSDisplayNode(Point startPoint)
     
     startPoint_ = startPoint;
     rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
-
 }
 
 ScreenId AbstractScreen::GetScreenGroupId() const
