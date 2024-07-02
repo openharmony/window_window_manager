@@ -1727,20 +1727,19 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     const int32_t compatibleInPcLandscapeWidth = 1447;
     const int32_t compatibleInPcLandscapeHeight = 965;
     const int32_t compatibleInPcDragLimit = 430;
-    bool isVertical = false;
-    if (rect.width_ < rect.height_) {
-        isVertical = true;
-    }
+    WSRect windowRect = GetSessionRect();
+    auto windowWidth = windowRect.width_;
+    auto windowHeight = windowRect.height_;
 
     if (reason != SizeChangeReason::MOVE) {
-        if (isSupportDragInPcCompatibleMode && !isVertical &&
+        if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
             rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
-        } else if (isSupportDragInPcCompatibleMode && isVertical &&
+        } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
             rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcLandscapeWidth;
             rect.height_ = compatibleInPcLandscapeHeight;
@@ -1748,7 +1747,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
         } else {
-            if (isVertical) {
+            if (windowWidth < windowHeight) {
                 rect.width_ = compatibleInPcPortraitWidth;
                 rect.height_ = compatibleInPcPortraitHeight;
             } else {
