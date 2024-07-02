@@ -327,6 +327,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         WLOGFE("Write hasContinuousTask failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(abilitySessionInfo->isAtomicService)) {
+        WLOGFE("Write isAtomicService failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (abilitySessionInfo->callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
             WLOGFE("Write callerToken info failed");

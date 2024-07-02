@@ -687,6 +687,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.requestOrientation_));
     napi_set_named_property(env, objValue, "isCalledRightlyByCallerId",
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
+    napi_set_named_property(env, objValue, "isAtomicService",
+        CreateJsValue(env, sessionInfo.isAtomicService));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
@@ -743,6 +745,9 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WITH_ANIMATION, true)));
         napi_set_named_property(env, objValue, "focusedOnShow",
             CreateJsValue(env, sessionInfo.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true)));
+        napi_set_named_property(env, objValue, "isStartupInstallFree",
+            CreateJsValue(env, (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
+                AAFwk::Want::FLAG_INSTALL_ON_DEMAND));
     }
 }
 
