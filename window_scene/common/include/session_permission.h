@@ -27,13 +27,13 @@ class SessionPermission {
 public:
     static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
-    static bool IsSystemCallingByCallerToken(const uint32_t callerToken);
     static bool VerifySessionPermission();
     static bool JudgeCallerIsAllowedToUseSystemAPI();
     static bool IsShellCall();
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
     static bool IsSACalling();
+    static bool IsSACallingByCallerToken(const uint32_t callerToken);
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);
     static bool IsSameBundleNameAsCalling(const std::string& bundleName);
