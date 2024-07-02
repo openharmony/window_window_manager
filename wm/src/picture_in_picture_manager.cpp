@@ -247,10 +247,9 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
         std::lock_guard<std::mutex> lock(mutex_);
-        if (!HasActiveController()) {
-            return;
+        if (HasActiveController()) {
+            activeController_->DoActionEvent(actionName, status);
         }
-        activeController_->DoActionEvent(actionName, status);
         return;
     }
     func->second();
