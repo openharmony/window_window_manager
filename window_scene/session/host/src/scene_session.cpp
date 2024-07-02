@@ -3580,7 +3580,7 @@ WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSession
 
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
-       sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
+        sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
     }
     return WMError::WM_OK;
 }
