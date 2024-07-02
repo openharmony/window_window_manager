@@ -734,11 +734,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+    if (display == nullptr) {
         WLOGFE("display is null!");
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo is null!");
+        return;
+    }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -1505,11 +1509,16 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     int32_t decorHeightWithPx = static_cast<int32_t>(decorHeight * vpr);
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1542,11 +1551,16 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return WMError::WM_DO_NOTHING;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1575,11 +1589,16 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         return WMError::WM_DO_NOTHING;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1624,11 +1643,16 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         }
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
