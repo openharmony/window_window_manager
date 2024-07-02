@@ -1312,6 +1312,23 @@ HWTEST_F(WindowSessionImplTwoTest, RegisterDialogDeathRecipientListener01, Funct
     window_->UnregisterDialogDeathRecipientListener(listener);
     GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: RegisterDialogDeathRecipientListener01 end";
 }
+
+/**
+ * @tc.name: GetUIContent
+ * @tc.desc: GetUIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetUIContent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetUIContent");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    Ace::UIContent *res = window->GetUIContent();
+    ASSERT_EQ(res, nullptr);
+    ASSERT_EQ(window->Destroy(), WMError::WM_ERROR_INVALID_WINDOW);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
