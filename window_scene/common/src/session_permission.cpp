@@ -114,6 +114,17 @@ bool SessionPermission::IsSACalling()
     return false;
 }
 
+bool SessionPermission::IsSACallingByCallerToken(const uint32_t callerToken)
+{
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        WLOGFW("SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
+        return true;
+    }
+    WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", callerToken, flag);
+    return false;
+}
+
 bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
