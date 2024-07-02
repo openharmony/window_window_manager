@@ -109,7 +109,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
-    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
+    virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -340,7 +340,7 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
-    void SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float postureAngle);
+    WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
 protected:
     SceneSessionManager();
@@ -680,8 +680,10 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
-    void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
-    void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
+
+    WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
+    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError ReportScreenFoldStatus(const ScreenFoldData& data);
 };
 } // namespace OHOS::Rosen
 
