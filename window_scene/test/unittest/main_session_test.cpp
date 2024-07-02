@@ -59,7 +59,7 @@ void MainSessionTest::SetUp()
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    mainSession_ = new MainSession(info, specificCallback);
+    mainSession_ = new (std::nothrow) MainSession(info, specificCallback);
     EXPECT_NE(nullptr, mainSession_);
 }
 
@@ -93,23 +93,23 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.abilityName_ = "";
     info.moduleName_ = "";
     info.bundleName_ = "";
-    pMainSession = new MainSession(info, pSpecificCallback);
+    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new MainSession(info, pSpecificCallback);
+    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = -1;
     info.abilityName_ = "MainSession01";
     info.moduleName_ = "MainSession02";
     info.bundleName_ = "MainSession03";
-    pSpecificCallback = new MainSession::SpecificSessionCallback;
-    pMainSession = new MainSession(info, pSpecificCallback);
+    pSpecificCallback = new(std::nothrow) MainSession::SpecificSessionCallback;
+    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new MainSession(info, pSpecificCallback);
+    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 }
 
