@@ -60,10 +60,13 @@ group("unittest") {
     ":ws_screen_session_manager_client_test",
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
+    ":ws_screen_session_manager_lite_test",
     ":ws_screen_session_manager_proxy_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
+    ":ws_screen_session_publish_test",
     ":ws_screen_session_test",
+    ":ws_screen_setting_helper_test",
     ":ws_screen_snapshot_picker_connection_test",
     ":ws_session_display_power_controller_test",
     ":ws_session_listener_controller_test",
@@ -189,6 +192,56 @@ ohos_unittest("ws_dual_display_sensor_fold_state_manager_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("ws_screen_session_publish_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_publish_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("ws_screen_setting_helper_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_setting_helper_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "ability_runtime:dataobs_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("ws_screen_session_manager_lite_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_lite_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/dm_lite:libdm_lite",
+    "${window_base_path}/wmserver:sms",
+  ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
