@@ -96,6 +96,7 @@ static const int32_t ROTATION_270 = 3;
 static const int32_t AUTO_ROTATE_OFF = 0;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
 constexpr int32_t TRANS_CODE_ABILITY_CONNECT = 1005;
+constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 
 bool JudgeIsBeta()
 {
@@ -3432,10 +3433,15 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     // get snapshot area frome Screenshot extension
     ConfigureScreenSnapshotParams();
     if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {
-        if (ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId) != 0) {
+        int32_t ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+        if (ret != 0) {
             TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
             ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
-            *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+            if (ret == RES_FAILURE_FOR_PRIVACY_WINDOW) {
+	        *errorCode = DmErrorCode::DM_ERROR_INVALID_CALLING;
+            } else {
+	        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+            }
             return nullptr;
         }
         ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
