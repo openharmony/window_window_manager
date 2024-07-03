@@ -4330,13 +4330,13 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
+    if (sceneSession->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     // dialog get focus
     if (CheckRequestFocusImmdediately(sceneSession)) {
         return WSError::WS_DO_NOTHING;
-    }
-    if (sceneSession->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", sceneSession->GetPersistentId());
-        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     // blocking-type session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
