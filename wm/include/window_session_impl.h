@@ -366,6 +366,10 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsFreeMutiWindowMode() const
+    {
+        return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
+    }
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
