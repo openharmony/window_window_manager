@@ -14,7 +14,6 @@
  */
 
 #include "window_adapter_lite.h"
-#include <key_event.h>
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "scene_board_judgement.h"
@@ -124,7 +123,7 @@ bool WindowAdapterLite::InitSSMProxy()
         int32_t clientUserId = GetUserIdByUid(getuid());
         if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
             SessionManagerLite::GetInstance().RegisterUserSwitchListener(
-                std::bind(&WindowAdapterLite::OnUserSwitch, this));
+                [this] { this->OnUserSwitch(); });
             isRegisteredUserSwitchListener_ = true;
         }
         isProxyValid_ = true;

@@ -757,7 +757,7 @@ struct MaximizeLayoutOption {
     ShowType dock = ShowType::HIDE;
 };
 
-enum class BackupAndRestoreType: int32_t {
+enum class BackupAndRestoreType : int32_t {
     NONE = 0,                       // no backup and restore
     CONTINUATION = 1,               // distribute
     APP_RECOVERY = 2,               // app recovery

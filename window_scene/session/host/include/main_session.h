@@ -33,6 +33,8 @@ public:
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
+    void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
+    bool IsExitSplitOnBackground() const override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

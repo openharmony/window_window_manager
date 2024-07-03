@@ -234,11 +234,10 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         return;
     }
 
-    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = mainScreenWidth,
         .height = mainScreenHeight,
-        .focusWindowId = focusId,
+        .focusWindowId = focusedSessionId_,
         .currentUserId = currentUserId_,
         .windowsInfo = windowInfoList,
         .displaysInfo = displayInfos};
@@ -305,8 +304,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
             windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
         TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %{public}s", windowinfolst.c_str());
-        int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
-        MMI::WindowGroupInfo windowGroup = {focusId, displayId, windowInfos};
+        MMI::WindowGroupInfo windowGroup = {focusedSessionId_, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
     }
 }
@@ -347,6 +345,18 @@ bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& dis
     return false;
 }
 
+void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
+{
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
+    if (focusedSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "focusedSceneSession is null");
+        return;
+    }
+    if (focusedSceneSession->HasModalUIExtension()) {
+        focusedSessionId_ =  focusedSceneSession->GetLastModalUIExtensionEventInfo().persistentId;
+    }
+}
+
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
@@ -356,12 +366,14 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     if (windowEventID == UINT32_MAX) {
         windowEventID = 0;
     }
+    focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(static_cast<int>(e.zOrder)) + "|" +
+            std::to_string(e.zOrder) + "|" +
             std::to_string(e.pid) + "|" +
             std::to_string(e.defaultHotAreas.size()) + " ";
     }
+    idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;
         TLOGI(WmsLogTag::WMS_EVENT, "EventID:%{public}d ListSize:%{public}d idList:%{public}s",

@@ -30,9 +30,8 @@ ScreenSnapshotPickerConnection &ScreenSnapshotPickerConnection::GetInstance()
 
 bool ScreenSnapshotPickerConnection::SnapshotPickerConnectExtension()
 {
-    if (bundleName_ == "" || abilityName_ == "") {
-        TLOGE(WmsLogTag::DMS, "screen snapshot bundleName:%{public}s or abilityName:%{public}s is empty",
-            bundleName_.c_str(), abilityName_.c_str());
+    if (bundleName_.empty() || abilityName_.empty()) {
+        TLOGE(WmsLogTag::DMS, "screen snapshot bundleName or abilityName is empty");
         return false;
     }
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s",

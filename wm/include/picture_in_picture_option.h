@@ -18,6 +18,7 @@
 #include <refbase.h>
 #include <string>
 #include "xcomponent_controller.h"
+#include "wm_common.h"
 #include "napi/native_api.h"
 
 namespace OHOS {
@@ -31,12 +32,16 @@ public:
     void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
     void SetContentSize(uint32_t width, uint32_t height);
+    void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status);
+    void SetPiPControlEnabled(PiPControlType controlType, PiPControlStatus enabled);
     void SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     void SetControlGroup(std::vector<std::uint32_t> controlGroup);
     void* GetContext() const;
     std::string GetNavigationId() const;
     uint32_t GetPipTemplate();
     std::vector<std::uint32_t> GetControlGroup();
+    std::vector<PiPControlStatusInfo> GetControlStatus();
+    std::vector<PiPControlEnableInfo> GetControlEnable();
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
     void SetNodeControllerRef(napi_ref ref);
@@ -49,6 +54,8 @@ private:
     uint32_t contentHeight_ = 0;
     std::shared_ptr<XComponentController> xComponentController_;
     std::vector<std::uint32_t> controlGroup_;
+    std::vector<PiPControlStatusInfo> pipControlStatusInfoList_;
+    std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
     napi_ref customNodeController_ = nullptr;
 };
 }

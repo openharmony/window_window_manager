@@ -43,7 +43,10 @@ void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
         TLOGE(WmsLogTag::DMS, "get remoteObject failed");
         return;
     }
-    remoteObject_ = remoteObject;
+    {
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
+        remoteObject_ = remoteObject;
+    }
     if (!AddObjectDeathRecipient()) {
         TLOGE(WmsLogTag::DMS, "AddObjectDeathRecipient failed");
         return;
@@ -65,6 +68,7 @@ void ScreenSessionAbilityConnectionStub::OnAbilityDisconnectDone(
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s, resultCode:%{public}d",
         element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
 
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "remoteObject member is nullptr");
         return;
@@ -80,6 +84,7 @@ bool ScreenSessionAbilityConnectionStub::AddObjectDeathRecipient()
     sptr<ScreenSessionAbilityDeathRecipient> deathRecipient(
         new(std::nothrow) ScreenSessionAbilityDeathRecipient([this] {
         TLOGI(WmsLogTag::DMS, "add death recipient handler");
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
         remoteObject_ = nullptr;
         isConnected_.store(false);
     }));
@@ -89,6 +94,7 @@ bool ScreenSessionAbilityConnectionStub::AddObjectDeathRecipient()
         return false;
     }
     deathRecipient_ = deathRecipient;
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "get the remoteObject failed");
         return false;
@@ -124,6 +130,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
     }
     lock.unlock();
     MessageOption option;
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
         return RES_FAILURE;

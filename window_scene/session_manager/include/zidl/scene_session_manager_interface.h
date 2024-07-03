@@ -97,6 +97,8 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
+        TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB,
+        TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB,
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
@@ -221,7 +223,10 @@ public:
         return WSError::WS_OK;
     }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId) override {}
+        int32_t parentId, UIExtensionUsage usage) override {}
+    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override {}
+    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
+        int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override
     {
         return WSError::WS_OK;

@@ -34,6 +34,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    sptr<WindowSessionImpl> window_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
@@ -53,6 +55,9 @@ void WindowSessionImplTwoTest::SetUp()
 void WindowSessionImplTwoTest::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+    if (window_ != nullptr) {
+        window_->Destroy();
+    }
 }
 
 namespace {
@@ -1011,6 +1016,302 @@ HWTEST_F(WindowSessionImplTwoTest, RegisterWindowRectChangeListener, Function | 
     window->Destroy();
 }
 
+/**
+ * @tc.name: NotifyScreenshot
+ * @tc.desc: NotifyScreenshot01 listener==nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyScreenshot01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyScreenshot01 start";
+    class MockIScrenshotListener : public IScreenshotListener
+    {
+    public:
+        MOCK_METHOD0(OnScreenshot, void());
+    };
+    window_ = GetTestWindowImpl("NotifyScreenshot01");
+    auto listeners = GetListenerList<IScreenshotListener, MockIScrenshotListener>();
+    listeners[0] = nullptr;
+    ASSERT_EQ(listeners.size(), 1);
+    window_->screenshotListeners_.insert({window_->GetPersistentId(), listeners});
+    window_->NotifyScreenshot();
+    std::vector<sptr<IScreenshotListener>> screenshotListeners =
+        window_->screenshotListeners_[window_->GetPersistentId()];
+    ASSERT_NE(std::find(screenshotListeners.begin(), screenshotListeners.end(), nullptr), screenshotListeners.end());
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyScreenshot01 end";
+}
+
+/**
+ * @tc.name: NotifyScreenshot
+ * @tc.desc: NotifyScreenshot02 listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyScreenshot02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyScreenshot02 start";
+    class ScreenshotListener : public IScreenshotListener
+    {
+    public:
+        void OnScreenshot()
+        {
+            GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyScreenshot02 OnScreenshot";
+            SUCCEED();
+        }
+    };
+    window_ = GetTestWindowImpl("NotifyScreenshot02");
+    sptr<IScreenshotListener> listener = new (std::nothrow) ScreenshotListener();
+    window_->RegisterScreenshotListener(listener);
+    window_->NotifyScreenshot();
+    window_->UnregisterScreenshotListener(listener);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyScreenshot02 end";
+}
+
+/**
+ * @tc.name: NotifyTouchDialogTarget
+ * @tc.desc: NotifyTouchDialogTarget01 hostSession_==nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyTouchDialogTarget01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget01 start";
+    window_ = GetTestWindowImpl("NotifyTouchDialogTarget01");
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->hostSession_ = nullptr;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    sptr<ISession> hostSession = window_->GetHostSession();
+    ASSERT_EQ(nullptr, hostSession);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget01 end";
+}
+
+/**
+ * @tc.name: NotifyTouchDialogTarget
+ * @tc.desc: NotifyTouchDialogTarget02 hostSession_!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyTouchDialogTarget02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget02 start";
+    window_ = GetTestWindowImpl("NotifyTouchDialogTarget02");
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> hostSession = new (std::nothrow) SessionMocker(sessionInfo);
+    window_->hostSession_ = hostSession;
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    sptr<ISession> hostSession1 = window_->GetHostSession();
+    ASSERT_NE(nullptr, hostSession1);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget02 end";
+}
+
+/**
+ * @tc.name: NotifyTouchDialogTarget
+ * @tc.desc: NotifyTouchDialogTarget03 hostSession_==nullptr listener==nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyTouchDialogTarget03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget03 start";
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
+    {
+    public:
+        MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
+    };
+    window_ = GetTestWindowImpl("NotifyTouchDialogTarget03");
+    window_->hostSession_ = nullptr;
+    auto listeners = GetListenerList<IDialogTargetTouchListener, MockIDialogTargetTouchListener>();
+    listeners[0] = nullptr;
+    (window_->dialogTargetTouchListener_)[window_->GetPersistentId()] = listeners;
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners =
+        (window_->dialogTargetTouchListener_)[window_->GetPersistentId()];
+    ASSERT_NE(std::find(dialogTargetTouchListeners.begin(), dialogTargetTouchListeners.end(), nullptr),
+              dialogTargetTouchListeners.end());
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget03 end";
+}
+
+/**
+ * @tc.name: NotifyTouchDialogTarget
+ * @tc.desc: NotifyTouchDialogTarget04 hostSession_==nullptr listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyTouchDialogTarget04, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget04 start";
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
+    {
+    public:
+        void OnDialogTargetTouch() const
+        {
+            GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget04 OnDialogTargetTouch";
+            SUCCEED();
+        }
+    };
+    window_ = GetTestWindowImpl("NotifyTouchDialogTarget04");
+    window_->hostSession_ = nullptr;
+    sptr<IDialogTargetTouchListener> dialogTargetTouchListener = new (std::nothrow) MockIDialogTargetTouchListener();
+    window_->RegisterDialogTargetTouchListener(dialogTargetTouchListener);
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    window_->UnregisterDialogTargetTouchListener(dialogTargetTouchListener);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyTouchDialogTarget04 end";
+}
+
+/**
+ * @tc.name: NotifyDisplayMove
+ * @tc.desc: NotifyDisplayMove01 listener==nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyDisplayMove01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove01 start";
+    class MockIDisplayMoveListener : public IDisplayMoveListener
+    {
+    public:
+        MOCK_METHOD2(OnDisplayMove, void(DisplayId from, DisplayId to));
+    };
+    window_ = GetTestWindowImpl("NotifyDisplayMove01");
+    auto listeners = GetListenerList<IDisplayMoveListener, MockIDisplayMoveListener>();
+    listeners[0] = nullptr;
+    (window_->displayMoveListeners_)[window_->GetPersistentId()] = listeners;
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners =
+        (window_->displayMoveListeners_)[window_->GetPersistentId()];
+    ASSERT_NE(std::find(displayMoveListeners.begin(), displayMoveListeners.end(), nullptr),
+              displayMoveListeners.end());
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove01 end";
+}
+
+/**
+ * @tc.name: NotifyDisplayMove
+ * @tc.desc: NotifyDisplayMove02 listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyDisplayMove02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove02 start";
+    class MockIDisplayMoveListener : public IDisplayMoveListener
+    {
+    public:
+        void OnDisplayMove(DisplayId from, DisplayId to)
+        {
+            GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove02 OnDisplayMove";
+            SUCCEED();
+        }
+    };
+    window_ = GetTestWindowImpl("NotifyDisplayMove02");
+    sptr<IDisplayMoveListener> displayMoveListener = new (std::nothrow) MockIDisplayMoveListener();
+    EXPECT_EQ(window_->RegisterDisplayMoveListener(displayMoveListener), WMError::WM_OK);
+    int32_t posX = 100;
+    int32_t posY = 100;
+    window_->NotifyTouchDialogTarget(posX, posY);
+    EXPECT_EQ(window_->UnregisterDisplayMoveListener(displayMoveListener), WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDisplayMove02 end";
+}
+
+/**
+ * @tc.name: NotifyDestroy
+ * @tc.desc: NotifyDestroy01 listener==nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyDestroy01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDestroy01 start";
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
+    {
+    public:
+        MOCK_CONST_METHOD0(OnDialogDeathRecipient, void());
+    };
+    window_ = GetTestWindowImpl("NotifyDestroy01");
+    auto listeners = GetListenerList<IDialogDeathRecipientListener, MockIDialogDeathRecipientListener>();
+    listeners[0] = nullptr;
+    (window_->dialogDeathRecipientListeners_)[window_->GetPersistentId()] = listeners;
+    window_->NotifyDestroy();
+    std::vector<sptr<IDialogDeathRecipientListener>> dialogDeathRecipientListeners =
+        (window_->dialogDeathRecipientListeners_)[window_->GetPersistentId()];
+    ASSERT_NE(std::find(dialogDeathRecipientListeners.begin(), dialogDeathRecipientListeners.end(), nullptr),
+              dialogDeathRecipientListeners.end());
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDestroy01 end";
+}
+
+/**
+ * @tc.name: NotifyDestroy
+ * @tc.desc: NotifyDestroy02 listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, NotifyDestroy02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDestroy02 start";
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
+    {
+    public:
+        void OnDialogDeathRecipient() const
+        {
+            GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDestroy02 OnDialogDeathRecipient";
+            SUCCEED();
+        }
+    };
+    window_ = GetTestWindowImpl("NotifyDestroy02");
+    sptr<IDialogDeathRecipientListener> listener = new (std::nothrow) MockIDialogDeathRecipientListener();
+    window_->RegisterDialogDeathRecipientListener(listener);
+    window_->NotifyDestroy();
+    window_->UnregisterDialogDeathRecipientListener(listener);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: NotifyDestroy02 end";
+}
+
+/**
+ * @tc.name: RegisterDialogTargetTouchListener
+ * @tc.desc: RegisterDialogTargetTouchListener01 listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, RegisterDialogTargetTouchListener01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: RegisterDialogTargetTouchListener01 start";
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
+    {
+    public:
+        void OnDialogTargetTouch() const
+        {
+        }
+    };
+    window_ = GetTestWindowImpl("RegisterDialogTargetTouchListener01");
+    sptr<IDialogTargetTouchListener> listener = new (std::nothrow) MockIDialogTargetTouchListener();
+    WMError res = window_->RegisterDialogTargetTouchListener(listener);
+    ASSERT_EQ(WMError::WM_OK, res);
+    window_->UnregisterDialogTargetTouchListener(listener);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: RegisterDialogTargetTouchListener01 end";
+}
+
+/**
+ * @tc.name: RegisterDialogDeathRecipientListener
+ * @tc.desc: RegisterDialogDeathRecipientListener01 listener!=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, RegisterDialogDeathRecipientListener01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: RegisterDialogDeathRecipientListener01 start";
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
+    {
+    public:
+        void OnDialogDeathRecipient() const
+        {
+        }
+    };
+    window_ = GetTestWindowImpl("RegisterDialogDeathRecipientListener01");
+    sptr<IDialogDeathRecipientListener> listener = new MockIDialogDeathRecipientListener();
+    int32_t count = (window_->dialogDeathRecipientListeners_)[window_->GetPersistentId()].size();
+    window_->RegisterDialogDeathRecipientListener(listener);
+    std::vector<sptr<IDialogDeathRecipientListener>> dialogDeathRecipientListeners =
+        (window_->dialogDeathRecipientListeners_)[window_->GetPersistentId()];
+    ASSERT_EQ(++count, dialogDeathRecipientListeners.size());
+    window_->UnregisterDialogDeathRecipientListener(listener);
+    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: RegisterDialogDeathRecipientListener01 end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
