@@ -2708,7 +2708,7 @@ WSError WindowSessionImpl::NotifyNoInteractionTimeout(const IWindowNoInteraction
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (!pointerEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Pointer event is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Pointer event is nullptr");
         return;
     }
 
@@ -2720,7 +2720,8 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW,
+                "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
                 pointerEvent->GetId());
         }
         if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
