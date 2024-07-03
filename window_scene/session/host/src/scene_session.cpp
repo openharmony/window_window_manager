@@ -119,6 +119,8 @@ const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_
         &SceneSession::HandleActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &SceneSession::HandleActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &SceneSession::HandleActionUpdateModeSupportInfo),
 };
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -3657,5 +3659,20 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGW(WmsLogTag::WMS_SCB, "in sceneSession, do nothing");
     return;
+}
+
+WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    if (!property->GetSystemCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
+    }
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
