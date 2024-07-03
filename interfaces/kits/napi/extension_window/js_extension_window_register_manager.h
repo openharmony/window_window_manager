@@ -52,7 +52,7 @@ private:
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
-        const sptr<Window>& window, bool isRegister, const std::string& type);
+        const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsExtensionWindowListener>>> jsCbMap_;
     std::mutex mtx_;
     std::map<CaseType, std::map<std::string, ListenerType>> listenerCodeMap_;

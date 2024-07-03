@@ -199,8 +199,8 @@ WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> wi
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
-    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister,
-    const std::string& type)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, const std::string& type,
+    bool isRegister)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (caseType == CaseType::CASE_WINDOW) {
