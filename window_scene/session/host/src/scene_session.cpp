@@ -119,6 +119,8 @@ const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_
         &SceneSession::HandleActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &SceneSession::HandleActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &SceneSession::HandleActionUpdateModeSupportInfo),
 };
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -807,6 +809,20 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_PIP, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->sessionPiPControlStatusChangeFunc_ = func;
+        return WSError::WS_OK;
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
 {
     auto newWinRect = winRect_;
@@ -1114,7 +1130,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad")) {
+        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !IsFreeMutiWindowMode()))) {
         return;
     }
     if (!GetSessionProperty()) {
@@ -1366,6 +1382,18 @@ WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t statu
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SetPipActionEvent(action, status);
+}
+
+WSError SceneSession::SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "controlType: %{public}u, status: %{public}u", controlType, status);
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetPiPControlEvent(controlType, status);
 }
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
@@ -3392,6 +3420,33 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, status:%{public}d", controlType, status);
+    if (!WindowHelper::IsPipWindow(GetWindowType())) {
+        return WSError::WS_DO_NOTHING;
+    }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    auto task = [weakThis = wptr(this), controlType, status, callingPid]() {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating) {
+            TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        if (callingPid != session->GetCallingPid()) {
+            TLOGW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (session->sessionPiPControlStatusChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdatePiPControlStatus");
+            session->sessionPiPControlStatusChangeFunc_(controlType, status);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "UpdatePiPControlStatus");
+    return WSError::WS_OK;
+}
+
 void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
@@ -3657,5 +3712,20 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGW(WmsLogTag::WMS_SCB, "in sceneSession, do nothing");
     return;
+}
+
+WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    if (!property->GetSystemCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
+    }
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

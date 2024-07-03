@@ -31,6 +31,7 @@ group("unittest") {
     ":ws_keyboard_session_test",
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
+    ":ws_multi_screen_manager_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
     ":ws_scene_input_manager_test",
@@ -46,6 +47,7 @@ group("unittest") {
     ":ws_scene_session_manager_test2",
     ":ws_scene_session_manager_test3",
     ":ws_scene_session_manager_test4",
+    ":ws_scene_session_manager_test5",
     ":ws_scene_session_manager_test6",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
@@ -250,6 +252,20 @@ ohos_unittest("ws_session_permission_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_multi_screen_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "multi_screen_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
   ]
 }
 
@@ -652,6 +668,26 @@ ohos_unittest("ws_scene_session_manager_test4") {
   module_out_path = module_out_path
 
   sources = [ "scene_session_manager_test4.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_test5") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test5.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

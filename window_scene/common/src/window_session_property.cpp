@@ -21,8 +21,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-    constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -78,6 +79,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -133,6 +136,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -707,6 +712,32 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
             return false;
         }
     }
+    auto controlStatusSize = pipTemplateInfo_.pipControlStatusInfoList.size();
+    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+        return false;
+    }
+    if (!parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
+        return false;
+    }
+    for (uint32_t i = 0; i < controlStatusSize; i++) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].controlType)) ||
+            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].status))) {
+            return false;
+        }
+    }
+    auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
+    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+        return false;
+    }
+    if (!parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
+        return false;
+    }
+    for (uint32_t i = 0; i < controlEnableSize; i++) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
+            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -724,11 +755,40 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t controlGroupId = 0;
-        if (parcel.ReadUint32(controlGroupId)) {
-            pipTemplateInfo.controlGroup.push_back(controlGroupId);
-        } else {
+        if (!parcel.ReadUint32(controlGroupId)) {
             return;
         }
+        pipTemplateInfo.controlGroup.push_back(controlGroupId);
+    }
+    auto controlStatusSize = parcel.ReadUint32();
+    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+        return;
+    }
+    for (uint32_t i = 0; i < controlStatusSize; i++) {
+        PiPControlStatusInfo pipControlStatusInfo;
+        uint32_t controlType = 0;
+        int32_t status = 0;
+        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
+            return;
+        }
+        pipControlStatusInfo.controlType = static_cast<PiPControlType>(controlType);
+        pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
+        pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
+    }
+    auto controlEnableSize = parcel.ReadUint32();
+    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+        return;
+    }
+    for (uint32_t i = 0; i < controlEnableSize; i++) {
+        PiPControlEnableInfo pipControlEnableInfo;
+        uint32_t controlType = 0;
+        int32_t enabled = 0;
+        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
+            return;
+        }
+        pipControlEnableInfo.controlType = static_cast<PiPControlType>(controlType);
+        pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
+        pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
     }
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
@@ -1052,6 +1112,12 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
     return parcel.WriteBool(topmost_);
 }
 
+
+bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    return parcel.WriteUint32(modeSupportInfo_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
@@ -1176,6 +1242,11 @@ void WindowSessionProperty::ReadActionUpdateWindowMask(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 {
     SetTopmost(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    SetModeSupportInfo(parcel.ReadUint32());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

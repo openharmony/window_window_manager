@@ -78,6 +78,9 @@ public:
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static ProcessStatusBarEnabledChangeFunc statusBarEnabledCallbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
@@ -121,6 +124,7 @@ void SceneSessionManagerTest2::SetUp()
 void SceneSessionManagerTest2::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 void SceneSessionManagerTest2::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)

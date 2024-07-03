@@ -890,6 +890,60 @@ napi_value CreateJsSessionProcessMode(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionPiPControlType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "VIDEO_PLAY_PAUSE", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_PLAY_PAUSE)));
+    napi_set_named_property(env, objValue, "VIDEO_PREVIOUS", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_PREVIOUS)));
+    napi_set_named_property(env, objValue, "VIDEO_NEXT", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_NEXT)));
+    napi_set_named_property(env, objValue, "FAST_FORWARD", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::FAST_FORWARD)));
+    napi_set_named_property(env, objValue, "FAST_BACKWARD", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::FAST_BACKWARD)));
+    napi_set_named_property(env, objValue, "HANG_UP_BUTTON", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::HANG_UP_BUTTON)));
+    napi_set_named_property(env, objValue, "MICROPHONE_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::MICROPHONE_SWITCH)));
+    napi_set_named_property(env, objValue, "CAMERA_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::CAMERA_SWITCH)));
+    napi_set_named_property(env, objValue, "MUTE_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::MUTE_SWITCH)));
+    return objValue;
+}
+
+napi_value CreateJsSessionPiPControlStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "PLAY", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::PLAY)));
+    napi_set_named_property(env, objValue, "PAUSE", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::PAUSE)));
+    napi_set_named_property(env, objValue, "OPEN", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::OPEN)));
+    napi_set_named_property(env, objValue, "CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::CLOSE)));
+    napi_set_named_property(env, objValue, "ENABLED", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::ENABLED)));
+    napi_set_named_property(env, objValue, "DISABLED", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::DISABLED)));
+    return objValue;
+}
+
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
