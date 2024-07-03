@@ -170,8 +170,8 @@ bool IsJsWindowInputTypeUndefind(napi_env env, napi_value jsWindowInputType, Ses
 
 bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo& sessionInfo)
 {
+    uint32_t windowType = 0;
     if (GetType(env, jsSessionType) != napi_undefined) {
-        uint32_t windowType = 0;
         if (!ConvertFromJsValue(env, jsSessionType, windowType)) {
             WLOGFE("[NAPI]Failed to convert parameter to windowType");
             return false;
@@ -179,11 +179,10 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
         if (JS_SESSION_TO_WINDOW_TYPE_MAP.count(static_cast<JsSessionType>(windowType)) != 0) {
             sessionInfo.windowType_ = static_cast<uint32_t>(
                 JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(windowType)));
-        } else {
-            if (sessionInfo.isSystem_) {
-                sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SCB_DEFAULT);
-            }
         }
+    }
+    if (windowType == 0 && sessionInfo.isSystem_) {
+        sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SCB_DEFAULT);
     }
     return true;
 }
@@ -891,6 +890,60 @@ napi_value CreateJsSessionProcessMode(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionPiPControlType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "VIDEO_PLAY_PAUSE", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_PLAY_PAUSE)));
+    napi_set_named_property(env, objValue, "VIDEO_PREVIOUS", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_PREVIOUS)));
+    napi_set_named_property(env, objValue, "VIDEO_NEXT", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::VIDEO_NEXT)));
+    napi_set_named_property(env, objValue, "FAST_FORWARD", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::FAST_FORWARD)));
+    napi_set_named_property(env, objValue, "FAST_BACKWARD", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::FAST_BACKWARD)));
+    napi_set_named_property(env, objValue, "HANG_UP_BUTTON", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::HANG_UP_BUTTON)));
+    napi_set_named_property(env, objValue, "MICROPHONE_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::MICROPHONE_SWITCH)));
+    napi_set_named_property(env, objValue, "CAMERA_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::CAMERA_SWITCH)));
+    napi_set_named_property(env, objValue, "MUTE_SWITCH", CreateJsValue(env,
+        static_cast<uint32_t>(PiPControlType::MUTE_SWITCH)));
+    return objValue;
+}
+
+napi_value CreateJsSessionPiPControlStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "PLAY", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::PLAY)));
+    napi_set_named_property(env, objValue, "PAUSE", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::PAUSE)));
+    napi_set_named_property(env, objValue, "OPEN", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::OPEN)));
+    napi_set_named_property(env, objValue, "CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::CLOSE)));
+    napi_set_named_property(env, objValue, "ENABLED", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::ENABLED)));
+    napi_set_named_property(env, objValue, "DISABLED", CreateJsValue(env,
+        static_cast<int32_t>(PiPControlStatus::DISABLED)));
+    return objValue;
+}
+
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
@@ -1083,6 +1136,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
+    SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     return objValue;
 }
 

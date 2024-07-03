@@ -279,6 +279,37 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallbac
 }
 
 /**
+ * @tc.name: UpdateModalExtensionRect
+ * @tc.desc: WindowAdapter/UpdateModalExtensionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    Rect rect { 1, 2, 3, 4 };
+    windowAdapter.UpdateModalExtensionRect(persistentId, parentId, rect);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ProcessModalExtensionPointDown
+ * @tc.desc: WindowAdapter/ProcessModalExtensionPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 12345;
+    int32_t parentId = 1234;
+    windowAdapter.ProcessModalExtensionPointDown(persistentId, parentId, 0, 0);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: WindowAdapter/AddOrRemoveSecureSession
  * @tc.type: FUNC

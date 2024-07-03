@@ -120,6 +120,17 @@ enum class WindowModeType : uint8_t {
 };
 
 /**
+ * @brief Enumerates modal of sub session.
+ */
+enum class SubWindowModalType : uint32_t {
+    TYPE_UNDEFINED = 0,
+    TYPE_NORMAL,
+    TYPE_DIALOG,
+    TYPE_WINDOW_MODALITY,
+    TYPE_APPLICATION_MODALITY,
+};
+
+/**
  * @brief Enumerates mode supported of window.
  */
 enum WindowModeSupport : uint32_t {
@@ -392,7 +403,7 @@ enum class WindowGravity : uint32_t {
 /**
  * @brief Enumerates window setuicontent type.
  */
-enum class WindowSetUIContentType: uint32_t {
+enum class WindowSetUIContentType : uint32_t {
     DEFAULT,
     RESTORE,
     BY_NAME,
@@ -402,7 +413,7 @@ enum class WindowSetUIContentType: uint32_t {
 /**
  * @brief Enumerates restore type.
  */
-enum class BackupAndRestoreType: int32_t {
+enum class BackupAndRestoreType : int32_t {
     NONE = 0,                       // no backup and restore
     CONTINUATION = 1,               // distribute
     APP_RECOVERY = 2,               // app recovery
@@ -644,6 +655,25 @@ struct Rect {
 };
 
 /**
+ * @brief UIExtension usage
+ */
+enum class UIExtensionUsage : uint32_t {
+    MODAL = 0,
+    EMBEDDED,
+    CONSTRAINED_EMBEDDED,
+    UIEXTENSION_USAGE_END
+};
+
+/**
+ * @brief UIExtension info for event
+ */
+struct ExtensionWindowEventInfo {
+    int32_t persistentId  = 0;
+    int32_t pid = -1;
+    Rect windowRect {0, 0, 0, 0};
+};
+
+/**
  * @struct KeyboardPanelInfo
  *
  * @brief Info of keyboard panel
@@ -866,10 +896,50 @@ enum class PiPState : int32_t {
     ERROR = 6,
 };
 
+/**
+ * @brief Enumerates picture in picture control status.
+ */
+enum class PiPControlStatus : int32_t {
+    PLAY = 1,
+    PAUSE = 0,
+    OPEN = 1,
+    CLOSE = 0,
+    ENABLED = -2,
+    DISABLED = -3,
+};
+
+/**
+ * @brief Enumerates picture in picture control type.
+ */
+enum class PiPControlType : uint32_t {
+    VIDEO_PLAY_PAUSE = 0,
+    VIDEO_PREVIOUS = 1,
+    VIDEO_NEXT = 2,
+    FAST_FORWARD = 3,
+    FAST_BACKWARD = 4,
+    HANG_UP_BUTTON = 5,
+    MICROPHONE_SWITCH = 6,
+    CAMERA_SWITCH = 7,
+    MUTE_SWITCH = 8,
+    END,
+};
+
+struct PiPControlStatusInfo {
+    PiPControlType controlType;
+    PiPControlStatus status;
+};
+
+struct PiPControlEnableInfo {
+    PiPControlType controlType;
+    PiPControlStatus enabled;
+};
+
 struct PiPTemplateInfo {
     uint32_t pipTemplateType;
     uint32_t priority;
     std::vector<uint32_t> controlGroup;
+    std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
+    std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
 };
 
 using OnCallback = std::function<void(int64_t, int64_t)>;

@@ -50,6 +50,8 @@ using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId)>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
+using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
+    WsPiPControlStatus status)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -190,6 +192,7 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
+    WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void RequestHideKeyboard(bool isAppColdStart = false);
@@ -217,6 +220,7 @@ public:
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetRestoringRectForKeyboard(WSRect rect);
     void SetSkipDraw(bool skip);
@@ -236,6 +240,7 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    SubWindowModalType GetSubWindowModalType() const;
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
@@ -282,6 +287,7 @@ public:
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     void SetShouldHideNonSecureWindows(bool shouldHide);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
+    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     void UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
         const ExtensionWindowFlags& extWindowActions);
     ExtensionWindowFlags GetCombinedExtWindowFlags();
@@ -321,6 +327,12 @@ public:
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void RemoveModalUIExtension(int32_t persistentId);
+    bool HasModalUIExtension();
+    void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
+    Vector2f GetPosition(bool useUIExtension);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -373,6 +385,10 @@ private:
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
+    bool IsFreeMutiWindowMode() const
+    {
+        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+    }
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -435,6 +451,7 @@ private:
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
+    NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     mutable std::mutex sessionChangeCbMutex_;
@@ -459,6 +476,8 @@ private:
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
+    std::shared_mutex modalUIExtensionInfoListMutex_;
+    std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;

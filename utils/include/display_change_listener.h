@@ -30,7 +30,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) { return; }
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) { return; }
-    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) { return; }
+    virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) { return; }
 };
 }
 }
