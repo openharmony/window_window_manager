@@ -380,6 +380,10 @@ private:
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
+    bool IsFreeMutiWindowMode() const
+    {
+        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+    }
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
