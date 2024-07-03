@@ -62,18 +62,10 @@ napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureContro
 JsPipController::JsPipController(const sptr<PictureInPictureController>& pipController, napi_env env)
     : pipController_(pipController), env_(env)
 {
-    registerFunc_ = {
-        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeRegister },
-        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventRegister },
-        { CONTROL_EVENT_CB, &JsPipController::ProcessControlEventRegister },
-    };
-    unRegisterFunc_ = {
-        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeUnRegister },
-        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventUnRegister },
-        { CONTROL_EVENT_CB, &JsPipController::ProcessControlEventUnRegister },
     listenerCodeMap_ = {
         {STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB},
         {CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB},
+        {CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB},
     };
 }
 
@@ -364,6 +356,9 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
             ProcessActionEventRegister();
             break;
+        case ListenerType::CONTROL_EVENT_CB:
+            ProcessControlEventRegister();
+            break;
         default:
             break;
     }
@@ -506,6 +501,9 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
             break;
         case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
             ProcessActionEventUnRegister();
+            break;
+        case ListenerType::CONTROL_EVENT_CB:
+            ProcessControlEventUnRegister();
             break;
         default:
             break;
