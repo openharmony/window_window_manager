@@ -1862,6 +1862,7 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged agents is empty");
             return;
         }
+        std::lock_guard<std::mutex> lock(freezedPidListMutex_);
         for (auto& agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
             if (freezedPidList_.count(agentPid) == 0) {
