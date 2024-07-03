@@ -252,7 +252,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
-    sessionInfo_.isAtomicService = info.isAtomicService;
+    sessionInfo_.isAtomicService_ = info.isAtomicService_;
 }
 
 void Session::SetScreenId(uint64_t screenId)

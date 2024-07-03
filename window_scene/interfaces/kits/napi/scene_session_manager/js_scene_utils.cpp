@@ -688,7 +688,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "isCalledRightlyByCallerId",
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     napi_set_named_property(env, objValue, "isAtomicService",
-        CreateJsValue(env, sessionInfo.isAtomicService));
+        CreateJsValue(env, sessionInfo.isAtomicService_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
