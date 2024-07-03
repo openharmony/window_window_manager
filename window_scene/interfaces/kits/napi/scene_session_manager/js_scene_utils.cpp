@@ -926,13 +926,13 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 napi_value SubWindowModalTypeInit(napi_env env)
 {
     if (env == nullptr) {
-        WLOGFE("Env is nullptr");
+        TLOGE(WmsLogTag::WMS_SUB, "Env is nullptr");
         return nullptr;
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
         return nullptr;
     }
 
