@@ -38,7 +38,7 @@ public:
     MockMmiPointerEvent(): MMI::PointerEvent(0) {}
 };
 
-class MockWindowDragLister : public IWindowDragListener {
+class MockWindowDragListener : public IWindowDragListener {
 public:
     MOCK_METHOD3(OnDrag, void(int32_t x, int32_t y, DragEvent event));
 };
