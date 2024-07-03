@@ -59,13 +59,9 @@ napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureContro
 JsPipController::JsPipController(const sptr<PictureInPictureController>& pipController, napi_env env)
     : pipController_(pipController), env_(env)
 {
-    registerFunc_ = {
-        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeRegister},
-        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventRegister},
-    };
-    unRegisterFunc_ = {
-        { STATE_CHANGE_CB, &JsPipController::ProcessStateChangeUnRegister},
-        { CONTROL_PANEL_ACTION_EVENT_CB, &JsPipController::ProcessActionEventUnRegister},
+    listenerCodeMap_ = {
+        {STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB},
+        {CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB},
     };
 }
 
@@ -271,7 +267,17 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     jsCbMap_[type] = callbackRef;
-    (this->*registerFunc_[type])();
+
+    switch (listenerCodeMap_[type]) {
+        case ListenerType::STATE_CHANGE_CB:
+            ProcessStateChangeRegister();
+            break;
+        case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
+            ProcessActionEventRegister();
+            break;
+        default:
+            break;
+    }
     return WmErrorCode::WM_OK;
 }
 
@@ -375,7 +381,17 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     jsCbMap_.erase(type);
-    (this->*unRegisterFunc_[type])();
+    
+    switch (listenerCodeMap_[type]) {
+        case ListenerType::STATE_CHANGE_CB:
+            ProcessStateChangeUnRegister();
+            break;
+        case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
+            ProcessActionEventUnRegister();
+            break;
+        default:
+            break;
+    }
     return WmErrorCode::WM_OK;
 }
 
