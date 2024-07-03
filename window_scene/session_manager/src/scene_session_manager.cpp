@@ -1462,7 +1462,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (sceneSession->GetSessionProperty()) {
         sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
-        TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession, synchronous screenId with displayid %{public}" PRIu64"",
+        TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64"",
             curDisplayId);
     }
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
@@ -1476,7 +1476,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
         auto rootContext = rootSceneContextWeak_.lock();
         sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
     } else {
-        TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, bundleName: %{public}s, "
+        TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, bundleName: %{public}s, "
             "moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
