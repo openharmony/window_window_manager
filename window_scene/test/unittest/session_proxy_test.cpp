@@ -512,9 +512,9 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_EQ(iRemoteObjectMocker, nullptr);
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_EQ(sProxy, nullptr);
+    ASSERT_NE(sProxy, nullptr);
     auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
     auto status = WsPiPControlStatus::PLAY;
     WSError res = sProxy->UpdatePiPControlStatus(controlType, status);
