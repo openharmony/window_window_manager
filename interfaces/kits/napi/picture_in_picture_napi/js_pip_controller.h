@@ -42,6 +42,7 @@ private:
     enum class ListenerType : uint32_t {
         STATE_CHANGE_CB,
         CONTROL_PANEL_ACTION_EVENT_CB,
+        CONTROL_EVENT_CB,
     };
 
     napi_value OnStartPictureInPicture(napi_env env, napi_callback_info info);
