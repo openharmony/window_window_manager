@@ -170,8 +170,8 @@ bool IsJsWindowInputTypeUndefind(napi_env env, napi_value jsWindowInputType, Ses
 
 bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo& sessionInfo)
 {
+    uint32_t windowType = 0;
     if (GetType(env, jsSessionType) != napi_undefined) {
-        uint32_t windowType = 0;
         if (!ConvertFromJsValue(env, jsSessionType, windowType)) {
             WLOGFE("[NAPI]Failed to convert parameter to windowType");
             return false;
@@ -179,11 +179,10 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
         if (JS_SESSION_TO_WINDOW_TYPE_MAP.count(static_cast<JsSessionType>(windowType)) != 0) {
             sessionInfo.windowType_ = static_cast<uint32_t>(
                 JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(windowType)));
-        } else {
-            if (sessionInfo.isSystem_) {
-                sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SCB_DEFAULT);
-            }
         }
+    }
+    if (windowType == 0 && sessionInfo.isSystem_) {
+        sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SCB_DEFAULT);
     }
     return true;
 }
@@ -1101,6 +1100,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
+    SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     return objValue;
 }
 

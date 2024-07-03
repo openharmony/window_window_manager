@@ -491,11 +491,17 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect)
 {
     bool needNotifyEvent = true;
-    uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
     int32_t winX = pointerItem.GetWindowX();
     int32_t winY = pointerItem.GetWindowY();
+    int32_t titleBarHeight = 0;
+    WMError ret = GetDecorHeight(titleBarHeight);
+    if (ret != WMError::WM_OK || titleBarHeight <= 0) {
+        titleBarHeight = static_cast<int32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
+    } else {
+        titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
+    }
     bool isMoveArea = (0 <= winX && winX <= static_cast<int32_t>(rect.width_)) &&
-        (0 <= winY && winY <= static_cast<int32_t>(titleBarHeight));
+        (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
     auto dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
@@ -735,7 +741,13 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null");
+        return;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null");
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
@@ -744,7 +756,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         return;
     }
 
-    virtualPixelRatio = GetVirtualPixelRatio(display->GetDisplayInfo());
+    virtualPixelRatio = GetVirtualPixelRatio(displayInfo);
     const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
 
     if (userLimitsSet_) {
@@ -926,12 +938,17 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+    if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, displayInfo is null, name: %{public}s, id: %{public}d",
+            property_->GetWindowName().c_str(), GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
     float density = GetVirtualPixelRatio(displayInfo);
     if (!MathHelper::NearZero(virtualPixelRatio_ - density) ||
         !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
@@ -1335,8 +1352,13 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     }
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get displayInfo failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
@@ -1344,7 +1366,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-    vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    vpr = GetVirtualPixelRatio(displayInfo);
     uint32_t smallWidth = displayHeight <= displayWidth ? displayHeight : displayWidth;
     float hwRatio = static_cast<float>(displayHeight) / static_cast<float>(displayWidth);
     uint32_t minWidth;
@@ -2637,12 +2659,17 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     } else {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-            WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo == nullptr) {
+            WLOGFE("get displayInfo failed displayId:%{public}" PRIu64, property_->GetDisplayId());
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(
-            static_cast<int>(blurStyle), GetVirtualPixelRatio(display->GetDisplayInfo())));
+            static_cast<int>(blurStyle), GetVirtualPixelRatio(displayInfo)));
     }
 
     RSTransaction::FlushImplicitTransaction();

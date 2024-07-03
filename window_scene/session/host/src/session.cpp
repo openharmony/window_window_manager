@@ -2637,6 +2637,17 @@ void Session::SetNeedSnapshot(bool needSnapshot)
     needSnapshot_ = needSnapshot;
 }
 
+void Session::SetExitSplitOnBackground(bool isExitSplitOnBackground)
+{
+    TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d, SetExitSplitOnBackground not implement", persistentId_);
+}
+
+bool Session::IsExitSplitOnBackground() const
+{
+    TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d, IsExitSplitOnBackground not implement", persistentId_);
+    return false;
+}
+
 void Session::SetFloatingScale(float floatingScale)
 {
     floatingScale_ = floatingScale;

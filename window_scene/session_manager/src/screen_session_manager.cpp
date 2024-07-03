@@ -23,6 +23,9 @@
 #include <unique_fd.h>
 
 #include <hitrace_meter.h>
+#ifdef DEVICE_STATUS_ENABLE
+#include <interaction_manager.h>
+#endif // DEVICE_STATUS_ENABLE
 #include <ipc_skeleton.h>
 #include <parameter.h>
 #include <parameters.h>
@@ -1864,7 +1867,7 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             if (freezedPidList_.count(agentPid) == 0) {
                 agent->OnDisplayChange(displayInfo, event);
             } else {
-                TLOGI(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
+                TLOGD(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
             }
         }
     };
@@ -4119,7 +4122,20 @@ void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId di
         return;
     }
     clientProxy_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
+#ifdef DEVICE_STATUS_ENABLE
+    SetDragWindowScreenId(screenId, displayNodeScreenId);
+#endif // DEVICE_STATUS_ENABLE
 }
+
+#ifdef DEVICE_STATUS_ENABLE
+void ScreenSessionManager::SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
+{
+    auto interactionManager = Msdp::DeviceStatus::InteractionManager::GetInstance();
+    if (interactionManager != nullptr) {
+        interactionManager->SetDragWindowScreenId(screenId, displayNodeScreenId);
+    }
+}
+#endif // DEVICE_STATUS_ENABLE
 
 void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
     ScreenId screenId)
@@ -4730,7 +4746,7 @@ void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
     rsInterface_.DisablePowerOffRenderControl(rsScreenId);
 }
 
-void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo)
+void ScreenSessionManager::ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo)
 {
     if (clientProxy_) {
         auto screenInfo = GetDefaultScreenSession();
@@ -4738,9 +4754,9 @@ void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_
         if (screenInfo != nullptr) {
             rotation = static_cast<int32_t>(screenInfo->GetRotation());
         }
-        screenFoldInfo.emplace_back(rotation);
+        screenFoldInfo.emplace_back(std::to_string(rotation));
 
-        clientProxy_->OnFoldStatusChangeReportUE(screenFoldInfo, angle);
+        clientProxy_->OnFoldStatusChangedReportUE(screenFoldInfo);
     }
 }
 } // namespace OHOS::Rosen

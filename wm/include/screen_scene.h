@@ -19,7 +19,7 @@
 #include <mutex>
 
 #include "vsync_station.h"
-#include "window.h"
+#include "wm/window.h"
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {

@@ -109,7 +109,7 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
-    virtual void OnFoldStatusChangeUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
+    virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -309,7 +309,10 @@ public:
     void FlushWindowInfoToMMI(const bool forceFlush = false);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId) override;
+        int32_t parentId, UIExtensionUsage usage) override;
+    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override;
+    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
+        int32_t posX, int32_t posY) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
     WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
@@ -337,7 +340,7 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
-    void SetFoldEventFromDMS(const std::vector<int32_t>& screenFoldInfo, float postureAngle);
+    WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
 protected:
     SceneSessionManager();
@@ -677,8 +680,10 @@ private:
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
-    void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
-    void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
+
+    WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
+    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError ReportScreenFoldStatus(const ScreenFoldData& data);
 };
 } // namespace OHOS::Rosen
 

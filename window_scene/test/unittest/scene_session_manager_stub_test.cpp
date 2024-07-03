@@ -1122,7 +1122,61 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     int32_t parentId = 12345;
     data.WriteInt32(parentId);
 
+    uint32_t usage = 0;
+    data.WriteUint32(usage);
+
     int res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateModalExtensionRect
+ * @tc.desc: test HandleUpdateModalExtensionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t persistentId = 12345;
+    data.WriteInt32(persistentId);
+    int32_t parentId = 1234;
+    data.WriteInt32(parentId);
+    Rect rect { 1, 2, 3, 4 };
+    data.WriteInt32(rect.posX_);
+    data.WriteInt32(rect.posY_);
+    data.WriteInt32(rect.width_);
+    data.WriteInt32(rect.height_);
+
+    int res = stub_->HandleUpdateModalExtensionRect(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleProcessModalExtensionPointDown
+ * @tc.desc: test HandleProcessModalExtensionPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Function | SmallTest | Level2)
+{
+    ASSERT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t persistentId = 12345;
+    data.WriteInt32(persistentId);
+    int32_t parentId = 1234;
+    data.WriteInt32(parentId);
+    int32_t posX = 114;
+    data.WriteInt32(posX);
+    int32_t posY = 514;
+    data.WriteInt32(posY);
+
+    int res = stub_->HandleProcessModalExtensionPointDown(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

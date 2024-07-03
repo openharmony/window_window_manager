@@ -236,6 +236,7 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    SubWindowModalType GetSubWindowModalType() const;
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
@@ -321,6 +322,12 @@ public:
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void RemoveModalUIExtension(int32_t persistentId);
+    bool HasModalUIExtension();
+    void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
+    Vector2f GetPosition(bool useUIExtension);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -457,6 +464,8 @@ private:
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
+    std::shared_mutex modalUIExtensionInfoListMutex_;
+    std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
