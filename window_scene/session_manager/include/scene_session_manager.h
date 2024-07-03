@@ -689,7 +689,8 @@ private:
     static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
     {
         return sessionInfo.isAtomicService_ && sessionInfo.want != nullptr &&
-        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
+            (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
+            AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
     }
 };
 } // namespace OHOS::Rosen
