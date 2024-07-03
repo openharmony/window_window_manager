@@ -1509,19 +1509,16 @@ HWTEST_F(SceneSessionTest2, SetForceHideState, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetForceHideState";
     info.bundleName_ = "SetForceHideState";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->SetForceHideState(true);
-    bool hide = scensession->GetForceHideState();
-    ASSERT_EQ(hide, true);
-    scensession->SetForceHideState(false);
-    hide = scensession->GetForceHideState();
-    ASSERT_EQ(hide, false);
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
+    bool hide = sceneSession->GetForceHideState();
+    ASSERT_EQ(hide, ForceHideState::NOT_HIDDEN);
+    sceneSession->SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
+    hide = sceneSession->GetForceHideState();
+    ASSERT_EQ(hide, ForceHideState::HIDDEN_WHEN_FOCUSED);
 }
 
 /**
