@@ -1213,6 +1213,8 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterForeground, Function | SmallTest | Le
     int res = 0;
     window->NotifyAfterForeground(true, true);
     window->NotifyAfterForeground(false, false);
+    window->vsyncStation_ = nullptr;
+    window->NotifyAfterForeground(false, false);
     ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterForeground end";
@@ -1238,6 +1240,8 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterBackground, Function | SmallTest | Le
 
     int res = 0;
     window->NotifyAfterBackground(true, true);
+    window->NotifyAfterBackground(false, false);
+    window->vsyncStation_ = nullptr;
     window->NotifyAfterBackground(false, false);
     ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
@@ -1267,7 +1271,6 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterUnfocused, Function | SmallTest | Lev
     window->NotifyAfterUnfocused(false);
     ASSERT_EQ(res, 0);
 
-    // GetUIContentSharedPtr!=nullptr
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
                           BackupAndRestoreType::NONE, nullptr, aceRet);
