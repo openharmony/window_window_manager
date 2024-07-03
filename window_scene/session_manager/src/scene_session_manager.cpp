@@ -1435,7 +1435,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        InitSessionInfo(sceneSession, sessionInfo, property);
+        InitSceneSession(sceneSession, sessionInfo, property);
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
@@ -1449,7 +1449,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
-void SceneSessionManager::InitSessionInfo(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
+void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
     const sptr<WindowSessionProperty>& property)
 {
     auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
@@ -1482,13 +1482,10 @@ void SceneSessionManager::InitSessionInfo(sptr<SceneSession>& sceneSession, cons
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
     RegisterSessionExceptionFunc(sceneSession);
-    if (!sessionInfo.isAtomicService || sessionInfo.want == nullptr ||
-        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) !=
-        AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
-            FillSessionInfo(sceneSession);
+    if (!IsAtomicServiceFreeInstall(sessionInfo)) {
+        FillSessionInfo(sceneSession);
     }
-    auto persistentId = sceneSession->GetPersistentId();
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", sceneSession->GetPersistentId());
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
     }
@@ -1499,7 +1496,7 @@ void SceneSessionManager::InitSessionInfo(sptr<SceneSession>& sceneSession, cons
     sceneSession->SetSnapshotScale(snapshotScale_);
     UpdateParentSessionForDialog(sceneSession, property);
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-        WLOGFI("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
+        TLOGI(WmsLogTag::WMS_LIFE, "ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
         PreHandleCollaborator(sceneSession);
     }
 }
@@ -5388,9 +5385,7 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     }
 
     const auto& sessionInfo = scnSession->GetSessionInfo();
-    if (sessionInfo.isAtomicService && sessionInfo.want != nullptr &&
-        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
-        AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+    if (IsAtomicServiceFreeInstall(sessionInfo)) {
         TLOGI(WmsLogTag::WMS_LIFE, "AtomicService free-install start, id: %{public}d, type: %{public}d",
             scnSession->GetPersistentId(), scnSession->GetWindowType());
         FillSessionInfo(scnSession);

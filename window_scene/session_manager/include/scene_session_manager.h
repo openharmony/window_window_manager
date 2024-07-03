@@ -402,7 +402,7 @@ private:
     bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
         sptr<SceneSession>& focusedSession, bool includingAppSession);
-    void InitSessionInfo(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
+    void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
@@ -681,6 +681,11 @@ private:
     int32_t dumpingSessionPid_ = INVALID_SESSION_ID;
     void CheckAndReportScreenFoldStatusEvent(const ScreenFoldData& data);
     void ReportScreenFoldStatusEvent(const ScreenFoldData& data);
+    static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
+    {
+        return sessionInfo.isAtomicService_ && sessionInfo.want != nullptr &&
+        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
+    }
 };
 } // namespace OHOS::Rosen
 
