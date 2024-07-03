@@ -17,6 +17,7 @@
 #include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include "../utils/include/screen_fold_data.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
@@ -1623,6 +1624,64 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | L
     EXPECT_EQ(clearFailedIds.size(), 1);
 }
 
+/**
+ * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
+ * @tc.desc: Test whether report the correct screen fold status events
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestReportCorrectScreenFoldStatusChangeEvent, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestReportCorrectScreenFoldStatusChangeEvent start";
+    ScreenFoldData screenFoldData1;
+    screenFoldData1.currentScreenFoldStatus_ = 1; // 1: current screen fold status
+    screenFoldData1.nextScreenFoldStatus_ = 3; // 3: next screen fold status
+    screenFoldData1.currentScreenFoldStatusDuration_ = 18; // 18: current duration
+    screenFoldData1.postureAngle_ = 47.1f; // 47.1: posture angle (type: float)
+    screenFoldData1.screenRotation_ = 1; // 1: screen rotation
+    screenFoldData1.typeCThermal_ = 3000; // 3000: typec port thermal
+    screenFoldData1.focusedPackageName_ = "Developer Test: (1, 3, 18, 47.1, 1, 3000)";
+    WMError result = ssm_->CheckAndReportScreenFoldStatus(screenFoldData1);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING); // not report half-fold event until next change
+
+    ScreenFoldData screenFoldData2;
+    screenFoldData2.currentScreenFoldStatus_ = 3; // 3: current screen fold status
+    screenFoldData2.nextScreenFoldStatus_ = 2; // 2: next screen fold status
+    screenFoldData2.currentScreenFoldStatusDuration_ = 20; // 20: current duration
+    screenFoldData2.postureAngle_ = 143.7f; // 143.7: posture angle (type: float)
+    screenFoldData2.screenRotation_ = 2; // 2: screen rotation
+    screenFoldData2.typeCThermal_ = 3005; // 3005: typec port thermal
+    screenFoldData2.focusedPackageName_ = "Developer Test: (3, 2, 20, 143.7, 2, 3005)";
+    result = ssm_->CheckAndReportScreenFoldStatus(screenFoldData2);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: TestReportIncompleteScreenFoldStatusChangeEvent
+ * @tc.desc: Test whether block the incomplete screen fold status events
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEvent, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestReportIncompleteScreenFoldStatusChangeEvent start";
+    // screen fold status changes from -1: invalid to 3: half_fold, duration = 0, angle = 67.0, rotation = 0
+    std::vector<std::string> screenFoldInfo {"-1", "3", "0", "67.0", "0"};
+    WMError result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    screenFoldInfo.clear();
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    // screen fold status changes from 2: folded to 3: half_fold, duration = 0, angle = 67.0, rotation = 0
+    screenFoldInfo = {"2", "3", "0", "67.0", "0"};
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    // screen fold status changes from 3: half_fold to 1: expand, duration = 18, angle = 147.3, rotation = 2
+    screenFoldInfo = {"3", "1", "18", "147.3", "2"};
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
