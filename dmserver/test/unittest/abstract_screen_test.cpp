@@ -273,8 +273,8 @@ HWTEST_F(AbstractScreenTest, GetSourceMode, Function | SmallTest | Level3)
 HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, Function | SmallTest | Level3)
 {
     Point point_(159, 357);
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({10086, absScreen_});
     sptr<ScreenGroupInfo> result = absScreenGroup_->ConvertToScreenGroupInfo();
     EXPECT_EQ(result->children_[0], 10086);
 }
@@ -300,8 +300,8 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig, Function | SmallTest | Leve
     result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
     EXPECT_FALSE(result);
     Point point_(159, 357);
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({10086, absScreen_});
     absScreenGroup_->mirrorScreenId_ = 10086;
     EXPECT_FALSE(result);
 }
@@ -313,7 +313,7 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig, Function | SmallTest | Leve
  */
 HWTEST_F(AbstractScreenTest, AddChild01, Function | SmallTest | Level3)
 {
-    absScreenGroup_->abstractScreenMap_.clear();
+    absScreenGroup_->screenMap_.clear();
     sptr<AbstractScreen> absTest = nullptr;
     Point point_(159, 357);
     bool result = absScreenGroup_->AddChild(absTest, point_);
@@ -343,12 +343,12 @@ HWTEST_F(AbstractScreenTest, AddChild01, Function | SmallTest | Level3)
  */
 HWTEST_F(AbstractScreenTest, AddChild02, Function | SmallTest | Level3)
 {
-    absScreenGroup_->abstractScreenMap_.clear();
+    absScreenGroup_->screenMap_.clear();
     Point point_(159, 357);
     absScreenGroup_->mirrorScreenId_ = 10086;
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({0, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({0, absScreen_});
     absScreen_->rsDisplayNode_ = nullptr;
     bool result = absScreenGroup_->AddChild(absScreen_, point_);
     EXPECT_FALSE(result);
@@ -406,8 +406,8 @@ HWTEST_F(AbstractScreenTest, RemoveChild02, Function | SmallTest | Level3)
     Point point_(159, 357);
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({0, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({0, absScreen_});
     bool result = absScreenGroup_->RemoveChild(absScreen_);
     ASSERT_TRUE(result);
 }
@@ -441,8 +441,8 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, Function | SmallTest | Level3)
 HWTEST_F(AbstractScreenTest, GetChildren, Function | SmallTest | Level3)
 {
     Point point_(159, 357);
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({10086, absScreen_});
     std::vector<sptr<AbstractScreen>> result = absScreenGroup_->GetChildren();
     ASSERT_EQ(result[0], absScreen_);
 }
@@ -455,8 +455,8 @@ HWTEST_F(AbstractScreenTest, GetChildren, Function | SmallTest | Level3)
 HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
 {
     Point point_(159, 357);
-    std::pair<sptr<AbstractScreen>, Point> pair_ = std::make_pair(absScreen_, point_);
-    (absScreenGroup_->abstractScreenMap_).insert({10086, pair_});
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({10086, absScreen_});
     std::vector<Point> result = absScreenGroup_->GetChildrenPosition();
     EXPECT_EQ(result[0].posX_, 159);
     EXPECT_EQ(result[0].posY_, 357);
