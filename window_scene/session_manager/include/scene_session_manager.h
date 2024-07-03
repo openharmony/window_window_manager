@@ -686,12 +686,6 @@ private:
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
-    static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
-    {
-        return sessionInfo.isAtomicService_ && sessionInfo.want != nullptr &&
-            (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
-            AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
-    }
 };
 } // namespace OHOS::Rosen
 
