@@ -35,7 +35,6 @@
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
-#include "interfaces/include/ws_common.h"
 #include "session_permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
@@ -2510,6 +2509,17 @@ WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t 
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
+    auto task = [controlType, status]() {
+        PictureInPictureManager::DoControlEvent(static_cast<PiPControlType>(controlType),
+            static_cast<PiPControlStatus>(status));
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SetPiPControlEvent");
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
     bool isUpdate = false;
@@ -2708,7 +2718,7 @@ WSError WindowSessionImpl::NotifyNoInteractionTimeout(const IWindowNoInteraction
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (!pointerEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Pointer event is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Pointer event is nullptr");
         return;
     }
 
@@ -2720,7 +2730,8 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW,
+                "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
                 pointerEvent->GetId());
         }
         if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
@@ -3083,7 +3094,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == "phone" || windowSystemConfig_.uiType_ == "pad")) {
+                (windowSystemConfig_.uiType_ == "phone" ||
+                 (windowSystemConfig_.uiType_ == "pad" && !IsFreeMutiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
@@ -3175,6 +3187,19 @@ void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason r
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
+}
+
+void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, status:%{public}d", controlType, status);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
+        static_cast<WsPiPControlStatus>(status));
 }
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)

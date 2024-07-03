@@ -69,9 +69,10 @@ enum class SessionInterfaceCode {
     TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION,
     TRANS_ID_NOTIFY_EXTENSION_TIMEOUT,
 
-    //PictureInPicture
+    // PictureInPicture
     TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE = 800,
     TRANS_ID_UPDATE_PIP_RECT,
+    TRANS_ID_UPDATE_PIP_CONTROL_STATUS,
 };
 } // namespace Rosen
 } // namespace OHOS
