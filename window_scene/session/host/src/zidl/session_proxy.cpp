@@ -328,7 +328,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(abilitySessionInfo->isAtomicService)) {
-        WLOGFE("Write isAtomicService failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isAtomicService failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
