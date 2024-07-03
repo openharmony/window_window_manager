@@ -4334,6 +4334,10 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     if (CheckRequestFocusImmdediately(sceneSession)) {
         return WSError::WS_DO_NOTHING;
     }
+    if (sceneSession->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", sceneSession->GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     // blocking-type session will block lower zOrder request focus
     auto focusedSession = GetSceneSession(focusedSessionId_);
     if (focusedSession) {
@@ -4382,7 +4386,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
         if (session == nullptr) {
             return false;
         }
-        if (session->GetForceHideState()) {
+        if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }

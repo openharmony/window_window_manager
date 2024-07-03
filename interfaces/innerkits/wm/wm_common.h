@@ -1078,6 +1078,12 @@ enum ShowType : int32_t {
     FORBIDDEN // hide always
 };
 
+enum ForceHideState : uint32_t {
+    NOT_HIDDEN = 0,
+    HIDDEN_WHEN_FOCUSED,
+    HIDDEN_WHEN_UNFOCUSED
+};
+
 struct MaximizeLayoutOption {
     ShowType decor = ShowType::HIDE;
     ShowType dock = ShowType::HIDE;
