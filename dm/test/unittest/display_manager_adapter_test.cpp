@@ -798,6 +798,22 @@ HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Lev
         ASSERT_EQ(err, DMError::DM_OK);
     }
 }
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level2)
+{
+    std::vector<DisplayPhysicalResolution> allSize =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(!allSize.empty());
+    } else {
+        ASSERT_TRUE(allSize.empty());
+    }
+}
 }
 }
 }

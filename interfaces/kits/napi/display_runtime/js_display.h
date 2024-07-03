@@ -61,6 +61,7 @@ napi_value CreateJsRectObject(napi_env env, DMRect rect);
 napi_value CreateJsWaterfallDisplayAreaRectsObject(napi_env env,
     WaterfallDisplayAreaRects waterfallDisplayAreaRects);
 napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> boundingRects);
+napi_value CreateJsDisplayPhysicalInfoObject(napi_env env, DisplayPhysicalResolution physicalInfo);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 class JsDisplay final {
