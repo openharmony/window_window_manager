@@ -753,10 +753,10 @@ HWTEST_F(WindowImplTest5, StartMove04, Function | SmallTest | Level1)
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->moveDragProperty_->pointEventStarted_ = true;
-    window->moveDragProperty_->startMoveFlag_ = false;
+    window->moveDragProperty_->startDragFlag_ = false;
     window->StartMove();
 
-    window->moveDragProperty_->startMoveFlag_ = true;
+    window->moveDragProperty_->startDragFlag_ = true;
     window->StartMove();
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
