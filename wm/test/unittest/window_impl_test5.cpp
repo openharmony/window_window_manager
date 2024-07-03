@@ -470,7 +470,7 @@ HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
     ASSERT_NE(window, nullptr);
 
     sptr<MockOccupiedAreaChangeListener> listener1;
-    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IOccupiedAreaChangeListener>(listener1));
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
     sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener2, nullptr);
     window->UnregisterOccupiedAreaChangeListener(listener2);
@@ -646,10 +646,10 @@ HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, Function | SmallTest | Level
     ASSERT_NE(window, nullptr);
 
     sptr<MockOccupiedAreaChangeListener> listener;
-    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IOccupiedAreaChangeListener>(listener));
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener);
     listener = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener, nullptr);
-    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IOccupiedAreaChangeListener>(listener));
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener);
     EXPECT_CALL(*listener, OnSizeChange(_, _));
     sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
     ASSERT_NE(info, nullptr);
@@ -672,10 +672,10 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
     ASSERT_NE(window, nullptr);
 
     sptr<MockWindowDragListener> listener;
-    window->windowDragListeners_.push_back(sptr<IWindowDragListener>(listener));
+    window->windowDragListeners_.push_back(listener);
     listener = new (std::nothrow) MockWindowDragListener();
     ASSERT_NE(listener, nullptr);
-    window->windowDragListeners_.push_back(sptr<IWindowDragListener>(listener));
+    window->windowDragListeners_.push_back(listener);
     EXPECT_CALL(*listener, OnDrag(_, _, _));
     PointInfo point({10, 20});
     window->NotifyDragEvent(point, DragEvent::DRAG_EVENT_OUT);
