@@ -1049,7 +1049,6 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
     option->SetWindowName("PreLayoutOnShow");
-    option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);

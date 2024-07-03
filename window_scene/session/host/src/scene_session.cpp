@@ -406,7 +406,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
-                session->IsFocused() && session->IsMovableWindowType())) {
+                session->IsFocused() && session->IsMovableWindowType() &&
+                session->moveDragController_->HasPointDown())) {
                 TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
                 return WSError::WS_OK;
             }
@@ -455,6 +456,25 @@ void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& are
     if (!result.second) {
         result.first->second = area;
     }
+}
+
+SubWindowModalType SceneSession::GetSubWindowModalType() const
+{
+    SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
+        return modalType;
+    }
+    auto windowType = property->GetWindowType();
+    if (WindowHelper::IsDialogWindow(windowType)) {
+        modalType = SubWindowModalType::TYPE_DIALOG;
+    } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
+        modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+    } else if (WindowHelper::IsSubWindow(windowType)) {
+        modalType = SubWindowModalType::TYPE_NORMAL;
+    }
+    return modalType;
 }
 
 void SceneSession::SetSessionEventParam(SessionEventParam param)
@@ -1208,6 +1228,78 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     return false;
 }
 
+void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, pid=%{public}d", GetPersistentId(),
+        extensionInfo.persistentId, extensionInfo.pid);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        modalUIExtensionInfoList_.push_back(extensionInfo);
+    }
+    NotifySessionInfoChange();
+}
+
+void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
+        "Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        extensionInfo.persistentId, extensionInfo.pid, extensionInfo.windowRect.posX_,
+        extensionInfo.windowRect.posY_, extensionInfo.windowRect.width_, extensionInfo.windowRect.height_);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        auto iter = std::find_if(modalUIExtensionInfoList_.begin(), modalUIExtensionInfoList_.end(),
+            [extensionInfo](const ExtensionWindowEventInfo& eventInfo) {
+            return extensionInfo.persistentId == eventInfo.persistentId && extensionInfo.pid == eventInfo.pid;
+        });
+        if (iter == modalUIExtensionInfoList_.end()) {
+            return;
+        }
+        iter->windowRect = extensionInfo.windowRect;
+    }
+    NotifySessionInfoChange();
+}
+
+void SceneSession::RemoveModalUIExtension(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d", GetPersistentId(), persistentId);
+    {
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        auto iter = std::find_if(modalUIExtensionInfoList_.begin(), modalUIExtensionInfoList_.end(),
+            [persistentId](const ExtensionWindowEventInfo& extensionInfo) {
+            return extensionInfo.persistentId == persistentId;
+        });
+        if (iter == modalUIExtensionInfoList_.end()) {
+            return;
+        }
+        modalUIExtensionInfoList_.erase(iter, modalUIExtensionInfoList_.end());
+    }
+    NotifySessionInfoChange();
+}
+
+bool SceneSession::HasModalUIExtension()
+{
+    std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+    return !modalUIExtensionInfoList_.empty();
+}
+
+ExtensionWindowEventInfo SceneSession::GetLastModalUIExtensionEventInfo()
+{
+    std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+    return modalUIExtensionInfoList_.back();
+}
+
+Vector2f SceneSession::GetPosition(bool useUIExtension)
+{
+    WSRect windowRect = GetSessionRect();
+    if (useUIExtension && HasModalUIExtension()) {
+        auto rect = GetLastModalUIExtensionEventInfo().windowRect;
+        windowRect.posX_ = rect.posX_;
+        windowRect.posY_ = rect.posY_;
+    }
+    Vector2f position(windowRect.posX_, windowRect.posY_);
+    return position;
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
@@ -1727,20 +1819,19 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     const int32_t compatibleInPcLandscapeWidth = 1447;
     const int32_t compatibleInPcLandscapeHeight = 965;
     const int32_t compatibleInPcDragLimit = 430;
-    bool isVertical = false;
-    if (rect.width_ < rect.height_) {
-        isVertical = true;
-    }
+    WSRect windowRect = GetSessionRect();
+    auto windowWidth = windowRect.width_;
+    auto windowHeight = windowRect.height_;
 
     if (reason != SizeChangeReason::MOVE) {
-        if (isSupportDragInPcCompatibleMode && !isVertical &&
+        if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
             rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
-        } else if (isSupportDragInPcCompatibleMode && isVertical &&
+        } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
             rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcLandscapeWidth;
             rect.height_ = compatibleInPcLandscapeHeight;
@@ -1748,7 +1839,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason);
         } else {
-            if (isVertical) {
+            if (windowWidth < windowHeight) {
                 rect.width_ = compatibleInPcPortraitWidth;
                 rect.height_ = compatibleInPcPortraitHeight;
             } else {
@@ -2286,7 +2377,7 @@ Orientation SceneSession::GetRequestedOrientation() const
 
 bool SceneSession::IsAnco() const
 {
-    return collaboratorType_ != static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE);
+    return collaboratorType_ == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
 int32_t SceneSession::GetCollaboratorType() const
@@ -2522,7 +2613,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
-        if (!(isPC || isFreeMutiWindowMode) && !isSACalling &&
+        auto callingTokenId = abilitySessionInfo->callingTokenId;
+        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::IsSACallingByCallerToken(callingTokenId) &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
@@ -2531,7 +2623,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                     session->GetForegroundInteractiveStatus());
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
-            auto callingTokenId = abilitySessionInfo->callingTokenId;
             auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
