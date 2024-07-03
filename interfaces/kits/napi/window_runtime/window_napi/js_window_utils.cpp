@@ -77,6 +77,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_DIVIDER", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_DIVIDER)));
     napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
@@ -479,6 +481,10 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
         CreateJsValue(env, GetHexColor(navi.contentColor_)));
     napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
         CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    napi_set_named_property(env, objValue, "enableStatusBarAnimation",
+                            CreateJsValue(env, status.enableAnimation_));
+    napi_set_named_property(env, objValue, "enableNavigationBarAnimation",
+                            CreateJsValue(env, navi.enableAnimation_));
     return objValue;
 }
 

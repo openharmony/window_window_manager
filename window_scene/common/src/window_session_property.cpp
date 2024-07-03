@@ -78,6 +78,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -133,6 +135,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -811,6 +815,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
@@ -869,6 +874,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
+    property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -1050,6 +1056,12 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
     return parcel.WriteBool(topmost_);
 }
 
+
+bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    return parcel.WriteUint32(modeSupportInfo_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
@@ -1176,6 +1188,11 @@ void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
     SetTopmost(parcel.ReadBool());
 }
 
+void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    SetModeSupportInfo(parcel.ReadUint32());
+}
+
 void WindowSessionProperty::SetTransform(const Transform& trans)
 {
     trans_ = trans;
@@ -1229,6 +1246,16 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
+}
+
+void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
+{
+    uiExtensionUsage_ = uiExtensionUsage;
+}
+
+UIExtensionUsage WindowSessionProperty::GetUIExtensionUsage() const
+{
+    return uiExtensionUsage_;
 }
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)

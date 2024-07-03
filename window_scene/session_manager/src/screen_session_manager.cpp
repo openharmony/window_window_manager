@@ -1867,7 +1867,7 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
             if (freezedPidList_.count(agentPid) == 0) {
                 agent->OnDisplayChange(displayInfo, event);
             } else {
-                TLOGI(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
+                TLOGD(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
             }
         }
     };
@@ -4746,7 +4746,7 @@ void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
     rsInterface_.DisablePowerOffRenderControl(rsScreenId);
 }
 
-void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo)
+void ScreenSessionManager::ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo)
 {
     if (clientProxy_) {
         auto screenInfo = GetDefaultScreenSession();
@@ -4754,9 +4754,9 @@ void ScreenSessionManager::ReportFoldStatusToScb(float angle, std::vector<int32_
         if (screenInfo != nullptr) {
             rotation = static_cast<int32_t>(screenInfo->GetRotation());
         }
-        screenFoldInfo.emplace_back(rotation);
+        screenFoldInfo.emplace_back(std::to_string(rotation));
 
-        clientProxy_->OnFoldStatusChangeReportUE(screenFoldInfo, angle);
+        clientProxy_->OnFoldStatusChangedReportUE(screenFoldInfo);
     }
 }
 } // namespace OHOS::Rosen

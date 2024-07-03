@@ -418,7 +418,7 @@ bool WindowAdapter::InitSSMProxy()
         }
         if (!recoverInitialized) {
             SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFunc(
-                std::bind(&WindowAdapter::WindowManagerAndSessionRecover, this));
+                [this] { this->WindowManagerAndSessionRecover(); });
             recoverInitialized = true;
         }
         // U0 system user needs to subscribe OnUserSwitch event
@@ -824,13 +824,31 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-    int32_t parentId)
+    int32_t parentId, UIExtensionUsage usage)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage);
+}
+
+void WindowAdapter::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId, int32_t posX, int32_t posY)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
+    wmsProxy->ProcessModalExtensionPointDown(persistentId, parentId, posX, posY);
+}
+
+void WindowAdapter::UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
+    wmsProxy->UpdateModalExtensionRect(persistentId, parentId, rect);
 }
 
 WMError WindowAdapter::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)

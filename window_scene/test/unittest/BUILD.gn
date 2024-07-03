@@ -21,7 +21,6 @@ group("unittest") {
   deps = [
     ":ws_anomaly_detection_test",
     ":ws_distributed_client_test",
-    ":ws_dual_display_device_policy_test",
     ":ws_dual_display_sensor_fold_state_manager_test",
     ":ws_event_stage_test",
     ":ws_extension_session_manager_test",
@@ -78,6 +77,7 @@ group("unittest") {
     ":ws_session_test",
     ":ws_setting_observer_test",
     ":ws_setting_provider_test",
+    ":ws_single_display_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
     ":ws_sub_session_test",
     ":ws_system_session_test",
@@ -159,10 +159,10 @@ ohos_unittest("ws_keyboard_session_test") {
   ]
 }
 
-ohos_unittest("ws_dual_display_device_policy_test") {
+ohos_unittest("ws_single_display_fold_policy_test") {
   module_out_path = module_out_path
 
-  sources = [ "dual_display_device_policy_test.cpp" ]
+  sources = [ "single_display_fold_policy_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
