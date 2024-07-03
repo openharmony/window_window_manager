@@ -81,6 +81,8 @@ private:
     napi_value OnGetSupportedColorSpaces(napi_env env, napi_callback_info info);
     napi_value OnGetSupportedHDRFormats(napi_env env, napi_callback_info info);
     napi_value OnGetAvailableArea(napi_env env, napi_callback_info info);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
+        napi_value lastParam, napi_value* result);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
