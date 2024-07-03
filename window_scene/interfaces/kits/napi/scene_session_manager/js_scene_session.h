@@ -42,7 +42,7 @@ public:
     sptr<SceneSession> GetNativeSession() const;
 
 private:
-    enum class ListenerFuncionType : uint32_t {
+    enum class ListenerFunctionType : uint32_t {
         PENDING_SCENE_CB,
         CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
         SESSION_STATE_CHANGE_CB,

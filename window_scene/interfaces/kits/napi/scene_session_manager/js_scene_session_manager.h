@@ -88,7 +88,7 @@ public:
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
 
 private:
-    enum class ListenerFuncionType : uint32_t {
+    enum class ListenerFunctionType : uint32_t {
         CREATE_SYSTEM_SESSION_CB,
         CREATE_KEYBOARD_SESSION_CB,
         RECOVER_SCENE_SESSION_CB,
