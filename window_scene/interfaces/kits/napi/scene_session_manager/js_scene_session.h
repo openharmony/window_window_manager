@@ -82,7 +82,8 @@ private:
         CONTEXT_TRANSPARENT_CB,
         KEYBOARD_GRAVITY_CHANGE_CB,
         ADJUST_KEYBOARD_LAYOUT_CB,
-        LAYOUT_FULL_SCREEN_CB
+        LAYOUT_FULL_SCREEN_CB,
+        INVALID,
     };
 
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
