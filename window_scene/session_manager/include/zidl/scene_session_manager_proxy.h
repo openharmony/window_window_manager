@@ -100,7 +100,10 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId) override;
+        int32_t parentId, UIExtensionUsage usage) override;
+    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override;
+    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
+        int32_t posX, int32_t posY) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
     WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
