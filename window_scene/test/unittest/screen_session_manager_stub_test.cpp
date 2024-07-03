@@ -2421,11 +2421,11 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest113, Function | SmallTest 
 }
 
 /**
- * @tc.name: OnRemoteRequest98
+ * @tc.name: OnRemoteRequest114
  * @tc.desc: normal function, TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest98, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest114, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
