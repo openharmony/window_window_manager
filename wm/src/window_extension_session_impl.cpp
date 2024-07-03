@@ -386,8 +386,9 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isConsumedFuture = isConsumedPromise->get_future().share();
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
-            std::bind(&WindowExtensionSessionImpl::InputMethodKeyEventResultCallback, this,
-                std::placeholders::_1, std::placeholders::_2, isConsumedPromise, isTimeout));
+            [this, isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+                this->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+            });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
             DispatchKeyEventCallback(keyEvent, isConsumed);

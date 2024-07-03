@@ -67,7 +67,7 @@ enum class WmsLogTag : uint8_t {
     WMS_MULTI_USER,            // C04210
     WMS_TOAST,                 // C04211
     WMS_MULTI_WINDOW,          // C04212
-
+    WMS_INPUT_KEY_FLOW,        // C04213
     END = 256,                 // Last one, do not use
 };
 
@@ -91,6 +91,7 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_MULTI_USER, "WMSMultiUser" },
     { WmsLogTag::WMS_TOAST, "WMSToast" },
     { WmsLogTag::WMS_MULTI_WINDOW, "WMSMultiWindow" },
+    { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
 };
 
 #define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
