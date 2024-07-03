@@ -29,6 +29,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr int32_t NUMBER_TWO = 2;
+    constexpr int32_t NUMBER_FOUR = 4;
     const std::string STATE_CHANGE_CB = "stateChange";
     const std::string CONTROL_PANEL_ACTION_EVENT_CB = "controlPanelActionEvent";
     const std::string CONTROL_EVENT_CB = "controlEvent";
@@ -92,8 +93,8 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         TLOGI(WmsLogTag::WMS_PIP, "OnStartPictureInPicture abort");
         return NapiGetUndefined(env);
     }
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value callback = nullptr;
     if (argc > 0) {
@@ -130,8 +131,8 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnStopPictureInPicture is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value callback = nullptr;
     if (argc > 0) {
@@ -168,8 +169,8 @@ napi_value JsPipController::SetAutoStartEnabled(napi_env env, napi_callback_info
 napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnSetAutoStartEnabled is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid: %{public}zu", argc);
@@ -197,8 +198,8 @@ napi_value JsPipController::UpdateContentSize(napi_env env, napi_callback_info i
 napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentSize is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid args count, need 2 args but received: %{public}zu", argc);
@@ -235,8 +236,8 @@ napi_value JsPipController::UpdatePiPControlStatus(napi_env env, napi_callback_i
 napi_value JsPipController::OnUpdatePiPControlStatus(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid args count, need 2 args but received: %{public}zu", argc);
@@ -273,8 +274,8 @@ napi_value JsPipController::SetPiPControlEnabled(napi_env env, napi_callback_inf
 napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid args count, need 2 args but received: %{public}zu", argc);
@@ -312,8 +313,8 @@ napi_value JsPipController::RegisterCallback(napi_env env, napi_callback_info in
 napi_value JsPipController::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnRegisterCallback is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
@@ -467,8 +468,8 @@ napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info 
 
 napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);

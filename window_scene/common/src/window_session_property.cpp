@@ -21,9 +21,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-    constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
-    constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -733,7 +733,7 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
         return false;
     }
     for (uint32_t i = 0; i < controlEnableSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType))  ||
+        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
             !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
             return false;
         }
