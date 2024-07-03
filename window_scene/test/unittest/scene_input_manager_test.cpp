@@ -247,6 +247,36 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateFocusedSessionId
+ * @tc.desc: UpdateFocusedSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | Level3)
+{
+    auto sceneInputManager = &SceneInputManager::GetInstance();
+    ASSERT_NE(sceneInputManager, nullptr);
+    EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+
+    sceneInputManager->UpdateFocusedSessionId(INVALID_SESSION_ID);
+    EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
+    sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
+    EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
+    ExtensionWindowEventInfo extensionInfo {
+        .persistentId = 12345
+    };
+    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
+    EXPECT_EQ(sceneInputManager->focusedSessionId_, extensionInfo.persistentId);
+
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
  * @tc.name: PrintWindowInfo
  * @tc.desc: PrintWindowInfo
  * @tc.type: FUNC

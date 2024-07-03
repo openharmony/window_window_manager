@@ -87,6 +87,7 @@ private:
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

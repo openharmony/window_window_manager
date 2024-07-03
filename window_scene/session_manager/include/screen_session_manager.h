@@ -262,7 +262,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
 
-    void ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo);
+    void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
 
 protected:
     ScreenSessionManager();
@@ -294,6 +294,7 @@ private:
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();
+    void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
 
@@ -316,6 +317,9 @@ private:
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
+#ifdef DEVICE_STATUS_ENABLE
+    void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
+#endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     class ScreenIdManager {

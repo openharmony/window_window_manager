@@ -193,4 +193,16 @@ void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
     uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
     RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
 }
+
+void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d, isExitSplitOnBackground: %{public}d", persistentId_,
+        isExitSplitOnBackground);
+    isExitSplitOnBackground_ = isExitSplitOnBackground;
+}
+
+bool MainSession::IsExitSplitOnBackground() const
+{
+    return isExitSplitOnBackground_;
+}
 } // namespace OHOS::Rosen
