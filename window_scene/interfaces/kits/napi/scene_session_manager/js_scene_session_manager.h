@@ -183,7 +183,7 @@ private:
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    std::map<std::string, ListenerFuncionType> listenerFuncTypeMap_;
+    std::map<std::string, ListenerFunctionType> listenerFuncTypeMap_;
 
     sptr<RootScene> rootScene_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
