@@ -54,13 +54,13 @@ static bool IsStringNumeric(const char* buffer)
 
 static bool GetTypeCFileNode(const std::vector<std::string>& allDirName, std::string& typeCMappingPath)
 {
-    constexpr int bufferSize = 20;
     for (const auto& dir : allDirName) {
         std::string absoluteTypePath = dir + "/type";
         std::ifstream srcFile(absoluteTypePath.c_str(), std::ifstream::in);
         if (!srcFile.is_open()) {
             continue;
         }
+        constexpr int bufferSize = 20;
         char buffer[bufferSize] = {0};
         srcFile.getline(buffer, bufferSize);
         if (strcmp(buffer, "usb_port") == 0) {

@@ -42,7 +42,7 @@
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
-#include "fold_screen_controller/screen_fold_data.h"
+#include "screen_fold_data.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
