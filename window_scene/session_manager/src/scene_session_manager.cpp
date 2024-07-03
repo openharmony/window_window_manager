@@ -642,6 +642,13 @@ static void AddAlphaToColor(float alpha, std::string& color)
     color.insert(1, strAlpha);
 }
 
+static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
+{
+    return sessionInfo.isAtomicService_ && sessionInfo.want != nullptr &&
+        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
+        AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
+}
+
 void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
 {
     AppWindowSceneConfig config;
