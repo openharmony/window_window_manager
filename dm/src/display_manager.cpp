@@ -42,12 +42,13 @@ class DisplayManager::Impl : public RefBase {
 public:
     Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
-    
+
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     sptr<Display> GetDefaultDisplay();
     sptr<Display> GetDefaultDisplaySync();
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
@@ -750,6 +751,16 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync()
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManager::Impl::GetAllDisplayPhysicalResolution()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalResolution()
+{
+    return pImpl_->GetAllDisplayPhysicalResolution();
 }
 
 std::vector<sptr<Display>> DisplayManager::GetAllDisplays()

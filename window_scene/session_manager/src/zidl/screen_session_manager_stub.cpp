@@ -759,6 +759,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
+            ProcGetAllDisplayPhysicalResolution(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -820,5 +824,33 @@ void ScreenSessionManagerStub::ProcProxyForFreeze(MessageParcel& data, MessagePa
     bool isProxy = data.ReadBool();
     DMError ret = ProxyForFreeze(pidList, isProxy);
     reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+void ScreenSessionManagerStub::ProcGetAllDisplayPhysicalResolution(MessageParcel& data, MessageParcel& reply)
+{
+    auto physicalInfos = GetAllDisplayPhysicalResolution();
+    size_t infoSize = physicalInfos.size();
+    bool writeRet = reply.WriteInt32(static_cast<int32_t>(infoSize));
+    if (!writeRet) {
+        WLOGFE("write physical size error");
+        return;
+    }
+    for (const auto &physicalItem : physicalInfos) {
+        writeRet = reply.WriteUint32(static_cast<uint32_t>(physicalItem.foldDisplayMode_));
+        if (!writeRet) {
+            WLOGFE("write display mode error");
+            break;
+        }
+        writeRet = reply.WriteUint32(physicalItem.physicalWidth_);
+        if (!writeRet) {
+            WLOGFE("write physical width error");
+            break;
+        }
+        writeRet = reply.WriteUint32(physicalItem.physicalHeight_);
+        if (!writeRet) {
+            WLOGFE("write physical height error");
+            break;
+        }
+    }
 }
 } // namespace OHOS::Rosen
