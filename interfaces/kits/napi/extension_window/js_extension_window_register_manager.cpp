@@ -134,7 +134,7 @@ WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> wind
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     extensionWindowListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessRegister(caseType, extensionWindowListener, window, true, type);
+    WmErrorCode ret = ProcessRegister(caseType, extensionWindowListener, window, type, true);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -159,7 +159,7 @@ WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> wi
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessRegister(caseType, it->second, window, false, type);
+            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -175,7 +175,7 @@ WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> wi
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessRegister(caseType, it->second, window, false, type);
+            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
