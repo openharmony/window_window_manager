@@ -797,10 +797,10 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult02, Funct
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->lastWaterMarkShowState_ =  true;
+    ssm_->lastWaterMarkShowState_ = true;
     ssm_->CheckAndNotifyWaterMarkChangedResult();
     ASSERT_NE(nullptr, ssm_);
-    ssm_->lastWaterMarkShowState_ =  false;
+    ssm_->lastWaterMarkShowState_ = false;
     ssm_->CheckAndNotifyWaterMarkChangedResult();
 }
 
