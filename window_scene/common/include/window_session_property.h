@@ -199,6 +199,7 @@ private:
     bool WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel);
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
+    bool WriteActionUpdateModeSupportInfo(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -221,6 +222,7 @@ private:
     void ReadActionUpdateTextfieldAvoidInfo(Parcel& parcel);
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
+    void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
