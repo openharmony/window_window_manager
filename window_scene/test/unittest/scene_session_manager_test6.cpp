@@ -797,10 +797,10 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult02, Funct
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->lastWaterMarkShowState_ = true;
+    ssm_->lastWaterMarkShowState_ =  true;
     ssm_->CheckAndNotifyWaterMarkChangedResult();
     ASSERT_NE(nullptr, ssm_);
-    ssm_->lastWaterMarkShowState_ = false;
+    ssm_->lastWaterMarkShowState_ =  false;
     ssm_->CheckAndNotifyWaterMarkChangedResult();
 }
 
@@ -842,6 +842,136 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo, Function | SmallTest | Level3
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: SetSessionVisibilityInfo
+ * @tc.desc: SetSessionVisibilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> session = nullptr;
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    std::string visibilityInfo = "";
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    ASSERT_NE(nullptr, session);
+    session->persistentId_ = 1;
+    ssm_->windowVisibilityListenerSessionSet_.clear();
+    ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
+    ssm_->windowVisibilityListenerSessionSet_.insert(1);
+    ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
+}
+
+/**
+ * @tc.name: SendTouchEvent
+ * @tc.desc: SendTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SendTouchEvent, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->SendTouchEvent(pointerEvent, 0);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.pointerId_ = 0;
+    pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->pointerId_ = 0;
+    pointerEvent->AddPointerItem(pointerItem);
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->SendTouchEvent(pointerEvent, 0);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    pointerEvent->pointerId_ = 1;
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->SendTouchEvent(pointerEvent, 0);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->RegisterWindowChanged(WindowChangedFuncTest);
+}
+
+/**
+ * @tc.name: JudgeNeedNotifyPrivacyInfo
+ * @tc.desc: JudgeNeedNotifyPrivacyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, JudgeNeedNotifyPrivacyInfo, Function | SmallTest | Level3)
+{
+    DisplayId displayId = 1;
+    std::unordered_set<std::string> privacyBundles;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
+    EXPECT_EQ(false, ret);
+    privacyBundles.insert("bundle1");
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
+    EXPECT_EQ(true, ret);
+    std::unordered_set<std::string> privacyBundles1;
+    privacyBundles1.insert("bundle2");
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->privacyBundleMap_.insert({displayId, privacyBundles1});
+    ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
+    EXPECT_EQ(false, ret);
+    privacyBundles.insert("bundle2");
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
+    EXPECT_EQ(true, ret);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->InitPersistentStorage();
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdateCameraFloatWindowStatus(0, true);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdateCameraWindowStatus(0, true);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify
+ * @tc.desc: UpdatePrivateStateAndNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdatePrivateStateAndNotify(0);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sceneSession->property_ = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdatePrivateStateAndNotifyForAllScreens();
+}
+
+/**
+ * @tc.name: GetCollaboratorByType
+ * @tc.desc: GetCollaboratorByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetCollaboratorByType, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->collaboratorMap_.clear();
+    auto ret = ssm_->GetCollaboratorByType(0);
+    EXPECT_EQ(nullptr, ret);
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
+    ret = ssm_->GetCollaboratorByType(1);
+    EXPECT_EQ(nullptr, ret);
 }
 }
 } // namespace Rosen
