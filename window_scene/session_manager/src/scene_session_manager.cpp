@@ -1469,14 +1469,11 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (sceneSession->GetSessionProperty()) {
         sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
-        TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64"",
+        TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
             curDisplayId);
     }
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return IsScreenLocked();
-    };
-    sceneSession->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+    sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
     if (sessionInfo.isSystem_) {
         sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
         sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
@@ -1489,6 +1486,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
     RegisterSessionExceptionFunc(sceneSession);
+    // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
     }
