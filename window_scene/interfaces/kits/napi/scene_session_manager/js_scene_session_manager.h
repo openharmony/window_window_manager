@@ -88,6 +88,19 @@ public:
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
 
 private:
+    enum class ListenerFuncionType : uint32_t {
+        CREATE_SYSTEM_SESSION_CB,
+        CREATE_KEYBOARD_SESSION_CB,
+        RECOVER_SCENE_SESSION_CB,
+        STATUS_BAR_ENABLED_CHANGE_CB,
+        OUTSIDE_DOWN_EVENT_CB,
+        SHIFT_FOCUS_CB,
+        CALLING_WINDOW_ID_CHANGE_CB,
+        START_UI_ABILITY_ERROR,
+        GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+        INVALID
+    };
+
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSession(napi_env env, napi_callback_info info);
@@ -169,8 +182,7 @@ private:
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
-    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    using Func = void(JsSceneSessionManager::*)();
+    std::map<std::string, ListenerFuncionType> listenerFuncTypeMap_;
     std::map<std::string, Func> listenerFunc_;
 
     sptr<RootScene> rootScene_;
