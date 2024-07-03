@@ -265,6 +265,7 @@ void JsSceneSession::InitListenerFuncs()
         {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFunctionType::BUFFER_AVAILABLE_CHANGE_CB},
         {SESSION_EVENT_CB,                      ListenerFunctionType::SESSION_EVENT_CB},
         {SESSION_RECT_CHANGE_CB,                ListenerFunctionType::SESSION_RECT_CHANGE_CB},
+        {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFunctionType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
         {CREATE_SUB_SESSION_CB,                 ListenerFunctionType::CREATE_SUB_SESSION_CB},
         {BIND_DIALOG_TARGET_CB,                 ListenerFunctionType::BIND_DIALOG_TARGET_CB},
         {RAISE_TO_TOP_CB,                       ListenerFunctionType::RAISE_TO_TOP_CB},
@@ -1318,6 +1319,9 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
             break;
         case ListenerFunctionType::SESSION_RECT_CHANGE_CB:
             ProcessSessionRectChangeRegister();
+            break;
+        case ListenerFunctionType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB:
+            ProcessSessionPiPControlStatusChangeRegister();
             break;
         case ListenerFunctionType::CREATE_SUB_SESSION_CB:
             ProcessCreateSubSessionRegister();
