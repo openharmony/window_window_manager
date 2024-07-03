@@ -163,16 +163,16 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
 JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
     listenerFuncTypeMap_ = {
-        {CREATE_SYSTEM_SESSION_CB,     ListenerFuncionType::CREATE_SYSTEM_SESSION_CB},
-        {CREATE_KEYBOARD_SESSION_CB,   ListenerFuncionType::CREATE_KEYBOARD_SESSION_CB},
-        {RECOVER_SCENE_SESSION_CB,     ListenerFuncionType::RECOVER_SCENE_SESSION_CB},
-        {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFuncionType::STATUS_BAR_ENABLED_CHANGE_CB},
-        {OUTSIDE_DOWN_EVENT_CB,        ListenerFuncionType::OUTSIDE_DOWN_EVENT_CB},
-        {SHIFT_FOCUS_CB,               ListenerFuncionType::SHIFT_FOCUS_CB},
-        {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFuncionType::CALLING_WINDOW_ID_CHANGE_CB},
-        {START_UI_ABILITY_ERROR,       ListenerFuncionType::START_UI_ABILITY_ERROR},
+        {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
+        {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
+        {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
+        {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
+        {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
+        {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
+        {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
+        {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
         {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-            ListenerFuncionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+            ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
@@ -885,36 +885,36 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
 
-    ListenerFuncionType listenerFuncType = ListenerFuncionType::INVALID;
+    ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
     if (listenerFuncTypeMap_.count(cbType) != 0) {
         listenerFuncType = listenerFuncTypeMap_[cbType];
     }
     switch (listenerFuncType) {
-        case ListenerFuncionType::CREATE_SYSTEM_SESSION_CB:
+        case ListenerFunctionType::CREATE_SYSTEM_SESSION_CB:
             ProcessCreateSystemSessionRegister();
             break;
-        case ListenerFuncionType::CREATE_KEYBOARD_SESSION_CB:
+        case ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB:
             ProcessCreateKeyboardSessionRegister();
             break;
-        case ListenerFuncionType::RECOVER_SCENE_SESSION_CB:
+        case ListenerFunctionType::RECOVER_SCENE_SESSION_CB:
             ProcessRecoverSceneSessionRegister();
             break;
-        case ListenerFuncionType::STATUS_BAR_ENABLED_CHANGE_CB:
+        case ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB:
             ProcessStatusBarEnabledChangeListener();
             break;
-        case ListenerFuncionType::OUTSIDE_DOWN_EVENT_CB:
+        case ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB:
             ProcessOutsideDownEvent();
             break;
-        case ListenerFuncionType::SHIFT_FOCUS_CB:
+        case ListenerFunctionType::SHIFT_FOCUS_CB:
             ProcessShiftFocus();
             break;
         case ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB:
             ProcessCallingSessionIdChangeRegister();
             break;
-        case ListenerFuncionType::START_UI_ABILITY_ERROR:
+        case ListenerFunctionType::START_UI_ABILITY_ERROR:
             ProcessStartUIAbilityErrorRegister();
             break;
-        case ListenerFuncionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
+        case ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
             ProcessGestureNavigationEnabledChangeListener();
             break;
         default:
