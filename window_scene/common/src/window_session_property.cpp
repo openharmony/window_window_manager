@@ -79,6 +79,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -134,6 +136,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -1108,6 +1112,12 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
     return parcel.WriteBool(topmost_);
 }
 
+
+bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    return parcel.WriteUint32(modeSupportInfo_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
@@ -1232,6 +1242,11 @@ void WindowSessionProperty::ReadActionUpdateWindowMask(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 {
     SetTopmost(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    SetModeSupportInfo(parcel.ReadUint32());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

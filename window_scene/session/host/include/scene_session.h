@@ -437,6 +437,8 @@ private:
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
     void SetWindowFlags(const sptr<SceneSession>& sceneSession,
