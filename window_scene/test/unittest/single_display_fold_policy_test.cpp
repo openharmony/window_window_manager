@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/dual_display_device_policy.h"
+#include "session_manager/include/fold_screen_controller/single_display_fold_policy.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 
@@ -28,7 +28,7 @@ namespace {
     constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
-class DualDisplayDevicePolicyTest : public testing::Test {
+class SingleDisplayFoldPolicyTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -37,21 +37,21 @@ public:
     static ScreenSessionManager& ssm_;
 };
 
-ScreenSessionManager& DualDisplayDevicePolicyTest::ssm_ = ScreenSessionManager::GetInstance();
+ScreenSessionManager& SingleDisplayFoldPolicyTest::ssm_ = ScreenSessionManager::GetInstance();
 
-void DualDisplayDevicePolicyTest::SetUpTestCase()
+void SingleDisplayFoldPolicyTest::SetUpTestCase()
 {
 }
 
-void DualDisplayDevicePolicyTest::TearDownTestCase()
+void SingleDisplayFoldPolicyTest::TearDownTestCase()
 {
 }
 
-void DualDisplayDevicePolicyTest::SetUp()
+void SingleDisplayFoldPolicyTest::SetUp()
 {
 }
 
-void DualDisplayDevicePolicyTest::TearDown()
+void SingleDisplayFoldPolicyTest::TearDown()
 {
     usleep(SLEEP_TIME_US);
 }
@@ -60,10 +60,10 @@ namespace {
 
     /**
      * @tc.name: ChangeScreenDisplayMode
-     * @tc.desc: DualDisplayDevicePolicy change screen display mode
+     * @tc.desc: SingleDisplayFoldPolicy change screen display mode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayDevicePolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
+    HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
     {
         int64_t ret = 0;
         FoldDisplayMode mode = ssm_.GetFoldDisplayMode();

@@ -1528,6 +1528,43 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, Function | SmallTe
     Rect rect;
     ASSERT_EQ(rect, window_->GetHostWindowRect(0));
 }
+
+/**
+ * @tc.name: ConsumePointerEvent
+ * @tc.desc: ConsumePointerEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    window_->state_ = WindowState::STATE_SHOWN;
+
+    auto pointerEvent = MMI::PointerEvent::Create();
+    window_->ConsumePointerEvent(nullptr);
+
+    window_->ConsumePointerEvent(pointerEvent);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->ConsumePointerEvent(pointerEvent);
+
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    item.SetPointerId(0);
+    item.SetDisplayX(15); // 15 : position x
+    item.SetDisplayY(15); // 15 : position y
+    item.SetWindowX(15); // 15 : position x
+    item.SetWindowY(15); // 15 : position y
+    pointerEvent->AddPointerItem(item);
+    window_->ConsumePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    pointerEvent->UpdatePointerItem(0, item);
+    window_->ConsumePointerEvent(pointerEvent);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

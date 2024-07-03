@@ -187,6 +187,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -733,11 +734,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+    if (display == nullptr) {
         WLOGFE("display is null!");
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo is null!");
+        return;
+    }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -966,7 +971,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         if (!isSystembarPropertiesSet_) {
             SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
         }
-    } else if (isIgnoreSafeAreaNeedNotify_) {
+    } else if (isIgnoreSafeAreaNeedNotify_ || isSubWindow) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
     }
 
@@ -1504,11 +1509,16 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     int32_t decorHeightWithPx = static_cast<int32_t>(decorHeight * vpr);
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1541,11 +1551,16 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return WMError::WM_DO_NOTHING;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1574,11 +1589,16 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         return WMError::WM_DO_NOTHING;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("get title buttons area failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1623,11 +1643,16 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         }
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display or get display info failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    float vpr = GetVirtualPixelRatio(display->GetDisplayInfo());
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
         WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2683,7 +2708,7 @@ WSError WindowSessionImpl::NotifyNoInteractionTimeout(const IWindowNoInteraction
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (!pointerEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Pointer event is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Pointer event is nullptr");
         return;
     }
 
@@ -2695,7 +2720,8 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW,
+                "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
                 pointerEvent->GetId());
         }
         if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
@@ -2707,17 +2733,17 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            WLOGFI("InputTracking id:%{public}d, WindowSessionImpl::NotifyPointerEvent",
+            TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d",
                 pointerEvent->GetId());
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
             pointerEvent->GetId(), pointerEvent->GetPointerAction());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
-            WLOGFI("UI content dose not consume this pointer event");
+            TLOGI(WmsLogTag::WMS_EVENT, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
         }
     } else {
-        WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_EVENT, "pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
     }
 }

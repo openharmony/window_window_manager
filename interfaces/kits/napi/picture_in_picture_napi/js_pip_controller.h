@@ -37,6 +37,11 @@ public:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
 private:
+    enum class ListenerType : uint32_t {
+        STATE_CHANGE_CB,
+        CONTROL_PANEL_ACTION_EVENT_CB,
+    };
+
     napi_value OnStartPictureInPicture(napi_env env, napi_callback_info info);
     napi_value OnStopPictureInPicture(napi_env env, napi_callback_info info);
     napi_value OnSetAutoStartEnabled(napi_env env, napi_callback_info info);
@@ -55,12 +60,8 @@ private:
 
     sptr<PictureInPictureController> pipController_;
     napi_env env_;
-    using Func = void(JsPipController::*)();
-    std::map<std::string, Func> registerFunc_;
-    std::map<std::string, Func> unRegisterFunc_;
+    std::map<std::string, ListenerType> listenerCodeMap_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    std::mutex mtx_;
-    static std::mutex pipMutex_;
 
 public:
     class PiPLifeCycleImpl : public IPiPLifeCycle {
@@ -79,7 +80,6 @@ public:
         void OnPipListenerCallback(PiPState state, int32_t errorCode);
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-        std::mutex mtx_;
     };
 
     class PiPActionObserverImpl : public IPiPActionObserver {
@@ -91,7 +91,6 @@ public:
     private:
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-        std::mutex mtx_;
     };
 };
 } // namespace Rosen

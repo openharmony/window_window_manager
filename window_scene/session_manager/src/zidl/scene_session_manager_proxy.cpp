@@ -1542,8 +1542,81 @@ WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+void SceneSessionManagerProxy::UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect)
+{
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write persistentId failed");
+        return;
+    }
+    if (!data.WriteInt32(parentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write parentId failed");
+        return;
+    }
+    if (!data.WriteInt32(rect.posX_)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write posX_ failed");
+        return;
+    }
+    if (!data.WriteInt32(rect.posY_)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write posY_ failed");
+        return;
+    }
+    if (!data.WriteInt32(rect.width_)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write width_ failed");
+        return;
+    }
+    if (!data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write height_ failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+                              SceneSessionManagerMessage::TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB),
+                              data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    }
+}
+
+void SceneSessionManagerProxy::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
+    int32_t posX, int32_t posY)
+{
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write persistentId failed");
+        return;
+    }
+    if (!data.WriteInt32(parentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write parentId failed");
+        return;
+    }
+    if (!data.WriteInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write posX failed");
+        return;
+    }
+    if (!data.WriteInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write posY failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+                              SceneSessionManagerMessage::TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB),
+                              data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    }
+}
+
 void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    int32_t persistentId, int32_t parentId)
+    int32_t persistentId, int32_t parentId, UIExtensionUsage usage)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -1562,6 +1635,10 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
     }
     if (!data.WriteInt32(parentId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write parentId failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(usage))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write usage failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
