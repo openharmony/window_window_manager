@@ -7207,7 +7207,7 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
         SessionGravity gravity = sceneSession->GetKeyboardGravity();
         if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
             type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
-            type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+            type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             UpdateAvoidSessionAvoidArea(type, needUpdate);
         } else {
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
