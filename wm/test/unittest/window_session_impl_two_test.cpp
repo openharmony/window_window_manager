@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
@@ -271,7 +272,7 @@ HWTEST_F(WindowSessionImplTwoTest, RecoverSessionListener, Function | SmallTest 
     window->touchOutsideListeners_.insert({id, iTouchOutsideListeners});
     window->RecoverSessionListener();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
-                !window->avoidAreaChangeListeners_[is].empty());
+                !window->avoidAreaChangeListeners_[id].empty());
     ASSERT_TRUE(window->touchOutsideListeners_.find(id) != window->touchOutsideListeners_.end() &&
                 !window->touchOutsideListeners_[id].empty());
     window->Destroy();
@@ -1472,28 +1473,11 @@ HWTEST_F(WindowSessionImplTwoTest, GetListeners02, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: MockWindowChangeListener
- * @tc.desc: MockWindowChangeListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTwoTest, MockWindowChangeListener, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: MockWindowChangeListener start";
-    window_ = GetTestWindowImpl("GetListeners02");
-    ASSERT_NE(window_, nullptr);
-    window_->MockWindowChangeListener(nullptr);
-    ASSERT_EQ(window_->notifyNativeFunc_, nullptr);
-    window_->Destroy();
-    GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: MockWindowChangeListener end";
-}
-
-
-/**
  * @tc.name: GetUIContent
  * @tc.desc: GetUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, GetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTwoTest, GetUIContent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1510,7 +1494,7 @@ HWTEST_F(WindowSessionImplTest, GetUIContent, Function | SmallTest | Level2)
  * @tc.desc: NotifySizeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, NotifySizeChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTwoTest, NotifySizeChange, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1536,7 +1520,7 @@ HWTEST_F(WindowSessionImplTest, NotifySizeChange, Function | SmallTest | Level2)
  * @tc.desc: AvoidAreaChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, AvoidAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTwoTest, AvoidAreaChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1571,7 +1555,7 @@ HWTEST_F(WindowSessionImplTest, AvoidAreaChangeListener, Function | SmallTest | 
  * @tc.desc: TouchOutsideListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, TouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTwoTest, TouchOutsideListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
