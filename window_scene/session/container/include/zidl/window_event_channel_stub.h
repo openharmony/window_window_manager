@@ -22,7 +22,6 @@
 
 namespace OHOS::Rosen {
 class WindowEventChannelStub;
-using WindowEventChannelStubFunc = int (WindowEventChannelStub::*)(MessageParcel& data, MessageParcel& reply);
 
 class WindowEventChannelStub : public IRemoteStub<IWindowEventChannel> {
 public:
@@ -33,8 +32,6 @@ public:
         MessageOption &option) override;
 
 private:
-    static const std::map<uint32_t, WindowEventChannelStubFunc> stubFuncMap_;
-
     int HandleTransferBackpressedEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferKeyEventAsync(MessageParcel& data, MessageParcel& reply);
