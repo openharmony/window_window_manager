@@ -1504,6 +1504,102 @@ HWTEST_F(WindowSessionImplTest, GetUIContent, Function | SmallTest | Level2)
     ASSERT_EQ(res, nullptr);
     ASSERT_EQ(window->Destroy(), WMError::WM_ERROR_INVALID_WINDOW);
 }
+
+/**
+ * @tc.name: NotifySizeChange
+ * @tc.desc: NotifySizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifySizeChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifySizeChange");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    sptr<IWindowChangeListener> listener = new (std::nothrow) MockWindowChangeListener();
+    ASSERT_NE(nullptr, listener);
+    window->RegisterWindowChangeListener(listener);
+
+    sptr<IWindowRectChangeListener> listener1 = new (std::nothrow) MockWindowRectChangeListener();
+    ASSERT_NE(nullptr, listener1);
+    window->RegisterWindowRectChangeListener(listener1);
+}
+
+/**
+ * @tc.name: AvoidAreaChangeListener
+ * @tc.desc: AvoidAreaChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, AvoidAreaChangeListener, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("AvoidAreaChangeListener");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    sptr<IAvoidAreaChangedListener> nullListener = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterAvoidAreaChangeListener(nullListener));
+
+    sptr<IAvoidAreaChangedListener> listener = new (std::nothrow) MockAvoidAreaChangedListener();
+    ASSERT_NE(nullptr, listener);
+    window->UnregisterAvoidAreaChangeListener(listener);
+
+    window->RegisterAvoidAreaChangeListener(nullListener);
+    window->RegisterAvoidAreaChangeListener(listener);
+
+    sptr<IAvoidAreaChangedListener> listener1 = new (std::nothrow) MockListener();
+    ASSERT_NE(nullptr, listener1);
+    window->RegisterAvoidAreaChangeListener(listener1);
+
+    window->UnregisterAvoidAreaChangeListener(listener);
+    window->UnregisterAvoidAreaChangeListener(listener1);
+}
+
+/**
+ * @tc.name: TouchOutsideListener
+ * @tc.desc: TouchOutsideListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, TouchOutsideListener, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("TouchOutsideListener");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    sptr<ITouchOutsideListener> nullListener = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterTouchOutsideListener(nullListener));
+
+    sptr<ITouchOutsideListener> listener = new (std::nothrow) MockTouchOutsideListener();
+    ASSERT_NE(nullptr, listener);
+    window->UnregisterTouchOutsideListener(listener);
+
+    window->RegisterTouchOutsideListener(nullListener);
+    window->RegisterTouchOutsideListener(listener);
+
+    sptr<ITouchOutsideListener> listener1 = new (std::nothrow) MockTouchOutsideListener();
+    ASSERT_NE(nullptr, listener1);
+    window->RegisterTouchOutsideListener(listener1);
+
+    window->UnregisterTouchOutsideListener(listener);
+    window->UnregisterTouchOutsideListener(listener1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
