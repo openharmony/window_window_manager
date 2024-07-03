@@ -1222,11 +1222,10 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    if (listenerFuncMap_.count(cbType) == 0) {
-        WLOGFD("[NAPI]Failed to find callbackfunction, type = %{public}s", cbType.c_str());
-        return NapiGetUndefined(env);
+    ListenerFuncionType listenerFuncType = ListenerFuncionType::INVALID;
+    if (listenerFuncMap_.count(cbType) != 0) {
+        listenerFuncType = listenerFuncMap_[cbType];
     }
-    ListenerFuncionType listenerFuncType = listenerFuncMap_[cbType];
     switch (listenerFuncType) {
         case ListenerFuncionType::PENDING_SCENE_CB:
             ProcessPendingSceneSessionActivationRegister();
