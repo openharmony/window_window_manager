@@ -16,6 +16,8 @@
 #include "iremote_object_mocker.h"
 #include <gtest/gtest.h>
 #include "accessibility_event_info.h"
+#include "ws_common.h"
+
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
@@ -499,6 +501,25 @@ HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Le
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent end";
+}
+
+/**
+ * @tc.name: UpdatePiPControlStatus
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_EQ(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy, nullptr);
+    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = WsPiPControlStatus::PLAY;
+    WSError res = sProxy->UpdatePiPControlStatus(controlType, status);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus end";
 }
 } // namespace
 } // namespace Rosen

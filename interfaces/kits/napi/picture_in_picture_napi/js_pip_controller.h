@@ -34,6 +34,8 @@ public:
     static napi_value StopPictureInPicture(napi_env env, napi_callback_info info);
     static napi_value SetAutoStartEnabled(napi_env env, napi_callback_info info);
     static napi_value UpdateContentSize(napi_env env, napi_callback_info info);
+    static napi_value UpdatePiPControlStatus(napi_env env, napi_callback_info info);
+    static napi_value SetPiPControlEnabled(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
 private:
@@ -41,6 +43,8 @@ private:
     napi_value OnStopPictureInPicture(napi_env env, napi_callback_info info);
     napi_value OnSetAutoStartEnabled(napi_env env, napi_callback_info info);
     napi_value OnUpdateContentSize(napi_env env, napi_callback_info info);
+    napi_value OnUpdatePiPControlStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetPiPControlEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
 
@@ -50,8 +54,10 @@ private:
 
     void ProcessStateChangeRegister();
     void ProcessActionEventRegister();
+    void ProcessControlEventRegister();
     void ProcessStateChangeUnRegister();
     void ProcessActionEventUnRegister();
+    void ProcessControlEventUnRegister();
 
     sptr<PictureInPictureController> pipController_;
     napi_env env_;
@@ -85,6 +91,17 @@ public:
             : engine_(env), jsCallBack_(callback) {}
         ~PiPActionObserverImpl() {}
         void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
+    private:
+        napi_env engine_ = nullptr;
+        std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
+    };
+
+    class PiPControlObserverImpl : public IPiPControlObserver {
+    public:
+        PiPControlObserverImpl(napi_env env, std::shared_ptr<NativeReference> callback)
+            : engine_(env), jsCallBack_(callback) {}
+        ~PiPControlObserverImpl() {}
+        void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
     private:
         napi_env engine_ = nullptr;
         std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
