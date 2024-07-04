@@ -174,6 +174,7 @@ private:
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessCallingSessionIdChangeRegister();
+    void ProcessRegisterCallback(const std::string& cbType);
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
