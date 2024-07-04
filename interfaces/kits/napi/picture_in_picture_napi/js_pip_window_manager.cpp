@@ -128,7 +128,7 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
         napi_get_element(env, controlGroup, i, &getElementValue);
         if (!ConvertFromJsValue(env, getElementValue, controlType)) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
-            return false;
+            continue;
         }
         auto iter = std::find(controls.begin(), controls.end(), controlType);
         if (iter != controls.end()) {
