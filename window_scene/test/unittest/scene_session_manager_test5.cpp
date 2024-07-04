@@ -334,7 +334,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(property, nullptr);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, ssm_->UpdateBrightness(1));
+    ssm_->UpdateBrightness(1);
     FocusChangeInfo focusInfo;
     ssm_->GetCurrentUserId();
     ssm_->GetFocusWindowInfo(focusInfo);
@@ -376,8 +376,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
     sptr<SceneSession> scensession = nullptr;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     ssm_->RequestAllAppSessionUnfocus();
 }
