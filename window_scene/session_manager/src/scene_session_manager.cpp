@@ -4332,7 +4332,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     int32_t persistentId = sceneSession->GetPersistentId();
     if (sceneSession->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
         TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
     // dialog get focus
     if (CheckRequestFocusImmdediately(sceneSession)) {
