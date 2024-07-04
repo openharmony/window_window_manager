@@ -179,17 +179,19 @@ void JsDisplayListener::OnChange(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-            CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
-        }
-    );
+    auto napiTask = [this, listener, id, env = env_]() {
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
+        CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayListener::OnChange", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnChange: env is nullptr");
+    }
 }
 
 void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
@@ -231,17 +233,19 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, foldStatus] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, foldStatus)};
+    auto napiTask = [this, listener, foldStatus, env = env_] () {
+            napi_value argv[] = {CreateJsValue(env, foldStatus)};
             CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
-        }
-    );
+        };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayListener::OnFoldStatusChanged", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnFoldStatusChanged: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnFoldStatusChanged: env is nullptr");
+    }
 }
 
 void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
@@ -307,17 +311,19 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, displayMode] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, displayMode)};
+    auto napiTask = [this, listener, displayMode, env = env_] () {
+            napi_value argv[] = {CreateJsValue(env, displayMode)};
             CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
-        }
-    );
+        };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnDisplayModeChanged: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnDisplayModeChanged: env is nullptr");
+    }
 }
 
 void JsDisplayListener::OnAvailableAreaChanged(DMRect area)

@@ -218,14 +218,14 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The scene session is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The scene session is nullptr");
         pointerEvent->MarkProcessed();
         return;
     }
     SetPointerId(pointerEvent);
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
             "windowName:%{public}s action:%{public}d isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
@@ -289,31 +289,31 @@ void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
 void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The key event is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The key event is nullptr");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent receive id:%d",
         keyEvent->GetId());
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "OnInputEvent is disabled temporarily");
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "OnInputEvent is disabled temporarily");
         keyEvent->MarkProcessed();
         return;
     }
     auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusedSessionId == INVALID_SESSION_ID) {
-        TLOGE(WmsLogTag::WMS_EVENT, "focusedSessionId is invalid");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "focusedSessionId is invalid");
         keyEvent->MarkProcessed();
         return;
     }
     auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
     if (focusedSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "focusedSceneSession is null");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "focusedSceneSession is null");
         keyEvent->MarkProcessed();
         return;
     }
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
     static uint32_t eventId = 0;
-    TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, InputTracking id:%{public}d, wid:%{public}u "
+    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, wid:%{public}u "
         "focusedSessionId:%{public}d, isSystem:%{public}d",
         eventId++, keyEvent->GetId(), keyEvent->GetTargetWindowId(), focusedSessionId, isSystem);
     if (!isSystem) {
@@ -326,7 +326,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     }
     bool isConsumed = focusedSceneSession->SendKeyEventToUI(keyEvent, true);
     if (isConsumed) {
-        TLOGI(WmsLogTag::WMS_EVENT, "SendKeyEventToUI id:%{public}d isConsumed:%{public}d",
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "SendKeyEventToUI id:%{public}d isConsumed:%{public}d",
             keyEvent->GetId(), static_cast<int>(isConsumed));
         return;
     }
@@ -346,9 +346,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         return;
     }
 #endif // IMF_ENABLE
-    TLOGD(WmsLogTag::WMS_EVENT, "Syetem window scene, transfer key event to root scene");
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Syetem window scene, transfer key event to root scene");
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "uiContent_ is null");
         keyEvent->MarkProcessed();
         return;
     }
@@ -372,16 +372,16 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::AxisEvent> axisEvent) const
 {
     if (axisEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "axisEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "axisEvent is nullptr");
         return;
     }
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "uiContent_ is null");
         axisEvent->MarkProcessed();
         return;
     }
     if (!(uiContent_->ProcessAxisEvent(axisEvent))) {
-        TLOGI(WmsLogTag::WMS_EVENT, "The UI content consumes the axis event failed.");
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "The UI content consumes the axis event failed.");
         axisEvent->MarkProcessed();
     }
 }

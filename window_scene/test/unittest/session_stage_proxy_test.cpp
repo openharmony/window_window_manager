@@ -21,6 +21,7 @@
 #include "util.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 
 using namespace testing;
@@ -311,6 +312,19 @@ HWTEST_F(SessionStageProxyTest, SetPipActionEvent, Function | SmallTest | Level1
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->SetPipActionEvent("close", 0);
+}
+
+/**
+ * @tc.name: SetPiPControlEvent
+ * @tc.desc: test function : SetPiPControlEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = WsPiPControlStatus::PLAY;
+    sessionStage_->SetPiPControlEvent(controlType, status);
 }
 }
 }

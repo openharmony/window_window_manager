@@ -203,29 +203,49 @@ napi_valuetype GetType(napi_env env, napi_value value)
 napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
 {
     WLOGD("OnGetCutoutInfo is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
-            if (cutoutInfo != nullptr) {
-                task.Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
-                WLOGD("JsDisplay::OnGetCutoutInfo success");
-            } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
-            }
-        };
+    napi_value result = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = nullptr;
-    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
-        GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
+    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr && GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
         lastParam = argv[ARGC_ONE - 1];
     }
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnGetCutoutInfo",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
+        if (cutoutInfo != nullptr) {
+            task->Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
+            WLOGD("JsDisplay::OnGetCutoutInfo success");
+        } else {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    }
     return result;
+}
+
+std::unique_ptr<NapiAsyncTask> JsDisplay::CreateEmptyAsyncTask(napi_env env, napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
 }
 
 napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
@@ -451,6 +471,16 @@ napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
     return objValue;
 }
 
+napi_value CreateJsDisplayPhysicalInfoObject(napi_env env, DisplayPhysicalResolution physicalInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "foldDisplayMode", CreateJsValue(env, physicalInfo.foldDisplayMode_));
+    napi_set_named_property(env, objValue, "physicalWidth", CreateJsValue(env, physicalInfo.physicalWidth_));
+    napi_set_named_property(env, objValue, "physicalHeight", CreateJsValue(env, physicalInfo.physicalHeight_));
+    return objValue;
+}
+
 napi_value CreateJsRectObject(napi_env env, DMRect rect)
 {
     napi_value objValue = nullptr;
@@ -509,6 +539,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "yDPI", CreateJsValue(env, info->GetYDpi()));
     napi_set_named_property(env, objValue, "colorSpaces", CreateJsColorSpaceArray(env, info->GetColorSpaces()));
     napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
+    napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
+    napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

@@ -821,6 +821,21 @@ HWTEST_F(DisplayManagerTest, isinsideof, Function | SmallTest | Level1)
     DMRect rect1 = {2, 2, 2, 2};
     ASSERT_EQ(rect.IsInsideOf(rect1), true);
 }
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
+{
+    std::vector<DisplayPhysicalResolution> allSize = DisplayManager::GetInstance().GetAllDisplayPhysicalResolution();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(!allSize.empty());
+    } else {
+        ASSERT_TRUE(allSize.empty());
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS

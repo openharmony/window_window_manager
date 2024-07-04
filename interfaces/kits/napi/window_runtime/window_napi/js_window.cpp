@@ -55,7 +55,7 @@ namespace {
     constexpr double MAX_GRAY_SCALE = 1.0;
 }
 
-static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
+static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;

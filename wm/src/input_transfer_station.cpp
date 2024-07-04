@@ -38,20 +38,21 @@ InputTransferStation::~InputTransferStation()
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "KeyEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "KeyEvent is nullptr");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "InputTransferStation:keyEvent Receive id:%d",
         keyEvent->GetId());
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
     static uint32_t eventId = 0;
-    TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, InputTracking id:%{public}d, Receive keyEvent,"
+    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, Receive keyEvent,"
         " windowId:%{public}u",
         eventId++, keyEvent->GetId(), windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         keyEvent->MarkProcessed();
-        TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr InputTracking id:%{public}d windowId:%{public}u",
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW,
+            "WindowInputChannel is nullptr InputTracking id:%{public}d windowId:%{public}u",
             keyEvent->GetId(), windowId);
         return;
     }
@@ -61,17 +62,17 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
 {
     if (axisEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "AxisEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "AxisEvent is nullptr");
         return;
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
     axisEvent->MarkProcessed();
 }
 
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "PointerEvent is nullptr");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "InputTransferStation:pointerEvent Receive id:%d action:%d",
@@ -82,14 +83,14 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_EVENT, "eventId:%{public}d, id:%{public}d, Receive pointerEvent, "
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, id:%{public}d, Receive pointerEvent, "
             "windowId:%{public}u action = %{public}d", eventId++, pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         if (windowId != invalidId) {
-            TLOGE(WmsLogTag::WMS_EVENT, "WindowInputChannel is nullptr InputTracking id:%{public}d "
+            TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "WindowInputChannel is nullptr InputTracking id:%{public}d "
                 "windowId:%{public}u",
                 pointerEvent->GetId(), windowId);
         }

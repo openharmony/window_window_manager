@@ -263,6 +263,7 @@ public:
     DMError ResetAllFreezeStatus() override;
 
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
 protected:
     ScreenSessionManager();
@@ -294,6 +295,7 @@ private:
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
     void SetClientInner();
+    void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
 
@@ -357,6 +359,7 @@ private:
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
+    std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
 
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
