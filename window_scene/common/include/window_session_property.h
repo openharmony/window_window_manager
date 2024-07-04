@@ -287,6 +287,7 @@ private:
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::MODAL };
 
     bool isShaped_ = false;
+    bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
