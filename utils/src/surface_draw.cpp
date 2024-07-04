@@ -359,7 +359,11 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SurfaceDraw:GetSurfaceSnapshot(%llu)", surfaceNode->GetId());
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    if (RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH)) {
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleW,
+        .scaleY = scaleH,
+    };
+    if (RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config)) {
         pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
     }
     if (pixelMap == nullptr) {
