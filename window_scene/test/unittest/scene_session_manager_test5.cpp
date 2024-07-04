@@ -456,6 +456,164 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Lev
     ssm_->UpdateFocusStatus(sceneSession, true);
     ssm_->UpdateFocusStatus(sceneSession, false);
 }
+
+/**
+ * @tc.name: RequestSessionUnfocus
+ * @tc.desc: RequestSessionUnfocus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+    ssm_->RequestSessionUnfocus(0, reason);
+}
+
+/**
+ * @tc.name: RequestFocusSpecificCheck
+ * @tc.desc: RequestFocusSpecificCheck
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->RequestFocusSpecificCheck(sceneSession, true, reason);
+
+    FocusChangeReason reason1 = FocusChangeReason::SPLIT_SCREEN;
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    ssm_->RequestFocusSpecificCheck(sceneSession, true, reason1);
+}
+
+/**
+ * @tc.name: NotifyFocusStatus
+ * @tc.desc: NotifyFocusStatus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->NotifyFocusStatus(scensession, true);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->NotifyFocusStatus(sceneSession, false);
+    info.isSystem_ = true;
+    ssm_->NotifyFocusStatus(sceneSession, true);
+}
+
+/**
+ * @tc.name: NotifyFocusStatusByMission
+ * @tc.desc: NotifyFocusStatusByMission
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> currSession = nullptr;
+    ssm_->NotifyFocusStatusByMission(scensession, currSession);
+    ASSERT_EQ(false, ssm_->MissionChanged(scensession, currSession));
+    std::shared_ptr<SessionListenerController> listenerController =
+        std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
+    ssm_->NotifyFocusStatusByMission(scensession, currSession);
+    ssm_->MissionChanged(scensession, currSession);
+    currSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(currSession, nullptr);
+    ssm_->NotifyFocusStatusByMission(scensession, currSession);
+    ssm_->MissionChanged(scensession, currSession);
+    info.isSystem_ = true;
+    ssm_->NotifyFocusStatusByMission(scensession, currSession);
+    ssm_->MissionChanged(scensession, currSession);
+}
+
+/**
+ * @tc.name: UpdateFocus
+ * @tc.desc: UpdateFocus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, UpdateFocus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->UpdateFocus(1, true);
+    ssm_->UpdateFocus(0, false);
+}
+
+/**
+ * @tc.name: RequestSessionFocusImmediately
+ * @tc.desc: RequestSessionFocusImmediately
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->RequestSessionFocusImmediately(0);
+    ssm_->RequestFocusBasicCheck(0);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<Session> session = new (std::nothrow) Session(info);
+    session->SetSessionProperty(property);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->RequestSessionFocusImmediately(1);
+    ssm_->RequestFocusBasicCheck(1);
+}
+/**
+ * @tc.name: CheckFocusIsDownThroughBlockingType
+ * @tc.desc: CheckFocusIsDownThroughBlockingType
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    sptr<SceneSession> scensession = nullptr;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    ssm_->CheckFocusIsDownThroughBlockingType(sceneSession, sceneSession2, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
