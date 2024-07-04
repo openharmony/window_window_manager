@@ -399,6 +399,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->reuse = data.ReadBool();
     abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     abilitySessionInfo->hasContinuousTask = data.ReadBool();
+    abilitySessionInfo->isAtomicService = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
