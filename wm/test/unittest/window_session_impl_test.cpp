@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <gtest/gtest.h>
-#include "ability_context_impl.h"
-#include "accessibility_event_info.h"
 #include <filesystem>
 #include <fstream>
+#include <gtest/gtest.h>
+
+#include "ability_context_impl.h"
+#include "accessibility_event_info.h"
 #include "mock_session.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
@@ -781,11 +781,13 @@ HWTEST_F(WindowSessionImplTest, SetTouchable, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    ASSERT_NE(window->property_, nullptr);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     WMError res = window->SetTouchable(true);
     ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_NE(window->property_, nullptr);
     ASSERT_TRUE(window->property_->touchable_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
