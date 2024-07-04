@@ -306,8 +306,8 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-    void SetForceHideState(bool hideFlag);
-    bool GetForceHideState() const;
+    void SetForceHideState(ForceHideState forceHideState);
+    ForceHideState GetForceHideState() const;
     bool IsTemporarilyShowWhenLocked() const;
     void SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked);
     int32_t GetCustomDecorHeight() override
@@ -470,7 +470,7 @@ private:
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
-    bool forceHideState_ = false;
+    ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     int32_t customDecorHeight_ = 0;
     WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     static std::shared_mutex windowDragHotAreaMutex_;
