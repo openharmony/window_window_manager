@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":ws_anomaly_detection_test",
+    ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_dual_display_sensor_fold_state_manager_test",
     ":ws_event_stage_test",
@@ -1282,6 +1283,19 @@ ohos_unittest("ws_session_manager_service_recover_proxy_test") {
     ":ws_unittest_common",
     "${window_base_path}/wmserver:sms",
   ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_dfx_hisysevent_test") {
+  module_out_path = module_out_path
+
+  sources = [ "dfx_hisysevent_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
 
   external_deps = [
     "c_utils:utils",
