@@ -263,6 +263,7 @@ public:
     DMError ResetAllFreezeStatus() override;
 
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
 protected:
     ScreenSessionManager();
@@ -358,6 +359,7 @@ private:
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
+    std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
 
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;

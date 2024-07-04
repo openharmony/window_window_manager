@@ -128,6 +128,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | Sm
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    std::vector<DisplayPhysicalResolution> allSize {};
+    std::function<void()> func = [&]()
+    {
+        allSize = screenSessionManagerProxy->GetAllDisplayPhysicalResolution();
+    };
+    func();
+    ASSERT_TRUE(!allSize.empty());
+}
+
 HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();

@@ -45,6 +45,7 @@ public:
     static uint32_t GetCurvedCompressionAreaInLandscape();
     static bool IsSupportRotateWithSensor();
     static std::string GetExternalScreenDefaultMode();
+    static std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalConfig();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -57,6 +58,7 @@ private:
     static bool isWaterfallDisplay_;
     static bool isScreenCompressionEnableInLandscape_;
     static uint32_t curvedAreaInLandscape_;
+    static std::vector<DisplayPhysicalResolution> displayPhysicalResolution_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
@@ -69,6 +71,7 @@ private:
     static std::vector<std::string> Split(std::string str, std::string pattern);
     static bool IsNumber(std::string str);
     static DMRect CalcCutoutBoundaryRect(const std::string svgPath);
+    static void ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
