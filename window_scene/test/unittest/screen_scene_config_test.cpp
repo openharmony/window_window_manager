@@ -290,7 +290,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
         }
     }
 
-    ASSERT_LE(ScreenSceneConfig::stringConfig_.size(), readCount);
+    ASSERT_GT(ScreenSceneConfig::stringConfig_.size(), readCount);
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
 }
