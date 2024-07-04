@@ -139,17 +139,17 @@ private:
 
     void WindowManagerAndSessionRecover();
 
-    sptr<IWindowManager> GetWindowManagerServiceProxy();
+    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
-    bool isProxyValid_ { false };
-
-    bool recoverInitialized = false;
+    bool isProxyValid_ = false;
+    bool recoverInitialized_ = false;
     bool isRegisteredUserSwitchListener_ = false;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
+    // above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS
