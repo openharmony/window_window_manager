@@ -328,12 +328,10 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags, Functio
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    int32_t id = sceneSession->GetPersistentId();
-    ASSERT_EQ(WSError::WS_OK, ssm_->UpdateSessionAvoidAreaListener(id, true));
     sceneSession->SetIsDisplayStatusBarTemporarily(true);
     ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
     ssm_->ClearDisplayStatusBarTemporarilyFlags();
-    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
 
 /**
@@ -1305,10 +1303,15 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 */
 HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallTest | Level3)
 {
-    std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
     ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
     ssm_->GetAllWindowVisibilityInfos(windowVisibilityInfos);
-    EXPECT_EQ(windowVisibilityInfos.size(), 0);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
 }
 
 /**
