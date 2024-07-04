@@ -47,7 +47,8 @@ int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
     return ProcessRemoteRequest(code, data, reply, option);
 }
 
-int ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
 {
     switch (code) {
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT):
