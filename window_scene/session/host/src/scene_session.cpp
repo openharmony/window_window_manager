@@ -2398,7 +2398,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
     if (hide) {
         if (isFocused_) {
             FocusChangeReason reason = FocusChangeReason::DEFAULT;
-            NotifyRequestFocusStatusNotifyManager(false, false, reason);
+            NotifyRequestFocusStatusNotifyManager(false, true, reason);
             SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
         } else if (forceHideState_ == ForceHideState::NOT_HIDDEN) {
             SetForceHideState(ForceHideState::HIDDEN_WHEN_UNFOCUSED);
@@ -2407,7 +2407,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
         if (forceHideState_ == ForceHideState::HIDDEN_WHEN_FOCUSED) {
             SetForceHideState(ForceHideState::NOT_HIDDEN);
             FocusChangeReason reason = FocusChangeReason::DEFAULT;
-            NotifyRequestFocusStatusNotifyManager(true, false, reason);
+            NotifyRequestFocusStatusNotifyManager(true, true, reason);
         } else {
             SetForceHideState(ForceHideState::NOT_HIDDEN);
         }
