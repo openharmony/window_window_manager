@@ -891,6 +891,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     if (sessionProperty && property) {
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+        if (sessionProperty->GetCompatibleModeInPc()) {
+            property_->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+        }
     }
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
@@ -2125,6 +2128,9 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     
     property->SetCompatibleModeInPc(enable);
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
+    if (enable) {
+        property_->SetDragEnabled(isSupportDragInPcCompatibleMode);
+    }
     return WSError::WS_OK;
 }
 
