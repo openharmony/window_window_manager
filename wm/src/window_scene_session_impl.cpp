@@ -1670,13 +1670,10 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     if (hostSession != nullptr) {
         hostSession->OnLayoutFullScreenChange(status);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
-    bool isSwitchFreeMultiWindow = windowSystemConfig_.freeMultiWindowEnable_ &&
-        windowSystemConfig_.freeMultiWindowSupport_;
-    if (isSwitchFreeMultiWindow || (WindowHelper::IsMainWindow(GetType()) &&
+    if (WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.uiType_ != "phone" &&
-        windowSystemConfig_.uiType_ != "pad")) {
+        windowSystemConfig_.uiType_ != "pad") {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1964,7 +1961,9 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        SetLayoutFullScreen(enableImmersiveMode_);
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        UpdateDecorEnable(true);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     } else {
         auto hostSession = GetHostSession();
