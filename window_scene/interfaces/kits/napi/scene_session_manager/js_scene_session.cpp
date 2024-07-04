@@ -1249,10 +1249,7 @@ bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type,
 
 bool JsSceneSession::IsCallbackTypeSupported(const std::string& type)
 {
-    if (listenerFuncMap_.find(type) != listenerFuncMap_.end()) {
-        return true;
-    }
-    return false;
+    return listenerFuncMap_.find(type) != listenerFuncMap_.end();
 }
 
 napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info info)
@@ -1297,10 +1294,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
-    if (listenerFuncMap_.count(cbType) != 0) {
-        listenerFuncType = listenerFuncMap_[cbType];
-    }
+    ListenerFunctionType listenerFuncType = listenerFuncMap_[cbType];
     switch (listenerFuncType) {
         case ListenerFunctionType::PENDING_SCENE_CB:
             ProcessPendingSceneSessionActivationRegister();
