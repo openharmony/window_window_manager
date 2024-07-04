@@ -137,6 +137,7 @@ public:
         TRANS_ID_PROXY_FOR_FREEZE,
         TRANS_ID_RESET_ALL_FREEZE_STATUS,
         TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO,
+        TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -292,6 +293,11 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
+
+    virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution()
+    {
+        return std::vector<DisplayPhysicalResolution> {};
+    }
 };
 } // namespace OHOS::Rosen
 

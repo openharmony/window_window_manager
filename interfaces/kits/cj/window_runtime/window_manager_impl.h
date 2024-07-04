@@ -15,7 +15,7 @@
 #ifndef WINDOW_MANAGER_IMPL_H
 #define WINDOW_MANAGER_IMPL_H
  
-#include "wm/window.h"
+#include "window.h"
  
 namespace OHOS {
 namespace Rosen {

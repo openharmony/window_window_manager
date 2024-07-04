@@ -123,7 +123,7 @@ bool WindowAdapterLite::InitSSMProxy()
         int32_t clientUserId = GetUserIdByUid(getuid());
         if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
             SessionManagerLite::GetInstance().RegisterUserSwitchListener(
-                std::bind(&WindowAdapterLite::OnUserSwitch, this));
+                [this] { this->OnUserSwitch(); });
             isRegisteredUserSwitchListener_ = true;
         }
         isProxyValid_ = true;
