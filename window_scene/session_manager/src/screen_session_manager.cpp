@@ -348,6 +348,7 @@ void ScreenSessionManager::ConfigureScreenScene()
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
         TLOGD(WmsLogTag::DMS, "orientation = %d", orientation);
     }
+    allDisplayPhysicalResolution_ = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
 }
 
 void ScreenSessionManager::ConfigureDpi()
@@ -4767,5 +4768,23 @@ void ScreenSessionManager::ReportFoldStatusToScb(std::vector<std::string>& scree
 
         clientProxy_->OnFoldStatusChangedReportUE(screenFoldInfo);
     }
+}
+
+std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysicalResolution()
+{
+    if (allDisplayPhysicalResolution_.empty()) {
+        sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
+        if (defaultScreen == nullptr) {
+            TLOGE(WmsLogTag::DMS, "default screen null");
+            return allDisplayPhysicalResolution_;
+        }
+        ScreenProperty defaultScreenProperty = defaultScreen->GetScreenProperty();
+        DisplayPhysicalResolution defaultSize;
+        defaultSize.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        defaultSize.physicalWidth_ = defaultScreenProperty.GetPhyBounds().rect_.width_;
+        defaultSize.physicalHeight_ = defaultScreenProperty.GetPhyBounds().rect_.height_;
+        allDisplayPhysicalResolution_.emplace_back(defaultSize);
+    }
+    return allDisplayPhysicalResolution_;
 }
 } // namespace OHOS::Rosen

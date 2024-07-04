@@ -222,6 +222,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetColorSpaces(colorSpaces_);
     displayInfo->SetDisplayState(property_.GetDisplayState());
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
+    displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
+    displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
     return displayInfo;
 }
 

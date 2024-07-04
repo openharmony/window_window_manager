@@ -67,6 +67,12 @@ static napi_value GetAllDisplay(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetAllDisplay(env, info) : nullptr;
 }
 
+static napi_value GetAllDisplayPhysicalResolution(napi_env env, napi_callback_info info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllDisplayPhysicalResolution(env, info) : nullptr;
+}
+
 static napi_value GetAllDisplays(napi_env env, napi_callback_info info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -226,9 +232,65 @@ napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value CreateJsDisplayPhysicalArrayObject(napi_env env,
+    const std::vector<DisplayPhysicalResolution>& physicalArray)
+{
+    WLOGD("CreateJsDisplayPhysicalArrayObject is called");
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, physicalArray.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("Failed to create display array");
+        return NapiGetUndefined(env);
+    }
+    int32_t i = 0;
+    for (const auto& displayItem : physicalArray) {
+        napi_set_element(env, arrayValue, i++, CreateJsDisplayPhysicalInfoObject(env, displayItem));
+    }
+    return arrayValue;
+}
+
+napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info info)
+{
+    WLOGD("OnGetAllDisplayPhysicalResolution called");
+    DMError errCode = DMError::DM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 0 && argc != ARGC_ONE) {
+        WLOGFE("params not match");
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    }
+
+    NapiAsyncTask::CompleteCallback complete =
+        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+            }
+            std::vector<DisplayPhysicalResolution> displayPhysicalArray =
+                SingletonContainer::Get<DisplayManager>().GetAllDisplayPhysicalResolution();
+            if (!displayPhysicalArray.empty()) {
+                task.Resolve(env, CreateJsDisplayPhysicalArrayObject(env, displayPhysicalArray));
+                WLOGI("OnGetAllDisplayPhysicalResolution success");
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR),
+                    "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+            }
+        };
+
+    napi_value lastParam = nullptr;
+    if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_function) {
+        lastParam = argv[0];
+    }
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayManager::OnGetAllDisplayPhysicalResolution",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetAllDisplays is called");
+    WLOGD("OnGetAllDisplays is called");
 
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1019,6 +1081,8 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
         JsDisplayManager::GetCurrentFoldCreaseRegion);
     BindNativeFunction(env, exportObj, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
+    BindNativeFunction(env, exportObj, "getAllDisplayPhysicalResolution", moduleName,
+        JsDisplayManager::GetAllDisplayPhysicalResolution);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

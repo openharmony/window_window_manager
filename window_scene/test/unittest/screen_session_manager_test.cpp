@@ -1283,6 +1283,22 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenBlackList, Function | SmallTe
     std::vector<uint64_t> windowId = {10, 20, 30};
     ssm_->SetVirtualScreenBlackList(screenId, windowId);
 }
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level3)
+{
+    std::vector<DisplayPhysicalResolution> allSize {};
+    if (ssm_ != nullptr) {
+        allSize = ssm_->GetAllDisplayPhysicalResolution();
+        ASSERT_TRUE(!allSize.empty());
+    } else {
+        ASSERT_TRUE(allSize.empty());
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS

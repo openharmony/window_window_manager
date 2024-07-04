@@ -451,6 +451,16 @@ napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
     return objValue;
 }
 
+napi_value CreateJsDisplayPhysicalInfoObject(napi_env env, DisplayPhysicalResolution physicalInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "foldDisplayMode", CreateJsValue(env, physicalInfo.foldDisplayMode_));
+    napi_set_named_property(env, objValue, "physicalWidth", CreateJsValue(env, physicalInfo.physicalWidth_));
+    napi_set_named_property(env, objValue, "physicalHeight", CreateJsValue(env, physicalInfo.physicalHeight_));
+    return objValue;
+}
+
 napi_value CreateJsRectObject(napi_env env, DMRect rect)
 {
     napi_value objValue = nullptr;
@@ -509,6 +519,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "yDPI", CreateJsValue(env, info->GetYDpi()));
     napi_set_named_property(env, objValue, "colorSpaces", CreateJsColorSpaceArray(env, info->GetColorSpaces()));
     napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
+    napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
+    napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
