@@ -14,6 +14,7 @@
  */
 
 #include <hisysevent.h>
+#include <chrono>
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
@@ -43,6 +44,9 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d, angle:%{public}f",
             mState_, nextState, angle);
         ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
+
+        NotifyReportFoldStatusToScb(mState_, nextState, angle);
+
         mState_ = nextState;
         if (foldScreenPolicy != nullptr) {
             foldScreenPolicy->SetFoldStatus(mState_);
@@ -84,5 +88,18 @@ void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
 }
 
 void SensorFoldStateManager::RegisterApplicationStateObserver() {}
+
+void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
+    float postureAngle)
+{
+    std::chrono::time_point<std::chrono::system_clock> timeNow = std::chrono::system_clock::now();
+    int32_t duration = static_cast<int32_t>(
+        std::chrono::duration_cast<std::chrono::seconds>(timeNow - mLastStateClock_).count());
+    mLastStateClock_ = timeNow;
+
+    std::vector<std::string> screenFoldInfo {std::to_string(static_cast<int32_t>(currentStatus)),
+        std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration), std::to_string(postureAngle)};
+    ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
+}
 
 } // namespace OHOS::Rosen

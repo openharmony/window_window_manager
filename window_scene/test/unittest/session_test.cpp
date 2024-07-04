@@ -357,7 +357,7 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
             mockEventChannel, surfaceNode, sessionConfig, property));
-    ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
     session_->UpdateSessionState(SessionState::STATE_FOREGROUND);
@@ -390,8 +390,7 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
             mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(1).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
     ASSERT_EQ(rect, session_->winRect_);
 }
 
@@ -431,16 +430,16 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
     result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);

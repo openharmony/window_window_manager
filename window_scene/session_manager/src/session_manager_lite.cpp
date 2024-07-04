@@ -88,9 +88,10 @@ public:
         : SceneSessionManagerLiteProxy(impl) {}
     virtual ~SceneSessionManagerLiteProxyMock() = default;
 
+#ifndef USE_ADAPTER_LITE
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        TLOGI(WmsLogTag::WMS_RECOVER, "called");
+        TLOGI(WmsLogTag::DEFAULT, "called");
         auto ret = SceneSessionManagerLiteProxy::RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -100,11 +101,12 @@ public:
     }
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
-        TLOGI(WmsLogTag::WMS_RECOVER, "called");
+        TLOGI(WmsLogTag::DEFAULT, "called");
         auto ret = SceneSessionManagerLiteProxy::UnRegisterSessionListener(listener);
         SessionManagerLite::GetInstance().DeleteSessionListener(listener);
         return ret;
     }
+#endif
 private:
     static inline BrokerDelegator<SceneSessionManagerLiteProxyMock> delegator_;
 };
@@ -160,6 +162,7 @@ sptr<ISessionManagerService> SessionManagerLite::GetSessionManagerServiceProxy()
     return sessionManagerServiceProxy_;
 }
 
+#ifndef USE_ADAPTER_LITE
 void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
@@ -168,7 +171,7 @@ void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& liste
             return (item && item->AsObject() == listener->AsObject());
         });
     if (it != sessionListeners_.end()) {
-        TLOGW(WmsLogTag::WMS_RECOVER, "listener was already added, do not add again");
+        TLOGW(WmsLogTag::DEFAULT, "listener was already added, do not add again");
         return;
     }
     sessionListeners_.emplace_back(listener);
@@ -185,11 +188,14 @@ void SessionManagerLite::DeleteSessionListener(const sptr<ISessionListener>& lis
         sessionListeners_.erase(it);
     }
 }
+#endif
 
 void SessionManagerLite::DeleteAllSessionListeners()
 {
+#ifndef USE_ADAPTER_LITE
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     sessionListeners_.clear();
+#endif
 }
 
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
@@ -212,15 +218,16 @@ void SessionManagerLite::ReregisterSessionListener() const
         TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy_ is null");
         return;
     }
-
+#ifndef USE_ADAPTER_LITE
     TLOGI(WmsLogTag::WMS_RECOVER, "RecoverSessionListeners, listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "RegisterSessionListener failed, ret = %{public}" PRId32, ret);
+            TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}" PRId32, ret);
         }
     }
+#endif
 }
 
 void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)

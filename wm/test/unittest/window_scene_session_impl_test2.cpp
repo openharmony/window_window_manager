@@ -1206,13 +1206,13 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    WindowLimits windowLimits = {100, 100, 100, 100, 0.0f, 0.0f};
+    WindowLimits windowLimits = {2000, 2000, 2000, 2000, 0.0f, 0.0f};
     if (WMError::WM_OK == window->SetWindowLimits(windowLimits)) {
         WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-        ASSERT_EQ(windowSizeLimits.maxWidth_, 100);
-        ASSERT_EQ(windowSizeLimits.maxHeight_, 100);
-        ASSERT_EQ(windowSizeLimits.minWidth_, 100);
-        ASSERT_EQ(windowSizeLimits.minHeight_, 100);
+        ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
+        ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
+        ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
+        ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
     }
 }
 

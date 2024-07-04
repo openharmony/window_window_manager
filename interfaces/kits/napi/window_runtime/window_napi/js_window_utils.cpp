@@ -77,6 +77,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_DIVIDER", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_DIVIDER)));
     napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
@@ -496,6 +498,10 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
         CreateJsValue(env, GetHexColor(navi.contentColor_)));
     napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
         CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    napi_set_named_property(env, objValue, "enableStatusBarAnimation",
+                            CreateJsValue(env, status.enableAnimation_));
+    napi_set_named_property(env, objValue, "enableNavigationBarAnimation",
+                            CreateJsValue(env, navi.enableAnimation_));
     return objValue;
 }
 
@@ -935,10 +941,6 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     }
     uint32_t size = 0;
     napi_get_array_length(env, jsObject, &size);
-    if (size == 0 || size > WINDOW_MAX_WIDTH) {
-        WLOGFE("Invalid window mask");
-        return false;
-    }
     for (uint32_t i = 0; i < size; i++) {
         std::vector<uint32_t> elementArray;
         napi_value getElementValue = nullptr;

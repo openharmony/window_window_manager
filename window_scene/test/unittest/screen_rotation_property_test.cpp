@@ -64,10 +64,33 @@ namespace {
  */
 HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: HandleSensorEventInput start";
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_PORTRAIT);
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: HandleSensorEventInput end";
+    ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_LANDSCAPE);
+}
+
+/**
+ * @tc.name: ConvertDeviceToFloat
+ * @tc.desc: test function : ConvertDeviceToFloat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToFloat, Function | SmallTest | Level1)
+{
+    float ret;
+    ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::INVALID);
+    ASSERT_EQ(ret, -1.0f);
+
+    ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::ROTATION_PORTRAIT);
+    ASSERT_EQ(ret, 0.0f);
+
+    ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::ROTATION_LANDSCAPE);
+    ASSERT_EQ(ret, 90.0f);
+
+    ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::ROTATION_PORTRAIT_INVERTED);
+    ASSERT_EQ(ret, 180.0f);
+
+    ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::ROTATION_LANDSCAPE_INVERTED);
+    ASSERT_EQ(ret, 270.0f);
 }
 
 }

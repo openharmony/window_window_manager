@@ -633,18 +633,21 @@ enum class WindowUpdateType : int32_t {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_;
-    uint32_t maxHeight_;
-    uint32_t minWidth_;
-    uint32_t minHeight_;
-    float maxRatio_;
-    float minRatio_;
+    uint32_t maxWidth_ = UINT32_MAX;
+    uint32_t maxHeight_ = UINT32_MAX;
+    uint32_t minWidth_ = 0;
+    uint32_t minHeight_ = 0;
+    float maxRatio_ = FLT_MAX;
+    float minRatio_ = 0.0f;
+    float vpRatio_ = 1.0f;
 
-    WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
-        minRatio_(0.0f) {}
+    WindowLimits() {}
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
         float minRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth), minHeight_(minHeight),
         maxRatio_(maxRatio), minRatio_(minRatio) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
+        minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
 
     bool IsEmpty() const
     {
@@ -747,7 +750,7 @@ enum class MaximizePresentation {
 };
 
 
-enum class BackupAndRestoreType: int32_t {
+enum class BackupAndRestoreType : int32_t {
     NONE = 0,                       // no backup and restore
     CONTINUATION = 1,               // distribute
     APP_RECOVERY = 2,               // app recovery

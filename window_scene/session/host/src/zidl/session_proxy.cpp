@@ -237,6 +237,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             property->SetWindowRect(rect);
         }
         property->SetCollaboratorType(reply.ReadInt32());
+        property->SetCompatibleModeInPc(reply.ReadBool());
+        property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -323,6 +325,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     if (!data.WriteBool(abilitySessionInfo->hasContinuousTask)) {
         WLOGFE("Write hasContinuousTask failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(abilitySessionInfo->isAtomicService)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isAtomicService failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
@@ -420,46 +426,47 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want))) {
-        WLOGFE("Write want info failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write want info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
-            WLOGFE("Write ability info failed");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write ability info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write ability info failed");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write ability info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
     if (!data.WriteInt32(abilitySessionInfo->persistentId)) {
-        WLOGFE("Write persistentId info failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write persistentId info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(abilitySessionInfo->errorCode)) {
-        WLOGFE("Write erroCode info failed");
+    if (!data.WriteInt32(abilitySessionInfo->errorCode) ||
+        !data.WriteString(abilitySessionInfo->errorReason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write error info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(abilitySessionInfo->errorReason)) {
-        WLOGFE("Write erroCode info failed");
+    if (!data.WriteString(abilitySessionInfo->identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write identity token info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -1050,6 +1057,33 @@ WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, status:%{public}d", controlType, status);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(controlType))) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write controlType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(status))) {
+        TLOGE(WmsLogTag::WMS_PIP, "write status failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();

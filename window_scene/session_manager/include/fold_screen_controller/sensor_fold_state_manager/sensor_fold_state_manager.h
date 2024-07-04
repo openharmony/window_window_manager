@@ -18,6 +18,7 @@
 
 #include <mutex>
 #include <refbase.h>
+#include <chrono>
 
 #include "dm_common.h"
 #include "fold_screen_controller/fold_screen_policy.h"
@@ -41,6 +42,9 @@ protected:
 private:
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
     FoldStatus mState_ = FoldStatus::UNKNOWN;
+
+    std::chrono::time_point<std::chrono::system_clock> mLastStateClock_ = std::chrono::system_clock::now();
+    void NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus, float postureAngle);
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
