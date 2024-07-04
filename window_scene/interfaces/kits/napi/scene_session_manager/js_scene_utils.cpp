@@ -937,7 +937,7 @@ napi_value SubWindowModalTypeInit(napi_env env)
     }
 
     napi_set_named_property(env, objValue, "TYPE_UNDEFINED", CreateJsValue(env,
-        static_cast<int32_t>(SubWindowModalType::TYPE_DIALOG)));
+        static_cast<int32_t>(SubWindowModalType::TYPE_UNDEFINED)));
     napi_set_named_property(env, objValue, "TYPE_NORMAL", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_NORMAL)));
     napi_set_named_property(env, objValue, "TYPE_DIALOG", CreateJsValue(env,
