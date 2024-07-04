@@ -223,9 +223,11 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
     }
     return result;
 }

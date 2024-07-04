@@ -185,7 +185,7 @@ void JsDisplayListener::OnChange(DisplayId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnChange: Failed to SendEvent.");
         }
@@ -239,7 +239,7 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
         };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnFoldStatusChanged: Failed to SendEvent.");
         }
@@ -317,7 +317,7 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
         };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnDisplayModeChanged: Failed to SendEvent.");
         }
