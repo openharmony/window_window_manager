@@ -1816,7 +1816,6 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
         }
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        hostSession->OnLayoutFullScreenChange(status);
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     };
