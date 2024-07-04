@@ -2320,7 +2320,10 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
 WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "WindowSessionImpl::NotifyCloseExistPipWindow");
-    PictureInPictureManager::DoClose(true, true);
+    auto task = [weak = wptr(this)]() {
+        PictureInPictureManager::DoClose(true, true);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyCloseExistPipWindow");
     return WSError::WS_OK;
 }
 
