@@ -886,7 +886,22 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     if (IsCallbackRegistered(env, cbType, value)) {
         return NapiGetUndefined(env);
     }
+    ProcessRegisterCallback(cbType);
+    std::shared_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSessionManager set jsCbMap[%s]", cbType.c_str());
+        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        jsCbMap_[cbType] = callbackRef;
+    }
+    WLOGFD("[NAPI]end, type = %{public}s", cbType.c_str());
+    return NapiGetUndefined(env);
+}
 
+void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
+{
     ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
     if (listenerFuncTypeMap_.count(cbType) != 0) {
         listenerFuncType = listenerFuncTypeMap_[cbType];
@@ -920,19 +935,9 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
             ProcessGestureNavigationEnabledChangeListener();
             break;
         default:
+            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
-    std::shared_ptr<NativeReference> callbackRef;
-    napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
-    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSessionManager set jsCbMap[%s]", cbType.c_str());
-        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
-        jsCbMap_[cbType] = callbackRef;
-    }
-    WLOGFD("[NAPI]end, type = %{public}s", cbType.c_str());
-    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnUpdateFocus(napi_env env, napi_callback_info info)

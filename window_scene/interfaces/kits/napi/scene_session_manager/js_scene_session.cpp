@@ -1294,6 +1294,13 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
+    ProcessRegisterCallback(cbType);
+    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessRegisterCallback(const std::string& cbType)
+{
     ListenerFunctionType listenerFuncType = listenerFuncMap_[cbType];
     switch (listenerFuncType) {
         case ListenerFunctionType::PENDING_SCENE_CB:
@@ -1420,10 +1427,9 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
             ProcessLayoutFullScreenChangeRegister();
             break;
         default:
+            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
-    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
-    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_info info)
