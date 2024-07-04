@@ -384,14 +384,14 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
         return;
     }
-    if (SessionHelper::IsEmptyRect(callingSessionRestoringRect)) {
-        callingSessionRestoringRect = callingSessionRect;
-        callingSession->SetRestoringRectForKeyboard(callingSessionRect);
-    }
 
     WSRect newRect = callingSessionRect;
     int32_t statusHeight = GetStatusBarHeight();
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
+        if (SessionHelper::IsEmptyRect(callingSessionRestoringRect)) {
+            callingSessionRestoringRect = callingSessionRect;
+            callingSession->SetRestoringRectForKeyboard(callingSessionRect);
+        }
         // calculate new rect of calling session
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - static_cast<int32_t>(newRect.height_), statusHeight);
         newRect.posY_ = std::min(callingSessionRestoringRect.posY_, newRect.posY_);
