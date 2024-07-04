@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
 #include "session/host/include/zidl/session_interface.h"
@@ -99,7 +100,7 @@ public:
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
-    WMError SetRestoredRouterStack(std::string& routerStack) override;
+    WMError SetRestoredRouterStack(const std::string& routerStack) override;
     Ace::UIContent* GetUIContent() const override;
     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -128,6 +129,7 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool notifyInputMethod = true) override;
+    void NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info);
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
@@ -205,8 +207,10 @@ public:
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
+    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
 
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
+    void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -358,7 +362,6 @@ private:
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
     inline void DestroyExistUIContent();
     std::string GetRestoredRouterStack();
-    Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type);
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
@@ -366,6 +369,10 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsFreeMultiWindowMode() const
+    {
+        return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
+    }
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
@@ -416,8 +423,7 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     sptr<WindowOption> windowOption_;
 
-    std::recursive_mutex routerStackMutex_;
-    std::string restoredRouterStack_ = { "" };
+    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };
 } // namespace Rosen
 } // namespace OHOS

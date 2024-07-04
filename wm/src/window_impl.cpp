@@ -50,6 +50,27 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
     const std::string PARAM_DUMP_HELP = "-h";
+
+Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
+}
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
@@ -601,7 +622,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
             auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
             if (!routerStack.empty() &&
                 uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
-                WLOGFI("Restore router stack succeed.");
+                TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                 break;
             }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
@@ -711,40 +732,17 @@ std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
     return uiContent_->GetContentInfo(GetAceContentInfoType(type));
 }
 
-WMError WindowImpl::SetRestoredRouterStack(std::string& routerStack)
+WMError WindowImpl::SetRestoredRouterStack(const std::string& routerStack)
 {
-    WLOGFD("Set restored router stack");
-    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
     restoredRouterStack_ = routerStack;
     return WMError::WM_OK;
 }
 
 std::string WindowImpl::GetRestoredRouterStack()
 {
-    WLOGFD("Get restored router stack");
-    std::lock_guard<std::recursive_mutex> lock(routerStackMutex_);
+    TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
     return std::move(restoredRouterStack_);
-}
-
-Ace::ContentInfoType WindowImpl::GetAceContentInfoType(BackupAndRestoreType type)
-{
-    auto contentInfoType = Ace::ContentInfoType::NONE;
-    switch (type) {
-        case BackupAndRestoreType::CONTINUATION:
-            contentInfoType = Ace::ContentInfoType::CONTINUATION;
-            break;
-        case BackupAndRestoreType::APP_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
-            break;
-        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
-            break;
-        case BackupAndRestoreType::NONE:
-            [[fallthrough]];
-        default:
-            break;
-    }
-    return contentInfoType;
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
@@ -2982,14 +2980,20 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
     // calculate window inner rect except frame
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-            property_->GetWindowId());
+    if (display == nullptr) {
+        WLOGFE("get display failed moveDragProperty targetDisplayId:%{public}u, window id:%{public}u",
+            moveDragProperty_->targetDisplayId_, property_->GetWindowId());
+        return;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("get display info failed moveDragProperty targetDisplayId:%{public}u, window id:%{public}u",
+            moveDragProperty_->targetDisplayId_, property_->GetWindowId());
         return;
     }
     float vpr = display->GetVirtualPixelRatio();
-    int32_t startPointPosX = moveDragProperty_->startPointPosX_ + display->GetDisplayInfo()->GetOffsetX();
-    int32_t startPointPosY = moveDragProperty_->startPointPosY_ + display->GetDisplayInfo()->GetOffsetY();
+    int32_t startPointPosX = moveDragProperty_->startPointPosX_ + displayInfo->GetOffsetX();
+    int32_t startPointPosY = moveDragProperty_->startPointPosY_ + displayInfo->GetOffsetY();
 
     CalculateStartRectExceptHotZone(vpr);
 

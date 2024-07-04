@@ -22,27 +22,46 @@ namespace Rosen {
 CjWindowRegisterManager::CjWindowRegisterManager()
 {
     listenerProcess_[CaseType::CASE_WINDOW_MANAGER] = {
-        {SYSTEM_BAR_TINT_CHANGE_CB,            &CjWindowRegisterManager::ProcessSystemBarChangeRegister               },
-        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, &CjWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister},
-        {WATER_MARK_FLAG_CHANGE_CB,            &CjWindowRegisterManager::ProcessWaterMarkFlagChangeRegister           },
+        {SYSTEM_BAR_TINT_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessSystemBarChangeRegister(listener, window, isRegister); } },
+        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+            [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessGestureNavigationEnabledChangeRegister(listener, window, isRegister); } },
+        {WATER_MARK_FLAG_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessWaterMarkFlagChangeRegister(listener, window, isRegister); } },
     };
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        {WINDOW_SIZE_CHANGE_CB,                &CjWindowRegisterManager::ProcessWindowChangeRegister               },
-        {SYSTEM_AVOID_AREA_CHANGE_CB,          &CjWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister      },
-        {AVOID_AREA_CHANGE_CB,                 &CjWindowRegisterManager::ProcessAvoidAreaChangeRegister            },
-        {LIFECYCLE_EVENT_CB,                   &CjWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        {WINDOW_EVENT_CB,                      &CjWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        {KEYBOARD_HEIGHT_CHANGE_CB,            &CjWindowRegisterManager::ProcessOccupiedAreaChangeRegister         },
-        {TOUCH_OUTSIDE_CB,                     &CjWindowRegisterManager::ProcessTouchOutsideRegister               },
-        {SCREENSHOT_EVENT_CB,                  &CjWindowRegisterManager::ProcessScreenshotRegister                 },
-        {DIALOG_TARGET_TOUCH_CB,               &CjWindowRegisterManager::ProcessDialogTargetTouchRegister          },
-        {DIALOG_DEATH_RECIPIENT_CB,            &CjWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
-        {WINDOW_STATUS_CHANGE_CB,              &CjWindowRegisterManager::ProcessWindowStatusChangeRegister         },
-        {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,   &CjWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
-        {WINDOW_VISIBILITY_CHANGE_CB,          &CjWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
+        {WINDOW_SIZE_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessWindowChangeRegister(listener, window, isRegister); } },
+        {SYSTEM_AVOID_AREA_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessSystemAvoidAreaChangeRegister(listener, window, isRegister); } },
+        {AVOID_AREA_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessAvoidAreaChangeRegister(listener, window, isRegister); } },
+        {LIFECYCLE_EVENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessLifeCycleEventRegister(listener, window, isRegister); } },
+        {WINDOW_EVENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessLifeCycleEventRegister(listener, window, isRegister); } },
+        {KEYBOARD_HEIGHT_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessOccupiedAreaChangeRegister(listener, window, isRegister); } },
+        {TOUCH_OUTSIDE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessTouchOutsideRegister(listener, window, isRegister); } },
+        {SCREENSHOT_EVENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessScreenshotRegister(listener, window, isRegister); } },
+        {DIALOG_TARGET_TOUCH_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessDialogTargetTouchRegister(listener, window, isRegister); } },
+        {DIALOG_DEATH_RECIPIENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessDialogDeathRecipientRegister(listener, window, isRegister); } },
+        {WINDOW_STATUS_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessWindowStatusChangeRegister(listener, window, isRegister); } },
+        {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
+            [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessWindowTitleButtonRectChangeRegister(listener, window, isRegister); } },
+        {WINDOW_VISIBILITY_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessWindowVisibilityChangeRegister(listener, window, isRegister); } },
     };
     listenerProcess_[CaseType::CASE_STAGE] = {
-        {WINDOW_STAGE_EVENT_CB,                &CjWindowRegisterManager::ProcessLifeCycleEventRegister    }
+        {WINDOW_STAGE_EVENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+            {return this->ProcessLifeCycleEventRegister(listener, window, isRegister); } },
     };
 }
 
@@ -185,7 +204,7 @@ WmErrorCode CjWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true);
+    WmErrorCode ret = listenerProcess_[caseType][type](windowManagerListener, window, true);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "[WindowRegister]Register type %{public}s failed", type.c_str());
         return ret;
@@ -210,7 +229,7 @@ WmErrorCode CjWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     }
     if (callbackObject == NONE_CALLBACK_OBJECT) {
         for (auto it = cjCbMap_[type].begin(); it != cjCbMap_[type].end();) {
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false);
+            WmErrorCode ret = listenerProcess_[caseType][type](it->second, window, false);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_SUB,
                     "[WindowRegister]Unregister type %{public}s failed, no value", type.c_str());

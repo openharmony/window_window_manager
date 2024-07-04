@@ -230,6 +230,8 @@ public:
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
+    virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    virtual bool IsExitSplitOnBackground() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
@@ -293,6 +295,7 @@ public:
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
+    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
@@ -451,6 +454,7 @@ protected:
     virtual bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
+    void NotifySessionInfoChange();
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
@@ -473,6 +477,7 @@ protected:
         return ret;
     }
 
+    static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
@@ -490,6 +495,7 @@ protected:
     Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
+    std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
@@ -554,7 +560,6 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     void NotifyPointerEventToRs(int32_t pointAction);
-    void NotifySessionInfoChange();
     WSError HandleSubWindowClick(int32_t action);
 
     template<typename T>

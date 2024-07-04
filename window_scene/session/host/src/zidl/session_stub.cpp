@@ -26,6 +26,7 @@
 #include "process_options.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -127,6 +128,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
         &SessionStub::HandleNotifyPiPWindowPrepareClose),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT),
         &SessionStub::HandleUpdatePiPRect),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS),
+        &SessionStub::HandleUpdatePiPControlStatus),
     std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE),
         &SessionStub::HandleLayoutFullScreenChange),
 };
@@ -273,6 +276,8 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.width_);
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
+        reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -340,6 +345,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->errorCode = data.ReadInt32();
     abilitySessionInfo->errorReason = data.ReadString();
+    abilitySessionInfo->identityToken = data.ReadString();
     const WSError& errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -393,6 +399,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->reuse = data.ReadBool();
     abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     abilitySessionInfo->hasContinuousTask = data.ReadBool();
+    abilitySessionInfo->isAtomicService = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -639,6 +646,21 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     WSError errCode = UpdatePiPRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+}
+
+int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    uint32_t controlType = 0;
+    int32_t status = 0;
+    if (data.ReadUint32(controlType) && data.ReadInt32(status)) {
+        WSError errCode = UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
+            static_cast<WsPiPControlStatus>(status));
+        reply.WriteInt32(static_cast<int32_t>(errCode));
+        return ERR_NONE;
+    } else {
+        return ERR_INVALID_DATA;
+    }
 }
 
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)

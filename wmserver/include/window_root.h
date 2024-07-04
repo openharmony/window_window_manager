@@ -156,8 +156,8 @@ private:
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
-    sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
-        this, std::placeholders::_1));
+    sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
+        [this](const sptr<IRemoteObject>& remoteObject) { this->OnRemoteDied(remoteObject); });
     Callback callback_;
     uint32_t maxAppWindowNumber_ = 100;
     SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};

@@ -447,7 +447,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Functi
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
-        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(ret, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
 }
 
@@ -463,7 +463,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, Function | SmallTes
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
-        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(ret, DMError::DM_OK);
     }
 }
 
@@ -479,7 +479,7 @@ HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, Function | SmallTest
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
-        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(ret, DMError::DM_OK);
     }
 }
 
@@ -493,7 +493,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, Function | SmallTes
     ScreenPowerState state = ScreenPowerState{0};
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(0, state, reason);
-    ASSERT_FALSE(ret);
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -508,7 +508,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetOrientation, Function | SmallTest | Level
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -524,7 +524,7 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
     } else {
-        ASSERT_FALSE(ret);
+        ASSERT_TRUE(ret);
     }
 }
 
@@ -539,7 +539,7 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, Function | SmallTest | Level2)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
     } else {
-        ASSERT_FALSE(ret);
+        ASSERT_TRUE(ret);
     }
 }
 
@@ -555,7 +555,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
     } else {
-        ASSERT_FALSE(ret);
+        ASSERT_TRUE(ret);
     }
 }
 
@@ -570,7 +570,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
     } else {
-        ASSERT_FALSE(ret);
+        ASSERT_TRUE(ret);
     }
 }
 
@@ -625,7 +625,7 @@ HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, Function | SmallTest | Lev
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(DMError::DM_OK, err);
     } else {
-        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, err);
+        ASSERT_EQ(DMError::DM_OK, err);
     }
 }
 
@@ -718,7 +718,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -733,7 +733,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest |
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_UNKNOWN);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -763,7 +763,7 @@ HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
 }
 
@@ -795,7 +795,23 @@ HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Lev
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+        ASSERT_EQ(err, DMError::DM_OK);
+    }
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level2)
+{
+    std::vector<DisplayPhysicalResolution> allSize =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(!allSize.empty());
+    } else {
+        ASSERT_TRUE(allSize.empty());
     }
 }
 }

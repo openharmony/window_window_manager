@@ -14,8 +14,8 @@
  */
 
 #include "fold_screen_controller/fold_screen_controller.h"
-#include "fold_screen_controller/dual_display_device_policy.h"
-#include "fold_screen_controller/dual_display_policy.h"
+#include "fold_screen_controller/single_display_fold_policy.h"
+#include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
@@ -56,11 +56,11 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
     sptr<FoldScreenPolicy> tempPolicy = nullptr;
     switch (productType) {
         case DisplayDeviceType::SINGLE_DISPLAY_DEVICE: {
-            tempPolicy = new DualDisplayDevicePolicy(displayInfoMutex_, screenPowerTaskScheduler_);
+            tempPolicy = new SingleDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         case DisplayDeviceType::DOUBLE_DISPLAY_DEVICE: {
-            tempPolicy = new DualDisplayPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
+            tempPolicy = new DualDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         default: {

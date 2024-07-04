@@ -28,6 +28,7 @@
 #include "session_permission.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
+#include "input_transfer_station.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -88,7 +89,11 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
-    TLOGI(WmsLogTag::WMS_LIFE, "Created %{public}d successfully.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
+        property_->GetWindowName().c_str(), GetPersistentId());
+    sptr<Window> self(this);
+    InputTransferStation::GetInstance().AddInputWindow(self);
+    needRemoveWindowInputChannel_ = true;
     return WMError::WM_OK;
 }
 
@@ -96,7 +101,7 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
     sptr<ISessionStage> iSessionStage(this);
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
-        property_->GetParentId());
+        property_->GetParentId(), property_->GetUIExtensionUsage());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -121,6 +126,11 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+    if (needRemoveWindowInputChannel_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d Destroy", GetPersistentId());
+        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+        needRemoveWindowInputChannel_ = false;
+    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -376,8 +386,9 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isConsumedFuture = isConsumedPromise->get_future().share();
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
-            std::bind(&WindowExtensionSessionImpl::InputMethodKeyEventResultCallback, this,
-                std::placeholders::_1, std::placeholders::_2, isConsumedPromise, isTimeout));
+            [this, isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+                this->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+            });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
             DispatchKeyEventCallback(keyEvent, isConsumed);
@@ -469,6 +480,12 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
             rect.height_, static_cast<int>(reason));
     }
     property_->SetWindowRect(wmRect);
+
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) {
+        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(property_->GetPersistentId(),
+            property_->GetParentId(), wmRect);
+    }
+
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else {
@@ -679,13 +696,17 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
     CheckAndAddExtWindowFlags();
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WindowExtensionSessionImpl::Show display is null!");
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "display is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "display info is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     float density = GetVirtualPixelRatio(displayInfo);
-    if (virtualPixelRatio_ != density) {
+    if (!MathHelper::NearZero(virtualPixelRatio_ - density)) {
         UpdateDensity();
     }
 
@@ -844,6 +865,37 @@ Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
     }
     SingletonContainer::Get<WindowAdapter>().GetHostWindowRect(hostWindowId, rect);
     return rect;
+}
+
+void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        return;
+    }
+    if (hostSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        TLOGW(WmsLogTag::WMS_EVENT, "invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
+        return;
+    }
+    auto action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
+            "pointId:%{public}d,sourceType:%{public}d,"
+            "pointPos:[%{public}d,%{public}d,%{public}d,%{public}d]",
+            pointerEvent->GetId(), GetWindowId(),
+            pointerEvent->GetPointerId(), pointerEvent->GetSourceType(),
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY(),
+            pointerItem.GetWindowX(), pointerItem.GetWindowY());
+    }
+    NotifyPointerEvent(pointerEvent);
 }
 } // namespace Rosen
 } // namespace OHOS

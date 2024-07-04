@@ -68,6 +68,12 @@ HWTEST_F(ScreenSceneConfigTest, IsNumber, Function | SmallTest | Level1)
     ASSERT_EQ(true, result);
     result = ScreenSceneConfig::IsNumber("a123");
     ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("");
+    ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("-123");
+    ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("123.456");
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -128,6 +134,21 @@ HWTEST_F(ScreenSceneConfigTest, IsValidNode2, Function | SmallTest | Level1)
     node.type = XML_TEXT_NODE;
     auto result = ScreenSceneConfig::IsValidNode(node);
     ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: IsValidNode3
+ * @tc.desc: test function : IsValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsValidNode3, Function | SmallTest | Level1)
+{
+    const xmlChar xmlStringText[] = { 't', 'e', 'x', 't', 0 };
+    xmlNode node;
+    node.name = xmlStringText;
+    node.type = XML_COMMENT_NODE;
+    auto result = ScreenSceneConfig::IsValidNode(node);
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -305,6 +326,17 @@ HWTEST_F(ScreenSceneConfigTest, GetStringConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetStringConfig();
     ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: GetStringListConfig
+ * @tc.desc: test function : GetStringListConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetStringListConfig, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetStringListConfig();
+    ASSERT_EQ(0, result.size());
 }
 
 /**

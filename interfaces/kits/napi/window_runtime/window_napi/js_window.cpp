@@ -55,7 +55,7 @@ namespace {
     constexpr double MAX_GRAY_SCALE = 1.0;
 }
 
-static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
+static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
@@ -5529,10 +5529,6 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetWindowDecorVisible is not allowed since window is not main window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         WLOGFE("Failed to convert parameter to visible");
@@ -5745,6 +5741,9 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    if (!CheckWindowMaskParams(env, argv[0])) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     std::vector<std::vector<uint32_t>> windowMask;
     if (!GetWindowMaskFromJsValue(env, argv[0], windowMask)) {
         WLOGFE("GetWindowMaskFromJsValue failed");
@@ -5781,6 +5780,32 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowMask",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value argv)
+{
+    if (env == nullptr || argv == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr or argv is nullptr");
+        return false;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr");
+        return false;
+    }
+    WindowLimits windowLimits;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Get windowLimits failed");
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, argv, &size);
+    if (size == 0 || static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
+            size, windowLimits.vpRatio_, windowLimits.maxWidth_);
+        return false;
+    }
+    return true;
 }
 
 void SetWindowGrayScaleTask(const wptr<Window>& weakToken, double grayScale,

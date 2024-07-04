@@ -64,7 +64,7 @@ private:
 
 template<typename T1, typename T2>
 ClientAgentContainer<T1, T2>::ClientAgentContainer() : deathRecipient_(
-    new AgentDeathRecipient(std::bind(&ClientAgentContainer<T1, T2>::RemoveAgent, this, std::placeholders::_1))) {}
+    new AgentDeathRecipient([this](const sptr<IRemoteObject>& remoteObject) { this->RemoveAgent(remoteObject); })) {}
 
 template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
@@ -105,7 +105,7 @@ std::set<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agentMap_.count(type) == 0) {
-        WLOGFI("no such type of agent registered! type:%{public}u", type);
+        WLOGFD("no such type of agent registered! type:%{public}u", type);
         return std::set<sptr<T1>>();
     }
     return agentMap_.at(type);

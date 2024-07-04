@@ -38,7 +38,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
-    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo) override {};
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
@@ -169,6 +169,11 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
+
+    virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
+    {
+        return std::vector<DisplayPhysicalResolution> {};
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

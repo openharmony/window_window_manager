@@ -114,6 +114,19 @@ HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetSnapshotByWindowId
+ * @tc.desc: test GetSnapshotByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+{
+    int windowId = INVALID_WINDOW_ID;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError err = windowManagerProxy_->GetSnapshotByWindowId(windowId, pixelMap);
+    ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifyWindowTransition
  * @tc.desc: test success
  * @tc.type: FUNC

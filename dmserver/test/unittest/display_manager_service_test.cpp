@@ -156,12 +156,13 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
 
+    sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
+    ASSERT_NE(nullptr, displayChangeListener);
+    dms_->RegisterDisplayChangeListener(displayChangeListener);
+
     dms_->RegisterDisplayChangeListener(nullptr);
     dms_->NotifyDisplayStateChange(0, nullptr, displayInfoMap, DisplayStateChangeType::SIZE_CHANGE);
     dms_->NotifyScreenshot(0);
-
-    sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
-    ASSERT_NE(nullptr, displayChangeListener);
 }
 
 /**
@@ -259,7 +260,13 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
 {
     DisplayId displayId = 10086;
     DmErrorCode* errorCode = nullptr;
-    std::shared_ptr<Media::PixelMap> result = dms_->GetDisplaySnapshot(displayId, errorCode);
+
+    *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    std::shared_ptr<Media::PixelMap>  result = dms_->GetDisplaySnapshot(displayId, errorCode);
+    EXPECT_EQ(result, nullptr);
+
+    errorCode = nullptr;
+    result = dms_->GetDisplaySnapshot(displayId, errorCode);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -270,7 +277,12 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
  */
 HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest | Level3)
 {
-    Orientation orientation = Orientation::UNSPECIFIED;
+    Orientation orientation = Orientation::VERTICAL;
+    ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
+    orientation = Orientation::SENSOR_VERTICAL;
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, dms_->SetOrientation(0, orientation));
+
+    orientation = Orientation::UNSPECIFIED;
     ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetOrientationFromWindow(0, orientation, true));
     Rotation rotation = Rotation::ROTATION_0;

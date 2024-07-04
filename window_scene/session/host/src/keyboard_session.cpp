@@ -102,6 +102,12 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
+        if (session->systemConfig_.uiType_ == "pc") {
+            session->RestoreCallingSession();
+            if (session->GetSessionProperty()) {
+                session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+            }
+        }
         return ret;
     };
     PostTask(task, "Hide");
@@ -170,17 +176,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    if (gravity != SessionGravity::SESSION_GRAVITY_DEFAULT &&
-        gravity != SessionGravity::SESSION_GRAVITY_BOTTOM &&
-        gravity != SessionGravity::SESSION_GRAVITY_FLOAT) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard session gravity: %{public}d", gravity);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    // when the keyboard bottom, the max percent is 70% of the screen
-    if (percent < 0 || percent > 70u) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard percent: %{public}d", percent);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
     auto task = [weakThis = wptr(this), gravity, percent]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
@@ -230,64 +225,6 @@ uint32_t KeyboardSession::GetCallingSessionId()
         return INVALID_SESSION_ID;
     }
     return GetSessionProperty()->GetCallingSessionId();
-}
-
-static bool IsKeyboardLayoutRectValid(const Rect& rect, uint32_t screenWidth, uint32_t screenHeight)
-{
-    // the keyboard height max is 70% of the screen
-    if (rect.width_ <= 0 || rect.width_ > screenWidth || rect.height_ <= 0 || rect.height_ > screenHeight * 0.7f) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard layout size");
-        return false;
-    }
-    constexpr int minRemain = 20;
-    if (rect.posX_ + static_cast<int>(rect.width_) < minRemain ||
-        rect.posX_ > static_cast<int>(screenWidth) - minRemain) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard horizontal remain at screen is too small");
-        return false;
-    }
-    if (rect.posY_ + static_cast<int>(rect.height_) < minRemain ||
-        rect.posY_ > static_cast<int>(screenHeight) - minRemain) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard vertically remain at screen is too small");
-        return false;
-    }
-    return true;
-}
-
-WSError KeyboardSession::CheckAdjustKeyboardLayoutParam(const KeyboardLayoutParams& params)
-{
-    if (params.gravity_ != WindowGravity::WINDOW_GRAVITY_FLOAT &&
-        params.gravity_ != WindowGravity::WINDOW_GRAVITY_BOTTOM) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard session gravity: %{public}u", params.gravity_);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
-        auto property = GetSessionProperty();
-        if (!property) {
-            return WSError::WS_ERROR_INTERNAL_ERROR;
-        }
-        auto displayId = property->GetDisplayId();
-        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-        if (screenSession == nullptr) {
-            // just check param,session is null will process at follow
-            return WSError::WS_OK;
-        }
-        int32_t phyHeight = screenSession->GetScreenProperty().GetPhyHeight();
-        int32_t phyWidth = screenSession->GetScreenProperty().GetPhyWidth();
-        Rotation rotation = screenSession->GetRotation();
-        bool rectIsValid = false;
-        if (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) {
-            rectIsValid = IsKeyboardLayoutRectValid(params.PortraitKeyboardRect_, phyHeight, phyWidth) &&
-            IsKeyboardLayoutRectValid(params.PortraitPanelRect_, phyHeight, phyWidth);
-        } else if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
-            rectIsValid = IsKeyboardLayoutRectValid(params.LandscapeKeyboardRect_, phyWidth, phyHeight) &&
-            IsKeyboardLayoutRectValid(params.LandscapePanelRect_, phyWidth, phyHeight);
-        }
-        if (!rectIsValid) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard layout rectangle");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    }
-    return WSError::WS_OK;
 }
 
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
@@ -447,14 +384,14 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
         return;
     }
-    if (SessionHelper::IsEmptyRect(callingSessionRestoringRect)) {
-        callingSessionRestoringRect = callingSessionRect;
-        callingSession->SetRestoringRectForKeyboard(callingSessionRect);
-    }
 
     WSRect newRect = callingSessionRect;
     int32_t statusHeight = GetStatusBarHeight();
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
+        if (SessionHelper::IsEmptyRect(callingSessionRestoringRect)) {
+            callingSessionRestoringRect = callingSessionRect;
+            callingSession->SetRestoringRectForKeyboard(callingSessionRect);
+        }
         // calculate new rect of calling session
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - static_cast<int32_t>(newRect.height_), statusHeight);
         newRect.posY_ = std::min(callingSessionRestoringRect.posY_, newRect.posY_);

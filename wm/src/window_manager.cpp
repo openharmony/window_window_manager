@@ -322,8 +322,6 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
 {
-    auto windowChecker = std::make_shared<WindowChecker>();
-    MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker);
 }
 
 int32_t WindowChecker::CheckWindowId(int32_t windowId) const
@@ -363,8 +361,9 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
         pImpl_->wmsConnectionChangedListener_ = listener;
     }
     auto ret = SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
-        std::bind(&WindowManager::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        [this](int32_t userId, int32_t screenId, bool isConnected) {
+            this->OnWMSConnectionChanged(userId, screenId, isConnected);
+        });
     if (ret != WMError::WM_OK) {
         pImpl_->wmsConnectionChangedListener_ = nullptr;
     }

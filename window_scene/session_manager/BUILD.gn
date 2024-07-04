@@ -63,6 +63,8 @@ ohos_shared_library("scene_session_manager") {
     "src/anomaly_detection.cpp",
     "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
+    "src/fold_screen_controller/screen_fold_data.cpp",
+    "src/publish/scene_event_publish.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
     "src/scene_session_converter.cpp",
@@ -118,6 +120,7 @@ ohos_shared_library("scene_session_manager") {
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "init:libbegetutil",
@@ -196,8 +199,7 @@ ohos_shared_library("screen_session_manager") {
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
-    "src/fold_screen_controller/dual_display_device_policy.cpp",
-    "src/fold_screen_controller/dual_display_policy.cpp",
+    "src/fold_screen_controller/dual_display_fold_policy.cpp",
     "src/fold_screen_controller/fold_screen_controller.cpp",
     "src/fold_screen_controller/fold_screen_policy.cpp",
     "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
@@ -205,6 +207,7 @@ ohos_shared_library("screen_session_manager") {
     "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
+    "src/fold_screen_controller/single_display_fold_policy.cpp",
     "src/multi_screen_manager.cpp",
     "src/publish/screen_session_publish.cpp",
     "src/screen_cutout_controller.cpp",
@@ -293,6 +296,11 @@ ohos_shared_library("screen_session_manager") {
     external_deps += [ "init:libbegetutil" ]
   } else {
     external_deps += [ "init_lite:libbegetutil" ]
+  }
+
+  if (device_status_enable) {
+    external_deps += [ "device_status:devicestatus_client" ]
+    defines += [ "DEVICE_STATUS_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

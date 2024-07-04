@@ -47,6 +47,7 @@ public:
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
+    bool HasPointDown();
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();

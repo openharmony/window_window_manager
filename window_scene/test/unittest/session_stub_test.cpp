@@ -23,6 +23,8 @@
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "want.h"
+#include "ws_common.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -163,7 +165,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleTransferAbilityResult(data, reply);
-    ASSERT_EQ(22, res);
+    ASSERT_EQ(0, res);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(22, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
@@ -233,6 +235,25 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleUpdatePiPRect(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleUpdatePiPControlStatus
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = WsPiPControlStatus::PLAY;
+    data.WriteUint32(static_cast<uint32_t>(controlType));
+    data.WriteInt32(static_cast<int32_t>(status));
+    auto res = session_->HandleUpdatePiPControlStatus(data, reply);
     ASSERT_EQ(0, res);
 }
 

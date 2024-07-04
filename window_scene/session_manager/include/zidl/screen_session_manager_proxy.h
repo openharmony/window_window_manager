@@ -116,7 +116,7 @@ public:
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
-    virtual void UpdateDisplayHookInfo(uint32_t uid, bool enable, DMHookInfo hookInfo) override;
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
@@ -161,6 +161,8 @@ public:
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
