@@ -158,7 +158,7 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
 
     sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
     ASSERT_NE(nullptr, displayChangeListener);
-    dms_->RegisterDisplayChangeListener(listener);
+    dms_->RegisterDisplayChangeListener(displayChangeListener);
 
     dms_->RegisterDisplayChangeListener(nullptr);
     dms_->NotifyDisplayStateChange(0, nullptr, displayInfoMap, DisplayStateChangeType::SIZE_CHANGE);
