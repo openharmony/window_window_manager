@@ -31,33 +31,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowE
 constexpr int32_t MAX_ARGUMENTS_KEY_SIZE = 1000;
 }
 
-const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
-        &WindowEventChannelStub::HandleTransferKeyEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
-        &WindowEventChannelStub::HandleTransferKeyEventAsync),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT),
-        &WindowEventChannelStub::HandleTransferPointerEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusActiveEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusStateEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
-        &WindowEventChannelStub::HandleTransferBackpressedEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO),
-        &WindowEventChannelStub::HandleTransferSearchElementInfo),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT),
-        &WindowEventChannelStub::HandleTransferSearchElementInfosByText),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO),
-        &WindowEventChannelStub::HandleTransferFindFocusedElementInfo),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
-        &WindowEventChannelStub::HandleTransferFocusMoveSearch),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
-        &WindowEventChannelStub::HandleTransferExecuteAction),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
-        &WindowEventChannelStub::HandleTransferAccessibilityHoverEvent),
-};
-
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -67,13 +40,35 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return ERR_INVALID_STATE;
     }
 
-    const auto func = stubFuncMap_.find(code);
-    if (func == stubFuncMap_.end()) {
-        WLOGFE("Failed to find function handler!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    switch (code) {
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT):
+            return HandleTransferKeyEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC):
+            return HandleTransferKeyEventAsync(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT):
+            return HandleTransferPointerEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT):
+            return HandleTransferFocusActiveEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT):
+            return HandleTransferFocusStateEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT):
+            return HandleTransferBackpressedEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO):
+            return HandleTransferSearchElementInfo(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT):
+            return HandleTransferSearchElementInfosByText(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO):
+            return HandleTransferFindFocusedElementInfo(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH):
+            return HandleTransferFocusMoveSearch(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION):
+            return HandleTransferExecuteAction(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT):
+            return HandleTransferAccessibilityHoverEvent(data, reply);
+        default:
+            WLOGFE("Failed to find function handler!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-
-    return (this->*(func->second))(data, reply);
 }
 
 int WindowEventChannelStub::HandleTransferBackpressedEvent(MessageParcel& data, MessageParcel& reply)
