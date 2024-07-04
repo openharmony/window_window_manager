@@ -595,9 +595,16 @@ void JsPipController::PiPControlObserverImpl::OnControlEvent(PiPControlType cont
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
     auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = engine_, task = napiAsyncTask.get()]() {
-        napi_value argv[2] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
-        size_t size = ArraySize(argv);
-        CallJsMethod(env, jsCallback->GetNapiValue(), argv, size);
+        napi_value propertyValue = nullptr;
+        napi_create_object(env, &propertyValue);
+        if (propertyValue == nullptr) {
+            TLOGI(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
+            return;
+        }
+        napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
+        napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
+        napi_value argv[] = {propertyValue};
+        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
         delete task;
     };
     if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
