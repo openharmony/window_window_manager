@@ -3890,7 +3890,6 @@ void SceneSessionManager::DumpSessionElementInfo(const sptr<SceneSession>& sessi
     if (!session->GetSessionInfo().isSystem_) {
         WLOGFI("Dump normal session, not system");
         dumpInfoFuture_.ResetLock({});
-        dumpingSessionPid_ = session->GetCallingPid();
         session->DumpSessionElementInfo(resetParams);
         std::vector<std::string> infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
         for (auto& info: infos) {
@@ -3974,15 +3973,6 @@ WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const st
 
 void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
-    if (dumpingSessionPid_ == INVALID_SESSION_ID) {
-        TLOGD(WmsLogTag::DEFAULT, "session pid invalid");
-        return;
-    }
-    pid_t callingPid = IPCSkeleton::GetCallingRealPid();
-    if (dumpingSessionPid_ != callingPid) {
-        TLOGD(WmsLogTag::DEFAULT, "invalid calling");
-        return;
-    }
     dumpInfoFuture_.SetValue(info);
     WLOGFD("NotifyDumpInfoResult");
 }
