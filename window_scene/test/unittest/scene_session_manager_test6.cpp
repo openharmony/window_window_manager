@@ -973,6 +973,186 @@ HWTEST_F(SceneSessionManagerTest6, GetCollaboratorByType, Function | SmallTest |
     ret = ssm_->GetCollaboratorByType(1);
     EXPECT_EQ(nullptr, ret);
 }
+
+/**
+ * @tc.name: RegisterGetStateFromManagerFunc
+ * @tc.desc: RegisterGetStateFromManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RegisterGetStateFromManagerFunc, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterGetStateFromManagerFunc(sceneSession);
+    sceneSession = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->RegisterGetStateFromManagerFunc(sceneSession);
+}
+
+/**
+ * @tc.name: ProcessDialogRequestFocusImmdediately
+ * @tc.desc: ProcessDialogRequestFocusImmdediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, ProcessDialogRequestFocusImmdediately, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    ASSERT_NE(nullptr, ssm_);
+    ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+}
+
+/**
+ * @tc.name: ProcessSubSessionBackground
+ * @tc.desc: ProcessSubSessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, ProcessSubSessionBackground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, subSession);
+    sceneSession->AddSubSession(subSession);
+    subSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    ASSERT_NE(nullptr, subSession);
+    subSession->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    ASSERT_NE(nullptr, subSession);
+    subSession->state_ = SessionState::STATE_INACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+}
+
+/**
+ * @tc.name: ProcessSubSessionBackground01
+ * @tc.desc: ProcessSubSessionBackground01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, ProcessSubSessionBackground01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    sceneSession->dialogVec_.clear();
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession->dialogVec_.push_back(sceneSession1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    sceneSession1->persistentId_ = 1;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    sptr<SceneSession> toastSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, toastSession);
+    sceneSession->AddToastSession(toastSession);
+    toastSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    ASSERT_NE(nullptr, toastSession);
+    toastSession->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+    ASSERT_NE(nullptr, toastSession);
+    toastSession->state_ = SessionState::STATE_INACTIVE;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessSubSessionBackground(sceneSession);
+}
+
+/**
+ * @tc.name: IsValidSessionIds
+ * @tc.desc: IsValidSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, IsValidSessionIds, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> sessionIds = {1, 2, 3, 4};
+    std::vector<bool> results;
+    results.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<SceneSession> sceneSession1 = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    ssm_->IsValidSessionIds(sessionIds, results);
+    EXPECT_FALSE(results.empty());
+    DisplayChangeListener listener;
+    std::vector<uint64_t> missionIds;
+    std::vector<uint64_t> surfaceNodeIds;
+    listener.OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: DeleteStateDetectTask
+ * @tc.desc: DeleteStateDetectTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->SetScreenLocked(true);
+    EXPECT_EQ(true, ssm_->isScreenLocked_);
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->DeleteStateDetectTask();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->detectTaskInfo_.taskState = DetectTaskState::NO_TASK;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->DeleteStateDetectTask();
+    sceneSession->detectTaskInfo_.taskState = DetectTaskState::ATTACH_TASK;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->DeleteStateDetectTask();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
