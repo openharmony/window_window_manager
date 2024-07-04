@@ -2731,6 +2731,10 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     };
+    if (AppExecFwk::EventRunner::IsAppMainThread()) {
+        PostTask(task, "UpdateProperty");
+        return WMError::WM_OK;
+    }
     return PostSyncTask(task, "UpdateProperty");
 }
 
