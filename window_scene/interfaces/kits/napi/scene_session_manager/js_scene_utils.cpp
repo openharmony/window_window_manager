@@ -982,6 +982,32 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     return objValue;
 }
 
+napi_value SubWindowModalTypeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "TYPE_UNDEFINED", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_UNDEFINED)));
+    napi_set_named_property(env, objValue, "TYPE_NORMAL", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_NORMAL)));
+    napi_set_named_property(env, objValue, "TYPE_DIALOG", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_DIALOG)));
+    napi_set_named_property(env, objValue, "TYPE_WINDOW_MODALITY", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
+    napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
+    return objValue;
+}
+
 static std::string GetHexColor(uint32_t color)
 {
     const int32_t rgbaLength = 8;
