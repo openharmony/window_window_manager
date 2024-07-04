@@ -282,7 +282,7 @@ private:
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
     bool isExtensionFlag_ = false;
-    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::MODAL };
+    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
 
     bool isShaped_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;

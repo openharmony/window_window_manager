@@ -165,8 +165,20 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEvent, Function | SmallTest | Level2
 HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Level2)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
-    auto res = windowEventChannel_->TransferPointerEvent(pointerEvent);
-    ASSERT_EQ(res, WSError::WS_OK);
+    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    ASSERT_NE(nullptr, windowEventChannel);
+
+    auto res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->SetIsUIExtension(true);
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -191,12 +203,21 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
  */
 HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTest | Level2)
 {
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+
     bool isConsumed = false;
-    auto res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
-    ASSERT_EQ(res, WSError::WS_OK);
+    bool isPreImeEvent = false;
+    auto res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
     isConsumed = true;
-    res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
-    ASSERT_EQ(res, WSError::WS_OK);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel_->SetIsUIExtension(true);
+    windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    EXPECT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**

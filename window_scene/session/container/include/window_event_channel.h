@@ -50,6 +50,8 @@ public:
     }
     ~WindowEventChannel() = default;
 
+    void SetIsUIExtension(bool isUIExtension);
+    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -80,6 +82,8 @@ private:
 
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
+    bool isUIExtension_ { false };
+    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     std::function<void(int32_t, int64_t)> dispatchCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen

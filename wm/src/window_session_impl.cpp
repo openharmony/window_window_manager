@@ -400,6 +400,10 @@ WMError WindowSessionImpl::Connect()
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     sptr<ISessionStage> iSessionStage(this);
     auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    if (windowEventChannel && property_) {
+        windowEventChannel->SetIsUIExtension(property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION);
+        windowEventChannel->SetUIExtensionUsage(property_->GetUIExtensionUsage());
+    }
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     if (token) {
