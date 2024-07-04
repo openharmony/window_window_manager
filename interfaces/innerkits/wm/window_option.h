@@ -475,7 +475,7 @@ private:
     bool subWindowDecorEnable_ = false;
     bool onlySupportSceneBoard_ = false;
     bool isExtensionTag_ = false;
-    uint32_t uiExtensionUsage_ = 0;
+    uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;

@@ -886,6 +886,12 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
         return;
     }
     auto action = pointerEvent->GetPointerAction();
+    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    if (property_ && (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) && isPointDown) {
+        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(property_->GetPersistentId(),
+            property_->GetParentId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
             "pointId:%{public}d,sourceType:%{public}d,"

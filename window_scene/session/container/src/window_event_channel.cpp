@@ -64,6 +64,16 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyE
     }
 }
 
+void WindowEventChannel::SetIsUIExtension(bool isUIExtension)
+{
+    isUIExtension_ = isUIExtension;
+}
+
+void WindowEventChannel::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
+{
+    uiExtensionUsage_ = uiExtensionUsage;
+}
+
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     WLOGFD("WindowEventChannel receive key event");
@@ -76,6 +86,10 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
 {
     WLOGFD("WindowEventChannel receive pointer event");
     PrintPointerEvent(pointerEvent);
+    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
@@ -123,6 +137,10 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     if (keyEvent == nullptr) {
         WLOGFE("keyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     if (isPreImeEvent) {
         isConsumed = sessionStage_->NotifyOnKeyPreImeEvent(keyEvent);
