@@ -4332,6 +4332,10 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
+    if (sceneSession->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
     // dialog get focus
     if (CheckRequestFocusImmdediately(sceneSession)) {
         return WSError::WS_DO_NOTHING;
@@ -4384,7 +4388,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
         if (session == nullptr) {
             return false;
         }
-        if (session->GetForceHideState()) {
+        if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }

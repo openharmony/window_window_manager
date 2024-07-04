@@ -2395,7 +2395,23 @@ void SceneSession::NotifyForceHideChange(bool hide)
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
     SetForceTouchable(!hide);
-    SetForceHideState(hide);
+    if (hide) {
+        if (isFocused_) {
+            FocusChangeReason reason = FocusChangeReason::DEFAULT;
+            NotifyRequestFocusStatusNotifyManager(false, true, reason);
+            SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
+        } else if (forceHideState_ == ForceHideState::NOT_HIDDEN) {
+            SetForceHideState(ForceHideState::HIDDEN_WHEN_UNFOCUSED);
+        }
+    } else {
+        if (forceHideState_ == ForceHideState::HIDDEN_WHEN_FOCUSED) {
+            SetForceHideState(ForceHideState::NOT_HIDDEN);
+            FocusChangeReason reason = FocusChangeReason::DEFAULT;
+            NotifyRequestFocusStatusNotifyManager(true, true, reason);
+        } else {
+            SetForceHideState(ForceHideState::NOT_HIDDEN);
+        }
+    }
 }
 
 Orientation SceneSession::GetRequestedOrientation() const
@@ -3653,12 +3669,12 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
-void SceneSession::SetForceHideState(bool hideFlag)
+void SceneSession::SetForceHideState(ForceHideState forceHideState)
 {
-    forceHideState_ = hideFlag;
+    forceHideState_ = forceHideState;
 }
 
-bool SceneSession::GetForceHideState() const
+ForceHideState SceneSession::GetForceHideState() const
 {
     return forceHideState_;
 }
