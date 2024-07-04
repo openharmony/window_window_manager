@@ -312,6 +312,7 @@ struct SessionInfo {
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     uint32_t uiExtensionUsage_ = 0;
+    bool isAtomicService_ = false;
 };
 
 enum class SessionFlag : uint32_t {

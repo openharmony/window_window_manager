@@ -642,6 +642,13 @@ static void AddAlphaToColor(float alpha, std::string& color)
     color.insert(1, strAlpha);
 }
 
+static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
+{
+    return sessionInfo.isAtomicService_ && sessionInfo.want != nullptr &&
+        (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
+        AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
+}
+
 void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
 {
     AppWindowSceneConfig config;
@@ -1435,63 +1442,68 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
-        DisplayId curDisplayId = DISPLAY_ID_INVALID;
-        if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
-            curDisplayId = sessionInfo.screenId_;
-        } else if (callerSession && callerSession->GetSessionProperty()) {
-            curDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
-        }
-        if (sceneSession->GetSessionProperty()) {
-            sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
-            sceneSession->SetScreenId(curDisplayId);
-            TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession, synchronous screenId with displayid %{public}" PRIu64"",
-                curDisplayId);
-        }
-        sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
-        auto isScreenLockedCallback = [this]() {
-            return IsScreenLocked();
-        };
-        sceneSession->RegisterIsScreenLockedCallback(isScreenLockedCallback);
-        if (sessionInfo.isSystem_) {
-            sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
-            sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
-            auto rootContext = rootSceneContextWeak_.lock();
-            sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
-        } else {
-            TLOGD(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, bundleName: %{public}s, "
-                "moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
-                sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
-                sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
-        }
-        RegisterSessionExceptionFunc(sceneSession);
-        FillSessionInfo(sceneSession);
-        auto persistentId = sceneSession->GetPersistentId();
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
-        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
-        }
-        if (property != nullptr && WindowHelper::IsPipWindow(property->GetWindowType())) {
-            sceneSession->SetPiPTemplateInfo(property->GetPiPTemplateInfo());
-        }
-        sceneSession->SetSystemConfig(systemConfig_);
-        sceneSession->SetSnapshotScale(snapshotScale_);
-        UpdateParentSessionForDialog(sceneSession, property);
-        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-            WLOGFI("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
-            PreHandleCollaborator(sceneSession);
-        }
+        InitSceneSession(sceneSession, sessionInfo, property);
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            sceneSessionMap_.insert({ persistentId, sceneSession });
+            sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, type: %{public}d",
-            persistentId, sceneSession->GetWindowType());
+            sceneSession->GetPersistentId(), sceneSession->GetWindowType());
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
+}
+
+void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
+    const sptr<WindowSessionProperty>& property)
+{
+    auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+    DisplayId curDisplayId = DISPLAY_ID_INVALID;
+    if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
+        curDisplayId = sessionInfo.screenId_;
+    } else if (callerSession && callerSession->GetSessionProperty()) {
+        curDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
+    }
+    if (sceneSession->GetSessionProperty()) {
+        sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
+        sceneSession->SetScreenId(curDisplayId);
+        TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
+            curDisplayId);
+    }
+    sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
+    sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
+    if (sessionInfo.isSystem_) {
+        sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
+        sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
+        auto rootContext = rootSceneContextWeak_.lock();
+        sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
+    } else {
+        TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
+            sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
+    }
+    RegisterSessionExceptionFunc(sceneSession);
+    // Skip FillSessionInfo when atomicService free-install start.
+    if (!IsAtomicServiceFreeInstall(sessionInfo)) {
+        FillSessionInfo(sceneSession);
+    }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", sceneSession->GetPersistentId());
+    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
+    }
+    if (property != nullptr && WindowHelper::IsPipWindow(property->GetWindowType())) {
+        sceneSession->SetPiPTemplateInfo(property->GetPiPTemplateInfo());
+    }
+    sceneSession->SetSystemConfig(systemConfig_);
+    sceneSession->SetSnapshotScale(snapshotScale_);
+    UpdateParentSessionForDialog(sceneSession, property);
+    if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+        TLOGI(WmsLogTag::WMS_LIFE, "ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
+        PreHandleCollaborator(sceneSession);
+    }
 }
 
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
@@ -5382,6 +5394,12 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     }
 
     const auto& sessionInfo = scnSession->GetSessionInfo();
+    if (IsAtomicServiceFreeInstall(sessionInfo)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "AtomicService free-install start, id: %{public}d, type: %{public}d",
+            scnSession->GetPersistentId(), scnSession->GetWindowType());
+        FillSessionInfo(scnSession);
+    }
+
     TLOGI(WmsLogTag::WMS_MAIN, " id: %{public}d, app info: [%{public}s %{public}s %{public}s]",
         scnSession->GetPersistentId(), sessionInfo.bundleName_.c_str(),
         sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
