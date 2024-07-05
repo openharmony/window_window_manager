@@ -1386,7 +1386,30 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
 }
- 
+
+/**
+ * @tc.name: HideNonSecureWindows05
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows05, Function | SmallTest | Level3)
+{
+    window_->property_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
+}
+
+/**
+ * @tc.name: HideNonSecureWindows06
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window_->HideNonSecureWindows(true));
+}
+
 /**
  * @tc.name: SetWaterMarkFlag01
  * @tc.desc: SetWaterMarkFlag Test
