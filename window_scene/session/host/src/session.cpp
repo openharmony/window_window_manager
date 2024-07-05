@@ -885,6 +885,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
             static_cast<uint32_t>(winRect_.height_)};
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
+        property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
     callingPid_ = pid;
     callingUid_ = uid;

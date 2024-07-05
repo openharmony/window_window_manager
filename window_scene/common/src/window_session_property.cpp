@@ -1373,5 +1373,15 @@ float WindowSessionProperty::GetLastLimitsVpr() const
 {
     return lastVpr_;
 }
+
+bool WindowSessionProperty::GetFullScreenStart() const
+{
+    return fullScreenStart_;
+}
+
+void WindowSessionProperty::SetFullScreenStart(bool fullScreenStart)
+{
+    fullScreenStart_ = fullScreenStart;
+}
 } // namespace Rosen
 } // namespace OHOS
