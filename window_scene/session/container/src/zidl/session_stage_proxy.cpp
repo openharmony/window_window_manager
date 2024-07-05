@@ -105,10 +105,13 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (hasRSTransaction) {
+        auto pid = rsTransaction->GetParentPid();
+        rsTransaction->SetParentPid(getprocpid());
         if (!data.WriteParcelable(rsTransaction.get())) {
             WLOGFE("Write transaction sync Id failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
+        rsTransaction->SetParentPid(pid);
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE),
