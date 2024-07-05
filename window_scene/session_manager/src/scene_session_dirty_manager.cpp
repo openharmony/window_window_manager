@@ -253,7 +253,7 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
 
     for (const auto& elem: sessionMap) {
         const auto& session = elem.second;
-        if (session == nullptr) {
+        if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
         bool isModalSubWindow = false;

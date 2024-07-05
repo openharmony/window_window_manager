@@ -107,6 +107,11 @@ public:
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
+    static inline bool IsNonSecureToUIExtension(WindowType type)
+    {
+        return IsSubWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG;
+    }
+
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
         int32_t sourceType, int outside, float vpr, const WSRect& rect)
     {

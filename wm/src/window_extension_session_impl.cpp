@@ -59,6 +59,15 @@ std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
+    if (property_ == nullptr) {
+        return;
+    }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
+        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+        property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
 
 WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
@@ -788,6 +797,16 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
+        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property is not allowed in %{public}s UIExtension.",
+            property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = shouldHide;
         return WMError::WM_OK;
