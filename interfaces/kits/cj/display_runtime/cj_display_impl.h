@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class DisplayImpl : public OHOS::FFI::FFIData {
+class DisplayImpl final : public OHOS::FFI::FFIData {
 public:
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
