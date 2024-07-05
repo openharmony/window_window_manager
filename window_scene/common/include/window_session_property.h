@@ -173,6 +173,8 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     bool Write(Parcel& parcel, WSPropertyChangeAction action);
     void Read(Parcel& parcel, WSPropertyChangeAction action);
+    void SetFullScreenStart(bool fullScreenStart);
+    bool GetFullScreenStart() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -285,6 +287,7 @@ private:
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
 
     bool isShaped_ = false;
+    bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;

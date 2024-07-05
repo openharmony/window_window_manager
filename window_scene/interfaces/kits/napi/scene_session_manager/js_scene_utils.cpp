@@ -265,6 +265,19 @@ bool IsJsIsSetPointerAreasUndefined(napi_env env, napi_value jsIsSetPointerAreas
     return true;
 }
 
+bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsFullscreenStart) != napi_undefined) {
+        bool fullScreenStart = false;
+        if (!ConvertFromJsValue(env, jsFullscreenStart, fullScreenStart)) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to fullScreenStart");
+            return false;
+        }
+        sessionInfo.fullScreenStart_ = fullScreenStart;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -279,6 +292,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
     napi_value jsWindowInputType = nullptr;
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
+    napi_value jsFullScreenStart = nullptr;
+    napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -295,6 +310,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
         return false;
     }
     return true;
