@@ -72,6 +72,33 @@ HWTEST_F(ScreenGroupInfoTest, MarshallingUnmarshalling, Function | SmallTest | L
     ASSERT_EQ(screenIdsDst[2], 3);
     delete screenGroupInfoDst;
 }
+
+/**
+ * @tc.name: InnerUnmarshalling
+ * @tc.desc: InnerUnmarshalling test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, Function | SmallTest | Level1)
+{
+    ScreenGroupInfo screenGroupInfoSrc;
+    Parcel parcel;
+    parcel.WriteUint32(21);    // MAX_SCREEN_GROUP_INFO_SIZE + 1
+    bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: Marshalling
+ * @tc.desc: Marshalling test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenGroupInfoTest, Marshalling, Function | SmallTest | Level1)
+{
+    ScreenGroupInfo screenGroupInfoSrc;
+    Parcel parcel;
+    bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
+    ASSERT_FALSE(result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

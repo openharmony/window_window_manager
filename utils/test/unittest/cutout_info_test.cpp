@@ -47,11 +47,11 @@ void CutoutInfoTest::TearDown()
 
 namespace {
 /**
- * @tc.name: WriteBoundingRectsVector
+ * @tc.name: WriteBoundingRectsVector01
  * @tc.desc: WriteBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector01, Function | SmallTest | Level2)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     DMRect rect = {0, 0, 0, 0};
@@ -60,6 +60,58 @@ HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector, Function | SmallTest | Level2
     Parcel parcel;
     bool ret = info->WriteBoundingRectsVector(boundingRects, parcel);
     ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: WriteBoundingRectsVector02
+ * @tc.desc: WriteBoundingRectsVector test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, Function | SmallTest | Level2)
+{
+    sptr<CutoutInfo> info = new CutoutInfo();
+    std::vector<DMRect> boundingRects;
+    for (int i = 0; i < 21 ; i++){  // MAX_CUTOUT_INFO_SIZE + 1
+        DMRect rect = {0, 0, 0, 0};
+        boundingRects.emplace_back(rect);
+    }
+    Parcel parcel;
+    bool ret = info->WriteBoundingRectsVector(boundingRects, parcel);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadBoundingRectsVector01
+ * @tc.desc: ReadBoundingRectsVector test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector01, Function | SmallTest | Level2)
+{
+    sptr<CutoutInfo> info = new CutoutInfo();
+    DMRect rect = {0, 0, 0, 0};
+    std::vector<DMRect> boundingRects;
+    boundingRects.emplace_back(rect);
+    Parcel parcel;
+    bool ret = info->ReadBoundingRectsVector(boundingRects, parcel);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadBoundingRectsVector02
+ * @tc.desc: ReadBoundingRectsVector test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector02, Function | SmallTest | Level2)
+{
+    sptr<CutoutInfo> info = new CutoutInfo();
+    std::vector<DMRect> boundingRects;
+    for (int i = 0; i < 21 ; i++){  // MAX_CUTOUT_INFO_SIZE + 1
+        DMRect rect = {0, 0, 0, 0};
+        boundingRects.emplace_back(rect);
+    }
+    Parcel parcel;
+    bool ret = info->ReadBoundingRectsVector(boundingRects, parcel);
+    ASSERT_FALSE(ret);
 }
 }
 } // namespace Rosen
