@@ -1069,24 +1069,16 @@ enum class CaseType {
     CASE_STAGE
 };
 
-/**
- * maximize layout show type
- */
-enum ShowType : int32_t {
-    SHOW, // normally show
-    HIDE, // show when hover, but hide normally
-    FORBIDDEN // hide always
+enum class MaximizePresentation {
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set imersiveStateEnable
+    EXIT_IMMERSIVE = 1,       // imersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,       // imersiveStateEnable will be set as true
 };
 
 enum ForceHideState : uint32_t {
     NOT_HIDDEN = 0,
     HIDDEN_WHEN_FOCUSED,
     HIDDEN_WHEN_UNFOCUSED
-};
-
-struct MaximizeLayoutOption {
-    ShowType decor = ShowType::HIDE;
-    ShowType dock = ShowType::HIDE;
 };
 
 /**

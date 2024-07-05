@@ -275,6 +275,23 @@ napi_value BlurStyleInit(napi_env env)
     return objValue;
 }
 
+napi_value MaximizePresentationInit(napi_env env)
+{
+    WLOGD("MaximizePresentationInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "FOLLOW_APP_IMMERSIVE_SETTING", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING)));
+    napi_set_named_property(env, objValue, "EXIT_IMMERSIVE", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::EXIT_IMMERSIVE)));
+    napi_set_named_property(env, objValue, "ENTER_IMMERSIVE", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE)));
+    return objValue;
+}
+
 napi_value WindowErrorInit(napi_env env)
 {
     WLOGFD("WindowErrorInit");
