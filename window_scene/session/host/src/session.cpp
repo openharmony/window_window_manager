@@ -870,6 +870,20 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
+    SetWindowSessionProperty(property);
+    callingPid_ = pid;
+    callingUid_ = uid;
+    UpdateSessionState(SessionState::STATE_CONNECT);
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
+        NotifyClientToUpdateRect(nullptr);
+    NotifyConnect();
+    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
+    return WSError::WS_OK;
+}
+
+void Session::SetWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
         property->SetIsNeedUpdateWindowMode(true);
@@ -885,8 +899,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
     }
-    callingPid_ = pid;
-    callingUid_ = uid;
     if (sessionProperty && property) {
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
@@ -894,13 +906,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
             property_->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
     }
-    UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
-        NotifyClientToUpdateRect(nullptr);
-    NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
-    return WSError::WS_OK;
 }
 
 WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
