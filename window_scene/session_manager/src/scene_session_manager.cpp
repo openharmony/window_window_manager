@@ -8444,7 +8444,7 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
     auto parentId = sceneSession->GetPersistentId();
     bool shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [persistentId, session]: sceneSessionMap_) {
+    for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (!session) {
             continue;
         }
