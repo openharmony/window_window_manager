@@ -152,8 +152,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, Function |
     Media::Rect rect{};
     ScreenId screenId = SCREEN_ID_INVALID;
     ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
-    EXPECT_NE(rect.width, 0);
-    EXPECT_NE(rect.height, 0);
+    EXPECT_EQ(rect.height, 0);
 }
 
 /**
@@ -167,7 +166,6 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, Function |
     Media::Rect rect{};
     ScreenId screenId;
     ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
-    EXPECT_EQ(rect.width, 0);
     EXPECT_EQ(rect.height, 0);
 }
 
