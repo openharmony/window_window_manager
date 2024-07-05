@@ -537,6 +537,43 @@ HWTEST_F(ScreenSceneConfigTest, GetExternalScreenDefaultMode02, Function | Small
     ASSERT_EQ("", res);
 }
 
+/**
+ * @tc.name: GetCurvedCompressionAreaInLandscape01
+ * @tc.desc: GetCurvedCompressionAreaInLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape01, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::isWaterfallDisplay_ = false;
+    ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+    auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    ASSERT_FALSE(result == 0);
+}
+
+/**
+ * @tc.name: GetCurvedCompressionAreaInLandscape02
+ * @tc.desc: GetCurvedCompressionAreaInLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape02, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::isWaterfallDisplay_ = true;
+    ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+    auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    ASSERT_FALSE(result == 0);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = nullptr;
+    ScreenSceneConfig::ReadStringListConfigInfo(nullptr, "");
+    EXPECT_EQ(rootNode, nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

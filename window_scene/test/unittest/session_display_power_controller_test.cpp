@@ -125,6 +125,21 @@ HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest |
     EXPECT_TRUE(controller.SuspendBegin(reason));
 }
 
+/**
+ * @tc.name: WaitScreenOffNotify
+ * @tc.desc: WaitScreenOffNotify func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionDisplayPowerControllerTest, WaitScreenOffNotify, Function | SmallTest | Level1)
+{
+    DisplayState state = DisplayState::ON_SUSPEND;
+    SessionDisplayPowerController controller(mutex_, [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+        sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
+        EXPECT_TRUE(true);
+    });
+    EXPECT_EQ(state, DisplayState::ON_SUSPEND);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

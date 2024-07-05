@@ -39,6 +39,7 @@ public:
     sptr<AbstractDisplay> absDisplay;
     sptr<AbstractDisplay> absDisplay2;
     sptr<AbstractDisplay> absDisplay3;
+    sptr<AbstractDisplay> absDisplay4;
 };
 
 void AbstractDisplayTest::SetUpTestCase()
@@ -64,6 +65,9 @@ void AbstractDisplayTest::SetUp()
     modesInfo.width_ = 2560;
     modesInfo.height_ = 2560;
     absDisplay3 = new AbstractDisplay(id, info, absScreen);
+    modesInfo.width_ = 2560;
+    modesInfo.height_ = 1600;
+    absDisplay4 = new AbstractDisplay(id, info, absScreen);
 }
 
 void AbstractDisplayTest::TearDown()
