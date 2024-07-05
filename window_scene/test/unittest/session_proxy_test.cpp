@@ -102,6 +102,7 @@ HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     WSError res = sProxy->DrawingCompleted();
