@@ -24,6 +24,7 @@
 
 #include "anr_handler.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -86,7 +87,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
 {
     WLOGFD("WindowEventChannel receive pointer event");
     PrintPointerEvent(pointerEvent);
-    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+    if (isUIExtension_ && SceneBoardJudgement::IsSceneBoardEnabled() && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
         TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -138,7 +139,7 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("keyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+    if (isUIExtension_ && SceneBoardJudgement::IsSceneBoardEnabled() && uiExtensionUsage_ == UIExtensionUsage::MODAL) {
         TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
