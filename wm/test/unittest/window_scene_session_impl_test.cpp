@@ -841,10 +841,12 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("NotifyDrawingCompleted");
     option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
