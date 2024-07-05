@@ -2189,7 +2189,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
                         property->IsFloatingWindowAppType() && shouldHideNonSecureFloatingWindows_.load());
     bool isSystemCalling = SessionPermission::IsSystemCalling();
-    if (SessionHelper::IsSubWindow(property->GetWindowType()) && !isSystemCalling) {
+    if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !isSystemCalling) {
         auto parentSession = GetSceneSession(property->GetParentPersistentId());
         if (parentSession) {
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
@@ -8425,12 +8425,11 @@ void SceneSessionManager::HideNonSecureFloatingWindows()
     }
 
     shouldHideNonSecureFloatingWindows_.store(shouldHide);
-    for (const auto& item: nonSystemFloatSceneSessionMap_) {
-        auto& session = item.second;
+    for (const auto& [persistentId, session] : nonSystemFloatSceneSessionMap_) {
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
             TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", session->GetWindowName().c_str(), item.first, shouldHide);
+                "shouldHide=%{public}u", session->GetWindowName().c_str(), persistentId, shouldHide);
         }
     }
 }
@@ -8442,14 +8441,22 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
         return;
     }
 
-    auto subSessions = sceneSession->GetSubSession();
+    auto parentId = sceneSession->GetPersistentId();
     bool shouldHide = sceneSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag;
-    for (const auto& subSession: subSessions) {
-        if (subSession && !subSession->IsSystemSpecificSession()) {
-            subSession->NotifyForceHideChange(shouldHide);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [persistentId, session]: sceneSessionMap_) {
+        if (!session) {
+            continue;
+        }
+        auto property = session->GetSessionProperty();
+        if (!property || property->GetParentPersistentId() != parentId) {
+            continue;
+        }
+
+        if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !session->IsSystemSpecificSession()) {
+            session->NotifyForceHideChange(shouldHide);
             TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", subSession->GetWindowName().c_str(), subSession->GetPersistentId(),
-                shouldHide);
+                "shouldHide=%{public}u", session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
         }
     }
 }
