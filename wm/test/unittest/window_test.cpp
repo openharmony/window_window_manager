@@ -2327,8 +2327,8 @@ HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    MaximizeLayoutOption option;
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(option));
+    std::optional<MaximizePresentation> presentation;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(presentation));
 }
 
 /**
