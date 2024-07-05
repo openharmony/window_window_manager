@@ -974,8 +974,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         if (!isSystembarPropertiesSet_) {
             SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
         }
-    } else if (isIgnoreSafeAreaNeedNotify_ || isSubWindow) {
+    } else if (isIgnoreSafeAreaNeedNotify_) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+    } else if (isSubWindow) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        isIgnoreSafeAreaNeedNotify_ = false;
     }
 
     UpdateDecorEnable(true);
