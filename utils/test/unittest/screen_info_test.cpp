@@ -64,6 +64,35 @@ HWTEST_F(ScreenInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level2
     ASSERT_EQ(screenInfoDst->GetScreenId(), 1);
     delete screenInfoDst;
 }
+
+/**
+ * @tc.name: Marshalling
+ * @tc.desc: Marshalling  test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenInfoTest, Marshalling, Function | SmallTest | Level2)
+{
+    ScreenInfo screenInfoSrc;
+    screenInfoSrc.SetScreenId(1);
+
+    Parcel parcel;
+    bool result = screenInfoSrc.Marshalling(parcel);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: InnerUnmarshalling
+ * @tc.desc: InnerUnmarshalling  test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenInfoTest, InnerUnmarshalling, Function | SmallTest | Level2)
+{
+    ScreenInfo screenInfoSrc;
+    Parcel parcel;
+    parcel.WriteUint32(21);    // MAX_SUPPORTED_SCREEN_MODES_SIZE + 1
+    bool result = screenInfoSrc.InnerUnmarshalling(parcel);
+    ASSERT_FALSE(result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
