@@ -896,7 +896,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         }
     }
     UpdateSessionState(SessionState::STATE_CONNECT);
-    // once update rect before connect, update again when connect
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
         NotifyClientToUpdateRect(nullptr);
     NotifyConnect();
