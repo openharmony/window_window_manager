@@ -376,7 +376,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
     sptr<SceneSession> scensession = nullptr;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(scensession, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, scensession);
     ssm_->RequestAllAppSessionUnfocus();
