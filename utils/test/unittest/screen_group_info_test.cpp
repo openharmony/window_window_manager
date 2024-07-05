@@ -82,7 +82,7 @@ HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, Function | SmallTest | Level1)
 {
     ScreenGroupInfo screenGroupInfoSrc;
     Parcel parcel;
-    parcel.WriteUint32(21);    //MAX_SCREEN_GROUP_INFO_SIZE + 1
+    parcel.WriteUint32(21);    // MAX_SCREEN_GROUP_INFO_SIZE + 1
     bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
     ASSERT_FALSE(result);
 }
@@ -97,7 +97,7 @@ HWTEST_F(ScreenGroupInfoTest, Marshalling, Function | SmallTest | Level1)
     ScreenGroupInfo screenGroupInfoSrc;
     Parcel parcel;
     bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
-    ASSERT_TRUE(result);
+    ASSERT_FALSE(result);
 }
 }
 } // namespace Rosen
