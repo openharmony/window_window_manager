@@ -65,7 +65,25 @@ namespace {
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
             if (listener != nullptr) {            \
-                listener->listenerFunction(param);    \
+                (listener->*listenerFunction)(param);    \
+            }                                                 \
+        }                                                     \
+    } while (0)
+
+#define CALL_ACTION_LISTENERS_WITH_PARAM(listenerFunction, listeners, param, res) \
+    do {                                                      \
+        for (auto& listener : (listeners)) {                  \
+            if (listener != nullptr) {            \
+                (listener->*listenerFunction)(param, res);    \
+            }                                                 \
+        }                                                     \
+    } while (0)
+
+#define CALL_CONTROL_LISTENERS_WITH_PARAM(listenerFunction, listeners, param, res) \
+    do {                                                      \
+        for (auto& listener : (listeners)) {                  \
+            if (listener != nullptr) {            \
+                (listener->*listenerFunction)(param, res);    \
             }                                                 \
         }                                                     \
     } while (0)
@@ -180,9 +198,9 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
-        int32_t err = static_cast<int32_t>(errCode);
         if (!pipLifeCycleListeners_.empty()) {
-            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPreparePictureInPictureStart, pipLifeCycleListeners_, err);
+            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPreparePictureInPictureStart, pipLifeCycleListeners_,
+                static_cast<int32_t>(errCode));
         }
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "window show failed");
@@ -327,7 +345,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
     }
     curState_ = PiPWindowState::STATE_STOPPING;
     if (!pipLifeCycleListeners_.empty()) {
-        pipLifeCycleListeners_.OnPreparePictureInPictureStop();
+        CALL_LIFECYCLE_LISTENERS(OnPreparePictureInPictureStop, pipLifeCycleListeners_);
     }
     if (!destroyWindow) {
         ResetExtController();
@@ -554,12 +572,12 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(in
 void PictureInPictureController::DoActionEvent(const std::string& actionName, int32_t status)
 {
     TLOGD(WmsLogTag::WMS_PIP, "actionName: %{public}s", actionName.c_str());
-    if (pipActionObserver_ == nullptr) {
+    if (!pipActionObservers_.empty()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipActionObserver is not registered");
         return;
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(pipOption_->GetPipTemplate(), actionName);
-    pipActionObserver_->OnActionEvent(actionName, status);
+    CALL_ACTION_LISTENERS_WITH_PARAM(OnActionEvent, pipActionObservers_, actionName, status);
     if (CONTROL_TYPE_MAP.find(actionName) != CONTROL_TYPE_MAP.end()) {
         pipOption_->SetPiPControlStatus(CONTROL_TYPE_MAP[actionName], static_cast<PiPControlStatus>(status));
     }
@@ -577,7 +595,7 @@ void PictureInPictureController::PreRestorePictureInPicture()
 void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (pipControlObserver_ == nullptr) {
+    if (!pipControlObservers_.empty()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipControlObserver is not registered");
         return;
     }
@@ -586,7 +604,7 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
         return;
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPControlEvent(pipOption_->GetPipTemplate(), controlType);
-    pipControlObserver_->OnControlEvent(controlType, status);
+    CALL_CONTROL_LISTENERS_WITH_PARAM(OnControlEvent, pipControlObservers_, controlType, status);
     pipOption_->SetPiPControlStatus(controlType, status);
 }
 
