@@ -174,7 +174,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     ConvertFromJsValue(env, heightValue, height);
     GetControlGroupFromJs(env, controlGroup, controls, templateType);
     std::shared_ptr<XComponentController> xComponentControllerResult =
-        XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
+        XComponentController::GetXComponentControllerFromNapiValue(env, xComponentControllerValue);
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);
