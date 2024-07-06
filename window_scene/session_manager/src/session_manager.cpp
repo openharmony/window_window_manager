@@ -333,7 +333,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
         isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
     }
     if (isWMSAlreadyConnected) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS already connected, notify  immediately");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS already connected, notify immediately");
         OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, true, true);
     }
     {
