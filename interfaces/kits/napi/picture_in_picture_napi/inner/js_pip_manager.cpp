@@ -71,7 +71,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     }
     napi_value xComponentController = argv[0];
     std::shared_ptr<XComponentController> xComponentControllerResult =
-        XComponentController::GetXComponentControllerFromNapiValue(xComponentController);
+        XComponentController::GetXComponentControllerFromNapiValue(env, xComponentController);
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (!pipWindow) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
