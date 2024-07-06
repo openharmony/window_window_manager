@@ -681,34 +681,69 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
     return WMError::WM_OK;
 }
 
-void PictureInPictureController::SetPictureInPictureLifecycle(sptr<IPiPLifeCycle> listener)
+WMError PictureInPictureController::RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
-    pipLifeCycleListener_ = listener;
+    preturn RegisterListener(pipLifeCycleListeners_, listener);
 }
 
-void PictureInPictureController::SetPictureInPictureActionObserver(sptr<IPiPActionObserver> listener)
+WMError PictureInPictureController::RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener)
 {
-    pipActionObserver_ = listener;
+    return RegisterListener(pipActionObservers_, listener);
 }
 
-void PictureInPictureController::SetPictureInPictureControlObserver(sptr<IPiPControlObserver> listener)
+WMError PictureInPictureController::RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener)
 {
-    pipControlObserver_ = listener;
+    return RegisterListener(pipControlObservers_, listener);
 }
 
-sptr<IPiPLifeCycle> PictureInPictureController::GetPictureInPictureLifecycle() const
+WMError PictureInPictureController::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
-    return pipLifeCycleListener_;
+    return UnregisterListener(pipLifeCycleListeners_, listener);
 }
 
-sptr<IPiPActionObserver> PictureInPictureController::GetPictureInPictureActionObserver() const
+WMError PictureInPictureController::UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener)
 {
-    return pipActionObserver_;
+    return UnregisterListener(pipActionObservers_, listener);
 }
 
-sptr<IPiPControlObserver> PictureInPictureController::GetPictureInPictureControlObserver() const
+WMError PictureInPictureController::UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener)
 {
-    return pipControlObserver_;
+    return UnregisterListener(pipControlObservers_, listener);
+}
+
+template<typename T>
+WMError PictureInPictureController::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        WLOGFE("Listener already registered");
+        return WMError::WM_OK;
+    }
+    holder.emplace_back(listener);
+    return WMError::WM_OK;
+}
+
+template<typename T>
+WMError WindowSessionImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [listener](sptr<T> registeredListener) {
+            return registeredListener == listener;
+        }), holder.end());
+    return WMError::WM_OK;
+}
+
+template<typename T>
+void WindowSessionImpl::ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId)
+{
+    listeners.erase(persistentId);
 }
 
 bool PictureInPictureController::IsPullPiPAndHandleNavigation()

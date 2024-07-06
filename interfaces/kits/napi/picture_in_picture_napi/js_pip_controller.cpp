@@ -22,6 +22,7 @@
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "js_pip_window_listener.h"
 #include "picture_in_picture_interface.h"
 
 namespace OHOS {
@@ -348,17 +349,22 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    jsCbMap_[type] = callbackRef;
+    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
+    if (pipWindowListener == nullptr) {
+        TLOGE("[NAPI]New JsPiPWindowListener failed");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    jsCbMap_[type][callbackRef] = pipWindowListener;
 
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:
-            ProcessStateChangeRegister();
+            ProcessStateChangeRegister(pipWindowListener);
             break;
         case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
-            ProcessActionEventRegister();
+            ProcessActionEventRegister(pipWindowListener);
             break;
         case ListenerType::CONTROL_EVENT_CB:
-            ProcessControlEventRegister();
+            ProcessControlEventRegister(pipWindowListener);
             break;
         default:
             break;
@@ -384,7 +390,7 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
     return false;
 }
 
-void JsPipController::ProcessStateChangeRegister()
+void JsPipController::ProcessStateChangeRegister(sptr<JsPiPWindowListener> listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(STATE_CHANGE_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register state change error");
@@ -394,11 +400,11 @@ void JsPipController::ProcessStateChangeRegister()
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-    sptr<IPiPLifeCycle> lifeCycle = new JsPipController::PiPLifeCycleImpl(env_, jsCbMap_[STATE_CHANGE_CB]);
-    pipController_->SetPictureInPictureLifecycle(lifeCycle);
+    sptr<JsPipController::PiPLifeCycleImpl> thisListener(listener);
+    pipController_->RegisterPiPLifecycle(thisListener);
 }
 
-void JsPipController::ProcessActionEventRegister()
+void JsPipController::ProcessActionEventRegister(sptr<JsPiPWindowListener> listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_PANEL_ACTION_EVENT_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register action event error");
@@ -408,12 +414,11 @@ void JsPipController::ProcessActionEventRegister()
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-    sptr<IPiPActionObserver> actionObserver =
-        new JsPipController::PiPActionObserverImpl(env_, jsCbMap_[CONTROL_PANEL_ACTION_EVENT_CB]);
-    pipController_->SetPictureInPictureActionObserver(actionObserver);
+    sptr<JsPipController::PiPActionObserverImpl> thisListener(listener);
+    pipController_->RegisterPiPActionObserver(listener);
 }
 
-void JsPipController::ProcessControlEventRegister()
+void JsPipController::ProcessControlEventRegister(sptr<JsPiPWindowListener> listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_EVENT_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register control event error");
@@ -423,40 +428,45 @@ void JsPipController::ProcessControlEventRegister()
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-    auto controlObserver = sptr<JsPipController::PiPControlObserverImpl>::MakeSptr(env_, jsCbMap_[CONTROL_EVENT_CB]);
+    sptr<JsPipController::PiPActionObserverImpl> thisListener(listener);
+    pipController_->RegisterPiPControlObserver(controlObserver);
+    TLOGI(WmsLogTag::WMS_PIP, "Register control event success");
+}
+
+void JsPipController::ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+
+    sptr<IPiPLifeCycle> lifeCycle = new JsPipController::PiPLifeCycleImpl(env_, callbackRef);
+    pipController_->UnregisterPiPLifecycle(lifeCycle);
+}
+
+void JsPipController::ProcessActionEventUnRegister(sptr<JsPiPWindowListener> listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    sptr<IPiPActionObserver> actionObserver =
+        new JsPipController::PiPActionObserverImpl(env_, callbackRef);
+    pipController_->UnregisterPiPActionObserver(actionObserver);
+}
+
+void JsPipController::ProcessControlEventUnRegister(sptr<JsPiPWindowListener> listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    auto controlObserver = sptr<JsPipController::PiPControlObserverImpl>::MakeSptr(env_, callbackRef);
     if (controlObserver == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controlObserver is nullptr");
         return;
     }
-    pipController_->SetPictureInPictureControlObserver(controlObserver);
-    TLOGI(WmsLogTag::WMS_PIP, "Register control event success");
-}
-
-void JsPipController::ProcessStateChangeUnRegister()
-{
-    if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
-        return;
-    }
-    pipController_->SetPictureInPictureLifecycle(nullptr);
-}
-
-void JsPipController::ProcessActionEventUnRegister()
-{
-    if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
-        return;
-    }
-    pipController_->SetPictureInPictureActionObserver(nullptr);
-}
-
-void JsPipController::ProcessControlEventUnRegister()
-{
-    if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
-        return;
-    }
-    pipController_->SetPictureInPictureControlObserver(nullptr);
+    pipController_->UnregisterPiPControlObserver(controlObserver);
     TLOGI(WmsLogTag::WMS_PIP, "UnRegister control event success");
 }
 
@@ -471,7 +481,7 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
     size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
+    if (argc > 2) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
@@ -494,17 +504,22 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    jsCbMap_.erase(type);
+    std::shared_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    jsCbMap_.erase(callbackRef);
     
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:
-            ProcessStateChangeUnRegister();
+            ProcessStateChangeUnRegister(callbackRef);
             break;
         case ListenerType::CONTROL_PANEL_ACTION_EVENT_CB:
-            ProcessActionEventUnRegister();
+            ProcessActionEventUnRegister(callbackRef);
             break;
         case ListenerType::CONTROL_EVENT_CB:
-            ProcessControlEventUnRegister();
+            ProcessControlEventUnRegister(callbackRef);
             break;
         default:
             break;
