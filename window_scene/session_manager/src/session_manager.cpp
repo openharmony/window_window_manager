@@ -120,7 +120,8 @@ void SessionManager::OnWMSConnectionChanged(
     auto lastUserId = currentWMSUserId_;
     auto lastScreenId = currentScreenId_;
     {
-        std::lock_guard<std::mutex> lock(wmsConnectionMutex);
+        // WMS连接回调和WMS状态监听注册同时发生时，加锁保障多线程下，以下成员变量状态的时序，确保WMS连接事件通知成功
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = isConnected;
         isCallbackRegistered = (wmsConnectionChangedFunc_ != nullptr);
         if (isConnected) {
@@ -321,14 +322,15 @@ void SessionManager::Clear()
 
 WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "RegisterWMSConnectionChangedListener in");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "in");
     if (callbackFunc == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "callbackFunc is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     bool isWMSAlreadyConnected = false;
     {
-        std::lock_guard<std::mutex> lock(wmsConnectionMutex);
+        // WMS状态监听注册和WMS连接回调同时发生时，加锁保障多线程下，以下成员变量状态的时序，确保WMS连接事件通知成功
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
         isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
     }
