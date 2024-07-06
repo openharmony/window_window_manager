@@ -870,6 +870,20 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
+    SetWindowSessionProperty(property);
+    callingPid_ = pid;
+    callingUid_ = uid;
+    UpdateSessionState(SessionState::STATE_CONNECT);
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
+        NotifyClientToUpdateRect(nullptr);
+    NotifyConnect();
+    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
+    return WSError::WS_OK;
+}
+
+void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
+{
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
         property->SetIsNeedUpdateWindowMode(true);
@@ -878,7 +892,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
-
     SetSessionProperty(property);
     if (property) {
         Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
@@ -887,20 +900,13 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
-    callingPid_ = pid;
-    callingUid_ = uid;
     if (sessionProperty && property) {
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+        if (sessionProperty->GetCompatibleModeInPc()) {
+            property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+        }
     }
-    UpdateSessionState(SessionState::STATE_CONNECT);
-    // once update rect before connect, update again when connect
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
-        NotifyClientToUpdateRect(nullptr);
-    NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
-    return WSError::WS_OK;
 }
 
 WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -2126,6 +2132,9 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     
     property->SetCompatibleModeInPc(enable);
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
+    if (enable) {
+        property->SetDragEnabled(isSupportDragInPcCompatibleMode);
+    }
     return WSError::WS_OK;
 }
 
