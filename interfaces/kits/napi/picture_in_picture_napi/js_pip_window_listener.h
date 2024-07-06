@@ -20,7 +20,6 @@
 #include <mutex>
 
 #include "class_var_definition.h"
-#include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "refbase.h"
@@ -30,12 +29,12 @@
 
 namespace OHOS {
 namespace Rosen {
-class JsWindowListener : public PiPLifeCycleImpl,
-                         public PiPActionObserverImpl,
-                         public PiPControlObserverImpl {
+class JsPiPWindowListener : public IPiPLifeCycle,
+                         public IPiPActionObserver,
+                         public IPiPControlObserver {
 public:
     JsPiPWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
-        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsPiPWindowListener> (this)) {}
+        : env_(env), weakRef_(wptr<JsPiPWindowListener> (this), jsCallBack_(callback)) {}
     ~JsPiPWindowListener();
     void OnPreparePictureInPictureStart() override;
     void OnPictureInPictureStart() override;
@@ -48,10 +47,9 @@ public:
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);
-    napi_env engine_ = nullptr;
-    std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
     napi_env env_ = nullptr;
-    wptr<JsWindowListener> weakRef_  = nullptr;
+    std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
+    wptr<JsPiPWindowListener> weakRef_  = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

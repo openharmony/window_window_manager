@@ -21,13 +21,14 @@
 #include "js_runtime_utils.h"
 #include "picture_in_picture_controller.h"
 #include "wm_common.h"
+#include "js_pip_window_listener.h"
 
 namespace OHOS {
 namespace Rosen {
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController);
 class JsPipController {
 public:
-    explicit JsPipController(const sptr<PictureInPictureController>& pipController, napi_env env);
+    explicit JsPipController(const sptr<PictureInPictureController>& pipController);
     ~JsPipController();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value StartPictureInPicture(napi_env env, napi_callback_info info);
@@ -66,7 +67,6 @@ private:
     void ProcessControlEventUnRegister(sptr<JsPiPWindowListener> listener);
 
     sptr<PictureInPictureController> pipController_;
-    napi_env env_;
     std::map<std::string, ListenerType> listenerCodeMap_;
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsPiPWindowListener>>> jsCbMap_;
 
