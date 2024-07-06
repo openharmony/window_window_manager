@@ -38,7 +38,8 @@ int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
     return ProcessRemoteRequest(code, data, reply, option);
 }
 
-int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
+int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     switch (code) {
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL):
