@@ -561,7 +561,7 @@ private:
     void HandleDialogBackground();
     void NotifyPointerEventToRs(int32_t pointAction);
     WSError HandleSubWindowClick(int32_t action);
-    void SetWindowSessionProperty(sptr<WindowSessionProperty> property);
+    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
