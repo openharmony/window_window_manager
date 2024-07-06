@@ -76,15 +76,18 @@ private:
     sptr<FoundationDeathRecipient> foundationDeath_ = nullptr;
     bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
+    // above guarded by mutex_
 
     std::recursive_mutex recoverMutex_;
     WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
+    // above guarded by recoverMutex_
 
     std::mutex wmsConnectionMutex_;
     bool isWMSConnected_ = false;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
+    // above guarded by wmsConnectionMutex_
 };
 } // namespace OHOS::Rosen
 

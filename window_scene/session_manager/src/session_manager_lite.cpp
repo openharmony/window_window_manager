@@ -246,7 +246,8 @@ void SessionManagerLite::OnWMSConnectionChanged(
     auto lastUserId = currentWMSUserId_;
     auto lastScreenId = currentScreenId_;
     {
-        // WMS连接回调和WMS状态监听注册同时发生时，加锁保障多线程下，以下成员变量状态的时序，确保WMS连接事件通知成功
+        // When the register WMS listener and WMS callback notification occur at the same time, the mutex ensures the
+        // timing of the state of the member variables in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = isConnected;
         isCallbackRegistered = (wmsConnectionChangedFunc_ != nullptr);
@@ -409,7 +410,8 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
     }
     bool isWMSAlreadyConnected = false;
     {
-        // WMS状态监听注册和WMS连接回调同时发生时，加锁保障多线程下，以下成员变量状态的时序，确保WMS连接事件通知成功
+        // When the register WMS listener and WMS callback notification occur at the same time, the mutex ensures the
+        // timing of the state of the member variables in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
         isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
