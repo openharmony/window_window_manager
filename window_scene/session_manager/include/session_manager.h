@@ -61,7 +61,7 @@ private:
     void InitSessionManagerServiceProxy();
     WMError InitMockSMSProxy();
     void InitSceneSessionManagerProxy();
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void RegisterSMSRecoverListener();
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
@@ -78,6 +78,7 @@ private:
     std::recursive_mutex mutex_;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
+    std::mutex wmsConnectionMutex;
     bool isWMSConnected_ = false;
     bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
