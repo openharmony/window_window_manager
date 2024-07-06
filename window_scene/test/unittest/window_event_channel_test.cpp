@@ -38,12 +38,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
-    WSError TransferSearchElementInfo(bool isChannelNull);
-    WSError TransferSearchElementInfosByText(bool isChannelNull);
-    WSError TransferFindFocusedElementInfo(bool isChannelNull);
-    WSError TransferFocusMoveSearch(bool isChannelNull);
-    WSError TransferExecuteAction(bool isChannelNull);
+    WSError TransferAccessibilityChildTreeRegister(bool isChannelNull);
+    WSError TransferAccessibilityChildTreeUnregister(bool isChannelNull);
+    WSError TransferAccessibilityDumpChildInfo(bool isChannelNull);
 
     sptr<ISessionStage> sessionStage = new SessionStageMocker();
     sptr<WindowEventChannel> windowEventChannel_ = new WindowEventChannelMocker(sessionStage);
@@ -65,65 +62,33 @@ void WindowEventChannelTest::TearDown()
 {
 }
 
-WSError WindowEventChannelTest::TransferSearchElementInfo(bool isChannelNull)
+WSError WindowEventChannelTest::TransferAccessibilityChildTreeRegister(bool isChannelNull)
 {
-    int64_t elementId = 0;
-    int32_t mode = 0;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
     }
-    return windowEventChannel_->TransferSearchElementInfo(elementId, mode, baseParent, infos);
+    return windowEventChannel_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
-WSError WindowEventChannelTest::TransferSearchElementInfosByText(bool isChannelNull)
+WSError WindowEventChannelTest::TransferAccessibilityChildTreeUnregister(bool isChannelNull)
 {
-    int64_t elementId = 0;
-    string text;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
     }
-    return windowEventChannel_->TransferSearchElementInfosByText(elementId, text, baseParent, infos);
+    return windowEventChannel_->TransferAccessibilityChildTreeUnregister();
 }
 
-
-WSError WindowEventChannelTest::TransferFindFocusedElementInfo(bool isChannelNull)
+WSError WindowEventChannelTest::TransferAccessibilityDumpChildInfo(bool isChannelNull)
 {
-    int64_t elementId = 0;
-    int32_t focusType = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
+    std::vector<std::string> params;
+    std::vector<std::string> info;
     if (isChannelNull) {
         windowEventChannel_->sessionStage_ = nullptr;
     }
-    return windowEventChannel_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
-}
-
-WSError WindowEventChannelTest::TransferFocusMoveSearch(bool isChannelNull)
-{
-    int64_t elementId = 0;
-    int32_t direction = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
-    if (isChannelNull) {
-        windowEventChannel_->sessionStage_ = nullptr;
-    }
-    return windowEventChannel_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
-}
-
-WSError WindowEventChannelTest::TransferExecuteAction(bool isChannelNull)
-{
-    int64_t elementId = 0;
-    map<string, string> actionArguments;
-    int32_t action = 0;
-    int64_t baseParent = 0;
-    if (isChannelNull) {
-        windowEventChannel_->sessionStage_ = nullptr;
-    }
-    return windowEventChannel_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+    return windowEventChannel_->TransferAccessibilityDumpChildInfo(params, info);
 }
 
 namespace {
@@ -326,141 +291,81 @@ HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: TransferSearchElementInfo01
- * @tc.desc: normal function TransferSearchElementInfo01
+ * @tc.name: TransferAccessibilityChildTreeRegister01
+ * @tc.desc: normal function TransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister01, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferSearchElementInfo01 begin");
-    auto res = TransferSearchElementInfo(true);
+    WLOGFI("TransferAccessibilityChildTreeRegister01 begin");
+    auto res = TransferAccessibilityChildTreeRegister(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferSearchElementInfo01 end");
+    WLOGFI("TransferAccessibilityChildTreeRegister01 end");
 }
 
 /**
- * @tc.name: TransferSearchElementInfo02
- * @tc.desc: normal function TransferSearchElementInfo02
+ * @tc.name: TransferAccessibilityChildTreeRegister01
+ * @tc.desc: normal function TransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferSearchElementInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister02, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferSearchElementInfo02 begin");
-    auto res = TransferSearchElementInfo(false);
+    WLOGFI("TransferAccessibilityChildTreeRegister02 begin");
+    auto res = TransferAccessibilityChildTreeRegister(false);
     ASSERT_EQ(res, WSError::WS_OK);
-    WLOGFI("TransferSearchElementInfo02 end");
+    WLOGFI("TransferAccessibilityChildTreeRegister02 end");
 }
 
 /**
- * @tc.name: TransferSearchElementInfosByText01
- * @tc.desc: normal function TransferSearchElementInfosByText01
+ * @tc.name: TransferAccessibilityChildTreeUnregister01
+ * @tc.desc: normal function TransferAccessibilityChildTreeUnregister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister01, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferSearchElementInfosByText01 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferSearchElementInfosByText(true);
+    WLOGFI("TransferAccessibilityChildTreeUnregister01 begin");
+    auto res = TransferAccessibilityChildTreeUnregister(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferSearchElementInfosByText01 end");
+    WLOGFI("TransferAccessibilityChildTreeUnregister01 end");
 }
 
 /**
- * @tc.name: TransferSearchElementInfosByText02
- * @tc.desc: normal function TransferSearchElementInfosByText02
+ * @tc.name: TransferAccessibilityChildTreeUnregister02
+ * @tc.desc: normal function TransferAccessibilityChildTreeUnregister02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferSearchElementInfosByText02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister02, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferSearchElementInfosByText02 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferSearchElementInfosByText(false);
+    WLOGFI("TransferAccessibilityChildTreeUnregister02 begin");
+    auto res = TransferAccessibilityChildTreeUnregister(false);
     ASSERT_EQ(res, WSError::WS_OK);
-    WLOGFI("TransferSearchElementInfosByText02 end");
+    WLOGFI("TransferAccessibilityChildTreeUnregister02 end");
 }
 
 /**
- * @tc.name: TransferFindFocusedElementInfo01
- * @tc.desc: normal function TransferFindFocusedElementInfo01
+ * @tc.name: TransferAccessibilityDumpChildInfo01
+ * @tc.desc: normal function TransferAccessibilityDumpChildInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo01, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferFindFocusedElementInfo01 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferFindFocusedElementInfo(true);
+    WLOGFI("TransferAccessibilityDumpChildInfo01 begin");
+    auto res = TransferAccessibilityDumpChildInfo(true);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferFindFocusedElementInfo01 end");
+    WLOGFI("TransferAccessibilityDumpChildInfo01 end");
 }
 
 /**
- * @tc.name: TransferFindFocusedElementInfo02
- * @tc.desc: normal function TransferFindFocusedElementInfo02
+ * @tc.name: TransferAccessibilityDumpChildInfo02
+ * @tc.desc: normal function TransferAccessibilityDumpChildInfo02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferFindFocusedElementInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, Function | SmallTest | Level2)
 {
-    WLOGFI("TransferFindFocusedElementInfo02 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferFindFocusedElementInfo(false);
+    WLOGFI("TransferAccessibilityDumpChildInfo02 begin");
+    auto res = TransferAccessibilityDumpChildInfo(false);
     ASSERT_EQ(res, WSError::WS_OK);
-    WLOGFI("TransferFindFocusedElementInfo02 end");
-}
-
-/**
- * @tc.name: TransferFocusMoveSearch01
- * @tc.desc: normal function TransferFocusMoveSearch01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFocusMoveSearch01 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferFocusMoveSearch(true);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferFocusMoveSearch01 end");
-}
-
-/**
- * @tc.name: TransferFocusMoveSearch02
- * @tc.desc: normal function TransferFocusMoveSearch02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, TransferFocusMoveSearch02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferFocusMoveSearch02 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferFocusMoveSearch(false);
-    ASSERT_EQ(res, WSError::WS_OK);
-    WLOGFI("TransferFocusMoveSearch02 end");
-}
-
-/**
- * @tc.name: TransferExecuteAction01
- * @tc.desc: normal function TransferExecuteAction01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, TransferExecuteAction01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferExecuteAction01 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferExecuteAction(true);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferExecuteAction01 end");
-}
-
-/**
- * @tc.name: TransferExecuteAction02
- * @tc.desc: normal function TransferExecuteAction02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, TransferExecuteAction02, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferExecuteAction02 begin");
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
-    auto res = TransferExecuteAction(false);
-    ASSERT_EQ(res, WSError::WS_OK);
-    WLOGFI("TransferExecuteAction02 end");
+    WLOGFI("TransferAccessibilityDumpChildInfo02 end");
 }
 
 /**

@@ -289,64 +289,47 @@ WSError WindowEventChannel::TransferFocusState(bool focusState)
     return WSError::WS_OK;
 }
 
-WSError WindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
-}
-
-WSError WindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifySearchElementInfosByText(elementId, text, baseParent, infos);
-}
-
-WSError WindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info);
-}
-
-WSError WindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyFocusMoveSearch(elementId, direction, baseParent, info);
-}
-
-WSError WindowEventChannel::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action,
-    int64_t baseParent)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyExecuteAction(elementId, actionArguments, action, baseParent);
-}
-
 WSError WindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
     if (!sessionStage_) {
-        WLOGFE("session stage is null!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+WSError WindowEventChannel::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+WSError WindowEventChannel::TransferAccessibilityChildTreeUnregister()
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityChildTreeUnregister();
+}
+
+WSError WindowEventChannel::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+#ifdef ACCESSIBILITY_DUMP_FOR_TEST
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityDumpChildInfo(params, info);
+#else
+    info.emplace_back("not support in user build variant");
+    return WSError::WS_OK;
+#endif
 }
 } // namespace OHOS::Rosen

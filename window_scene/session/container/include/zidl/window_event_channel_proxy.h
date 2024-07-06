@@ -40,18 +40,13 @@ public:
         const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferFocusState(bool focusState) override;
-    WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent) override;
     WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
+    WSError TransferAccessibilityChildTreeRegister(
+        uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    WSError TransferAccessibilityChildTreeUnregister() override;
+    WSError TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) override;
 private:
     static inline BrokerDelegator<WindowEventChannelProxy> delegator_;
 };
