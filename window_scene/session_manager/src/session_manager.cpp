@@ -128,7 +128,7 @@ void SessionManager::OnWMSConnectionChanged(
             currentScreenId_ = screenId;
         }
     }
-    if (isConnected && currentWMSUserId_ > INVALID_UID && lastUserId != userId) {
+    if (isConnected && lastUserId > INVALID_UID && lastUserId != userId) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
         OnUserSwitch(sessionManagerService);

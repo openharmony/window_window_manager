@@ -243,19 +243,21 @@ void SessionManagerLite::OnWMSConnectionChanged(
         "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
         currentWMSUserId_, screenId, isConnected);
     bool isCallbackRegistered = false;
+    auto lastUserId = currentWMSUserId_;
+    auto lastScreenId = currentScreenId_;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionMutex);
         isWMSConnected_ = isConnected;
         isCallbackRegistered = (wmsConnectionChangedFunc_ != nullptr);
-    }
-    if (isConnected) {
-        if (currentWMSUserId_ > INVALID_UID && currentWMSUserId_ != userId) {
-            // Notify the user that the old wms has been disconnected.
-            OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, false, isCallbackRegistered);
-            OnUserSwitch(sessionManagerService);
+        if (isConnected) {
+            currentWMSUserId_ = userId;
+            currentScreenId_ = screenId;
         }
-        currentWMSUserId_ = userId;
-        currentScreenId_ = screenId;
+    }
+    if (isConnected && lastUserId > INVALID_UID && lastUserId != userId) {
+        // Notify the user that the old wms has been disconnected.
+        OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
+        OnUserSwitch(sessionManagerService);
     }
     // Notify the user that the current wms connection has changed.
     OnWMSConnectionChangedCallback(userId, screenId, isConnected, isCallbackRegistered);
