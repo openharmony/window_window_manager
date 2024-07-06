@@ -76,7 +76,6 @@ private:
     void RegisterSMSRecoverListener();
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     WMError InitMockSMSProxy();
-
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
 
     std::recursive_mutex mutex_;
