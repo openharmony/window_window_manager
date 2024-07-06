@@ -903,7 +903,7 @@ void Session::SetWindowSessionProperty(sptr<WindowSessionProperty> property)
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         if (sessionProperty->GetCompatibleModeInPc()) {
-            property_->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+            property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
     }
 }
@@ -2132,7 +2132,7 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     property->SetCompatibleModeInPc(enable);
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     if (enable) {
-        property_->SetDragEnabled(isSupportDragInPcCompatibleMode);
+        property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
 }
