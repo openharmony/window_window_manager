@@ -62,91 +62,83 @@ void WindowEventChannelMockStubTest::TearDown()
 }
 
 /**
- * @tc.name: HandleTransferSearchElementInfo
- * @tc.desc: test function : HandleTransferSearchElementInfo
+ * @tc.name: HandleTransferAccessibilityChildTreeRegister01
+ * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferSearchElementInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister01, Function | SmallTest | Level1)
 {
-    WLOGI("HandleTransferSearchElementInfo begin");
+    WLOGI("HandleTransferAccessibilityChildTreeRegister01 begin");
     MockMessageParcel::ClearAllErrorFlag();
     MessageParcel data;
     MessageParcel reply;
     
-    data.WriteUint64(0);
     data.WriteUint32(0);
-    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteInt64(0);
     
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
+    WLOGI("HandleTransferAccessibilityChildTreeRegister01 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityChildTreeRegister02
+ * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister02, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityChildTreeRegister02 begin");
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(0);
+    data.WriteInt32(0);
+    data.WriteInt64(0);
+
     MockMessageParcel::SetWriteInt64ErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
-    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfo(data, reply));
-    WLOGI("HandleTransferSearchElementInfo end");
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
+    WLOGI("HandleTransferAccessibilityChildTreeRegister02 end");
 }
 
 /**
- * @tc.name: HandleTransferSearchElementInfosByText
- * @tc.desc: test function : HandleTransferSearchElementInfosByText
+ * @tc.name: HandleTransferAccessibilityChildTreeUnregister
+ * @tc.desc: test function : HandleTransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferSearchElementInfosByText, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeUnregister, Function | SmallTest | Level1)
 {
-    WLOGI("HandleTransferSearchElementInfosByText begin");
+    WLOGI("HandleTransferAccessibilityChildTreeUnregister begin");
     MockMessageParcel::ClearAllErrorFlag();
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteUint64(0);
-    data.WriteString("action");
-    data.WriteUint64(0);
-    
-    MockMessageParcel::SetWriteInt64ErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
-    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferSearchElementInfosByText(data, reply));
-    WLOGI("HandleTransferSearchElementInfosByText end");
+    ASSERT_EQ(ERR_NONE, windowEventChannelStub_->HandleTransferAccessibilityChildTreeUnregister(data, reply));
+    WLOGI("HandleTransferAccessibilityChildTreeUnregister end");
 }
 
 /**
- * @tc.name: HandleTransferFindFocusedElementInfo
- * @tc.desc: test function : HandleTransferFindFocusedElementInfo
+ * @tc.name: HandleTransferAccessibilityDumpChildInfo
+ * @tc.desc: test function : HandleTransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferFindFocusedElementInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityDumpChildInfo, Function | SmallTest | Level1)
 {
-    WLOGI("HandleTransferFindFocusedElementInfo begin");
+    WLOGI("HandleTransferAccessibilityDumpChildInfo begin");
     MockMessageParcel::ClearAllErrorFlag();
     MessageParcel data;
     MessageParcel reply;
+    std::vector<std::string> params;
+    data.WriteStringVector(params);
 
-    data.WriteUint64(0);
-    data.WriteUint32(0);
-    data.WriteUint64(0);
-
-    MockMessageParcel::SetWriteParcelableErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
-    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFindFocusedElementInfo(data, reply));
-    WLOGI("HandleTransferFindFocusedElementInfo end");
-}
-
-/**
- * @tc.name: HandleTransferFocusMoveSearch
- * @tc.desc: test function : HandleTransferFocusMoveSearch
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferFocusMoveSearch, Function | SmallTest | Level1)
-{
-    WLOGI("HandleTransferFocusMoveSearch begin");
-    MockMessageParcel::ClearAllErrorFlag();
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint64(0);
-    data.WriteUint32(0);
-    data.WriteUint64(0);
-
-    MockMessageParcel::SetWriteParcelableErrorFlag(true);
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
-    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferFocusMoveSearch(data, reply));
-    WLOGI("HandleTransferFocusMoveSearch end");
+    ASSERT_EQ(ERR_NONE, windowEventChannelStub_->HandleTransferAccessibilityDumpChildInfo(data, reply));
+    WLOGI("HandleTransferAccessibilityDumpChildInfo end");
 }
 }
 }

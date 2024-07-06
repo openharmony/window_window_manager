@@ -58,14 +58,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
         parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT),
-        parcel, reply, option);
     return true;
 }
 } // namespace.OHOS
