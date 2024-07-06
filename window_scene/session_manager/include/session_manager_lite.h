@@ -78,6 +78,8 @@ private:
     WMError InitMockSMSProxy();
 
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
+
+    std::recursive_mutex mutex_;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManagerLite> sceneSessionManagerLiteProxy_ = nullptr;
@@ -86,16 +88,17 @@ private:
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
+    bool destroyed_ = false;
+    bool isFoundationListenerRegistered_ = false;
+
     std::recursive_mutex listenerLock_;
 #ifndef USE_ADAPTER_LITE
     std::vector<sptr<ISessionListener>> sessionListeners_;
 #endif
-    std::recursive_mutex mutex_;
-    bool destroyed_ = false;
+
+    std::mutex wmsConnectionMutex_;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
-    bool isFoundationListenerRegistered_ = false;
-    std::mutex wmsConnectionMutex;
     bool isWMSConnected_ = false;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
 };
