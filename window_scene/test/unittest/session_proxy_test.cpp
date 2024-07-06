@@ -94,6 +94,23 @@ HWTEST_F(SessionProxyTest, Disconnect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: DrawingCompleted
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->DrawingCompleted();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted end";
+}
+
+/**
  * @tc.name: PendingSessionActivation
  * @tc.desc: normal function
  * @tc.type: FUNC
