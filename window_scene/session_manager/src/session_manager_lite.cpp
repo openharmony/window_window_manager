@@ -249,7 +249,7 @@ void SessionManagerLite::OnWMSConnectionChanged(
         // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = isConnected;
-        isCallbackRegistered = (wmsConnectionChangedFunc_ != nullptr);
+        isCallbackRegistered = wmsConnectionChangedFunc_ != nullptr;
         if (isConnected) {
             currentWMSUserId_ = userId;
             currentScreenId_ = screenId;
