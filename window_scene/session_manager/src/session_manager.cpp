@@ -106,7 +106,7 @@ void SessionManager::OnWMSConnectionChangedCallback(
             screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     } else {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS Callback is null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS CallbackFunc is null.");
     }
 }
 

@@ -489,7 +489,7 @@ void SessionManagerLite::OnWMSConnectionChangedCallback(
             screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     } else {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "Lite WMS Callback is null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Lite WMS CallbackFunc is null.");
     }
 }
 
