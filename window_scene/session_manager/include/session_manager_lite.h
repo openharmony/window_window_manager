@@ -89,17 +89,20 @@ private:
     bool recoverListenerRegistered_ = false;
     bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
+    // above guarded by mutex_
 
     std::recursive_mutex listenerLock_;
 #ifndef USE_ADAPTER_LITE
     std::vector<sptr<ISessionListener>> sessionListeners_;
 #endif
+    // above guarded by listenerLock_
 
     std::mutex wmsConnectionMutex_;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
     bool isWMSConnected_ = false;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
+    // above guarded by wmsConnectionMutex_
 };
 } // namespace OHOS::Rosen
 
