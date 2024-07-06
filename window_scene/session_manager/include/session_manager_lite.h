@@ -102,7 +102,8 @@ private:
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
     bool isWMSConnected_ = false;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
-    // above guarded by wmsConnectionMutex_
+    // above guarded by wmsConnectionMutex_, among OnWMSConnectionChanged for wms connection event, user switched,
+    // register WMSConnectionChangedListener.
 };
 } // namespace OHOS::Rosen
 
