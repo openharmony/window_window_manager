@@ -74,7 +74,7 @@ private:
     void DeleteAllSessionListeners();
     void ReregisterSessionListener() const;
     void RegisterSMSRecoverListener();
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     WMError InitMockSMSProxy();
 
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
@@ -95,6 +95,7 @@ private:
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
     bool isFoundationListenerRegistered_ = false;
+    std::mutex wmsConnectionMutex;
     bool isWMSConnected_ = false;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
 };
