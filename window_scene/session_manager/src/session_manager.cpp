@@ -120,8 +120,7 @@ void SessionManager::OnWMSConnectionChanged(
     auto lastUserId = currentWMSUserId_;
     auto lastScreenId = currentScreenId_;
     {
-        // When the register WMS listener and WMS callback notification occur at the same time, the mutex ensures the
-        // timing of the state of the member variables in multiple threads
+        // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = isConnected;
         isCallbackRegistered = (wmsConnectionChangedFunc_ != nullptr);
@@ -330,8 +329,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
     }
     bool isWMSAlreadyConnected = false;
     {
-        // When the register WMS listener and WMS callback notification occur at the same time, the mutex ensures the
-        // timing of the state of the member variables in multiple threads
+        // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
         isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
