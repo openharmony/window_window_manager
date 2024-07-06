@@ -332,7 +332,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
         // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
-        isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
+        isWMSAlreadyConnected = isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID);
     }
     if (isWMSAlreadyConnected) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS already connected, notify immediately");
