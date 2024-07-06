@@ -154,16 +154,16 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
             pipOption_->GetPipTemplate(), FAILED, "window is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPreparePictureInPictureStart();
+    if (!pipLifeCycleListeners_.empty()) {
+        pipLifeCycleListeners_.OnPreparePictureInPictureStart();
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
         int32_t err = static_cast<int32_t>(errCode);
-        if (pipLifeCycleListener_ != nullptr) {
-            pipLifeCycleListener_->OnPictureInPictureOperationError(err);
+        if (!pipLifeCycleListeners_.empty()) {
+            pipLifeCycleListeners_.OnPictureInPictureOperationError(err);
         }
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "window show failed");
@@ -307,14 +307,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     curState_ = PiPWindowState::STATE_STOPPING;
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPreparePictureInPictureStop();
+    if (!pipLifeCycleListeners_.empty()) {
+        pipLifeCycleListeners_.OnPreparePictureInPictureStop();
     }
     if (!destroyWindow) {
         ResetExtController();
         curState_ = PiPWindowState::STATE_STOPPED;
-        if (pipLifeCycleListener_) {
-            pipLifeCycleListener_->OnPictureInPictureStop();
+        if (!pipLifeCycleListeners_.empty()) {
+            pipLifeCycleListeners_.OnPictureInPictureStop();
         }
         PictureInPictureManager::RemoveActiveController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
@@ -344,8 +344,8 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
     }
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPictureInPictureStop();
+    if (!pipLifeCycleListeners_.empty()) {
+        pipLifeCycleListeners_.OnPictureInPictureStop();
     }
     curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
@@ -373,8 +373,8 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     if (ret != WmErrorCode::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
-        if (pipLifeCycleListener_ != nullptr) {
-            pipLifeCycleListener_->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
+        if (!pipLifeCycleListeners_.empty()) {
+            pipLifeCycleListeners_[at]->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
@@ -549,8 +549,8 @@ void PictureInPictureController::PreRestorePictureInPicture()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
-    if (pipLifeCycleListener_) {
-        pipLifeCycleListener_->OnRestoreUserInterface();
+    if (!pipLifeCycleListeners_.empty()) {
+        pipLifeCycleListeners_.OnRestoreUserInterface();
     }
 }
 
@@ -675,8 +675,8 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
         TLOGE(WmsLogTag::WMS_PIP, "swap xComponent failed, errorCode: %{public}u", errorCode);
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    if (pipLifeCycleListener_ != nullptr) {
-        pipLifeCycleListener_->OnPictureInPictureStart();
+    if (!pipLifeCycleListeners_.empty()) {
+        pipLifeCycleListener_.OnPictureInPictureStart();
     }
     return WMError::WM_OK;
 }
