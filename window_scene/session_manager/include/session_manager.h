@@ -64,7 +64,6 @@ private:
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void RegisterSMSRecoverListener();
-
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
 
     std::recursive_mutex mutex_;
