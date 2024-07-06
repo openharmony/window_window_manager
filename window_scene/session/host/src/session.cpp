@@ -882,7 +882,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     return WSError::WS_OK;
 }
 
-void Session::SetWindowSessionProperty(sptr<WindowSessionProperty> property)
+void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
