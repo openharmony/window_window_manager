@@ -61,26 +61,34 @@ private:
     void InitSessionManagerServiceProxy();
     WMError InitMockSMSProxy();
     void InitSceneSessionManagerProxy();
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
     void RegisterSMSRecoverListener();
+    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
+
+    std::recursive_mutex mutex_;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     bool isRecoverListenerRegistered_ = false;
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
-    WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
-    WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
-    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     sptr<FoundationDeathRecipient> foundationDeath_ = nullptr;
-    std::recursive_mutex recoverMutex_;
-    std::recursive_mutex mutex_;
-    int32_t currentWMSUserId_ = INVALID_USER_ID;
-    int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
-    bool isWMSConnected_ = false;
     bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
+    // above guarded by mutex_
+
+    std::recursive_mutex recoverMutex_;
+    WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
+    // above guarded by recoverMutex_
+
+    std::mutex wmsConnectionMutex_;
+    bool isWMSConnected_ = false;
+    int32_t currentWMSUserId_ = INVALID_USER_ID;
+    int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
+    WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
+    // above guarded by wmsConnectionMutex_, among OnWMSConnectionChanged for wms connection event, user switched,
+    // register WMSConnectionChangedListener.
 };
 } // namespace OHOS::Rosen
 
