@@ -721,7 +721,7 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
 
 WMError PictureInPictureController::RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
-    preturn RegisterListener(pipLifeCycleListeners_, listener);
+    return RegisterListener(pipLifeCycleListeners_, listener);
 }
 
 WMError PictureInPictureController::RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener)
