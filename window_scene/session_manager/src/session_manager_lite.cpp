@@ -413,7 +413,7 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
         isWMSAlreadyConnected = (isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID));
     }
     if (isWMSAlreadyConnected) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify  immediately");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify immediately");
         OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, true, true);
     }
     {
