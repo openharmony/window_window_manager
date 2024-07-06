@@ -58,17 +58,17 @@ private:
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type);
 
-    void ProcessStateChangeRegister();
-    void ProcessActionEventRegister();
-    void ProcessControlEventRegister();
-    void ProcessStateChangeUnRegister();
-    void ProcessActionEventUnRegister();
-    void ProcessControlEventUnRegister();
+    void ProcessStateChangeRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessActionEventRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessControlEventRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessActionEventUnRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessControlEventUnRegister(sptr<JsPiPWindowListener> listener);
 
     sptr<PictureInPictureController> pipController_;
     napi_env env_;
     std::map<std::string, ListenerType> listenerCodeMap_;
-    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsPiPWindowListener>>> jsCbMap_;
 
 public:
     class PiPLifeCycleImpl : public IPiPLifeCycle {
