@@ -428,8 +428,8 @@ void JsPipController::ProcessControlEventRegister(sptr<JsPiPWindowListener> list
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-    sptr<IPiPActionObserver> thisListener(listener);
-    pipController_->RegisterPiPControlObserver(controlObserver);
+    sptr<IPiPControlObserver> thisListener(listener);
+    pipController_->RegisterPiPControlObserver(thisListener);
     TLOGI(WmsLogTag::WMS_PIP, "Register control event success");
 }
 
@@ -460,7 +460,7 @@ void JsPipController::ProcessControlEventUnRegister(sptr<JsPiPWindowListener> li
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-    sptr<IPiPActionObserver> thisListener(listener);
+    sptr<IPiPControlObserver> thisListener(listener);
     pipController_->UnregisterPiPControlObserver(thisListener);
     TLOGI(WmsLogTag::WMS_PIP, "UnRegister control event success");
 }
