@@ -87,7 +87,7 @@ private:
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
 
-    int ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
 
