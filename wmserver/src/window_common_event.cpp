@@ -29,6 +29,14 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "CommonEvent"};
     constexpr int RETRY_MAX_COUNT = 3;
     const std::string THREAD_ID = "WindowCommonEventHandler";
+
+    enum class EVENT_CODE : uint32_t {
+        COMMON_EVENT_USER_SWITCHED,
+    };
+
+    const std::map<std::string, EVENT_CODE> EVENT_CODE_MAP{
+        {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, EVENT_CODE::COMMON_EVENT_USER_SWITCHED},
+    };
 }
 
 WindowCommonEvent::WindowCommonEvent()
@@ -80,8 +88,10 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
-        if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-            HandleAccountSwitched(data);
+        if (EVENT_CODE_MAP.count(action)) {
+            if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+                HandleAccountSwitched(data);
+            }
         }
     };
     eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
