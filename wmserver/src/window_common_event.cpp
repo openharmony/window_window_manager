@@ -91,10 +91,8 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
         auto iter = EVENT_CODE_MAP.find(action);
         if (iter != EVENT_CODE_MAP.end()) {
             EVENT_CODE eventCode = iter->second;
-            switch (static_cast<uint32_t>(eventCode)) {
-                case EVENT_CODE::COMMON_EVENT_USER_SWITCHED:
-                    HandleAccountSwitched(data);
-                    break;
+            if (eventCode == EVENT_CODE::COMMON_EVENT_USER_SWITCHED) {
+                HandleAccountSwitched(data);
             }
         }
     };

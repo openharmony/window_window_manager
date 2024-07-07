@@ -46,13 +46,13 @@ namespace {
         WINDOW_STAGE_EVENT_CB,
     };
 
-    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_MANAGER_LISTENER_MAP{
+    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_MANAGER_LISTENER_MAP {
         // white register list for window manager
         {SYSTEM_BAR_TINT_CHANGE_CB, REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB},
         {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
         {WATER_MARK_FLAG_CHANGE_CB, REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB},
     };
-    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_LISTENER_MAP{
+    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_LISTENER_MAP {
         // white register list for window
         {WINDOW_SIZE_CHANGE_CB, REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB},
         {SYSTEM_AVOID_AREA_CHANGE_CB, REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB},
@@ -71,12 +71,12 @@ namespace {
         {WINDOW_RECT_CHANGE_CB, REGISTER_LISTENER_TYPE::WINDOW_RECT_CHANGE_CB},
         {SUB_WINDOW_CLOSE_CB, REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB},
     };
-    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_STAGE_LISTENER_MAP{
+    const std::map<std::string, REGISTER_LISTENER_TYPE> WINDOW_STAGE_LISTENER_MAP {
         // white register list for window stage
         {WINDOW_STAGE_EVENT_CB, REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB},
     };
 
-    const std::map<CaseType, std::map<std::string, REGISTER_LISTENER_TYPE>> LISTENER_CODE_MAP{
+    const std::map<CaseType, std::map<std::string, REGISTER_LISTENER_TYPE>> LISTENER_CODE_MAP {
         {CaseType::CASE_WINDOW_MANAGER, WINDOW_MANAGER_LISTENER_MAP},
         {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
         {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
@@ -382,7 +382,9 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    if (LISTENER_CODE_MAP[caseType].count(type) == 0) {
+    auto iter = LISTENER_CODE_MAP.find(caseType);
+    const std::map<std::string, REGISTER_LISTENER_TYPE> registerListenerTypeMap = iter->second;
+    if (registerListenerTypeMap.count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
@@ -421,6 +423,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
                     env, parameter);
             case REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB:
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, true, env, parameter);
+            default:
+                return WmErrorCode::WM_OK;
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
         switch (static_cast<uint32_t>(listenerType)) {
@@ -456,6 +460,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB:
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, true, env, parameter);
+            default:
+                return WmErrorCode::WM_OK;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
         if (listenerType == REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB) {
@@ -472,7 +478,9 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    if (LISTENER_CODE_MAP[caseType].count(type) == 0) {
+    auto iter = LISTENER_CODE_MAP.find(caseType);
+    const std::map<std::string, REGISTER_LISTENER_TYPE> registerListenerTypeMap = iter->second;
+    if (registerListenerTypeMap.count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
