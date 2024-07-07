@@ -382,9 +382,13 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    auto iter = LISTENER_CODE_MAP.find(caseType);
-    const std::map<std::string, REGISTER_LISTENER_TYPE> registerListenerTypeMap = iter->second;
-    if (registerListenerTypeMap.count(type) == 0) {
+    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
+    if (iterCaseType == LISTENER_CODE_MAP.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterType = iterCaseType->second.find(type);
+    if (iterType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
@@ -397,7 +401,8 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessListener(type, caseType, windowManagerListener, window, true, env, parameter);
+    WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType, windowManagerListener,
+        window, true, env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -408,15 +413,12 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, CaseType caseType,
+WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerType, CaseType caseType,
     const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
     napi_env env, napi_value parameter)
 {
-    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
-    auto iterType = iterCaseType->second.find(type);
-    REGISTER_LISTENER_TYPE listenerType = iterType->second;
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (static_cast<uint32_t>(listenerType)) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
             case static_cast<uint32_t>(REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB):
                 return ProcessSystemBarChangeRegister(windowManagerListener, window, true, env, parameter);
             case static_cast<uint32_t>(REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
@@ -428,7 +430,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
                 return WmErrorCode::WM_OK;
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (static_cast<uint32_t>(listenerType)) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
             case static_cast<uint32_t>(REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB):
                 return ProcessWindowChangeRegister(windowManagerListener, window, true, env, parameter);
             case static_cast<uint32_t>(REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB):
@@ -465,7 +467,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
                 return WmErrorCode::WM_OK;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
-        if (listenerType == REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB) {
+        if (registerListenerType == static_cast<uint32_t>(REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB)) {
             return ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
         }
     }
@@ -479,15 +481,20 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    auto iter = LISTENER_CODE_MAP.find(caseType);
-    const std::map<std::string, REGISTER_LISTENER_TYPE> registerListenerTypeMap = iter->second;
-    if (registerListenerTypeMap.count(type) == 0) {
+    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
+    if (iterCaseType == LISTENER_CODE_MAP.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterType = iterCaseType->second.find(type);
+    if (iterType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessListener(type, caseType, it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType,
+                it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
