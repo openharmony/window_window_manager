@@ -470,6 +470,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerTy
         if (registerListenerType == static_cast<uint32_t>(REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB)) {
             return ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
         }
+        return WmErrorCode::WM_OK;
     }
 }
 
