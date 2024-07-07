@@ -70,9 +70,7 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    WmErrorCode ProcessRegisterListener(const std::string& type, CaseType caseType, const sptr<JsWindowListener>& listener,
-        const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter);
-    WmErrorCode ProcessUnRegisterListener(const std::string& type, CaseType caseType, const sptr<JsWindowListener>& listener,
+    WmErrorCode ProcessListener(const std::string& type, CaseType caseType, const sptr<JsWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
