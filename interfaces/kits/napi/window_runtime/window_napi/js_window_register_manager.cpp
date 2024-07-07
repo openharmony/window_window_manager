@@ -510,7 +510,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessListener(type, caseType, it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType,
+                it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
