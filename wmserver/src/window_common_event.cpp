@@ -80,10 +80,8 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
-        if (handleCommonEventFuncs_.count(action)) {
-            if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-                HandleAccountSwitched(data);
-            }
+        if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+            HandleAccountSwitched(data);
         }
     };
     eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
