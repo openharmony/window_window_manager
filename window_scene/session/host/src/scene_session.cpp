@@ -2755,6 +2755,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowMask(property, sceneSession, action);
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
             return HandleActionUpdateTopmost(property, sceneSession, action);
+        case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+            return HandleActionUpdateModeSupportInfo(property, sceneSession, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;

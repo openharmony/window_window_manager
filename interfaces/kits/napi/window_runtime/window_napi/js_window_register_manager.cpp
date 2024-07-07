@@ -76,7 +76,7 @@ namespace {
         {WINDOW_STAGE_EVENT_CB, REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB},
     };
 
-    const std::map<CaseType, std::map<std::string, REGISTER_LISTENER_TYPE>> {
+    const std::map<CaseType, std::map<std::string, REGISTER_LISTENER_TYPE>> LISTENER_CODE_MAP{
         {CaseType::CASE_WINDOW_MANAGER, WINDOW_MANAGER_LISTENER_MAP},
         {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
         {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
@@ -382,7 +382,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    if ([CaseType].count(type) == 0) {
+    if (LISTENER_CODE_MAP[CaseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
@@ -395,7 +395,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessRegisterListener(type, caseType, windowManagerListener, window, true, env, parameter);
+    WmErrorCode ret = ProcessListener(type, caseType, windowManagerListener, window, true, env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -406,75 +406,75 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessRegisterListener(const std::string& type, CaseType caseType,
+WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, CaseType caseType,
     const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister, napi_env env,
     napi_value parameter)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
-    REGISTER_LISTENER_TYPE listenerType = [type];
+    REGISTER_LISTENER_TYPE listenerType = LISTENER_CODE_MAP[type];
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (static_cast<int>(listenerType)) {
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB):
+        switch (listenerType) {
+            case REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB:
                 ret = ProcessSystemBarChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
                 ret = ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, true,
                     env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB:
                 ret = ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
             default:
                 break;
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (static_cast<int>(listenerType)) {
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB):
+        switch (listenerType) {
+            case REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB:
                 ret = ProcessWindowChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB:
                 ret = ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::AVOID_AREA_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::AVOID_AREA_CHANGE_CB:
                 ret = ProcessAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::LIFECYCLE_EVENT_CB):
+            case REGISTER_LISTENER_TYPE::LIFECYCLE_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_EVENT_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::KEYBOARD_HEIGHT_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::KEYBOARD_HEIGHT_CHANGE_CB:
                 ret = ProcessOccupiedAreaChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::TOUCH_OUTSIDE_CB):
+            case REGISTER_LISTENER_TYPE::TOUCH_OUTSIDE_CB:
                 ret = ProcessTouchOutsideRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SCREENSHOT_EVENT_CB):
+            case REGISTER_LISTENER_TYPE::SCREENSHOT_EVENT_CB:
                 ret = ProcessScreenshotRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::DIALOG_TARGET_TOUCH_CB):
+            case REGISTER_LISTENER_TYPE::DIALOG_TARGET_TOUCH_CB:
                 ret = ProcessDialogTargetTouchRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::DIALOG_DEATH_RECIPIENT_CB):
+            case REGISTER_LISTENER_TYPE::DIALOG_DEATH_RECIPIENT_CB:
                 ret = ProcessDialogDeathRecipientRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_STATUS_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_STATUS_CHANGE_CB:
                 ret = ProcessWindowStatusChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB:
                 ret = ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_VISIBILITY_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_VISIBILITY_CHANGE_CB:
                 ret = ProcessWindowVisibilityChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_NO_INTERACTION_DETECT_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_NO_INTERACTION_DETECT_CB:
                 ret = ProcessWindowNoInteractionRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_RECT_CHANGE_CB):
+            case REGISTER_LISTENER_TYPE::WINDOW_RECT_CHANGE_CB:
                 ret = ProcessWindowRectChangeRegister(windowManagerListener, window, true, env, parameter);
                 break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB):
+            case REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB:
                 ret = ProcessSubWindowCloseRegister(windowManagerListener, window, true, env, parameter);
                 break;
             default:
@@ -496,13 +496,13 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    if ([CaseType].count(type) == 0) {
+    if (LISTENER_CODE_MAP[CaseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessUnRegisterListener(type, caseType, it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(type, caseType, it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -518,7 +518,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessUnRegisterListener(type, caseType, it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(type, caseType, it->second, window, false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
@@ -538,86 +538,6 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         jsCbMap_.erase(type);
     }
     return WmErrorCode::WM_OK;
-}
-
-WmErrorCode JsWindowRegisterManager::ProcessUnRegisterListener(const std::string& type, CaseType caseType,
-    const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister, napi_env env,
-    napi_value parameter)
-{
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    REGISTER_LISTENER_TYPE listenerType = [type];
-    if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (static_cast<int>(listenerType)) {
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB):
-                ret = ProcessSystemBarChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
-                ret = ProcessGestureNavigationEnabledChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB):
-                ret = ProcessWaterMarkFlagChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            default:
-                break;
-        }
-    } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (static_cast<int>(listenerType)) {
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB):
-                ret = ProcessWindowChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB):
-                ret = ProcessSystemAvoidAreaChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::AVOID_AREA_CHANGE_CB):
-                ret = ProcessAvoidAreaChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::LIFECYCLE_EVENT_CB):
-                ret = ProcessLifeCycleEventRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_EVENT_CB):
-                ret = ProcessLifeCycleEventRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::KEYBOARD_HEIGHT_CHANGE_CB):
-                ret = ProcessOccupiedAreaChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::TOUCH_OUTSIDE_CB):
-                ret = ProcessTouchOutsideRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SCREENSHOT_EVENT_CB):
-                ret = ProcessScreenshotRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::DIALOG_TARGET_TOUCH_CB):
-                ret = ProcessDialogTargetTouchRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::DIALOG_DEATH_RECIPIENT_CB):
-                ret = ProcessDialogDeathRecipientRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_STATUS_CHANGE_CB):
-                ret = ProcessWindowStatusChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
-                ret = ProcessWindowTitleButtonRectChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_VISIBILITY_CHANGE_CB):
-                ret = ProcessWindowVisibilityChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_NO_INTERACTION_DETECT_CB):
-                ret = ProcessWindowNoInteractionRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::WINDOW_RECT_CHANGE_CB):
-                ret = ProcessWindowRectChangeRegister(it->second, window, false, env, nullptr);
-                break;
-            case static_cast<int>(REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB):
-                ret = ProcessSubWindowCloseRegister(it->second, window, false, env, nullptr);
-                break;
-            default:
-                break;
-        }
-    } else if (caseType == CaseType::CASE_STAGE) {
-        if (listenerType == REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB) {
-            ret = ProcessLifeCycleEventRegister(it->second, window, false, env, nullptr);
-        }
-    }
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener,
