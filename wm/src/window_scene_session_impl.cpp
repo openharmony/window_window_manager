@@ -887,7 +887,7 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent != nullptr) {
+    if (uiContent == nullptr) {
         TLOGW(WmsLogTag::WMS_LIFE, "uiContent is null");
         return;
     }
