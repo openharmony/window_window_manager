@@ -81,7 +81,6 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
         if (handleCommonEventFuncs_.count(action)) {
-            (this->*handleCommonEventFuncs_[action])(data);
             if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
                 HandleAccountSwitched(data);
             }

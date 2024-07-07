@@ -410,82 +410,57 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
     const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister, napi_env env,
     napi_value parameter)
 {
-    WmErrorCode ret = WmErrorCode::WM_OK;
     REGISTER_LISTENER_TYPE listenerType = LISTENER_CODE_MAP[type];
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         switch (listenerType) {
             case REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB:
-                ret = ProcessSystemBarChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessSystemBarChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
-                ret = ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, true,
+                return ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, true,
                     env, parameter);
-                break;
             case REGISTER_LISTENER_TYPE::WATER_MARK_FLAG_CHANGE_CB:
-                ret = ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
-            default:
-                break;
+                return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, true, env, parameter);
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
         switch (listenerType) {
             case REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB:
-                ret = ProcessWindowChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB:
-                ret = ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::AVOID_AREA_CHANGE_CB:
-                ret = ProcessAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessAvoidAreaChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::LIFECYCLE_EVENT_CB:
-                ret = ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_EVENT_CB:
-                ret = ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::KEYBOARD_HEIGHT_CHANGE_CB:
-                ret = ProcessOccupiedAreaChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::TOUCH_OUTSIDE_CB:
-                ret = ProcessTouchOutsideRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessTouchOutsideRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::SCREENSHOT_EVENT_CB:
-                ret = ProcessScreenshotRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessScreenshotRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::DIALOG_TARGET_TOUCH_CB:
-                ret = ProcessDialogTargetTouchRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessDialogTargetTouchRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::DIALOG_DEATH_RECIPIENT_CB:
-                ret = ProcessDialogDeathRecipientRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessDialogDeathRecipientRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_STATUS_CHANGE_CB:
-                ret = ProcessWindowStatusChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowStatusChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB:
-                ret = ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_VISIBILITY_CHANGE_CB:
-                ret = ProcessWindowVisibilityChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_NO_INTERACTION_DETECT_CB:
-                ret = ProcessWindowNoInteractionRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowNoInteractionRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::WINDOW_RECT_CHANGE_CB:
-                ret = ProcessWindowRectChangeRegister(windowManagerListener, window, true, env, parameter);
-                break;
+                return ProcessWindowRectChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::SUB_WINDOW_CLOSE_CB:
-                ret = ProcessSubWindowCloseRegister(windowManagerListener, window, true, env, parameter);
-                break;
-            default:
-                break;
+                return ProcessSubWindowCloseRegister(windowManagerListener, window, true, env, parameter);
         }
     } else if (caseType == CaseType::CASE_STAGE) {
         if (listenerType == REGISTER_LISTENER_TYPE::WINDOW_STAGE_EVENT_CB) {
-            ret = ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
+            return ProcessLifeCycleEventRegister(windowManagerListener, window, true, env, parameter);
         }
     }
-    return ret;
 }
 
 WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
