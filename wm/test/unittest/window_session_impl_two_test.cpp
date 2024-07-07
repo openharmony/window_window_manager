@@ -455,10 +455,10 @@ HWTEST_F(WindowSessionImplTwoTest, FlushFrameRate, Function | SmallTest | Level2
         vsyncStation = std::make_shared<VsyncStation>(DisplayId(0));
     }
     window->vsyncStation_ = nullptr;
-    window->FlushFrameRate(1, true);
+    window->FlushFrameRate(1, -1);
 
     window->vsyncStation_ = vsyncStation;
-    window->FlushFrameRate(1, true);
+    window->FlushFrameRate(1, -1);
     window->Destroy();
 }
 
