@@ -2696,7 +2696,7 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    return ProcessUpdatePropertyByAction(property, sceneSession, action)
+    return ProcessUpdatePropertyByAction(property, sceneSession, action);
 }
 
 WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
