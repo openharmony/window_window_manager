@@ -70,11 +70,12 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool,
-        napi_env env, napi_value parameter);
+    WmErrorCode ProcessRegisterListener(const std::string& type, CaseType caseType, const sptr<JsWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter);
+    WmErrorCode ProcessUnRegisterListener(const std::string& type, CaseType caseType, const sptr<JsWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
-    std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
 };
 } // namespace Rosen
 } // namespace OHOS
