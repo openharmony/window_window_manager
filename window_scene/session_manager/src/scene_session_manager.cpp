@@ -51,6 +51,8 @@
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
 #include "publish/scene_event_publish.h"
+#include "app_mgr_client.h"
+#include "singleton.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -7036,7 +7038,10 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 
 WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    AppExecFwk::RunningProcessInfo info;
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    DelayedSingleto<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+    if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
         WLOGFE("SystemCalling permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
