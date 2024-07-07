@@ -412,7 +412,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
     const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
     napi_env env, napi_value parameter)
 {
-    auto iter = LISTENER_CODE_MAP.find(type);
+    auto iter = LISTENER_CODE_MAP.find(caseType);
     REGISTER_LISTENER_TYPE listenerType = iter->second;
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         switch (static_cast<uint32_t>(listenerType)) {
