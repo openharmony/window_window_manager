@@ -382,7 +382,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    if (LISTENER_CODE_MAP[CaseType].count(type) == 0) {
+    if (LISTENER_CODE_MAP[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
@@ -407,12 +407,13 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, CaseType caseType,
-    const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister, napi_env env,
-    napi_value parameter)
+    const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+    napi_env env, napi_value parameter)
 {
-    REGISTER_LISTENER_TYPE listenerType = LISTENER_CODE_MAP[type];
+    auto iter = LISTENER_CODE_MAP.find(type);
+    REGISTER_LISTENER_TYPE listenerType = iter->second;
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (listenerType) {
+        switch (static_cast<uint32_t>(listenerType)) {
             case REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB:
                 return ProcessSystemBarChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
@@ -422,7 +423,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, true, env, parameter);
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (listenerType) {
+        switch (static_cast<uint32_t>(listenerType)) {
             case REGISTER_LISTENER_TYPE::WINDOW_SIZE_CHANGE_CB:
                 return ProcessWindowChangeRegister(windowManagerListener, window, true, env, parameter);
             case REGISTER_LISTENER_TYPE::SYSTEM_AVOID_AREA_CHANGE_CB:
@@ -471,7 +472,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    if (LISTENER_CODE_MAP[CaseType].count(type) == 0) {
+    if (LISTENER_CODE_MAP[caseType].count(type) == 0) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
