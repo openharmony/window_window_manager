@@ -412,8 +412,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(const std::string& type, Ca
     const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
     napi_env env, napi_value parameter)
 {
-    auto iter = LISTENER_CODE_MAP.find(caseType);
-    REGISTER_LISTENER_TYPE listenerType = iter->second;
+    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
+    auto iterType = iter->second.find(type);
+    REGISTER_LISTENER_TYPE listenerType = iterType->second;
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         switch (static_cast<uint32_t>(listenerType)) {
             case static_cast<uint32_t>(REGISTER_LISTENER_TYPE::SYSTEM_BAR_TINT_CHANGE_CB):
