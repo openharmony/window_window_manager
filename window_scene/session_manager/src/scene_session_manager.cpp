@@ -7040,7 +7040,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
 {
     AppExecFwk::RunningProcessInfo info;
     auto pid = IPCSkeleton::GetCallingRealPid();
-    DelayedSingleto<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
     if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
         WLOGFE("SystemCalling permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
