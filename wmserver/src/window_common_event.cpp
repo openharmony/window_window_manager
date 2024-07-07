@@ -33,8 +33,6 @@ namespace {
 
 WindowCommonEvent::WindowCommonEvent()
 {
-    handleCommonEventFuncs_.insert(make_pair(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
-        &WindowCommonEvent::HandleAccountSwitched));
     auto runner = AppExecFwk::EventRunner::Create(THREAD_ID);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
@@ -84,6 +82,9 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
         WLOGI("called action = %{public}s", action.c_str());
         if (handleCommonEventFuncs_.count(action)) {
             (this->*handleCommonEventFuncs_[action])(data);
+            if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+                HandleAccountSwitched(data);
+            }
         }
     };
     eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
