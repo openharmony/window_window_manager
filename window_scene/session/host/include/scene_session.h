@@ -333,6 +333,9 @@ public:
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
     Vector2f GetPosition(bool useUIExtension);
+    void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
+    void RemoveUIExtSurfaceNodeId(int32_t persistentId);
+    int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -478,6 +481,8 @@ private:
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
+    mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
+    std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;

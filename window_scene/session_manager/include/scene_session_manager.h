@@ -69,6 +69,8 @@ struct SCBAbilityInfo {
     uint32_t sdkVersion_;
 };
 class SceneSession;
+struct SecSurfaceInfo;
+class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -308,7 +310,7 @@ public:
     void FlushWindowInfoToMMI(const bool forceFlush = false);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage) override;
+        int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId) override;
     void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override;
     void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
         int32_t posX, int32_t posY) override;
@@ -340,7 +342,7 @@ public:
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
-
+    void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -506,7 +508,7 @@ private:
     void NotifyAllAccessibilityInfo();
     void removeFailRecoveredSession();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
-
+    void RegisterSecSurfaceInfoListener();
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;

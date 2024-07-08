@@ -109,8 +109,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
 void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
     sptr<ISessionStage> iSessionStage(this);
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
+        return;
+    }
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
-        property_->GetParentId(), property_->GetUIExtensionUsage());
+        property_->GetParentId(), property_->GetUIExtensionUsage(), surfaceNode_->GetId());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -418,6 +422,23 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
     DispatchKeyEventCallback(keyEvent, isConsumed);
 }
 
+void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI new framework support after API10
+    if (version < 10) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        if (!isSystembarPropertiesSet_) {
+            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
+        }
+    } else if (isIgnoreSafeAreaNeedNotify_) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+    }
+}
+
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -440,6 +461,9 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
+        if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
+        }
         uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
@@ -450,21 +474,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     if (focusState_ != std::nullopt) {
         focusState_.value() ? uiContent->Focus() : uiContent->UnFocus();
     }
-
-    uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
-    }
-    // 10 ArkUI new framework support after API10
-    if (version < 10) {
-        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
-        if (!isSystembarPropertiesSet_) {
-            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
-        }
-    } else if (isIgnoreSafeAreaNeedNotify_) {
-        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
-    }
-
+    ArkUIFrameworkSupport();
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown

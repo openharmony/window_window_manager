@@ -938,6 +938,26 @@ HWTEST_F(SceneSessionTest5, SetSnapshotSkip, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UIExtSurfaceNodeIdCache
+ * @tc.desc: UIExtSurfaceNodeIdCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UIExtSurfaceNodeIdCache, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UIExtSurfaceNodeIdCache";
+    info.bundleName_ = "UIExtSurfaceNodeIdCache";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->AddUIExtSurfaceNodeId(1, 2);
+    EXPECT_EQ(session->GetUIExtPersistentIdBySurfaceNodeId(1), 2);
+
+    session->RemoveUIExtSurfaceNodeId(2);
+    EXPECT_EQ(session->GetUIExtPersistentIdBySurfaceNodeId(1), 0);
+}
+
+/**
  * @tc.name: SetSystemSceneOcclusionAlpha
  * @tc.desc: SetSystemSceneOcclusionAlpha function01
  * @tc.type: FUNC
