@@ -97,7 +97,7 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
+void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
