@@ -505,10 +505,19 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     std::shared_ptr<NativeReference> callbackRef;
-    napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
     sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
-    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+           
+            bool isEquals = false;
+            napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+            if (!isEquals) {
+                continue;
+            }
+            findFlag = true;
+            jsCbMap_[type][callbackRef] = pipWindowListener;
+            jsCbMap_[type].erase(it);
+            break;
+        }
     jsCbMap_[type][callbackRef] = pipWindowListener;
     jsCbMap_.erase(type);
     
@@ -525,6 +534,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         default:
             break;
     }
+    TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s is unregistered!", type.c_str());
     return WmErrorCode::WM_OK;
 }
 

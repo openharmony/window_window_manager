@@ -571,8 +571,8 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(in
 
 void PictureInPictureController::DoActionEvent(const std::string& actionName, int32_t status)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "actionName: %{public}s", actionName.c_str());
-    if (!pipActionObservers_.empty()) {
+    TLOGI(WmsLogTag::WMS_PIP, "actionName: %{public}s", actionName.c_str());
+    if (pipActionObservers_.empty()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipActionObserver is not registered");
         return;
     }
@@ -595,7 +595,7 @@ void PictureInPictureController::PreRestorePictureInPicture()
 void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (!pipControlObservers_.empty()) {
+    if (pipControlObservers_.empty()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipControlObserver is not registered");
         return;
     }
