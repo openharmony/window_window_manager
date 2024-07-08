@@ -1874,6 +1874,8 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
                 rect.width_ = compatibleInPcLandscapeWidth;
                 rect.height_ = compatibleInPcLandscapeHeight;
             }
+            SetSurfaceBounds(rect);
+            UpdateSizeChangeReason(reason);
         }
     } else {
         SetSurfaceBounds(rect);
