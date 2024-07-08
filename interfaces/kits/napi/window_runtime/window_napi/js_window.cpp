@@ -5672,9 +5672,9 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     TitleButtonRect titleButtonRect;
-    WMError ret = windowToken_->GetTitleButtonArea(titleButtonRect);
-    if (ret != WMError::WM_OK) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetTitleButtonArea(titleButtonRect));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetTitleButtonRect end",
         window->GetWindowId(), window->GetWindowName().c_str());
