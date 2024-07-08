@@ -23,29 +23,6 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
 
-    enum class RegisterListenerType : uint32_t {
-        SYSTEM_BAR_TINT_CHANGE_CB,
-        GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-        WATER_MARK_FLAG_CHANGE_CB,
-        WINDOW_SIZE_CHANGE_CB,
-        SYSTEM_AVOID_AREA_CHANGE_CB,
-        AVOID_AREA_CHANGE_CB,
-        LIFECYCLE_EVENT_CB,
-        WINDOW_EVENT_CB,
-        KEYBOARD_HEIGHT_CHANGE_CB,
-        TOUCH_OUTSIDE_CB,
-        SCREENSHOT_EVENT_CB,
-        DIALOG_TARGET_TOUCH_CB,
-        DIALOG_DEATH_RECIPIENT_CB,
-        WINDOW_STATUS_CHANGE_CB,
-        WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
-        WINDOW_VISIBILITY_CHANGE_CB,
-        WINDOW_NO_INTERACTION_DETECT_CB,
-        WINDOW_RECT_CHANGE_CB,
-        SUB_WINDOW_CLOSE_CB,
-        WINDOW_STAGE_EVENT_CB,
-    };
-
     const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
         // white register list for window manager
         {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
@@ -401,8 +378,8 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType, windowManagerListener,
-        window, true, env, parameter);
+    WmErrorCode ret = ProcessListener(iterType->second, caseType, windowManagerListener, window, true,
+        env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -413,12 +390,12 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerType, CaseType caseType,
+WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
     const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
     napi_env env, napi_value parameter)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (registerListenerType) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
             case RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB:
                 return ProcessSystemBarChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
@@ -428,7 +405,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerTy
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (registerListenerType) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
             case RegisterListenerType::WINDOW_SIZE_CHANGE_CB:
                 return ProcessWindowChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB:
@@ -490,8 +467,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType,
-                it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(iterType->second, caseType, it->second, window,
+                false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -507,8 +484,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessListener(static_cast<uint32_t>(iterType->second), caseType,
-                it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(iterType->second, caseType, it->second, window,
+                false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
