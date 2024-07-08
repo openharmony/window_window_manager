@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_display_listener.h"
+
+#include <hitrace_meter.h>
+
 #include "dm_common.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
@@ -180,6 +184,7 @@ void JsDisplayListener::OnChange(DisplayId id)
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     auto napiTask = [this, listener, id, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnChange");
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
         CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
     };
@@ -234,9 +239,10 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     auto napiTask = [this, listener, foldStatus, env = env_] () {
-            napi_value argv[] = {CreateJsValue(env, foldStatus)};
-            CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
-        };
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldStatusChanged");
+        napi_value argv[] = {CreateJsValue(env, foldStatus)};
+        CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
+    };
 
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
@@ -312,9 +318,10 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     auto napiTask = [this, listener, displayMode, env = env_] () {
-            napi_value argv[] = {CreateJsValue(env, displayMode)};
-            CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
-        };
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDisplayModeChanged");
+        napi_value argv[] = {CreateJsValue(env, displayMode)};
+        CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
+    };
 
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
