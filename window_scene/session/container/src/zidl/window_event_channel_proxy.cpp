@@ -30,7 +30,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
-constexpr int64_t MAX_COUNT = 210 * 9 * 9 * 100000000000;
 }
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -214,209 +213,6 @@ WSError WindowEventChannelProxy::TransferFocusState(bool focusState)
     return static_cast<WSError>(ret);
 }
 
-WSError GetElementInfos(MessageParcel& reply, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    int64_t count = 0;
-    if (!reply.ReadInt64(count)) {
-        WLOGFE("GetElementInfos failed to read count");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (count > MAX_COUNT) {
-        WLOGFE("GetElementInfos count over size");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    infos.clear();
-    for (int i = 0; i < count; i++) {
-        sptr<Accessibility::AccessibilityElementInfoParcel> infoPtr =
-            reply.ReadStrongParcelable<Accessibility::AccessibilityElementInfoParcel>();
-        if (infoPtr != nullptr) {
-            infos.push_back(*infoPtr);
-        }
-    }
-    return WSError::WS_OK;
-}
-
-WSError WindowEventChannelProxy::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(elementId)) {
-        WLOGFE("Write elementId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(mode)) {
-        WLOGFE("Write mode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(baseParent)) {
-        WLOGFE("Write baseParent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return GetElementInfos(reply, infos);
-}
-
-WSError WindowEventChannelProxy::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(elementId)) {
-        WLOGFE("Write elementId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(text)) {
-        WLOGFE("Write text failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(baseParent)) {
-        WLOGFE("Write baseParent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(
-        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT), data, reply,
-        option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return GetElementInfos(reply, infos);
-}
-
-WSError GetElementInfo(MessageParcel& reply, Accessibility::AccessibilityElementInfo& info)
-{
-    sptr<Accessibility::AccessibilityElementInfoParcel> infoPtr =
-        reply.ReadStrongParcelable<Accessibility::AccessibilityElementInfoParcel>();
-    if (infoPtr != nullptr) {
-        info = *infoPtr;
-    }
-    return WSError::WS_OK;
-}
-
-WSError WindowEventChannelProxy::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType,
-    int64_t baseParent, Accessibility::AccessibilityElementInfo& info)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(elementId)) {
-        WLOGFE("Write elementId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(focusType)) {
-        WLOGFE("Write focusType failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(baseParent)) {
-        WLOGFE("Write baseParent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(
-        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO), data, reply,
-        option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return GetElementInfo(reply, info);
-}
-
-WSError WindowEventChannelProxy::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(elementId)) {
-        WLOGFE("Write elementId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(direction)) {
-        WLOGFE("Write direction failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(baseParent)) {
-        WLOGFE("Write baseParent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return GetElementInfo(reply, info);
-}
-
-WSError WindowEventChannelProxy::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action,
-    int64_t baseParent)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(elementId)) {
-        WLOGFE("Write elementId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(action)) {
-        WLOGFE("Write action failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    std::vector<std::string> actionArgumentsKey {};
-    std::vector<std::string> actionArgumentsValue {};
-    for (auto iter = actionArguments.begin(); iter != actionArguments.end(); iter++) {
-        actionArgumentsKey.push_back(iter->first);
-        actionArgumentsValue.push_back(iter->second);
-    }
-    if (!data.WriteStringVector(actionArgumentsKey)) {
-        WLOGFE("actionArgumentsKey write error");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteStringVector(actionArgumentsValue)) {
-        WLOGFE("actionArgumentsValue write error");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt64(baseParent)) {
-        WLOGFE("Write baseParent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
 WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
@@ -424,7 +220,7 @@ WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, f
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteFloat(pointX) ||
@@ -432,13 +228,96 @@ WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, f
         !data.WriteInt32(sourceType) ||
         !data.WriteInt32(eventType) ||
         !data.WriteInt64(timeMs)) {
-        WLOGFE("Write TransferAccessibilityHoverEvent data failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write TransferAccessibilityHoverEvent data failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(
         static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write windowId fail, action error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(treeId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write treeId fail, action error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt64(accessibilityId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write accessibilityId fail, action error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_REGISTER),
+        data, reply, option);
+    if (error != ERR_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to SendRequest: %{public}d", error);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferAccessibilityChildTreeUnregister()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_UNREGISTER),
+        data, reply, option);
+    if (error != ERR_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to SendRequest: %{public}d", error);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteStringVector(params)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to write params");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_DUMP_CHILD_INFO),
+        data, reply, option);
+    if (error != ERR_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to SendRequest: %{public}d", error);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadStringVector(&info)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "%{public}s, Read reply info failed.", __func__);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
