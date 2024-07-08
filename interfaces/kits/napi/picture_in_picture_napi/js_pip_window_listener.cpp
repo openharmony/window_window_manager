@@ -67,27 +67,51 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
     OnPipListenerCallback(PiPState::ERROR, errorCode);
 }
 
-void CallBackJsMethod(napi_env env, napi_value method, napi_value const* argv, size_t argc)
+napi_value JsPiPWindowListener::CallJsMethod(napi_value methodName, napi_value const * argv, size_t argc)
 {
+    if (env_ == nullptr || jsCallBack_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]env_ nullptr or jsCallBack_ is nullptr");
+        return nullptr;
+    }
+    napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "empty method, call method failed");
-        return;
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get method callback from object");
+        return nullptr;
     }
-    if (env == nullptr) {
-        return;
-    }
-    napi_call_function(env, NapiGetUndefined(env), method, argc, argv, nullptr);
+    napi_value result = nullptr;
+    napi_value callResult = nullptr;
+    napi_get_undefined(env_, &result);
+    napi_get_undefined(env_, &callResult);
+    napi_call_function(env_, result, method, argc, argv, &callResult);
+    TLOGI(WmsLogTag::WMS_PIP, "called.");
+    return callResult;
 }
 
 void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
-    auto jsCallback = jsCallBack_;
     std::string error = std::to_string(errorCode);
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [jsCallback, state, error] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(state)), CreateJsValue(env, error)};
-            CallBackJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        [self = weakRef_, state, error, eng = env_, jsCallback = jsCallBack_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
+            
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or eng is nullptr");
+                return;
+            }
+            napi_value propertyValue = nullptr;
+            napi_create_object(eng, &propertyValue);
+            if (propertyValue == nullptr) {
+                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                return;
+            }
+            napi_set_named_property(env, propertyValue, "state",
+                CreateJsValue(eng, state));
+            napi_set_named_property(env, propertyValue, "error",
+                CreateJsValue(eng, error));
+            napi_value argv[] = {propertyValue};
+            thisListener->CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
         }
     );
 
@@ -100,43 +124,68 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
 void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
-    auto jsCallback = jsCallBack_;
+    std::string state = std::to_string(statusCode);
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [jsCallback, actionEvent, statusCode] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[2] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
-            CallBackJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        [self = weakRef_, actionEvent, state, eng = env_, jsCallback = jsCallBack_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
+            
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or eng is nullptr");
+                return;
+            }
+            napi_value propertyValue = nullptr;
+            napi_create_object(eng, &propertyValue);
+            if (propertyValue == nullptr) {
+                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                return;
+            }
+            napi_set_named_property(env, propertyValue, "actionEvent",
+                CreateJsValue(eng, actionEvent));
+            napi_set_named_property(env, propertyValue, "state",
+                CreateJsValue(eng, state));
+            napi_value argv[] = {propertyValue};
+            thisListener->CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
         }
     );
 
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::PiPActionObserverImpl::OnActionEvent",
+    NapiAsyncTask::Schedule("JsPiPWindowListener::OnActionEvent",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
-    napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = env_, task = napiAsyncTask.get()]() {
-        napi_value propertyValue = nullptr;
-        napi_create_object(env, &propertyValue);
-        if (propertyValue == nullptr) {
-            TLOGI(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
-            return;
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [self = weakRef_, controlType, statusCode, eng = env_, jsCallback = jsCallBack_] (napi_env env,
+            NapiAsyncTask &task, int32_t status) {
+            
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or eng is nullptr");
+                return;
+            }
+            napi_value propertyValue = nullptr;
+            napi_create_object(eng, &propertyValue);
+            if (propertyValue == nullptr) {
+                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                return;
+            }
+            napi_set_named_property(env, propertyValue, "controlType",
+                CreateJsValue(eng, controlType));
+            napi_set_named_property(env, propertyValue, "statusCode",
+                CreateJsValue(eng, statusCode));
+            napi_value argv[] = {propertyValue};
+            thisListener->CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
         }
-        napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
-        napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
-        napi_value argv[] = {propertyValue};
-        CallBackJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        delete task;
-    };
-    if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env_, CreateJsError(env_, 1, "send event failed"));
-    } else {
-        napiAsyncTask.release();
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsPiPWindowListener::OnActionEvent",
+        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS
