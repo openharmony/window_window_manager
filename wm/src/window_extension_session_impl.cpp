@@ -746,10 +746,10 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+    if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
+        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
-        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property is not allowed in %{public}s UIExtension.",
+        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property to false is not allowed in %{public}s UIExtension.",
             property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
