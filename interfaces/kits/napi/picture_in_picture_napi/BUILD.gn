@@ -32,6 +32,7 @@ ohos_shared_library("pipwindow_napi") {
     "js_pip_utils.cpp",
     "js_pip_window_manager.cpp",
     "js_pipwindow_module.cpp",
+    "js_pip_window_listener.cpp",
   ]
 
   configs = [

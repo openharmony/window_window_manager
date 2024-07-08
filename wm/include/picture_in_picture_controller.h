@@ -83,12 +83,12 @@ public:
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
     void LocateSource();
-    void RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
-    void RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
-    void RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
-    void UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
-    void UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
-    void UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
+    WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
+    WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
+    WMError UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
+    WMError UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
