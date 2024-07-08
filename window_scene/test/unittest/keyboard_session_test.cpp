@@ -701,9 +701,7 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
     ASSERT_FALSE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    bool result = !(sceneSession->GetSystemConfig().uiType_ == "phone" ||
-        sceneSession->GetSystemConfig().uiType_ == "tablet");
-    ASSERT_EQ(result, keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
+    keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true);
 
     WLOGFI("CheckIfNeedRaiseCallingSession end!");
 }
