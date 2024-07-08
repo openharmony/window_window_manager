@@ -46,13 +46,13 @@ namespace {
         WINDOW_STAGE_EVENT_CB,
     };
 
-    const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP{
+    const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
         // white register list for window manager
         {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
         {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
         {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
     };
-    const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP{
+    const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
         // white register list for window
         {WINDOW_SIZE_CHANGE_CB, RegisterListenerType::WINDOW_SIZE_CHANGE_CB},
         {SYSTEM_AVOID_AREA_CHANGE_CB, RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB},
@@ -71,12 +71,12 @@ namespace {
         {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
         {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
     };
-    const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP{
+    const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
         // white register list for window stage
         {WINDOW_STAGE_EVENT_CB, RegisterListenerType::WINDOW_STAGE_EVENT_CB},
     };
 
-    const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_CODE_MAP{
+    const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_CODE_MAP {
         {CaseType::CASE_WINDOW_MANAGER, WINDOW_MANAGER_LISTENER_MAP},
         {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
         {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
@@ -417,9 +417,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerTy
     const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
     napi_env env, napi_value parameter)
 {
-    RegisterListenerType listenerType = LISTENER_CODE_MAP[type];
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (listenerType) {
+        switch (registerListenerType) {
             case RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB:
                 return ProcessSystemBarChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
@@ -429,7 +428,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerTy
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (listenerType) {
+        switch (registerListenerType) {
             case RegisterListenerType::WINDOW_SIZE_CHANGE_CB:
                 return ProcessWindowChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB:
@@ -464,7 +463,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(uint32_t registerListenerTy
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
         }
     } else if (caseType == CaseType::CASE_STAGE) {
-        if (listenerType == RegisterListenerType::WINDOW_STAGE_EVENT_CB) {
+        if (registerListenerType == RegisterListenerType::WINDOW_STAGE_EVENT_CB) {
             return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
         }
     }
