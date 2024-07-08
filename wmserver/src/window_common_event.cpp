@@ -88,7 +88,7 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
-        if ((auto iter = EVENT_CODE_MAP.find(action)) != EVENT_CODE_MAP.end()) {
+        if ((auto iter = COMMON_EVENT_CODE_MAP.find(action)) != COMMON_EVENT_CODE_MAP.end()) {
             HandleAccountSwitched(data);
         }
     };
