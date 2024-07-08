@@ -893,19 +893,21 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 {
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "uiContent is null");
+        return;
+    }
     const auto& requestRect = GetRequestRect();
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
         UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE);
     }
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent != nullptr) {
-        state_ = WindowState::STATE_SHOWN;
-        requestState_ = WindowState::STATE_SHOWN;
-        uiContent->Foreground();
-        uiContent->PreLayout();
-    }
+    state_ = WindowState::STATE_SHOWN;
+    requestState_ = WindowState::STATE_SHOWN;
+    uiContent->Foreground();
+    uiContent->PreLayout();
 }
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
@@ -980,9 +982,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
-            state_ = WindowState::STATE_SHOWN;
-            requestState_ = WindowState::STATE_SHOWN;
         }
+        state_ = WindowState::STATE_SHOWN;
+        requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, WindowHelper::IsMainWindow(type));
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
