@@ -566,7 +566,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
                 screenSession->GetRSScreenId(), screenSession->GetName());
         }
-        if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
+        if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
             auto task = [this]() { PublishCastEvent(true); };
             taskScheduler_->PostAsyncTask(task, "PublishCastEventTrue");
@@ -575,7 +575,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
+        if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
             auto task = [this]() { PublishCastEvent(false); };
             taskScheduler_->PostAsyncTask(task, "PublishCastEventFalse");
@@ -1045,7 +1045,6 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         .property = property,
     };
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
-    screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
     screenSession->SetName("CastEngine");
     screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
