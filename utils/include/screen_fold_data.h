@@ -21,8 +21,7 @@
 
 namespace OHOS::Rosen {
 
-class ScreenFoldData {
-public:
+struct ScreenFoldData {
     ScreenFoldData() {}
     ~ScreenFoldData() {}
 
