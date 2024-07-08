@@ -34,7 +34,6 @@
 #include <iservice_registry.h>
 #include <hisysevent.h>
 #include <parameters.h>
-#include "parameter.h"
 #include <pointer_event.h>
 #include <resource_manager.h>
 #include <running_lock.h>
@@ -45,14 +44,15 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
-#include "transaction/rs_sync_transaction_controller.h"
-#include "screen_manager.h"
-#include "screen.h"
+#include "app_mgr_client.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
+#include "parameter.h"
 #include "publish/scene_event_publish.h"
-#include "app_mgr_client.h"
+#include "screen_manager.h"
+#include "screen.h"
 #include "singleton.h"
+#include "transaction/rs_sync_transaction_controller.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
