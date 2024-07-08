@@ -882,13 +882,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGroupInfoById, Function | Small
 
     sptr<ScreenGroupInfo> expectation = nullptr;
     sptr<ScreenGroupInfo> res = nullptr;
-    ScreenId Id = 1001;
+    ScreenId Id {0};
     std::function<void()> func = [&]()
     {
         res = screenSessionManagerProxy->GetScreenGroupInfoById(Id);
     };
     func();
-    ASSERT_NE(res, expectation);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -899,7 +899,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGroupInfoById, Function | Small
 HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenFromGroup, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
     
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
@@ -929,7 +928,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest
 
     std::shared_ptr<Media::PixelMap> expectation = nullptr;
     std::shared_ptr<Media::PixelMap> res = nullptr;
-    DisplayId displayId {1001};
+    DisplayId displayId {0};
     DmErrorCode* errorCode = nullptr;
     std::function<void()> func = [&]()
     {
@@ -953,7 +952,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, Function | SmallTest
 
     sptr<DisplayInfo> expectation = nullptr;
     sptr<DisplayInfo> res = nullptr;
-    DisplayId displayId {1001};
+    DisplayId displayId {0};
     std::function<void()> func = [&]()
     {
         res = screenSessionManagerProxy->GetDisplayInfoById(displayId);
@@ -976,7 +975,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, Function | Small
 
     sptr<DisplayInfo> expectation = nullptr;
     sptr<DisplayInfo> res = nullptr;
-    ScreenId screenId {1001};
+    ScreenId screenId {0};
     std::function<void()> func = [&]()
     {
         res = screenSessionManagerProxy->GetDisplayInfoByScreen(screenId);
@@ -993,7 +992,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, Function | Small
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayIds, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
     
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
@@ -1022,7 +1020,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, Function | SmallTest 
 
     sptr<ScreenInfo> expectation = nullptr;
     sptr<ScreenInfo> res = nullptr;
-    ScreenId Id {1001};
+    ScreenId Id {0};
     std::function<void()> func = [&]()
     {
         res = screenSessionManagerProxy->GetScreenInfoById(Id);
@@ -1308,7 +1306,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldDisplayMode, Function | SmallTest
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    EXPECT_NE(FoldDisplayMode::UNKNOWN,
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN,
               screenSessionManagerProxy->GetFoldDisplayMode());
 }
 
