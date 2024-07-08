@@ -486,14 +486,15 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
         return NapiThrowInvalidParam(env);
     }
     napi_value value = argv[1];
-    if (value == nullptr || !NapiIsCallable(env, value)) {
-        TLOGE(WmsLogTag::WMS_PIP, "Callback is nullptr or not callable");
-        return NapiThrowInvalidParam(env);
-    }
-    WmErrorCode ret = UnRegisterListenerWithType(env, cbType, value);
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "OnUnregisterCallback failed");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+    if (argc == 1) {
+        for (auto it = jsCbMap_.begin(); it != jsCbMap_.end(); it++) {
+            TLOGI(WmsLogTag::WMS_PIP, "method %{public}s all to be unregister", it->first.c_str());
+            UnRegisterListenerWithType(env, it->first, value);
+        }
+    } else if (value != nullptr && NapiIsCallable(env, value)) {
+        UnRegisterListenerWithType(env, cbType, value);
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "unregister failed");
     }
     return NapiGetUndefined(env);
 }
