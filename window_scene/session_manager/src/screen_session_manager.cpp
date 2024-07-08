@@ -95,7 +95,8 @@ static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 static const int32_t AUTO_ROTATE_OFF = 0;
 const unsigned int XCOLLIE_TIMEOUT_S = 10;
-constexpr int32_t TRANS_CODE_ABILITY_CONNECT = 1005;
+constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
+constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 
 bool JudgeIsBeta()
@@ -528,23 +529,24 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
-    if (isPlugIn) {
-        if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
-            TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
-            return;
-        }
-        if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
-            TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
-            ScreenCastConnection::GetInstance().CastDisconnectExtension();
-        }
-        MessageParcel data;
-        MessageParcel reply;
-        ScreenCastConnection::GetInstance().SendMessageToCastService(TRANS_CODE_ABILITY_CONNECT, data, reply);
-        ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+        return;
+    }
+    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
         ScreenCastConnection::GetInstance().CastDisconnectExtension();
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (isPlugIn) {
+        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_START, data, reply);
+        ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
     } else {
+        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_STOP, data, reply);
         ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
     }
+    ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
