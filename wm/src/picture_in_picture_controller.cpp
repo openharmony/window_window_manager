@@ -65,7 +65,7 @@ namespace {
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
             if (listener != nullptr) {            \
-                (listener->*listenerFunction)(param);    \
+                listener->listenerFunction(param);    \
             }                                                 \
         }                                                     \
     } while (0)
@@ -74,7 +74,7 @@ namespace {
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
             if (listener != nullptr) {            \
-                (listener->*listenerFunction)(param, res);    \
+                listener->listenerFunction(param, res);    \
             }                                                 \
         }                                                     \
     } while (0)
@@ -83,7 +83,7 @@ namespace {
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
             if (listener != nullptr) {            \
-                (listener->*listenerFunction)(param, res);    \
+                listener->listenerFunction(param, res);    \
             }                                                 \
         }                                                     \
     } while (0)
@@ -199,7 +199,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
         if (!pipLifeCycleListeners_.empty()) {
-            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPreparePictureInPictureStart, pipLifeCycleListeners_,
+            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPictureInPictureOperationError, pipLifeCycleListeners_,
                 static_cast<int32_t>(errCode));
         }
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
@@ -753,11 +753,11 @@ template<typename T>
 WMError PictureInPictureController::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
-        WLOGFE("Listener already registered");
+        TLOGE(WmsLogTag::WMS_PIP, "Listener already registered");
         return WMError::WM_OK;
     }
     holder.emplace_back(listener);
@@ -765,10 +765,10 @@ WMError PictureInPictureController::RegisterListener(std::vector<sptr<T>>& holde
 }
 
 template<typename T>
-WMError WindowSessionImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+WMError PictureInPictureController::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
@@ -779,7 +779,7 @@ WMError WindowSessionImpl::UnregisterListener(std::vector<sptr<T>>& holder, cons
 }
 
 template<typename T>
-void WindowSessionImpl::ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId)
+void PictureInPictureController::ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId)
 {
     listeners.erase(persistentId);
 }

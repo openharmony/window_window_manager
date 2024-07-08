@@ -26,6 +26,7 @@
 #include "window.h"
 #include "window_manager.h"
 #include "wm_common.h"
+#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -44,6 +45,7 @@ public:
     void OnRestoreUserInterface() override;
     void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
+    napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);
