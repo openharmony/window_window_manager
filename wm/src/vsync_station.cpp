@@ -36,6 +36,15 @@ VsyncStation::VsyncStation(NodeId nodeId) : nodeId_(nodeId)
     TLOGI(WmsLogTag::WMS_MAIN, "Vsync Constructor");
 }
 
+VsyncStation::~VsyncStation()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    destroyed_ = true;
+    if (vsyncHandler_) {
+        vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
+    }
+}
+
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     {
