@@ -1502,7 +1502,7 @@ HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallT
     auto result = ssm_->AddOrRemoveSecureSession(0, shouldHide);
     EXPECT_EQ(result, WSError::WS_OK);
     result = ssm_->AddOrRemoveSecureSession(persistentId, shouldHide);
-    ssm_->AddExtensionWindowStageToSCB(nullptr, 1, 1, UIExtensionUsage::MODAL);
+    ssm_->AddExtensionWindowStageToSCB(nullptr, 1, 1, UIExtensionUsage::MODAL, 1);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 

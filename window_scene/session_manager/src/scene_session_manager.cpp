@@ -53,6 +53,7 @@
 #include "screen.h"
 #include "singleton.h"
 #include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_uiextension_data.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -251,7 +252,7 @@ void SceneSessionManager::Init()
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
-
+    RegisterSecSurfaceInfoListener();
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
@@ -2163,6 +2164,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
                 UpdatePrivateStateAndNotify(parentId);
             }
             sceneSession->RemoveModalUIExtension(persistentId);
+            sceneSession->RemoveUIExtSurfaceNodeId(persistentId);
         } else {
             ExtensionWindowFlags actions;
             actions.SetAllActive();
@@ -2981,6 +2983,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string &fileDir)
         ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = userId;
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+        RegisterSecSurfaceInfoListener();
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "InitUserInfo");
@@ -8345,12 +8348,14 @@ void SceneSessionManager::ProcessModalExtensionPointDown(int32_t persistentId, i
 }
 
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-    int32_t parentId, UIExtensionUsage usage)
+    int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d, parentId=%{public}d, usage=%{public}u, pid=%{public}d",
-        persistentId, parentId, usage, pid);
-    auto task = [this, sessionStage, persistentId, parentId, usage, pid]() {
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "persistentId=%{public}d, parentId=%{public}d, usage=%{public}u, surfaceNodeId=%{public}" PRIu64
+        ", pid=%{public}d",
+        persistentId, parentId, usage, surfaceNodeId, pid);
+    auto task = [this, sessionStage, persistentId, parentId, usage, surfaceNodeId, pid]() {
         if (sessionStage == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
             return;
@@ -8369,6 +8374,9 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         }
 
         auto parentSession = GetSceneSession(parentId);
+        if (parentSession) {
+            parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
+        }
         if (usage == UIExtensionUsage::MODAL && parentSession) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
@@ -9237,5 +9245,30 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
         return WMError::WM_DO_NOTHING;
     }
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
+{
+    if (currentUserId_ != userid) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_, userid);
+        return;
+    }
+    auto secSurfaceInfoMap = secExtensionData->GetSecData();
+    auto task = [secSurfaceInfoMap]()-> WSError {
+        SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostAsyncTask(task, "UpdateSecSurfaceInfo");
+}
+
+void SceneSessionManager::RegisterSecSurfaceInfoListener()
+{
+    auto callBack = [this](std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid) {
+        this->UpdateSecSurfaceInfo(secExtensionData, userid);
+    };
+    TLOGI(WmsLogTag::WMS_EVENT, "RegisterSecSurfaceInfoListener");
+    if (rsInterface_.RegisterUIExtensionCallback(currentUserId_, callBack) != WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "RegisterSecSurfaceInfoListener failed");
+    }
 }
 } // namespace OHOS::Rosen

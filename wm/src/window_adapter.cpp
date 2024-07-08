@@ -825,13 +825,13 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-    int32_t parentId, UIExtensionUsage usage)
+    int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage, surfaceNodeId);
 }
 
 void WindowAdapter::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId, int32_t posX, int32_t posY)

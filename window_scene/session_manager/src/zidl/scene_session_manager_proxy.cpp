@@ -1616,7 +1616,7 @@ void SceneSessionManagerProxy::ProcessModalExtensionPointDown(int32_t persistent
 }
 
 void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    int32_t persistentId, int32_t parentId, UIExtensionUsage usage)
+    int32_t persistentId, int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -1639,6 +1639,10 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
     }
     if (!data.WriteUint32(static_cast<uint32_t>(usage))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write usage failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(surfaceNodeId))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write surfaceNodeId failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
