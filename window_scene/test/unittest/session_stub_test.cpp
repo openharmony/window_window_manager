@@ -336,6 +336,20 @@ HWTEST_F(SessionStubTest, HandleHide010, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: HandleDrawingCompleted
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleDrawingCompleted, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleDrawingCompleted(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
  * @tc.name: HandlePendingSessionActivation011
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

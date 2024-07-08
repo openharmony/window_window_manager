@@ -157,50 +157,42 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest |
 }
 
 /**
- * @tc.name: TransferFindFocusedElementInfo
- * @tc.desc: test function : TransferFindFocusedElementInfo
+ * @tc.name: TransferAccessibilityChildTreeRegister
+ * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferFindFocusedElementInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeRegister, Function | SmallTest | Level1)
 {
-    int64_t elementId = 0;
-    int32_t focusType = 0;
-    int64_t baseParent = 0;
-    Accessibility::AccessibilityElementInfo info;
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
 
-    WSError res = windowEventChannelProxy_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
+    WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**
- * @tc.name: TransferFocusMoveSearch
- * @tc.desc: test function : TransferFocusMoveSearch
+ * @tc.name: TransferAccessibilityChildTreeUnregister
+ * @tc.desc: test function : TransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferFocusMoveSearch, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeUnregister, Function | SmallTest | Level1)
 {
-    int64_t elementId = 0;
-    int32_t direction = 0;
-    int64_t baseParent = 0;
-    Accessibility::AccessibilityElementInfo info;
-
-    WSError res = windowEventChannelProxy_->TransferFocusMoveSearch(elementId, direction, baseParent, info);
+    WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeUnregister();
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**
- * @tc.name: TransferExecuteAction
- * @tc.desc: test function : TransferExecuteAction
+ * @tc.name: TransferAccessibilityDumpChildInfo
+ * @tc.desc: test function : TransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferExecuteAction, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityDumpChildInfo, Function | SmallTest | Level1)
 {
-    int64_t elementId = 0;
-    map<string, string> actionArguments;
-    int32_t action = 0;
-    int64_t baseParent = 0;
+    std::vector<std::string> params;
+    std::vector<std::string> info;
 
-    WSError res = windowEventChannelProxy_->TransferExecuteAction(elementId, actionArguments, action, baseParent);
+    WSError res = windowEventChannelProxy_->TransferAccessibilityDumpChildInfo(params, info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }
