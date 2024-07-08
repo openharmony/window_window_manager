@@ -222,6 +222,9 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
+    BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
+    BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
+        JsSceneSession::SetBufferAvailableCallbackEnable);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1226,6 +1229,20 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBlankFlag");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetBlankFlag(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBufferAvailableCallbackEnable");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3094,6 +3111,66 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     session->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetBlankFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isAddBlank = false;
+    if (!ConvertFromJsValue(env, argv[0], isAddBlank)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to isAddBlank");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetBlankFlag(isAddBlank);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetBufferAvailableCallbackEnable(enable);
     return NapiGetUndefined(env);
 }
 
