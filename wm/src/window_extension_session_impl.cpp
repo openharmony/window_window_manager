@@ -522,7 +522,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (rsTransaction && rsTransaction->GetSyncId() > 0) {
             // extract high 32 bits of SyncId as pid
             auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
-            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetChildPid()) {
+            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetParentPid()) {
                 needSync = true;
             }
         }
