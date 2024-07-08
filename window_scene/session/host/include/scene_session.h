@@ -227,6 +227,10 @@ public:
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
 
     bool IsAnco() const override;
+    void SetBlankFlag(bool isAddBlank) override;
+    bool GetBlankFlag() const override;
+    void SetBufferAvailableCallbackEnable(bool enable);
+    bool GetBufferAvailableCallbackEnable() const override;
     int32_t GetCollaboratorType() const;
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRect() const;
@@ -481,6 +485,8 @@ private:
     std::string clientIdentityToken_ = { "" };
     static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
+    bool isAddBlank_ = false;
+    bool bufferAvailableCallbackEnable_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

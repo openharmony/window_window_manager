@@ -2424,6 +2424,26 @@ bool SceneSession::IsAnco() const
     return collaboratorType_ == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
+void SceneSession::SetBlankFlag(bool isAddBlank)
+{
+    isAddBlank_ = isAddBlank;
+}
+
+bool SceneSession::GetBlankFlag() const
+{
+    return isAddBlank_;
+}
+
+void SceneSession::SetBufferAvailableCallbackEnable(bool enable)
+{
+    bufferAvailableCallbackEnable_ = enable;
+}
+
+bool SceneSession::GetBufferAvailableCallbackEnable() const
+{
+    return bufferAvailableCallbackEnable_;
+}
+
 int32_t SceneSession::GetCollaboratorType() const
 {
     return collaboratorType_;
