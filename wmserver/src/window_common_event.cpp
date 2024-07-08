@@ -30,12 +30,12 @@ namespace {
     constexpr int RETRY_MAX_COUNT = 3;
     const std::string THREAD_ID = "WindowCommonEventHandler";
 
-    enum class EVENT_CODE : uint32_t {
+    enum class CommonEventCode : uint32_t {
         COMMON_EVENT_USER_SWITCHED,
     };
 
-    const std::map<std::string, EVENT_CODE> EVENT_CODE_MAP{
-        {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, EVENT_CODE::COMMON_EVENT_USER_SWITCHED},
+    const std::map<std::string, CommonEventCode> COMMON_EVENT_CODE_MAP {
+        {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, CommonEventCode::COMMON_EVENT_USER_SWITCHED},
     };
 }
 
@@ -88,12 +88,8 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
-        auto iter = EVENT_CODE_MAP.find(action);
-        if (iter != EVENT_CODE_MAP.end()) {
-            EVENT_CODE eventCode = iter->second;
-            if (eventCode == EVENT_CODE::COMMON_EVENT_USER_SWITCHED) {
-                HandleAccountSwitched(data);
-            }
+        if ((auto iter = EVENT_CODE_MAP.find(action)) != EVENT_CODE_MAP.end()) {
+            HandleAccountSwitched(data);
         }
     };
     eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
