@@ -868,7 +868,8 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
     int32_t persistentId = data.ReadInt32();
     int32_t parentId = data.ReadInt32();
     UIExtensionUsage usage = static_cast<UIExtensionUsage>(data.ReadUint32());
-    AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage);
+    uint64_t surfaceNodeId = data.ReadUint64();
+    AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage, surfaceNodeId);
     return ERR_NONE;
 }
 

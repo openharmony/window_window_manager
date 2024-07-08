@@ -202,7 +202,7 @@ public:
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage) {}
+        int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId) {}
     virtual void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) {}
     virtual void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
         int32_t posX, int32_t posY) {}

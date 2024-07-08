@@ -1316,6 +1316,43 @@ Vector2f SceneSession::GetPosition(bool useUIExtension)
     return position;
 }
 
+void SceneSession::AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId)
+{
+    std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Add uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
+        surfaceNodeId, persistentId);
+    uiExtNodeIdToPersistentIdMap_.insert(std::make_pair(surfaceNodeId, persistentId));
+}
+
+void SceneSession::RemoveUIExtSurfaceNodeId(int32_t persistentId)
+{
+    std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Remove uiExtension by persistentId=%{public}d", persistentId);
+    auto iter = uiExtNodeIdToPersistentIdMap_.cbegin();
+    while (iter != uiExtNodeIdToPersistentIdMap_.cend()) {
+        if (iter->second == persistentId) {
+            TLOGI(WmsLogTag::WMS_UIEXT,
+                "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
+                iter->first, persistentId);
+            uiExtNodeIdToPersistentIdMap_.erase(iter);
+            return;
+        }
+        ++iter;
+    }
+    TLOGE(WmsLogTag::WMS_UIEXT, "Failed to remove uiExtension by persistentId=%{public}d", persistentId);
+}
+
+int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const
+{
+    std::shared_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
+    auto ret = uiExtNodeIdToPersistentIdMap_.find(surfaceNodeId);
+    if (ret == uiExtNodeIdToPersistentIdMap_.end()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to find uiExtension by surfaceNodeId=%{public}" PRIu64 "", surfaceNodeId);
+        return 0;
+    }
+    return ret->second;
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
