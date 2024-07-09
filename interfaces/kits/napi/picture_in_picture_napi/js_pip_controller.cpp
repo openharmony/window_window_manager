@@ -508,13 +508,11 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     std::shared_ptr<NativeReference> callbackRef;
     sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-           
             bool isEquals = false;
             napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
             if (!isEquals) {
                 continue;
             }
-            findFlag = true;
             jsCbMap_[type][callbackRef] = pipWindowListener;
             jsCbMap_[type].erase(it);
             break;
