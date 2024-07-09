@@ -3686,7 +3686,7 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
                 listenerController_->NotifySessionSnapshotChanged(persistentId);
             }
         };
-        taskScheduler_->PostVoidSyncTask(task, "sessionSnapshot");
+        task();
     };
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("RegisterSessionSnapshotFunc success, id: %{public}d", sceneSession->GetPersistentId());
