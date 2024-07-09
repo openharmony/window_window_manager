@@ -25,6 +25,7 @@
 
 #include "anr_handler.h"
 #include "window_manager_hilog.h"
+#include "session_permission.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -95,9 +96,13 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
     if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ &&
         (uiExtensionUsage_ == UIExtensionUsage::MODAL ||
         uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Point event blocked because of modal/constrained UIExtension:%{public}u",
-            uiExtensionUsage_);
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Point event blocked because of modal/constrained UIExtension:%{public}u",
+                uiExtensionUsage_);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension:%{public}u", uiExtensionUsage_);
+        }
     }
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
@@ -165,8 +170,13 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
 bool WindowEventChannel::IsUIExtensionKeyEventBlocked(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (uiExtensionUsage_ == UIExtensionUsage::MODAL) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Modal UIExtension.");
-        return true;
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Modal UIExtension.");
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension.");
+            return false;
+        }
     }
     if (uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         auto keyCode = keyEvent->GetKeyCode();
