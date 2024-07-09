@@ -135,8 +135,9 @@ WSError SystemSession::Hide()
         }
         // background will remove surfaceNode, custom not execute
         // not animation playing when already background; inactive may be animation playing
-        if (session->GetSessionProperty() &&
-            session->GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty &&
+            sessionProperty->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
@@ -209,7 +210,8 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
             return WSError::WS_OK;
         }
     }
-    if (type == WindowType::WINDOW_TYPE_DIALOG && GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
+    auto sessionProperty = GetSessionProperty();
+    if (type == WindowType::WINDOW_TYPE_DIALOG && sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
     PresentFocusIfPointDown();
