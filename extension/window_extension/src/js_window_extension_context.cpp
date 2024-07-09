@@ -21,6 +21,7 @@
 
 #include "napi_common_start_options.h"
 #include "napi_common_want.h"
+#include "permission.h"
 #include "service_extension_context.h"
 #include "start_options.h"
 #include "window_manager_hilog.h"
@@ -97,6 +98,11 @@ private:
 
     napi_value OnStartAbility(napi_env env, napi_callback_info info)
     {
+        if (!Permission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+            return NapiGetUndefined(env);
+        }
         WLOGI("OnStartAbility is called");
         size_t argc = 4;
         napi_value argv[4] = {nullptr};
