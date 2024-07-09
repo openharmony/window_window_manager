@@ -364,11 +364,12 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    auto iterType = iterCaseType->second.find(type);
-    if (iterType == iterCaseType->second.end()) {
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    RegisterListenerType listenerType = iterCallbackType->second;
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
@@ -378,7 +379,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessListener(iterType->second, caseType, windowManagerListener, window, true,
+    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true,
         env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
@@ -403,6 +404,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            default:
+                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported", static_cast<uint32_t>(registerListenerType));
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     } else if (caseType == CaseType::CASE_WINDOW) {
         switch (static_cast<uint32_t>(registerListenerType)) {
@@ -429,7 +433,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
                 return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
-                return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+                return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
@@ -438,6 +443,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            default:
+                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported", static_cast<uint32_t>(registerListenerType));
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
         if (registerListenerType == RegisterListenerType::WINDOW_STAGE_EVENT_CB) {
@@ -460,14 +468,15 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    auto iterType = iterCaseType->second.find(type);
-    if (iterType == iterCaseType->second.end()) {
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    RegisterListenerType listenerType = iterCallbackType->second;
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessListener(iterType->second, caseType, it->second, window,
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
                 false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
@@ -484,7 +493,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessListener(iterType->second, caseType, it->second, window,
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
                 false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
