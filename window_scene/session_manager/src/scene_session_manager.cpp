@@ -1314,11 +1314,16 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
         return;
     }
-    if (keyboardSession == nullptr || keyboardSession->GetSessionProperty() == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSession or property is nullptr");
+    if (keyboardSession == nullptr ||  == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSession is nullptr");
         return;
     }
-    DisplayId displayId = keyboardSession->GetSessionProperty()->GetDisplayId();
+    auto sessionProperty = keyboardSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
+        return;
+    }
+    DisplayId displayId = sessionProperty->GetDisplayId();
     const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
     sptr<SceneSession> panelSession;
     if (panelVec.size() > 1) {
@@ -1466,11 +1471,15 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     DisplayId curDisplayId = DISPLAY_ID_INVALID;
     if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
         curDisplayId = sessionInfo.screenId_;
-    } else if (callerSession && callerSession->GetSessionProperty()) {
-        curDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
+    } else if (callerSession) {
+        auto callerSessionProperty = callerSession->GetSessionProperty();
+        if (callerSessionProperty) {
+            curDisplayId = callerSessionProperty->GetDisplayId();
+        }
     }
-    if (sceneSession->GetSessionProperty()) {
-        sceneSession->GetSessionProperty()->SetDisplayId(curDisplayId);
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty) {
+        sessionProperty->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
         TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
             curDisplayId);
@@ -1599,9 +1608,10 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
     }
-    if (scnSession->GetSessionProperty()) {
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (sessionProperty) {
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
-            static_cast<int>(scnSession->GetSessionProperty()->GetDisplayId()));
+            static_cast<int>(sessionProperty->GetDisplayId()));
     }
     return abilitySessionInfo;
 }
@@ -2817,9 +2827,10 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             if (sceneSession == nullptr) {
                 continue;
             }
+            auto sessionProperty = sceneSession->GetSessionProperty();
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-                sceneSession->GetSessionProperty() != nullptr) {
-                callingSessionId = static_cast<int32_t>(sceneSession->GetSessionProperty()->GetCallingSessionId());
+                sessionProperty != nullptr) {
+                callingSessionId = static_cast<int32_t>(sessionProperty->GetCallingSessionId());
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
                     persistentId, callingSessionId);
             }
@@ -3288,8 +3299,9 @@ WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionP
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
-    if (sceneSession->GetSessionProperty() != nullptr) {
-        sceneSession->GetSessionProperty()->SetDragEnabled(property->GetDragEnabled());
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetDragEnabled(property->GetDragEnabled());
     }
     return WMError::WM_OK;
 }
@@ -3302,8 +3314,9 @@ WMError SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSession
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
-    if (sceneSession->GetSessionProperty() != nullptr) {
-        sceneSession->GetSessionProperty()->SetRaiseEnabled(property->GetRaiseEnabled());
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
     }
     return WMError::WM_OK;
 }
@@ -3797,9 +3810,10 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
     }
     uint32_t flag = 0;
     uint64_t displayId = INVALID_SCREEN_ID;
-    if (session->GetSessionProperty()) {
-        flag = session->GetSessionProperty()->GetWindowFlags();
-        displayId = session->GetSessionProperty()->GetDisplayId();
+    auto sessionProperty = session->GetSessionProperty();
+    if (sessionProperty) {
+        flag = sessionProperty->GetWindowFlags();
+        displayId = sessionProperty->GetDisplayId();
     }
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
@@ -3921,13 +3935,17 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     if (session == nullptr) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    auto sessionProperty = session->GetSessionProperty();
+    if (sessionProperty) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
 
     WSRect rect = session->GetSessionRect();
     std::string isVisible = session->GetVisible() ? "true" : "false";
     std::string Focusable = session->GetFocusable() ? "true" : "false";
-    std::string DecoStatus = session->GetSessionProperty()->IsDecorEnable() ? "true" : "false";
-    bool PrivacyMode = session->GetSessionProperty()->GetSystemPrivacyMode() ||
-        session->GetSessionProperty()->GetPrivacyMode();
+    std::string DecoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
+    bool PrivacyMode = sessionProperty->GetSystemPrivacyMode() ||
+        sessionProperty->GetPrivacyMode();
     std::string isPrivacyMode = PrivacyMode ? "true" : "false";
     bool isFirstFrameAvailable = true;
     std::ostringstream oss;
@@ -3937,7 +3955,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "Pid: " << session->GetCallingPid() << std::endl;
     oss << "Type: " << static_cast<uint32_t>(session->GetWindowType()) << std::endl;
     oss << "Mode: " << static_cast<uint32_t>(session->GetWindowMode()) << std::endl;
-    oss << "Flag: " << session->GetSessionProperty()->GetWindowFlags() << std::endl;
+    oss << "Flag: " << sessionProperty->GetWindowFlags() << std::endl;
     oss << "Orientation: " << static_cast<uint32_t>(session->GetRequestedOrientation()) << std::endl;
     oss << "FirstFrameCallbackCalled: " << isFirstFrameAvailable << std::endl;
     oss << "IsVisible: " << isVisible << std::endl;
@@ -5344,10 +5362,14 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& iter: sceneSessionMap_) {
             auto& session = iter.second;
-            if (!session || !session->GetSessionProperty()) {
+            if (!session) {
                 continue;
             }
-            bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
+            auto sessionProperty = session->GetSessionProperty();
+            if (!sessionProperty) {
+                continue;
+            }
+            bool hasWaterMark = sessionProperty->GetWindowFlags()
                 & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
             bool isExtWindowHasWaterMarkFlag = session->GetCombinedExtWindowFlags().waterMarkFlag;
             if ((hasWaterMark && session->GetVisible()) || isExtWindowHasWaterMarkFlag) {
@@ -7962,11 +7984,12 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     }
     auto fromScreenId = scnSession->GetSessionInfo().screenId_;
     scnSession->SetScreenId(screenId);
-    if (!scnSession->GetSessionProperty()) {
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (!sessionProperty) {
         WLOGFE("Property is null, synchronous screenId failed");
         return WSError::WS_ERROR_NULLPTR;
     }
-    scnSession->GetSessionProperty()->SetDisplayId(screenId);
+    sessionProperty->SetDisplayId(screenId);
     WLOGFD("Session move display %{public}" PRIu64 " from %{public}" PRIu64, screenId, fromScreenId);
     NotifySessionUpdate(scnSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     scnSession->NotifyDisplayMove(fromScreenId, screenId);
@@ -8932,11 +8955,12 @@ WMError SceneSessionManager::GetCallingWindowWindowStatus(int32_t persistentId, 
     TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
         persistentId, scnSession->GetWindowType());
 
-    if (scnSession->GetSessionProperty() == nullptr) {
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session property is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    uint32_t callingWindowId = scnSession->GetSessionProperty()->GetCallingSessionId();
+    uint32_t callingWindowId = sessionProperty->GetCallingSessionId();
     auto callingSession = GetSceneSession(callingWindowId);
     if (callingSession == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null");
@@ -8970,11 +8994,12 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
         persistentId, scnSession->GetWindowType());
-    if (scnSession->GetSessionProperty() == nullptr) {
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session property is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    uint32_t callingWindowId = scnSession->GetSessionProperty()->GetCallingSessionId();
+    uint32_t callingWindowId = sessionProperty->GetCallingSessionId();
     auto callingSession = GetSceneSession(callingWindowId);
     if (callingSession == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null");
