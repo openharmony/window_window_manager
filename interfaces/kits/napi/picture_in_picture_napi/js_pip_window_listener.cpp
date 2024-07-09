@@ -28,9 +28,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-namespace {
-    //constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListener"};
-}
 
 JsPiPWindowListener::~JsPiPWindowListener()
 {
@@ -97,13 +94,13 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
             
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
                 return;
             }
             napi_value propertyValue = nullptr;
             napi_create_object(eng, &propertyValue);
             if (propertyValue == nullptr) {
-                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert prop to jsObject");
                 return;
             }
             napi_set_named_property(env, propertyValue, "state",
@@ -131,13 +128,13 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
             
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
                 return;
             }
             napi_value propertyValue = nullptr;
             napi_create_object(eng, &propertyValue);
             if (propertyValue == nullptr) {
-                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert prop to jsObject");
                 return;
             }
             napi_set_named_property(env, propertyValue, "actionEvent",
@@ -164,13 +161,13 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
             
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
                 return;
             }
             napi_value propertyValue = nullptr;
             napi_create_object(eng, &propertyValue);
             if (propertyValue == nullptr) {
-                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert prop to jsObject");
                 return;
             }
             napi_set_named_property(env, propertyValue, "controlType",
