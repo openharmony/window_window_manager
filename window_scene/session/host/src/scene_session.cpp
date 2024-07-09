@@ -1531,7 +1531,7 @@ WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent
 WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d, pos: [%{public}d, %{public}d]", id, GetWindowType(), posX, posY);
+    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
 
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
