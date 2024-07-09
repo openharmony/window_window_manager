@@ -444,7 +444,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
-                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported", static_cast<uint32_t>(registerListenerType));
+                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
+                    static_cast<uint32_t>(registerListenerType));
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
