@@ -66,7 +66,7 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
 
 napi_value JsPiPWindowListener::CallJsMethod(napi_env env, napi_value methodName, napi_value const * argv, size_t argc)
 {
-    if (env_ == nullptr || jsCallBack_ == nullptr) {
+    if (env == nullptr || jsCallBack_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
     }
@@ -89,8 +89,8 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
     std::string error = std::to_string(errorCode);
     napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, state, error, env = engine_, task = napiAsyncTask.get(), this]() {
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, nullptr, &result);
+    auto asyncTask = [jsCallback = jsCallBack_, state, error, env = env_, task = napiAsyncTask.get(), this]() {
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
@@ -103,8 +103,8 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
         CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
         delete task;
     };
-    if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(engine_, CreateJsError(engine_, 1, "send event failed"));
+    if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env_, CreateJsError(env_, 1, "send event failed"));
     } else {
         napiAsyncTask.release();
     }
@@ -115,8 +115,8 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
     TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
     std::string state = std::to_string(statusCode);
     napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, actionEvent, state, env = engine_, task = napiAsyncTask.get(), this]() {
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, nullptr, &result);
+    auto asyncTask = [jsCallback = jsCallBack_, actionEvent, state, env = env_, task = napiAsyncTask.get(), this]() {
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
@@ -129,8 +129,8 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
         CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
         delete task;
     };
-    if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(engine_, CreateJsError(engine_, 1, "send event failed"));
+    if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env_, CreateJsError(env_, 1, "send event failed"));
     } else {
         napiAsyncTask.release();
     }
@@ -140,8 +140,8 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
     napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = engine_,
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, nullptr, &result);
+    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = env_,
         task = napiAsyncTask.get(), this]() {
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
@@ -155,8 +155,8 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
         CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
         delete task;
     };
-    if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(engine_, CreateJsError(engine_, 1, "send event failed"));
+    if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env_, CreateJsError(env_, 1, "send event failed"));
     } else {
         napiAsyncTask.release();
     }
