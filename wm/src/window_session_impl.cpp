@@ -1600,7 +1600,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     if (!res) {
         WLOGFE("get window title buttons area failed");
         titleButtonRect.IsUninitializedRect();
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
