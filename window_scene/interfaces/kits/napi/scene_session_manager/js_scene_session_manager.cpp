@@ -60,6 +60,32 @@ const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
+
+enum class ListenerFunctionType : uint32_t {
+    CREATE_SYSTEM_SESSION_CB,
+    CREATE_KEYBOARD_SESSION_CB,
+    RECOVER_SCENE_SESSION_CB,
+    STATUS_BAR_ENABLED_CHANGE_CB,
+    OUTSIDE_DOWN_EVENT_CB,
+    SHIFT_FOCUS_CB,
+    CALLING_WINDOW_ID_CHANGE_CB,
+    START_UI_ABILITY_ERROR,
+    GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+    INVALID
+};
+
+const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
+    {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
+    {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
+    {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
+    {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
+    {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
+    {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
+    {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
+    {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
+    {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+        ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+};
 } // namespace
 
 napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
@@ -165,18 +191,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
 
 JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
-    listenerFuncTypeMap_ = {
-        {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
-        {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
-        {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
-        {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
-        {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
-        {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
-        {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
-        {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
-        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-            ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
-    };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
 
@@ -904,8 +918,8 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
 void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
 {
     ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
-    if (listenerFuncTypeMap_.count(cbType) != 0) {
-        listenerFuncType = listenerFuncTypeMap_[cbType];
+    if (ListenerFunctionTypeMap.count(cbType) != 0) {
+        listenerFuncType = ListenerFunctionTypeMap[cbType];
     }
     switch (listenerFuncType) {
         case ListenerFunctionType::CREATE_SYSTEM_SESSION_CB:
