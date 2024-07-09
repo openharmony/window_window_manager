@@ -138,7 +138,7 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
         napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
         napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
         napi_value argv[] = {propertyValue};
-        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
         delete task;
     };
     if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
