@@ -122,6 +122,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         }
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenConnected(screenSession);
+            WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
+                screenId, config.property.GetDensity());
+            screenSession->SetScreenSceneDpi(config.property.GetDensity());
         }
         screenSession->Connect();
         return;
