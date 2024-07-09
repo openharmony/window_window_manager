@@ -911,6 +911,7 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
 
     std::shared_ptr<Media::PixelMap> map(reply.ReadParcelable<Media::PixelMap>());
     if (map == nullptr) {
+        WLOGFE("Read pixelMap is null");
         return nullptr;
     }
     return map;
@@ -920,6 +921,7 @@ WMError WindowManagerProxy::GetSnapshotByWindowId(int32_t persistentId, std::sha
 {
     pixelMap = GetSnapshot(persistentId);
     if (pixelMap == nullptr) {
+        WLOGFE("Get snapshot is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     return WMError::WM_OK;
