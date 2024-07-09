@@ -8335,9 +8335,8 @@ void SceneSessionManager::ProcessModalExtensionPointDown(int32_t persistentId, i
     int32_t posX, int32_t posY)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
-    TLOGI(WmsLogTag::WMS_UIEXT, "pid=%{public}d, persistentId=%{public}d, parentId=%{public}d, "
-        "posX:%{public}d posY:%{public}d",
-        pid, persistentId, parentId, posX, posY);
+    TLOGI(WmsLogTag::WMS_UIEXT, "pid=%{public}d, persistentId=%{public}d, parentId=%{public}d",
+        pid, persistentId, parentId);
     auto task = [this, persistentId, parentId, pid, posX, posY]() {
         auto parentSession = GetSceneSession(parentId);
         if (parentSession && parentSession->HasModalUIExtension()) {
