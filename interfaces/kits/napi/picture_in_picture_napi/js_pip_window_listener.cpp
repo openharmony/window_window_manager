@@ -91,7 +91,6 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, state, error, eng = env_, jsCallback = jsCallBack_] (napi_env env,
             NapiAsyncTask &task, int32_t status) {
-            
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
@@ -124,8 +123,7 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
     std::string state = std::to_string(statusCode);
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, actionEvent, state, eng = env_, jsCallback = jsCallBack_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
-            
+            NapiAsyncTask &task, int32_t status) {  
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
@@ -158,7 +156,6 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, controlType, statusCode, eng = env_, jsCallback = jsCallBack_] (napi_env env,
             NapiAsyncTask &task, int32_t status) {
-            
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 TLOGE(WmsLogTag::WMS_PIP, "[NAPI]this listener or eng is nullptr");
