@@ -29,6 +29,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
+    constexpr int32_t NUMBER_ONE = 1;
     constexpr int32_t NUMBER_TWO = 2;
     constexpr int32_t NUMBER_FOUR = 4;
     const std::string STATE_CHANGE_CB = "stateChange";
@@ -476,7 +477,7 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
     size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 2) {
+    if (argc > NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
@@ -486,10 +487,10 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
         return NapiThrowInvalidParam(env);
     }
     napi_value value = argv[1];
-    if (argc == 1) {
+    if (argc == NUMBER_ONE) {
         for (auto it = jsCbMap_.begin(); it != jsCbMap_.end(); it++) {
             TLOGI(WmsLogTag::WMS_PIP, "method %{public}s all to be unregister", it->first.c_str());
-            UnRegisterListenerWithType(env, it->first, value);
+            UnRegisterListenerWithType(env, it->first, nullptr);
         }
     } else if (value != nullptr && NapiIsCallable(env, value)) {
         UnRegisterListenerWithType(env, cbType, value);
@@ -505,21 +506,50 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    std::shared_ptr<NativeReference> callbackRef;
-    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+    if (value == nullptr) {
+        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+            WmErrorCode ret = ProcessRegister(env, type);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed, no value", type.c_str());
+                return ret;
+            }
+            jsCbMap_[type].erase(it++);
+        }
+    } else {
+        bool findFlag = false;
+        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
             bool isEquals = false;
             napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
             if (!isEquals) {
                 continue;
             }
-            jsCbMap_[type][callbackRef] = pipWindowListener;
+            findFlag = true;
+            WmErrorCode ret = ProcessRegister(env, type);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed", type.c_str());
+                return ret;
+            }
             jsCbMap_[type].erase(it);
             break;
         }
-    jsCbMap_[type][callbackRef] = pipWindowListener;
-    jsCbMap_.erase(type);
-    
+        if (!findFlag) {
+            TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            return WmErrorCode::WM_OK;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
+        type.c_str(), jsCbMap_[type].size());
+    // erase type when there is no callback in one type
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode JsPipController::ProcessRegister(napi_env env, const std::string& type)
+{
+    std::shared_ptr<NativeReference> callbackRef;
+    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:
             ProcessStateChangeUnRegister(pipWindowListener);
@@ -533,7 +563,6 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         default:
             break;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s is unregistered!", type.c_str());
     return WmErrorCode::WM_OK;
 }
 
