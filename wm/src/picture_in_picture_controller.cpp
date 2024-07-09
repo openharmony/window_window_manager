@@ -312,7 +312,9 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
     }
     curState_ = PiPWindowState::STATE_STOPPING;
     if (!pipLifeCycleListeners_.empty()) {
-        CALL_LIFECYCLE_LISTENERS(OnPreparePictureInPictureStop, pipLifeCycleListeners_);
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPreparePictureInPictureStop();
+        }
     }
     if (!destroyWindow) {
         ResetExtController();
