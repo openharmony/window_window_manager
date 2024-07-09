@@ -52,42 +52,6 @@ namespace {
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
 
-#define CALL_LIFECYCLE_LISTENERS(listenerFunction, listeners) \
-    do {                                                      \
-        for (auto& listener : (listeners)) {                  \
-            if (listener != nullptr) {            \
-                listener->listenerFunction();    \
-            }                                                 \
-        }                                                     \
-    } while (0)
-
-#define CALL_LIFECYCLE_LISTENERS_WITH_PARAM(listenerFunction, listeners, param) \
-    do {                                                      \
-        for (auto& listener : (listeners)) {                  \
-            if (listener != nullptr) {            \
-                listener->listenerFunction(param);    \
-            }                                                 \
-        }                                                     \
-    } while (0)
-
-#define CALL_ACTION_LISTENERS_WITH_PARAM(listenerFunction, listeners, param, res) \
-    do {                                                      \
-        for (auto& listener : (listeners)) {                  \
-            if (listener != nullptr) {            \
-                listener->listenerFunction(param, res);    \
-            }                                                 \
-        }                                                     \
-    } while (0)
-
-#define CALL_CONTROL_LISTENERS_WITH_PARAM(listenerFunction, listeners, param, res) \
-    do {                                                      \
-        for (auto& listener : (listeners)) {                  \
-            if (listener != nullptr) {            \
-                listener->listenerFunction(param, res);    \
-            }                                                 \
-        }                                                     \
-    } while (0)
-
 uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
 {
     if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
@@ -192,15 +156,18 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     if (!pipLifeCycleListeners_.empty()) {
-        CALL_LIFECYCLE_LISTENERS(OnPreparePictureInPictureStart, pipLifeCycleListeners_);
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPreparePictureInPictureStart();
+        }
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
         if (!pipLifeCycleListeners_.empty()) {
-            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPictureInPictureOperationError, pipLifeCycleListeners_,
-                static_cast<int32_t>(errCode));
+            for (auto& listener : pipLifeCycleListeners_) {
+                listener->OnPictureInPictureOperationError(static_cast<int32_t>(errCode));
+            }
         }
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "window show failed");
@@ -351,7 +318,9 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         ResetExtController();
         curState_ = PiPWindowState::STATE_STOPPED;
         if (!pipLifeCycleListeners_.empty()) {
-            CALL_LIFECYCLE_LISTENERS(OnPictureInPictureStop, pipLifeCycleListeners_);
+            for (auto& listener : pipLifeCycleListeners_) {
+                listener->OnPictureInPictureStop();
+            }
         }
         PictureInPictureManager::RemoveActiveController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
@@ -382,7 +351,9 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         syncTransactionController->CloseSyncTransaction();
     }
     if (!pipLifeCycleListeners_.empty()) {
-        CALL_LIFECYCLE_LISTENERS(OnPictureInPictureStop, pipLifeCycleListeners_);
+        for (auto& listener : pipLifeCycleListeners_) {
+                listener->OnPictureInPictureStop();
+        }
     }
     curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
@@ -411,8 +382,9 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
         if (!pipLifeCycleListeners_.empty()) {
-            CALL_LIFECYCLE_LISTENERS_WITH_PARAM(OnPictureInPictureOperationError, pipLifeCycleListeners_,
-                static_cast<int32_t>(ret));
+            for (auto& listener : pipLifeCycleListeners_) {
+                listener->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
+            }
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
@@ -577,7 +549,9 @@ void PictureInPictureController::DoActionEvent(const std::string& actionName, in
         return;
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(pipOption_->GetPipTemplate(), actionName);
-    CALL_ACTION_LISTENERS_WITH_PARAM(OnActionEvent, pipActionObservers_, actionName, status);
+    for (auto& listener : pipActionObservers_) {
+        listener->OnActionEvent(actionName, status);
+    }
     if (CONTROL_TYPE_MAP.find(actionName) != CONTROL_TYPE_MAP.end()) {
         pipOption_->SetPiPControlStatus(CONTROL_TYPE_MAP[actionName], static_cast<PiPControlStatus>(status));
     }
@@ -588,7 +562,9 @@ void PictureInPictureController::PreRestorePictureInPicture()
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
     if (!pipLifeCycleListeners_.empty()) {
-        CALL_LIFECYCLE_LISTENERS(OnRestoreUserInterface, pipLifeCycleListeners_);
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnRestoreUserInterface();
+        }
     }
 }
 
@@ -604,7 +580,9 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
         return;
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPControlEvent(pipOption_->GetPipTemplate(), controlType);
-    CALL_CONTROL_LISTENERS_WITH_PARAM(OnControlEvent, pipControlObservers_, controlType, status);
+    for (auto& listener : pipControlObservers_) {
+        listener->OnControlEvent(controlType, status);
+    }
     pipOption_->SetPiPControlStatus(controlType, status);
 }
 
@@ -714,7 +692,9 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     if (!pipLifeCycleListeners_.empty()) {
-        CALL_LIFECYCLE_LISTENERS(OnPictureInPictureStart, pipLifeCycleListeners_);
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPictureInPictureStart();
+        }
     }
     return WMError::WM_OK;
 }

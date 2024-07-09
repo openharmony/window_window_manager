@@ -508,7 +508,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessRegister(env, type);
+            WmErrorCode ret = UnRegisterListener(env, type);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -524,7 +524,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessRegister(env, type);
+            WmErrorCode ret = UnRegisterListener(env, type);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;
@@ -546,7 +546,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsPipController::ProcessRegister(napi_env env, const std::string& type)
+WmErrorCode JsPipController::UnRegisterListener(napi_env env, const std::string& type)
 {
     std::shared_ptr<NativeReference> callbackRef;
     sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
