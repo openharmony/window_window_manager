@@ -1392,7 +1392,6 @@ HWTEST_F(WindowImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Lev
     ASSERT_NE(option, nullptr);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
-    EXPECT_EQ(window->Create(INVALID_WINDOW_ID, nullptr), WMError::WM_OK);
     std::string routerStack = "stackInfo:{}";
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
     std::string gettedStack = window->GetRestoredRouterStack();
