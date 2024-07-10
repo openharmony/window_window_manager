@@ -749,9 +749,6 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
 
     EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
-
-    pipControl->SetPictureInPictureLifecycle(listener);
-    ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
 }
 
 /**

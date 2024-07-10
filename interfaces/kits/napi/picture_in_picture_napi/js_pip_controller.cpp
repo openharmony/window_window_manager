@@ -535,7 +535,8 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
             break;
         }
         if (!findFlag) {
-            TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed because not found callback!",
+                type.c_str());
             return WmErrorCode::WM_OK;
         }
     }
