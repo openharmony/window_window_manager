@@ -445,6 +445,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
+        return;
     }
     bool dragEnabled = sessionProperty->GetDragEnabled();
     if (dragEnabled) {
