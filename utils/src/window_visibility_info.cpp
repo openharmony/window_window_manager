@@ -48,7 +48,7 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
     }
     windowVisibilityInfo->visibilityState_ = static_cast<WindowVisibilityState>(visibilityState);
     windowVisibilityInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
-    windowVisibilityInfo->rect_ ={ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    windowVisibilityInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     windowVisibilityInfo->bundleName_ = parcel.ReadString();
     windowVisibilityInfo->abilityName_ = parcel.ReadString();
     windowVisibilityInfo->windowStatus_ = static_cast<WindowStatus>(parcel.ReadUint32());
