@@ -446,6 +446,10 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
 void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSession,
     std::vector<int32_t>& pointerChangeAreas) const
 {
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
