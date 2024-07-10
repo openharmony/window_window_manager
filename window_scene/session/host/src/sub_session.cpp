@@ -55,8 +55,10 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
-        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-            session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+        auto sessionProperty = session->GetSessionProperty();
+        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
+            sessionProperty) {
+            sessionProperty->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
         }
         auto ret = session->SceneSession::Foreground(property);
@@ -81,8 +83,9 @@ WSError SubSession::Hide()
         }
         // background will remove surfaceNode, custom not execute
         // not animation playing when already background; inactive may be animation playing
-        if (session->GetSessionProperty() &&
-            session->GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty &&
+            sessionProperty->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
@@ -152,7 +155,8 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
     }
-    if (GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
     PresentFocusIfPointDown();
@@ -219,8 +223,9 @@ void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 bool SubSession::IsTopmost() const
 {
     bool isTopmost = false;
-    if (GetSessionProperty()) {
-        isTopmost = GetSessionProperty()->IsTopmost();
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        isTopmost = sessionProperty->IsTopmost();
     }
     TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
     return isTopmost;
