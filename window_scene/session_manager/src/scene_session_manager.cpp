@@ -1311,11 +1311,11 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
 {
     if (!isKeyboardPanelEnabled_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanel is not enabled");
         return;
     }
     if (keyboardSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSession is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr");
         return;
     }
     auto sessionProperty = keyboardSession->GetSessionProperty();
@@ -1331,7 +1331,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         return;
     } else if (panelVec.size() == 1) {
         panelSession = panelVec.front();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is created, panelId:%{public}d", panelSession->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanel is created, panelId:%{public}d", panelSession->GetPersistentId());
     } else {
         SessionInfo panelInfo = {
             .bundleName_ = "SCBKeyboardPanel",
@@ -3942,8 +3942,8 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
     WSRect rect = session->GetSessionRect();
     std::string isVisible = session->GetVisible() ? "true" : "false";
-    std::string Focusable = session->GetFocusable() ? "true" : "false";
-    std::string DecoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
+    std::string focusable = session->GetFocusable() ? "true" : "false";
+    std::string decoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
     bool privacyMode = sessionProperty->GetSystemPrivacyMode() || sessionProperty->GetPrivacyMode();
     std::string isPrivacyMode = privacyMode ? "true" : "false";
     bool isFirstFrameAvailable = true;
@@ -3958,8 +3958,8 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "Orientation: " << static_cast<uint32_t>(session->GetRequestedOrientation()) << std::endl;
     oss << "FirstFrameCallbackCalled: " << isFirstFrameAvailable << std::endl;
     oss << "IsVisible: " << isVisible << std::endl;
-    oss << "Focusable: "  << Focusable << std::endl;
-    oss << "DecoStatus: "  << DecoStatus << std::endl;
+    oss << "Focusable: "  << focusable << std::endl;
+    oss << "DecoStatus: "  << decoStatus << std::endl;
     oss << "isPrivacyMode: "  << isPrivacyMode << std::endl;
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
