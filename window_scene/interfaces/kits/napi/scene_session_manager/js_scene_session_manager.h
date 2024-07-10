@@ -29,6 +29,18 @@
 #include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
+enum class ListenerFunctionType : uint32_t {
+    CREATE_SYSTEM_SESSION_CB,
+    CREATE_KEYBOARD_SESSION_CB,
+    RECOVER_SCENE_SESSION_CB,
+    STATUS_BAR_ENABLED_CHANGE_CB,
+    OUTSIDE_DOWN_EVENT_CB,
+    SHIFT_FOCUS_CB,
+    CALLING_WINDOW_ID_CHANGE_CB,
+    START_UI_ABILITY_ERROR,
+    GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+};
+
 class JsSceneSessionManager final {
 public:
     explicit JsSceneSessionManager(napi_env env);
@@ -161,7 +173,7 @@ private:
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
     void ProcessCallingSessionIdChangeRegister();
-    void ProcessRegisterCallback(const std::string& cbType);
+    void ProcessRegisterCallback(ListenerFunctionType listenerFunctionType);
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();

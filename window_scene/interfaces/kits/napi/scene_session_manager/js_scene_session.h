@@ -188,7 +188,7 @@ private:
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
-    void ProcessRegisterCallback(ListenerFunctionType listenerFunctionType);
+    void ProcessRegisterCallback(ListenerFuncType listenerFunctionType);
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
