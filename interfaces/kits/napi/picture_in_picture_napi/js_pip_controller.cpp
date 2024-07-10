@@ -486,10 +486,7 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
         return NapiThrowInvalidParam(env);
     }
     if (argc == NUMBER_ONE) {
-        for (auto it = jsCbMap_.begin(); it != jsCbMap_.end(); it++) {
-            TLOGI(WmsLogTag::WMS_PIP, "method %{public}s all to be unregister", it->first.c_str());
-            UnRegisterListenerWithType(env, it->first, nullptr);
-        }
+        UnRegisterListenerWithType(env, cbType, nullptr);
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
@@ -538,6 +535,9 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     }
     TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
+    }
     return WmErrorCode::WM_OK;
 }
 
