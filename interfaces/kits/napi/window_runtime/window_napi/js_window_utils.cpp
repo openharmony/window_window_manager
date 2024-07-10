@@ -486,10 +486,16 @@ napi_value CreateJsWindowInfoObject(napi_env env, sptr<WindowVisibilityInfo>& in
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
-    napi_set_named_property(env, objValue, "bundleName",CreateJsValue(env, info->GetBundleName()));
-    napi_set_named_property(env, objValue, "abilityName",CreateJsValue(env, info->GetAbilityName()));
-    napi_set_named_property(env, objValue, "windowId",CreateJsValue(env, info->GetWindowId()));
-    napi_set_named_property(env, objValue, "windowStatusType",CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
+    napi_set_named_property(env, objValue, "windowStatusType", CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    auto windowType = info->GetWindowType();
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowType) != 0) {
+        napi_set_named_property(env, objValue, "windowType", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowType)));
+    } else {
+        napi_set_named_property(env, objValue, "windowType", CreateJsValue(env, windowType));
+    }
     return objValue;
 }
 
