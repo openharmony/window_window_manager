@@ -49,9 +49,6 @@ private:
     void SubscriberEventInner(int retry);
     void HandleAccountSwitched(const EventFwk::CommonEventData& data) const;
 
-    typedef void (WindowCommonEvent::*HandleCommonEventFunc)(const EventFwk::CommonEventData& data) const;
-
-    std::map<std::string, HandleCommonEventFunc> handleCommonEventFuncs_;
     std::shared_ptr<EventSubscriber> subscriber_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
