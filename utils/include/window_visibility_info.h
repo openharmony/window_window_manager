@@ -120,6 +120,11 @@ public:
         return windowStatus_;
     }
 
+    WindowType GetWindowType() const
+    {
+        return windowType_;
+    }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
