@@ -111,6 +111,7 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
+    virtual int32_t GetAppForceLandscapeMode(const std::string& bundleName) { return 0; }
 };
 } // namespace OHOS::Rosen
 

@@ -106,6 +106,7 @@ public:
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
     MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent));
+    MOCK_METHOD1(SetForceSplitEnable, void(bool isForceSplit));
 };
 } // namespace Ace
 } // namespace OHOS
