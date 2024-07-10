@@ -66,62 +66,6 @@ std::mutex SceneSession::enterSessionMutex_;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint32_t, WSRect> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
-const std::map<uint32_t, HandleUpdatePropertyFunc> SceneSession::sessionFuncMap_ {
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON),
-        &SceneSession::HandleActionUpdateTurnScreenOn),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
-        &SceneSession::HandleActionUpdateKeepScreenOn),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
-        &SceneSession::HandleActionUpdateFocusable),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
-        &SceneSession::HandleActionUpdateTouchable),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS),
-        &SceneSession::HandleActionUpdateSetBrightness),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION),
-        &SceneSession::HandleActionUpdateOrientation),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE),
-        &SceneSession::HandleActionUpdatePrivacyMode),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE),
-        &SceneSession::HandleActionUpdatePrivacyMode),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP),
-        &SceneSession::HandleActionUpdateSnapshotSkip),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE),
-        &SceneSession::HandleActionUpdateMaximizeState),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS),
-        &SceneSession::HandleActionUpdateOtherProps),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS),
-        &SceneSession::HandleActionUpdateStatusProps),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS),
-        &SceneSession::HandleActionUpdateNavigationProps),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS),
-        &SceneSession::HandleActionUpdateNavigationIndicatorProps),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS),
-        &SceneSession::HandleActionUpdateFlags),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE),
-        &SceneSession::HandleActionUpdateMode),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG),
-        &SceneSession::HandleActionUpdateAnimationFlag),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA),
-        &SceneSession::HandleActionUpdateTouchHotArea),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE),
-        &SceneSession::HandleActionUpdateDecorEnable),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS),
-        &SceneSession::HandleActionUpdateWindowLimits),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED),
-        &SceneSession::HandleActionUpdateDragenabled),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED),
-        &SceneSession::HandleActionUpdateRaiseenabled),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS),
-        &SceneSession::HandleActionUpdateHideNonSystemFloatingWindows),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO),
-        &SceneSession::HandleActionUpdateTextfieldAvoidInfo),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK),
-        &SceneSession::HandleActionUpdateWindowMask),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
-        &SceneSession::HandleActionUpdateTopmost),
-    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
-        &SceneSession::HandleActionUpdateModeSupportInfo),
-};
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -2810,12 +2754,72 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    const auto funcIter = sessionFuncMap_.find(static_cast<uint32_t>(action));
-    if (funcIter == sessionFuncMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
-        return WMError::WM_DO_NOTHING;
+
+    return ProcessUpdatePropertyByAction(property, sceneSession, action);
+}
+
+WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    switch (static_cast<uint32_t>(action)) {
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
+            return HandleActionUpdateTurnScreenOn(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
+            return HandleActionUpdateKeepScreenOn(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
+            return HandleActionUpdateFocusable(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
+            return HandleActionUpdateTouchable(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
+            return HandleActionUpdateSetBrightness(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
+            return HandleActionUpdateOrientation(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
+            return HandleActionUpdatePrivacyMode(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
+            return HandleActionUpdatePrivacyMode(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
+            return HandleActionUpdateSnapshotSkip(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
+            return HandleActionUpdateMaximizeState(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
+            return HandleActionUpdateOtherProps(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
+            return HandleActionUpdateStatusProps(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
+            return HandleActionUpdateNavigationProps(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
+            return HandleActionUpdateNavigationIndicatorProps(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
+            return HandleActionUpdateFlags(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
+            return HandleActionUpdateMode(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
+            return HandleActionUpdateAnimationFlag(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
+            return HandleActionUpdateTouchHotArea(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
+            return HandleActionUpdateDecorEnable(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
+            return HandleActionUpdateWindowLimits(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
+            return HandleActionUpdateDragenabled(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
+            return HandleActionUpdateRaiseenabled(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
+            return HandleActionUpdateHideNonSystemFloatingWindows(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
+            return HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
+            return HandleActionUpdateWindowMask(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
+            return HandleActionUpdateTopmost(property, sceneSession, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
+            return HandleActionUpdateModeSupportInfo(property, sceneSession, action);
+        default:
+            TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
+            return WMError::WM_DO_NOTHING;
     }
-    return (this->*(funcIter->second))(property, sceneSession, action);
 }
 
 WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
