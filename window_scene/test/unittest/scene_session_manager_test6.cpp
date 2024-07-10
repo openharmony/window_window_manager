@@ -718,6 +718,56 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing, Function | S
 }
 
 /**
+ * @tc.name: NotifyCompleteFirstFrameDrawing02
+ * @tc.desc: NotifyCompleteFirstFrameDrawing02:AtomicService free-install start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.abilityInfo = nullptr;
+    sessionInfo.isAtomicService_ = true;
+    unsigned int flags = 11111111;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ASSERT_NE(nullptr, sessionInfo.want);
+    sessionInfo.want->SetFlags(flags);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->NotifyCompleteFirstFrameDrawing(1);
+    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+}
+
+/**
+ * @tc.name: InitSceneSession01
+ * @tc.desc: InitSceneSession01:AtomicService free-install start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.abilityInfo = nullptr;
+    sessionInfo.isAtomicService_ = true;
+    unsigned int flags = 11111111;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ASSERT_NE(nullptr, sessionInfo.want);
+    sessionInfo.want->SetFlags(flags);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
+    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+}
+
+/**
  * @tc.name: CheckAndNotifyWaterMarkChangedResult
  * @tc.desc: CheckAndNotifyWaterMarkChangedResult
  * @tc.type: FUNC
