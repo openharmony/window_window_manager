@@ -86,6 +86,7 @@ public:
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
+    static napi_value SetAppForceLandscapeMode(napi_env env, napi_callback_info info);
 
 private:
     enum class ListenerFunctionType : uint32_t {
@@ -155,6 +156,7 @@ private:
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
+    napi_value OnSetAppForceLandscapeMode(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable);
     void OnGestureNavigationEnabledUpdate(bool enable);
