@@ -557,7 +557,11 @@ napi_value JsSceneSessionManager::RequestSceneSession(napi_env env, napi_callbac
 {
     WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRequestSceneSession(env, info) : nullptr;
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "me is null");
+        return nullptr;
+    }
+    return me->OnRequestSceneSession(env, info);
 }
 
 napi_value JsSceneSessionManager::UpdateSceneSessionWant(napi_env env, napi_callback_info info)
@@ -571,21 +575,33 @@ napi_value JsSceneSessionManager::RequestSceneSessionActivation(napi_env env, na
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRequestSceneSessionActivation(env, info) : nullptr;
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "me is null");
+        return nullptr;
+    }
+    return me->OnRequestSceneSessionActivation(env, info);
 }
 
 napi_value JsSceneSessionManager::RequestSceneSessionBackground(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRequestSceneSessionBackground(env, info) : nullptr;
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "me is null");
+        return nullptr;
+    }
+    return me->OnRequestSceneSessionBackground(env, info);
 }
 
 napi_value JsSceneSessionManager::RequestSceneSessionDestruction(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnRequestSceneSessionDestruction(env, info) : nullptr;
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "me is null");
+        return nullptr;
+    }    
+    return me->OnRequestSceneSessionDestruction(env, info);
 }
 
 napi_value JsSceneSessionManager::NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info)
@@ -1177,7 +1193,7 @@ void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
 
 napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
     if (rootSceneSession == nullptr) {
         napi_throw(env,
@@ -1216,7 +1232,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1268,7 +1284,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnUpdateSceneSessionWant(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_MAIN, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1309,7 +1325,7 @@ napi_value JsSceneSessionManager::OnUpdateSceneSessionWant(napi_env env, napi_ca
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1348,7 +1364,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1414,7 +1430,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1475,7 +1491,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 
 napi_value JsSceneSessionManager::OnNotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1515,7 +1531,7 @@ napi_value JsSceneSessionManager::OnNotifyForegroundInteractiveStatus(napi_env e
 
 napi_value JsSceneSessionManager::OnIsSceneSessionValid(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1566,7 +1582,7 @@ void JsSceneSessionManager::SetIsClearSession(napi_env env, napi_value jsSceneSe
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1613,7 +1629,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
 
 napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1654,7 +1670,7 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
 
 napi_value JsSceneSessionManager::OnStartUIAbilityBySCB(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1700,7 +1716,7 @@ napi_value JsSceneSessionManager::OnStartUIAbilityBySCB(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1749,7 +1765,7 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
 
 napi_value JsSceneSessionManager::OnGetWindowSceneConfig(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "start");
     const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
     napi_value jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(env, windowSceneConfig);
     if (jsWindowSceneConfigObj == nullptr) {
@@ -1786,7 +1802,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
 
 napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
     return NapiGetUndefined(env);
 }
@@ -1882,7 +1898,7 @@ napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_c
 
 napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "start");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1908,7 +1924,7 @@ napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "start");
 #ifdef SOC_PERF_ENABLE
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
