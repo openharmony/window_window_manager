@@ -3944,8 +3944,8 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     std::string isVisible = session->GetVisible() ? "true" : "false";
     std::string Focusable = session->GetFocusable() ? "true" : "false";
     std::string DecoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
-    bool PrivacyMode = sessionProperty->GetSystemPrivacyMode() || sessionProperty->GetPrivacyMode();
-    std::string isPrivacyMode = PrivacyMode ? "true" : "false";
+    bool privacyMode = sessionProperty->GetSystemPrivacyMode() || sessionProperty->GetPrivacyMode();
+    std::string isPrivacyMode = privacyMode ? "true" : "false";
     bool isFirstFrameAvailable = true;
     std::ostringstream oss;
     oss << "WindowName: " << session->GetWindowName()  << std::endl;
@@ -5368,8 +5368,8 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             if (!sessionProperty) {
                 continue;
             }
-            bool hasWaterMark = sessionProperty->GetWindowFlags()
-                & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+            bool hasWaterMark = sessionProperty->GetWindowFlags() &
+                static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
             bool isExtWindowHasWaterMarkFlag = session->GetCombinedExtWindowFlags().waterMarkFlag;
             if ((hasWaterMark && session->GetVisible()) || isExtWindowHasWaterMarkFlag) {
                 currentWaterMarkShowState = true;
