@@ -530,6 +530,41 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
+napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
+    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
+    napi_set_named_property(env, objValue, "windowStatusType",
+        CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    auto windowType = info->GetWindowType();
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowType) != 0) {
+        napi_set_named_property(env, objValue, "windowType",
+            CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowType)));
+    } else {
+        napi_set_named_property(env, objValue, "windowType", CreateJsValue(env, windowType));
+    }
+    return objValue;
+}
+
 napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarRegionTints& tints)
 {
     if (tints.empty()) {
