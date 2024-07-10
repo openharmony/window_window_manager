@@ -2075,9 +2075,6 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(
     } else {
         // if terminate, reset want. so start from recent, start a new one.
         TLOGI(WmsLogTag::WMS_MAIN, "reset want: %{public}d", persistentId);
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            scnSession->SetSessionInfoWant(nullptr);
-        }
         auto& sessionInfo = scnSession->GetSessionInfo();
         if (sessionInfo.want != nullptr) {
             const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
