@@ -89,7 +89,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    auto iterCallbackType = iterCaseType->find(type);
+    auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
