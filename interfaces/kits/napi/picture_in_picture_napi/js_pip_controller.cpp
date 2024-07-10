@@ -352,7 +352,7 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
     if (pipWindowListener == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]New JsPiPWindowListener failed");
+        TLOGE(WmsLogTag::WMS_PIP, "New JsPiPWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     jsCbMap_[type][callbackRef] = pipWindowListener;
@@ -370,7 +370,7 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         default:
             break;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]Register type %{public}s sucess! callback map size: %{public}zu",
+    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s sucess! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
@@ -433,7 +433,6 @@ void JsPipController::ProcessControlEventRegister(sptr<JsPiPWindowListener> list
     }
     sptr<IPiPControlObserver> thisListener(listener);
     pipController_->RegisterPiPControlObserver(thisListener);
-    TLOGI(WmsLogTag::WMS_PIP, "Register control event success");
 }
 
 void JsPipController::ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> listener)
@@ -442,7 +441,6 @@ void JsPipController::ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> lis
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
     }
-
     sptr<IPiPLifeCycle> thisListener(listener);
     pipController_->UnregisterPiPLifecycle(thisListener);
 }
@@ -465,7 +463,6 @@ void JsPipController::ProcessControlEventUnRegister(sptr<JsPiPWindowListener> li
     }
     sptr<IPiPControlObserver> thisListener(listener);
     pipController_->UnregisterPiPControlObserver(thisListener);
-    TLOGI(WmsLogTag::WMS_PIP, "UnRegister control event success");
 }
 
 napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info info)
@@ -510,9 +507,9 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = UnRegisterListener(env, type);
+            WmErrorCode ret = UnRegisterListener(type, it->second);
             if (ret != WmErrorCode::WM_OK) {
-                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed, no value", type.c_str());
+                TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it++);
@@ -526,29 +523,26 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = UnRegisterListener(env, type);
+            WmErrorCode ret = UnRegisterListener(type, it->second);
             if (ret != WmErrorCode::WM_OK) {
-                TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed", type.c_str());
+                TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it);
             break;
         }
         if (!findFlag) {
-            TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s failed because not found callback!",
-                type.c_str());
+            TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
+    TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsPipController::UnRegisterListener(napi_env env, const std::string& type)
+WmErrorCode JsPipController::UnRegisterListener(const std::string& type, sptr<JsPiPWindowListener> pipWindowListener)
 {
-    std::shared_ptr<NativeReference> callbackRef;
-    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:
             ProcessStateChangeUnRegister(pipWindowListener);

@@ -58,7 +58,7 @@ private:
     bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
-    WmErrorCode UnRegisterListener(napi_env env, const std::string& type);
+    WmErrorCode UnRegisterListener(const std::string& type, sptr<JsPiPWindowListener> pipWindowListener);
 
     void ProcessStateChangeRegister(sptr<JsPiPWindowListener> listener);
     void ProcessActionEventRegister(sptr<JsPiPWindowListener> listener);

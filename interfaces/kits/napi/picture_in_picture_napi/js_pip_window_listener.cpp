@@ -67,12 +67,12 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
 napi_value JsPiPWindowListener::CallJsMethod(napi_value methodName, napi_value const * argv, size_t argc)
 {
     if (env_ == nullptr || jsCallBack_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]env_ nullptr or jsCallBack_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
     }
     napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get method callback from object");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get method callback from object");
         return nullptr;
     }
     napi_value result = nullptr;
@@ -105,7 +105,7 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
 
 void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
+    TLOGI(WmsLogTag::WMS_PIP, "called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
     sptr<JsPiPWindowListener> pipWindowListener = this;
     auto napiTask = [this, jsCallback = jsCallBack_, pipWindowListener, actionEvent, statusCode, env = env_]() {
