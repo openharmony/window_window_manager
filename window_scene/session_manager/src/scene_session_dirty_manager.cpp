@@ -96,12 +96,12 @@ void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sce
     bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("SceneSession is nullptr");
+        WLOGFE("sceneSession is nullptr");
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
-        WLOGFE("SessionProperty is nullptr");
+        WLOGFE("sessionProperty is nullptr");
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
