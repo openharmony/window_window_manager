@@ -71,7 +71,6 @@ enum class ListenerFunctionType : uint32_t {
     CALLING_WINDOW_ID_CHANGE_CB,
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-    INVALID
 };
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
@@ -917,10 +916,13 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
 
 void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
 {
-    ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
-    if (ListenerFunctionTypeMap.count(cbType) != 0) {
-        listenerFuncType = ListenerFunctionTypeMap[cbType];
+    auto iterFuncType = ListenerFunctionTypeMap.find(cbType);
+    if (iterFuncType == ListenerFunctionTypeMap.end()) {
+        WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
+        return;
     }
+    ListenerFunctionType listenerFuncType = iterFuncType->second;
+    
     switch (listenerFuncType) {
         case ListenerFunctionType::CREATE_SYSTEM_SESSION_CB:
             ProcessCreateSystemSessionRegister();
@@ -950,7 +952,6 @@ void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
             ProcessGestureNavigationEnabledChangeListener();
             break;
         default:
-            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
 }
