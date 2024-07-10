@@ -89,6 +89,9 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         hostSession_ = iSession;
     }
     context_ = context;
+    if (context_) {
+        abilityToken_ = context_->GetToken();
+    }
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
@@ -109,12 +112,17 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
 void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
     sptr<ISessionStage> iSessionStage(this);
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return;
+    }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
         return;
     }
-    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
-        property_->GetParentId(), property_->GetUIExtensionUsage(), surfaceNode_->GetId());
+
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, abilityToken_,
+        surfaceNode_->GetId());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -502,8 +510,11 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     property_->SetWindowRect(wmRect);
 
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) {
-        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(property_->GetPersistentId(),
-            property_->GetParentId(), wmRect);
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, wmRect);
     }
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
@@ -891,8 +902,13 @@ WMError WindowExtensionSessionImpl::UpdateExtWindowFlags(const ExtensionWindowFl
         TLOGI(WmsLogTag::WMS_UIEXT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(property_->GetParentId(), GetPersistentId(),
-        flags.bitData, actions.bitData);
+
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(abilityToken_, flags.bitData, actions.bitData);
 }
 
 Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
@@ -928,8 +944,12 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (property_ && (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) && isPointDown) {
-        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(property_->GetPersistentId(),
-            property_->GetParentId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return;
+        }
+        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(abilityToken_,
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
