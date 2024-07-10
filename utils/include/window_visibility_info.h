@@ -71,9 +71,10 @@ public:
 
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
                          WindowType winType, Rect rect, std::string bundleName, std::string abilityName,
-                         WindowStatus windowStatus) : windowId_(winId), pid_(pid), uid_(uid), visibilityState_(visibilityState),
-                                                      windowType_(winType), rect_(rect), bundleName_(bundleName),
-                                                      abilityName_(abilityName), windowStatus_(windowStatus){};
+                         WindowStatus windowStatus) : windowId_(winId), pid_(pid), uid_(uid),
+                                                      visibilityState_(visibilityState), windowType_(winType),
+                                                      rect_(rect), bundleName_(bundleName), abilityName_(abilityName),
+                                                      windowStatus_(windowStatus){};
 
     /**
      * @brief Deconstruct of WindowVisibilityInfo.
