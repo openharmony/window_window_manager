@@ -733,7 +733,7 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, Function |
     sessionInfo.isAtomicService_ = true;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
-    ASSERT_NE(nullptr, sessionInof.want);
+    ASSERT_NE(nullptr, sessionInfo.want);
     sessionInfo.want->SetFlags(flags);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
@@ -758,7 +758,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sessionInfo.isAtomicService_ = true;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
-    ASSERT_NE(nullptr, sessionInof.want);
+    ASSERT_NE(nullptr, sessionInfo.want);
     sessionInfo.want->SetFlags(flags);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
