@@ -8366,7 +8366,7 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
             return;
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "ProcessModalExtensionPointDown: pid=%{public}d, persistentId=%{public}d, "
-            "parentId=%{public}d, posX:%{public}d posY:%{public}d", pid, persistentId, parentId, posX, posY);
+            "parentId=%{public}d", pid, persistentId, parentId);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession && parentSession->HasModalUIExtension()) {
             auto modalUIExtension = parentSession->GetLastModalUIExtensionEventInfo();
