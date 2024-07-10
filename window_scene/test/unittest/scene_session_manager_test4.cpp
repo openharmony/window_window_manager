@@ -1496,10 +1496,6 @@ HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallT
     auto result = ssm_->AddOrRemoveSecureSession(0, shouldHide);
     EXPECT_EQ(result, WSError::WS_OK);
     result = ssm_->AddOrRemoveSecureSession(persistentId, shouldHide);
-<<<<<<< HEAD
-    ssm_->AddExtensionWindowStageToSCB(nullptr, nullptr, 1);
-=======
->>>>>>> master
     EXPECT_EQ(result, WSError::WS_OK);
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
     usleep(WAIT_SYNC_IN_NS);
