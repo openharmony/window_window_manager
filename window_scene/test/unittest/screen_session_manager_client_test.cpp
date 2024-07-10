@@ -836,5 +836,37 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldStatusChangedReportUE, Function |
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->OnFoldStatusChangedReportUE(screenFoldInfo);
 }
+
+/**
+ * @tc.name: UpdateDisplayScale01
+ * @tc.desc: UpdateDisplayScale test
+ * @tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    const float scaleX = 1.0f;
+    const float scaleY = 1.0f;
+    const float pivotX = 0.5f;
+    const float pivotY = 0.5f;
+    ScreenId defaultScreenId = screenSessionManagerClient_->GetDefaultScreenId();
+    screenSessionManagerClient_->UpdateDisplayScale(defaultScreenId, scaleX, scaleY, pivotX, pivotY);
+}
+
+/**
+ * @tc.name: UpdateDisplayScale02
+ * @tc.desc: UpdateDisplayScale test
+ * @tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    const float scaleX = 1.0f;
+    const float scaleY = 1.0f;
+    const float pivotX = 0.5f;
+    const float pivotY = 0.5f;
+    uint64_t fakeScreenId = 100;
+    screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -103,6 +103,7 @@ public:
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
@@ -261,6 +262,8 @@ public:
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
+
+    virtual void SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
 
