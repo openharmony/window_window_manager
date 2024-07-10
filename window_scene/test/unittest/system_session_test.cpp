@@ -58,7 +58,7 @@ void SystemSessionTest::SetUp()
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    systemSession_ = new SystemSession(info, specificCallback);
+    systemSession_ = new (std::nothrow) SystemSession(info, specificCallback);
     EXPECT_NE(nullptr, systemSession_);
 }
 
@@ -83,7 +83,7 @@ namespace {
  */
 HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
 
     ASSERT_TRUE((systemSession_ != nullptr));
     ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
@@ -96,7 +96,7 @@ HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionTest, Show02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_TRUE((property != nullptr));
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     ASSERT_TRUE((systemSession_ != nullptr));
@@ -111,7 +111,7 @@ HWTEST_F(SystemSessionTest, Show02, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionTest, Show03, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_TRUE((property != nullptr));
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE((systemSession_ != nullptr));
@@ -149,7 +149,7 @@ HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    
+
     property->windowState_ = WindowState::STATE_SHOWN;
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -194,7 +194,7 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
     systemSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
 
-    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(nullptr, windowSessionProperty);
     systemSession_->property_ = windowSessionProperty;
     EXPECT_NE(WSError::WS_OK, systemSession_->TransferKeyEvent(keyEvent));
@@ -239,7 +239,7 @@ HWTEST_F(SystemSessionTest, CheckKeyEventDispatch02, Function | SmallTest | Leve
     info.abilityName_ = "ParamSystemSession1";
     info.moduleName_ = "ParamSystemSession2";
     info.bundleName_ = "ParamSystemSession3";
-    sptr<Session> session = new Session(info);
+    sptr<Session> session = new (std::nothrow) Session(info);
     systemSession_->parentSession_ = session;
 
     systemSession_->parentSession_->state_ = SessionState::STATE_CONNECT;
@@ -332,7 +332,7 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     sysSession->UpdatePointerArea(rect);
     ASSERT_NE(sysSession->preRect_, rect);
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetDecorEnable(true);
     sysSession->property_ = property;
@@ -381,7 +381,7 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Leve
     auto ret = systemSession_->ProcessPointDownSession(posX, posY);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(nullptr, windowSessionProperty);
 
     systemSession_->property_ = windowSessionProperty;
@@ -393,6 +393,11 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Leve
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
+/**
+ * @tc.name: GetMissionId
+ * @tc.desc: test function : GetMissionId
+ * @tc.type: FUNC
+ */
 HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
@@ -400,11 +405,32 @@ HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    sptr<Session> session = new Session(info);
+    sptr<Session> session = new (std::nothrow) Session(info);
     systemSession_->parentSession_ = session;
     auto ret = systemSession_->GetMissionId();
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: RectCheck
+ * @tc.desc: test function : RectCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testRectCheck";
+    info.moduleName_ = "testRectCheck";
+    info.bundleName_ = "testRectCheck";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+    systemSession_->parentSession_ = session;
+    uint32_t curWidth = 100;
+    uint32_t curHeight = 200;
+    systemSession_->RectCheck(curWidth, curHeight);
 }
-}
-}
+
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
