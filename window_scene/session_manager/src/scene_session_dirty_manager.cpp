@@ -95,11 +95,16 @@ bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform,
     bool useUIExtension) const
 {
-    if (sceneSession == nullptr || sceneSession->GetSessionProperty() == nullptr) {
-        WLOGFE("SceneSession or SessionProperty is nullptr");
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
         return;
     }
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        WLOGFE("sessionProperty is nullptr");
+        return;
+    }
+    auto displayId = sessionProperty->GetDisplayId();
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
@@ -182,8 +187,9 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
         (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
         float vpr = 1.5f; // 1.5: default vp
-        if (sceneSession->GetSessionProperty() != nullptr) {
-            auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty != nullptr) {
+            auto displayId = sessionProperty->GetDisplayId();
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
             if (screenSession != nullptr) {
                 vpr = screenSession->GetScreenProperty().GetDensity();
@@ -440,15 +446,22 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
 void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSession,
     std::vector<int32_t>& pointerChangeAreas) const
 {
-    bool dragEnabled = sceneSession->GetSessionProperty()->GetDragEnabled();
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
+        return;
+    }
+    bool dragEnabled = sessionProperty->GetDragEnabled();
     if (dragEnabled) {
         float vpr = 1.5f; // 1.5: default vp
-        if (sceneSession->GetSessionProperty() != nullptr) {
-            auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-            if (screenSession != nullptr) {
-                vpr = screenSession->GetScreenProperty().GetDensity();
-            }
+        auto displayId = sessionProperty->GetDisplayId();
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+        if (screenSession != nullptr) {
+            vpr = screenSession->GetScreenProperty().GetDensity();
         }
         int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
         int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
@@ -459,7 +472,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
             return;
         }
-        auto limits = sceneSession->GetSessionProperty()->GetWindowLimits();
+        auto limits = sessionProperty->GetWindowLimits();
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
                 POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
