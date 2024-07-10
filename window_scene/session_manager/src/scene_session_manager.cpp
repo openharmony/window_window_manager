@@ -1314,7 +1314,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
         return;
     }
-    if (keyboardSession == nullptr ||  == nullptr) {
+    if (keyboardSession == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardSession is nullptr");
         return;
     }
@@ -3936,7 +3936,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto sessionProperty = session->GetSessionProperty();
-    if (sessionProperty) {
+    if (sessionProperty == nullptr) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
@@ -3944,8 +3944,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     std::string isVisible = session->GetVisible() ? "true" : "false";
     std::string Focusable = session->GetFocusable() ? "true" : "false";
     std::string DecoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
-    bool PrivacyMode = sessionProperty->GetSystemPrivacyMode() ||
-        sessionProperty->GetPrivacyMode();
+    bool PrivacyMode = sessionProperty->GetSystemPrivacyMode() || sessionProperty->GetPrivacyMode();
     std::string isPrivacyMode = PrivacyMode ? "true" : "false";
     bool isFirstFrameAvailable = true;
     std::ostringstream oss;
