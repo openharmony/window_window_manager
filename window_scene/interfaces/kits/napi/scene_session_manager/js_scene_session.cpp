@@ -1424,7 +1424,6 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFunctionType listenerFuncti
             ProcessLayoutFullScreenChangeRegister();
             break;
         default:
-            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
 }
