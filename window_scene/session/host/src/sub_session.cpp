@@ -55,12 +55,11 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
-        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-            auto sessionProperty = session->GetSessionProperty();
-            if (sessionProperty) {
-                sessionProperty->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-                session->NotifyIsCustomAnimationPlaying(true);
-            }
+        auto sessionProperty = session->GetSessionProperty();
+        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
+            sessionProperty) {
+            sessionProperty->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+            session->NotifyIsCustomAnimationPlaying(true);
         }
         auto ret = session->SceneSession::Foreground(property);
         return ret;
