@@ -1198,6 +1198,19 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
     ASSERT_NE(nullptr, ssm_);
     ssm_->DeleteStateDetectTask();
 }
+
+/**
+ * @tc.name: TestProcessDisplayScale
+ * @tc.desc: TestProcessDisplayScale
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest6:: ProcessDisplayScale, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ssm_->ProcessDisplayScale(displayInfo);
+    ssm_->ProcessDisplayScale(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

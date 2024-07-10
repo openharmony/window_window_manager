@@ -1706,6 +1706,23 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, Function | S
         ASSERT_TRUE(allSize.empty());
     }
 }
+
+/**
+ * @tc.name: SetDisplayScale
+ * @tc.desc: SetDisplayScale test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDisplayScale, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId fakeScreenId = static_cast<ScreenId>(-1);
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float pivotX = 0.5f;
+    float pivotY = 0.5f;
+    ssm_->SetDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
+    ssm_->SetDisplayScale(ssm_->GetDefaultScreenId(), scaleX, scaleY, pivotX, pivotY);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
