@@ -123,8 +123,7 @@ WmErrorCode JsWindowRegisterManager::ProcessRegisterCallback(ListenerFunctionTyp
     if (caseType == CaseType::CASE_WINDOW) {
         switch (listenerFunctionType) {
             case ListenerFunctionType::SYSTEM_AVOID_AREA_CHANGE_CB:
-                return ProcessSystemAvoidAreaChangeRegister(listener, window, isRegister, env,
-                    parameter);
+                return ProcessSystemAvoidAreaChangeRegister(listener, window, isRegister, env, parameter);
             case ListenerFunctionType::AVOID_AREA_CHANGE_CB:
                 return ProcessAvoidAreaChangeRegister(listener, window, isRegister, env, parameter);
             default:
