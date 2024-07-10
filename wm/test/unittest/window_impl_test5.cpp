@@ -215,40 +215,40 @@ HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
     ASSERT_NE(window, nullptr);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_VOLUME_OVERLAY);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_VOLUME_OVERLAY);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     window->SetDefaultOption();
 }
 
@@ -267,34 +267,34 @@ HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
     ASSERT_NE(window, nullptr);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_DOCK);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_DOCK);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_SEARCHING_BAR);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SEARCHING_BAR);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_SCREENSHOT);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SCREENSHOT);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_BOOT_ANIMATION);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_BOOT_ANIMATION);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_POINTER);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_POINTER);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_TOAST);
     window->SetDefaultOption();
 
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     window->SetDefaultOption();
 }
 
@@ -885,6 +885,470 @@ HWTEST_F(WindowImplTest5, Minimize03, Function | SmallTest | Level1)
     window->context_ = context;
     window->Minimize();
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: RegisterListener
+ * @tc.desc: UnregisterListener | RegisterListener desc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, RegisterListener, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("RegisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    window->UnregisterOccupiedAreaChangeListener(nullptr);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener2);
+    window->RegisterOccupiedAreaChangeListener(listener2);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: SetImmersiveModeEnabledState02
+ * @tc.desc: SetImmersiveModeEnabledState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, SetImmersiveModeEnabledState02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetImmersiveModeEnabledState02");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_INITIAL;
+    EXPECT_EQ(window->SetImmersiveModeEnabledState(true), WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->UpdateModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_EQ(window->SetImmersiveModeEnabledState(true), WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(window->SetImmersiveModeEnabledState(true), WMError::WM_OK);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: SetGlobalMaximizeMode
+ * @tc.desc: SetGlobalMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, SetGlobalMaximizeMode, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetGlobalMaximizeMode");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_INITIAL;
+    EXPECT_EQ(window->SetGlobalMaximizeMode(MaximizeMode::MODE_RECOVER), WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(window->SetGlobalMaximizeMode(MaximizeMode::MODE_RECOVER), WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(window->SetGlobalMaximizeMode(MaximizeMode::MODE_RECOVER), WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: MaximizeFloating02
+ * @tc.desc: MaximizeFloating test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, MaximizeFloating02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("MaximizeFloating02");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->MaximizeFloating();
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: SetCallingWindow
+ * @tc.desc: SetCallingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, SetCallingWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetCallingWindow");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_INITIAL;
+    window->SetCallingWindow(1);
+}
+
+/**
+ * @tc.name: Resize
+ * @tc.desc: Resize test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("Resize");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
+
+    window->state_ = WindowState::STATE_HIDDEN;
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->Resize(10, 10);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: MoveTo
+ * @tc.desc: MoveTo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, MoveTo, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("MoveTo");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_EQ(window->MoveTo(10, 10), WMError::WM_OK);
+
+    window->state_ = WindowState::STATE_HIDDEN;
+    EXPECT_EQ(window->MoveTo(10, 10), WMError::WM_OK);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(window->MoveTo(10, 10), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->MoveTo(10, 10);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+}
+
+/**
+ * @tc.name: AdjustWindowAnimationFlag
+ * @tc.desc: AdjustWindowAnimationFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("AdjustWindowAnimationFlag");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<IAnimationTransitionController> animationTransitionController = new (std::nothrow)
+        IAnimationTransitionController();
+    ASSERT_NE(animationTransitionController, nullptr);
+    window->animationTransitionController_ = animationTransitionController;
+
+    window->AdjustWindowAnimationFlag(true);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->needDefaultAnimation_ = true;
+    window->AdjustWindowAnimationFlag(true);
+
+    window->animationTransitionController_ = nullptr;
+    window->needDefaultAnimation_ = false;
+    window->AdjustWindowAnimationFlag(true);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    window->AdjustWindowAnimationFlag(false);
+}
+
+/**
+ * @tc.name: NeedToStopShowing
+ * @tc.desc: NeedToStopShowing test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, NeedToStopShowing, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NeedToStopShowing");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(window->NeedToStopShowing(), true);
+
+    window->UpdateModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    window->property_->SetWindowFlags(1 << 2);
+    EXPECT_EQ(window->NeedToStopShowing(), false);
+
+    window->property_->SetWindowFlags(1);
+    EXPECT_EQ(window->NeedToStopShowing(), false);
+}
+
+/**
+ * @tc.name: DestroyFloatingWindow
+ * @tc.desc: DestroyFloatingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("DestroyFloatingWindow");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    option->SetWindowType(WindowType::WINDOW_TYPE_VOLUME_OVERLAY);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    option->SetBundleName("OK");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<WindowProperty> property = new (std::nothrow) WindowProperty();
+    ASSERT_NE(property, nullptr);
+    property->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window->property_ = property;
+    window->DestroyFloatingWindow();
+
+    std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap;
+    sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl, nullptr);
+    sptr<WindowProperty> property2 = new (std::nothrow) WindowProperty();
+    ASSERT_NE(property2, nullptr);
+    windowImpl->property_ = property2;
+    std::vector<sptr<WindowImpl>> v;
+    std::vector<sptr<WindowImpl>> v2;
+    v.push_back(windowImpl);
+    appFloatingWindowMap.insert({0, v});
+    appFloatingWindowMap.insert({0, v2});
+    window->appFloatingWindowMap_ = appFloatingWindowMap;
+    window->DestroyFloatingWindow();
+
+    property2->windowId_ = 10;
+    window->DestroyFloatingWindow();
+}
+
+/**
+ * @tc.name: DestroyDialogWindow
+ * @tc.desc: DestroyDialogWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("DestroyDialogWindow");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    option->SetWindowType(WindowType::WINDOW_TYPE_VOLUME_OVERLAY);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    option->SetBundleName("OK");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<WindowProperty> property = new (std::nothrow) WindowProperty();
+    ASSERT_NE(property, nullptr);
+    property->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window->property_ = property;
+    window->DestroyFloatingWindow();
+
+    std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap;
+    sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl, nullptr);
+    sptr<WindowProperty> property2 = new (std::nothrow) WindowProperty();
+    ASSERT_NE(property2, nullptr);
+    windowImpl->property_ = property2;
+    std::vector<sptr<WindowImpl>> v;
+    std::vector<sptr<WindowImpl>> v2;
+    v.push_back(windowImpl);
+    appDialogWindowMap.insert({0, v});
+    appDialogWindowMap.insert({0, v2});
+    window->appDialogWindowMap_ = appDialogWindowMap;
+    window->DestroyFloatingWindow();
+
+    property2->windowId_ = 10;
+    window->DestroyFloatingWindow();
+}
+
+/**
+ * @tc.name: GetOriginalAbilityInfo
+ * @tc.desc: GetOriginalAbilityInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetOriginalAbilityInfo");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = context;
+    window->GetOriginalAbilityInfo();
+}
+
+/**
+ * @tc.name: WindowCreateCheck05
+ * @tc.desc: WindowCreateCheck test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, WindowCreateCheck05, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("WindowCreateCheck05");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    EXPECT_EQ(window->WindowCreateCheck(INVALID_WINDOW_ID), WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(window->WindowCreateCheck(INVALID_WINDOW_ID), WMError::WM_ERROR_INVALID_PARENT);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    sptr<WindowImpl> windowImpl1 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl1, nullptr);
+    windowImpl1->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl1)));
+    EXPECT_EQ(window->WindowCreateCheck(INVALID_WINDOW_ID), WMError::WM_ERROR_REPEAT_OPERATION);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    sptr<WindowImpl> windowImpl2 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl2, nullptr);
+    windowImpl2->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(0, windowImpl2)));
+    EXPECT_EQ(window->WindowCreateCheck(0), WMError::WM_ERROR_INVALID_PARENT);
+
+    sptr<WindowImpl> windowImpl3 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl3, nullptr);
+    windowImpl3->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl3)));
+    EXPECT_EQ(window->WindowCreateCheck(1), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsAppMainOrSubOrFloatingWindow
+ * @tc.desc: IsAppMainOrSubOrFloatingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, IsAppMainOrSubOrFloatingWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("IsAppMainOrSubOrFloatingWindow");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, nullptr)));
+    EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
+
+    sptr<WindowImpl> windowImpl1 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl1, nullptr);
+    windowImpl1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl1)));
+    EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
+
+    sptr<WindowImpl> windowImpl2 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl2, nullptr);
+    windowImpl2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl2)));
+    EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
+
+    sptr<WindowImpl> windowImpl3 = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(windowImpl3, nullptr);
+    windowImpl3->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = context;
+    windowImpl3->context_ = context;
+    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl3)));
+    EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
+}
+
+/**
+ * @tc.name: UpdateTitleButtonVisibility02
+ * @tc.desc: UpdateTitleButtonVisibility test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UpdateTitleButtonVisibility02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateTitleButtonVisibility02");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    window->uiContent_ = nullptr;
+    window->UpdateTitleButtonVisibility();
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
+    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _));
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->UpdateTitleButtonVisibility();
+
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->UpdateTitleButtonVisibility();
+}
+
+/**
+ * @tc.name: GetConfigurationFromAbilityInfo02
+ * @tc.desc: GetConfigurationFromAbilityInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetConfigurationFromAbilityInfo02");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = context;
+    window->GetConfigurationFromAbilityInfo();
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    context->SetAbilityInfo(info);
+    window->GetConfigurationFromAbilityInfo();
+
+    std::vector<AppExecFwk::SupportWindowMode> supportModes;
+    supportModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+    context->GetAbilityInfo()->windowModes = supportModes;
+    window->GetConfigurationFromAbilityInfo();
 }
 }
 } // namespace Rosen
