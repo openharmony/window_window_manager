@@ -6061,7 +6061,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
-        TLOGI(WmsLogTag::WMS_MAIN, "RequestSceneSessionByCall persistentId: %{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_MAIN, "RSSBC id:%{public}d", persistentId);
         if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -6078,7 +6078,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         } else {
             WLOGFE("wrong callState_");
         }
-        TLOGI(WmsLogTag::WMS_MAIN, "RequestSceneSessionByCall callState:%{public}d, persistentId: %{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "RSSBC state:%{public}d, id:%{public}d",
             sessionInfo.callState_, persistentId);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
