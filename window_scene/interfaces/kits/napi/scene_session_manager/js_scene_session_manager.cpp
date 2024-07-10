@@ -60,6 +60,19 @@ const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
+
+const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
+    {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
+    {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
+    {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
+    {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
+    {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
+    {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
+    {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
+    {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
+    {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+        ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+};
 } // namespace
 
 napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
@@ -167,18 +180,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
 
 JsSceneSessionManager::JsSceneSessionManager(napi_env env) : env_(env)
 {
-    listenerFuncTypeMap_ = {
-        {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
-        {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
-        {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
-        {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
-        {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
-        {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
-        {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
-        {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
-        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-            ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
-    };
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
 }
 
@@ -889,7 +890,15 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     if (IsCallbackRegistered(env, cbType, value)) {
         return NapiGetUndefined(env);
     }
-    ProcessRegisterCallback(cbType);
+    auto iterFuncType = ListenerFunctionTypeMap.find(cbType);
+    if (iterFuncType == ListenerFunctionTypeMap.end()) {
+        WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ListenerFunctionType listenerFunctionType = iterFuncType->second;
+    ProcessRegisterCallback(listenerFunctionType);
     std::shared_ptr<NativeReference> callbackRef;
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
@@ -903,13 +912,9 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     return NapiGetUndefined(env);
 }
 
-void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
+void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listenerFunctionType)
 {
-    ListenerFunctionType listenerFuncType = ListenerFunctionType::INVALID;
-    if (listenerFuncTypeMap_.count(cbType) != 0) {
-        listenerFuncType = listenerFuncTypeMap_[cbType];
-    }
-    switch (listenerFuncType) {
+    switch (listenerFunctionType) {
         case ListenerFunctionType::CREATE_SYSTEM_SESSION_CB:
             ProcessCreateSystemSessionRegister();
             break;
@@ -938,7 +943,6 @@ void JsSceneSessionManager::ProcessRegisterCallback(const std::string& cbType)
             ProcessGestureNavigationEnabledChangeListener();
             break;
         default:
-            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
 }
