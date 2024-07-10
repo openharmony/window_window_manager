@@ -1471,14 +1471,13 @@ HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | 
 {
     ASSERT_NE(ssm_, nullptr);
     int32_t parentId = 1;
-    int32_t persistentId = 0;
     SessionInfo info;
     info.abilityName_ = "UpdateExtWindowFlags";
     info.bundleName_ = "UpdateExtWindowFlags";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(parentId, sceneSession));
-    auto ret = ssm_->UpdateExtWindowFlags(parentId, persistentId, 7, 7);
+    auto ret = ssm_->UpdateExtWindowFlags(nullptr, 7, 7);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
@@ -1502,7 +1501,7 @@ HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallT
     auto result = ssm_->AddOrRemoveSecureSession(0, shouldHide);
     EXPECT_EQ(result, WSError::WS_OK);
     result = ssm_->AddOrRemoveSecureSession(persistentId, shouldHide);
-    ssm_->AddExtensionWindowStageToSCB(nullptr, 1, 1, UIExtensionUsage::MODAL, 1);
+    ssm_->AddExtensionWindowStageToSCB(nullptr, nullptr, 1);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 

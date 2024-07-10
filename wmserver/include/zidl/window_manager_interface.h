@@ -201,16 +201,15 @@ public:
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId) {}
-    virtual void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) {}
-    virtual void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
-        int32_t posX, int32_t posY) {}
+    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
+    virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}
+    virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) {}
     virtual WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
     {
         return WSError::WS_OK;
     }
-    virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    virtual WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions)
     {
         return WSError::WS_OK;
