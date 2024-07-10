@@ -106,7 +106,6 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     windowManagerListener->SetMainEventHandler();
     WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, windowManagerListener, window,
         true, env, parameter);
-
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
