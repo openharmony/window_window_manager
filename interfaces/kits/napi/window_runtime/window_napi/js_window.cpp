@@ -2245,7 +2245,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
             WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
         *errCodePtr = spWindow->SetSystemBarProperty(
             WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
-        *errCodePtr = spWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, 
+        *errCodePtr = spWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
             systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
         TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set set system bar enalbe end, ret = %{public}d",
             spWindow->GetWindowId(), spWindow->GetWindowName().c_str(), *errCodePtr);
