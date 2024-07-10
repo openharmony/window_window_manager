@@ -3791,4 +3791,17 @@ WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSession
     }
     return WMError::WM_OK;
 }
+
+void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
+{
+    forceSplitFunc_ = func;
+}
+
+int32_t SceneSession::GetAppForceLandscapeMode(const std::string& bundleName)
+{
+    if (forceSplitFunc_ == nullptr) {
+        return 0;
+    }
+    return forceSplitFunc_(bundleName);
+}
 } // namespace OHOS::Rosen

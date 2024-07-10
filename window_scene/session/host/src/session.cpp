@@ -1092,7 +1092,7 @@ WSError Session::DrawingCompleted()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "active:%{public}d, id:%{public}d, state:%{public}" PRIu32,
+    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}" PRIu32,
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
@@ -2533,11 +2533,11 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     bool isPc = systemConfig_.uiType_ == "pc";
     bool isPhone = systemConfig_.uiType_ == "phone";
     if (!isPc && !isPhone) {
-        TLOGI(WmsLogTag::WMS_LIFE, "type not support, id:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
     }
     if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "screen lock, id:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "screen locked, id:%{public}d", persistentId_);
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType())) {

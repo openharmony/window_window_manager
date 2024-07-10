@@ -1402,6 +1402,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     if (sceneSession != nullptr) {
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         sceneSession->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
+        sceneSession->RegisterForceSplitListener(std::bind(&SceneSessionManager::GetAppForceLandscapeMode,
+            this, std::placeholders::_1));
     }
     return sceneSession;
 }
@@ -4558,6 +4560,12 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 
+    TLOGI(WmsLogTag::WMS_FOCUS,
+        "name: %{public}s/%{public}s/%{public}s, id: %{public}d, isFocused: %{public}d",
+        sceneSession->GetSessionInfo().bundleName_.c_str(),
+        sceneSession->GetSessionInfo().abilityName_.c_str(),
+        sceneSession->GetWindowNameAllType().c_str(),
+        persistentId, isFocused);
     if (isFocused) {
         if (IsSessionVisible(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
@@ -6061,7 +6069,6 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
-        TLOGI(WmsLogTag::WMS_MAIN, "RSSBC id:%{public}d", persistentId);
         if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -6069,6 +6076,8 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         auto sessionInfo = scnSession->GetSessionInfo();
         auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
         if (!abilitySessionInfo) {
+            TLOGE(WmsLogTag::WMS_MAIN,
+                "RequestSceneSessionByCall abilitySessionInfo is null, id:%{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (sessionInfo.callState_ == static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
@@ -6078,7 +6087,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         } else {
             WLOGFE("wrong callState_");
         }
-        TLOGI(WmsLogTag::WMS_MAIN, "RSSBC state:%{public}d, id:%{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "RequestSceneSessionByCall state:%{public}d, id:%{public}d",
             sessionInfo.callState_, persistentId);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
@@ -9272,5 +9281,31 @@ void SceneSessionManager::RegisterSecSurfaceInfoListener()
     if (rsInterface_.RegisterUIExtensionCallback(currentUserId_, callBack) != WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "RegisterSecSurfaceInfoListener failed");
     }
+}
+
+WSError SceneSessionManager::SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode)
+{
+    if (bundleName.empty()) {
+        WLOGFE("bundle name is empty");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGFD("set app force landscape mode, app: %{public}s, mode: %{public}d", bundleName.c_str(), mode);
+    std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+    appForceLandscapeMap_.emplace(bundleName, mode);
+    return WSError::WS_OK;
+}
+
+int32_t SceneSessionManager::GetAppForceLandscapeMode(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        WLOGFE("bundle name is empty");
+        return 0;
+    }
+    std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+    if (appForceLandscapeMap_.empty()
+        || appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
+        return 0;
+    }
+    return appForceLandscapeMap_[bundleName];
 }
 } // namespace OHOS::Rosen

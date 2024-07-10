@@ -59,6 +59,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t ANIMATION_TIME = 400;
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -970,6 +971,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         } else if (isDialogWindow) {
             SetAPPWindowLabel(dialogTitle_);
         }
+    }
+
+    if (context_ != nullptr && WindowHelper::IsMainWindow(GetType())
+        && IsAppSupportForceSplit(context_->GetBundleName())) {
+        SetForceSplitEnable(true);
     }
 
     uint32_t version = 0;
@@ -3334,5 +3340,27 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
+bool WindowSessionImpl::IsAppSupportForceSplit(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        return false;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return false;
+    }
+    return hostSession_->GetAppForceLandscapeMode(bundleName) == FORCE_SPLIT_MODE;
+}
+
+void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        WLOGFW("uiContent is null!");
+        return;
+    }
+    uiContent->SetForceSplitEnable(isForceSplit);
+    WLOGFI("set app force split success");
+}
 } // namespace Rosen
 } // namespace OHOS

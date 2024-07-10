@@ -160,6 +160,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateDisplayHookInfo);
     BindNativeFunction(env, exportObj, "initScheduleUtils", moduleName,
         JsSceneSessionManager::InitScheduleUtils);
+    BindNativeFunction(env, exportObj, "SetAppForceLandscapeMode", moduleName,
+        JsSceneSessionManager::SetAppForceLandscapeMode);
     return NapiGetUndefined(env);
 }
 
@@ -600,7 +602,7 @@ napi_value JsSceneSessionManager::RequestSceneSessionDestruction(napi_env env, n
     if (me == nullptr) {
         TLOGW(WmsLogTag::WMS_LIFE, "me is null");
         return nullptr;
-    }    
+    }
     return me->OnRequestSceneSessionDestruction(env, info);
 }
 
@@ -1193,7 +1195,7 @@ void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
 
 napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    WLOGFI("in");
     sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
     if (rootSceneSession == nullptr) {
         napi_throw(env,
@@ -1232,7 +1234,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "start");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1284,7 +1286,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnUpdateSceneSessionWant(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "start");
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1325,7 +1327,7 @@ napi_value JsSceneSessionManager::OnUpdateSceneSessionWant(napi_env env, napi_ca
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1364,7 +1366,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1430,7 +1432,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1491,7 +1493,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 
 napi_value JsSceneSessionManager::OnNotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1531,7 +1533,7 @@ napi_value JsSceneSessionManager::OnNotifyForegroundInteractiveStatus(napi_env e
 
 napi_value JsSceneSessionManager::OnIsSceneSessionValid(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1582,7 +1584,7 @@ void JsSceneSessionManager::SetIsClearSession(napi_env env, napi_value jsSceneSe
 
 napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1629,7 +1631,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
 
 napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "start");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1670,7 +1672,7 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
 
 napi_value JsSceneSessionManager::OnStartUIAbilityBySCB(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1716,7 +1718,7 @@ napi_value JsSceneSessionManager::OnStartUIAbilityBySCB(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    WLOGFI("in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1765,7 +1767,7 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
 
 napi_value JsSceneSessionManager::OnGetWindowSceneConfig(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "start");
+    WLOGFD("in");
     const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
     napi_value jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(env, windowSceneConfig);
     if (jsWindowSceneConfigObj == nullptr) {
@@ -1802,7 +1804,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
 
 napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    WLOGFI("in");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
     return NapiGetUndefined(env);
 }
@@ -1898,7 +1900,7 @@ napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_c
 
 napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "start");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1924,7 +1926,7 @@ napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "start");
+    WLOGFD("in");
 #ifdef SOC_PERF_ENABLE
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -2678,6 +2680,43 @@ napi_value JsSceneSessionManager::OnUpdateDisplayHookInfo(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateDisplayHookInfo(uid, width, height, static_cast<float_t>(density), enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SetAppForceLandscapeMode(napi_env env, napi_callback_info info)
+{
+    WLOGFI("[NAPI] SetAppForceLandscapeMode");
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetAppForceLandscapeMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetAppForceLandscapeMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        WLOGFE("[NAPI]Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+    }
+
+    int32_t mode;
+    if (!ConvertFromJsValue(env, argv[1], mode)) {
+        WLOGFE("[NAPI]Failed to convert parameter to forceLandscapeMode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetAppForceLandscapeMode(bundleName, mode);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
