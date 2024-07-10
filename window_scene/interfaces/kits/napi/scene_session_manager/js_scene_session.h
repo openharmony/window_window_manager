@@ -29,7 +29,7 @@
 #include "task_scheduler.h"
 
 namespace OHOS::Rosen {
-enum class ListenerFunctionType : uint32_t {
+enum class ListenerFuncType : uint32_t {
     PENDING_SCENE_CB,
     CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
     SESSION_STATE_CHANGE_CB,
