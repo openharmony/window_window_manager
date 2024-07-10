@@ -95,9 +95,13 @@ bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform,
     bool useUIExtension) const
 {
+    if (sceneSession == nullptr) {
+        WLOGFE("SceneSession is nullptr");
+        return;
+    }
     auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sceneSession == nullptr || sessionProperty == nullptr) {
-        WLOGFE("SceneSession or SessionProperty is nullptr");
+    if (sessionProperty == nullptr) {
+        WLOGFE("SessionProperty is nullptr");
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
