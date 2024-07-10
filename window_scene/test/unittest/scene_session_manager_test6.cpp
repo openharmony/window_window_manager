@@ -735,9 +735,7 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, Function |
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     sessionInfo.want->SetFlags(flags);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ASSERT_NE(nullptr, ssm_);
     ssm_->NotifyCompleteFirstFrameDrawing(1);
     ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
 }
@@ -760,9 +758,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     sessionInfo.want->SetFlags(flags);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ASSERT_NE(nullptr, ssm_);
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
     ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
 }
