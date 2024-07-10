@@ -49,7 +49,6 @@ SystemSession::~SystemSession()
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "isShowing: %{public}d", static_cast<int>(isShowing));
     if (specificCallback_ == nullptr) {
         return;
     }
@@ -70,7 +69,7 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
             specificCallback_->onCameraSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
         }
     } else {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "skip window type");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "Skip window type, isShowing: %{public}d", isShowing);
     }
 }
 
@@ -200,7 +199,6 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     const auto& type = GetWindowType();
-    WLOGFI("id: %{public}d, type: %{public}d", id, type);
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         WLOGFI("Parent has dialog foreground, id: %{public}d, type: %{public}d", id, type);
@@ -212,6 +210,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (type == WindowType::WINDOW_TYPE_DIALOG && GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
