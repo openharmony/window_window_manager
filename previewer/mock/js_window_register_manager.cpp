@@ -123,10 +123,10 @@ WmErrorCode JsWindowRegisterManager::ProcessRegisterCallback(ListenerFunctionTyp
     if (caseType == CaseType::CASE_WINDOW) {
         switch (listenerFunctionType) {
             case ListenerFunctionType::SYSTEM_AVOID_AREA_CHANGE_CB:
-                return ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env,
+                return ProcessSystemAvoidAreaChangeRegister(listener, window, isRegister, env,
                     parameter);
             case ListenerFunctionType::AVOID_AREA_CHANGE_CB:
-                return ProcessAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+                return ProcessAvoidAreaChangeRegister(listener, window, isRegister, env, parameter);
             default:
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
@@ -147,7 +147,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    auto iterCallbackType = iterCaseType->find(type);
+    auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
