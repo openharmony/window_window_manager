@@ -8318,8 +8318,14 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             if (session == nullptr) {
                 continue;
             }
-            infos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
-                session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType()));
+            WSRect hostRect = session->GetSessionRect();
+            Rect rect = {hostRect.posX_, hostRect.posY_,
+                         static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_)};
+            auto windowStatus = GetWindowStatus(session->GetWindowMode(), session->GetSessionState(),
+                                                session->GetSessionProperty());
+            infos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
+                session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
+                session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_));
         }
         return WMError::WM_OK;
     };
