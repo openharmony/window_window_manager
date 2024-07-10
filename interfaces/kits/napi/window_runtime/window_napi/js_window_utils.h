@@ -28,6 +28,7 @@
 #endif
 
 #include "window_option.h"
+#include "window_visibility_info.h"
 #include "wm_common.h"
 namespace OHOS {
 namespace Rosen {
