@@ -1166,7 +1166,7 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     napi_value lastParam = argc <= 0 || GetType(env, argv[0]) != napi_function ? nullptr : argv[0];
     napi_value result = nullptr;
     NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
             std::vector<sptr<WindowVisibilityInfo>> infos;
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
