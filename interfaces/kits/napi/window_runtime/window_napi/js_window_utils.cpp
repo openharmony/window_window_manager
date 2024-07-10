@@ -482,7 +482,6 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
     return objValue;
 }
 
-
 static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBarRegionTint& tint)
 {
     napi_value objValue = nullptr;
