@@ -47,6 +47,7 @@ public:
     static napi_value SetWaterMarkImage(napi_env env, napi_callback_info info);
     static napi_value ShiftAppWindowFocus(napi_env env, napi_callback_info info);
     static napi_value GetVisibleWindowInfo(napi_env env, napi_callback_info info);
+
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
     static napi_value OnCreateWindow(napi_env env, napi_callback_info info);
