@@ -1170,12 +1170,12 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
             [=](napi_env env, NapiAsyncTask& task, int32_t status) {
                 std::vector<sptr<WindowVisibilityInfo>> infos;
                 WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                        SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
-                if (ret == WmErrorCode::WM_OK ) {
+                    SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
+                if (ret == WmErrorCode::WM_OK) {
                     task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                    TLOGI(WmsLogTag::DEFAULT,"OnGetVisibleWindowInfo success");
+                    TLOGI(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo success");
                 } else {
-                    TLOGE(WmsLogTag::DEFAULT,"OnGetVisibleWindowInfo failed");
+                    TLOGE(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo failed");
                     task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
                 }
             };

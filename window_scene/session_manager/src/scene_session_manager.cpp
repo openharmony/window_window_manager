@@ -8253,8 +8253,7 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    if (!SessionPermission::IsSystemCalling())
-    {
+    if (!SessionPermission::IsSystemCalling()) {
         WLOGFE("GetVisibilityWindowInfo permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -8266,13 +8265,10 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             }
             WSRect hostRect = session->GetSessionRect();
             Rect rect = {
-                    hostRect.posX_,
-                    hostRect.posY_,
-                    static_cast<uint32_t>(hostRect.width_),
-                    static_cast<uint32_t>(hostRect.height_)
-            };
+                hostRect.posX_, hostRect.posY_,
+                static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_)};
             auto windowStatus = GetWindowStatus(session->GetWindowMode(), session->GetSessionState(),
-                                           session->GetSessionProperty());
+                                                session->GetSessionProperty());
             auto windowVisibilityInfo = new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
                                                                  session->GetCallingUid(),
                                                                  session->GetVisibilityState(),
