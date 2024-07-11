@@ -453,8 +453,8 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u \
-        state:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
