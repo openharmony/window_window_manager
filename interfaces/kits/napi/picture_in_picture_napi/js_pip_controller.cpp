@@ -525,7 +525,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
-            jsCbMap_[type].erase(it);
+            it = jsCbMap_[type].erase(it);
             break;
         }
         if (!findFlag) {

@@ -17,13 +17,8 @@
 
 #include <refbase.h>
 #include "js_pip_controller.h"
-#include "js_pip_utils.h"
-#include "js_runtime_utils.h"
-#include "picture_in_picture_controller.h"
 #include "picture_in_picture_interface.h"
-#include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -125,26 +120,19 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
 void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
-    napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = env_,
-        task = napiAsyncTask.get(), this]() {
-        napi_value propertyValue = nullptr;
-        napi_create_object(env, &propertyValue);
-        if (propertyValue == nullptr) {
-            TLOGI(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
-            return;
-        }
-        napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
-        napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
-        napi_value argv[] = {propertyValue};
+    auto jsCallback = jsCallBack_;
+    sptr<JsPiPWindowListener> pipWindowListener = this;
+    auto napiTask = [this, jsCallback = jsCallBack_, controlType, statusCode, env = env_]() {
+        napi_value argv[] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        delete task;
     };
-    if (napi_send_event(env_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env_, CreateJsError(env_, 1, "send event failed"));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
+        }
     } else {
-        napiAsyncTask.release();
+        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
     }
 }
 } // namespace Rosen

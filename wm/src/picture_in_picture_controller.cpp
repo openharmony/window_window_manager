@@ -736,12 +736,6 @@ WMError PictureInPictureController::UnregisterListener(std::vector<sptr<T>>& hol
     return WMError::WM_OK;
 }
 
-template<typename T>
-void PictureInPictureController::ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId)
-{
-    listeners.erase(persistentId);
-}
-
 bool PictureInPictureController::IsPullPiPAndHandleNavigation()
 {
     if (pipOption_->GetNavigationId() == "") {
