@@ -98,7 +98,7 @@ ohos_shared_library("scene_session") {
   public_external_deps = [
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
   defines = []
 
@@ -175,7 +175,7 @@ ohos_shared_library("screen_session") {
   ]
   public_external_deps = [
     "accessibility:accessibility_common",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
 
   innerapi_tags = [ "platformsdk" ]
