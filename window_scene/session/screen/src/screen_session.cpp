@@ -535,9 +535,7 @@ void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 {
     if (foldToExpand) {
-        if (property_.GetRotation() != currentSensorRotation_) {
-            SensorRotationChange(currentSensorRotation_);
-        }
+        SensorRotationChange(currentSensorRotation_);
     }
 }
 
