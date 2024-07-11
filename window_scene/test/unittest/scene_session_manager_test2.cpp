@@ -118,12 +118,10 @@ void SceneSessionManagerTest2::TearDownTestCase()
 
 void SceneSessionManagerTest2::SetUp()
 {
-    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest2::TearDown()
 {
-    ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
 }
 
