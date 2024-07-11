@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 
-#include <shared_mutex>
 #include <iremote_stub.h>
+#include <shared_mutex>
 
-#include "session_manager_service_interface.h"
 #include "mock_session_manager_service_interface.h"
-#include "zidl/scene_session_manager_interface.h"
+#include "session_manager_service_interface.h"
 #include "wm_single_instance.h"
+#include "zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 class SSMDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -35,7 +35,8 @@ public:
 };
 
 class SessionManager {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
+    WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
+    
 public:
     using SessionRecoverCallbackFunc = std::function<void()>;
     using WindowManagerRecoverCallbackFunc = std::function<void()>;
