@@ -3805,6 +3805,27 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
     return;
 }
 
+WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
+{
+    TLOGI(WmsLogTag::DEFAULT, "SceneSession set unique dpi: id = %{public}d, dpi = %{public}f",
+        GetPersistentId(), dpi);
+    if (useUnique && (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE)) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+            DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi;
+    if (!IsSessionValid()) {
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sessionStage_->SetUniqueVirtualPixelRatio(useUnique, density);
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
