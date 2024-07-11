@@ -4612,7 +4612,7 @@ bool JsWindow::ParseScaleOption(napi_env env, napi_value jsObject, Transform& tr
 
 napi_value JsWindow::OnScale(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
@@ -4683,7 +4683,7 @@ bool JsWindow::ParseRotateOption(napi_env env, napi_value jsObject, Transform& t
 
 napi_value JsWindow::OnRotate(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
@@ -4744,7 +4744,7 @@ bool JsWindow::ParseTranslateOption(napi_env env, napi_value jsObject, Transform
 
 napi_value JsWindow::OnTranslate(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
@@ -4825,7 +4825,7 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
 
 napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }

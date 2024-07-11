@@ -59,7 +59,7 @@ napi_value JsTransitionContext::CompleteTransition(napi_env env, napi_callback_i
 
 napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
