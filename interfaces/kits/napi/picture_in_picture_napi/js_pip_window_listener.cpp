@@ -83,7 +83,6 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
 {
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
     auto jsCallback = jsCallBack_;
-    sptr<JsPiPWindowListener> pipWindowListener = this;
     auto napiTask = [this, jsCallback = jsCallBack_, state, errorCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
@@ -102,7 +101,6 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
 {
     TLOGI(WmsLogTag::WMS_PIP, "called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
-    sptr<JsPiPWindowListener> pipWindowListener = this;
     auto napiTask = [this, jsCallback = jsCallBack_, actionEvent, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
@@ -121,7 +119,6 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
     auto jsCallback = jsCallBack_;
-    sptr<JsPiPWindowListener> pipWindowListener = this;
     auto napiTask = [this, jsCallback = jsCallBack_, controlType, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
