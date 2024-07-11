@@ -1680,6 +1680,17 @@ public:
     }
 
     /**
+     * @brief Unregister window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -1694,17 +1705,6 @@ public:
      * @return WMError.
     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Unregister window visibility change listener.
-     *
-     * @param listener IWindowVisibilityChangedListener.
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
 
     /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
