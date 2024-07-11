@@ -59,23 +59,22 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
     OnPipListenerCallback(PiPState::ERROR, errorCode);
 }
 
-napi_value JsPiPWindowListener::CallJsMethod(napi_value methodName, napi_value const * argv, size_t argc)
+napi_value JsPiPWindowListener::CallJsMethod(napi_env env, napi_value methodName, napi_value const * argv, size_t argc)
 {
-    if (env_ == nullptr || jsCallBack_ == nullptr) {
+    if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
     }
-    napi_value method = jsCallBack_->GetNapiValue();
-    if (method == nullptr) {
+    if (methodName == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get method callback from object");
         return nullptr;
     }
     napi_value result = nullptr;
     napi_value callResult = nullptr;
-    napi_get_undefined(env_, &result);
-    napi_get_undefined(env_, &callResult);
-    napi_call_function(env_, result, method, argc, argv, &callResult);
-    TLOGI(WmsLogTag::WMS_PIP, "called.");
+    napi_get_undefined(env, &result);
+    napi_get_undefined(env, &callResult);
+    napi_call_function(env, result, methodName, argc, argv, &callResult);
+    TLOGI(WmsLogTag::WMS_PIP, "methodName: %{public}s", (char *)methodName);
     return callResult;
 }
 
@@ -85,7 +84,7 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
     auto jsCallback = jsCallBack_;
     auto napiTask = [this, jsCallback = jsCallBack_, state, errorCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
-        CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
@@ -103,7 +102,7 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
     auto jsCallback = jsCallBack_;
     auto napiTask = [this, jsCallback = jsCallBack_, actionEvent, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
-        CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
@@ -121,7 +120,7 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
     auto jsCallback = jsCallBack_;
     auto napiTask = [this, jsCallback = jsCallBack_, controlType, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
-        CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
+        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
