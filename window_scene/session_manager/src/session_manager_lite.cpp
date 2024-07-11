@@ -198,6 +198,18 @@ void SessionManagerLite::DeleteAllSessionListeners()
 #endif
 }
 
+WMError SessionManagerLite::GetSessionVerificationInfo(const int32_t persistentId,
+    SessionVerificationInfo& verificationInfo)
+{
+    auto sceneSessionManagerLiteProxy = GetSceneSessionManagerLiteProxy();
+    if (sceneSessionManagerLiteProxy == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sceneSessionManagerLiteProxy is null");
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return static_cast<WMError>(
+        sceneSessionManagerLiteProxy->GetSessionVerificationInfo(persistentId, verificationInfo));
+}
+
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
 {
     {
