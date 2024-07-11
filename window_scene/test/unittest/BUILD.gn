@@ -1448,7 +1448,6 @@ ohos_static_library("ws_unittest_common") {
   ]
 
   deps = [
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
