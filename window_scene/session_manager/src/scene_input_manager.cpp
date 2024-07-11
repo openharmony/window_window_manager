@@ -248,11 +248,11 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
     for (const auto& displayInfo : displayGroupInfo.displaysInfo) {
         TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", DumpDisplayInfo(displayInfo).c_str());
     }
-    std::string windowinfolst = "windowinfo  ";
+    std::string windowInfoListDump = "windowinfo  ";
     for (const auto& windowInfo : displayGroupInfo.windowsInfo) {
-        windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
+        windowInfoListDump.append(DumpWindowInfo(windowInfo).append("  ||  "));
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowinfolst.c_str());
+    TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", windowInfoListDump.c_str());
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 }
 

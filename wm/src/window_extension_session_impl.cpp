@@ -933,12 +933,8 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
-            "pointId:%{public}d,sourceType:%{public}d,"
-            "pointPos:[%{public}d,%{public}d,%{public}d,%{public}d]",
-            pointerEvent->GetId(), GetWindowId(),
-            pointerEvent->GetPointerId(), pointerEvent->GetSourceType(),
-            pointerItem.GetDisplayX(), pointerItem.GetDisplayY(),
-            pointerItem.GetWindowX(), pointerItem.GetWindowY());
+            "pointId:%{public}d,sourceType:%{public}d", pointerEvent->GetId(), GetWindowId(),
+            pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
     }
     NotifyPointerEvent(pointerEvent);
 }
