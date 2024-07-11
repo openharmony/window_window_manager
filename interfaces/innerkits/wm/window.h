@@ -1428,7 +1428,7 @@ public:
      * @param presentation the value means use presentation enum to layout when maximize window
      * @return WM_OK means maximize window ok, others means failed.
      */
-    virtual WMError Maximize(MaximizePresentation presentation)
+    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
