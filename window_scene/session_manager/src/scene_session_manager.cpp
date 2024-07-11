@@ -6004,6 +6004,38 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
+WSError SceneSessionManager::GetSessionVerificationInfo(const int32_t persistentId,
+    SessionVerificationInfo& verificationInfo)
+{
+    TLOGI(WmsLogTag::DEFAULT, "persistentId: %{public}d", persistentId);
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to find session with persistentId=%{public}d", persistentId);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    uint64_t displayId = session->GetSessionInfo().screenId_;
+    if (displayId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId.");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get display object with id=%{public}" PRIu64, displayId);
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    verificationInfo.pid = session->GetCallingPid();
+    verificationInfo.displayId = displayId;
+    verificationInfo.density = displayInfo->GetVirtualPixelRatio();
+    verificationInfo.orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    return WSError::WS_OK;
+}
+
 WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)
 {
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI() && !SessionPermission::IsShellCall()) {

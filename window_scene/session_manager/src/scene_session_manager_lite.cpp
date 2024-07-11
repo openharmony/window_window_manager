@@ -107,6 +107,13 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
+WSError SceneSessionManagerLite::GetSessionVerificationInfo(const int32_t persistentId,
+    SessionVerificationInfo& verificationInfo)
+{
+    TLOGD(WmsLogTag::DEFAULT, "run");
+    return SceneSessionManager::GetInstance().GetSessionVerificationInfo(persistentId, verificationInfo);
+}
+
 WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
     WLOGFD("run PendingSessionToForeground");
