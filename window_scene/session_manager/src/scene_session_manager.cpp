@@ -9153,7 +9153,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
-        return WSError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     clearFailedIds.clear();
     for (const auto persistentId : persistentIds) {
