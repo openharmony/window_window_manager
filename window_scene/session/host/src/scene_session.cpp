@@ -816,8 +816,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
         SetSessionRect(rect);
         NotifySessionRectChange(rect, reason);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
-        "newRequestRect: %{public}s, newWinRect: %{public}s", GetPersistentId(), reason,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d newReason:%{public}d rect:%{public}s "
+        "newRequestRect:%{public}s newWinRect:%{public}s", GetPersistentId(), reason,
         newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
