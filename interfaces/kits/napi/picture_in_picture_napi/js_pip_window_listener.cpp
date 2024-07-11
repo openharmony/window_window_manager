@@ -74,7 +74,7 @@ napi_value JsPiPWindowListener::CallJsMethod(napi_env env, napi_value methodName
     napi_get_undefined(env, &result);
     napi_get_undefined(env, &callResult);
     napi_call_function(env, result, methodName, argc, argv, &callResult);
-    TLOGI(WmsLogTag::WMS_PIP, "methodName: %{public}s", (char *)methodName);
+    TLOGI(WmsLogTag::WMS_PIP, "called.");
     return callResult;
 }
 
