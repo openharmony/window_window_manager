@@ -224,6 +224,7 @@ public:
     void SetRestoringRectForKeyboard(WSRect rect);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
+    WMError SetUniqueDensityDpi(bool useUnique, float dpi);
 
     bool IsAnco() const override;
     int32_t GetCollaboratorType() const;
