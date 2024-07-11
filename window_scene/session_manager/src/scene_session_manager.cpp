@@ -9228,7 +9228,7 @@ WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& 
         TLOGI(WmsLogTag::DMS, "Error: fail to get typeC thermal.");
         return WMError::WM_DO_NOTHING;
     }
-    AppExecFwk::ElementName element;
+    AppExecFwk::ElementName element = {};
     WSError ret = GetFocusSessionElement(element);
     if (ret != WSError::WS_OK) {
         TLOGI(WmsLogTag::DMS, "Error: fail to get focused package name.");
