@@ -858,7 +858,7 @@ HWTEST_F(SceneSessionManagerTest, ProcessModalExtensionPointDown, Function | Sma
 
 /**
  * @tc.name: GetExtensionWindowIds
- * @tc.desc: SceneSesionManager process modal extension point down
+ * @tc.desc: SceneSesionManager get extension window ids
  * @tc.type: FUNC
 */
 HWTEST_F(SceneSessionManagerTest, GetExtensionWindowIds, Function | SmallTest | Level3)
