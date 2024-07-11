@@ -152,7 +152,6 @@ private:
     bool IsPullPiPAndHandleNavigation();
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_;
     std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;
