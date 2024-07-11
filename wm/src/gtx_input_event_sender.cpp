@@ -41,7 +41,7 @@ void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect,
 
     std::unique_lock<std::mutex> lock(mEventMutex);
     mEvent = {};
-    mEvent.windowId = pointerEvent->GetAgentWindowId();
+    mEvent.windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     mEvent.pointerId = pointerEvent->GetPointerId();
     mEvent.extent = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
 
