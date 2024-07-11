@@ -340,10 +340,7 @@ public:
     }
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
 
-    virtual WMError Maximize(MaximizePresentation presentation)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError Maximize(MaximizePresentation presentation) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {

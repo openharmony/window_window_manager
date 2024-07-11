@@ -5352,7 +5352,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         int32_t nativeValue;
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
             napi_get_value_int32(env, argv[0], &nativeValue));
-        presentation.emplace(static_cast<MaximizePresentation>(nativeValue));
+        presentation = static_cast<MaximizePresentation>(nativeValue);
     }
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, errCode);
