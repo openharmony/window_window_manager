@@ -1156,7 +1156,7 @@ public:
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
     /**
-     * @brief Register window destroyed listener.
+     * @brief Unregister window destroyed listener.
      *
      */
     virtual void UnregisterWindowDestroyedListener() {}
@@ -1336,7 +1336,6 @@ public:
      * @brief Get ui content object.
      *
      * @param winId window id.
-     *
      * @return UIContent object of ACE.
      */
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const { return nullptr; }
