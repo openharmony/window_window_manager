@@ -3428,7 +3428,7 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTurnScreenOn(wakeUp));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiGetUndefined(env, ret);
+        return NapiThrowError(env, ret);
     }
     
     WLOGI("Window [%{public}u, %{public}s] set wake up screen %{public}d end",
