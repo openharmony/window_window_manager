@@ -2716,11 +2716,11 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
         }
     } else if (action == WSPropertyChangeAction::ACTION_UPDATE_FLAGS) {
-        if (!SessionPermission::IsSystemCalling()) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
         }
     } else if (action == WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP) {
-        if (!SessionPermission::IsSystemCalling()) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
         }
     }
