@@ -580,7 +580,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
         const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
         if (!(pidCheck ||
             SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION))) {
-            TLOGE(WmsLogTag::WMS_LIFE,
+            TLOGW(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
             return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -5939,7 +5939,7 @@ WSError SceneSessionManager::TerminateSessionNew(
         const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
         if (!(pidCheck ||
             SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION))) {
-            TLOGE(WmsLogTag::WMS_LIFE,
+            TLOGW(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
             return WSError::WS_ERROR_INVALID_PERMISSION;
