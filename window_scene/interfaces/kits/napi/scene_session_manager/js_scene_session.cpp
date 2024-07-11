@@ -2096,7 +2096,7 @@ void JsSceneSession::OnBackPressed(bool needMoveToBackground)
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundle:%{public}s, ability:%{public}s, id:%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), info.persistentId_);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
