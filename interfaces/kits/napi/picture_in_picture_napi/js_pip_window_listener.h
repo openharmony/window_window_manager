@@ -37,7 +37,7 @@ public:
     void OnRestoreUserInterface() override;
     void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
-    napi_value CallJsMethod(napi_value methodName, napi_value const * argv, size_t argc);
+    napi_value CallJsMethod(napi_value env, napi_value methodName, napi_value const * argv, size_t argc);
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);
