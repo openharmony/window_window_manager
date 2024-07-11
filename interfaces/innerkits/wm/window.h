@@ -1428,7 +1428,7 @@ public:
      * @param presentation the value means use presentation enum to layout when maximize window
      * @return WM_OK means maximize window ok, others means failed.
      */
-    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
+    virtual WMError Maximize(MaximizePresentation presentation)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1612,18 +1612,18 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
-     * @brief Set Text Field Avoid Info.
-     *
-     * @return Errorcode of window.
-     */
-    virtual WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WMError::WM_OK; }
-
-    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataForResultListener(const NotifyTransferComponentDataForResultFunc& func) {}
+
+    /**
+     * @brief Set Text Field Avoid Info.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WMError::WM_OK; }
 
     /**
      * @brief Transfer accessibility event data
@@ -1663,7 +1663,21 @@ public:
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
      * @return WM_OK means set keep keyboard flag success, others means failed.
     */
-    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) 
+    {
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; 
+    }
+
+    /**
+     * @brief Register window visibility change listener.
+     *
+     * @param listener IWindowVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the window limits of current window.
@@ -1680,17 +1694,6 @@ public:
      * @return WMError.
     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Register window visibility change listener.
-     *
-     * @param listener IWindowVisibilityChangedListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    virtual WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
 
     /**
      * @brief Unregister window visibility change listener.
@@ -1918,37 +1921,20 @@ public:
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Get the rect of host window.
+     *
+     * @param hostWindowId window Id of the host window.
+     * @return Rect of window.
+     */
+    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
+
+    /**
      * @brief Make multi-window become landscape or not.
      *
      * @param isLandscapeMultiWindow means whether multi-window's scale is landscape.
      * @return WMError WM_OK means set success, others means failed.
      */
-    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
-    {
-        return WMError::WM_OK;
-    }
-
-    /**
-     * @brief Register window rect change listener.
-     *
-     * @param listener IWindowRectChangeListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
-    {
-        return WMError::WM_OK;
-    }
-
-    /**
-     * @brief Unregister window rect change listener.
-     *
-     * @param listener IWindowRectChangeListener.
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
-    {
-        return WMError::WM_OK;
-    }
+    virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WMError::WM_OK; }
 
     /**
      * @brief Register subwindow close listener.
@@ -1967,14 +1953,6 @@ public:
      */
     virtual WMError UnregisterSubWindowCloseListeners(
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Get the rect of host window.
-     *
-     * @param hostWindowId window Id of the host window.
-     * @return Rect of window.
-     */
-    virtual Rect GetHostWindowRect(int32_t hostWindowId) { return {}; }
 
     /**
      * @brief Set Shaped Window Mask.
@@ -2036,6 +2014,28 @@ public:
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
+     * @brief Register window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief get callingWindow windowStatus.
      * @param windowStatus
      * @return WM_OK means set success, others means set Failed.
@@ -2075,8 +2075,8 @@ public:
      * @param dvsyncSwitch bool.
      * @return * void
      */
-
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
     /**
      * @brief Set whether to enable immersive mode.
      * @param enable the value true means to enable immersive mode, and false means the opposite.
