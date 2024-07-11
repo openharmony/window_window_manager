@@ -22,11 +22,11 @@
 #include "class_var_definition.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "picture_in_picture_interface.h"
 #include "refbase.h"
 #include "window.h"
 #include "window_manager.h"
 #include "wm_common.h"
-#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
