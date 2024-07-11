@@ -303,11 +303,11 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
     for (auto& iter : screenId2Windows) {
         auto displayId = iter.first;
         auto& windowInfos = iter.second;
-        std::string windowinfolst = "windowinfo  ";
+        std::string windowInfoListDump = "windowinfo  ";
         for (auto& windowInfo : windowInfos) {
-            windowinfolst.append(DumpWindowInfo(windowInfo).append("  ||  "));
+            windowInfoListDump.append(DumpWindowInfo(windowInfo).append("  ||  "));
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %{public}s", windowinfolst.c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] --- %{public}s", windowInfoListDump.c_str());
         MMI::WindowGroupInfo windowGroup = {focusedSessionId_, displayId, windowInfos};
         MMI::InputManager::GetInstance()->UpdateWindowInfo(windowGroup);
     }
