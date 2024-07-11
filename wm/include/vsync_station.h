@@ -41,7 +41,7 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType = 0);
+    void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
     void SetFrameRateLinkerEnable(bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void RemoveCallback();
