@@ -5347,7 +5347,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         WLOGFE("[NAPI] maximize interface only support main Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    std::optional<MaximizePresentation> presentation;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     if (argc == 1) {
         int32_t nativeValue;
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,

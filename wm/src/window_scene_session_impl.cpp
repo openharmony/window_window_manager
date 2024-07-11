@@ -1932,7 +1932,7 @@ WMError WindowSceneSessionImpl::Maximize()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> presentation)
+WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "maximize fail, not main window");
@@ -1941,8 +1941,7 @@ WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> pre
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    MaximizePresentation maximizePresentation = presentation.value_or(MaximizePresentation::ENTER_IMMERSIVE);
-    switch (maximizePresentation) {
+    switch (presentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
             enableImmersiveMode_ = true;
             break;
@@ -1953,7 +1952,7 @@ WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> pre
             break;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
-        maximizePresentation, enableImmersiveMode_);
+        presentation, enableImmersiveMode_);
     return SetLayoutFullScreen(enableImmersiveMode_);
 }
 

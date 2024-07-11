@@ -2327,7 +2327,7 @@ HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    std::optional<MaximizePresentation> presentation;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->Maximize(presentation));
 }
 
