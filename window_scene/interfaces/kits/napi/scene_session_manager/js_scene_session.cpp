@@ -1334,10 +1334,10 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB):
             ProcessRaiseToTopForPointDownRegister();
             break;
-        case static_cast<uint32_t>(ListenerFunctionType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB):
+        case static_cast<uint32_t>(ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB):
             ProcessClickModalSpecificWindowOutsideRegister();
             break;
-        case static_cast<uint32_t>(ListenerFunctionType::BACK_PRESSED_CB):
+        case static_cast<uint32_t>(ListenerFuncType::BACK_PRESSED_CB):
             ProcessBackPressedRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB):
@@ -2599,11 +2599,7 @@ void JsSceneSession::ProcessClickModalSpecificWindowOutsideRegister()
 void JsSceneSession::OnClickModalSpecificWindowOutside()
 {
     TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [jsCallBack = GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
             return;
