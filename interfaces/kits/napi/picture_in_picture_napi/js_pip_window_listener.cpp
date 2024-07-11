@@ -15,15 +15,15 @@
 
 #include "js_pip_window_listener.h"
 
-#include "js_pip_controller.h"
 #include <refbase.h>
+#include "js_pip_controller.h"
 #include "js_pip_utils.h"
 #include "js_runtime_utils.h"
 #include "picture_in_picture_controller.h"
+#include "picture_in_picture_interface.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -31,7 +31,7 @@ using namespace AbilityRuntime;
 
 JsPiPWindowListener::~JsPiPWindowListener()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]~JsWindowListener");
+    TLOGI(WmsLogTag::WMS_PIP, "~JsWindowListener");
 }
 
 void JsPiPWindowListener::OnPreparePictureInPictureStart()
@@ -89,7 +89,7 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
     auto jsCallback = jsCallBack_;
     sptr<JsPiPWindowListener> pipWindowListener = this;
-    auto napiTask = [this, jsCallback = jsCallBack_, pipWindowListener, state, errorCode, env = env_]() {
+    auto napiTask = [this, jsCallback = jsCallBack_, state, errorCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
@@ -108,7 +108,7 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
     TLOGI(WmsLogTag::WMS_PIP, "called, actionEvent: %{public}s", actionEvent.c_str());
     auto jsCallback = jsCallBack_;
     sptr<JsPiPWindowListener> pipWindowListener = this;
-    auto napiTask = [this, jsCallback = jsCallBack_, pipWindowListener, actionEvent, statusCode, env = env_]() {
+    auto napiTask = [this, jsCallback = jsCallBack_, actionEvent, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
         CallJsMethod(jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };

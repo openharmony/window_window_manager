@@ -58,14 +58,14 @@ private:
     bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
-    WmErrorCode UnRegisterListener(const std::string& type, sptr<JsPiPWindowListener> pipWindowListener);
+    WmErrorCode UnRegisterListener(const std::string& type, const sptr<JsPiPWindowListener>& pipWindowListener);
 
-    void ProcessStateChangeRegister(sptr<JsPiPWindowListener> listener);
-    void ProcessActionEventRegister(sptr<JsPiPWindowListener> listener);
-    void ProcessControlEventRegister(sptr<JsPiPWindowListener> listener);
-    void ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> listener);
-    void ProcessActionEventUnRegister(sptr<JsPiPWindowListener> listener);
-    void ProcessControlEventUnRegister(sptr<JsPiPWindowListener> listener);
+    void ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessActionEventUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener);
 
     sptr<PictureInPictureController> pipController_;
     std::map<std::string, ListenerType> listenerCodeMap_;
