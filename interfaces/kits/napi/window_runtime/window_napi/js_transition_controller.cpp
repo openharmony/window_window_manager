@@ -20,6 +20,7 @@
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "js_window.h"
+#include "permission.h"
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -58,20 +59,22 @@ napi_value JsTransitionContext::CompleteTransition(napi_env env, napi_callback_i
 
 napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    bool transitionCompleted = false;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], transitionCompleted)) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    bool transitionCompleted = false;
+    if (!ConvertFromJsValue(env, argv[0], transitionCompleted)) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
     WMError ret = WMError::WM_OK;
     auto window = windowToken_.promote();
     if (window == nullptr) {
