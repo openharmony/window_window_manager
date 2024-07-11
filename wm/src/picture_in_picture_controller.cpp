@@ -155,19 +155,15 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
             pipOption_->GetPipTemplate(), FAILED, "window is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (!pipLifeCycleListeners_.empty()) {
-        for (auto& listener : pipLifeCycleListeners_) {
-            listener->OnPreparePictureInPictureStart();
-        }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPreparePictureInPictureStart();
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
-        if (!pipLifeCycleListeners_.empty()) {
-            for (auto& listener : pipLifeCycleListeners_) {
-                listener->OnPictureInPictureOperationError(static_cast<int32_t>(errCode));
-            }
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPictureInPictureOperationError(static_cast<int32_t>(errCode));
         }
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "window show failed");
@@ -311,18 +307,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     curState_ = PiPWindowState::STATE_STOPPING;
-    if (!pipLifeCycleListeners_.empty()) {
-        for (auto& listener : pipLifeCycleListeners_) {
-            listener->OnPreparePictureInPictureStop();
-        }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPreparePictureInPictureStop();
     }
     if (!destroyWindow) {
         ResetExtController();
         curState_ = PiPWindowState::STATE_STOPPED;
-        if (!pipLifeCycleListeners_.empty()) {
-            for (auto& listener : pipLifeCycleListeners_) {
-                listener->OnPictureInPictureStop();
-            }
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPictureInPictureStop();
         }
         PictureInPictureManager::RemoveActiveController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
@@ -352,10 +344,8 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
     }
-    if (!pipLifeCycleListeners_.empty()) {
-        for (auto& listener : pipLifeCycleListeners_) {
-                listener->OnPictureInPictureStop();
-        }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPictureInPictureStop();
     }
     curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
@@ -383,10 +373,8 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     if (ret != WmErrorCode::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
-        if (!pipLifeCycleListeners_.empty()) {
-            for (auto& listener : pipLifeCycleListeners_) {
-                listener->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
-            }
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
@@ -546,10 +534,6 @@ void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(in
 void PictureInPictureController::DoActionEvent(const std::string& actionName, int32_t status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "actionName: %{public}s", actionName.c_str());
-    if (pipActionObservers_.empty()) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipActionObserver is not registered");
-        return;
-    }
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(pipOption_->GetPipTemplate(), actionName);
     for (auto& listener : pipActionObservers_) {
         listener->OnActionEvent(actionName, status);
@@ -563,20 +547,14 @@ void PictureInPictureController::PreRestorePictureInPicture()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
-    if (!pipLifeCycleListeners_.empty()) {
-        for (auto& listener : pipLifeCycleListeners_) {
-            listener->OnRestoreUserInterface();
-        }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnRestoreUserInterface();
     }
 }
 
 void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (pipControlObservers_.empty()) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipControlObserver is not registered");
-        return;
-    }
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption_ is nullptr");
         return;
@@ -693,10 +671,8 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
         TLOGE(WmsLogTag::WMS_PIP, "swap xComponent failed, errorCode: %{public}u", errorCode);
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    if (!pipLifeCycleListeners_.empty()) {
-        for (auto& listener : pipLifeCycleListeners_) {
-            listener->OnPictureInPictureStart();
-        }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPictureInPictureStart();
     }
     return WMError::WM_OK;
 }
@@ -754,7 +730,7 @@ WMError PictureInPictureController::UnregisterListener(std::vector<sptr<T>>& hol
         return WMError::WM_ERROR_NULLPTR;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
-        [listener](sptr<T> registeredListener) {
+        [listener](const sptr<T>& registeredListener) {
             return registeredListener == listener;
         }), holder.end());
     return WMError::WM_OK;

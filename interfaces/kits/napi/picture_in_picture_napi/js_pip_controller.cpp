@@ -17,13 +17,13 @@
 
 #include <refbase.h>
 #include "js_pip_utils.h"
+#include "js_pip_window_listener.h"
 #include "js_runtime_utils.h"
 #include "picture_in_picture_controller.h"
+#include "picture_in_picture_interface.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "js_pip_window_listener.h"
-#include "picture_in_picture_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -350,7 +350,7 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    sptr<JsPiPWindowListener> pipWindowListener = new(std::nothrow) JsPiPWindowListener(env, callbackRef);
+    auto pipWindowListener = sptr<JsPiPWindowListener>::MakeSptr(env, callbackRef);
     if (pipWindowListener == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "New JsPiPWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -393,7 +393,7 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
     return false;
 }
 
-void JsPipController::ProcessStateChangeRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(STATE_CHANGE_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register state change error");
@@ -407,7 +407,7 @@ void JsPipController::ProcessStateChangeRegister(sptr<JsPiPWindowListener> liste
     pipController_->RegisterPiPLifecycle(thisListener);
 }
 
-void JsPipController::ProcessActionEventRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_PANEL_ACTION_EVENT_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register action event error");
@@ -421,7 +421,7 @@ void JsPipController::ProcessActionEventRegister(sptr<JsPiPWindowListener> liste
     pipController_->RegisterPiPActionObserver(listener);
 }
 
-void JsPipController::ProcessControlEventRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_EVENT_CB) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Register control event error");
@@ -435,7 +435,7 @@ void JsPipController::ProcessControlEventRegister(sptr<JsPiPWindowListener> list
     pipController_->RegisterPiPControlObserver(thisListener);
 }
 
-void JsPipController::ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
@@ -445,7 +445,7 @@ void JsPipController::ProcessStateChangeUnRegister(sptr<JsPiPWindowListener> lis
     pipController_->UnregisterPiPLifecycle(thisListener);
 }
 
-void JsPipController::ProcessActionEventUnRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessActionEventUnRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
@@ -455,7 +455,7 @@ void JsPipController::ProcessActionEventUnRegister(sptr<JsPiPWindowListener> lis
     pipController_->UnregisterPiPActionObserver(thisListener);
 }
 
-void JsPipController::ProcessControlEventUnRegister(sptr<JsPiPWindowListener> listener)
+void JsPipController::ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
@@ -541,7 +541,8 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsPipController::UnRegisterListener(const std::string& type, sptr<JsPiPWindowListener> pipWindowListener)
+WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
+    const sptr<JsPiPWindowListener>& pipWindowListener)
 {
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:

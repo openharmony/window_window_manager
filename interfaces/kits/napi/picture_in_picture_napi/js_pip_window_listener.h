@@ -31,11 +31,11 @@
 namespace OHOS {
 namespace Rosen {
 class JsPiPWindowListener : public IPiPLifeCycle,
-                         public IPiPActionObserver,
-                         public IPiPControlObserver {
+                            public IPiPActionObserver,
+                            public IPiPControlObserver {
 public:
-    JsPiPWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
-        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsPiPWindowListener> (this)) {}
+    JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
+        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsPiPWindowListener>(this)) {}
     ~JsPiPWindowListener();
     void OnPreparePictureInPictureStart() override;
     void OnPictureInPictureStart() override;
