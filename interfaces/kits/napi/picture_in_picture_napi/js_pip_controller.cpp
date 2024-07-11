@@ -489,7 +489,7 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
         UnRegisterListenerWithType(env, cbType, nullptr);
         return NapiGetUndefined(env);
     }
-    napi_value value = argv[1];
+    napi_value value = argv[NUMBER_ONE];
     if (value != nullptr && NapiIsCallable(env, value)) {
         UnRegisterListenerWithType(env, cbType, value);
     }
@@ -512,14 +512,14 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
             jsCbMap_[type].erase(it++);
         }
     } else {
-        bool findFlag = false;
+        bool foundCallbackValue = false;
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
             bool isEquals = false;
             napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
             if (!isEquals) {
                 continue;
             }
-            findFlag = true;
+            foundCallbackValue = true;
             WmErrorCode ret = UnRegisterListener(type, it->second);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
@@ -528,7 +528,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
             it = jsCbMap_[type].erase(it);
             break;
         }
-        if (!findFlag) {
+        if (!foundCallbackValue) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
