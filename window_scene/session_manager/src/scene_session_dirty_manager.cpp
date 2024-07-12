@@ -426,11 +426,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
         } else if (sceneSessionValue->HasModalUIExtension()) {
-            if (sceneSessionValue->GetSessionProperty()->IsDecorEnable()) {
-                AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
-            } else {
-                UpdateModalExtensionWindowInfo(sceneSessionValue, windowInfo);
-            }
+            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
         }
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
