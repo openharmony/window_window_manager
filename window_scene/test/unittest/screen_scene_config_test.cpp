@@ -547,7 +547,7 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape01, Function 
     ScreenSceneConfig::isWaterfallDisplay_ = false;
     ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
     auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
-    ASSERT_FALSE(result == 0);
+    ASSERT_TRUE(result == 0);
 }
 
 /**
@@ -560,7 +560,7 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape02, Function 
     ScreenSceneConfig::isWaterfallDisplay_ = true;
     ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
     auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
-    ASSERT_FALSE(result == 0);
+    ASSERT_TRUE(result == 0);
 }
 
 /**

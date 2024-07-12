@@ -26,19 +26,19 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManager" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager" };
 }
 
 class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
     explicit SessionManagerServiceRecoverListener() = default;
 
-    virtual int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("InterfaceToken check failed");
-        return -1;
+            WLOGFE("InterfaceToken check failed");
+            return -1;
         }
         auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
         switch (msgId) {
@@ -155,8 +155,7 @@ void SessionManager::ClearSessionManagerProxy()
     sceneSessionManagerProxy_ = nullptr;
 }
 
-__attribute__((no_sanitize("cfi")))
-sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
+__attribute__((no_sanitize("cfi"))) sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     InitSessionManagerServiceProxy();
@@ -220,8 +219,7 @@ WMError SessionManager::InitMockSMSProxy()
     return WMError::WM_OK;
 }
 
-__attribute__((no_sanitize("cfi")))
-void SessionManager::InitSceneSessionManagerProxy()
+__attribute__((no_sanitize("cfi"))) void SessionManager::InitSceneSessionManagerProxy()
 {
     if (sceneSessionManagerProxy_) {
         return;
@@ -281,7 +279,7 @@ void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerServ
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         sessionManagerServiceProxy_ = sessionManagerService;
     }
-    
+
     {
         std::lock_guard<std::recursive_mutex> lock(recoverMutex_);
         TLOGI(WmsLogTag::WMS_RECOVER, "Run recover");

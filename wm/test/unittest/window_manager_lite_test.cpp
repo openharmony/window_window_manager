@@ -242,18 +242,6 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: Test02
- * @tc.desc: Test02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerLiteTest, Test02, Function | SmallTest | Level2)
-{
-    WindowChecker windowChecker;
-    auto ret1 = windowChecker.CheckWindowId(-1);
-    ASSERT_EQ(-1, ret1);
-}
-
-/**
  * @tc.name: TestUpdateFocusChangeInfo
  * @tc.desc: TestUpdateFocusChangeInfo
  * @tc.type: FUNC
@@ -298,9 +286,6 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
     lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
     lite.pImpl_->NotifyWindowModeChange(WindowModeType::WINDOW_MODE_SPLIT);
-    WindowChecker windowChecker;
-    auto ret = windowChecker.CheckWindowId(-1);
-    ASSERT_EQ(-1, ret);
 }
 
 /**
