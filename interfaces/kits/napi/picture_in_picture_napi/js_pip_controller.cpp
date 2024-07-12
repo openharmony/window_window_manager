@@ -15,7 +15,6 @@
 
 #include "js_pip_controller.h"
 
-#include <refbase.h>
 #include "js_pip_utils.h"
 #include "js_pip_window_listener.h"
 #include "js_runtime_utils.h"
@@ -370,7 +369,7 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         default:
             break;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s sucess! callback map size: %{public}zu",
+    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
@@ -381,8 +380,7 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return false;
     }
-
-    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end();  ++iter) {
+    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); ++iter) {
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter->first->GetNapiValue(), &isEquals);
         if (isEquals) {
@@ -395,10 +393,6 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
 
 void JsPipController::ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener)
 {
-    if (jsCbMap_.empty() || jsCbMap_.find(STATE_CHANGE_CB) == jsCbMap_.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Register state change error");
-        return;
-    }
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
@@ -409,10 +403,6 @@ void JsPipController::ProcessStateChangeRegister(const sptr<JsPiPWindowListener>
 
 void JsPipController::ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener)
 {
-    if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_PANEL_ACTION_EVENT_CB) == jsCbMap_.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Register action event error");
-        return;
-    }
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
@@ -423,10 +413,6 @@ void JsPipController::ProcessActionEventRegister(const sptr<JsPiPWindowListener>
 
 void JsPipController::ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener)
 {
-    if (jsCbMap_.empty() || jsCbMap_.find(CONTROL_EVENT_CB) == jsCbMap_.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Register control event error");
-        return;
-    }
     if (pipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
         return;
