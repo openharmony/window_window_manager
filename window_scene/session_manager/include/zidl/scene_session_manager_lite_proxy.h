@@ -27,7 +27,6 @@ public:
         : IRemoteProxy<ISceneSessionManagerLite>(impl) {}
     virtual ~SceneSessionManagerLiteProxy() = default;
 
-#ifndef USE_ADAPTER_LITE
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
@@ -53,7 +52,7 @@ public:
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
-#endif
+ 
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -66,11 +65,9 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
-#ifndef USE_ADAPTER_LITE
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
-#endif
     
 private:
     template<typename T>

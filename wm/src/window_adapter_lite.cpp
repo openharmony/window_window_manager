@@ -14,6 +14,7 @@
  */
 
 #include "window_adapter_lite.h"
+#include <key_event.h>
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "scene_board_judgement.h"
