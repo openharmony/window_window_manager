@@ -27,7 +27,7 @@ class JsPiPWindowListener : public IPiPLifeCycle,
                             public IPiPControlObserver {
 public:
     JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
-        : env_(env), jsCallBack_(callback), weakRef_(wptr<JsPiPWindowListener>(this)) {}
+        : env_(env), jsCallBack_(callback) {}
     ~JsPiPWindowListener();
     void OnPreparePictureInPictureStart() override;
     void OnPictureInPictureStart() override;
@@ -37,13 +37,11 @@ public:
     void OnRestoreUserInterface() override;
     void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
-    napi_value CallJsMethod(napi_env env, napi_value methodName, napi_value const * argv, size_t argc);
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-    wptr<JsPiPWindowListener> weakRef_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
