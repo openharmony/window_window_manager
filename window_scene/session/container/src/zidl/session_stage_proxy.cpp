@@ -822,4 +822,29 @@ void SessionStageProxy::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& k
         return;
     }
 }
+
+void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(useUniqueDensity)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write useUniqueDensity failed");
+        return;
+    }
+    if (!data.WriteFloat(virtualPixelRatio)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write virtualPixelRatio failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
