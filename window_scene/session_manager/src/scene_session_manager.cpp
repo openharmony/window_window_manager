@@ -3753,7 +3753,8 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
         return false;
     }
 
-    if (session->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
+    if (session->IsVisible() || (session->GetAttachState() && (state == SessionState::STATE_ACTIVE ||
+        state == SessionState::STATE_FOREGROUND))) {
         WLOGFD("Window is at foreground, id: %{public}d", session->GetPersistentId());
         return true;
     }
