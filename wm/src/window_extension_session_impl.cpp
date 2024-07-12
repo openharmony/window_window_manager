@@ -34,8 +34,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
-constexpr int32_t ANIMATION_TIME = 400;
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -538,7 +538,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (!window) {
             return;
         }
-        int32_t duration = ANIMATION_TIME;
+        int32_t duration = UIEXTENTION_ROTATION_ANIMATION_TIME;
         bool needSync = false;
         if (rsTransaction && rsTransaction->GetSyncId() > 0) {
             // extract high 32 bits of SyncId as pid
@@ -557,6 +557,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
