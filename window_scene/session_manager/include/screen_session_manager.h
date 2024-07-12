@@ -418,6 +418,7 @@ private:
     std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
+    std::atomic<bool> isPhyScreenConnected_ = false;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
