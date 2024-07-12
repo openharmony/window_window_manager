@@ -519,8 +519,7 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     for (size_t i = 0; i < infos.size(); i++) {
         auto info = infos[i];
         auto windowType = info->GetWindowType();
-        if (windowType == WindowType::APP_WINDOW_BASE || windowType == WindowType::APP_MAIN_WINDOW_BASE ||
-            windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        if (type >= WindowType::APP_MAIN_WINDOW_BASE && type < WindowType::APP_MAIN_WINDOW_END) {
             napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
         }
     }
