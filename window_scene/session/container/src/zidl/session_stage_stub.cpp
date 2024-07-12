@@ -100,6 +100,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
+            return HandleSetUniqueVirtualPixelRatio(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -450,6 +452,15 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
     }
     NotifyKeyboardPanelInfoChange(*keyboardPanelInfo);
 
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
+    bool useUniqueDensity = data.ReadBool();
+    float densityValue = data.ReadFloat();
+    HandleSetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
