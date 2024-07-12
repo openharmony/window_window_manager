@@ -73,7 +73,7 @@ napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * ar
     napi_get_undefined(env, &result);
     napi_get_undefined(env, &callResult);
     napi_call_function(env, result, method, argc, argv, &callResult);
-    TLOGI(WmsLogTag::WMS_PIP, "called.");
+    TLOGD(WmsLogTag::WMS_PIP, "called.");
     return callResult;
 }
 
