@@ -338,18 +338,11 @@ ohos_shared_library("libwm") {
 ohos_shared_library("libwm_lite") {
   defines = [ "USE_ADAPTER_LITE" ]
   include_dirs = [
+    "../interfaces/innerkits/wm",
     "../utils/include",
-    "../window_scene/session_manager_service/include",
-    "../window_scene/session_manager/include",
-    "../dm/include",
-    "../window_scene/session_manager/include/zidl",
   ]
   sources = [
     "../utils/src/window_visibility_info.cpp",
-    "../window_scene/session_manager/src/session_manager_lite.cpp",
-    "../window_scene/session_manager/src/zidl/scene_session_manager_lite_proxy.cpp",
-    "../window_scene/session_manager_service/src/session_manager_service_proxy.cpp",
-    "../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "src/window_adapter_lite.cpp",
     "src/window_manager_agent_lite.cpp",
     "src/window_manager_lite.cpp",
@@ -364,20 +357,20 @@ ohos_shared_library("libwm_lite") {
 
   deps = [
     "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager:session_manager_lite",
   ]
 
   public_configs = [ ":libwm_public_config" ]
 
   external_deps = [
-    "ability_runtime:extension_manager",
+    "ability_runtime:ability_manager",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "init:libbegetutil",
-    "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
