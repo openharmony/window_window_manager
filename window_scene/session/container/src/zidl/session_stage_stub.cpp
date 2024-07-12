@@ -460,7 +460,7 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
     bool useUniqueDensity = data.ReadBool();
     float densityValue = data.ReadFloat();
-    HandleSetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
+    SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
