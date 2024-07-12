@@ -513,10 +513,11 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         }
     } else {
         bool foundCallbackValue = false;
-        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
+        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             bool isEquals = false;
             napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
             if (!isEquals) {
+                ++it;
                 continue;
             }
             foundCallbackValue = true;
