@@ -91,7 +91,6 @@ private:
 
     std::recursive_mutex listenerLock_;
     std::vector<sptr<ISessionListener>> sessionListeners_;
-#endif
     // above guarded by listenerLock_
 
     std::mutex wmsConnectionMutex_;

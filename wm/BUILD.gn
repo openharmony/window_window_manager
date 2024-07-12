@@ -337,7 +337,10 @@ ohos_shared_library("libwm") {
 ## Build libwm_lite.so
 ohos_shared_library("libwm_lite") {
   defines = [ "USE_ADAPTER_LITE" ]
-  include_dirs = [ "../utils/include" ]
+  include_dirs = [
+    "../interfaces/innerkits/wm",
+    "../utils/include",
+  ]
   sources = [
     "../utils/src/window_visibility_info.cpp",
     "src/window_adapter_lite.cpp",
@@ -354,7 +357,6 @@ ohos_shared_library("libwm_lite") {
 
   deps = [
     "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
   ]
@@ -369,9 +371,7 @@ ohos_shared_library("libwm_lite") {
     "hilog:libhilog",
     "image_framework:image_native",
     "init:libbegetutil",
-    "input:libmmi-client",
     "ipc:ipc_single",
-    "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
 
