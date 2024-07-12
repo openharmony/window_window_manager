@@ -16,12 +16,26 @@
 #include "js_pip_window_listener.h"
 
 #include "js_pip_controller.h"
-#include "picture_in_picture_interface.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
+
+static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
+{
+    if (env == nullptr || method == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "env nullptr or method is nullptr");
+        return nullptr;
+    }
+    napi_value result = nullptr;
+    napi_value callResult = nullptr;
+    napi_get_undefined(env, &result);
+    napi_get_undefined(env, &callResult);
+    napi_call_function(env, result, method, argc, argv, &callResult);
+    TLOGD(WmsLogTag::WMS_PIP, "called.");
+    return callResult;
+}
 
 JsPiPWindowListener::~JsPiPWindowListener()
 {
@@ -56,21 +70,6 @@ void JsPiPWindowListener::OnRestoreUserInterface()
 void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
 {
     OnPipListenerCallback(PiPState::ERROR, errorCode);
-}
-
-napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
-{
-    if (env == nullptr || method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "env_ nullptr or method is nullptr");
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_value callResult = nullptr;
-    napi_get_undefined(env, &result);
-    napi_get_undefined(env, &callResult);
-    napi_call_function(env, result, method, argc, argv, &callResult);
-    TLOGD(WmsLogTag::WMS_PIP, "called.");
-    return callResult;
 }
 
 void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCode)
