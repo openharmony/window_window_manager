@@ -30,6 +30,7 @@ ohos_shared_library("pipwindow_napi") {
   sources = [
     "js_pip_controller.cpp",
     "js_pip_utils.cpp",
+    "js_pip_window_listener.cpp",
     "js_pip_window_manager.cpp",
     "js_pipwindow_module.cpp",
   ]
