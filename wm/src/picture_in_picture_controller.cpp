@@ -498,10 +498,6 @@ bool PictureInPictureController::IsContentSizeChanged(float width, float height,
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 {
-    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        TLOGI(WmsLogTag::WMS_PIP, "disable auto start as screen is off");
-        return;
-    }
     std::string value;
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
