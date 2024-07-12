@@ -18,8 +18,6 @@
 #include <algorithm>
 #include <cinttypes>
 
-#include "input_manager.h"
-#include "i_window_checker.h"
 #include "marshalling_helper.h"
 #include "window_adapter_lite.h"
 #include "window_manager_agent_lite.h"
@@ -30,12 +28,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerLite"};
-struct WindowChecker : public MMI::IWindowChecker {
-public:
-    WindowChecker() = default;
-    ~WindowChecker() = default;
-    int32_t CheckWindowId(int32_t windowId) const override;
-};
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerLite)
@@ -209,16 +201,6 @@ void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, b
 
 WindowManagerLite::WindowManagerLite() : pImpl_(std::make_unique<Impl>(mutex_))
 {
-}
-
-int32_t WindowChecker::CheckWindowId(int32_t windowId) const
-{
-    int32_t pid = INVALID_PID;
-    WMError ret = SingletonContainer::Get<WindowAdapterLite>().CheckWindowId(windowId, pid);
-    if (ret != WMError::WM_OK) {
-        WLOGFE("Window(%{public}d) do not allow styles to be set", windowId);
-    }
-    return pid;
 }
 
 WindowManagerLite::~WindowManagerLite()
