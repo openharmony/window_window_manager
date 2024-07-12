@@ -3359,10 +3359,13 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow) {
             isDefaultDensityEnabled = mainWindow->GetDefaultDensityEnabled();
+            CopyUniqueDensityParameter(mainWindow);
         }
     }
     if (isDefaultDensityEnabled) {
         vpr = displayInfo->GetDefaultVirtualPixelRatio();
+    } else if (useUniqueDensity_) {
+        vpr = virtualPixelRatio_;
     } else {
         vpr = displayInfo->GetVirtualPixelRatio();
     }
