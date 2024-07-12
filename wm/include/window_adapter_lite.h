@@ -21,6 +21,7 @@
 #include <zidl/window_manager_agent_interface.h>
 
 #include "singleton_delegator.h"
+#include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_lite_interface.h"
 
