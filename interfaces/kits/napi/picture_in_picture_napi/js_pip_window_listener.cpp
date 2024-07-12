@@ -60,12 +60,8 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
 
 napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
 {
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "env_ nullptr or jsCallBack_ is nullptr");
-        return nullptr;
-    }
-    if (method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Failed to get method callback from object");
+    if (env == nullptr || method == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "env_ nullptr or method is nullptr");
         return nullptr;
     }
     napi_value result = nullptr;
@@ -80,7 +76,6 @@ napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * ar
 void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
-    auto jsCallback = jsCallBack_;
     auto napiTask = [jsCallback = jsCallBack_, state, errorCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
@@ -98,7 +93,6 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
 void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called, actionEvent: %{public}s", actionEvent.c_str());
-    auto jsCallback = jsCallBack_;
     auto napiTask = [jsCallback = jsCallBack_, actionEvent, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
@@ -116,7 +110,6 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
 void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
-    auto jsCallback = jsCallBack_;
     auto napiTask = [jsCallback = jsCallBack_, controlType, statusCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
