@@ -4363,7 +4363,10 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
             isReset = false;
         }
     } else {
+        int id = HiviewDFX::XCollie::GetInstance().SetTimer("GetCurrentScreenPhyBounds", XCOLLIE_TIMEOUT_S, nullptr,
+            nullptr, HiviewDFX::XCOLLIE_FLAG_RECOVERY);
         auto remoteScreenMode = rsInterface_.GetScreenActiveMode(screenid);
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         phyWidth = remoteScreenMode.GetScreenWidth();
         phyHeight = remoteScreenMode.GetScreenHeight();
     }
