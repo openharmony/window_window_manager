@@ -1821,7 +1821,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
-        .useCurWindow = false,
+        .useCurWindow = systemConfig_.uiType_ == "pc",
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
     if (!ret) {
