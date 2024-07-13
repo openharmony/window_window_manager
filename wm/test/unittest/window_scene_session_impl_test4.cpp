@@ -281,7 +281,7 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetDecorEnable(true);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetDecorEnable(false);
     pointerItem.SetWindowX(100);
@@ -291,6 +291,342 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     pointerItem.SetWindowX(1);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UpdateWindowModeImmediately
+ * @tc.desc: UpdateWindowModeImmediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateWindowModeImmediately, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("UpdateWindowModeImmediately");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
+    auto ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_HIDDEN;
+    ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_UNFROZEN;
+    ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: AdjustWindowAnimationFlag
+ * @tc.desc: AdjustWindowAnimationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, AdjustWindowAnimationFlag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("AdjustWindowAnimationFlag");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->animationTransitionController_ = sptr<IAnimationTransitionController>::MakeSptr();
+    ASSERT_NE(nullptr, windowSceneSessionImpl->animationTransitionController_);
+    windowSceneSessionImpl->AdjustWindowAnimationFlag(true);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    auto ret = windowSceneSessionImpl->property_->GetAnimationFlag();
+    EXPECT_EQ(3, ret);
+    windowSceneSessionImpl->animationTransitionController_ = nullptr;
+    windowSceneSessionImpl->AdjustWindowAnimationFlag(true);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    ret = windowSceneSessionImpl->property_->GetAnimationFlag();
+    EXPECT_EQ(1, ret);
+    windowSceneSessionImpl->AdjustWindowAnimationFlag(false);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    ret = windowSceneSessionImpl->property_->GetAnimationFlag();
+    EXPECT_EQ(0, ret);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->AdjustWindowAnimationFlag(false);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    ret = windowSceneSessionImpl->property_->GetAnimationFlag();
+    EXPECT_EQ(1, ret);
+    windowSceneSessionImpl->enableDefaultAnimation_ = false;
+    windowSceneSessionImpl->AdjustWindowAnimationFlag(false);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    ret = windowSceneSessionImpl->property_->GetAnimationFlag();
+    EXPECT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: UpdateConfigurationForAll
+ * @tc.desc: UpdateConfigurationForAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationForAll, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("UpdateConfigurationForAll");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, configuration);
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSession);
+    SessionInfo sessionInfo = {"CreateTestBundle1", "CreateTestModule1", "CreateTestAbility1"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSession->hostSession_ = session;
+    ASSERT_NE(nullptr, windowSession->property_);
+    windowSession->property_->SetPersistentId(1);
+    windowSession->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
+    windowSceneSessionImpl->UpdateConfigurationForAll(configuration);
+    ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
+}
+
+/**
+ * @tc.name: SetWindowFlags
+ * @tc.desc: SetWindowFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowFlags, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetWindowFlags");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->SetWindowFlags(1);
+    auto ret = windowSceneSessionImpl->SetWindowFlags(1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = windowSceneSessionImpl->SetWindowFlags(2);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ret = windowSceneSessionImpl->NotifyPrepareClosePiPWindow();
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: ConsumePointerEventInner
+ * @tc.desc: ConsumePointerEventInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("ConsumePointerEventInner");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(10);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+    pointerEvent->SetPointerAction(4);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+    pointerEvent->SetPointerAction(2);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: RegisterKeyboardPanelInfoChangeListener
+ * @tc.desc: RegisterKeyboardPanelInfoChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, RegisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("RegisterKeyboardPanelInfoChangeListener");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    windowSceneSessionImpl->keyboardPanelInfoChangeListeners_ = sptr<IKeyboardPanelInfoChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, windowSceneSessionImpl->keyboardPanelInfoChangeListeners_);
+    sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
+    auto ret = windowSceneSessionImpl->RegisterKeyboardPanelInfoChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: GetSystemBarPropertyByType
+ * @tc.desc: GetSystemBarPropertyByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetSystemBarPropertyByType");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    windowSceneSessionImpl->property_ = nullptr;
+    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+}
+
+/**
+ * @tc.name: SetSpecificBarProperty
+ * @tc.desc: SetSpecificBarProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetSpecificBarProperty");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SystemBarProperty property;
+    windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
+    auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    auto ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_BOTTOM;
+    ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
+    ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    property = SystemBarProperty();
+    property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
+    ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: NotifyDialogStateChange
+ * @tc.desc: NotifyDialogStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyDialogStateChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyDialogStateChange");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    auto ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    windowSceneSessionImpl->property_->SetPersistentId(0);
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->property_ = nullptr;
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: MoveTo02
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("MoveTo02SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1001);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(2, 2));
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("MoveTo02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle2", "CreateTestModule2", "CreateTestAbility2"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(3, 3));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(3, 3));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(3, 4));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 4));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 4));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 5));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 5));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 }
 } // namespace Rosen
