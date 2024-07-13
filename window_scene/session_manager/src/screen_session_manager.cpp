@@ -98,6 +98,7 @@ const unsigned int XCOLLIE_TIMEOUT_S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
+constexpr int32_t ROTATE_ANIMATION_TIME_MS = 600;
 
 bool JudgeIsBeta()
 {
@@ -4216,6 +4217,7 @@ void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMod
 
 void ScreenSessionManager::ScbClientDeathCallback(int32_t deathScbPid)
 {
+    std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
     if (oldScbPids_.empty()) {
         return;
     }
@@ -4255,6 +4257,7 @@ void ScreenSessionManager::SwitchUser()
             TLOGI(WmsLogTag::DMS, "switch user not change");
             return;
         }
+        std::lock_guard<std::mutex> lockScb(oldScbPidsMutex_);
         if (clientProxy_) {
             auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
             if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
@@ -4269,10 +4272,52 @@ void ScreenSessionManager::SwitchUser()
             clientProxy_ = it->second;
         }
         if (clientProxy_) {
-            clientProxy_->SwitchUserCallback(oldScbPids_, newScbPid);
+            ScbStatusRecoveryWhenSwitchUser(newScbPid);
         }
     }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(currentUserId_, GetDefaultScreenId(), false);
+}
+
+void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(int32_t newScbPid)
+{
+    NotifyFoldStatusChanged(GetFoldStatus());
+    NotifyDisplayModeChanged(GetFoldDisplayMode());
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
+        return;
+    }
+    if (g_foldScreenFlag) {
+        auto displayMode = GetFoldDisplayMode();
+        // fold device will be callback NotifyFoldToExpandCompletion to UpdateRotationAfterBoot
+        if (displayMode == FoldDisplayMode::FULL) {
+            screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_FULL));
+            screenSession->PropertyChange(screenSession->GetScreenProperty(),
+                ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+        } else if (displayMode == FoldDisplayMode::MAIN) {
+            screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_MAIN));
+            screenSession->PropertyChange(screenSession->GetScreenProperty(),
+                ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
+        } else {
+            TLOGE(WmsLogTag::DMS, "unsuport displaymode: %{public}u", displayMode);
+        }
+    } else {
+        screenSession->UpdateRotationAfterBoot(true);
+    }
+    if (oldScbPids_.size() == 0) {
+        screenEventTracker_.RecordEvent("swicth user failed, oldScbPids is null");
+        TLOGE(WmsLogTag::DMS, "swicth user failed, oldScbPids is null");
+        return;
+    }
+    auto delayTask = [this, oldScbPids = oldScbPids_, newScbPid] {
+        if (!clientProxy_) {
+            TLOGE(WmsLogTag::DMS, "clientProxy is null");
+            return;
+        }
+        clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
+    };
+    // Wait for the display to stabilize
+    taskScheduler_->PostAsyncTask(delayTask, "SwitchUserCallback", ROTATE_ANIMATION_TIME_MS);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
