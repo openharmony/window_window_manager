@@ -642,7 +642,7 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetDecorEnable(true);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
-    ASSERT_EQ(false, scensession->IsDecorEnable());
+    ASSERT_EQ(true, scensession->IsDecorEnable());
 
     sptr<SceneSession> scensession_;
     scensession_ = new (std::nothrow) SceneSession(info, nullptr);

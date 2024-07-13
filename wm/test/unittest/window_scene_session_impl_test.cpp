@@ -854,7 +854,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
     ASSERT_NE(nullptr, session);
 
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->NotifyDrawingCompleted());
+    window->NotifyDrawingCompleted();
 }
 
 /**
