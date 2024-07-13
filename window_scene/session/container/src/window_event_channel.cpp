@@ -14,6 +14,7 @@
  */
 
 #include "session/container/include/window_event_channel.h"
+#include "scene_board_judgement.h"
 
 #include <functional>
 #include <utility>
@@ -24,11 +25,16 @@
 
 #include "anr_handler.h"
 #include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
+#include "session_permission.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
+const std::set<int32_t> VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION({ MMI::KeyEvent::KEYCODE_HOME,
+    MMI::KeyEvent::KEYCODE_TAB, MMI::KeyEvent::KEYCODE_ESCAPE, MMI::KeyEvent::KEYCODE_DPAD_UP,
+    MMI::KeyEvent::KEYCODE_DPAD_DOWN, MMI::KeyEvent::KEYCODE_DPAD_LEFT, MMI::KeyEvent::KEYCODE_DPAD_RIGHT,
+    MMI::KeyEvent::KEYCODE_MOVE_HOME, MMI::KeyEvent::KEYCODE_MOVE_END });
+constexpr int32_t SIZE_TWO = 2;
 }
 
 void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
@@ -87,9 +93,16 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
 {
     WLOGFD("WindowEventChannel receive pointer event");
     PrintPointerEvent(pointerEvent);
-    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL && SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+    if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ &&
+        (uiExtensionUsage_ == UIExtensionUsage::MODAL ||
+        uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Point event blocked because of modal/constrained UIExtension:%{public}u",
+                uiExtensionUsage_);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension:%{public}u", uiExtensionUsage_);
+        }
     }
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
@@ -139,8 +152,7 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("keyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (isUIExtension_ && uiExtensionUsage_ == UIExtensionUsage::MODAL && SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "event blocked because of modal UIExtension");
+    if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ && IsUIExtensionKeyEventBlocked(keyEvent)) {
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     if (isPreImeEvent) {
@@ -153,6 +165,38 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
+}
+
+bool WindowEventChannel::IsUIExtensionKeyEventBlocked(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Modal UIExtension.");
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension.");
+            return false;
+        }
+    }
+    if (uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        auto keyCode = keyEvent->GetKeyCode();
+        if (VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION.find(keyCode) ==
+            VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION.end()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Constrained embedded UIExtension.");
+            return true;
+        }
+        auto pressedKeys = keyEvent->GetPressedKeys();
+        if (pressedKeys.size() == SIZE_TWO && keyCode == MMI::KeyEvent::KEYCODE_TAB &&
+            (pressedKeys[0] == MMI::KeyEvent::KEYCODE_SHIFT_LEFT ||
+            pressedKeys[0] == MMI::KeyEvent::KEYCODE_SHIFT_RIGHT)) {
+            // only allows combined keys SHIFT+TAB
+            return false;
+        } else if (pressedKeys.size() >= SIZE_TWO) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Invalid size of PressedKeys due to Constrained embedded UIExtension.");
+            return true;
+        }
+    }
+    return false;
 }
 
 WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
@@ -271,10 +315,8 @@ void WindowEventChannel::PrintInfoPointerEvent(const std::shared_ptr<MMI::Pointe
             WLOGFE("Invalid pointer: %{public}d.", pointerId);
             return;
         }
-        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-            "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
-            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
-            item.GetWindowX(), item.GetWindowY());
+        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d",
+            pointerId, item.GetDownTime(), item.IsPressed());
     }
 }
 

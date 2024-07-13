@@ -182,7 +182,16 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     windowEventChannel_->SetIsUIExtension(true);
     windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
     res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
-    EXPECT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**

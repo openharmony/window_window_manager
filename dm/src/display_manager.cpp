@@ -687,6 +687,10 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
     WLOGFI("snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         rect.left, rect.top, rect.width, rect.height);
     // create crop pixel map
+    if (rect.width == 0 || rect.height == 0) {
+        WLOGFE("width or height is invalid!");
+        return nullptr;
+    }
     Media::InitializationOptions opt;
     opt.size.width = rect.width;
     opt.size.height = rect.height;
@@ -1886,4 +1890,4 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
-} // namespace OHOS::Rosen
+} // namespace OHOS::Rosen

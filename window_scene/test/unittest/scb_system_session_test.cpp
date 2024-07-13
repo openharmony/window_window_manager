@@ -52,7 +52,7 @@ void SCBSystemSessionTest::SetUp()
     info.abilityName_ = "testSCBSystemSession1";
     info.moduleName_ = "testSCBSystemSession2";
     info.bundleName_ = "testSCBSystemSession3";
-    scbSystemSession_ = new SCBSystemSession(info, specificCallback);
+    scbSystemSession_ = new (std::nothrow) SCBSystemSession(info, specificCallback);
     EXPECT_NE(nullptr, scbSystemSession_);
 }
 
@@ -176,8 +176,8 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
     sptr<SceneSession::SpecificSessionCallback> callback =
-        new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> session = new SceneSession(info, callback);
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, callback);
     scbSystemSession_->BindKeyboardSession(session);
     int ret = 0;
     ASSERT_EQ(0, ret);

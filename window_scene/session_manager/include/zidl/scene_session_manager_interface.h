@@ -222,16 +222,15 @@ public:
     {
         return WSError::WS_OK;
     }
-    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage) override {}
-    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override {}
-    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
-        int32_t posX, int32_t posY) override {}
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override {}
+    void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
+    void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override
     {
         return WSError::WS_OK;
     }
-    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions) override
     {
         return WSError::WS_OK;

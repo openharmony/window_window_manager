@@ -74,6 +74,7 @@ private:
     void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     void PrintInfoPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     static void OnDispatchEventProcessed(int32_t eventId, int64_t actionTime);
+    bool IsUIExtensionKeyEventBlocked(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;

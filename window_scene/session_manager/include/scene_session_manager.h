@@ -69,6 +69,8 @@ struct SCBAbilityInfo {
     uint32_t sdkVersion_;
 };
 class SceneSession;
+struct SecSurfaceInfo;
+class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -307,13 +309,13 @@ public:
     void GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos);
     void FlushWindowInfoToMMI(const bool forceFlush = false);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
-    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId, UIExtensionUsage usage) override;
-    void UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect) override;
-    void ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId,
-        int32_t posX, int32_t posY) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override;
+    void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override;
+    void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
-    WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    WSError CheckExtWindowFlagsPermission(ExtensionWindowFlags& actions) const;
+    WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
     void CheckSceneZOrder();
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
@@ -340,6 +342,9 @@ public:
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+    void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
+    WSError SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode);
+    int32_t GetAppForceLandscapeMode(const std::string& bundleName);
 
 protected:
     SceneSessionManager();
@@ -484,6 +489,7 @@ private:
         const std::vector<std::string>& params, std::string& dumpInfo);
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
+    bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
@@ -506,7 +512,7 @@ private:
     void NotifyAllAccessibilityInfo();
     void removeFailRecoveredSession();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
-
+    void RegisterSecSurfaceInfoListener();
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -516,7 +522,8 @@ private:
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
-    std::map<sptr<IRemoteObject>,  std::pair<int32_t, int32_t>> remoteExtSessionMap_;
+    std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> remoteExtSessionMap_;
+    std::map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo> extSessionInfoMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
@@ -568,6 +575,8 @@ private:
     std::shared_mutex startingWindowMapMutex_;
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
+    std::map<std::string, int32_t> appForceLandscapeMap_;
+    std::shared_mutex appForceLandscapeMutex_;
 
     std::mutex privacyBundleMapMutex_;
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleMap_;

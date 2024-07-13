@@ -29,6 +29,50 @@
 #include "task_scheduler.h"
 
 namespace OHOS::Rosen {
+enum class ListenerFuncType : uint32_t {
+    PENDING_SCENE_CB,
+    CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
+    SESSION_STATE_CHANGE_CB,
+    BUFFER_AVAILABLE_CHANGE_CB,
+    SESSION_EVENT_CB,
+    SESSION_RECT_CHANGE_CB,
+    SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
+    CREATE_SUB_SESSION_CB,
+    BIND_DIALOG_TARGET_CB,
+    RAISE_TO_TOP_CB,
+    RAISE_TO_TOP_POINT_DOWN_CB,
+    BACK_PRESSED_CB,
+    SESSION_FOCUSABLE_CHANGE_CB,
+    SESSION_TOUCHABLE_CHANGE_CB,
+    SESSION_TOP_MOST_CHANGE_CB,
+    CLICK_CB,
+    TERMINATE_SESSION_CB,
+    TERMINATE_SESSION_CB_NEW,
+    TERMINATE_SESSION_CB_TOTAL,
+    SESSION_EXCEPTION_CB,
+    UPDATE_SESSION_LABEL_CB,
+    UPDATE_SESSION_ICON_CB,
+    SYSTEMBAR_PROPERTY_CHANGE_CB,
+    NEED_AVOID_CB,
+    PENDING_SESSION_TO_FOREGROUND_CB,
+    PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
+    CUSTOM_ANIMATION_PLAYING_CB,
+    NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB,
+    SHOW_WHEN_LOCKED_CB,
+    REQUESTED_ORIENTATION_CHANGE_CB,
+    RAISE_ABOVE_TARGET_CB,
+    FORCE_HIDE_CHANGE_CB,
+    WINDOW_DRAG_HOT_AREA_CB,
+    TOUCH_OUTSIDE_CB,
+    SESSIONINFO_LOCKEDSTATE_CHANGE_CB,
+    PREPARE_CLOSE_PIP_SESSION,
+    LANDSCAPE_MULTI_WINDOW_CB,
+    CONTEXT_TRANSPARENT_CB,
+    KEYBOARD_GRAVITY_CHANGE_CB,
+    ADJUST_KEYBOARD_LAYOUT_CB,
+    LAYOUT_FULL_SCREEN_CB,
+};
+
 class SceneSession;
 class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
 public:
@@ -42,50 +86,6 @@ public:
     sptr<SceneSession> GetNativeSession() const;
 
 private:
-    enum class ListenerFunctionType : uint32_t {
-        PENDING_SCENE_CB,
-        CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
-        SESSION_STATE_CHANGE_CB,
-        BUFFER_AVAILABLE_CHANGE_CB,
-        SESSION_EVENT_CB,
-        SESSION_RECT_CHANGE_CB,
-        SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
-        CREATE_SUB_SESSION_CB,
-        BIND_DIALOG_TARGET_CB,
-        RAISE_TO_TOP_CB,
-        RAISE_TO_TOP_POINT_DOWN_CB,
-        BACK_PRESSED_CB,
-        SESSION_FOCUSABLE_CHANGE_CB,
-        SESSION_TOUCHABLE_CHANGE_CB,
-        SESSION_TOP_MOST_CHANGE_CB,
-        CLICK_CB,
-        TERMINATE_SESSION_CB,
-        TERMINATE_SESSION_CB_NEW,
-        TERMINATE_SESSION_CB_TOTAL,
-        SESSION_EXCEPTION_CB,
-        UPDATE_SESSION_LABEL_CB,
-        UPDATE_SESSION_ICON_CB,
-        SYSTEMBAR_PROPERTY_CHANGE_CB,
-        NEED_AVOID_CB,
-        PENDING_SESSION_TO_FOREGROUND_CB,
-        PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
-        CUSTOM_ANIMATION_PLAYING_CB,
-        NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB,
-        SHOW_WHEN_LOCKED_CB,
-        REQUESTED_ORIENTATION_CHANGE_CB,
-        RAISE_ABOVE_TARGET_CB,
-        FORCE_HIDE_CHANGE_CB,
-        WINDOW_DRAG_HOT_AREA_CB,
-        TOUCH_OUTSIDE_CB,
-        SESSIONINFO_LOCKEDSTATE_CHANGE_CB,
-        PREPARE_CLOSE_PIP_SESSION,
-        LANDSCAPE_MULTI_WINDOW_CB,
-        CONTEXT_TRANSPARENT_CB,
-        KEYBOARD_GRAVITY_CHANGE_CB,
-        ADJUST_KEYBOARD_LAYOUT_CB,
-        LAYOUT_FULL_SCREEN_CB,
-    };
-
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
@@ -115,6 +115,8 @@ private:
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
+    static napi_value SetBlankFlag(napi_env env, napi_callback_info info);
+    static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -144,11 +146,11 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
+    napi_value OnSetBlankFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
-    bool IsCallbackTypeSupported(const std::string& type);
-
     void InitListenerFuncs();
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
@@ -190,7 +192,7 @@ private:
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
-    void ProcessRegisterCallback(const std::string& cbType);
+    void ProcessRegisterCallback(ListenerFuncType listenerFunctionType);
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -244,7 +246,6 @@ private:
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    std::map<std::string, ListenerFunctionType> listenerFuncMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
 };

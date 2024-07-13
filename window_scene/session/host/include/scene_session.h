@@ -75,13 +75,12 @@ using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, b
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
-using HandleUpdatePropertyFunc = WMError (SceneSession::*)(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using SystemSessionBufferAvailableCallback = std::function<void()>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
+using NotifyForceSplitFunc = std::function<int32_t(const std::string& bundleName)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -227,6 +226,10 @@ public:
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
 
     bool IsAnco() const override;
+    void SetBlankFlag(bool isAddBlank) override;
+    bool GetBlankFlag() const override;
+    void SetBufferAvailableCallbackEnable(bool enable);
+    bool GetBufferAvailableCallbackEnable() const override;
     int32_t GetCollaboratorType() const;
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRect() const;
@@ -278,6 +281,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void ClearSpecificSessionCbMap();
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -333,6 +337,10 @@ public:
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
     Vector2f GetPosition(bool useUIExtension);
+    void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
+    void RemoveUIExtSurfaceNodeId(int32_t persistentId);
+    int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
+    int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -443,6 +451,8 @@ private:
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
     void SetWindowFlags(const sptr<SceneSession>& sceneSession,
@@ -452,6 +462,7 @@ private:
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
+    NotifyForceSplitFunc forceSplitFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     mutable std::mutex sessionChangeCbMutex_;
@@ -478,9 +489,12 @@ private:
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
+    mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
+    std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
     std::string clientIdentityToken_ = { "" };
-    static const std::map<uint32_t, HandleUpdatePropertyFunc> sessionFuncMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
+    bool isAddBlank_ = false;
+    bool bufferAvailableCallbackEnable_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

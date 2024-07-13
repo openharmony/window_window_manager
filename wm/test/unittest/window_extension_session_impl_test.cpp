@@ -1169,7 +1169,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
 }
 
 /**
@@ -1192,7 +1192,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | Smal
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window_->HideNonSecureWindows(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window_->HideNonSecureWindows(false));
 }
 
 /**
@@ -1240,7 +1240,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, Function | SmallTes
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->SetWaterMarkFlag(true));
 }
 
 /**
@@ -1312,7 +1312,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
 
 /**

@@ -39,6 +39,8 @@
 #include "permission.h"
 #include "request_info.h"
 #include "ui_content.h"
+#include "foundation/communication/ipc/interfaces/innerkits/ipc_core/include/ipc_skeleton.h"
+#include "base/security/access_token/interfaces/innerkits/accesstoken/include/tokenid_kit.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -251,14 +253,14 @@ napi_value JsWindow::BindDialogTarget(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGD("LoadContent");
+    WLOGI("LoadContent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsWindow::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGD("LoadContentByName");
+    WLOGI("LoadContentByName");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
@@ -1762,6 +1764,20 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
     return NapiGetUndefined(env);
 }
 
+static napi_value CheckBindDialogWindow(sptr<Window> weakWindow, napi_env env)
+{
+    if (weakWindow == nullptr) {
+        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+    if (!isSystemApp) {
+        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "Permission verification failed. A non-system application calls a system API.");
+    }
+    return nullptr;
+}
+
 napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1795,11 +1811,11 @@ napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, token, errCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        [weakToken, token](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
-            if (errCode != WmErrorCode::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            napi_value checkResult = CheckBindDialogWindow(weakWindow, env);
+            if (checkResult != nullptr) {
+                task.Reject(env, checkResult);
                 return;
             }
 
@@ -2229,6 +2245,8 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
             WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
         *errCodePtr = spWindow->SetSystemBarProperty(
             WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
+        *errCodePtr = spWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+            systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
         TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set set system bar enalbe end, ret = %{public}d",
             spWindow->GetWindowId(), spWindow->GetWindowName().c_str(), *errCodePtr);
     };
@@ -3407,7 +3425,12 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    windowToken_->SetTurnScreenOn(wakeUp);
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTurnScreenOn(wakeUp));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    
     WLOGI("Window [%{public}u, %{public}s] set wake up screen %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
     return NapiGetUndefined(env);
@@ -4594,6 +4617,11 @@ bool JsWindow::ParseScaleOption(napi_env env, napi_value jsObject, Transform& tr
 
 napi_value JsWindow::OnScale(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4660,6 +4688,11 @@ bool JsWindow::ParseRotateOption(napi_env env, napi_value jsObject, Transform& t
 
 napi_value JsWindow::OnRotate(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4716,6 +4749,11 @@ bool JsWindow::ParseTranslateOption(napi_env env, napi_value jsObject, Transform
 
 napi_value JsWindow::OnTranslate(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4792,6 +4830,11 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
 
 napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -4816,6 +4859,7 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
         WLOGFE("set corner radius permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -5674,9 +5718,9 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     TitleButtonRect titleButtonRect;
-    WMError ret = windowToken_->GetTitleButtonArea(titleButtonRect);
-    if (ret != WMError::WM_OK) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetTitleButtonArea(titleButtonRect));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetTitleButtonRect end",
         window->GetWindowId(), window->GetWindowName().c_str());

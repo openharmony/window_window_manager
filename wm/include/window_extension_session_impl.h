@@ -105,7 +105,9 @@ private:
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateAccessibilityTreeInfo();
+    void ArkUIFrameworkSupport();
 
+    sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;

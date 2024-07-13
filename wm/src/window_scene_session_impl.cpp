@@ -504,14 +504,16 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
-    auto dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    AreaType dragType = AreaType::UNDEFINED;
+    if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    }
     WindowType windowType = property_->GetWindowType();
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
     bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
-    bool isFloatingMode = (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
-    if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin || !isFloatingMode) && !isDecorDialog) {
+    if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin) && !isDecorDialog) {
         hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
@@ -568,12 +570,10 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
     if (isPointDown || isPointUp) {
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "InputTracking id:%{public}d, windowId:%{public}u, pointId:%{public}d, "
-            "sourceType:%{public}d, pointPos:[%{public}d, %{public}d], "
-            "winRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
+            "sourceType:%{public}d, winRect:[%{public}d, %{public}d, %{public}u, %{public}u], "
             "needNotifyEvent:%{public}d",
             pointerEvent->GetId(), GetWindowId(), pointerEvent->GetPointerId(),
-            sourceType, pointerItem.GetDisplayX(), pointerItem.GetDisplayY(),
-            rect.posX_, rect.posY_, rect.width_, rect.height_,
+            sourceType, rect.posX_, rect.posY_, rect.width_, rect.height_,
             needNotifyEvent);
     }
 }

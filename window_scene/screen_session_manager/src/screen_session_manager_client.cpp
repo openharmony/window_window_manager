@@ -18,6 +18,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_transaction.h>
+#include <transaction/rs_interfaces.h>
 
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
@@ -122,6 +123,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         }
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenConnected(screenSession);
+            WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
+                screenId, config.property.GetDensity());
+            screenSession->SetScreenSceneDpi(config.property.GetDensity());
         }
         screenSession->Connect();
         return;
@@ -389,17 +393,26 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         return;
     }
     if (oldScbPids.size() == 0) {
-        WLOGFI("oldScbPids size 0");
+        WLOGFE("oldScbPids size 0");
         return;
     }
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
-            WLOGFI("display node is null");
+            WLOGFE("display node is null");
             continue;
         }
-        displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->Begin();
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+            transactionProxy->Commit();
+            transactionProxy->FlushImplicitTransaction();
+        } else {
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+            WLOGFW("transactionProxy is null");
+        }
     }
     WLOGFI("switch user callback end");
 }

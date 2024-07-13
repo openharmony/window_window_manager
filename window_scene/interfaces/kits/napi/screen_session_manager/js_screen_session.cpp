@@ -15,6 +15,7 @@
 
 #include "js_screen_session.h"
 
+#include <hitrace_meter.h>
 #include <js_runtime_utils.h>
 
 #include "interfaces/include/ws_common.h"
@@ -373,6 +374,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, sensorRotation, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnSensorRotationChange");
         if (jsCallbackRef == nullptr) {
             WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
@@ -452,6 +454,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPropertyChange");
         if (jsCallbackRef == nullptr) {
             WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
@@ -532,6 +535,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPowerStatusChange");
         if (jsCallbackRef == nullptr) {
             WLOGFE("[UL_POWER]Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;

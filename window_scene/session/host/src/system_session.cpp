@@ -49,7 +49,6 @@ SystemSession::~SystemSession()
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "isShowing: %{public}d", static_cast<int>(isShowing));
     if (specificCallback_ == nullptr) {
         return;
     }
@@ -70,7 +69,7 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
             specificCallback_->onCameraSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
         }
     } else {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "skip window type");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "Skip window type, isShowing: %{public}d", isShowing);
     }
 }
 
@@ -135,8 +134,9 @@ WSError SystemSession::Hide()
         }
         // background will remove surfaceNode, custom not execute
         // not animation playing when already background; inactive may be animation playing
-        if (session->GetSessionProperty() &&
-            session->GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty &&
+            sessionProperty->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
@@ -200,7 +200,6 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     const auto& type = GetWindowType();
-    WLOGFI("id: %{public}d, type: %{public}d", id, type);
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         WLOGFI("Parent has dialog foreground, id: %{public}d, type: %{public}d", id, type);
@@ -209,9 +208,11 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
             return WSError::WS_OK;
         }
     }
-    if (type == WindowType::WINDOW_TYPE_DIALOG && GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
+    auto sessionProperty = GetSessionProperty();
+    if (type == WindowType::WINDOW_TYPE_DIALOG && sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }

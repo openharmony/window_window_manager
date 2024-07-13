@@ -22,39 +22,46 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
+
+    const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
+        // white register list for window manager
+        {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
+        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+        {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
+    };
+    const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
+        // white register list for window
+        {WINDOW_SIZE_CHANGE_CB, RegisterListenerType::WINDOW_SIZE_CHANGE_CB},
+        {SYSTEM_AVOID_AREA_CHANGE_CB, RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB},
+        {AVOID_AREA_CHANGE_CB, RegisterListenerType::AVOID_AREA_CHANGE_CB},
+        {LIFECYCLE_EVENT_CB, RegisterListenerType::LIFECYCLE_EVENT_CB},
+        {WINDOW_EVENT_CB, RegisterListenerType::WINDOW_EVENT_CB},
+        {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
+        {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
+        {SCREENSHOT_EVENT_CB, RegisterListenerType::SCREENSHOT_EVENT_CB},
+        {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
+        {DIALOG_DEATH_RECIPIENT_CB, RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB},
+        {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
+        {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
+        {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
+        {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
+        {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
+        {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
+    };
+    const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
+        // white register list for window stage
+        {WINDOW_STAGE_EVENT_CB, RegisterListenerType::WINDOW_STAGE_EVENT_CB},
+    };
+
+    const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_CODE_MAP {
+        {CaseType::CASE_WINDOW_MANAGER, WINDOW_MANAGER_LISTENER_MAP},
+        {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
+        {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
+    };
 }
 
 JsWindowRegisterManager::JsWindowRegisterManager()
 {
-    // white register list for window manager
-    listenerProcess_[CaseType::CASE_WINDOW_MANAGER] = {
-        {SYSTEM_BAR_TINT_CHANGE_CB,            &JsWindowRegisterManager::ProcessSystemBarChangeRegister               },
-        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, &JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister},
-        {WATER_MARK_FLAG_CHANGE_CB,            &JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister           },
-    };
-    // white register list for window
-    listenerProcess_[CaseType::CASE_WINDOW] = {
-        { WINDOW_SIZE_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowChangeRegister               },
-        { SYSTEM_AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister      },
-        { AVOID_AREA_CHANGE_CB,               &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister            },
-        { LIFECYCLE_EVENT_CB,                 &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        { WINDOW_EVENT_CB,                    &JsWindowRegisterManager::ProcessLifeCycleEventRegister             },
-        { KEYBOARD_HEIGHT_CHANGE_CB,          &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister         },
-        { TOUCH_OUTSIDE_CB,                   &JsWindowRegisterManager::ProcessTouchOutsideRegister               },
-        { SCREENSHOT_EVENT_CB,                &JsWindowRegisterManager::ProcessScreenshotRegister                 },
-        { DIALOG_TARGET_TOUCH_CB,             &JsWindowRegisterManager::ProcessDialogTargetTouchRegister          },
-        { DIALOG_DEATH_RECIPIENT_CB,          &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister       },
-        { WINDOW_STATUS_CHANGE_CB,            &JsWindowRegisterManager::ProcessWindowStatusChangeRegister         },
-        { WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, &JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister},
-        { WINDOW_VISIBILITY_CHANGE_CB,        &JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister     },
-        { WINDOW_NO_INTERACTION_DETECT_CB,    &JsWindowRegisterManager::ProcessWindowNoInteractionRegister        },
-        { WINDOW_RECT_CHANGE_CB,              &JsWindowRegisterManager::ProcessWindowRectChangeRegister           },
-        { SUB_WINDOW_CLOSE_CB,                &JsWindowRegisterManager::ProcessSubWindowCloseRegister           },
-    };
-    // white register list for window stage
-    listenerProcess_[CaseType::CASE_STAGE] = {
-        {WINDOW_STAGE_EVENT_CB,         &JsWindowRegisterManager::ProcessLifeCycleEventRegister    }
-    };
 }
 
 JsWindowRegisterManager::~JsWindowRegisterManager()
@@ -352,10 +359,17 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    if (listenerProcess_[caseType].count(type) == 0) {
+    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
+    if (iterCaseType == LISTENER_CODE_MAP.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    RegisterListenerType listenerType = iterCallbackType->second;
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
@@ -365,7 +379,8 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true, env, parameter);
+    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true,
+        env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -373,6 +388,72 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     jsCbMap_[type][callbackRef] = windowManagerListener;
     WLOGI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
+    const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+    napi_env env, napi_value parameter)
+{
+    if (caseType == CaseType::CASE_WINDOW_MANAGER) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
+            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB):
+                return ProcessSystemBarChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
+                return ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, isRegister,
+                    env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
+                return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            default:
+                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
+                    static_cast<uint32_t>(registerListenerType));
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+    } else if (caseType == CaseType::CASE_WINDOW) {
+        switch (static_cast<uint32_t>(registerListenerType)) {
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_SIZE_CHANGE_CB):
+                return ProcessWindowChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB):
+                return ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::AVOID_AREA_CHANGE_CB):
+                return ProcessAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::LIFECYCLE_EVENT_CB):
+                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_EVENT_CB):
+                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
+                return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
+                return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
+                return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
+                return ProcessDialogTargetTouchRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB):
+                return ProcessDialogDeathRecipientRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
+                return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
+                return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
+                return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
+                return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
+                return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
+                return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            default:
+                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
+                    static_cast<uint32_t>(registerListenerType));
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+    } else if (caseType == CaseType::CASE_STAGE) {
+        if (registerListenerType == RegisterListenerType::WINDOW_STAGE_EVENT_CB) {
+            return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+        }
+    }
     return WmErrorCode::WM_OK;
 }
 
@@ -384,13 +465,21 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    if (listenerProcess_[caseType].count(type) == 0) {
+    auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
+    if (iterCaseType == LISTENER_CODE_MAP.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    RegisterListenerType listenerType = iterCallbackType->second;
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
+                false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -406,7 +495,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
+                false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;

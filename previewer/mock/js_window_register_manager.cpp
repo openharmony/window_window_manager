@@ -19,14 +19,19 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
+
+const std::map<std::string, ListenerFunctionType> WindowListenerFunctionMap {
+    {SYSTEM_AVOID_AREA_CHANGE_CB, ListenerFunctionType::SYSTEM_AVOID_AREA_CHANGE_CB},
+    {AVOID_AREA_CHANGE_CB, ListenerFunctionType::AVOID_AREA_CHANGE_CB},
+};
+
+const std::map<CaseType, std::map<std::string, ListenerFunctionType>> ListenerFunctionMap {
+    {CaseType::CASE_WINDOW, WindowListenerFunctionMap},
+};
 }
 
 JsWindowRegisterManager::JsWindowRegisterManager()
 {
-    listenerProcess_[CaseType::CASE_WINDOW] = {
-        { SYSTEM_AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister },
-        { AVOID_AREA_CHANGE_CB,               &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
-    };
 }
 
 JsWindowRegisterManager::~JsWindowRegisterManager()
@@ -79,10 +84,17 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     if (IsCallbackRegistered(env, type, callback)) {
         return WmErrorCode::WM_OK;
     }
-    if (listenerProcess_[caseType].count(type) == 0) {
+    auto iterCaseType = ListenerFunctionMap.find(caseType);
+    if (iterCaseType == ListenerFunctionMap.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    ListenerFunctionType listenerFunctionType = iterCallbackType->second;
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
@@ -92,7 +104,8 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = (this->*listenerProcess_[caseType][type])(windowManagerListener, window, true, env, parameter);
+    WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, windowManagerListener, window,
+        true, env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -103,6 +116,23 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     return WmErrorCode::WM_OK;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessRegisterCallback(ListenerFunctionType listenerFunctionType,
+    CaseType caseType, const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister,
+    napi_env env, napi_value parameter)
+{
+    if (caseType == CaseType::CASE_WINDOW) {
+        switch (listenerFunctionType) {
+            case ListenerFunctionType::SYSTEM_AVOID_AREA_CHANGE_CB:
+                return ProcessSystemAvoidAreaChangeRegister(listener, window, isRegister, env, parameter);
+            case ListenerFunctionType::AVOID_AREA_CHANGE_CB:
+                return ProcessAvoidAreaChangeRegister(listener, window, isRegister, env, parameter);
+            default:
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+    }
+    return WmErrorCode::WM_ERROR_INVALID_PARAM;
+}
+
 WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
     CaseType caseType, napi_env env, napi_value value)
 {
@@ -111,13 +141,21 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
         WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    if (listenerProcess_[caseType].count(type) == 0) {
+    auto iterCaseType = ListenerFunctionMap.find(caseType);
+    if (iterCaseType == ListenerFunctionMap.end()) {
+        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto iterCallbackType = iterCaseType->second.find(type);
+    if (iterCallbackType == iterCaseType->second.end()) {
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    ListenerFunctionType listenerFunctionType = iterCallbackType->second;
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, it->second, window, false,
+                env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -133,7 +171,8 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = (this->*listenerProcess_[caseType][type])(it->second, window, false, env, nullptr);
+            WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, it->second, window, false,
+                env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return ret;

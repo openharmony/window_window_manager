@@ -29,12 +29,18 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "CommonEvent"};
     constexpr int RETRY_MAX_COUNT = 3;
     const std::string THREAD_ID = "WindowCommonEventHandler";
+
+    enum class CommonEventCode : uint32_t {
+        COMMON_EVENT_USER_SWITCHED,
+    };
+
+    const std::map<std::string, CommonEventCode> COMMON_EVENT_CODE_MAP {
+        {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, CommonEventCode::COMMON_EVENT_USER_SWITCHED},
+    };
 }
 
 WindowCommonEvent::WindowCommonEvent()
 {
-    handleCommonEventFuncs_.insert(make_pair(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
-        &WindowCommonEvent::HandleAccountSwitched));
     auto runner = AppExecFwk::EventRunner::Create(THREAD_ID);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
@@ -82,8 +88,11 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGI("called action = %{public}s", action.c_str());
-        if (handleCommonEventFuncs_.count(action)) {
-            (this->*handleCommonEventFuncs_[action])(data);
+        if (auto iter = COMMON_EVENT_CODE_MAP.find(action); iter != COMMON_EVENT_CODE_MAP.end()) {
+            CommonEventCode commonEventCode = iter->second;
+            if (commonEventCode == CommonEventCode::COMMON_EVENT_USER_SWITCHED) {
+                HandleAccountSwitched(data);
+            }
         }
     };
     eventHandler_->PostTask(task, "wms:OnReceiveEvent", 0, AppExecFwk::EventQueue::Priority::HIGH);
