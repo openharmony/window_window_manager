@@ -113,7 +113,7 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
-            TLOGI(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
             return;
         }
         napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
