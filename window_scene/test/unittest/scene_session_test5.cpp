@@ -560,7 +560,6 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
     SessionInfo info;
     info.abilityName_ = "UpdateSessionPropertyByAction";
     info.bundleName_ = "UpdateSessionPropertyByAction";
-    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);

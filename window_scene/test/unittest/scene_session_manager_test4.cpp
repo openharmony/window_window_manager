@@ -1470,11 +1470,9 @@ HWTEST_F(SceneSessionManagerTest4, GetIsLayoutFullScreen, Function | SmallTest |
 HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    int32_t parentId = 1;
-    int32_t persistentId = 0;
     uint32_t extWindowFlags = 0;
     uint32_t extWindowActions = 0;
-    auto ret = ssm_->UpdateExtWindowFlags(parentId, persistentId, extWindowFlags, extWindowActions);
+    auto ret = ssm_->UpdateExtWindowFlags(nullptr, extWindowFlags, extWindowActions);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 

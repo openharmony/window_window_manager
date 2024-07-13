@@ -824,32 +824,32 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
         wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 
-void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-    int32_t parentId, UIExtensionUsage usage, uint64_t surfaceNodeId)
+void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, persistentId, parentId, usage, surfaceNodeId);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId);
 }
 
-void WindowAdapter::ProcessModalExtensionPointDown(int32_t persistentId, int32_t parentId, int32_t posX, int32_t posY)
+void WindowAdapter::ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->ProcessModalExtensionPointDown(persistentId, parentId, posX, posY);
+    wmsProxy->ProcessModalExtensionPointDown(token, posX, posY);
 }
 
-void WindowAdapter::UpdateModalExtensionRect(int32_t persistentId, int32_t parentId, Rect rect)
+void WindowAdapter::UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->UpdateModalExtensionRect(persistentId, parentId, rect);
+    wmsProxy->UpdateModalExtensionRect(token, rect);
 }
 
 WMError WindowAdapter::AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
@@ -861,15 +861,14 @@ WMError WindowAdapter::AddOrRemoveSecureSession(int32_t persistentId, bool shoul
     return static_cast<WMError>(wmsProxy->AddOrRemoveSecureSession(persistentId, shouldHide));
 }
 
-WMError WindowAdapter::UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+WMError WindowAdapter::UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
     uint32_t extWindowActions)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->UpdateExtWindowFlags(parentId, persistentId,
-        extWindowFlags, extWindowActions));
+    return static_cast<WMError>(wmsProxy->UpdateExtWindowFlags(token, extWindowFlags, extWindowActions));
 }
 
 WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)

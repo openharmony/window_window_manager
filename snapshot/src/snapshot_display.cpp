@@ -44,12 +44,12 @@ int main(int argc, char *argv[])
     cmdArguments.fileName = "";
 
     if (!SnapShotUtils::ProcessArgs(argc, argv, cmdArguments)) {
-        return 0;
+        _exit(-1);
     }
 
     if (DEVELOPER_MODE_STATE_ON_DEFAULT == IS_DEVELOPER_MODE) {
         std::cout << "current mode is not developer mode, just return." << std::endl;
-        return 0;
+        _exit(-1);
     }
 
     auto display = DisplayManager::GetInstance().GetDisplayById(cmdArguments.displayId);
