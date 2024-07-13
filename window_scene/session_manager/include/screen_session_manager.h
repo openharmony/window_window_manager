@@ -247,6 +247,7 @@ public:
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -419,6 +420,7 @@ private:
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
     std::atomic<bool> isPhyScreenConnected_ = false;
+    std::atomic<bool> isInGetSnapshotByPicker_ = false;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
