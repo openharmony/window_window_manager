@@ -459,6 +459,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    bool isNeedSystemPermissionByAction(WSPropertyChangeAction action);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
