@@ -319,6 +319,9 @@ public:
     bool IsTerminated() const;
     bool IsSessionForeground() const;
     virtual bool IsAnco() const { return false; }
+    virtual void SetBlankFlag(bool isAddBlank) {};
+    virtual bool GetBlankFlag() const { return false; }
+    virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
