@@ -24,6 +24,29 @@
 #include "window.h"
 namespace OHOS {
 namespace Rosen {
+enum class RegisterListenerType : uint32_t {
+    SYSTEM_BAR_TINT_CHANGE_CB,
+    GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+    WATER_MARK_FLAG_CHANGE_CB,
+    WINDOW_SIZE_CHANGE_CB,
+    SYSTEM_AVOID_AREA_CHANGE_CB,
+    AVOID_AREA_CHANGE_CB,
+    LIFECYCLE_EVENT_CB,
+    WINDOW_EVENT_CB,
+    KEYBOARD_HEIGHT_CHANGE_CB,
+    TOUCH_OUTSIDE_CB,
+    SCREENSHOT_EVENT_CB,
+    DIALOG_TARGET_TOUCH_CB,
+    DIALOG_DEATH_RECIPIENT_CB,
+    WINDOW_STATUS_CHANGE_CB,
+    WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
+    WINDOW_VISIBILITY_CHANGE_CB,
+    WINDOW_NO_INTERACTION_DETECT_CB,
+    WINDOW_RECT_CHANGE_CB,
+    SUB_WINDOW_CLOSE_CB,
+    WINDOW_STAGE_EVENT_CB,
+};
+
 class JsWindowRegisterManager {
 public:
     JsWindowRegisterManager();
@@ -70,11 +93,11 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool,
+    WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
+        const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         napi_env env, napi_value parameter);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
-    std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
 };
 } // namespace Rosen
 } // namespace OHOS

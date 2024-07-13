@@ -229,8 +229,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         Rect preRect = property->GetWindowRect();
         Rect rect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
         TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect when connect."
-            "preRect:[%{public}d, %{public}d, %{public}u, %{public}u]"
-            "rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            "preRect:[%{public}d,%{public}d,%{public}u,%{public}u]"
+            "rect:[%{public}d,%{public}d,%{public}u,%{public}u]",
             preRect.posX_, preRect.posY_, preRect.width_, preRect.height_,
             rect.posX_, rect.posY_, rect.width_, rect.height_);
         if (preRect.IsUninitializedRect() && !rect.IsUninitializedRect()) {
@@ -1283,5 +1283,27 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
+}
+
+int32_t SessionProxy::GetAppForceLandscapeMode(const std::string& bundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return 0;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::DEFAULT, "bundle name write failed");
+        return 0;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_MODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return 0;
+    }
+    return reply.ReadInt32();
 }
 } // namespace OHOS::Rosen

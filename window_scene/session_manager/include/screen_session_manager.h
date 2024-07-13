@@ -247,6 +247,7 @@ public:
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -293,6 +294,7 @@ private:
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void PublishCastEvent(const bool &isPlugIn);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void ScbStatusRecoveryWhenSwitchUser(int32_t newScbPid);
 
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
@@ -352,6 +354,7 @@ private:
 
     int32_t currentUserId_ { 0 };
     int32_t currentScbPId_ { -1 };
+    std::mutex oldScbPidsMutex_;
     std::vector<int32_t> oldScbPids_ {};
     mutable std::mutex currentUserIdMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
@@ -418,6 +421,8 @@ private:
     std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
+    std::atomic<bool> isPhyScreenConnected_ = false;
+    std::atomic<bool> isInGetSnapshotByPicker_ = false;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;

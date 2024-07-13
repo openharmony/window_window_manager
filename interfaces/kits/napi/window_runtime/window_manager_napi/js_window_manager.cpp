@@ -143,6 +143,12 @@ napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnShiftAppWindowFocus(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetVisibleWindowInfo(env, info) : nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -1152,6 +1158,32 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = argc <= 0 || GetType(env, argv[0]) != napi_function ? nullptr : argv[0];
+    napi_value result = nullptr;
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            std::vector<sptr<WindowVisibilityInfo>> infos;
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
+                TLOGD(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo success");
+            } else {
+                TLOGE(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo failed");
+                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
+            }
+        };
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetVisibleWindowInfo",
+                            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("JsWindowManagerInit");
@@ -1194,6 +1226,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetGestureNavigationEnabled);
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
+    BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

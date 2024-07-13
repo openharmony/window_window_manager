@@ -70,6 +70,52 @@ constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
+
+const std::map<std::string, ListenerFuncType> ListenerFuncMap {
+    {PENDING_SCENE_CB,                      ListenerFuncType::PENDING_SCENE_CB},
+    {CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
+        ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR},
+    {SESSION_STATE_CHANGE_CB,               ListenerFuncType::SESSION_STATE_CHANGE_CB},
+    {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB},
+    {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
+    {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
+    {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
+    {CREATE_SUB_SESSION_CB,                 ListenerFuncType::CREATE_SUB_SESSION_CB},
+    {BIND_DIALOG_TARGET_CB,                 ListenerFuncType::BIND_DIALOG_TARGET_CB},
+    {RAISE_TO_TOP_CB,                       ListenerFuncType::RAISE_TO_TOP_CB},
+    {RAISE_TO_TOP_POINT_DOWN_CB,            ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB},
+    {BACK_PRESSED_CB,                       ListenerFuncType::BACK_PRESSED_CB},
+    {SESSION_FOCUSABLE_CHANGE_CB,           ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB},
+    {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB},
+    {SESSION_TOP_MOST_CHANGE_CB,            ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB},
+    {CLICK_CB,                              ListenerFuncType::CLICK_CB},
+    {TERMINATE_SESSION_CB,                  ListenerFuncType::TERMINATE_SESSION_CB},
+    {TERMINATE_SESSION_CB_NEW,              ListenerFuncType::TERMINATE_SESSION_CB_NEW},
+    {TERMINATE_SESSION_CB_TOTAL,            ListenerFuncType::TERMINATE_SESSION_CB_TOTAL},
+    {SESSION_EXCEPTION_CB,                  ListenerFuncType::SESSION_EXCEPTION_CB},
+    {UPDATE_SESSION_LABEL_CB,               ListenerFuncType::UPDATE_SESSION_LABEL_CB},
+    {UPDATE_SESSION_ICON_CB,                ListenerFuncType::UPDATE_SESSION_ICON_CB},
+    {SYSTEMBAR_PROPERTY_CHANGE_CB,          ListenerFuncType::SYSTEMBAR_PROPERTY_CHANGE_CB},
+    {NEED_AVOID_CB,                         ListenerFuncType::NEED_AVOID_CB},
+    {PENDING_SESSION_TO_FOREGROUND_CB,      ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB},
+    {PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
+        ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB},
+    {CUSTOM_ANIMATION_PLAYING_CB,           ListenerFuncType::CUSTOM_ANIMATION_PLAYING_CB},
+    {NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, ListenerFuncType::NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB},
+    {SHOW_WHEN_LOCKED_CB,                   ListenerFuncType::SHOW_WHEN_LOCKED_CB},
+    {REQUESTED_ORIENTATION_CHANGE_CB,       ListenerFuncType::REQUESTED_ORIENTATION_CHANGE_CB},
+    {RAISE_ABOVE_TARGET_CB,                 ListenerFuncType::RAISE_ABOVE_TARGET_CB},
+    {FORCE_HIDE_CHANGE_CB,                  ListenerFuncType::FORCE_HIDE_CHANGE_CB},
+    {WINDOW_DRAG_HOT_AREA_CB,               ListenerFuncType::WINDOW_DRAG_HOT_AREA_CB},
+    {TOUCH_OUTSIDE_CB,                      ListenerFuncType::TOUCH_OUTSIDE_CB},
+    {SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     ListenerFuncType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB},
+    {PREPARE_CLOSE_PIP_SESSION,             ListenerFuncType::PREPARE_CLOSE_PIP_SESSION},
+    {LANDSCAPE_MULTI_WINDOW_CB,             ListenerFuncType::LANDSCAPE_MULTI_WINDOW_CB},
+    {CONTEXT_TRANSPARENT_CB,                ListenerFuncType::CONTEXT_TRANSPARENT_CB},
+    {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB},
+    {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
+    {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
+};
 } // namespace
 
 std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
@@ -222,6 +268,9 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
+    BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
+    BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
+        JsSceneSession::SetBufferAvailableCallbackEnable);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -257,51 +306,6 @@ JsSceneSession::~JsSceneSession()
 
 void JsSceneSession::InitListenerFuncs()
 {
-    listenerFuncMap_ = {
-        {PENDING_SCENE_CB,                      ListenerFunctionType::PENDING_SCENE_CB},
-        {CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
-            ListenerFunctionType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR},
-        {SESSION_STATE_CHANGE_CB,               ListenerFunctionType::SESSION_STATE_CHANGE_CB},
-        {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFunctionType::BUFFER_AVAILABLE_CHANGE_CB},
-        {SESSION_EVENT_CB,                      ListenerFunctionType::SESSION_EVENT_CB},
-        {SESSION_RECT_CHANGE_CB,                ListenerFunctionType::SESSION_RECT_CHANGE_CB},
-        {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFunctionType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
-        {CREATE_SUB_SESSION_CB,                 ListenerFunctionType::CREATE_SUB_SESSION_CB},
-        {BIND_DIALOG_TARGET_CB,                 ListenerFunctionType::BIND_DIALOG_TARGET_CB},
-        {RAISE_TO_TOP_CB,                       ListenerFunctionType::RAISE_TO_TOP_CB},
-        {RAISE_TO_TOP_POINT_DOWN_CB,            ListenerFunctionType::RAISE_TO_TOP_POINT_DOWN_CB},
-        {BACK_PRESSED_CB,                       ListenerFunctionType::BACK_PRESSED_CB},
-        {SESSION_FOCUSABLE_CHANGE_CB,           ListenerFunctionType::SESSION_FOCUSABLE_CHANGE_CB},
-        {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFunctionType::SESSION_TOUCHABLE_CHANGE_CB},
-        {SESSION_TOP_MOST_CHANGE_CB,            ListenerFunctionType::SESSION_TOP_MOST_CHANGE_CB},
-        {CLICK_CB,                              ListenerFunctionType::CLICK_CB},
-        {TERMINATE_SESSION_CB,                  ListenerFunctionType::TERMINATE_SESSION_CB},
-        {TERMINATE_SESSION_CB_NEW,              ListenerFunctionType::TERMINATE_SESSION_CB_NEW},
-        {TERMINATE_SESSION_CB_TOTAL,            ListenerFunctionType::TERMINATE_SESSION_CB_TOTAL},
-        {SESSION_EXCEPTION_CB,                  ListenerFunctionType::SESSION_EXCEPTION_CB},
-        {UPDATE_SESSION_LABEL_CB,               ListenerFunctionType::UPDATE_SESSION_LABEL_CB},
-        {UPDATE_SESSION_ICON_CB,                ListenerFunctionType::UPDATE_SESSION_ICON_CB},
-        {SYSTEMBAR_PROPERTY_CHANGE_CB,          ListenerFunctionType::SYSTEMBAR_PROPERTY_CHANGE_CB},
-        {NEED_AVOID_CB,                         ListenerFunctionType::NEED_AVOID_CB},
-        {PENDING_SESSION_TO_FOREGROUND_CB,      ListenerFunctionType::PENDING_SESSION_TO_FOREGROUND_CB},
-        {PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
-            ListenerFunctionType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB},
-        {CUSTOM_ANIMATION_PLAYING_CB,           ListenerFunctionType::CUSTOM_ANIMATION_PLAYING_CB},
-        {NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, ListenerFunctionType::NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB},
-        {SHOW_WHEN_LOCKED_CB,                   ListenerFunctionType::SHOW_WHEN_LOCKED_CB},
-        {REQUESTED_ORIENTATION_CHANGE_CB,       ListenerFunctionType::REQUESTED_ORIENTATION_CHANGE_CB},
-        {RAISE_ABOVE_TARGET_CB,                 ListenerFunctionType::RAISE_ABOVE_TARGET_CB},
-        {FORCE_HIDE_CHANGE_CB,                  ListenerFunctionType::FORCE_HIDE_CHANGE_CB},
-        {WINDOW_DRAG_HOT_AREA_CB,               ListenerFunctionType::WINDOW_DRAG_HOT_AREA_CB},
-        {TOUCH_OUTSIDE_CB,                      ListenerFunctionType::TOUCH_OUTSIDE_CB},
-        {SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     ListenerFunctionType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB},
-        {PREPARE_CLOSE_PIP_SESSION,             ListenerFunctionType::PREPARE_CLOSE_PIP_SESSION},
-        {LANDSCAPE_MULTI_WINDOW_CB,             ListenerFunctionType::LANDSCAPE_MULTI_WINDOW_CB},
-        {CONTEXT_TRANSPARENT_CB,                ListenerFunctionType::CONTEXT_TRANSPARENT_CB},
-        {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFunctionType::KEYBOARD_GRAVITY_CHANGE_CB},
-        {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFunctionType::ADJUST_KEYBOARD_LAYOUT_CB},
-        {LAYOUT_FULL_SCREEN_CB,                 ListenerFunctionType::LAYOUT_FULL_SCREEN_CB},
-    };
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
@@ -1228,6 +1232,20 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBlankFlag");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetBlankFlag(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBufferAvailableCallbackEnable");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
+}
+
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession::IsCallbackRegistered[%s]", type.c_str());
@@ -1245,11 +1263,6 @@ bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type,
         }
     }
     return false;
-}
-
-bool JsSceneSession::IsCallbackTypeSupported(const std::string& type)
-{
-    return listenerFuncMap_.find(type) != listenerFuncMap_.end();
 }
 
 napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info info)
@@ -1271,10 +1284,12 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         WLOGFE("[NAPI]Invalid argument");
         return NapiGetUndefined(env);
     }
-    if (!IsCallbackTypeSupported(cbType)) {
+    auto iterFunctionType = ListenerFuncMap.find(cbType);
+    if (iterFunctionType == ListenerFuncMap.end()) {
         WLOGFE("[NAPI]callback type is not supported, type = %{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
+    ListenerFuncType listenerFuncType = iterFunctionType->second;
     if (IsCallbackRegistered(env, cbType, value)) {
         WLOGFE("[NAPI]callback is registered, type = %{public}s", cbType.c_str());
         return NapiGetUndefined(env);
@@ -1294,140 +1309,138 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    ProcessRegisterCallback(cbType);
+    ProcessRegisterCallback(listenerFuncType);
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
-void JsSceneSession::ProcessRegisterCallback(const std::string& cbType)
+void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
 {
-    ListenerFunctionType listenerFuncType = listenerFuncMap_[cbType];
-    switch (listenerFuncType) {
-        case ListenerFunctionType::PENDING_SCENE_CB:
+    switch (static_cast<uint32_t>(listenerFuncType)) {
+        case static_cast<uint32_t>(ListenerFuncType::PENDING_SCENE_CB):
             ProcessPendingSceneSessionActivationRegister();
             break;
-        case ListenerFunctionType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR:
+        case static_cast<uint32_t>(ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
             ProcessChangeSessionVisibilityWithStatusBarRegister();
             break;
-        case ListenerFunctionType::SESSION_STATE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_STATE_CHANGE_CB):
             ProcessSessionStateChangeRegister();
             break;
-        case ListenerFunctionType::BUFFER_AVAILABLE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB):
             ProcessBufferAvailableChangeRegister();
             break;
-        case ListenerFunctionType::SESSION_EVENT_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_EVENT_CB):
             ProcessSessionEventRegister();
             break;
-        case ListenerFunctionType::SESSION_RECT_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_RECT_CHANGE_CB):
             ProcessSessionRectChangeRegister();
             break;
-        case ListenerFunctionType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB):
             ProcessSessionPiPControlStatusChangeRegister();
             break;
-        case ListenerFunctionType::CREATE_SUB_SESSION_CB:
+        case static_cast<uint32_t>(ListenerFuncType::CREATE_SUB_SESSION_CB):
             ProcessCreateSubSessionRegister();
             break;
-        case ListenerFunctionType::BIND_DIALOG_TARGET_CB:
+        case static_cast<uint32_t>(ListenerFuncType::BIND_DIALOG_TARGET_CB):
             ProcessBindDialogTargetRegister();
             break;
-        case ListenerFunctionType::RAISE_TO_TOP_CB:
+        case static_cast<uint32_t>(ListenerFuncType::RAISE_TO_TOP_CB):
             ProcessRaiseToTopRegister();
             break;
-        case ListenerFunctionType::RAISE_TO_TOP_POINT_DOWN_CB:
+        case static_cast<uint32_t>(ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB):
             ProcessRaiseToTopForPointDownRegister();
             break;
-        case ListenerFunctionType::BACK_PRESSED_CB:
+        case static_cast<uint32_t>(ListenerFuncType::BACK_PRESSED_CB):
             ProcessBackPressedRegister();
             break;
-        case ListenerFunctionType::SESSION_FOCUSABLE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB):
             ProcessSessionFocusableChangeRegister();
             break;
-        case ListenerFunctionType::SESSION_TOUCHABLE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB):
             ProcessSessionTouchableChangeRegister();
             break;
-        case ListenerFunctionType::SESSION_TOP_MOST_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB):
             ProcessSessionTopmostChangeRegister();
             break;
-        case ListenerFunctionType::CLICK_CB:
+        case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
             break;
-        case ListenerFunctionType::TERMINATE_SESSION_CB:
+        case static_cast<uint32_t>(ListenerFuncType::TERMINATE_SESSION_CB):
             ProcessTerminateSessionRegister();
             break;
-        case ListenerFunctionType::TERMINATE_SESSION_CB_NEW:
+        case static_cast<uint32_t>(ListenerFuncType::TERMINATE_SESSION_CB_NEW):
             ProcessTerminateSessionRegisterNew();
             break;
-        case ListenerFunctionType::TERMINATE_SESSION_CB_TOTAL:
+        case static_cast<uint32_t>(ListenerFuncType::TERMINATE_SESSION_CB_TOTAL):
             ProcessTerminateSessionRegisterTotal();
             break;
-        case ListenerFunctionType::SESSION_EXCEPTION_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_EXCEPTION_CB):
             ProcessSessionExceptionRegister();
             break;
-        case ListenerFunctionType::UPDATE_SESSION_LABEL_CB:
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_SESSION_LABEL_CB):
             ProcessUpdateSessionLabelRegister();
             break;
-        case ListenerFunctionType::UPDATE_SESSION_ICON_CB:
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_SESSION_ICON_CB):
             ProcessUpdateSessionIconRegister();
             break;
-        case ListenerFunctionType::SYSTEMBAR_PROPERTY_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SYSTEMBAR_PROPERTY_CHANGE_CB):
             ProcessSystemBarPropertyChangeRegister();
             break;
-        case ListenerFunctionType::NEED_AVOID_CB:
+        case static_cast<uint32_t>(ListenerFuncType::NEED_AVOID_CB):
             ProcessNeedAvoidRegister();
             break;
-        case ListenerFunctionType::PENDING_SESSION_TO_FOREGROUND_CB:
+        case static_cast<uint32_t>(ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB):
             ProcessPendingSessionToForegroundRegister();
             break;
-        case ListenerFunctionType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB:
+        case static_cast<uint32_t>(ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB):
             ProcessPendingSessionToBackgroundForDelegatorRegister();
             break;
-        case ListenerFunctionType::CUSTOM_ANIMATION_PLAYING_CB:
+        case static_cast<uint32_t>(ListenerFuncType::CUSTOM_ANIMATION_PLAYING_CB):
             ProcessIsCustomAnimationPlaying();
             break;
-        case ListenerFunctionType::NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB):
             ProcessSessionDefaultAnimationFlagChangeRegister();
             break;
-        case ListenerFunctionType::SHOW_WHEN_LOCKED_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SHOW_WHEN_LOCKED_CB):
             ProcessShowWhenLockedRegister();
             break;
-        case ListenerFunctionType::REQUESTED_ORIENTATION_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::REQUESTED_ORIENTATION_CHANGE_CB):
             ProcessRequestedOrientationChange();
             break;
-        case ListenerFunctionType::RAISE_ABOVE_TARGET_CB:
+        case static_cast<uint32_t>(ListenerFuncType::RAISE_ABOVE_TARGET_CB):
             ProcessRaiseAboveTargetRegister();
             break;
-        case ListenerFunctionType::FORCE_HIDE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::FORCE_HIDE_CHANGE_CB):
             ProcessForceHideChangeRegister();
             break;
-        case ListenerFunctionType::WINDOW_DRAG_HOT_AREA_CB:
+        case static_cast<uint32_t>(ListenerFuncType::WINDOW_DRAG_HOT_AREA_CB):
             ProcessWindowDragHotAreaRegister();
             break;
-        case ListenerFunctionType::TOUCH_OUTSIDE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::TOUCH_OUTSIDE_CB):
             ProcessTouchOutsideRegister();
             break;
-        case ListenerFunctionType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB):
             ProcessSessionInfoLockedStateChangeRegister();
             break;
-        case ListenerFunctionType::PREPARE_CLOSE_PIP_SESSION:
+        case static_cast<uint32_t>(ListenerFuncType::PREPARE_CLOSE_PIP_SESSION):
             ProcessPrepareClosePiPSessionRegister();
             break;
-        case ListenerFunctionType::LANDSCAPE_MULTI_WINDOW_CB:
+        case static_cast<uint32_t>(ListenerFuncType::LANDSCAPE_MULTI_WINDOW_CB):
             ProcessLandscapeMultiWindowRegister();
             break;
-        case ListenerFunctionType::CONTEXT_TRANSPARENT_CB:
+        case static_cast<uint32_t>(ListenerFuncType::CONTEXT_TRANSPARENT_CB):
             ProcessContextTransparentRegister();
             break;
-        case ListenerFunctionType::KEYBOARD_GRAVITY_CHANGE_CB:
+        case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB):
             ProcessKeyboardGravityChangeRegister();
             break;
-        case ListenerFunctionType::ADJUST_KEYBOARD_LAYOUT_CB:
+        case static_cast<uint32_t>(ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB):
             ProcessAdjustKeyboardLayoutRegister();
             break;
-        case ListenerFunctionType::LAYOUT_FULL_SCREEN_CB:
+        case static_cast<uint32_t>(ListenerFuncType::LAYOUT_FULL_SCREEN_CB):
             ProcessLayoutFullScreenChangeRegister();
             break;
         default:
-            WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
             break;
     }
 }
@@ -2100,7 +2113,7 @@ void JsSceneSession::OnBackPressed(bool needMoveToBackground)
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundle:%{public}s, ability:%{public}s, id:%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), info.persistentId_);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -3094,6 +3107,66 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     session->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetBlankFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isAddBlank = false;
+    if (!ConvertFromJsValue(env, argv[0], isAddBlank)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to isAddBlank");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetBlankFlag(isAddBlank);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetBufferAvailableCallbackEnable(enable);
     return NapiGetUndefined(env);
 }
 

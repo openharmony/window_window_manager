@@ -56,7 +56,12 @@ static bool GetTypeCFileNode(const std::vector<std::string>& allDirName, std::st
 {
     for (const auto& dir : allDirName) {
         std::string absoluteTypePath = dir + "/type";
-        std::ifstream srcFile(absoluteTypePath.c_str(), std::ifstream::in);
+        char realPathResult[PATH_MAX] = { 0 };
+        if (!realpath(absoluteTypePath.c_str(), realPathResult)) {
+            return false;
+        }
+
+        std::ifstream srcFile(realPathResult, std::ifstream::in);
         if (!srcFile.is_open()) {
             continue;
         }
@@ -84,7 +89,12 @@ bool TypeCPortInfo::GetTypeCThermal(int32_t& thermal)
         }
     }
 
-    std::ifstream typeCThermalFile(typeCMappingPath.c_str(), std::ifstream::in);
+    char realPathResult[PATH_MAX] = { 0 };
+    if (!realpath(typeCMappingPath.c_str(), realPathResult)) {
+        return false;
+    }
+
+    std::ifstream typeCThermalFile(realPathResult, std::ifstream::in);
     if (!typeCThermalFile.is_open()) {
         return false;
     }

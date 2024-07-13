@@ -530,6 +530,38 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < infos.size(); i++) {
+        auto info = infos[i];
+        auto windowType = info->GetWindowType();
+        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
+        }
+    }
+    return arrayValue;
+}
+
+napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
+    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
+    napi_set_named_property(env, objValue, "windowStatusType",
+        CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    return objValue;
+}
+
 napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarRegionTints& tints)
 {
     if (tints.empty()) {
@@ -569,12 +601,16 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     }
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     statusProperty.enable_ = false;
     navProperty.enable_ = false;
+    navIndicatorProperty.enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -585,12 +621,14 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
         }
         if (name.compare("status") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
+            systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = true;
         } else if (name.compare("navigation") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
         }
     }
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
 }
 

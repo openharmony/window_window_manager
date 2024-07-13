@@ -87,6 +87,21 @@ public:
     MOCK_METHOD2(OnRectChange, void(Rect rect, WindowSizeChangeReason reason));
 };
 
+class MockIAceAbilityHandler : public IAceAbilityHandler {
+public:
+    MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
+    MOCK_METHOD0(GetBackgroundColor, uint32_t());
+};
+
+class MockIDisplayMoveListener : public IDisplayMoveListener {
+public:
+    MOCK_METHOD2(OnDisplayMove, void(DisplayId from, DisplayId to));
+};
+
+class MockIWindowNoInteractionListener : public IWindowNoInteractionListener {
+public:
+    MOCK_METHOD0(OnWindowNoInteractionCallback, void());
+};
 } // Rosen
 } // OHOS
 

@@ -364,7 +364,7 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel &d
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetFocusSessionInfo lite!");
+    WLOGFD("run HandleGetFocusSessionInfo lite!");
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo);
     reply.WriteParcelable(&focusInfo);

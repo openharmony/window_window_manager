@@ -29,6 +29,12 @@ enum class CaseType {
     CASE_WINDOW,
     CASE_STAGE
 };
+
+enum class ListenerFunctionType : uint32_t {
+    SYSTEM_AVOID_AREA_CHANGE_CB,
+    AVOID_AREA_CHANGE_CB,
+};
+
 class JsWindowRegisterManager {
 public:
     JsWindowRegisterManager();
@@ -44,11 +50,11 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
-    using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool,
-        napi_env env, napi_value parameter);
+    WmErrorCode ProcessRegisterCallback(ListenerFunctionType listenerFunctionType, CaseType caseType,
+        const sptr<JsWindowListener>& listener, const sptr<Window>& window, bool isRegister, napi_env env,
+        napi_value parameter);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
-    std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
 };
 } // namespace Rosen
 } // namespace OHOS

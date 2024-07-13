@@ -16,6 +16,7 @@
 #include "js_display.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <map>
 #include <set>
 
@@ -213,6 +214,7 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
     }
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnGetCutoutInfo");
         sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
         if (cutoutInfo != nullptr) {
             task->Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));

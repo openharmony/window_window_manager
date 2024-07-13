@@ -495,14 +495,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
             if (titleButtonRectValue == nullptr) {
                 return;
             }
-            napi_value objValue = nullptr;
-            napi_create_object(env, &objValue);
-            if (objValue == nullptr) {
-                WLOGFE("Failed to get object");
-                return;
-            }
-            napi_set_named_property(env, objValue, "titleButtonRect", titleButtonRectValue);
-            napi_value argv[] = { objValue };
+            napi_value argv[] = { titleButtonRectValue };
             thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
