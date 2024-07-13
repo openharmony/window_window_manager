@@ -28,6 +28,8 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD2(UnregisterDisplayManagerAgent, DMError(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
+    MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
+    MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
 };
 }
 } // namespace OHOS

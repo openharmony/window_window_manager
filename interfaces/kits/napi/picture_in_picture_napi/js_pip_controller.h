@@ -21,13 +21,14 @@
 #include "js_runtime_utils.h"
 #include "picture_in_picture_controller.h"
 #include "wm_common.h"
+#include "js_pip_window_listener.h"
 
 namespace OHOS {
 namespace Rosen {
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController);
 class JsPipController {
 public:
-    explicit JsPipController(const sptr<PictureInPictureController>& pipController, napi_env env);
+    explicit JsPipController(const sptr<PictureInPictureController>& pipController);
     ~JsPipController();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value StartPictureInPicture(napi_env env, napi_callback_info info);
@@ -56,19 +57,19 @@ private:
 
     bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
-    WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type);
+    WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
+    WmErrorCode UnRegisterListener(const std::string& type, const sptr<JsPiPWindowListener>& pipWindowListener);
 
-    void ProcessStateChangeRegister();
-    void ProcessActionEventRegister();
-    void ProcessControlEventRegister();
-    void ProcessStateChangeUnRegister();
-    void ProcessActionEventUnRegister();
-    void ProcessControlEventUnRegister();
+    void ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessActionEventUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener);
 
     sptr<PictureInPictureController> pipController_;
-    napi_env env_;
     std::map<std::string, ListenerType> listenerCodeMap_;
-    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsPiPWindowListener>>> jsCbMap_;
 
 public:
     class PiPLifeCycleImpl : public IPiPLifeCycle {

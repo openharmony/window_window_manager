@@ -571,6 +571,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             auto task = [this]() { PublishCastEvent(true); };
             taskScheduler_->PostAsyncTask(task, "PublishCastEventTrue");
             TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventTrue");
+            isPhyScreenConnected_ = true;
         }
         return;
     }
@@ -583,6 +584,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
+            isPhyScreenConnected_ = false;
         }
         if (clientProxy_) {
             clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
@@ -680,7 +682,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             return displayInfo;
         }
     }
-    TLOGE(WmsLogTag::DMS, "GetDisplayInfoById failed.");
+    TLOGE(WmsLogTag::DMS, "GetDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
 }
 
@@ -703,7 +705,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId
             return displayInfo;
         }
     }
-    TLOGE(WmsLogTag::DMS, "GetDisplayInfoByScreen failed.");
+    TLOGE(WmsLogTag::DMS, "GetDisplayInfoByScreen failed. screenId: %{public}" PRIu64" ", screenId);
     return nullptr;
 }
 
@@ -1721,8 +1723,12 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
     if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock suspend");
         gotScreenOffNotify_ = true;
-        isScreenLockSuspend_ = true;
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend_  is true");
+        if (isPhyScreenConnected_) {
+            isScreenLockSuspend_ = false;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
+        } else {
+            isScreenLockSuspend_ = true;
+        }
         if (needScreenOffNotify_) {
             ScreenOffCVNotify();
         }
@@ -3426,40 +3432,33 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");
     *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (isInGetSnapshotByPicker_ == true) {
+        isInGetSnapshotByPicker_ = false;
+        return nullptr;
+    }
+    isInGetSnapshotByPicker_ = true;
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         TLOGI(WmsLogTag::DMS, "snapshot was disabled by edm!");
+        isInGetSnapshotByPicker_ = false;
         return nullptr;
     }
     ScreenId screenId = SCREEN_ID_INVALID;
     // get snapshot area frome Screenshot extension
-    ConfigureScreenSnapshotParams();
-    if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {
-        int32_t ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
-        if (ret != 0) {
-            TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
-            ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
-            if (ret == RES_FAILURE_FOR_PRIVACY_WINDOW) {
-	        *errorCode = DmErrorCode::DM_ERROR_INVALID_CALLING;
-            } else {
-	        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
-            }
-            return nullptr;
-        }
-        ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
-    } else {
-        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
-        TLOGE(WmsLogTag::DMS, "SnapshotPickerConnectExtension failed");
+    if (!GetSnapshotArea(rect, errorCode, screenId)) {
+        isInGetSnapshotByPicker_ = false;
         return nullptr;
     }
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "can not get screen session");
+        isInGetSnapshotByPicker_ = false;
         return nullptr;
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "can not get default display");
+        isInGetSnapshotByPicker_ = false;
         return nullptr;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
@@ -3471,7 +3470,32 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     isScreenShot_ = true;
     NotifyCaptureStatusChanged();
     *errorCode = DmErrorCode::DM_OK;
+    isInGetSnapshotByPicker_ = false;
     return pixelMap;
+}
+
+bool ScreenSessionManager::GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId)
+{
+    ConfigureScreenSnapshotParams();
+    if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {
+        int32_t ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+        if (ret != 0) {
+            TLOGE(WmsLogTag::DMS, "GetScreenSnapshotInfo failed");
+            ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
+            if (ret == RES_FAILURE_FOR_PRIVACY_WINDOW) {
+                *errorCode = DmErrorCode::DM_ERROR_INVALID_CALLING;
+            } else {
+                *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+            }
+            return false;
+        }
+        ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
+    } else {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        TLOGE(WmsLogTag::DMS, "SnapshotPickerConnectExtension failed");
+        return false;
+    }
+    return true;
 }
 
 bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
@@ -4357,7 +4381,10 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
             isReset = false;
         }
     } else {
+        int id = HiviewDFX::XCollie::GetInstance().SetTimer("GetCurrentScreenPhyBounds", XCOLLIE_TIMEOUT_S, nullptr,
+            nullptr, HiviewDFX::XCOLLIE_FLAG_RECOVERY);
         auto remoteScreenMode = rsInterface_.GetScreenActiveMode(screenid);
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         phyWidth = remoteScreenMode.GetScreenWidth();
         phyHeight = remoteScreenMode.GetScreenHeight();
     }

@@ -34,8 +34,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
-constexpr int32_t ANIMATION_TIME = 400;
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -89,6 +89,9 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         hostSession_ = iSession;
     }
     context_ = context;
+    if (context_) {
+        abilityToken_ = context_->GetToken();
+    }
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
@@ -109,12 +112,17 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
 void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
     sptr<ISessionStage> iSessionStage(this);
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return;
+    }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
         return;
     }
-    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
-        property_->GetParentId(), property_->GetUIExtensionUsage(), surfaceNode_->GetId());
+
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, abilityToken_,
+        surfaceNode_->GetId());
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -502,8 +510,11 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     property_->SetWindowRect(wmRect);
 
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) {
-        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(property_->GetPersistentId(),
-            property_->GetParentId(), wmRect);
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, wmRect);
     }
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
@@ -527,7 +538,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (!window) {
             return;
         }
-        int32_t duration = ANIMATION_TIME;
+        int32_t duration = UIEXTENTION_ROTATION_ANIMATION_TIME;
         bool needSync = false;
         if (rsTransaction && rsTransaction->GetSyncId() > 0) {
             // extract high 32 bits of SyncId as pid
@@ -546,6 +557,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -893,8 +905,13 @@ WMError WindowExtensionSessionImpl::UpdateExtWindowFlags(const ExtensionWindowFl
         TLOGI(WmsLogTag::WMS_UIEXT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(property_->GetParentId(), GetPersistentId(),
-        flags.bitData, actions.bitData);
+
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(abilityToken_, flags.bitData, actions.bitData);
 }
 
 Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
@@ -930,8 +947,12 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (property_ && (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) && isPointDown) {
-        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(property_->GetPersistentId(),
-            property_->GetParentId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return;
+        }
+        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(abilityToken_,
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"

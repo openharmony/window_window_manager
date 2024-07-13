@@ -674,6 +674,15 @@ struct ExtensionWindowEventInfo {
 };
 
 /**
+ * @brief UIExtension info from ability
+ */
+struct ExtensionWindowAbilityInfo {
+    int32_t persistentId  { 0 };
+    int32_t parentId { 0 };
+    UIExtensionUsage usage { UIExtensionUsage::UIEXTENSION_USAGE_END };
+};
+
+/**
  * @struct KeyboardPanelInfo
  *
  * @brief Info of keyboard panel

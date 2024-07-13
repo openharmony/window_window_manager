@@ -88,6 +88,7 @@ group("unittest") {
     ":ws_setting_observer_test",
     ":ws_setting_provider_test",
     ":ws_single_display_fold_policy_test",
+    ":ws_single_display_pocket_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
     ":ws_sub_session_test",
     ":ws_system_session_test",
@@ -173,6 +174,20 @@ ohos_unittest("ws_single_display_fold_policy_test") {
   module_out_path = module_out_path
 
   sources = [ "single_display_fold_policy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_single_display_pocket_fold_policy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "single_display_pocket_fold_policy_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1448,7 +1463,6 @@ ohos_static_library("ws_unittest_common") {
   ]
 
   deps = [
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
