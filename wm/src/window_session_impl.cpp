@@ -2351,8 +2351,7 @@ WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 
 void WindowSessionImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d position [%{public}d %{public}d]",
-        GetWindowName().c_str(), GetPersistentId(), posX, posY);
+    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d", GetWindowName().c_str(), GetPersistentId());
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->ProcessPointDownSession(posX, posY);

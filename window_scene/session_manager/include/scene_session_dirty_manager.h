@@ -73,7 +73,6 @@ private:
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
         MMI::WindowInfo& windowInfo) const;
-    void UpdateModalExtensionWindowInfo(const sptr<SceneSession> sceneSession, MMI::WindowInfo& windowInfo);
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession> sceneSession);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
