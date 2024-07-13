@@ -69,7 +69,6 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
-    WSError HandleBackEvent() override;
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;

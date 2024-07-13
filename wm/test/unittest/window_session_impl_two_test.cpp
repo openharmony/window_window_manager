@@ -415,6 +415,22 @@ HWTEST_F(WindowSessionImplTwoTest, DispatchKeyEventCallback, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleBackEvent01
+ * @tc.desc: HandleBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTwoTest, HandleBackEvent01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("HandleBackEvent01");
+    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, windowSession);
+
+    windowSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WSError::WS_OK, windowSession->HandleBackEvent());
+}
+
+/**
  * @tc.name: IsKeyboardEvent
  * @tc.desc: IsKeyboardEvent
  * @tc.type: FUNC
