@@ -571,7 +571,8 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
 {
     WLOGFI("Enter");
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    auto task = [this, token, continueState, callingPid]() {
+    const auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto task = [this, token, continueState, callingPid, callerToken]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
             WLOGFI("fail to find session by token.");
@@ -579,7 +580,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
         }
         const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
         if (!(pidCheck ||
-            SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION))) {
+            SessionPermission::VerifyPermissionByCallerToken(callerToken, PermissionConstants::PERMISSION_MANAGE_MISSION))) {
             TLOGW(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
@@ -5930,7 +5931,8 @@ WSError SceneSessionManager::TerminateSessionNew(
         "bundleName=%{public}s, needStartCaller=%{public}d, isFromBroker=%{public}d",
         info->want.GetElement().GetBundleName().c_str(), needStartCaller, isFromBroker);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    auto task = [this, info, needStartCaller, isFromBroker, callingPid]() {
+    const auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto task = [this, info, needStartCaller, isFromBroker, callingPid, callerToken]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
@@ -5938,7 +5940,7 @@ WSError SceneSessionManager::TerminateSessionNew(
         }
         const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
         if (!(pidCheck ||
-            SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION))) {
+            SessionPermission::VerifyPermissionByCallerToken(callerToken, PermissionConstants::PERMISSION_MANAGE_MISSION))) {
             TLOGW(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
