@@ -570,22 +570,11 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
     const ContinueState& continueState)
 {
     WLOGFI("Enter");
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-    const auto callerToken = IPCSkeleton::GetCallingTokenID();
-    auto task = [this, token, continueState, callingPid, callerToken]() {
+    auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
             WLOGFI("fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
-        }
-        const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
-        if (!(pidCheck ||
-            SessionPermission::VerifyPermissionByCallerToken(callerToken,
-                PermissionConstants::PERMISSION_MANAGE_MISSION))) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
-                sceneSession->GetCallingPid(), callingPid);
-            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient dmsClient;
