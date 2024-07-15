@@ -311,6 +311,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     napi_value RectChangeReasonInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
+    napi_value ExtensionWindowAttributeInit(napi_env env);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
