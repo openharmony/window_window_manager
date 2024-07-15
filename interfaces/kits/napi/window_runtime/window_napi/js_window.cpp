@@ -5702,6 +5702,9 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
     int32_t height = 0;
     WMError ret = window->GetDecorHeight(height);
     if (ret != WMError::WM_OK) {
+        if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
