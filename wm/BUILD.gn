@@ -110,8 +110,6 @@ ohos_static_library("libwm_static") {
     "${window_base_path}/window_scene/session_manager:session_manager",
   ]
 
-  public_deps = [ "${window_base_path}/utils:libwmutil" ]
-
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
@@ -261,8 +259,6 @@ ohos_shared_library("libwm") {
     "../utils:libwmutil",
   ]
 
-  public_deps = [ "${window_base_path}/utils:libwmutil" ]
-
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
@@ -333,7 +329,7 @@ ohos_shared_library("libwm") {
     external_deps += [ "imf:inputmethod_client" ]
     defines += [ "IMF_ENABLE" ]
   }
-  innerapi_tags = [ "platformsdk" ]
+
   part_name = "window_manager"
   subsystem_name = "window"
 }
