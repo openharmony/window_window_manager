@@ -335,29 +335,6 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
     }
 }
 
-void SceneSessionDirtyManager::UpdateModalExtensionWindowInfo(const sptr<SceneSession> sceneSession,
-    MMI::WindowInfo& windowInfo)
-{
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
-        return;
-    }
-    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    windowInfo.agentWindowId = extensionInfo.persistentId;
-    windowInfo.pid = extensionInfo.pid;
-    std::vector<MMI::Rect> touchHotAreas;
-    WSRect windowRect = sceneSession->GetSessionRect();
-    MMI::Rect touchRect = {
-        .x = 0,
-        .y = 0,
-        .width = windowRect.width_,
-        .height = windowRect.height_
-    };
-    touchHotAreas.emplace_back(touchRect);
-    windowInfo.defaultHotAreas = touchHotAreas;
-    windowInfo.pointerHotAreas = touchHotAreas;
-}
-
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
     MMI::WindowInfo windowInfo, const sptr<SceneSession> sceneSession)
 {
@@ -426,11 +403,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
         } else if (sceneSessionValue->HasModalUIExtension()) {
-            if (sceneSessionValue->GetSessionProperty()->IsDecorEnable()) {
-                AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
-            } else {
-                UpdateModalExtensionWindowInfo(sceneSessionValue, windowInfo);
-            }
+            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
         }
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {

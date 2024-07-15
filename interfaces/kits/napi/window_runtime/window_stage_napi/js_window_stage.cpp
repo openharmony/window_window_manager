@@ -617,7 +617,7 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] SetDefaultDensityEnabled=%{public}u, ret=%{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u,%{public}s] SetDefaultDensityEnabled=%{public}u ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
 
     return CreateJsValue(env, static_cast<int32_t>(ret));

@@ -453,8 +453,8 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u \
-        state:%{public}u", property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -605,6 +605,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(ANIMATION_TIME);
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -762,8 +763,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
 
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation, deviceRotation, transformHint, virtualPixelRatio]: [%{public}u, "
-        "%{public}u, %{public}u, %{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation,deviceRotation,transformHint,virtualPixelRatio]:[%{public}u,"
+        "%{public}u,%{public}u,%{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
@@ -779,12 +780,12 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         uiContent->UpdateViewportConfig(config, reason, rsTransaction);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}d, windowRect:[%{public}d, %{public}d, \
-            %{public}u, %{public}u], displayOrientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,\
+            %{public}u,%{public}u] displayOrientation:%{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
             rect.width_, rect.height_, orientation);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}d, windowRect:[%{public}d, %{public}d, \
-            %{public}u, %{public}u], displayOrientation: %{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,\
+            %{public}u,%{public}u] displayOrientation:%{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
             rect.width_, rect.height_, orientation);
     }
 }
@@ -2350,8 +2351,7 @@ WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 
 void WindowSessionImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d position [%{public}d %{public}d]",
-        GetWindowName().c_str(), GetPersistentId(), posX, posY);
+    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d", GetWindowName().c_str(), GetPersistentId());
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->ProcessPointDownSession(posX, posY);
@@ -2863,6 +2863,58 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
             escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
         }
     }
+}
+
+WSError WindowSessionImpl::HandleBackEvent()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
+    bool isConsumed = false;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGFD("Transfer back event to inputEventConsumer");
+        std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
+        backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+        backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+        isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
+    } else {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            WLOGFD("Transfer back event to uiContent");
+            isConsumed = uiContent->ProcessBackPressed();
+        } else {
+            WLOGFE("There is no back event consumer");
+        }
+    }
+
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return WSError::WS_OK;
+    }
+    WLOGFD("report Back");
+    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
+    if (handler_ == nullptr) {
+        WLOGFE("HandleBackEvent handler_ is nullptr!");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    // notify back event to host session
+    wptr<WindowSessionImpl> weak = this;
+    auto task = [weak]() {
+        auto weakSession = weak.promote();
+        if (weakSession == nullptr) {
+            WLOGFE("HandleBackEvent session wptr is nullptr");
+            return;
+        }
+        weakSession->PerformBack();
+    };
+    if (!handler_->PostTask(task, "wms:PerformBack")) {
+        WLOGFE("Failed to post PerformBack");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    return WSError::WS_OK;
 }
 
 void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,

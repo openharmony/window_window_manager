@@ -244,7 +244,7 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

@@ -917,9 +917,8 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_RECOVER, "session with: persistentId=%{public}d, windowState=%{public}u"
-        " callingPid:%{public}d", property->GetPersistentId(),
-        static_cast<uint32_t>(property->GetWindowState()), pid);
+    TLOGI(WmsLogTag::WMS_RECOVER, "id:%{public}d, state:%{public}u, pid:%{public}d",
+        property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()), pid);
     if (sessionStage == nullptr || eventChannel == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
@@ -941,8 +940,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
-        static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
+        GetPersistentId(), static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
@@ -1093,7 +1092,7 @@ WSError Session::DrawingCompleted()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "new active: %{public}d, id: %{public}d, state: %{public}" PRIu32,
+    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}" PRIu32,
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
@@ -1822,7 +1821,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
-        .useCurWindow = false,
+        .useCurWindow = systemConfig_.uiType_ == "pc",
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
     if (!ret) {
@@ -2534,24 +2533,20 @@ bool Session::IsSupportDetectWindow(bool isAttach)
     bool isPc = systemConfig_.uiType_ == "pc";
     bool isPhone = systemConfig_.uiType_ == "phone";
     if (!isPc && !isPhone) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: device type not support, "
-            "persistentId:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
     }
     if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Screen is locked, "
-            "persistentId:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "screen locked, id:%{public}d", persistentId_);
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support mainwindow, "
-            "persistentId:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "only support main window, id:%{public}d", persistentId_);
         return false;
     }
     // Only detecting cold start scenarios on PC
     if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Window state detect not support: Only support cold start on pc, "
-            "persistentId:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "pc only support cold start, id:%{public}d", persistentId_);
         RemoveWindowDetectTask();
         return false;
     }

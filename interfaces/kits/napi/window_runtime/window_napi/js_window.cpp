@@ -3425,7 +3425,12 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    windowToken_->SetTurnScreenOn(wakeUp);
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTurnScreenOn(wakeUp));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    
     WLOGI("Window [%{public}u, %{public}s] set wake up screen %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
     return NapiGetUndefined(env);
@@ -4612,6 +4617,11 @@ bool JsWindow::ParseScaleOption(napi_env env, napi_value jsObject, Transform& tr
 
 napi_value JsWindow::OnScale(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4678,6 +4688,11 @@ bool JsWindow::ParseRotateOption(napi_env env, napi_value jsObject, Transform& t
 
 napi_value JsWindow::OnRotate(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4734,6 +4749,11 @@ bool JsWindow::ParseTranslateOption(napi_env env, napi_value jsObject, Transform
 
 napi_value JsWindow::OnTranslate(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4810,6 +4830,11 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
 
 napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info info)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
     if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -4834,6 +4859,7 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
         WLOGFE("set corner radius permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
+
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
