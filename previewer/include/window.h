@@ -357,7 +357,7 @@ public:
      *
      * @param dvsyncSwitch bool.
      * @return * void
-    */
+     */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
