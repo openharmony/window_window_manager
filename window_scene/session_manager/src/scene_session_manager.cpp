@@ -5918,6 +5918,12 @@ WSError SceneSessionManager::TerminateSessionNew(
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
 }
 
+WSError SceneSessionManager::SetVmaCacheStatus(bool showRecent) {
+    WLOGFI("SceneSessionManager SetVmaCacheStatus: %{public}d", showRecent);
+    RSInterfaces::GetInstance().SetVmaCacheStatus(showRecent);
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                                 SessionSnapshot& snapshot, bool isLowResolution)
 {
