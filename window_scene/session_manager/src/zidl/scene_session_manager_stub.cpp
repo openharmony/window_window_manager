@@ -688,7 +688,7 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
 int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleBindDialogTarget!");
-    auto persistentId = data.ReadUint64();
+    uint64_t persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     const WSError& ret = BindDialogSessionTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -962,7 +962,7 @@ int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply)
 {
     WindowModeType windowModeType = Rosen::WindowModeType::WINDOW_MODE_OTHER;
     WMError errCode = GetWindowModeType(windowModeType);

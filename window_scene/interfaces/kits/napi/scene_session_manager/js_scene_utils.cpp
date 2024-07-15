@@ -22,6 +22,7 @@
 
 #include "root_scene.h"
 #include "window_manager_hilog.h"
+#include "window_visibility_info.h"
 #include "process_options.h"
 
 namespace OHOS::Rosen {
@@ -937,6 +938,30 @@ napi_value CreateJsSessionStartupVisibility(napi_env env)
         static_cast<int32_t>(AAFwk::StartupVisibility::STARTUP_SHOW)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(AAFwk::StartupVisibility::END)));
+    return objValue;
+}
+
+napi_value CreateJsWindowVisibility(napi_env env)
+{
+    if (env == nullptr) {
+        WLOGFE("Env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "NO_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
+    napi_set_named_property(env, objValue, "PARTICALLY_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
+    napi_set_named_property(env, objValue, "COMPLETE_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_LAYER_STATE_MAX)));
     return objValue;
 }
 

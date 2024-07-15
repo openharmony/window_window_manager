@@ -92,6 +92,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "KeyboardGravity", KeyboardGravityInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
     napi_set_named_property(env, exportObj, "StartupVisibility", CreateJsSessionStartupVisibility(env));
+    napi_set_named_property(env, exportObj, "WindowVisibility", CreateJsWindowVisibility(env));
     napi_set_named_property(env, exportObj, "ProcessMode", CreateJsSessionProcessMode(env));
     napi_set_named_property(env, exportObj, "PiPControlType", CreateJsSessionPiPControlType(env));
     napi_set_named_property(env, exportObj, "PiPControlStatus", CreateJsSessionPiPControlStatus(env));
