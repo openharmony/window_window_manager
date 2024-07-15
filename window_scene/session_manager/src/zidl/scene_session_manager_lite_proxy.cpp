@@ -22,9 +22,7 @@
 
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
-#ifndef USE_ADAPTER_LITE
 #include "window_session_property.h"
-#endif
 
 namespace OHOS::Rosen {
 namespace {
@@ -32,7 +30,7 @@ constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteProxy"};
 constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
-#ifndef USE_ADAPTER_LITE
+
 WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::SetSessionLabel");
@@ -313,6 +311,25 @@ WSError SceneSessionManagerLiteProxy::GetSessionInfoByContinueSessionId(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+template<typename T>
+WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
+{
+    int32_t infoSize = reply.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        WLOGFE("infoSize is too large");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    for (int32_t i = 0; i < infoSize; i++) {
+        std::unique_ptr<T> info(reply.ReadParcelable<T>());
+        if (!info) {
+            WLOGFE("Read Parcelable infos failed.");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        parcelableInfos.emplace_back(*info);
+    }
+    return WSError::WS_OK;
+}
 
 WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     bool needStartCaller, bool isFromBroker)
@@ -603,27 +620,6 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
-}
-#endif
-
-template<typename T>
-WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
-{
-    int32_t infoSize = reply.ReadInt32();
-    if (infoSize > CYCLE_LIMIT) {
-        WLOGFE("infoSize is too large");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    for (int32_t i = 0; i < infoSize; i++) {
-        std::unique_ptr<T> info(reply.ReadParcelable<T>());
-        if (!info) {
-            WLOGFE("Read Parcelable infos failed.");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-        parcelableInfos.emplace_back(*info);
-    }
-    return WSError::WS_OK;
 }
 
 void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
@@ -933,7 +929,6 @@ WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
     return static_cast<WSError>(ret);
 }
 
-#ifndef USE_ADAPTER_LITE
 WSError SceneSessionManagerLiteProxy::RegisterIAbilityManagerCollaborator(int32_t type,
     const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
 {
@@ -992,5 +987,4 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
-#endif
 } // namespace OHOS::Rosen

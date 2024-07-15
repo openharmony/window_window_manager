@@ -315,10 +315,8 @@ void WindowEventChannel::PrintInfoPointerEvent(const std::shared_ptr<MMI::Pointe
             WLOGFE("Invalid pointer: %{public}d.", pointerId);
             return;
         }
-        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-            "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
-            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
-            item.GetWindowX(), item.GetWindowY());
+        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d",
+            pointerId, item.GetDownTime(), item.IsPressed());
     }
 }
 

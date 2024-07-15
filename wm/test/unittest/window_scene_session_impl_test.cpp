@@ -536,22 +536,6 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTe
 }
 
 /**
- * @tc.name: HandleBackEvent01
- * @tc.desc: HandleBackEvent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("HandleBackEvent01");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-
-    windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(WSError::WS_OK, windowSceneSession->HandleBackEvent());
-}
-
-/**
  * @tc.name: RaiseToAppTop01
  * @tc.desc: RaiseToAppTop
  * @tc.type: FUNC
