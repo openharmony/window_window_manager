@@ -16,9 +16,13 @@
 #include "input_manager.h"
 #include "session_manager/include/scene_session_dirty_manager.h"
 #include <gtest/gtest.h>
+#include <parameter.h>
+#include <parameters.h>
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "transaction/rs_uiextension_data.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +32,7 @@ namespace Rosen {
 constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
+static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 class SceneSessionDirtyManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -244,26 +249,26 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTramform, Function | SmallTes
 }
 
 /**
- * @tc.name: CalTramform
- * @tc.desc: CalTramform
+ * @tc.name: CalTransform
+ * @tc.desc: CalTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalTramform, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Level2)
 {
     int ret = 0;
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CalTramform";
-    sessionInfo.moduleName_ = "CalTramform";
+    sessionInfo.bundleName_ = "CalTransform";
+    sessionInfo.moduleName_ = "CalTransform";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
     Matrix3f tranform;
-    manager_->CalTramform(nullptr, tranform);
+    manager_->CalTransform(nullptr, tranform);
     sessionInfo.isRotable_ = true;
-    manager_->CalTramform(sceneSession, tranform);
+    manager_->CalTransform(sceneSession, tranform);
     sessionInfo.isSystem_ = true;
-    manager_->CalTramform(sceneSession, tranform);
+    manager_->CalTransform(sceneSession, tranform);
     ASSERT_EQ(ret, 0);
 }
 
@@ -355,18 +360,20 @@ HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | Sm
     ASSERT_EQ(dirction, MMI::DIRECTION180);
     dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::UNKNOWN);
     ASSERT_EQ(dirction, MMI::DIRECTION270);
-    dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::FULL);
-    ASSERT_EQ(dirction, MMI::DIRECTION90);
-    dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::FULL);
-    ASSERT_EQ(dirction, MMI::DIRECTION180);
-    dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::FULL);
-    ASSERT_EQ(dirction, MMI::DIRECTION270);
-    dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::FULL);
-    ASSERT_EQ(dirction, MMI::DIRECTION0);
+    if (g_screenRotationOffset != 0) {
+        dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::FULL);
+        ASSERT_EQ(dirction, MMI::DIRECTION90);
+        dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::FULL);
+        ASSERT_EQ(dirction, MMI::DIRECTION180);
+        dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::FULL);
+        ASSERT_EQ(dirction, MMI::DIRECTION270);
+        dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::FULL);
+        ASSERT_EQ(dirction, MMI::DIRECTION0);
+        dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::FULL);
+        ASSERT_EQ(dirction, MMI::DIRECTION90);
+    }
     dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::UNKNOWN);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
-    dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::FULL);
-    ASSERT_EQ(dirction, MMI::DIRECTION90);
 }
 
 /**
@@ -556,6 +563,104 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
     ASSERT_EQ(windowInfoList.size(), 3);
     EXPECT_EQ(windowInfoList[2].defaultHotAreas.size(), 1);
+}
+
+/**
+ * @tc.name: GetHostComponentWindowInfo
+ * @tc.desc: GetHostComponentWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetHostComponentWindowInfo, Function | SmallTest | Level2)
+{
+    MMI::WindowInfo hostWindowinfo;
+    SecSurfaceInfo secSurfaceInfo;
+    Matrix3f transform;
+    MMI::WindowInfo ret;
+    MMI::WindowInfo windowInfo;
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ASSERT_EQ(ret.id, windowInfo.id);
+
+    SecRectInfo secRectInfo;
+    secSurfaceInfo.upperNodes.emplace_back(secRectInfo);
+    secSurfaceInfo.hostPid = 1;
+    windowInfo.pid = 1;
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ASSERT_EQ(ret.pid, windowInfo.pid);
+
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ASSERT_EQ(ret.defaultHotAreas.size(), 1);
+}
+
+/**
+ * @tc.name: GetSecComponentWindowInfo
+ * @tc.desc: GetSecComponentWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetSecComponentWindowInfo, Function | SmallTest | Level2)
+{
+    MMI::WindowInfo hostWindowinfo;
+    SecSurfaceInfo secSurfaceInfo;
+    Matrix3f transform;
+    MMI::WindowInfo ret;
+    MMI::WindowInfo windowInfo;
+    ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, nullptr, transform);
+    ASSERT_EQ(ret.id, windowInfo.id);
+
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
+    ASSERT_EQ(ret.id, windowInfo.id);
+
+    secSurfaceInfo.uiExtensionNodeId = 1;
+    sceneSession->AddUIExtSurfaceNodeId(1, 1);
+    windowInfo.privacyUIFlag = true;
+    ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
+    ASSERT_EQ(ret.privacyUIFlag, windowInfo.privacyUIFlag);
+
+    windowInfo.id = 1;
+    ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
+    ASSERT_EQ(ret.id, windowInfo.id);
+}
+
+/**
+ * @tc.name: GetSecSurfaceWindowinfoList
+ * @tc.desc: GetSecSurfaceWindowinfoList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | SmallTest | Level2)
+{
+    MMI::WindowInfo hostWindowinfo;
+    SecSurfaceInfo secSurfaceInfo;
+    Matrix3f transform;
+    MMI::WindowInfo windowInfo;
+    auto ret = manager_->GetSecSurfaceWindowinfoList(nullptr, hostWindowinfo, transform);
+    ASSERT_EQ(ret.size(), 0);
+
+    std::vector<SecSurfaceInfo> SecSurfaceInfoList;
+    SecSurfaceInfoList.emplace_back(secSurfaceInfo);
+    manager_->secSurfaceInfoMap_.emplace(1, SecSurfaceInfoList);
+    ret = manager_->GetSecSurfaceWindowinfoList(nullptr, hostWindowinfo, transform);
+    ASSERT_EQ(ret.size(), 0);
+
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->id_ = 1;
+    sceneSession->surfaceNode_ = surfaceNode;
+    ret = manager_->GetSecSurfaceWindowinfoList(sceneSession, hostWindowinfo, transform);
+    ASSERT_EQ(ret.size(), 2);
+
+    manager_->secSurfaceInfoMap_.emplace(0, SecSurfaceInfoList);
+    ret = manager_->GetSecSurfaceWindowinfoList(sceneSession, hostWindowinfo, transform);
+    ASSERT_EQ(ret.size(), 2);
 }
 
 } // namespace
