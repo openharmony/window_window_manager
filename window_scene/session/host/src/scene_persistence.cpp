@@ -40,7 +40,7 @@ constexpr uint8_t SUCCESS = 0;
 
 std::string ScenePersistence::snapshotDirectory_;
 std::string ScenePersistence::updatedIconDirectory_;
-std::shared_ptr<FFRTHelper> ScenePersistence::snapshotFfrtHelper_;
+std::shared_ptr<WSFFRTHelper> ScenePersistence::snapshotFfrtHelper_;
 
 bool ScenePersistence::CreateSnapshotDir(const std::string& directory)
 {
@@ -74,7 +74,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
     }
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
     if (snapshotFfrtHelper_ == nullptr) {
-        snapshotFfrtHelper_ = std::make_shared<FFRTHelper>();
+        snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
 }
 
@@ -83,7 +83,7 @@ ScenePersistence::~ScenePersistence()
     remove(snapshotPath_.c_str());
 }
 
-std::shared_ptr<FFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
+std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
 {
     return snapshotFfrtHelper_;
 }
@@ -137,7 +137,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         }
         WLOGFD("Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotFfrtHelper_->SubmitTask(task, "SaveSnapshot" + snapshotPath_);
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
 
 bool ScenePersistence::IsSavingSnapshot()
@@ -170,7 +170,8 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
                 oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         }
     };
-    snapshotFfrtHelper_->SubmitTask(task, "RenameSnapshotFromOldPersistentId" + std::to_string(oldPersistentId));
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "RenameSnapshotFromOldPersistentId"
+        + std::to_string(oldPersistentId));
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()

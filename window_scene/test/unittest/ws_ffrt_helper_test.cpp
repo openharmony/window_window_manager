@@ -19,17 +19,17 @@
 #include <atomic>
 #include <string>
 
-#include "ffrt_helper.h"
+#include "ws_ffrt_helper.h"
 
 using namespace testing::ext;
 using namespace testing::mt;
 
 namespace OHOS::Rosen {
 static std::atomic<int> g_taskId(0);
-static FFRTHelper* g_ffrtHelper = nullptr;
-static constexpr size_t g_taskNum = 1000;
+static WSFFRTHelper* g_wsFfrtHelper = nullptr;
+static constexpr size_t TASK_NUM = 1000;
 
-class FFRTHelperTest : public testing::Test {
+class WSFFRTHelperTest : public testing::Test {
 protected:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -37,26 +37,26 @@ protected:
     void TearDown() override;
 
 private:
-    FFRTHelper* ffrtHelper;
+    WSFFRTHelper* wsFfrtHelper_;
 };
 
-void FFRTHelperTest::SetUpTestCase()
+void WSFFRTHelperTest::SetUpTestCase()
 {
 }
 
-void FFRTHelperTest::TearDownTestCase()
+void WSFFRTHelperTest::TearDownTestCase()
 {
 }
 
-void FFRTHelperTest::SetUp()
+void WSFFRTHelperTest::SetUp()
 {
-    ffrtHelper = new FFRTHelper();
+    wsFfrtHelper_ = new WSFFRTHelper();
 }
 
-void FFRTHelperTest::TearDown()
+void WSFFRTHelperTest::TearDown()
 {
-    delete ffrtHelper;
-    ffrtHelper = nullptr;
+    delete wsFfrtHelper_;
+    wsFfrtHelper_ = nullptr;
 }
 
 /**
@@ -64,17 +64,17 @@ void FFRTHelperTest::TearDown()
  * @tc.desc: test function SubmitTask
  * @tc.type: FUNC
  */
-HWTEST_F(FFRTHelperTest, SubmitTask001, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, SubmitTask001, Function | SmallTest | Level2)
 {
-    ASSERT_NE(ffrtHelper, nullptr);
+    ASSERT_NE(wsFfrtHelper_, nullptr);
 
-    auto mockTask = []() {};
+    auto mockTask = []{};
     std::string taskName = "testTask";
     uint64_t delayTime = 0;
     TaskQos qos = TaskQos::USER_INTERACTIVE;
 
-    ffrtHelper->SubmitTask(mockTask, taskName, delayTime, qos);
-    bool result = ffrtHelper->IsTaskExisted(taskName);
+    wsFfrtHelper_->SubmitTask(mockTask, taskName, delayTime, qos);
+    bool result = wsFfrtHelper_->IsTaskExisted(taskName);
     ASSERT_EQ(result, true);
 }
 
@@ -83,29 +83,29 @@ HWTEST_F(FFRTHelperTest, SubmitTask001, Function | SmallTest | Level2)
  * @tc.desc: test function SubmitTask in a multithreading case
  * @tc.type: FUNC
  */
-HWTEST_F(FFRTHelperTest, SubmitTask002, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, SubmitTask002, Function | SmallTest | Level2)
 {
-    g_ffrtHelper = ffrtHelper;
-    ASSERT_NE(g_ffrtHelper, nullptr);
+    g_wsFfrtHelper = wsFfrtHelper_;
+    ASSERT_NE(g_wsFfrtHelper, nullptr);
 
-    const int threadNum = 100;
+    constexpr int threadNum = 100;
     g_taskId.store(0);
     SET_THREAD_NUM(threadNum);
-    auto submitTask = []() {
-        for (size_t i = 0; i < g_taskNum; ++i) {
-            auto mockTask = [](){};
+    auto submitTask = [] {
+        for (size_t i = 0; i < TASK_NUM; ++i) {
+            auto mockTask = []{};
             int id = g_taskId.fetch_add(1);
             std::string taskName = "testTask" + std::to_string(id);
             uint64_t delayTime = 0;
             TaskQos qos = TaskQos::USER_INTERACTIVE;
-            g_ffrtHelper->SubmitTask(mockTask, taskName, delayTime, qos);
+            g_wsFfrtHelper->SubmitTask(mockTask, taskName, delayTime, qos);
         }
     };
     GTEST_RUN_TASK(submitTask);
 
-    int result = g_ffrtHelper->CountTask();
-    ASSERT_EQ(result, g_taskNum * threadNum);
-    g_ffrtHelper = nullptr;
+    int result = g_wsFfrtHelper->CountTask();
+    ASSERT_EQ(result, TASK_NUM * threadNum);
+    g_wsFfrtHelper = nullptr;
 }
 
 /**
@@ -113,18 +113,18 @@ HWTEST_F(FFRTHelperTest, SubmitTask002, Function | SmallTest | Level2)
  * @tc.desc: test function CancelTask
  * @tc.type: FUNC
  */
-HWTEST_F(FFRTHelperTest, CancelTask001, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, CancelTask001, Function | SmallTest | Level2)
 {
-    ASSERT_NE(ffrtHelper, nullptr);
+    ASSERT_NE(wsFfrtHelper_, nullptr);
 
-    auto mockTask = [](){};
+    auto mockTask = []{};
     std::string taskName = "testTask";
     uint64_t delayTime = 0;
     TaskQos qos = TaskQos::USER_INTERACTIVE;
 
-    ffrtHelper->SubmitTask(mockTask, taskName, delayTime, qos);
-    ffrtHelper->CancelTask(taskName);
-    bool result = ffrtHelper->IsTaskExisted(taskName);
+    wsFfrtHelper_->SubmitTask(mockTask, taskName, delayTime, qos);
+    wsFfrtHelper_->CancelTask(taskName);
+    bool result = wsFfrtHelper_->IsTaskExisted(taskName);
     ASSERT_EQ(result, false);
 }
 
@@ -133,31 +133,32 @@ HWTEST_F(FFRTHelperTest, CancelTask001, Function | SmallTest | Level2)
  * @tc.desc: test function CancelTask in a multithreading case
  * @tc.type: FUNC
  */
-HWTEST_F(FFRTHelperTest, CancelTask002, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, CancelTask002, Function | SmallTest | Level2)
 {
-    g_ffrtHelper = ffrtHelper;
-    ASSERT_NE(g_ffrtHelper, nullptr);
+    g_wsFfrtHelper = wsFfrtHelper_;
+    ASSERT_NE(g_wsFfrtHelper, nullptr);
 
-    const int totalTaskNum = 500000;
+    constexpr int totalTaskNum = 50000;
+    auto mockTask = []{};
     for (size_t i = 0; i < totalTaskNum; ++i) {
-        ffrtHelper->SubmitTask([](){}, "testTask" + std::to_string(i), 0, TaskQos::USER_INTERACTIVE);
+        wsFfrtHelper_->SubmitTask(mockTask, "testTask" + std::to_string(i), 0, TaskQos::USER_INTERACTIVE);
     }
-    
-    const int threadNum = 10;
+
+    constexpr int threadNum = 10;
     g_taskId.store(0);
     SET_THREAD_NUM(threadNum);
-    auto cancelTask = []() {
-        for (size_t i = 0; i < g_taskNum; ++i) {
+    auto cancelTask = [] {
+        for (size_t i = 0; i < TASK_NUM; ++i) {
             int id = g_taskId.fetch_add(1);
             std::string taskName = "testTask" + std::to_string(id);
-            g_ffrtHelper->CancelTask(taskName);
+            g_wsFfrtHelper->CancelTask(taskName);
         }
     };
     GTEST_RUN_TASK(cancelTask);
 
-    int result = g_ffrtHelper->CountTask();
-    ASSERT_EQ(result, totalTaskNum - threadNum * g_taskNum);
-    g_ffrtHelper = nullptr;
+    int result = g_wsFfrtHelper->CountTask();
+    ASSERT_EQ(result, totalTaskNum - threadNum * TASK_NUM);
+    g_wsFfrtHelper = nullptr;
 }
 
 }

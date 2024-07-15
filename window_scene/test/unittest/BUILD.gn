@@ -443,7 +443,7 @@ ohos_unittest("ws_extension_session_test") {
 ohos_unittest("ws_ffrt_helper_test") {
   module_out_path = module_out_path
 
-  sources = [ "ffrt_helper_test.cpp" ]
+  sources = [ "ws_ffrt_helper_test.cpp" ]
   include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
 
   deps = [ ":ws_unittest_common" ]

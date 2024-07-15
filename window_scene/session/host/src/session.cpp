@@ -37,7 +37,7 @@
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
-#include "session/host/include/ffrt_helper.h"
+#include "session/host/include/ws_ffrt_helper.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
 
@@ -1823,6 +1823,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
     }
+    constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
     auto pixelMap = callback->GetResult(FFRT_SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
@@ -1866,9 +1867,9 @@ void Session::SaveSnapshot(bool useFfrt)
         task();
         return;
     }
-    std::string taskName = "Session::SaveSnapshot" + std::to_string(callingPid_) + ":" + std::to_string(persistentId_);
+    std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
-    snapshotFfrtHelper->SubmitTask(task, taskName);
+    snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)

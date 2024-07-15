@@ -20,8 +20,11 @@
 #include <string>
 
 namespace OHOS::Rosen {
-struct FFRTHelperData;
+class TaskHandleMap;
 
+/**
+ * @brief Enumerates FFRT Qos translation
+ */
 enum class TaskQos {
     INHERIT = 0,
     BACKGROUND,
@@ -32,17 +35,18 @@ enum class TaskQos {
     USER_INTERACTIVE
 };
 
-class FFRTHelper {
+class WSFFRTHelper {
 public:
-    explicit FFRTHelper();
-    ~FFRTHelper() = default;
-    void SubmitTask(const std::function<void()>& task, const std::string& taskName, uint64_t delayTime = 0,
+    WSFFRTHelper();
+    ~WSFFRTHelper();
+    void SubmitTask(std::function<void()>&& task, const std::string& taskName, uint64_t delayTime = 0,
         TaskQos qos = TaskQos::USER_INTERACTIVE);
     void CancelTask(const std::string& taskName);
     bool IsTaskExisted(const std::string& taskName) const;
-    int CountTask() const;
+    std::size_t CountTask() const;
+
 private:
-    std::shared_ptr<FFRTHelperData> data_;
+    std::unique_ptr<TaskHandleMap> taskHandleMap_;
 };
 } // namespace OHOS::Rosen
 

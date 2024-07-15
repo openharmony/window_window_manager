@@ -3663,30 +3663,27 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
         return;
     }
     NotifySessionSnapshotFunc sessionSnapshotFunc = [this](int32_t persistentId) {
-        auto task = [this, persistentId]() {
-            auto scnSession = GetSceneSession(persistentId);
-            if (scnSession == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
-                return;
-            }
-            if (scnSession->GetSessionInfo().isSystem_) {
-                WLOGFW("NotifySessionSnapshotFunc, id: %{public}d is system", scnSession->GetPersistentId());
-                return;
-            }
-            auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
-            if (abilityInfoPtr == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
-                return;
-            }
-            if (listenerController_ == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, listenerController_ is nullptr");
-                return;
-            }
-            if (!(abilityInfoPtr->excludeFromMissions)) {
-                listenerController_->NotifySessionSnapshotChanged(persistentId);
-            }
-        };
-        task();
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
+            return;
+        }
+        if (sceneSession->GetSessionInfo().isSystem_) {
+            WLOGFW("NotifySessionSnapshotFunc, id: %{public}d is system", sceneSession->GetPersistentId());
+            return;
+        }
+        auto abilityInfoPtr = sceneSession->GetSessionInfo().abilityInfo;
+        if (abilityInfoPtr == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
+            return;
+        }
+        if (listenerController_ == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, listenerController_ is nullptr");
+            return;
+        }
+        if (!abilityInfoPtr->excludeFromMissions) {
+            listenerController_->NotifySessionSnapshotChanged(persistentId);
+        }
     };
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("RegisterSessionSnapshotFunc success, id: %{public}d", sceneSession->GetPersistentId());
