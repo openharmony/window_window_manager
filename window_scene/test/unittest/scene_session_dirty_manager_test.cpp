@@ -216,13 +216,13 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalNotRotateTransform";
     sessionInfo.moduleName_ = "sessionInfo";
-    Matrix3f tranform;
+    Matrix3f transform;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    manager_->CalNotRotateTransform(nullptr, tranform);
+    manager_->CalNotRotateTransform(nullptr, transform);
     auto screenId = 0;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
-    manager_->CalNotRotateTransform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
     ScreenSessionConfig config;
@@ -232,19 +232,19 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, transform);
 
     screenProperty0.SetRotation(90.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, transform);
 
     screenProperty0.SetRotation(180.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, transform);
 
     screenProperty0.SetRotation(270.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(ret, 0);
 }
 
@@ -263,12 +263,12 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     if (sceneSession == nullptr) {
         return;
     }
-    Matrix3f tranform;
-    manager_->CalTransform(nullptr, tranform);
+    Matrix3f transform;
+    manager_->CalTransform(nullptr, transform);
     sessionInfo.isRotable_ = true;
-    manager_->CalTransform(sceneSession, tranform);
+    manager_->CalTransform(sceneSession, transform);
     sessionInfo.isSystem_ = true;
-    manager_->CalTransform(sceneSession, tranform);
+    manager_->CalTransform(sceneSession, transform);
     ASSERT_EQ(ret, 0);
 }
 
