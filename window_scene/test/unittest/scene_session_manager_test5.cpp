@@ -615,12 +615,13 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function
     ssm_->CheckFocusIsDownThroughBlockingType(sceneSession, sceneSession2, true);
 }
 
+
 /**
  * @tc.name: CheckFocusIsDownThroughBlockingType
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -705,7 +706,6 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, Function | SmallTest
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->GetNextFocusableSession(persistentId);
-    sceneSession->forceHideState_ = true;
     sceneSession->GetForceHideState();
     Session session = Session(info);
     session.property_ = new WindowSessionProperty();
