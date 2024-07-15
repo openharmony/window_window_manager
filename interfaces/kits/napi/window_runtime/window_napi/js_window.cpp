@@ -253,14 +253,14 @@ napi_value JsWindow::BindDialogTarget(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGI("LoadContent");
+    WLOGFI("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsWindow::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGI("LoadContentByName");
+    WLOGFI("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
@@ -274,7 +274,7 @@ napi_value JsWindow::GetUIContext(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 {
-    WLOGI("LoadContent");
+    WLOGFI("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
@@ -1855,7 +1855,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window load content failed"));
     }
-    WLOGFD("Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return;
 }

@@ -317,7 +317,7 @@ WMError WindowManagerLite::UnregisterVisibilityChangedListener(const sptr<IVisib
 
 void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
-    WLOGFD("Get Focus window info lite");
+    WLOGFD("In");
     SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo);
 }
 
