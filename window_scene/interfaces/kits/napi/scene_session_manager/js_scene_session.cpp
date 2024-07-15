@@ -1907,7 +1907,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
 
 void JsSceneSession::OnSessionTopmostChange(bool topmost)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]OnSessionTopmostChange, state: %{public}u", topmost);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]State: %{public}u", topmost);
     auto task = [topmost, jsCallBack = GetJSCallback(SESSION_TOP_MOST_CHANGE_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");

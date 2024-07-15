@@ -6760,7 +6760,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
         CheckAndNotifyWaterMarkChangedResult();
     }
     if (windowVisibilityInfos.size() != 0) {
-        WLOGI("Notify window visibility info changed, size: %{public}zu, %{public}s", windowVisibilityInfos.size(),
+        WLOGI("Visibility changed, size: %{public}zu, %{public}s", windowVisibilityInfos.size(),
             visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
