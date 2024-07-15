@@ -1607,7 +1607,8 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions001, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId()};
     auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 0);
 }
 
 /**
@@ -1635,7 +1636,8 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     std::vector<int32_t> persistentIds = {sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
 }
 
 /**
@@ -1656,7 +1658,8 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId(), invalidPersistentId};
     auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
 }
 
 /**
