@@ -1568,8 +1568,9 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         height = uiContent->GetContainerModalTitleHeight();
     }
     if (height == -1) {
+        height = 0;
         WLOGFE("Get app window decor height failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
