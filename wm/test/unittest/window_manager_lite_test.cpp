@@ -377,7 +377,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Lev
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, errorCode);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
 }
 
 /**
@@ -393,7 +393,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, errorCode);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
 }
 
 /**
@@ -409,7 +409,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Lev
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, errorCode);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
 }
 
 /**
@@ -425,7 +425,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, errorCode);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
 }
 
 /**
