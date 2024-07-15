@@ -1090,6 +1090,31 @@ enum ForceHideState : uint32_t {
     HIDDEN_WHEN_UNFOCUSED
 };
 
+enum class ExtensionWindowAttribute : int32_t {
+    SYSTEM_WINDOW,
+    SUB_WINDOW,
+    UNKNOWN
+};
+
+struct SystemWindowOptions {
+    int32_t windowType;
+};
+
+struct SubWindowOptions {
+    std::string title;
+    bool decorEnabled;
+    bool isModal;
+    bool isTopmost;
+};
+
+struct ExtensionWindowConfig {
+    std::string windowName;
+    ExtensionWindowAttribute windowAttribute = ExtensionWindowAttribute::UNKNOWN;
+    Rect windowRect;
+    SubWindowOptions subWindowOptions;
+    SystemWindowOptions systemWindowOptions;
+};
+
 /**
  * @class KeyboardLayoutParams
  *
