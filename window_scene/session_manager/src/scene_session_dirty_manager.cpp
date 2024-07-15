@@ -92,7 +92,7 @@ bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
     return a.defaultHotAreas.size() > b.defaultHotAreas.size();
 }
 
-void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& transform,
+void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
     bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
@@ -150,7 +150,7 @@ void SceneSessionDirtyManager::CalNotRotateTramform(const sptr<SceneSession> sce
     transform = transform.Inverse();
 }
 
-void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession> sceneSession, Matrix3f& transform,
+void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
     bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
@@ -169,7 +169,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession> sceneSessio
         transform = transform.Inverse();
         return;
     }
-    CalNotRotateTramform(sceneSession, transform, useUIExtension);
+    CalNotRotateTransform(sceneSession, transform, useUIExtension);
 }
 
 
@@ -336,7 +336,7 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
 }
 
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
-    MMI::WindowInfo windowInfo, const sptr<SceneSession> sceneSession)
+    MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -464,7 +464,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
     }
 }
 
-void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
+void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
     MMI::WindowInfo& windowInfo) const
 {
     windowInfo.privacyMode = MMI::SecureFlag::DEFAULT_MODE;
@@ -478,7 +478,7 @@ void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession> sceneS
     }
 }
 
-void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
     MMI::WindowInfo& windowInfo) const
 {
     windowInfo.flags = 0;
@@ -646,13 +646,13 @@ MMI::Rect CalRectInScreen(const Matrix3f& transform, const SecRectInfo& secRectI
     auto top = std::min(topLeft[1], bottomRight[1]);
     if (INT32_MIN + bottomRight[0] > topLeft[0]) {
         TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeft:%{public}d bottomRight:%{public}d",
-            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(topLeft[1]));
-            return {};
+            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(bottomRight[0]));
+        return {};
     }
     if (INT32_MAX + bottomRight[0] < topLeft[0]) {
         TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeft:%{public}d bottomRight:%{public}d",
-            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(topLeft[1]));
-            return {};
+            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(bottomRight[0]));
+        return {};
     }
     auto width = std::abs(topLeft[0] - bottomRight[0]);
     auto height = std::abs(topLeft[1] - bottomRight[1]);
