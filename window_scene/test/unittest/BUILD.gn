@@ -962,15 +962,15 @@ ohos_unittest("ws_scene_session_dirty_manager_test") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_runtime:app_manager",
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "init:libbegetutil",
     "hilog:libhilog",
+    "init:libbegetutil",
     "input:libmmi-client",
   ]
 }
