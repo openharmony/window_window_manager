@@ -77,7 +77,7 @@ WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Called.");
+    TLOGD(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {
         TLOGE(WmsLogTag::WMS_LIFE, "context is nullptr: %{public}u or sessionToken is nullptr: %{public}u",
             context == nullptr, iSession == nullptr);
@@ -256,7 +256,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "called");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
