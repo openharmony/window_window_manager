@@ -986,11 +986,13 @@ ohos_unittest("ws_scene_session_dirty_manager_test") {
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
     "input:libmmi-client",
   ]
 }
@@ -1010,7 +1012,10 @@ ohos_unittest("ws_window_event_channel_test") {
 
   sources = [ "window_event_channel_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
