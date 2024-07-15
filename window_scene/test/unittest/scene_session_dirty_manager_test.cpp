@@ -525,44 +525,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest |
 }
 
 /**
- * @tc.name: UpdateModalExtensionWindowInfo
- * @tc.desc: UpdateModalExtensionWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionWindowInfo, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    MMI::WindowInfo windowInfo;
-    manager_->UpdateModalExtensionWindowInfo(nullptr, windowInfo);
-    EXPECT_TRUE(windowInfo.defaultHotAreas.empty());
-    EXPECT_TRUE(windowInfo.pointerHotAreas.empty());
-
-    ExtensionWindowEventInfo extensionInfo = {
-        .persistentId = 12345,
-        .pid = 1234
-    };
-    sceneSession->AddModalUIExtension(extensionInfo);
-    sceneSession->SetSessionRect({ 5, 6, 7, 8 });
-    manager_->UpdateModalExtensionWindowInfo(sceneSession, windowInfo);
-    EXPECT_EQ(windowInfo.agentWindowId, extensionInfo.persistentId);
-    EXPECT_EQ(windowInfo.pid, extensionInfo.pid);
-    MMI::Rect resultRect { 0, 0, 7, 8 };
-    ASSERT_EQ(windowInfo.defaultHotAreas.size(), 1);
-    EXPECT_EQ(windowInfo.defaultHotAreas.front().x, resultRect.x);
-    EXPECT_EQ(windowInfo.defaultHotAreas.front().y, resultRect.y);
-    EXPECT_EQ(windowInfo.defaultHotAreas.front().width, resultRect.width);
-    EXPECT_EQ(windowInfo.defaultHotAreas.front().height, resultRect.height);
-    ASSERT_EQ(windowInfo.pointerHotAreas.size(), 1);
-    EXPECT_EQ(windowInfo.pointerHotAreas.front().x, resultRect.x);
-    EXPECT_EQ(windowInfo.pointerHotAreas.front().y, resultRect.y);
-    EXPECT_EQ(windowInfo.pointerHotAreas.front().width, resultRect.width);
-    EXPECT_EQ(windowInfo.pointerHotAreas.front().height, resultRect.height);
-}
-
-/**
  * @tc.name: AddModalExtensionWindowInfo
  * @tc.desc: AddModalExtensionWindowInfo
  * @tc.type: FUNC

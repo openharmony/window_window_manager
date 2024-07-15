@@ -227,6 +227,10 @@ public:
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
 
     bool IsAnco() const override;
+    void SetBlankFlag(bool isAddBlank) override;
+    bool GetBlankFlag() const override;
+    void SetBufferAvailableCallbackEnable(bool enable);
+    bool GetBufferAvailableCallbackEnable() const override;
     int32_t GetCollaboratorType() const;
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRect() const;
@@ -456,6 +460,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    bool isNeedSystemPermissionByAction(WSPropertyChangeAction action);
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
@@ -490,6 +495,8 @@ private:
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
+    bool isAddBlank_ = false;
+    bool bufferAvailableCallbackEnable_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
