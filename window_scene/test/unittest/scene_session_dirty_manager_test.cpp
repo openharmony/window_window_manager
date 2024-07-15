@@ -206,23 +206,23 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: CalNotRotateTramform
- * @tc.desc: CalNotRotateTramform
+ * @tc.name: CalNotRotateTransform
+ * @tc.desc: CalNotRotateTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTramform, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTest | Level2)
 {
     int ret = 0;
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CalNotRotateTramform";
+    sessionInfo.bundleName_ = "CalNotRotateTransform";
     sessionInfo.moduleName_ = "sessionInfo";
     Matrix3f tranform;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    manager_->CalNotRotateTramform(nullptr, tranform);
+    manager_->CalNotRotateTransform(nullptr, tranform);
     auto screenId = 0;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, tranform);
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
     ScreenSessionConfig config;
@@ -232,19 +232,19 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTramform, Function | SmallTes
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, tranform);
 
     screenProperty0.SetRotation(90.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, tranform);
 
     screenProperty0.SetRotation(180.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, tranform);
 
     screenProperty0.SetRotation(270.0f);
     Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTramform(sceneSession, tranform);
+    manager_->CalNotRotateTransform(sceneSession, tranform);
     ASSERT_EQ(ret, 0);
 }
 
@@ -640,9 +640,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | S
     auto ret = manager_->GetSecSurfaceWindowinfoList(nullptr, hostWindowinfo, transform);
     ASSERT_EQ(ret.size(), 0);
 
-    std::vector<SecSurfaceInfo> SecSurfaceInfoList;
-    SecSurfaceInfoList.emplace_back(secSurfaceInfo);
-    manager_->secSurfaceInfoMap_.emplace(1, SecSurfaceInfoList);
+    std::vector<SecSurfaceInfo> secSurfaceInfoList;
+    secSurfaceInfoList.emplace_back(secSurfaceInfo);
+    manager_->secSurfaceInfoMap_.emplace(1, secSurfaceInfoList);
     ret = manager_->GetSecSurfaceWindowinfoList(nullptr, hostWindowinfo, transform);
     ASSERT_EQ(ret.size(), 0);
 
@@ -658,7 +658,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | S
     ret = manager_->GetSecSurfaceWindowinfoList(sceneSession, hostWindowinfo, transform);
     ASSERT_EQ(ret.size(), 2);
 
-    manager_->secSurfaceInfoMap_.emplace(0, SecSurfaceInfoList);
+    manager_->secSurfaceInfoMap_.emplace(0, secSurfaceInfoList);
     ret = manager_->GetSecSurfaceWindowinfoList(sceneSession, hostWindowinfo, transform);
     ASSERT_EQ(ret.size(), 2);
 }
