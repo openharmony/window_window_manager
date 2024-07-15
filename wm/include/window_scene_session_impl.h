@@ -59,7 +59,7 @@ public:
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
-    WMError Maximize(std::optional<MaximizePresentation> presentation) override;
+    WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
