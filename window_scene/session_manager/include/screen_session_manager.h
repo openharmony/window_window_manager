@@ -325,6 +325,7 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
+    std::shared_ptr<RSDisplayNode> GetScreenSnapshotDisplayNode(DisplayId displayId);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -421,6 +422,7 @@ private:
     std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
+    std::atomic<bool> isScreenShotByPicker_ = false;
     std::atomic<bool> isPhyScreenConnected_ = false;
     std::atomic<bool> isInGetSnapshotByPicker_ = false;
 
