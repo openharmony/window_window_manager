@@ -256,7 +256,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
