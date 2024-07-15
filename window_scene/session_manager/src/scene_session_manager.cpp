@@ -5921,7 +5921,7 @@ WSError SceneSessionManager::TerminateSessionNew(
         "bundleName=%{public}s, needStartCaller=%{public}d, isFromBroker=%{public}d",
         info->want.GetElement().GetBundleName().c_str(), needStartCaller, isFromBroker);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    const auto callerToken = IPCSkeleton::GetCallingTokenID();
+    uint32_t callerToken = IPCSkeleton::GetCallingTokenID();
     auto task = [this, info, needStartCaller, isFromBroker, callingPid, callerToken]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
@@ -5929,15 +5929,15 @@ WSError SceneSessionManager::TerminateSessionNew(
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
-        if (!(pidCheck ||
-            SessionPermission::VerifyPermissionByCallerToken(callerToken,
-                PermissionConstants::PERMISSION_MANAGE_MISSION))) {
+        if (!pidCheck &&
+            !SessionPermission::VerifyPermissionByCallerToken(callerToken,
+                PermissionConstants::PERMISSION_MANAGE_MISSION)) {
             TLOGE(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
+        WSError errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
         return errCode;
     };
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
