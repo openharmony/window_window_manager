@@ -21,7 +21,7 @@
 #include <refbase.h>
 
 #include "common/include/task_scheduler.h"
-#include "session/host/include/ffrt_helper.h"
+#include "session/host/include/ws_ffrt_helper.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -42,7 +42,7 @@ public:
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath();
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
-    std::shared_ptr<FFRTHelper> GetSnapshotFfrtHelper() const;
+    std::shared_ptr<WSFFRTHelper> GetSnapshotFfrtHelper() const;
 
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::function<void()> resetSnapshotCallback = [](){});
@@ -66,7 +66,7 @@ private:
     std::atomic<int> savingSnapshotSum_ { 0 };
     std::atomic<bool> isSavingSnapshot_ { false };
 
-    static std::shared_ptr<FFRTHelper> snapshotFfrtHelper_;
+    static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
 };
 } // namespace OHOS::Rosen
 
