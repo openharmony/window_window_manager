@@ -293,10 +293,10 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
