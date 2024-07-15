@@ -9352,7 +9352,7 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostAsyncTask(task, "UpdateSecSurfaceInfo");
+    taskScheduler_->PostAsyncTask(task, "UpdateSecSurfaceInfo");
 }
 
 void SceneSessionManager::RegisterSecSurfaceInfoListener()
