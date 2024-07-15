@@ -5537,7 +5537,7 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -5565,7 +5565,7 @@ WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListen
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -5932,7 +5932,7 @@ WSError SceneSessionManager::TerminateSessionNew(
         if (!(pidCheck ||
             SessionPermission::VerifyPermissionByCallerToken(callerToken,
                 PermissionConstants::PERMISSION_MANAGE_MISSION))) {
-            TLOGW(WmsLogTag::WMS_LIFE,
+            TLOGE(WmsLogTag::WMS_LIFE,
                 "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
                 sceneSession->GetCallingPid(), callingPid);
             return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -7505,7 +7505,7 @@ WSError SceneSessionManager::ClearSession(int32_t persistentId)
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, persistentId]() {
@@ -7539,7 +7539,7 @@ WSError SceneSessionManager::ClearAllSessions()
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this]() {
@@ -7574,7 +7574,7 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -7597,7 +7597,7 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -9145,7 +9145,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     clearFailedIds.clear();
