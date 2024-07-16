@@ -1289,16 +1289,14 @@ void SceneSession::RemoveUIExtSurfaceNodeId(int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
     TLOGI(WmsLogTag::WMS_UIEXT, "Remove uiExtension by persistentId=%{public}d", persistentId);
-    auto iter = uiExtNodeIdToPersistentIdMap_.cbegin();
-    while (iter != uiExtNodeIdToPersistentIdMap_.cend()) {
-        if (iter->second == persistentId) {
-            TLOGI(WmsLogTag::WMS_UIEXT,
-                "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
-                iter->first, persistentId);
-            uiExtNodeIdToPersistentIdMap_.erase(iter);
-            return;
-        }
-        ++iter;
+    auto pairIter = std::find_if(uiExtNodeIdToPersistentIdMap_.begin(), uiExtNodeIdToPersistentIdMap_.end(),
+        [persistentId](const auto& entry) { return entry.second == persistentId; });
+    if (pairIter != uiExtNodeIdToPersistentIdMap_.end()) {
+        uiExtNodeIdToPersistentIdMap_.erase(pairIter);
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
+            pairIter->first, persistentId);
+        return;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "Failed to remove uiExtension by persistentId=%{public}d", persistentId);
 }
@@ -3290,7 +3288,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
