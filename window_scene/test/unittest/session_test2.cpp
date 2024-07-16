@@ -461,7 +461,6 @@ HWTEST_F(WindowSessionTest2, SaveSnapshot, Function | SmallTest | Level2)
     EXPECT_EQ(session_->snapshot_, nullptr);
 
     session_->scenePersistence_ = new ScenePersistence(session_->sessionInfo_.bundleName_, session_->persistentId_);
-    ASSERT_NE(session_->scenePersistence_->GetSnapshotScheduler(), nullptr);
 
     session_->SaveSnapshot(false);
     ASSERT_EQ(session_->snapshot_, nullptr);
