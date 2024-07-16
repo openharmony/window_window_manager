@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <string>
 #include "js_extension_window_config.h"
+#include <string>
 #include "js_window_utils.h"
 #include "window_manager_hilog.h"
 
@@ -46,6 +46,14 @@ namespace {
         napi_define_properties(env, object, ARGC_ONE, properties);
     }
 } // namespace
+#define CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig)    \
+    do {                                                                            \
+        if (extensionWindowConfig == nullptr) {                                     \
+            TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");        \
+            return NapiGetUndefined(env);                                           \
+        }                                                                           \
+    } while (false)
+
 JsExtensionWindowConfig::JsExtensionWindowConfig(const std::shared_ptr<ExtensionWindowConfig> &extensionWindowConfig)
     :extensionWindowConfig_(extensionWindowConfig)
 {
@@ -91,10 +99,7 @@ napi_value JsExtensionWindowConfig::GetWindowName(napi_env env, napi_callback_in
 napi_value JsExtensionWindowConfig::OnGetWindowName(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->windowName);
 }
 
@@ -108,10 +113,7 @@ napi_value JsExtensionWindowConfig::GetWindowAttribute(napi_env env, napi_callba
 napi_value JsExtensionWindowConfig::OnGetWindowAttribute(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, static_cast<int32_t>(extensionWindowConfig->windowAttribute));
 }
 
@@ -128,10 +130,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRect(napi_env env, NapiCallbackIn
     napi_create_object(env, &objValue);
 
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
         std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig);
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
@@ -157,10 +156,7 @@ napi_value JsExtensionWindowConfig::GetWindowRectLeft(napi_env env, napi_callbac
 napi_value JsExtensionWindowConfig::OnGetWindowRectLeft(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->windowRect.posX_);
 }
 
@@ -174,10 +170,7 @@ napi_value JsExtensionWindowConfig::GetWindowRectTop(napi_env env, napi_callback
 napi_value JsExtensionWindowConfig::OnGetWindowRectTop(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->windowRect.posY_);
 }
 
@@ -191,10 +184,7 @@ napi_value JsExtensionWindowConfig::GetWindowRectWidth(napi_env env, napi_callba
 napi_value JsExtensionWindowConfig::OnGetWindowRectWidth(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->windowRect.width_);
 }
 
@@ -208,10 +198,7 @@ napi_value JsExtensionWindowConfig::GetWindowRectHeight(napi_env env, napi_callb
 napi_value JsExtensionWindowConfig::OnGetWindowRectHeight(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->windowRect.height_);
 }
 
@@ -228,10 +215,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptions(napi_env env, NapiCall
     napi_create_object(env, &objValue);
 
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
         std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig);
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
@@ -257,10 +241,7 @@ napi_value JsExtensionWindowConfig::GetSubWindowOptionsTitle(napi_env env, napi_
 napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsTitle(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->subWindowOptions.title);
 }
 
@@ -274,10 +255,7 @@ napi_value JsExtensionWindowConfig::GetSubWindowOptionsDecorEnabled(napi_env env
 napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsDecorEnabled(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->subWindowOptions.decorEnabled);
 }
 
@@ -291,10 +269,7 @@ napi_value JsExtensionWindowConfig::GetSubWindowOptionsIsModal(napi_env env, nap
 napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsIsModal(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->subWindowOptions.isModal);
 }
 
@@ -308,10 +283,7 @@ napi_value JsExtensionWindowConfig::GetSubWindowOptionsIsTopmost(napi_env env, n
 napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsIsTopmost(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->subWindowOptions.isTopmost);
 }
 
@@ -328,10 +300,7 @@ napi_value JsExtensionWindowConfig::OnGetSystemWindowOptions(napi_env env, NapiC
     napi_create_object(env, &objValue);
 
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
         std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig);
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
@@ -351,10 +320,7 @@ napi_value JsExtensionWindowConfig::GetSystemWindowOptionsWindowType(napi_env en
 napi_value JsExtensionWindowConfig::OnGetSystemWindowOptionsWindowType(napi_env env, NapiCallbackInfo& info)
 {
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     return CreateJsValue(env, extensionWindowConfig->systemWindowOptions.windowType);
 }
 
@@ -375,10 +341,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowName(napi_env env, NapiCallbackIn
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowName = windowName;
     return result;
 }
@@ -400,10 +363,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowAttribute(napi_env env, NapiCallb
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowAttribute = ExtensionWindowAttribute(value);
     return result;
 }
@@ -420,10 +380,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRect(napi_env env, NapiCallbackIn
     napi_value result = nullptr;
     result = info.argv[ARGC_ZERO];
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     int32_t res = 0;
     if (!ParseJsValue(result, env, "left", res)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "failed to convert left");
@@ -466,10 +423,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectLeft(napi_env env, NapiCallba
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowRect.posX_ = left;
     return result;
 }
@@ -491,10 +445,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectTop(napi_env env, NapiCallbac
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowRect.posY_ = top;
     return result;
 }
@@ -516,10 +467,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectWidth(napi_env env, NapiCallb
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowRect.width_ = width;
     return result;
 }
@@ -541,10 +489,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectHeight(napi_env env, NapiCall
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->windowRect.height_ = height;
     return result;
 }
@@ -561,10 +506,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptions(napi_env env, NapiCall
     napi_value result = nullptr;
     result = info.argv[ARGC_ZERO];
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     std::string title;
     if (!ParseJsValue(result, env, "title", title)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "failed to convert title");
@@ -612,10 +554,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsTitle(napi_env env, Nap
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->subWindowOptions.title = title;
     return result;
 }
@@ -638,10 +577,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsDecorEnabled(napi_env e
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->subWindowOptions.decorEnabled = decorEnabled;
     return result;
 }
@@ -663,10 +599,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsModal(napi_env env, N
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->subWindowOptions.isModal = isModal;
     return result;
 }
@@ -688,10 +621,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsTopmost(napi_env env,
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->subWindowOptions.isTopmost = isTopmost;
     return result;
 }
@@ -708,10 +638,7 @@ napi_value JsExtensionWindowConfig::OnSetSystemWindowOptions(napi_env env, NapiC
     napi_value result = nullptr;
     result = info.argv[ARGC_ZERO];
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     int32_t windowType = 0;
     if (!ParseJsValue(result, env, "windowType", windowType)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "failed to convert windowType");
@@ -738,10 +665,7 @@ napi_value JsExtensionWindowConfig::OnSetSystemWindowOptionsWindowType(napi_env 
         return NapiGetUndefined(env);
     }
     auto extensionWindowConfig = extensionWindowConfig_.lock();
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window config is null.");
-        return NapiGetUndefined(env);
-    }
+    CHECK_EXTENSION_WINDOW_CONFIG_RETURN_IF_NULL(env, extensionWindowConfig);
     extensionWindowConfig->systemWindowOptions.windowType = windowType;
     return result;
 }
