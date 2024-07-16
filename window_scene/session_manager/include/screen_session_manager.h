@@ -219,6 +219,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
+    void RegisterSettingRotationObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
