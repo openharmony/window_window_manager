@@ -152,6 +152,17 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
 }
 
 /**
+ * @tc.name: RemoveExtensionWindowStageFromSCB
+ * @tc.desc: RemoveExtensionWindowStageFromSCB Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->RemoveExtensionWindowStageFromSCB();
+}
+
+/**
  * @tc.name: UpdateConfiguration01
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC

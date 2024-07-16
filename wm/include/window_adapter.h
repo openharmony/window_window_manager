@@ -120,6 +120,8 @@ public:
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId);
+    virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token);
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect);
     virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
