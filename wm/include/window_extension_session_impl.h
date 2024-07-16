@@ -95,12 +95,13 @@ protected:
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
-    void AddExtensionWindowStageToSCB();
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
 
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
+    void AddExtensionWindowStageToSCB();
+    void RemoveExtensionWindowStageFromSCB();
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
@@ -108,6 +109,7 @@ private:
     void ArkUIFrameworkSupport();
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
+    sptr<ISessionStage> sessionStage_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;

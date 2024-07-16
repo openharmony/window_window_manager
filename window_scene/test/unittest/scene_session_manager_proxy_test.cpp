@@ -580,6 +580,44 @@ HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function 
 }
 
 /**
+ * @tc.name: AddExtensionWindowStageToSCB
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
+ * @tc.name: RemoveExtensionWindowStageFromSCB
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    sceneSessionManagerProxy->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: normal function
  * @tc.type: FUNC
