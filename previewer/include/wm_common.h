@@ -758,9 +758,9 @@ enum class BackupAndRestoreType : int32_t {
 };
 
 enum class ExtensionWindowAttribute : int32_t {
-    SYSTEM_WINDOW,
-    SUB_WINDOW,
-    UNKNOWN
+    SYSTEM_WINDOW = 0,
+    SUB_WINDOW = 1,
+    UNKNOWN = 2
 };
 
 struct SystemWindowOptions {
