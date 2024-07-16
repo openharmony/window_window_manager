@@ -4319,11 +4319,6 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
         }
         bool isBlockingType = focusedSession->IsAppSession() ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
-        if (byForeground && isBlockingType && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "session %{public}d is lower than focused session %{public}d",
-                persistentId, focusedSessionId_);
-            return WSError::WS_DO_NOTHING;
-        }
         // temp check
         if (isBlockingType && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
             sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
