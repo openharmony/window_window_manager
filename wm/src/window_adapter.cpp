@@ -834,6 +834,16 @@ void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sess
     wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId);
 }
 
+void WindowAdapter::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+    const sptr<IRemoteObject>& token)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
+    wmsProxy->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+}
+
 void WindowAdapter::ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY)
 {
     INIT_PROXY_CHECK_RETURN();

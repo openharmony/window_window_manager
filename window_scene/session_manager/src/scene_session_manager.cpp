@@ -8351,7 +8351,8 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             return;
         }
 
-        TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_UIEXT, "DestroyExtensionSession: persistentId=%{public}d, parentId=%{public}d",
+            persistentId, parentId);
         auto sceneSession = GetSceneSession(parentId);
         if (sceneSession != nullptr) {
             auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
@@ -8476,6 +8477,31 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         }
     };
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
+}
+
+void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+    const sptr<IRemoteObject>& token)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    auto task = [this, sessionStage, token]() {
+        if (sessionStage == nullptr || token == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
+            return;
+        }
+        auto remoteExtSession = sessionStage->AsObject();
+        if (remoteExtSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage object is nullptr");
+            return;
+        }
+        auto iter = remoteExtSessionMap_.find(remoteExtSession);
+        if (iter->second != token) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token not match");
+            return;
+        }
+
+        DestroyExtensionSession(remoteExtSession);
+    };
+    taskScheduler_->PostAsyncTask(task, "RemoveExtensionWindowStageFromSCB");
 }
 
 void SceneSessionManager::CalculateCombinedExtWindowFlags()
