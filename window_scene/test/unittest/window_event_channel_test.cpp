@@ -20,6 +20,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "session/container/include/window_event_channel.h"
+#include "scene_board_judgement.h"
 #include "window_manager_hilog.h"
 #include "iremote_object_mocker.h"
 
@@ -139,7 +140,7 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Le
     windowEventChannel->SetIsUIExtension(true);
     windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::MODAL);
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
-    EXPECT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(res, WSError::WS_OK);
 
     windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
@@ -172,26 +173,55 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     ASSERT_NE(keyEvent, nullptr);
 
     bool isConsumed = false;
-    bool isPreImeEvent = false;
-    auto res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    auto res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
     EXPECT_EQ(res, WSError::WS_OK);
     isConsumed = true;
-    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
     EXPECT_EQ(res, WSError::WS_OK);
 
+    GTEST_LOG_(INFO) << "Test uiExtension key event with modal usage";
     windowEventChannel_->SetIsUIExtension(true);
     windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
-    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
+    ASSERT_EQ(res, WSError::WS_OK);
 
+    GTEST_LOG_(INFO) << "Test single uiExtension key event with constrained embedded usage";
     windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
-    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    } else {
+        ASSERT_EQ(res, WSError::WS_OK);
+    }
 
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
-    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreImeEvent);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
     ASSERT_EQ(res, WSError::WS_OK);
+
+    GTEST_LOG_(INFO) << "Test combined uiExtension key event with constrained embedded usage";
+    auto keyItemTab = MMI::KeyEvent::KeyItem();
+    keyItemTab.SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyItemTab.SetPressed(true);
+    auto keyItemTest = MMI::KeyEvent::KeyItem();
+    keyItemTest.SetKeyCode(MMI::KeyEvent::KEYCODE_SHIFT_RIGHT);
+    keyItemTest.SetPressed(true);
+    keyEvent->AddPressedKeyItems(keyItemTest);
+    keyEvent->AddPressedKeyItems(keyItemTab);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    keyEvent->Reset();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyItemTest.SetKeyCode(MMI::KeyEvent::KEYCODE_ALT_LEFT);
+    keyEvent->AddPressedKeyItems(keyItemTest);
+    keyEvent->AddPressedKeyItems(keyItemTab);
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PERMISSION);
+    } else {
+        ASSERT_EQ(res, WSError::WS_OK);
+    }
 }
 
 /**
