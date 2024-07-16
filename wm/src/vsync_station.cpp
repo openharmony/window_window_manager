@@ -105,8 +105,8 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             WLOGI("VsyncStation::FlushFrameRateImme %{public}d, linkerID = %{public}" PRIu64,
                 range.preferred_, frameRateLinker_->GetId());
-            frameRateLinker_->UpdateFrameRateRange(range, true);
-            frameRateLinker_->UpdateFrameRateRangeImme(range, true);
+            frameRateLinker_->UpdateFrameRateRange(range);
+            frameRateLinker_->UpdateFrameRateRangeImme(range);
         }
         frameRateLinker_->SetEnable(enabled);
     }
