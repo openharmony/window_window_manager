@@ -320,6 +320,11 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
             WLOGFD("[EventDispatch] wid = %{public}d, winType = %{public}d",
                 sceneSession->GetWindowId(), static_cast<int>(type));
     }
+    ResetFlushWindowInfoTask();
+}
+
+void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
+{
     sessionDirty_.store(true);
     if (!hasPostTask_.load()) {
         hasPostTask_.store(true);
@@ -669,16 +674,12 @@ MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSu
         windowinfo = MakeWindowInfoFormHostWindow(secRectInfoList[0], hostWindowinfo);
     }
     for (const auto& secRectInfo : secRectInfoList) {
-        auto infoStr = DumpSecRectInfo(secRectInfo);
-        TLOGI(WmsLogTag::WMS_EVENT, "HostsecRectInfo:%{public}s", infoStr.c_str());
         windowinfo.pid = secSurfaceInfo.hostPid;
         MMI::Rect hotArea = { secRectInfo.relativeCoords.GetLeft(), secRectInfo.relativeCoords.GetTop(),
             secRectInfo.relativeCoords.GetWidth(), secRectInfo.relativeCoords.GetHeight() };
         windowinfo.defaultHotAreas.emplace_back(hotArea);
         windowinfo.pointerHotAreas.emplace_back(hotArea);
     }
-    auto str = DumpWindowInfo(windowinfo);
-    TLOGI(WmsLogTag::WMS_EVENT, "host:%{public}s", str.c_str());
     return windowinfo;
 }
 
@@ -691,8 +692,6 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
     }
     MMI::WindowInfo windowinfo;
     const auto& secRectInfo = secSurfaceInfo.uiExtensionRectInfo;
-    auto infoStr = DumpSecRectInfo(secRectInfo);
-    TLOGI(WmsLogTag::WMS_EVENT, "secRectInfo:%{public}s", infoStr.c_str());
     windowinfo = MakeWindowInfoFormHostWindow(secRectInfo, hostWindowinfo);
     windowinfo.id = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(secSurfaceInfo.uiExtensionNodeId);
     if (windowinfo.id == 0) {
@@ -711,21 +710,59 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
     transform = transform.Inverse();
     std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
     windowinfo.transform = transformData;
-    auto str = DumpWindowInfo(windowinfo);
-    TLOGI(WmsLogTag::WMS_EVENT, "sec:%{public}s", str.c_str());
     return windowinfo;
+}
+
+bool operator==(const SecRectInfo& a, const SecRectInfo& b)
+{
+    return (a.relativeCoords == b.relativeCoords && a.scale == b.scale && a.anchor == b.anchor);
+}
+
+bool operator!=(const SecRectInfo& a, const SecRectInfo& b)
+{
+    return !(a == b);
+}
+
+bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
+{
+    return (a.uiExtensionRectInfo == b.uiExtensionRectInfo && a.hostPid == b.hostPid &&
+        a.uiExtensionNodeId == b.uiExtensionNodeId && a.uiExtensionPid == b.uiExtensionPid &&
+        a.hostNodeId == b.hostNodeId && a.upperNodes == b.upperNodes);
+}
+
+void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfoMap size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    for (auto& e : secSurfaceInfoMap) {
+        auto hostNodeId = e.first;
+        TLOGI(WmsLogTag::WMS_EVENT, "hostNodeId:%{public}" PRIu64 " secSurfaceInfoList size:%{public}d",
+            hostNodeId, static_cast<int>(e.second.size()));
+        for (const auto& secSurfaceInfo : e.second) {
+            auto surfaceInfoStr = DumpSecSurfaceInfo(secSurfaceInfo);
+            auto rectInfoStr = DumpSecRectInfo(secSurfaceInfo.uiExtensionRectInfo);
+            TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfo:%{public}s secRectInfo:%{public}s", surfaceInfoStr.c_str(),
+                rectInfoStr.c_str());
+            for (const auto& secRectInfo : secSurfaceInfo.upperNodes) {
+                auto infoStr = DumpSecRectInfo(secRectInfo);
+                TLOGI(WmsLogTag::WMS_EVENT, "hostRectInfo:%{public}s", infoStr.c_str());
+            }
+        }
+    }
 }
 
 void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
     std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-    TLOGD(WmsLogTag::WMS_EVENT, "secSurfaceInfoMap size:%{public}d", int(secSurfaceInfoMap.size()));
-    secSurfaceInfoMap_ = secSurfaceInfoMap;
+    if (secSurfaceInfoMap.size() != secSurfaceInfoMap_.size() || secSurfaceInfoMap_ != secSurfaceInfoMap) {
+        secSurfaceInfoMap_ = secSurfaceInfoMap;
+        ResetFlushWindowInfoTask();
+        DumpSecSurfaceInfoMap(secSurfaceInfoMap_);
+    }
 }
 
 std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoList(
-    const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const
+    const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const
 {
     if (secSurfaceInfoMap_.size() == 0) {
         return {};
@@ -749,14 +786,10 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
         }
         secSurfaceInfoList = iter->second;
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "hostWindowId:%{public}d secSurfaceInfoList:%{public}d secSurfaceInfoMap:%{public}d",
-        hostWindowinfo.id, static_cast<int>(secSurfaceInfoList.size()), static_cast<int>(secSurfaceInfoMap_.size()));
     std::vector<MMI::WindowInfo> windowinfoList;
     int seczOrder = 0;
     MMI::WindowInfo windowinfo;
     for (const auto& secSurfaceInfo : secSurfaceInfoList) {
-        auto infoStr = DumpSecSurfaceInfo(secSurfaceInfo);
-        TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfo:%{public}s", infoStr.c_str());
         windowinfo = GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, hostTransform);
         windowinfo.zOrder = seczOrder++;
         windowinfoList.emplace_back(windowinfo);
@@ -764,8 +797,6 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
         windowinfo.zOrder = seczOrder++;
         windowinfoList.emplace_back(windowinfo);
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "surfaceNodeId:%{public}" PRIu64" windowinfoList:%{public}d",
-        surfaceNodeId, int(windowinfoList.size()));
     return windowinfoList;
 }
 } //namespace OHOS::Rosen
