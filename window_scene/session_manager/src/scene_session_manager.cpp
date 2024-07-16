@@ -161,6 +161,24 @@ const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 
+const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_DISPLAY_ORIENTATION_MAP {
+    {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
+    {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
+    {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
+    {"follow_recent",                       OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT},
+    {"landscape_inverted",                  OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED},
+    {"portrait_inverted",                   OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED},
+    {"auto_rotation",                       OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION},
+    {"auto_rotation_landscape",             OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE},
+    {"auto_rotation_portrait",              OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT},
+    {"auto_rotation_restricted",            OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED},
+    {"auto_rotation_landscape_restricted",  OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {"auto_rotation_portrait_restricted",   OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
+    {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
+    {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
+};
+
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
@@ -3007,7 +3025,7 @@ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResourceManager(
-    const AppExecFwk::AbilityInfo& abilityInfo)
+    const AppExecFwk::AbilityInfo& abilityInfo, uint32_t selectedTypes)
 {
     auto context = rootSceneContextWeak_.lock();
     if (!context) {
@@ -3040,7 +3058,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA)) {
+    if (!resourceMgr->AddResource(loadPath.c_str(), selectedTypes)) {
         WLOGFW("Add resource %{private}s failed.", loadPath.c_str());
     }
     return resourceMgr;
@@ -3049,7 +3067,8 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
-    auto resourceMgr = GetResourceManager(abilityInfo);
+    auto resourceMgr = GetResourceManager(abilityInfo,
+        Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA);
     if (!resourceMgr) {
         WLOGFE("resourceMgr is nullptr.");
         return false;
@@ -5886,11 +5905,36 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
+                GetOrientationFormResourceIfNeed(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
         }
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (abilityInfo.orientationId == 0) {
+        return;
+    }
+    auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::SELECT_STRING);
+    if (!resourceMgr) {
+        WLOGFE("resourceMgr is nullptr.");
+        return;
+    }
+    std::string orientation;
+    auto ret = resourceMgr->GetStringById(static_cast<uint32_t>(abilityInfo.orientationId), orientation);
+    if (ret != Global::Resource::RState::SUCCESS) {
+        WLOGFE("GetStringById failed errcode:%{public}d, labelId:%{public}d", static_cast<int32_t>(ret),
+            abilityInfo.orientationId);
+        return;
+    }
+    if (ABILITY_TO_DISPLAY_ORIENTATION_MAP.find(orientation) == ABILITY_TO_DISPLAY_ORIENTATION_MAP.end()) {
+        WLOGFE("Do not support this orientation:%{public}s", orientation.c_str());
+        return;
+    }
+    abilityInfo.orientation = ABILITY_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
 }
 
 WSError SceneSessionManager::TerminateSessionNew(
