@@ -125,6 +125,17 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
         surfaceNode_->GetId());
 }
 
+void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
+{
+    sptr<ISessionStage> iSessionStage(this);
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return;
+    }
+
+    SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(iSessionStage, abilityToken_);
+}
+
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -156,7 +167,6 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    CheckAndRemoveExtWindowFlags();
     {
         auto hostSession = GetHostSession();
         if (hostSession != nullptr) {
@@ -190,6 +200,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
+    RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
