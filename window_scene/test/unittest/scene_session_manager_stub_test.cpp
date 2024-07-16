@@ -1118,6 +1118,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     ASSERT_NE(sessionStage, nullptr);
     data.WriteRemoteObject(sessionStage->AsObject());
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
 
@@ -1141,6 +1142,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
     ASSERT_NE(sessionStage, nullptr);
     data.WriteRemoteObject(sessionStage->AsObject());
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
 
     int res = stub_->HandleRemoveExtensionWindowStageFromSCB(data, reply);
