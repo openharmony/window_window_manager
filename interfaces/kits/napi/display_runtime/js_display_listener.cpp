@@ -131,20 +131,17 @@ void JsDisplayListener::OnCreate(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, id, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCreate");
-        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnCreate: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
+            CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnCreate: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnCreate", env_, std::make_unique<NapiAsyncTask>(
+        callback, std::move(execute), std::move(complete)));
 }
 
 void JsDisplayListener::OnDestroy(DisplayId id)
@@ -160,20 +157,17 @@ void JsDisplayListener::OnDestroy(DisplayId id)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, id, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDestroy");
-        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnDestroy: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
+            CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnDestroy: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnDestroy", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 void JsDisplayListener::OnChange(DisplayId id)
@@ -218,20 +212,17 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, hasPrivate, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnPrivateWindow");
-        napi_value argv[] = {CreateJsValue(env, hasPrivate)};
-        CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnPrivateWindow: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, hasPrivate] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, hasPrivate)};
+            CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnPrivateWindow: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnPrivateWindow", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
@@ -275,20 +266,17 @@ void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, foldAngles, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldAngleChanged");
-        napi_value argv[] = {CreateNativeArray(env, foldAngles)};
-        CallJsMethod(EVENT_FOLD_ANGLE_CHANGED, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnFoldAngleChanged: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, foldAngles] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateNativeArray(env_, foldAngles)};
+            CallJsMethod(EVENT_FOLD_ANGLE_CHANGED, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnFoldAngleChanged: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnFoldAngleChanged", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
@@ -303,20 +291,17 @@ void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, isCapture, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCaptureStatusChanged");
-        napi_value argv[] = {CreateJsValue(env, isCapture)};
-        CallJsMethod(EVENT_CAPTURE_STATUS_CHANGED, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnCaptureStatusChanged: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, isCapture] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsValue(env_, isCapture)};
+            CallJsMethod(EVENT_CAPTURE_STATUS_CHANGED, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnCaptureStatusChanged: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnCaptureStatusChanged", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
@@ -361,20 +346,17 @@ void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
         return;
     }
     sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, area, env = env_]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnAvailableAreaChanged");
-        napi_value argv[] = {CreateJsRectObject(env, area)};
-        CallJsMethod(EVENT_AVAILABLE_AREA_CHANGED, argv, ArraySize(argv));
-    };
-
-    if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
-        if (ret != napi_status::napi_ok) {
-            WLOGFE("OnAvailableAreaChanged: Failed to SendEvent.");
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
+        [this, listener, area] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            napi_value argv[] = {CreateJsRectObject(env_, area)};
+            CallJsMethod(EVENT_AVAILABLE_AREA_CHANGED, argv, ArraySize(argv));
         }
-    } else {
-        WLOGFE("OnAvailableAreaChanged: env is nullptr");
-    }
+    );
+
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDisplayListener::OnAvailableAreaChanged", env_, std::make_unique<NapiAsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS
