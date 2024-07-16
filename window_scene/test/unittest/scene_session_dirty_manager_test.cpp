@@ -663,6 +663,45 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | S
     ASSERT_EQ(ret.size(), 2);
 }
 
+/**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Level2)
+{
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap;
+    SecRectInfo secRectInfo1;
+    SecRectInfo secRectInfo2;
+    SecSurfaceInfo secSurfaceInfo1;
+    secSurfaceInfo1.upperNodes.emplace_back(secRectInfo1);
+    SecSurfaceInfo secSurfaceInfo2;
+    secSurfaceInfo2.upperNodes.emplace_back(secRectInfo2);
+    std::vector<SecSurfaceInfo> secSurfaceInfoList1;
+    std::vector<SecSurfaceInfo> secSurfaceInfoList2;
+    secSurfaceInfoList1.emplace_back(secSurfaceInfo1);
+    secSurfaceInfoList2.emplace_back(secSurfaceInfo2);
+    manager_->secSurfaceInfoMap_.emplace(1, secSurfaceInfoList1);
+    secSurfaceInfoMap.emplace(1, secSurfaceInfoList2);
+    manager_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
+    ASSERT_EQ(secSurfaceInfoMap.size(), manager_->secSurfaceInfoMap_.size());
+
+    secSurfaceInfoMap.emplace(2, secSurfaceInfoList2);
+    manager_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
+    ASSERT_EQ(secSurfaceInfoMap.size(), manager_->secSurfaceInfoMap_.size());
+
+    secSurfaceInfoMap.clear();
+    manager_->secSurfaceInfoMap_.clear();
+    secSurfaceInfoList1.clear();
+    secSurfaceInfoList2.clear();
+    secSurfaceInfo1.uiExtensionRectInfo.scale[0] = 1;
+    secSurfaceInfoList1.emplace_back(secSurfaceInfo1);
+    secSurfaceInfoList2.emplace_back(secSurfaceInfo2);
+    secSurfaceInfoMap.emplace(1, secSurfaceInfoList1);
+    manager_->secSurfaceInfoMap_.emplace(1, secSurfaceInfoList2);
+    ASSERT_EQ(secSurfaceInfoMap.size(), manager_->secSurfaceInfoMap_.size());
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

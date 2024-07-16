@@ -76,7 +76,7 @@ private:
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession>& sceneSession);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
-        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
+        const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
         const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession,
         const Matrix3f hostTransform) const;
@@ -84,7 +84,7 @@ private:
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
     MMI::WindowInfo MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
         const MMI::WindowInfo& hostWindowinfo) const;
-
+    void ResetFlushWindowInfoTask();
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
