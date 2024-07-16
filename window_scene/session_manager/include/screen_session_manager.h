@@ -295,7 +295,8 @@ private:
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void PublishCastEvent(const bool &isPlugIn);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
-    void ScbStatusRecoveryWhenSwitchUser(int32_t newScbPid);
+    void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
 
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
@@ -354,11 +355,11 @@ private:
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 
+    std::mutex oldScbPidsMutex_;
+    std::condition_variable scbSwitchCV_;
     int32_t currentUserId_ { 0 };
     int32_t currentScbPId_ { -1 };
-    std::mutex oldScbPidsMutex_;
     std::vector<int32_t> oldScbPids_ {};
-    mutable std::mutex currentUserIdMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
