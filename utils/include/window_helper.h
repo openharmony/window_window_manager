@@ -401,9 +401,8 @@ public:
     {
         TransformHelper::Matrix4 ret = TransformHelper::Matrix4::Identity;
         // set scale
-        if ((MathHelper::LessNotEqual(transform.scaleX_, 1.0) || MathHelper::GreatNotEqual(transform.scaleX_, 1.0)) ||
-            (MathHelper::LessNotEqual(transform.scaleY_, 1.0) || MathHelper::GreatNotEqual(transform.scaleY_, 1.0)) ||
-            (MathHelper::LessNotEqual(transform.scaleZ_, 1.0) || MathHelper::GreatNotEqual(transform.scaleZ_, 1.0))) {
+        if (!MathHelper::NearZero(transform.scaleX_ - 1.0) || !MathHelper::NearZero(transform.scaleY_ - 1.0) ||
+            !MathHelper::NearZero(transform.scaleZ_ - 1.0)) {
             ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, transform.scaleZ_);
         }
         // set rotation
