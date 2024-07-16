@@ -644,18 +644,22 @@ MMI::Rect CalRectInScreen(const Matrix3f& transform, const SecRectInfo& secRectI
         secRectInfo.relativeCoords.GetHeight(), 1.0);
     auto left = std::min(topLeft[0], bottomRight[0]);
     auto top = std::min(topLeft[1], bottomRight[1]);
-    if (INT32_MIN + bottomRight[0] > topLeft[0]) {
-        TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeft:%{public}d bottomRight:%{public}d",
-            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(bottomRight[0]));
-        return {};
+    auto topLeftX = static_cast<int32_t>(topLeft[0]);
+    auto topLeftY = static_cast<int32_t>(topLeft[1]);
+    auto bottomRightX = static_cast<int32_t>(bottomRight[0]);
+    auto bottomRightY = static_cast<int32_t>(bottomRight[1]);
+    if ((topLeftX > 0 && bottomRightX < INT32_MIN + topLeftX) ||
+        (topLeftX < 0 && bottomRightX > INT32_MAX + topLeftX)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeftX:%{public}d bottomRightX:%{public}d",
+            topLeftX, bottomRightX);
     }
-    if (INT32_MAX + bottomRight[0] < topLeft[0]) {
-        TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeft:%{public}d bottomRight:%{public}d",
-            static_cast<int32_t>(topLeft[0]), static_cast<int32_t>(bottomRight[0]));
-        return {};
+    if ((topLeftY > 0 && bottomRightY < INT32_MIN + topLeftY) ||
+        (topLeftY < 0 && bottomRightY > INT32_MAX + topLeftY)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "data overflows topLeftY:%{public}d bottomRightY:%{public}d",
+            topLeftY, bottomRightY);
     }
-    auto width = std::abs(topLeft[0] - bottomRight[0]);
-    auto height = std::abs(topLeft[1] - bottomRight[1]);
+    auto width = std::abs(topLeftX - bottomRightX);
+    auto height = std::abs(topLeftY - bottomRightY);
     return MMI::Rect{ left, top, width, height};
 }
 
