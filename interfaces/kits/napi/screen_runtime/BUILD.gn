@@ -51,7 +51,6 @@ ohos_shared_library("screen_napi") {
     "c_utils:utils",
     "graphic_surface:surface",  # use for SurfaceUtils
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "hiview:libxpower_event_js",
     "napi:ace_napi",
   ]
