@@ -1694,7 +1694,7 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
@@ -1702,7 +1702,7 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
@@ -2067,13 +2067,14 @@ public:
      * @return WM_OK means set success, others means set failed
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
     /*
      * @brief Set the Dvsync Switch
      *
      * @param dvsyncSwitch bool.
      * @return * void
      */
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {};
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     /**
      * @brief Set whether to enable immersive mode.
