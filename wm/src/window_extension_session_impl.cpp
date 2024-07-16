@@ -111,7 +111,6 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
 
 void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
-    sptr<ISessionStage> iSessionStage(this);
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return;
@@ -121,19 +120,19 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
         return;
     }
 
-    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, abilityToken_,
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
         surfaceNode_->GetId());
 }
 
 void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
 {
-    sptr<ISessionStage> iSessionStage(this);
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return;
     }
 
-    SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(iSessionStage, abilityToken_);
+    SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(sptr<ISessionStage>(this),
+        abilityToken_);
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
