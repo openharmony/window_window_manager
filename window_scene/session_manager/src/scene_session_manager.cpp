@@ -8483,6 +8483,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
 void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
     const sptr<IRemoteObject>& token)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     auto task = [this, sessionStage, token]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
