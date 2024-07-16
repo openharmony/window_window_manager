@@ -695,6 +695,44 @@ WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, 
         wmsProxy->UpdateSessionTouchOutsideListener(persistentId, haveListener));
 }
 
+WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
+}
+
+WMError WindowAdapter::RaiseWindowToTop(int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->RaiseWindowToTop(persistentId));
+}
+
+WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    WSError ret = wmsProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
+}
+
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -784,44 +822,6 @@ WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return static_cast<WMError>(wmsProxy->RequestFocusStatus(persistentId, isFocused));
-}
-
-WMError WindowAdapter::RaiseWindowToTop(int32_t persistentId)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->RaiseWindowToTop(persistentId));
-}
-
-WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
-}
-
-WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    WSError ret = wmsProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
-    return static_cast<WMError>(ret);
-}
-
-WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
-
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(
-        wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,

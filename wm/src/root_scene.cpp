@@ -17,13 +17,13 @@
 
 #include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
+#include "fold_screen_state_internel.h"
 #include <input_manager.h>
 #include <iremote_stub.h>
 #include <ui_content.h>
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
-#include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
