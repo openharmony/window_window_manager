@@ -649,6 +649,7 @@ WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionId
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetWindowAnimationTargets(missionIds, targets);
 }
+
 void WindowAdapter::SetMaximizeMode(MaximizeMode maximizeMode)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -913,6 +914,225 @@ sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
     std::lock_guard<std::mutex> lock(mutex_);
     return windowManagerServiceProxy_;
 }
-
+//
+diff --git a/window_window_manager-master/interfaces/innerkits/wm/window.h b/window_window_manager-master/interfaces/innerkits/wm/window.h
+index a9ee85d..1b6e3a1 100644
+--- a/window_window_manager-master/interfaces/innerkits/wm/window.h
++++ b/window_window_manager-master/interfaces/innerkits/wm/window.h
+@@ -1705,7 +1705,7 @@ public:
+     */
+     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ 
+-    /*
++    /**
+      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
+      *
+      * @param listener IWindowNoInteractionListenerSptr.
+diff --git a/window_window_manager-master/wm/include/window_adapter.h b/window_window_manager-master/wm/include/window_adapter.h
+index 0d666d1..275f8e2 100644
+--- a/window_window_manager-master/wm/include/window_adapter.h
++++ b/window_window_manager-master/wm/include/window_adapter.h
+@@ -96,6 +96,8 @@ public:
+     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
+     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
+     virtual WMError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener);
++    virtual WMError RaiseWindowToTop(int32_t persistentId);
++    virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+@@ -116,8 +118,6 @@ public:
+     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
+     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
+     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
+-    virtual WMError RaiseWindowToTop(int32_t persistentId);
+-    virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId);
+     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect);
+diff --git a/window_window_manager-master/wm/include/window_impl.h b/window_window_manager-master/wm/include/window_impl.h
+index 721b859..2b7b8b1 100644
+--- a/window_window_manager-master/wm/include/window_impl.h
++++ b/window_window_manager-master/wm/include/window_impl.h
+@@ -315,6 +315,7 @@ public:
+         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
+     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
+     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
++    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+ 
+ private:
+     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+@@ -438,7 +439,6 @@ private:
+     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
+     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
+     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
+-    static bool enableImmersiveMode_;
+     sptr<WindowProperty> property_;
+     WindowState state_ { WindowState::STATE_INITIAL };
+     WindowState subWindowState_ {WindowState::STATE_INITIAL};
+@@ -495,6 +495,7 @@ private:
+     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+     bool needNotifyFocusLater_ = false;
+     bool escKeyEventTriggered_ = false;
++    bool enableImmersiveMode_ = false;
+     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+ 
+     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+diff --git a/window_window_manager-master/wm/src/root_scene.cpp b/window_window_manager-master/wm/src/root_scene.cpp
+index 0bc4242..9129ad7 100644
+--- a/window_window_manager-master/wm/src/root_scene.cpp
++++ b/window_window_manager-master/wm/src/root_scene.cpp
+@@ -17,13 +17,13 @@
+ 
+ #include <bundlemgr/launcher_service.h>
+ #include <event_handler.h>
++#include "fold_screen_state_internel.h"
+ #include <input_manager.h>
+ #include <iremote_stub.h>
+ #include <ui_content.h>
+ #include <viewport_config.h>
+ 
+ #include "app_mgr_client.h"
+-#include "fold_screen_state_internel.h"
+ #include "input_transfer_station.h"
+ #include "singleton.h"
+ #include "singleton_container.h"
+@@ -240,7 +240,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
+ {
+     std::lock_guard<std::mutex> lock(mutex_);
+     if (vsyncStation_ == nullptr) {
+-        TLOGE(WmsLogTag::WMS_MAIN, "set dvsync switch failed, vsyncStation is nullptr");
++        TLOGE(WmsLogTag::WMS_MAIN, "set  dvsync switch failed, vsyncStation is nullptr");
+         return;
+     }
+     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+diff --git a/window_window_manager-master/wm/src/window_adapter.cpp b/window_window_manager-master/wm/src/window_adapter.cpp
+index 059c0ab..f1deb9f 100644
+--- a/window_window_manager-master/wm/src/window_adapter.cpp
++++ b/window_window_manager-master/wm/src/window_adapter.cpp
+@@ -649,6 +649,7 @@ WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionId
+     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+     return wmsProxy->GetWindowAnimationTargets(missionIds, targets);
+ }
++
+ void WindowAdapter::SetMaximizeMode(MaximizeMode maximizeMode)
+ {
+     INIT_PROXY_CHECK_RETURN();
+@@ -695,6 +696,44 @@ WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId,
+         wmsProxy->UpdateSessionTouchOutsideListener(persistentId, haveListener));
+ }
+ 
++WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
++{
++    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
++
++    auto wmsProxy = GetWindowManagerServiceProxy();
++    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
++    return static_cast<WMError>(wmsProxy->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
++}
++
++WMError WindowAdapter::RaiseWindowToTop(int32_t persistentId)
++{
++    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
++
++    auto wmsProxy = GetWindowManagerServiceProxy();
++    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
++    return static_cast<WMError>(wmsProxy->RaiseWindowToTop(persistentId));
++}
++
++WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
++{
++    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
++
++    auto wmsProxy = GetWindowManagerServiceProxy();
++    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
++    WSError ret = wmsProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
++    return static_cast<WMError>(ret);
++}
++
++WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
++{
++    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
++
++    auto wmsProxy = GetWindowManagerServiceProxy();
++    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
++    return static_cast<WMError>(
++        wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
++}
++
+ void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+@@ -786,44 +825,6 @@ WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
+     return static_cast<WMError>(wmsProxy->RequestFocusStatus(persistentId, isFocused));
+ }
+ 
+-WMError WindowAdapter::RaiseWindowToTop(int32_t persistentId)
+-{
+-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+-
+-    auto wmsProxy = GetWindowManagerServiceProxy();
+-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+-    return static_cast<WMError>(wmsProxy->RaiseWindowToTop(persistentId));
+-}
+-
+-WMError WindowAdapter::NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+-{
+-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+-
+-    auto wmsProxy = GetWindowManagerServiceProxy();
+-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+-    return static_cast<WMError>(wmsProxy->NotifyWindowExtensionVisibilityChange(pid, uid, visible));
+-}
+-
+-WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+-{
+-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+-
+-    auto wmsProxy = GetWindowManagerServiceProxy();
+-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+-    WSError ret = wmsProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+-    return static_cast<WMError>(ret);
+-}
+-
+-WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+-{
+-    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+-
+-    auto wmsProxy = GetWindowManagerServiceProxy();
+-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+-    return static_cast<WMError>(
+-        wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
+-}
+-
+ void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+     const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
+ {
+diff --git a/window_window_manager-master/wm/src/window_impl.cpp b/window_window_manager-master/wm/src/window_impl.cpp
+index 87f7ea2..e6cd1ce 100644
+--- a/window_window_manager-master/wm/src/window_impl.cpp
++++ b/window_window_manager-master/wm/src/window_impl.cpp
+@@ -95,7 +95,6 @@ std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathR
+ std::recursive_mutex WindowImpl::globalMutex_;
+ int g_constructorCnt = 0;
+ int g_deConstructorCnt = 0;
+-bool WindowImpl::enableImmersiveMode_ = true;
+ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
+ {
+     property_ = new (std::nothrow) WindowProperty();
+@@ -4198,5 +4197,14 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
+     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+     return WMError::WM_OK;
+ }
++
++void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
++{
++    std::lock_guard<std::recursive_mutex> lock(mutex_);
++    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
++        vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
++    }
++}
++
+//
 } // namespace Rosen
 } // namespace OHOS
