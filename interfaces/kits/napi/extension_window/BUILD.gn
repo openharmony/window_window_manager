@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/ohos/ace/ace.gni")
 import("//build/templates/abc/ohos_abc.gni")
 
 es2abc_gen_abc("gen_extension_window_abc") {
