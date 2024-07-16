@@ -1635,6 +1635,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
+        that.RegisterSettingRotationObserver();
     }
 }
 
@@ -1855,8 +1856,9 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
-        displayInfo->GetScreenId(), displayInfo->GetRotation());
+    // screenId要在rotation前进行设置
+    ScreenSettingHelper::SetSettingRotationScreenId(static_cast<int32_t>(displayInfo->GetScreenId()));
+    ScreenSettingHelper::SetSettingRotation(static_cast<int32_t>(displayInfo->GetRotation()));
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
@@ -2576,6 +2578,23 @@ void ScreenSessionManager::SetCastFromSettingData()
         }
         rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, enable);
     }
+}
+
+void ScreenSessionManager::RegisterSettingRotationObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register setting rotation observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) {
+        int32_t rotation = -1;
+        int32_t screenId = -1;
+        if (ScreenSettingHelper::GetSettingRotation(rotation) &&
+            ScreenSettingHelper::GetSettingRotationScreenID(screenId)) {
+            TLOGI(WmsLogTag::DMS, "current dms setting rotation:%{public}d, screenId:%{public}d",
+                rotation, screenId);
+        } else {
+            TLOGI(WmsLogTag::DMS, "get current dms setting rotation and screenId failed");
+        }
+    };
+    ScreenSettingHelper::RegisterSettingRotationObserver(updateFunc);
 }
 
 DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
