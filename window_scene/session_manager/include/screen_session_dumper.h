@@ -39,6 +39,7 @@ public:
     void ExcuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
+    void DumpMultiUserInfo(std::vector<int32_t> oldScbPids, int32_t userId, int32_t ScbPid);
 
 private:
     void ShowHelpInfo();
