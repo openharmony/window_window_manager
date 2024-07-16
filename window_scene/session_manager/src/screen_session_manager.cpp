@@ -527,9 +527,9 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
-void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
+void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 {
-    TLOGI(WmsLogTag::DMS, "PublishCastEvent entry isPlugIn:%{public}d", isPlugIn);
+    TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
     if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
         TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
         return;
@@ -542,10 +542,8 @@ void ScreenSessionManager::PublishCastEvent(const bool &isPlugIn)
     MessageParcel reply;
     if (isPlugIn) {
         ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_START, data, reply);
-        ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
     } else {
         ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_STOP, data, reply);
-        ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
     }
     ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
@@ -569,9 +567,9 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            auto task = [this]() { PublishCastEvent(true); };
-            taskScheduler_->PostAsyncTask(task, "PublishCastEventTrue");
-            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventTrue");
+            auto task = [this]() { SendCastEvent(true); };
+            taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventTrue");
             isPhyScreenConnected_ = true;
         }
         return;
@@ -579,9 +577,9 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            auto task = [this]() { PublishCastEvent(false); };
-            taskScheduler_->PostAsyncTask(task, "PublishCastEventFalse");
-            TLOGI(WmsLogTag::DMS, "PostAsyncTask PublishCastEventFalse");
+            auto task = [this]() { SendCastEvent(false); };
+            taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
+            TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
         }
         if (phyMirrorEnable) {
             FreeDisplayMirrorNodeInner(screenSession);
