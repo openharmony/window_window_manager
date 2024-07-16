@@ -407,25 +407,18 @@ public:
             ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, transform.scaleZ_);
         }
         // set rotation
-        if (MathHelper::LessNotEqual(transform.rotationX_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.rotationX_, 0.0)) {
+        if (!MathHelper::NearZero(transform.rotationX_)) {
             ret *= TransformHelper::CreateRotationX(MathHelper::ToRadians(transform.rotationX_));
         }
-        if (MathHelper::LessNotEqual(transform.rotationY_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.rotationY_, 0.0)) {
+        if (!MathHelper::NearZero(transform.rotationY_)) {
             ret *= TransformHelper::CreateRotationY(MathHelper::ToRadians(transform.rotationY_));
         }
-        if (MathHelper::LessNotEqual(transform.rotationZ_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.rotationZ_, 0.0)) {
+        if (!MathHelper::NearZero(transform.rotationZ_)) {
             ret *= TransformHelper::CreateRotationZ(MathHelper::ToRadians(transform.rotationZ_));
         }
         // set translation
-        if ((MathHelper::LessNotEqual(transform.translateX_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.translateX_, 0.0)) ||
-            (MathHelper::LessNotEqual(transform.translateY_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.translateY_, 0.0)) ||
-            (MathHelper::LessNotEqual(transform.translateZ_, 0.0) ||
-            MathHelper::GreatNotEqual(transform.translateZ_, 0.0))) {
+        if (!MathHelper::NearZero(transform.translateX_) || !MathHelper::NearZero(transform.translateY_) ||
+            !MathHelper::NearZero(transform.translateZ_)) {
             ret *= TransformHelper::CreateTranslation(TransformHelper::Vector3(transform.translateX_,
                 transform.translateY_, transform.translateZ_));
         }
