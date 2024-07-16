@@ -593,7 +593,9 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, Function | 
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
     sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345);
     sceneSessionManagerProxy = nullptr;
 }
@@ -612,7 +614,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveExtensionWindowStageFromSCB, Functi
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
     sceneSessionManagerProxy->RemoveExtensionWindowStageFromSCB(sessionStage, token);
     sceneSessionManagerProxy = nullptr;
 }
