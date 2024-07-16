@@ -9355,7 +9355,7 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 
 void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
 {
-    if (currentUserId_ != userid) {
+    if (currentUserId_ != static_cast<int32_t>(userid)) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_, userid);
         return;
     }
