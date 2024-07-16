@@ -4197,6 +4197,7 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
+
 void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     std::lock_guard<std::recursive_mutex> look(mutex_);
