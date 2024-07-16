@@ -111,6 +111,7 @@ struct DetectTaskInfo {
 
 class Session : public SessionStub {
 public:
+    friend class HidumpController;
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
