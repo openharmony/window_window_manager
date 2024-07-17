@@ -192,7 +192,6 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
 
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
-    WLOGD("[NAPI]Create");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr || session == nullptr) {
@@ -260,12 +259,12 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetTemporarilyShowWhenLocked);
     BindNativeFunction(env, objValue, "setSkipDraw", moduleName,
         JsSceneSession::SetSkipDraw);
-    BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
-        JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
     BindNativeFunction(env, objValue, "openKeyboardSyncTransaction", moduleName,
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
         JsSceneSession::CloseKeyboardSyncTransaction);
+    BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
+        JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
@@ -366,7 +365,7 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
             WLOGFE("[NAPI]jsHotAreaRect is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsHotAreaType, [1] = jsHotAreaReason, [2] = jsHotAreaRect};
+        napi_value argv[] = {jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnWindowDragHotArea");
@@ -1868,7 +1867,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
             WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = CreateJsError(env, 0), [1] = jsSceneSessionObj};
+        napi_value argv[] = {CreateJsError(env, 0), jsSceneSessionObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnRaiseAboveTarget: " + std::to_string(subWindowId));
