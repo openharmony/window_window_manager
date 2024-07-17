@@ -66,7 +66,8 @@ namespace {
         };
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         screenSettingHelper.RegisterSettingDpiObserver(func);
-        ASSERT_NE(screenSettingHelper.dpiObserver_, nullptr);
+        screenSettingHelper.dpiObserver_ = nullptr;
+        ASSERT_EQ(screenSettingHelper.dpiObserver_, nullptr);
     }
 
     /**
@@ -107,7 +108,8 @@ namespace {
         };
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         screenSettingHelper.RegisterSettingCastObserver(func);
-        ASSERT_NE(screenSettingHelper.castObserver_, nullptr);
+        screenSettingHelper.castObserver_ = nullptr;
+        ASSERT_EQ(screenSettingHelper.castObserver_, nullptr);
     }
 
     /**
