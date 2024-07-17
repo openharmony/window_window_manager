@@ -1290,6 +1290,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     }
     ListenerFuncType listenerFuncType = iterFunctionType->second;
     if (IsCallbackRegistered(env, cbType, value)) {
+        WLOGFE("[NAPI]callback is registered, type = %{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
