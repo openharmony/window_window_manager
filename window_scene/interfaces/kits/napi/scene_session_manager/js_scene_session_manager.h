@@ -185,8 +185,6 @@ private:
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
-    using Func = void(JsSceneSessionManager::*)();
-    std::map<std::string, Func> listenerFunc_;
 
     sptr<RootScene> rootScene_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
