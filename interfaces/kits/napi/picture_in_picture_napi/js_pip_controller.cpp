@@ -488,6 +488,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
+
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             WmErrorCode ret = UnRegisterListener(type, it->second);
