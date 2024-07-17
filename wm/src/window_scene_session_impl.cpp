@@ -21,6 +21,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include <hitrace_meter.h>
+
 #include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
