@@ -251,7 +251,8 @@ HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO,
         property));
     auto sessionProperty = sceneSession->GetSessionProperty();
-    uint32_t remove = sessionProperty->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)));
+    uint32_t remove = sessionProperty->GetWindowFlags() &
+        (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)));
     uint32_t add = sessionProperty->GetWindowFlags() | (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
     sessionProperty.SetWindowFlags(remove);
     property.SetWindowFlags(add);
