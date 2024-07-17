@@ -2787,6 +2787,7 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
             if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
                 return true;
             }
+            break;
         default:
             break;
     }
