@@ -4336,6 +4336,11 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
             // return ok if focused session is topmost
             return WSError::WS_OK;
         }
+        if (reason == FocusChangeReason::CLIENT_REQUEST && sceneSession->IsAppSession() &&
+            sceneSession->GetMissionId() == focusedSession->GetMissionId()) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "client request from the same app, skip blocking check");
+            byForeground = false;
+        }
         if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
             TLOGD(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
             return WSError::WS_DO_NOTHING;
@@ -4350,11 +4355,6 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
         }
         bool isBlockingType = focusedSession->IsAppSession() ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
-        if (byForeground && isBlockingType && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "session %{public}d is lower than focused session %{public}d",
-                persistentId, focusedSessionId_);
-            return WSError::WS_DO_NOTHING;
-        }
         // temp check
         if (isBlockingType && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
             sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
