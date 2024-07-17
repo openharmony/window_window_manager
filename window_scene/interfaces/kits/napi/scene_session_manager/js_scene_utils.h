@@ -159,6 +159,7 @@ napi_value CreateJsSessionRecoverInfo(
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);
+napi_value CreateJsWindowVisibility(napi_env env);
 napi_value CreateJsSessionProcessMode(napi_env env);
 napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);
