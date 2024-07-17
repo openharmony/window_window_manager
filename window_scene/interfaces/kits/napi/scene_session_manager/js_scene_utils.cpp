@@ -187,11 +187,11 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
     return true;
 }
 
-bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sessionInfo)
+bool IsJsScreenIdUndefind(napi_env env, napi_value jsScreenId, SessionInfo& sessionInfo)
 {
-    if (GetType(env, JsScreenId) != napi_undefined) {
+    if (GetType(env, jsScreenId) != napi_undefined) {
         int32_t screenId = -1;
-        if (!ConvertFromJsValue(env, JsScreenId, screenId)) {
+        if (!ConvertFromJsValue(env, jsScreenId, screenId)) {
             WLOGFE("[NAPI]Failed to convert parameter to screenId");
             return false;
         }
@@ -328,11 +328,13 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
 
     int32_t processMode;
     if (!ConvertFromJsValue(env, jsProcessMode, processMode)) {
+        WLOGE("[NAPI]Failed to convert parameter to processMode");
         return false;
     }
 
     int32_t startupVisibility;
     if (!ConvertFromJsValue(env, jsStartupVisibility, startupVisibility)) {
+        WLOGE("[NAPI]Failed to convert parameter to startupVisibility");
         return false;
     }
     processOptions->processMode = static_cast<AAFwk::ProcessMode>(processMode);
@@ -349,10 +351,10 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
     napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
-    napi_value jsScreenId = nullptr;
-    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsPersistentRecover = nullptr;
     napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsRotable = nullptr;
     napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
     napi_value jsIsSystemInput = nullptr;
@@ -1204,6 +1206,7 @@ napi_value SessionTypeInit(napi_env env)
         WLOGFE("Failed to get object");
         return nullptr;
     }
+
     SetTypeProperty(objValue, env, "TYPE_UNDEFINED", JsSessionType::TYPE_UNDEFINED);
     SetTypeProperty(objValue, env, "TYPE_APP", JsSessionType::TYPE_APP);
     SetTypeProperty(objValue, env, "TYPE_SUB_APP", JsSessionType::TYPE_SUB_APP);
@@ -1232,10 +1235,11 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_VOICE_INTERACTION", JsSessionType::TYPE_VOICE_INTERACTION);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_TOAST", JsSessionType::TYPE_SYSTEM_TOAST);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_FLOAT", JsSessionType::TYPE_SYSTEM_FLOAT);
-    SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
+    SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
+    SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     return objValue;
 }
@@ -1247,7 +1251,7 @@ struct AsyncInfo {
     std::function<void()> func;
 };
 
-void NapiAsyncWork(napi_env env, std::function<void()> task)
+static void NapiAsyncWork(napi_env env, std::function<void()> task)
 {
     napi_value resource = nullptr;
     AsyncInfo* info = new AsyncInfo();
