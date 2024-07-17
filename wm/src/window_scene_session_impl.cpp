@@ -21,7 +21,6 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include <hitrace_meter.h>
-
 #include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
@@ -1541,7 +1540,7 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     const WSError ret = hostSession->RaiseToAppTop();
-    return static_cast<WmErrorCode>(ret);
+    return WM_JS_TO_ERROR_CODE_MAP.at(static_cast<WMError>(ret));
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
