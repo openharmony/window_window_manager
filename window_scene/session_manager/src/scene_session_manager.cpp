@@ -102,7 +102,8 @@
 #include "focus_change_info.h"
 #include "anr_manager.h"
 #include "dms_reporter.h"
-
+#include "res_sched_client.h"
+#include "res_type.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
 #include "anomaly_detection.h"
@@ -110,10 +111,6 @@
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
 #endif
-
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "suspend_manager_client.h"
-#endif // EFFICIENCY_MANAGER_ENABLE
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
 #include "sec_comp_enhance_kit.h"
@@ -4562,10 +4559,7 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
         sceneSession->GetWindowType(),
         sceneSession->GetAbilityToken()
     );
-#ifdef EFFICIENCY_MANAGER_ENABLE
-        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(focusChangeInfo->uid_,
-            "", "THAW_BY_FOCUS_CHANGED");
-#endif // EFFICIENCY_MANAGER_ENABLE
+    SceneSessionManager::NotifyRssThawApp(focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     sceneSession->NotifyFocusStatus(isFocused);
     std::string sName = "FoucusWindow:";
@@ -4585,6 +4579,19 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
         NotifyFocusStatusByMission(prevSession, sceneSession);
     }
+}
+
+int32_t SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::string &bundleName,
+    const std::string &reason)
+{
+    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_THAW_ONE_APP;
+    nlohmann::json payload;
+    payload.emplace("uid", uid);
+    payload.emplace("bundleName", bundleName);
+    payload.emplace("reason", reason);
+    nlohmann::json reply;
+    int32_t ret = ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    return ret;
 }
 
 void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession)
