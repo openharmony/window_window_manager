@@ -1606,7 +1606,7 @@ WSError Session::RaiseToAppTopForPointDown()
 
 void Session::PresentFocusIfPointDown()
 {
-    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    WLOGFI("id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
