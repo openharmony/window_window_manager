@@ -35,8 +35,6 @@
 #include "permission.h"
 #include "request_info.h"
 #include "ui_content.h"
-#include "foundation/communication/ipc/interfaces/innerkits/ipc_core/include/ipc_skeleton.h"
-#include "base/security/access_token/interfaces/innerkits/accesstoken/include/tokenid_kit.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1738,43 +1736,40 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
     return NapiGetUndefined(env);
 }
 
-static napi_value CheckBindDialogWindow(sptr<Window> weakWindow, napi_env env)
+static sptr<IRemoteObject> GetBindDialogToken(napi_env env, napi_value argv0)
 {
-    if (weakWindow == nullptr) {
-        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    sptr<IRemoteObject> token = NAPI_ohos_rpc_getNativeRemoteObject(env, argv0);
+    if (token != nullptr) {
+        return token;
     }
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
-    if (!isSystemApp) {
-        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
-            "Permission verification failed. A non-system application calls a system API.");
-    }
-    return nullptr;
+    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
+        AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv0);
+    return (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
 }
 
 napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    errCode = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
-
-    sptr<IRemoteObject> token = nullptr;
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "window is nullptr!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "permission denied, require system application!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
 
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 1) {
-        token = NAPI_ohos_rpc_getNativeRemoteObject(env, argv[0]);
-        if (token == nullptr) {
-            std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
-                AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv[0]);
-            token = (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
-        }
-    }
 
-    if ((argc <= 1) || (token == nullptr)) { // 1: invalid params nums
+    if (argc < 2) { // at least 2 params
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
+    sptr<IRemoteObject> token = GetBindDialogToken(env, argv[0]);
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "token is null!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     napi_value value = argv[1];
     if (value == nullptr || !NapiIsCallable(env, value)) {
         registerManager_->RegisterListener(windowToken_,
@@ -1787,9 +1782,8 @@ napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, token](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
-            napi_value checkResult = CheckBindDialogWindow(weakWindow, env);
-            if (checkResult != nullptr) {
-                task.Reject(env, checkResult);
+            if (weakWindow == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
 
