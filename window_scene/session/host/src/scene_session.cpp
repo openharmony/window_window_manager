@@ -2745,21 +2745,11 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!isSystemCalling && isNeedSystemPermissionByAction(action)) {
+    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property)) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     wptr<SceneSession> weak = this;
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_FLAGS) {
-        auto session = weak.promote();
-        auto sessionProperty = session->GetSessionProperty();
-        uint32_t flags = property->GetWindowFlags();
-        uint32_t oldFlags = sessionProperty->GetWindowFlags();
-        if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK) &&
-            !isSystemCalling) {
-            return WMError::WM_ERROR_NOT_SYSTEM_APP;
-        }
-    }
     property->SetSystemCalling(isSystemCalling);
     auto task = [weak, property, action]() -> WMError {
         auto sceneSession = weak.promote();
@@ -2778,7 +2768,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     return PostSyncTask(task, "UpdateProperty");
 }
 
-bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action)
+bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action, const sptr<WindowSessionProperty>& property)
 {
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
@@ -2790,6 +2780,13 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action)
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+            auto sessionProperty = this->GetSessionProperty();
+            uint32_t flags = property->GetWindowFlags();
+            uint32_t oldFlags = sessionProperty->GetWindowFlags();
+            if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+                return true;
+            }
         default:
             break;
     }
