@@ -1272,7 +1272,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     }
 
     gotScreenlockFingerprint_ = false;
-    TLOGI(WmsLogTag::DMS, "[UL_POWER]SuspendBegin  reason: %{public}u", static_cast<uint32_t>(reason));
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
@@ -4161,7 +4161,7 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "NotifyDisplayChangeInfoChanged agents is empty");
+        TLOGI(WmsLogTag::DMS, "Agents is empty");
         return;
     }
     for (auto& agent : agents) {
@@ -4171,11 +4171,11 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
+    TLOGI(WmsLogTag::DMS, "DisplayMode:%{public}d", displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "NotifyDisplayModeChanged agents is empty");
+        TLOGI(WmsLogTag::DMS, "Agents is empty");
         return;
     }
     for (auto& agent : agents) {
