@@ -401,8 +401,8 @@ public:
     {
         TransformHelper::Matrix4 ret = TransformHelper::Matrix4::Identity;
         // set scale
-        if (!MathHelper::NearZero(transform.scaleX_ - 1.0) || !MathHelper::NearZero(transform.scaleY_ - 1.0) ||
-            !MathHelper::NearZero(transform.scaleZ_ - 1.0)) {
+        if (!MathHelper::NearZero(transform.scaleX_ - 1.0f) || !MathHelper::NearZero(transform.scaleY_ - 1.0f) ||
+            !MathHelper::NearZero(transform.scaleZ_ - 1.0f)) {
             ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, transform.scaleZ_);
         }
         // set rotation
