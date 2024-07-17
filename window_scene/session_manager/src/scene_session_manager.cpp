@@ -4301,7 +4301,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
             return WSError::WS_OK;
         }
         if (reason == FocusChangeReason::CLIENT_REQUEST && sceneSession->IsAppSession() &&
-        (sceneSession->GetMissionId() == focusedSession->GetMissionId())) {
+            sceneSession->GetMissionId() == focusedSession->GetMissionId()) {
             TLOGD(WmsLogTag::WMS_FOCUS, "client request from the same app, skip blocking check");
             byForeground = false;
         }
