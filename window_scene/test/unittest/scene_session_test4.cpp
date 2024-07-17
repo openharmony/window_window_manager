@@ -254,8 +254,8 @@ HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest
     uint32_t remove = sessionProperty->GetWindowFlags() &
         (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)));
     uint32_t add = sessionProperty->GetWindowFlags() | (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
-    sessionProperty.SetWindowFlags(remove);
-    property.SetWindowFlags(add);
+    sessionProperty->SetWindowFlags(remove);
+    property->SetWindowFlags(add);
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS,
         property));
     ASSERT_FALSE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE,
