@@ -2780,7 +2780,7 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             auto sessionProperty = this->GetSessionProperty();
             uint32_t flags = property->GetWindowFlags();
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
@@ -2788,6 +2788,7 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
                 return true;
             }
             break;
+        }
         default:
             break;
     }
