@@ -314,11 +314,11 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
     session->SetPendingSessionActivationEventListener(func);
-    WLOGFE("ProcessPendingSceneSessionActivationRegister success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
@@ -447,7 +447,7 @@ void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
         std::to_string(static_cast<int>(gravity)));
 }
- 
+
 void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();

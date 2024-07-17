@@ -213,11 +213,11 @@ bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRec
     return true;
 }
 
-bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotable, SessionInfo& sessionInfo)
+bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInfo& sessionInfo)
 {
-    if (GetType(env, jsIsRotable) != napi_undefined) {
+    if (GetType(env, jsIsRotatable) != napi_undefined) {
         bool isRotable = false;
-        if (!ConvertFromJsValue(env, jsIsRotable, isRotable)) {
+        if (!ConvertFromJsValue(env, jsIsRotatable, isRotable)) {
             WLOGFE("[NAPI]Failed to convert parameter to isRotable");
             return false;
         }
@@ -361,7 +361,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
     napi_value jsIsSetPointerAreas = nullptr;
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
-
     napi_value jsProcessOption = nullptr;
     napi_get_named_property(env, jsObject, "processOptions", &jsProcessOption);
 
@@ -1057,13 +1056,13 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 napi_value SubWindowModalTypeInit(napi_env env)
 {
     if (env == nullptr) {
-        WLOGFE("Env is nullptr");
+        TLOGE(WmsLogTag::WMS_SUB, "Env is nullptr");
         return nullptr;
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to get object");
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
         return nullptr;
     }
 
