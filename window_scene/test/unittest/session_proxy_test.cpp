@@ -538,6 +538,21 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus end";
 }
+
+/**
+ * @tc.name: GetStatusBarVectorHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetStatusBarVectorHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    int32_t res = sProxy->GetStatusBarVectorHeight();
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
