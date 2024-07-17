@@ -1762,7 +1762,7 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFI("[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -1890,4 +1890,4 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
-} // namespace OHOS::Rosen
+} // namespace OHOS::Rosen

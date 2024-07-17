@@ -21,7 +21,7 @@ namespace Rosen {
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     static DeviceRotation lastSensorRotationConverted_ = DeviceRotation::INVALID;
-    TLOGI(WmsLogTag::DMS, "ScreenRotationProperty::HandleSensorEventInput deviceRotation: %{public}d, "
+    TLOGI(WmsLogTag::DMS, "DeviceRotation: %{public}d, "
         "lastSensorRotationConverted: %{public}d", deviceRotation, lastSensorRotationConverted_);
 
     if (deviceRotation != DeviceRotation::INVALID && lastSensorRotationConverted_ != deviceRotation) {
