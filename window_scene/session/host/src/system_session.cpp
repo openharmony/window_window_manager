@@ -44,7 +44,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
 
 SystemSession::~SystemSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, " ~SystemSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, " ~SystemSession");
 }
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
@@ -95,7 +95,6 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
-
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
@@ -127,7 +126,6 @@ WSError SystemSession::Hide()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
-
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -217,6 +215,12 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
 
+int32_t SystemSession::GetMissionId() const
+{
+    auto parentSession = GetParentSession();
+    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
+}
+
 WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (!IsSessionValid()) {
@@ -282,12 +286,6 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
     };
     PostTask(task, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
-}
-
-int32_t SystemSession::GetMissionId() const
-{
-    auto parentSession = GetParentSession();
-    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const

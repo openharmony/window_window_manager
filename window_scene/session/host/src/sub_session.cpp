@@ -31,7 +31,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+    if (moveDragController_ != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
@@ -41,7 +41,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession");
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
@@ -163,6 +163,12 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
 
+int32_t SubSession::GetMissionId() const
+{
+    auto parentSession = GetParentSession();
+    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
+}
+
 WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (!IsSessionValid()) {
@@ -180,12 +186,6 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 
     WSError ret = Session::TransferKeyEvent(keyEvent);
     return ret;
-}
-
-int32_t SubSession::GetMissionId() const
-{
-    auto parentSession = GetParentSession();
-    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 void SubSession::UpdatePointerArea(const WSRect& rect)
