@@ -764,14 +764,14 @@ enum class ExtensionWindowAttribute : int32_t {
 };
 
 struct SystemWindowOptions {
-    int32_t windowType;
+    int32_t windowType = -1;
 };
 
 struct SubWindowOptions {
     std::string title;
-    bool decorEnabled;
-    bool isModal;
-    bool isTopmost;
+    bool decorEnabled = false;
+    bool isModal = false;
+    bool isTopmost = false;
 };
 
 struct ExtensionWindowConfig {

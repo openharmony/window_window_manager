@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "native_engine/native_value.h"
 #include "js_runtime_utils.h"
 #include "wm_common.h"
+
 namespace OHOS {
 namespace Rosen {
 #ifdef _WIN32
@@ -27,8 +28,10 @@ namespace Rosen {
 #else
 #define WINDOW_EXPORT __attribute__((visibility("default")))
 #endif
+
 WINDOW_EXPORT napi_value CreateJsExtensionWindowConfig(napi_env env,
-    std::shared_ptr<ExtensionWindowConfig> extensionWindowConfig);
+    const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig);
+
 class JsExtensionWindowConfig {
 public:
     explicit JsExtensionWindowConfig(const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig);
@@ -93,7 +96,7 @@ private:
     napi_value OnSetSystemWindowOptions(napi_env env, AbilityRuntime::NapiCallbackInfo& info);
     napi_value OnSetSystemWindowOptionsWindowType(napi_env env, AbilityRuntime::NapiCallbackInfo& info);
 
-    std::weak_ptr<ExtensionWindowConfig> extensionWindowConfig_;
+    std::shared_ptr<ExtensionWindowConfig> extensionWindowConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

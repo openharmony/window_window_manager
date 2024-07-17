@@ -30,6 +30,7 @@
 #include "window_option.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
+#include "window_helper.h"
 namespace OHOS {
 namespace Rosen {
 constexpr int32_t RGB_LENGTH = 6;
@@ -295,6 +296,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     bool CheckCallingPermission(std::string permission);
+    bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType);
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
