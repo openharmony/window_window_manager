@@ -1887,6 +1887,8 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRecoveredSessionInfo02, Function | Smal
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
