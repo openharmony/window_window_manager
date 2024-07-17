@@ -95,7 +95,6 @@ std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathR
 std::recursive_mutex WindowImpl::globalMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
-bool WindowImpl::enableImmersiveMode_ = true;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
