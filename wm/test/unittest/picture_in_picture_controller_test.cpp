@@ -126,7 +126,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    
+
     pipControl->pipOption_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_ = option;
@@ -207,7 +207,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
 
     EXPECT_EQ(nullptr, windowOption);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    
+
     sptr<Window> window = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
