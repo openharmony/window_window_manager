@@ -283,27 +283,12 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-            WLOGFE("Failed to get system ability mgr.");
-            return;
-        }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject) {
-        WLOGFE("Remote object is nullptr");
+    auto ret = InitMockSMSProxy();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Init mock session manager service failed in Lite");
         return;
     }
-    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    if (!mockSessionManagerServiceProxy_) {
-        WLOGFW("Get mock session manager service proxy failed, nullptr");
-        return;
-    }
-    if (!recoverListenerRegistered_) {
-        recoverListenerRegistered_ = true;
-        smsRecoverListener_ = new SessionManagerServiceLiteRecoverListener();
-        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
-    }
+    RegisterSMSRecoverListener();
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
         WLOGFE("Remote object2 is nullptr");
