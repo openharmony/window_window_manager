@@ -3067,8 +3067,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
-    auto resourceMgr = GetResourceManager(abilityInfo,
-        Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA);
+    auto resourceMgr = GetResourceManager(abilityInfo);
     if (!resourceMgr) {
         WLOGFE("resourceMgr is nullptr.");
         return false;
@@ -5905,7 +5904,7 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
-                GetOrientationFormResourceIfNeed(scbAbilityInfo.abilityInfo_);
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
         }
@@ -5920,18 +5919,18 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     }
     auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::SELECT_STRING);
     if (!resourceMgr) {
-        WLOGFE("resourceMgr is nullptr.");
+        WLOGFE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
         return;
     }
     std::string orientation;
     auto ret = resourceMgr->GetStringById(static_cast<uint32_t>(abilityInfo.orientationId), orientation);
     if (ret != Global::Resource::RState::SUCCESS) {
-        WLOGFE("GetStringById failed errcode:%{public}d, labelId:%{public}d", static_cast<int32_t>(ret),
-            abilityInfo.orientationId);
+        WLOGFE(WmsLogTag::DEFAULT, "GetStringById failed errcode:%{public}d, labelId:%{public}d",
+            static_cast<int32_t>(ret), abilityInfo.orientationId);
         return;
     }
     if (ABILITY_TO_DISPLAY_ORIENTATION_MAP.find(orientation) == ABILITY_TO_DISPLAY_ORIENTATION_MAP.end()) {
-        WLOGFE("Do not support this orientation:%{public}s", orientation.c_str());
+        WLOGFE(WmsLogTag::DEFAULT, "Do not support this orientation:%{public}s", orientation.c_str());
         return;
     }
     abilityInfo.orientation = ABILITY_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
