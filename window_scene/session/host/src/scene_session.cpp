@@ -2768,7 +2768,8 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     return PostSyncTask(task, "UpdateProperty");
 }
 
-bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action, const sptr<WindowSessionProperty>& property)
+bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
+    const sptr<WindowSessionProperty>& property)
 {
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
