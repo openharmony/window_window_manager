@@ -22,10 +22,6 @@
 #include "mock/js_transition_controller.h"
 #endif
 
-#ifdef SCENE_BOARD_ENABLE
-#include "scene_board_judgement.h"
-#endif
-
 #include "js_err_utils.h"
 #include "js_window_utils.h"
 #include "window.h"
@@ -62,12 +58,6 @@ static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
 static int g_finalizerCnt = 0;
-
-#ifdef SCENE_BOARD_ENABLE
-static bool g_isSceneEnabled = SceneBoardJudgement::IsSceneBoardEnabled();
-#else
-static bool g_isSceneEnabled = false;
-#endif
 JsWindow::JsWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
@@ -924,14 +914,6 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
-            // intercept show main window if window is created
-            if (g_isSceneEnabled && WindowHelper::IsMainWindow(weakWindow->GetType()) &&
-                weakWindow->GetWindowState() == WindowState::STATE_CREATED) {
-                WLOGFI("MainWindow is created but not show, can not show by napi, [%{public}u, %{public}s]",
-                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-                task.Resolve(env, NapiGetUndefined(env));
-                return;
-            }
             if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
                 TLOGW(WmsLogTag::WMS_LIFE,
                     "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
@@ -964,14 +946,6 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             if (weakWindow == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 WLOGFE("window is nullptr or get invalid param");
-                return;
-            }
-            // intercept show main window if window is created
-            if (g_isSceneEnabled && WindowHelper::IsMainWindow(weakWindow->GetType()) &&
-                weakWindow->GetWindowState() == WindowState::STATE_CREATED) {
-                WLOGFI("MainWindow is created but not show, can not show by napi, [%{public}u, %{public}s]",
-                    weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-                task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
             if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
@@ -2247,7 +2221,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
             WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
         *errCodePtr = spWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
             systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
-        TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set set system bar enalbe end, ret = %{public}d",
+        TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] set system bar enalbe end, ret = %{public}d",
             spWindow->GetWindowId(), spWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -2258,8 +2232,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
         if (*errCodePtr == WMError::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env,
-                *errCodePtr, "JsWindow::OnSetSystemBarEnable failed"));
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnSetSystemBarEnable failed"));
         }
     };
 }
@@ -5612,23 +5585,20 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, isModal, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != WmErrorCode::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "invalid parameter");
+                TLOGE(WmsLogTag::WMS_SUB, "OnSetSubWindowModal invalid parameter");
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "invalid parameter."));
                 return;
             }
-
-            WmErrorCode wmErrorCode;
             auto window = weakToken.promote();
             if (window == nullptr) {
-                TLOGE(WmsLogTag::WMS_SUB, "window is nullptr");
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                TLOGE(WmsLogTag::WMS_SUB, "OnSetSubWindowModal window is nullptr");
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr."));
                 return;
             }
-
             if (!WindowHelper::IsSubWindow(window->GetType())) {
-                TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", window->GetType());
-                wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+                TLOGE(WmsLogTag::WMS_SUB, "OnSetSubWindowModal invalid call, type:%{public}d", window->GetType());
+                WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "invalid window type."));
                 return;
             }
@@ -5636,11 +5606,11 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                TLOGE(WmsLogTag::WMS_SUB, "Set subwindow modal failed, ret is %{public}d", wmErrorCode);
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                TLOGE(WmsLogTag::WMS_SUB, "OnSetSubWindowModal set failed, ret is %{public}d", wmErrorCode);
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set subwindow modal failed"));
             }
-            TLOGI(WmsLogTag::WMS_SUB, "id:%{public}u, name:%{public}s, isModal:%{public}d",
+            TLOGI(WmsLogTag::WMS_SUB, "OnSetSubWindowModal id:%{public}u, name:%{public}s, isModal:%{public}d",
                 window->GetWindowId(), window->GetWindowName().c_str(), isModal);
         };
     napi_value lastParam = nullptr;
