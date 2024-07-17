@@ -2749,8 +2749,18 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    property->SetSystemCalling(isSystemCalling);
     wptr<SceneSession> weak = this;
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_FLAGS) {
+        auto session = weak.promote();
+        auto sessionProperty = session->GetSessionProperty();
+        uint32_t flags = property->GetWindowFlags();
+        uint32_t oldFlags = sessionProperty->GetWindowFlags();
+        if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK) &&
+            !isSystemCalling) {
+            return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        }
+    }
+    property->SetSystemCalling(isSystemCalling);
     auto task = [weak, property, action]() -> WMError {
         auto sceneSession = weak.promote();
         if (sceneSession == nullptr) {
@@ -2772,7 +2782,6 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action)
 {
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
         case WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP:
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
