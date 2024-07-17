@@ -2749,8 +2749,8 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    wptr<SceneSession> weak = this;
     property->SetSystemCalling(isSystemCalling);
+    wptr<SceneSession> weak = this;
     auto task = [weak, property, action]() -> WMError {
         auto sceneSession = weak.promote();
         if (sceneSession == nullptr) {
