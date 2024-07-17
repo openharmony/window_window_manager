@@ -1323,7 +1323,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
-        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType avoidAreaType:%{public}u", type);
+        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType type:%{public}u", type);
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
