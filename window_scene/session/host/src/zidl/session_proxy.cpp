@@ -1306,4 +1306,23 @@ int32_t SessionProxy::GetAppForceLandscapeMode(const std::string& bundleName)
     }
     return reply.ReadInt32();
 }
+
+int32_t SessionProxy::GetStatusBarVectorHeight()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t height = 0;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return height;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_VECTOR_HEIGHT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return height;
+    }
+    height = reply.ReadInt32();
+    return height;
+}
 } // namespace OHOS::Rosen

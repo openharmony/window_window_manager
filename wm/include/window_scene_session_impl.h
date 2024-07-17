@@ -158,6 +158,7 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+    uint32_t GetStatusBarVectorHeight() override;
 
 protected:
     void DestroySubWindow();
