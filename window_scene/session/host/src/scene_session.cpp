@@ -2745,8 +2745,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
 
     auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr)
-    {
+    if (sessionProperty == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "get session property failed");
         return WMError::WM_ERROR_NULLPTR;
     }
