@@ -77,7 +77,7 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
 HWTEST_F(ModalSystemUiExtensionTest, ToString, Function | SmallTest | Level2)
 {
     AAFwk::WantParams wantParams;
-    std::string ret = ModalSystemUiExtension::ToString(wantParams_);
+    std::string ret = ModalSystemUiExtension::ToString(wantParams);
     ASSERT_EQ("{}", ret);
 }
 }
