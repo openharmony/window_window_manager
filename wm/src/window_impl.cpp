@@ -2919,8 +2919,8 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
     Rect rectWithHotzone;
     rectWithHotzone.posX_ = GetRect().posX_ - static_cast<int32_t>(HOTZONE_POINTER);
     rectWithHotzone.posY_ = GetRect().posY_ - static_cast<int32_t>(HOTZONE_POINTER);
-    rectWithHotzone.width_ = GetRect().width_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
-    rectWithHotzone.height_ = GetRect().height_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
+    rectWithHotzone.width_ = GetRect().width_ + HOTZONE_POINTER * 2;   // 2: calculate width need
+    rectWithHotzone.height_ = GetRect().height_ + HOTZONE_POINTER * 2; // 2: calculate height need
 
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         !WindowHelper::IsPointInTargetRectWithBound(startPointPosX, startPointPosY, rectWithHotzone)) {
@@ -3129,7 +3129,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     auto action = pointerEvent->GetPointerAction();
-    uint32_t windowId = pointerEvent->GetAgentWindowId();
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     int32_t mousePointX = pointerItem.GetDisplayX();
     int32_t mousePointY = pointerItem.GetDisplayY();
     int32_t sourceType = pointerEvent->GetSourceType();
@@ -3165,7 +3165,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
            GetRect().posY_, GetRect().width_, GetRect().height_, newStyleID, oldStyleID);
     if (oldStyleID != newStyleID) {
         MMI::PointerStyle pointerStyle;
-        pointerStyle.id = newStyleID;
+        pointerStyle.id = static_cast<int32_t>(newStyleID);
         int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
         if (res != 0) {
             WLOGFE("set pointer style failed, res is %{public}u", res);
