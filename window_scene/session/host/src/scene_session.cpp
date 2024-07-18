@@ -276,37 +276,36 @@ WSError SceneSession::Disconnect(bool isFromClient)
             return WSError::WS_OK;
         }
     }
-    return DisconnectTask(true);
+    return DisconnectTask(isFromClient, true);
 }
 
-WSError SceneSession::DisconnectTask(const bool isSaveSnapshot)
+WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
 {
-    auto task = [weakThis = wptr(this), isSaveSnapshot]() {
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        auto state = session->GetSessionState();
-        if (state == SessionState::STATE_DISCONNECT) {
+        if (isFromClient) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Client need notify destroy session, id: %{public}d",
+                session->GetPersistentId());
+            session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
-        auto ret = session->Session::Disconnect();
-        if (ret != WSError::WS_OK) {
-            return ret;
+        auto state = session->GetSessionState();
+        auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
+        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) && isSaveSnapshot) {
+            session->SaveSnapshot(false);
         }
-        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
-            session->SaveSnapshot(true);
-        }
+        session->Session::Disconnect(isFromClient);
+        session->isTerminating = false;
         if (session->specificCallback_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            session->specificCallback_->onWindowInfoUpdate_(
-                session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "Disconnect");
+    },
+        "Disconnect");
     return WSError::WS_OK;
 }
 
