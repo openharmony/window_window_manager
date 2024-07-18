@@ -29,6 +29,7 @@ group("unittest") {
     ":dmserver_display_manager_agent_controller_test",
     ":dmserver_display_manager_config_test",
     ":dmserver_display_manager_proxy_test",
+    ":dmserver_display_manager_service_inner_test",
     ":dmserver_display_manager_service_test",
     ":dmserver_screen_rotation_controller_test",
   ]
@@ -69,6 +70,19 @@ ohos_unittest("dmserver_abstract_display_test") {
   module_out_path = module_out_path
 
   sources = [ "abstract_display_test.cpp" ]
+
+  deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("dmserver_display_manager_service_inner_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_service_inner_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
 

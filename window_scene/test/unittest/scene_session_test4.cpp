@@ -134,9 +134,8 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -226,6 +225,25 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
     sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
     sceneSession->HandleActionUpdateWindowMask(property, sceneSession, action);
     sceneSession->HandleActionUpdateTopmost(property, sceneSession, action);
+}
+
+/**
+ * @tc.name: isNeedSystemPermissionByAction
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
+
+    ASSERT_FALSE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
 }
 
 /**

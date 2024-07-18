@@ -605,6 +605,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(ANIMATION_TIME);
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -1567,8 +1568,9 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         height = uiContent->GetContainerModalTitleHeight();
     }
     if (height == -1) {
+        height = 0;
         WLOGFE("Get app window decor height failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -2350,8 +2352,7 @@ WSError WindowSessionImpl::NotifyCloseExistPipWindow()
 
 void WindowSessionImpl::NotifyTouchDialogTarget(int32_t posX, int32_t posY)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d position [%{public}d %{public}d]",
-        GetWindowName().c_str(), GetPersistentId(), posX, posY);
+    TLOGI(WmsLogTag::WMS_DIALOG, "window %{public}s id %{public}d", GetWindowName().c_str(), GetPersistentId());
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->ProcessPointDownSession(posX, posY);
@@ -2492,7 +2493,7 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "NotifyAvoidAreaChange: id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
+        "id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
         "down{%{public}d,%{public}d,%{public}d,%{public}d}", GetPersistentId(), type,
         avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_, avoidArea->topRect_.height_,
         avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
@@ -2863,6 +2864,58 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
             escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
         }
     }
+}
+
+WSError WindowSessionImpl::HandleBackEvent()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
+    bool isConsumed = false;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGFD("Transfer back event to inputEventConsumer");
+        std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
+        backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+        backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+        isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
+    } else {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            WLOGFD("Transfer back event to uiContent");
+            isConsumed = uiContent->ProcessBackPressed();
+        } else {
+            WLOGFE("There is no back event consumer");
+        }
+    }
+
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return WSError::WS_OK;
+    }
+    WLOGFD("report Back");
+    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
+    if (handler_ == nullptr) {
+        WLOGFE("HandleBackEvent handler_ is nullptr!");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    // notify back event to host session
+    wptr<WindowSessionImpl> weak = this;
+    auto task = [weak]() {
+        auto weakSession = weak.promote();
+        if (weakSession == nullptr) {
+            WLOGFE("HandleBackEvent session wptr is nullptr");
+            return;
+        }
+        weakSession->PerformBack();
+    };
+    if (!handler_->PostTask(task, "wms:PerformBack")) {
+        WLOGFE("Failed to post PerformBack");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    return WSError::WS_OK;
 }
 
 void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,

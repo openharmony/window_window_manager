@@ -97,6 +97,7 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
+        TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
         TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB,
         TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB,
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
@@ -224,6 +225,8 @@ public:
     }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override {}
+    void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token) override {}
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
     void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override

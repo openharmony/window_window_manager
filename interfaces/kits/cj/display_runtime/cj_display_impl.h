@@ -36,7 +36,7 @@ private:
     }
 public:
     explicit DisplayImpl(const sptr<Display>& display);
-    ~DisplayImpl();
+    ~DisplayImpl() override;
     static sptr<DisplayImpl> CreateDisplayImpl(sptr<Display>& display);
     static sptr<DisplayImpl> FindDisplayObject(uint64_t displayId);
     uint32_t GetInfoId();
