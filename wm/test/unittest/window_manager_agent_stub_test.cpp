@@ -334,6 +334,66 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | L
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest16
+ * @tc.desc: test TRANS_ID_UPDATE_CAMERA_FLOAT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    data.WriteUint8(static_cast<uint32_t>(1));
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT);
+    ASSERT_NE(stub_, nullptr);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest17
+ * @tc.desc: test TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    data.WriteUint8(static_cast<uint32_t>(1));
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS);
+    ASSERT_NE(stub_, nullptr);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest18
+ * @tc.desc: test deafault
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(12);
+    ASSERT_NE(stub_, nullptr);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 305);
+}
 }
 }
 }
