@@ -92,35 +92,10 @@ bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
     return a.defaultHotAreas.size() > b.defaultHotAreas.size();
 }
 
-void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-    bool useUIExtension) const
+Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float width, float height,
+    const Vector2f& offset, float& rotate)
 {
-    if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
-        return;
-    }
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        WLOGFE("sessionProperty is nullptr");
-        return;
-    }
-    auto displayId = sessionProperty->GetDisplayId();
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    if (screensProperties.find(displayId) == screensProperties.end()) {
-        return;
-    }
-    auto screenProperty = screensProperties[displayId];
-    auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-        static_cast<MMI::DisplayMode>(displayMode));
-    float width = screenProperty.GetBounds().rect_.GetWidth();
-    float height = screenProperty.GetBounds().rect_.GetHeight();
-    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
-    Vector2f offset = sceneSession->GetPosition(useUIExtension);
     Vector2f translate = offset;
-    float rotate = 0.0f;
     switch (displayRotation) {
         case MMI::DIRECTION0: {
             break;
@@ -145,6 +120,37 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
         default:
             break;
     }
+    return translate;
+}
+
+void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
+    bool useUIExtension) const
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        WLOGFE("sessionProperty is nullptr");
+        return;
+    }
+    auto displayId = sessionProperty->GetDisplayId();
+    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
+        return;
+    }
+    auto screenProperty = screensProperties[displayId];
+    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
+        static_cast<MMI::DisplayMode>(displayMode));
+    float width = screenProperty.GetBounds().rect_.GetWidth();
+    float height = screenProperty.GetBounds().rect_.GetHeight();
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f offset = sceneSession->GetPosition(useUIExtension);
+    float rotate = 0.0f;
+    Vector2f translate = CalRotationToTranslate(displayRotation, width, height, offset, rotate);
     transform = transform.Translate(translate).Rotate(rotate).Scale(scale, sceneSession->GetPivotX(),
         sceneSession->GetPivotY());
     transform = transform.Inverse();
