@@ -681,7 +681,7 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     if (useUniqueDensity_) {
         float oldVirtualPixelRatio = virtualPixelRatio_;
         virtualPixelRatio_ = virtualPixelRatio;
-        if (MathHelper::NearZero(oldVirtualPixelRatio - virtualPixelRatio)) {
+        if (!MathHelper::NearZero(oldVirtualPixelRatio - virtualPixelRatio)) {
             UpdateDensity();
             SetUniqueVirtualPixelRatioForSub(useUniqueDensity, virtualPixelRatio);
         }
