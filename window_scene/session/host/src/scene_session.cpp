@@ -2731,11 +2731,43 @@ void SceneSession::HandleCastScreenConnection(SessionInfo& info, sptr<SceneSessi
     }
 }
 
+static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
+    const sptr<WindowSessionProperty>& property, const sptr<WindowSessionProperty>& sessionProperty)
+{
+    switch (action) {
+        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
+        case WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP:
+        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
+        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
+        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
+        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
+        case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+            return true;
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
+            uint32_t oldFlags = sessionProperty->GetWindowFlags();
+            uint32_t flags = property->GetWindowFlags();
+            if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+                return true;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return false;
+}
+
 WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
     if (property == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
         return WMError::WM_ERROR_NULLPTR;
     }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
@@ -2745,7 +2777,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!isSystemCalling && isNeedSystemPermissionByAction(action)) {
+    if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2766,25 +2798,6 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         return WMError::WM_OK;
     }
     return PostSyncTask(task, "UpdateProperty");
-}
-
-bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action)
-{
-    switch (action) {
-        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
-        case WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP:
-        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
-        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
-        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
-        case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            return true;
-        default:
-            break;
-    }
-    return false;
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
