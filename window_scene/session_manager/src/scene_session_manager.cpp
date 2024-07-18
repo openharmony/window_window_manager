@@ -161,7 +161,7 @@ const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 
-const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_DISPLAY_ORIENTATION_MAP {
+const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
     {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
     {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
@@ -3067,7 +3067,8 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
-    auto resourceMgr = GetResourceManager(abilityInfo);
+    auto resourceMgr = GetResourceManager(abilityInfo,
+        Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA);
     if (!resourceMgr) {
         WLOGFE("resourceMgr is nullptr.");
         return false;
@@ -5919,21 +5920,21 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     }
     auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::SELECT_STRING);
     if (!resourceMgr) {
-        WLOGFE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
+        TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
         return;
     }
     std::string orientation;
     auto ret = resourceMgr->GetStringById(static_cast<uint32_t>(abilityInfo.orientationId), orientation);
     if (ret != Global::Resource::RState::SUCCESS) {
-        WLOGFE(WmsLogTag::DEFAULT, "GetStringById failed errcode:%{public}d, labelId:%{public}d",
+        TLOGE(WmsLogTag::DEFAULT, "GetStringById failed errcode:%{public}d, labelId:%{public}d",
             static_cast<int32_t>(ret), abilityInfo.orientationId);
         return;
     }
-    if (ABILITY_TO_DISPLAY_ORIENTATION_MAP.find(orientation) == ABILITY_TO_DISPLAY_ORIENTATION_MAP.end()) {
-        WLOGFE(WmsLogTag::DEFAULT, "Do not support this orientation:%{public}s", orientation.c_str());
+    if (STRING_TO_DISPLAY_ORIENTATION_MAP.find(orientation) == STRING_TO_DISPLAY_ORIENTATION_MAP.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "Do not support this orientation:%{public}s", orientation.c_str());
         return;
     }
-    abilityInfo.orientation = ABILITY_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
+    abilityInfo.orientation = STRING_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
 }
 
 WSError SceneSessionManager::TerminateSessionNew(
