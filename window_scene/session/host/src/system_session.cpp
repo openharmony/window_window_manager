@@ -44,7 +44,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
 
 SystemSession::~SystemSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "SystemSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "~SystemSession, id: %{public}d", GetPersistentId());
 }
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
