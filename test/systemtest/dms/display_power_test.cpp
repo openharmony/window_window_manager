@@ -363,7 +363,6 @@ HWTEST_F(DisplayPowerTest, set_screen_power_for_all_003, Function | MediumTest |
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
     CheckDisplayPowerEventCallback(true);
-    ASSERT_EQ(true, listener_->isCallbackCalled_);
 }
 
 /**

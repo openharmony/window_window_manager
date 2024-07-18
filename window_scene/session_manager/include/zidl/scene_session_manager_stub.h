@@ -86,6 +86,7 @@ private:
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply);
     int HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply);
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);

@@ -1725,6 +1725,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshot, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->displayNode_ = nullptr;
     auto pixelmap = session->GetScreenSnapshot(1.0, 1.0);
     EXPECT_EQ(pixelmap, nullptr);
 

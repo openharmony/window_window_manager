@@ -92,6 +92,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "KeyboardGravity", KeyboardGravityInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
     napi_set_named_property(env, exportObj, "StartupVisibility", CreateJsSessionStartupVisibility(env));
+    napi_set_named_property(env, exportObj, "WindowVisibility", CreateJsWindowVisibility(env));
     napi_set_named_property(env, exportObj, "ProcessMode", CreateJsSessionProcessMode(env));
     napi_set_named_property(env, exportObj, "PiPControlType", CreateJsSessionPiPControlType(env));
     napi_set_named_property(env, exportObj, "PiPControlStatus", CreateJsSessionPiPControlStatus(env));
@@ -160,13 +161,13 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSystemAnimatedScenes);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMap", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMap);
-    BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
-        JsSceneSessionManager::GetIsLayoutFullScreen);
+    BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "switchFreeMultiWindow", moduleName,
         JsSceneSessionManager::SwitchFreeMultiWindow);
     BindNativeFunction(env, exportObj, "getFreeMultiWindowConfig", moduleName,
         JsSceneSessionManager::GetFreeMultiWindowConfig);
-    BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
+    BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
+        JsSceneSessionManager::GetIsLayoutFullScreen);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
@@ -824,18 +825,18 @@ napi_value JsSceneSessionManager::GetSessionSnapshotPixelMap(napi_env env, napi_
     return (me != nullptr) ? me->OnGetSessionSnapshotPixelMap(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callback_info info)
-{
-    WLOGFI("[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
-}
-
 napi_value JsSceneSessionManager::SwitchFreeMultiWindow(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSwitchFreeMultiWindow(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callback_info info)
+{
+    WLOGFI("[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
@@ -1175,7 +1176,7 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
 {
     DumpRootSceneElementInfoFunc func = [this](const std::vector<std::string>& params,
         std::vector<std::string>& infos) {
-        if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1 params num
+        if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
             Ace::UIContent::ShowDumpHelp(infos);
             WLOGFD("Dump ArkUI help info");
         } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
@@ -2522,12 +2523,34 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     return result;
 }
 
-napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::GetCustomDecorHeight(napi_env env, napi_callback_info info)
 {
-    bool isLayoutFullScreen = false;
-    SceneSessionManager::GetInstance().GetIsLayoutFullScreen(isLayoutFullScreen);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]GetCustomDecorHeight");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetCustomDecorHeight(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnGetCustomDecorHeight(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t customDecorHeight = SceneSessionManager::GetInstance().GetCustomDecorHeight(persistentId);
     napi_value result = nullptr;
-    napi_get_boolean(env, isLayoutFullScreen, &result);
+    napi_create_int32(env, customDecorHeight, &result);
     return result;
 }
 
@@ -2559,34 +2582,12 @@ napi_value JsSceneSessionManager::OnGetFreeMultiWindowConfig(napi_env env, napi_
     return JsWindowSceneConfig::CreateFreeMultiWindowConfig(env, systemConfig);
 }
 
-napi_value JsSceneSessionManager::GetCustomDecorHeight(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]GetCustomDecorHeight");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetCustomDecorHeight(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::OnGetCustomDecorHeight(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t persistentId;
-    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to persistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t customDecorHeight = SceneSessionManager::GetInstance().GetCustomDecorHeight(persistentId);
+    bool isLayoutFullScreen = false;
+    SceneSessionManager::GetInstance().GetIsLayoutFullScreen(isLayoutFullScreen);
     napi_value result = nullptr;
-    napi_create_int32(env, customDecorHeight, &result);
+    napi_get_boolean(env, isLayoutFullScreen, &result);
     return result;
 }
 

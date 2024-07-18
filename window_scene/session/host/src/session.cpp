@@ -37,6 +37,7 @@
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
+#include "session/host/include/ws_ffrt_helper.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
 
@@ -1605,7 +1606,7 @@ WSError Session::RaiseToAppTopForPointDown()
 
 void Session::PresentFocusIfPointDown()
 {
-    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    WLOGFI("id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -1828,7 +1829,8 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
     }
-    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
+    auto pixelMap = callback->GetResult(FFRT_SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
@@ -1841,7 +1843,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
     return nullptr;
 }
 
-void Session::SaveSnapshot(bool useSnapshotThread)
+void Session::SaveSnapshot(bool useFfrt)
 {
     if (scenePersistence_ == nullptr) {
         return;
@@ -1866,12 +1868,14 @@ void Session::SaveSnapshot(bool useSnapshotThread)
         };
         session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
-    auto snapshotScheduler = scenePersistence_->GetSnapshotScheduler();
-    if (!useSnapshotThread || snapshotScheduler == nullptr) {
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
+    if (!useFfrt || snapshotFfrtHelper == nullptr) {
         task();
         return;
     }
-    snapshotScheduler->PostAsyncTask(task, "SaveSnapshot");
+    std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
+    snapshotFfrtHelper->CancelTask(taskName);
+    snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)

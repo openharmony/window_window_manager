@@ -372,6 +372,29 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
     }
 }
 
+void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
+{
+    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is null");
+        return;
+    }
+    auto surfaceId = surfaceNode->GetId();
+    TLOGI(WmsLogTag::WMS_EVENT, "HostId:%{public}d surfaceId:%{public}" PRIu64
+        " uiExtentionWindowInfo:%{public}d",
+        windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
+    for (auto uiExWindowinfo : windowInfo.uiExtentionWindowInfo) {
+        auto str = DumpWindowInfo(uiExWindowinfo);
+        str = "sec:" + std::to_string(uiExWindowinfo.privacyUIFlag) + " " + str;
+        TLOGI(WmsLogTag::WMS_EVENT, "uiExWindowinfo:%{public}s", str.c_str());
+    }
+}
+
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
@@ -389,6 +412,9 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             std::to_string(e.defaultHotAreas.size()) + " ";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
+        }
+        if (e.uiExtentionWindowInfo.size() > 0) {
+            DumpUIExtentionWindowInfo(e);
         }
     }
     idList += std::to_string(focusedSessionId_);

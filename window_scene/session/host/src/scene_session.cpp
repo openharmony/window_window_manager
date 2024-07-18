@@ -652,16 +652,10 @@ WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction
         if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
             const auto& keyboardSession = GetKeyboardSession();
             FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
-            if (keyboardSession != nullptr) {
-                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, rsTransaction);
-            }
-            if (ret != WSError::WS_OK) {
-                return ret;
-            }
+            return ret;
         }
         if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             FixKeyboardPositionByKeyboardPanel(GetKeyboardPanelSession(), self);
-            return WSError::WS_OK;
         }
     }
 
@@ -1289,16 +1283,14 @@ void SceneSession::RemoveUIExtSurfaceNodeId(int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
     TLOGI(WmsLogTag::WMS_UIEXT, "Remove uiExtension by persistentId=%{public}d", persistentId);
-    auto iter = uiExtNodeIdToPersistentIdMap_.cbegin();
-    while (iter != uiExtNodeIdToPersistentIdMap_.cend()) {
-        if (iter->second == persistentId) {
-            TLOGI(WmsLogTag::WMS_UIEXT,
-                "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
-                iter->first, persistentId);
-            uiExtNodeIdToPersistentIdMap_.erase(iter);
-            return;
-        }
-        ++iter;
+    auto pairIter = std::find_if(uiExtNodeIdToPersistentIdMap_.begin(), uiExtNodeIdToPersistentIdMap_.end(),
+        [persistentId](const auto& entry) { return entry.second == persistentId; });
+    if (pairIter != uiExtNodeIdToPersistentIdMap_.end()) {
+        uiExtNodeIdToPersistentIdMap_.erase(pairIter);
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
+            pairIter->first, persistentId);
+        return;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "Failed to remove uiExtension by persistentId=%{public}d", persistentId);
 }
@@ -1331,7 +1323,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
-        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType avoidAreaType:%{public}u", type);
+        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType type:%{public}u", type);
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
@@ -2575,8 +2567,8 @@ void SceneSession::SetSystemTouchable(bool touchable)
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The interface permission failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [weakThis = wptr(this), abilitySessionInfo, visible]() {
@@ -2651,21 +2643,22 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     }
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
-        "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
+        "callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
         info.windowMode, info.callerPersistentId_);
     return info;
 }
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The permission check failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    auto isSACalling = SessionPermission::IsSACalling();
+    auto task = [weakThis = wptr(this), abilitySessionInfo, isSACalling]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2678,8 +2671,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
-        auto callingTokenId = abilitySessionInfo->callingTokenId;
-        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::IsSACallingByCallerToken(callingTokenId) &&
+        if (!(isPC || isFreeMutiWindowMode) && !isSACalling &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
@@ -2688,6 +2680,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                     session->GetForegroundInteractiveStatus());
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
+            auto callingTokenId = abilitySessionInfo->callingTokenId;
             auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
@@ -3289,7 +3282,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }

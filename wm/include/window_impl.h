@@ -438,7 +438,6 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
-    static bool enableImmersiveMode_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState subWindowState_ {WindowState::STATE_INITIAL};
@@ -495,6 +494,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
+    bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
