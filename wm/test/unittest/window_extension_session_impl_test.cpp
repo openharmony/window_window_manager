@@ -1384,6 +1384,33 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTe
     pointerEvent->UpdatePointerItem(0, item);
     window_->ConsumePointerEvent(pointerEvent);
 }
+
+/**
+ * @tc.name: PreNotifyKeyEvent
+ * @tc.desc: PreNotifyKeyEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(nullptr, keyEvent);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    bool ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, true);
+
+    window_->focusState_ = false;
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, true);
+
+    window_->focusState_ = true;
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
