@@ -684,7 +684,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         if (onlySupportFullScreen || property_->GetFullScreenStart()) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
                 onlySupportFullScreen, property_->GetFullScreenStart());
-            SetLayoutFullScreen(true);
+            Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         }
         // get orientation configuration
         OHOS::AppExecFwk::DisplayOrientation displayOrientation =
@@ -1941,6 +1941,10 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (property_ == nullptr || property_->GetCompatibleModeInPc()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     switch (presentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
             enableImmersiveMode_ = true;
@@ -1951,9 +1955,15 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;
     }
+    property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_);
-    return SetLayoutFullScreen(enableImmersiveMode_);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
 WMError WindowSceneSessionImpl::MaximizeFloating()
