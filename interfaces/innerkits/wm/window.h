@@ -2095,7 +2095,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarVectorHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() { return 0; }
 };
 }
 }

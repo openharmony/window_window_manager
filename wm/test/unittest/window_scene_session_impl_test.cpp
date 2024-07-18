@@ -1700,16 +1700,16 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
 }
 
 /*
- * @tc.name: GetStatusBarVectorHeight
- * @tc.desc: GetStatusBarVectorHeight test
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, GetStatusBarVectorHeight, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetStatusBarVectorHeight");
+    option->SetWindowName("GetStatusBarHeight");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_EQ(0, window->GetStatusBarVectorHeight());
+    ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 }
 } // namespace Rosen

@@ -341,7 +341,7 @@ public:
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
     int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
-    int32_t GetStatusBarVectorHeight() override;
+    int32_t GetStatusBarHeight() override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);

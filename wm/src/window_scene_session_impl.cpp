@@ -3554,12 +3554,12 @@ bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
     return enableImmersiveMode_;
 }
 
-uint32_t WindowSceneSessionImpl::GetStatusBarVectorHeight()
+uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
 {
     uint32_t height = 0;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
-    height = static_cast<uint32_t>(hostSession->GetStatusBarVectorHeight());
+    height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
     TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     return height;
 }

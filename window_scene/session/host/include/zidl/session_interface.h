@@ -112,7 +112,7 @@ public:
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual int32_t GetAppForceLandscapeMode(const std::string& bundleName) { return 0; }
-    virtual int32_t GetStatusBarVectorHeight() { return 0; }
+    virtual int32_t GetStatusBarHeight() { return 0; }
 };
 } // namespace OHOS::Rosen
 
