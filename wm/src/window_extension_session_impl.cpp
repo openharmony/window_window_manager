@@ -346,6 +346,10 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
         NotifyWindowAfterUnfocused();
     }
     focusState_ = focusState;
+    if (focusState_ != std::nullopt) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "persistentId:%{public}d  focusState:%{public}d",
+            GetPersistentId(), static_cast<int32_t>(focusState_.value()));
+    }
 }
 
 void WindowExtensionSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
@@ -968,6 +972,33 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
             pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
     }
     NotifyPointerEvent(pointerEvent);
+}
+
+bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
+        return false;
+    }
+    RefreshNoInteractionTimeoutMonitor();
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        if (focusState_ == std::nullopt) {
+            TLOGW(WmsLogTag::WMS_EVENT, "focusState is null");
+            keyEvent->MarkProcessed();
+            return true;
+        }
+        if (!focusState_.value()) {
+            keyEvent->MarkProcessed();
+            return true;
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking:%{public}d wid:%{public}d",
+            keyEvent->GetId(), keyEvent->GetAgentWindowId());
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent != nullptr) {
+        return uiContent->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS
