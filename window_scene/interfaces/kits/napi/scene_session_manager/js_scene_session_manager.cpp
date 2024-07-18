@@ -1479,13 +1479,20 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
             "sceneSession is nullptr"));
         return NapiGetUndefined(env);
     }
+
+    bool isSaveSnapshot = true;
+    if (argc == ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+        ConvertFromJsValue(env, argv[ARGC_TWO], isSaveSnapshot);
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]isSaveSnapshot: %{public}u", isSaveSnapshot);
+    } 
+
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
+    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot);
     auto localScheduler = SceneSessionManager::GetInstance().GetTaskScheduler();
     auto clearTask = [jsSceneSession, needRemoveSession, persistentId = sceneSession->GetPersistentId()]() {
         if (jsSceneSession != nullptr) {

@@ -1997,10 +1997,10 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(
-    const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
+    const sptr<SceneSession>& sceneSession, const bool needRemoveSession, const bool isSaveSnapshot)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, needRemoveSession]() {
+    auto task = [this, weakSceneSession, needRemoveSession, isSaveSnapshot]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -2021,7 +2021,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
         }
         WindowDestroyNotifyVisibility(scnSession);
-        scnSession->Disconnect();
+        scnSession->DisconnectTask(isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
