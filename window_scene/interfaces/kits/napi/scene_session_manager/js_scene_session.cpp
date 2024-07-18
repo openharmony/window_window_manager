@@ -99,6 +99,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SYSTEMBAR_PROPERTY_CHANGE_CB,          ListenerFuncType::SYSTEMBAR_PROPERTY_CHANGE_CB},
     {NEED_AVOID_CB,                         ListenerFuncType::NEED_AVOID_CB},
     {PENDING_SESSION_TO_FOREGROUND_CB,      ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB},
+    {CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
+        ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB},
     {PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
         ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB},
     {CUSTOM_ANIMATION_PLAYING_CB,           ListenerFuncType::CUSTOM_ANIMATION_PLAYING_CB},
@@ -2598,7 +2600,7 @@ void JsSceneSession::ProcessClickModalSpecificWindowOutsideRegister()
 
 void JsSceneSession::OnClickModalSpecificWindowOutside()
 {
-    TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     auto task = [jsCallBack = GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
