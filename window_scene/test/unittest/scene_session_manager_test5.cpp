@@ -631,6 +631,173 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function
     ASSERT_NE(sceneSession2, nullptr);
     ssm_->CheckFocusIsDownThroughBlockingType(sceneSession, sceneSession2, true);
 }
+
+
+/**
+ * @tc.name: CheckFocusIsDownThroughBlockingType
+ * @tc.desc: CheckFocusIsDownThroughBlockingType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> requestSceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(requestSceneSession, nullptr);
+    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(focusedSession, nullptr);
+    bool includingAppSession = true;
+    ssm_->CheckFocusIsDownThroughBlockingType(requestSceneSession, focusedSession, includingAppSession);
+
+    requestSceneSession->SetZOrder(0);
+    focusedSession->SetZOrder(1);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    Session session = Session(info);
+    session.property_ = nullptr;
+    session.SetZOrder(2);
+
+    session.property_ = new WindowSessionProperty();
+    session.isVisible_ = true;
+    ssm_->CheckFocusIsDownThroughBlockingType(requestSceneSession, focusedSession, includingAppSession);
+}
+
+/**
+ * @tc.name: CheckTopmostWindowFocus
+ * @tc.desc: CheckTopmostWindowFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+
+    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(focusedSession, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    Session session = Session(info);
+    session.property_ = nullptr;
+
+    session.persistentId_ = 1;
+    focusedSession->GetMissionId();
+    ssm_->CheckTopmostWindowFocus(focusedSession, sceneSession);
+}
+
+/**
+ * @tc.name: CheckRequestFocusImmdediately
+ * @tc.desc: CheckRequestFocusImmdediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    Session session = Session(info);
+    session.property_ = nullptr;
+    ssm_->CheckRequestFocusImmdediately(sceneSession);
+}
+
+/**
+ * @tc.name: GetNextFocusableSession
+ * @tc.desc: GetNextFocusableSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->GetNextFocusableSession(persistentId);
+    sceneSession->GetForceHideState();
+    Session session = Session(info);
+    session.property_ = new WindowSessionProperty();
+    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    ssm_->GetNextFocusableSession(persistentId);
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+
+    ssm_->GetTopNearestBlockingFocusSession(2, true);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->GetTopNearestBlockingFocusSession(0, true);
+
+    Session session = Session(info);
+    session.property_ = nullptr;
+    ssm_->GetTopNearestBlockingFocusSession(0, true);
+    sptr<SceneSession> session_ = nullptr;
+    ssm_->GetTopNearestBlockingFocusSession(0, true);
+    session_ = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(session_, nullptr);
+    ssm_->GetTopNearestBlockingFocusSession(0, true);
+}
+
+/**
+ * @tc.name: PreloadInLakeApp、UpdateSessionAvoidAreaListener
+ * @tc.desc: PreloadInLakeApp、UpdateSessionAvoidAreaListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    int32_t persistentId = 0;
+
+    ssm_->PreloadInLakeApp("");
+    sptr<SceneSession> sceneSession = nullptr;
+
+    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
+    sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
+}
+
+/**
+ * @tc.name: NotifyMMIWindowPidChange
+ * @tc.desc: NotifyMMIWindowPidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->NotifyMMIWindowPidChange(0, true);
+    sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+}
 }
 } // namespace Rosen
 } // namespace OHOS
