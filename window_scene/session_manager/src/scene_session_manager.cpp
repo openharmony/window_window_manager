@@ -4533,6 +4533,10 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
 {
     if (sceneSession == nullptr) {
         WLOGFE("[WMSComm]session is nullptr");
+        if (isFocused) {
+            auto prevSession = GetSceneSession(lastFocusedSessionId_);
+            NotifyUnFocusedByMission(prevSession);
+        }
         return;
     }
     int32_t persistentId = sceneSession->GetPersistentId();
@@ -4597,6 +4601,16 @@ void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession>& prevSes
         if (currSession && !currSession->GetSessionInfo().isSystem_) {
             TLOGD(WmsLogTag::WMS_FOCUS, "NotifyMissionFocused, id: %{public}d", currSession->GetMissionId());
             listenerController_->NotifySessionFocused(currSession->GetMissionId());
+        }
+    }
+}
+
+void SceneSessionManager::NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession)
+{
+    if (listenerController_ != nullptr) {
+        if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "NotifyMissionUnfocused, id: %{public}d", sceneSession->GetMissionId());
+            listenerController_->NotifySessionUnfocused(sceneSession->GetMissionId());
         }
     }
 }

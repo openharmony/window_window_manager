@@ -421,6 +421,7 @@ private:
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
+    void NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession);
     bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
