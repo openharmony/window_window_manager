@@ -23,6 +23,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 class SingleDisplaySensorFoldStateManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -37,6 +40,7 @@ void SingleDisplaySensorFoldStateManagerTest::SetUpTestCase()
 
 void SingleDisplaySensorFoldStateManagerTest::TearDownTestCase()
 {
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void SingleDisplaySensorFoldStateManagerTest::SetUp()

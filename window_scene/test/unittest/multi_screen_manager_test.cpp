@@ -22,6 +22,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 class MultiScreenManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -36,6 +39,7 @@ void MultiScreenManagerTest::SetUpTestCase()
 
 void MultiScreenManagerTest::TearDownTestCase()
 {
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void MultiScreenManagerTest::SetUp()
