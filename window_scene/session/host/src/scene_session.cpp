@@ -2731,7 +2731,7 @@ void SceneSession::HandleCastScreenConnection(SessionInfo& info, sptr<SceneSessi
     }
 }
 
-static bool isNeedSystemPermissionByAction(WSPropertyChangeAction action,
+static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
     const sptr<WindowSessionProperty>& property, const sptr<WindowSessionProperty>& sessionProperty)
 {
     switch (action) {
@@ -2777,7 +2777,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property, sessionProperty)) {
+    if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
