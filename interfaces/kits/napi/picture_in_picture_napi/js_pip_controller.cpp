@@ -644,7 +644,7 @@ void JsPipController::PiPControlObserverImpl::OnControlEvent(PiPControlType cont
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "engine is null");
     }
 }
 } // namespace Rosen
