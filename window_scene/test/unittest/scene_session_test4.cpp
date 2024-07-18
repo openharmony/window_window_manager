@@ -263,9 +263,9 @@ HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest
     sessionProperty->SetWindowFlags(oldFlag);
     property->SetWindowFlags(newFlag);
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS,
-        property));
+        property, sessionProperty));
     ASSERT_FALSE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE,
-        property));
+        property, sessionProperty));
 }
 
 /**
