@@ -46,21 +46,6 @@ void BindNativePropertys(napi_env env, napi_value object, const char* name, napi
     napi_define_properties(env, object, ARGC_ONE, properties);
 }
 } // namespace
-#define CHECK_OBJECT_VALUE_RETURN_IF_NULL(env, objValue)                    \
-    do {                                                            \
-        if (objValue == nullptr) {                                    \
-            TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");         \
-            return NapiGetUndefined(env);                           \
-        }                                                           \
-    } while (false)
-
-#define CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info)                    \
-    do {                                                            \
-        if (info.argc < ARGC_ONE) {                                 \
-            TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one."); \
-            return nullptr;                                         \
-        }                                                           \
-    }
 
 JsExtensionWindowConfig::JsExtensionWindowConfig(const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
     : extensionWindowConfig_(extensionWindowConfig)
@@ -80,7 +65,10 @@ napi_value CreateJsExtensionWindowConfig(napi_env env,
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
-    CHECK_OBJECT_VALUE_RETURN_IF_NULL(env, objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
+        return NapiGetUndefined(env);
+    }
     std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
         std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig);
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
@@ -133,7 +121,10 @@ napi_value JsExtensionWindowConfig::OnGetWindowRect(napi_env env, NapiCallbackIn
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
-    CHECK_OBJECT_VALUE_RETURN_IF_NULL(env, objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
+        return NapiGetUndefined(env);
+    }
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
         std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "left", JsExtensionWindowConfig::GetWindowRectLeft,
@@ -206,7 +197,10 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptions(napi_env env, NapiCall
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
-    CHECK_OBJECT_VALUE_RETURN_IF_NULL(env, objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
+        return NapiGetUndefined(env);
+    }
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
         std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "title", JsExtensionWindowConfig::GetSubWindowOptionsTitle,
@@ -279,7 +273,10 @@ napi_value JsExtensionWindowConfig::OnGetSystemWindowOptions(napi_env env, NapiC
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
-    CHECK_OBJECT_VALUE_RETURN_IF_NULL(env, objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
+        return NapiGetUndefined(env);
+    }
     SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
         std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "windowType", JsExtensionWindowConfig::GetSystemWindowOptionsWindowType,
@@ -308,7 +305,10 @@ napi_value JsExtensionWindowConfig::SetWindowName(napi_env env, napi_callback_in
 
 napi_value JsExtensionWindowConfig::OnSetWindowName(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     std::string windowName;
     if (!ConvertFromJsValue(env, result, windowName)) {
@@ -328,7 +328,10 @@ napi_value JsExtensionWindowConfig::SetWindowAttribute(napi_env env, napi_callba
 
 napi_value JsExtensionWindowConfig::OnSetWindowAttribute(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t value = 0;
     if (!ConvertFromJsValue(env, result, value)) {
@@ -348,7 +351,10 @@ napi_value JsExtensionWindowConfig::SetWindowRect(napi_env env, napi_callback_in
 
 napi_value JsExtensionWindowConfig::OnSetWindowRect(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t res = 0;
     if (!ParseJsValue(result, env, "left", res)) {
@@ -384,7 +390,10 @@ napi_value JsExtensionWindowConfig::SetWindowRectLeft(napi_env env, napi_callbac
 
 napi_value JsExtensionWindowConfig::OnSetWindowRectLeft(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t left = 0;
     if (!ConvertFromJsValue(env, result, left)) {
@@ -404,7 +413,10 @@ napi_value JsExtensionWindowConfig::SetWindowRectTop(napi_env env, napi_callback
 
 napi_value JsExtensionWindowConfig::OnSetWindowRectTop(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t top = 0;
     if (!ConvertFromJsValue(env, result, top)) {
@@ -424,7 +436,10 @@ napi_value JsExtensionWindowConfig::SetWindowRectWidth(napi_env env, napi_callba
 
 napi_value JsExtensionWindowConfig::OnSetWindowRectWidth(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, result, width)) {
@@ -444,7 +459,10 @@ napi_value JsExtensionWindowConfig::SetWindowRectHeight(napi_env env, napi_callb
 
 napi_value JsExtensionWindowConfig::OnSetWindowRectHeight(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     uint32_t height = 0;
     if (!ConvertFromJsValue(env, result, height)) {
@@ -464,7 +482,10 @@ napi_value JsExtensionWindowConfig::SetSubWindowOptions(napi_env env, napi_callb
 
 napi_value JsExtensionWindowConfig::OnSetSubWindowOptions(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     std::string title;
     if (!ParseJsValue(result, env, "title", title)) {
@@ -505,7 +526,10 @@ napi_value JsExtensionWindowConfig::SetSubWindowOptionsTitle(napi_env env, napi_
 
 napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsTitle(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     std::string title;
     if (!ConvertFromJsValue(env, result, title)) {
@@ -526,7 +550,10 @@ napi_value JsExtensionWindowConfig::SetSubWindowOptionsDecorEnabled(napi_env env
 
 napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsDecorEnabled(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     bool decorEnabled = false;
     if (!ConvertFromJsValue(env, result, decorEnabled)) {
@@ -546,7 +573,10 @@ napi_value JsExtensionWindowConfig::SetSubWindowOptionsIsModal(napi_env env, nap
 
 napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsModal(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     bool isModal = false;
     if (!ConvertFromJsValue(env, result, isModal)) {
@@ -566,7 +596,10 @@ napi_value JsExtensionWindowConfig::SetSubWindowOptionsIsTopmost(napi_env env, n
 
 napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsTopmost(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     bool isTopmost = false;
     if (!ConvertFromJsValue(env, result, isTopmost)) {
@@ -586,7 +619,10 @@ napi_value JsExtensionWindowConfig::SetSystemWindowOptions(napi_env env, napi_ca
 
 napi_value JsExtensionWindowConfig::OnSetSystemWindowOptions(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t windowType = 0;
     if (!ParseJsValue(result, env, "windowType", windowType)) {
@@ -606,7 +642,10 @@ napi_value JsExtensionWindowConfig::SetSystemWindowOptionsWindowType(napi_env en
 
 napi_value JsExtensionWindowConfig::OnSetSystemWindowOptionsWindowType(napi_env env, NapiCallbackInfo& info)
 {
-    CHECK_ARGC_RETURN_IF_LESS_THEN_ONE(info);
+    if (info.argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "info argc less then one.");
+        return NapiGetUndefined(env);
+    }
     napi_value result = info.argv[ARGC_ZERO];
     int32_t windowType = 0;
     if (!ConvertFromJsValue(env, result, windowType)) {
