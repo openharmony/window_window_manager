@@ -1997,10 +1997,9 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(
-    const sptr<SceneSession>& sceneSession, const bool needRemoveSession, const bool isSaveSnapshot)
+    const sptr<SceneSession>& sceneSession, bool needRemoveSession, bool isSaveSnapshot)
 {
-    wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, needRemoveSession, isSaveSnapshot]() {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), needRemoveSession, isSaveSnapshot]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -2013,15 +2012,15 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
         DestroySubSession(scnSession); // destroy sub session by destruction
-        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d, remove:%{public}d",
-            persistentId, needRemoveSession);
+        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d, remove:%{public}d, isSaveSnapshot:%{public}d",
+            persistentId, needRemoveSession, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
         if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
             auto sessionInfo = scnSession->GetSessionInfo();
             WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
         }
         WindowDestroyNotifyVisibility(scnSession);
-        scnSession->DisconnectTask(isSaveSnapshot);
+        scnSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
