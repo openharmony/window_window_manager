@@ -24,6 +24,7 @@ namespace {
 constexpr char EXTENSION_WINDOW_CONFIG_NAME[] = "__extension_window_config_ptr__";
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
+
 napi_value NapiGetUndefined(napi_env env)
 {
     napi_value result = nullptr;
