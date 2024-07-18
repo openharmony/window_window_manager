@@ -41,7 +41,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
