@@ -4010,7 +4010,7 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
-void ScreenSessionManager::SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX,
+void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
     auto session = GetScreenSession(screenId);

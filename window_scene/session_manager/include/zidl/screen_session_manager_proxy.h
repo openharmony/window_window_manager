@@ -123,7 +123,7 @@ public:
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
 
-    void SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY,
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
         float pivotX, float pivotY) override;
 
     void SetFoldStatusLocked(bool locked) override;

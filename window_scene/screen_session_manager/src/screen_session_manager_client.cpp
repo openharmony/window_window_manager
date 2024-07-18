@@ -515,7 +515,7 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     }
 }
 
-void ScreenSessionManagerClient::UpdateDisplayScale(const ScreenId id, const float scaleX, const float scaleY,
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
     const float pivotX, const float pivotY)
 {
     auto session = GetScreenSession(id);

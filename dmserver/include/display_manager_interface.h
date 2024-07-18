@@ -263,7 +263,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual void SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
+    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
 

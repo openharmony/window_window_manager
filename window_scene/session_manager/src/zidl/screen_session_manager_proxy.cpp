@@ -1872,7 +1872,7 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
     }
 }
 
-void ScreenSessionManagerProxy::SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX,
+void ScreenSessionManagerProxy::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
     sptr<IRemoteObject> remote = Remote();
