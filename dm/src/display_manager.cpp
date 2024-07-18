@@ -57,7 +57,7 @@ public:
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
-    void SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -839,12 +839,12 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
-void DisplayManager::SetDisplayScale(const ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
+void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
 {
     pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
-void DisplayManager::Impl::SetDisplayScale(const ScreenId screenId,
+void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
     float scaleX, float scaleY, float pivotX, float pivotY)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
@@ -1902,4 +1902,5 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
-} // namespace OHOS::Rosen
+} // namespace OHOS::Rosen
+
