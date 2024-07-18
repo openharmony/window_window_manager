@@ -35,6 +35,7 @@ namespace {
     const static uint32_t MAX_DISPLAY_SIZE = 32;
     const static uint32_t MAX_INTERVAL_US = 25000;
     std::atomic<bool> g_dmIsDestroyed = false;
+    std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -678,8 +679,14 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
+    std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
+    if (!lock.try_lock()) {
+        WLOGFE("DisplayManager::GetSnapshotByPicker try_lock failed!");
+        return nullptr;
+    }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetSnapshotByPicker(rect, errorCode);
+    lock.unlock();
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetSnapshotByPicker failed!");
         return nullptr;
