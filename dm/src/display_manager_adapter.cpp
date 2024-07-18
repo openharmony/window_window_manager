@@ -593,7 +593,7 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
-void DisplayManagerAdapter::SetDisplayScale(const ScreenId screenId,
+void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,
     float scaleX, float scaleY, float pivotX, float pivotY)
 {
     INIT_PROXY_CHECK_RETURN();
