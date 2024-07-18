@@ -172,7 +172,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
-    res = session->HandleGetStatusBarVectorHeight(data, reply);
+    res = session_->HandleGetStatusBarVectorHeight(data, reply);
     ASSERT_EQ(0, res);
 }
 
