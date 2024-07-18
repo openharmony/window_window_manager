@@ -126,8 +126,10 @@ napi_value JsExtensionWindowConfig::OnGetWindowRect(napi_env env, NapiCallbackIn
         TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
         return NapiGetUndefined(env);
     }
-    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
-        std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
+    std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
+        std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig_);
+    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
+        JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "left", JsExtensionWindowConfig::GetWindowRectLeft,
         JsExtensionWindowConfig::SetWindowRectLeft);
     BindNativePropertys(env, objValue, "top", JsExtensionWindowConfig::GetWindowRectTop,
@@ -202,8 +204,10 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptions(napi_env env, NapiCall
         TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
         return NapiGetUndefined(env);
     }
-    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
-        std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
+    std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
+        std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig_);
+    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
+        JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "title", JsExtensionWindowConfig::GetSubWindowOptionsTitle,
         JsExtensionWindowConfig::SetSubWindowOptionsTitle);
     BindNativePropertys(env, objValue, "decorEnabled", JsExtensionWindowConfig::GetSubWindowOptionsDecorEnabled,
@@ -278,8 +282,10 @@ napi_value JsExtensionWindowConfig::OnGetSystemWindowOptions(napi_env env, NapiC
         TLOGE(WmsLogTag::WMS_UIEXT, "objValue is null.");
         return NapiGetUndefined(env);
     }
-    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME,
-        std::unique_ptr<JsExtensionWindowConfig>(this).release(), JsExtensionWindowConfig::Finalizer);
+    std::unique_ptr<JsExtensionWindowConfig> jsExtensionWindowConfig =
+        std::make_unique<JsExtensionWindowConfig>(extensionWindowConfig_);
+    SetNamedNativePointer(env, objValue, EXTENSION_WINDOW_CONFIG_NAME, jsExtensionWindowConfig.release(),
+        JsExtensionWindowConfig::Finalizer);
     BindNativePropertys(env, objValue, "windowType", JsExtensionWindowConfig::GetSystemWindowOptionsWindowType,
         JsExtensionWindowConfig::SetSystemWindowOptionsWindowType);
     return objValue;
