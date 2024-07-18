@@ -102,14 +102,6 @@ constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t ROTATE_ANIMATION_TIME_MS = 600;
 
-bool JudgeIsBeta()
-{
-    std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
-    return betaName.find("beta") != std::string::npos;
-}
-
-static const bool IS_BETA = JudgeIsBeta();
-
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -2260,7 +2252,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     TLOGI(WmsLogTag::DMS, "ENTER");
-    if (IS_BETA) {
+    if (SessionPermission::IsBetaVersion()) {
         CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "hmos.screenrecorder");
     }
     if (clientProxy_ && option.missionIds_.size() > 0) {
@@ -3453,7 +3445,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         auto res = GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
-            if (IS_BETA) {
+            if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
         }
@@ -3503,7 +3495,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSnapshotByPicker(%" PRIu64")", displayId);
     isScreenShotByPicker_ = true;
     auto pixelMap = GetScreenSnapshot(displayId);
-    if (pixelMap != nullptr && IS_BETA) {
+    if (pixelMap != nullptr && SessionPermission::IsBetaVersion()) {
         CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
     }
     isScreenShot_ = true;

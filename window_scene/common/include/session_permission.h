@@ -38,6 +38,7 @@ public:
     static bool IsSameBundleNameAsCalling(const std::string& bundleName);
     static bool IsStartedByUIExtension();
     static bool CheckCallingIsUserTestMode(pid_t pid);
+    static bool IsBetaVersion();
 };
 } // Rosen
 } // OHOS
