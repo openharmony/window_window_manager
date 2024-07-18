@@ -2471,7 +2471,7 @@ uint32_t Session::GetZOrder() const
 
 void Session::SetUINodeId(uint32_t uiNodeId)
 {
-    if (uiNodeId_ != 0 && uiNodeId != 0 && !IsSystemSession()) {
+    if (uiNodeId_ != 0 && uiNodeId != 0 && !IsSystemSession() && SessionPermission::IsBetaVersion()) {
         int32_t eventRet = HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
             "REPEAT_SET_UI_NODE_ID",

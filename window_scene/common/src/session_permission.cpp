@@ -27,6 +27,7 @@
 #include <singleton.h>
 #include <singleton_container.h>
 #include "common/include/session_permission.h"
+#include "parameters.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -307,6 +308,12 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
         return false;
     }
     return isUserTestMode;
+}
+
+bool SessionPermission::IsBetaVersion()
+{
+    std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
+    return betaName.find("beta") != std::string::npos;
 }
 
 } // namespace Rosen
