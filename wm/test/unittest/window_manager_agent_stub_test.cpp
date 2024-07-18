@@ -318,7 +318,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | L
 
 /**
  * @tc.name: OnRemoteRequest15
- * @tc.desc: test
+ * @tc.desc: test TRANS_ID_UPDATE_WINDOW_DRAWING_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
@@ -379,7 +379,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | L
 
 /**
  * @tc.name: OnRemoteRequest18
- * @tc.desc: test deafault
+ * @tc.desc: test default
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
