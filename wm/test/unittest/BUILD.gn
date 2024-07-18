@@ -55,6 +55,7 @@ group("unittest") {
     ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
+    ":wm_window_session_impl_test3",
     ":wm_window_session_impl_two_test",
     ":wm_window_stub_test",
     ":wm_window_test",
@@ -80,11 +81,6 @@ ohos_unittest("wm_window_manager_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
   ]
-
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines = [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
 }
 
 ohos_unittest("wm_window_display_change_adapter_test") {
@@ -253,6 +249,20 @@ ohos_unittest("wm_window_session_impl_two_test") {
   module_out_path = module_out_path
 
   sources = [ "window_session_impl_two_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_session_impl_test3") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_impl_test3.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

@@ -652,16 +652,10 @@ WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction
         if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
             const auto& keyboardSession = GetKeyboardSession();
             FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
-            if (keyboardSession != nullptr) {
-                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, rsTransaction);
-            }
-            if (ret != WSError::WS_OK) {
-                return ret;
-            }
+            return ret;
         }
         if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             FixKeyboardPositionByKeyboardPanel(GetKeyboardPanelSession(), self);
-            return WSError::WS_OK;
         }
     }
 
@@ -1289,16 +1283,14 @@ void SceneSession::RemoveUIExtSurfaceNodeId(int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
     TLOGI(WmsLogTag::WMS_UIEXT, "Remove uiExtension by persistentId=%{public}d", persistentId);
-    auto iter = uiExtNodeIdToPersistentIdMap_.cbegin();
-    while (iter != uiExtNodeIdToPersistentIdMap_.cend()) {
-        if (iter->second == persistentId) {
-            TLOGI(WmsLogTag::WMS_UIEXT,
-                "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
-                iter->first, persistentId);
-            uiExtNodeIdToPersistentIdMap_.erase(iter);
-            return;
-        }
-        ++iter;
+    auto pairIter = std::find_if(uiExtNodeIdToPersistentIdMap_.begin(), uiExtNodeIdToPersistentIdMap_.end(),
+        [persistentId](const auto& entry) { return entry.second == persistentId; });
+    if (pairIter != uiExtNodeIdToPersistentIdMap_.end()) {
+        uiExtNodeIdToPersistentIdMap_.erase(pairIter);
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
+            pairIter->first, persistentId);
+        return;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "Failed to remove uiExtension by persistentId=%{public}d", persistentId);
 }
@@ -1331,7 +1323,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
-        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType avoidAreaType:%{public}u", type);
+        TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType type:%{public}u", type);
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
@@ -2425,6 +2417,26 @@ bool SceneSession::IsAnco() const
     return collaboratorType_ == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
+void SceneSession::SetBlankFlag(bool isAddBlank)
+{
+    isAddBlank_ = isAddBlank;
+}
+
+bool SceneSession::GetBlankFlag() const
+{
+    return isAddBlank_;
+}
+
+void SceneSession::SetBufferAvailableCallbackEnable(bool enable)
+{
+    bufferAvailableCallbackEnable_ = enable;
+}
+
+bool SceneSession::GetBufferAvailableCallbackEnable() const
+{
+    return bufferAvailableCallbackEnable_;
+}
+
 int32_t SceneSession::GetCollaboratorType() const
 {
     return collaboratorType_;
@@ -2555,8 +2567,8 @@ void SceneSession::SetSystemTouchable(bool touchable)
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The interface permission failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [weakThis = wptr(this), abilitySessionInfo, visible]() {
@@ -2631,21 +2643,22 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     }
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
-        "callState:%{public}d, want persistentId:%{public}d, callingTokenId:%{public}d, "
+        "callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_,
+        info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
         info.windowMode, info.callerPersistentId_);
     return info;
 }
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The permission check failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [weakThis = wptr(this), abilitySessionInfo]() {
+    auto isSACalling = SessionPermission::IsSACalling();
+    auto task = [weakThis = wptr(this), abilitySessionInfo, isSACalling]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2658,8 +2671,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
         bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
             session->systemConfig_.freeMultiWindowEnable_;
-        auto callingTokenId = abilitySessionInfo->callingTokenId;
-        if (!(isPC || isFreeMutiWindowMode) && !SessionPermission::IsSACallingByCallerToken(callingTokenId) &&
+        if (!(isPC || isFreeMutiWindowMode) && !isSACalling &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
@@ -2668,6 +2680,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                     session->GetForegroundInteractiveStatus());
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
+            auto callingTokenId = abilitySessionInfo->callingTokenId;
             auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
                 callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
                 SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
@@ -2729,21 +2742,13 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON) {
-        if (!SessionPermission::IsSystemCalling()) {
-            return WMError::WM_ERROR_NOT_SYSTEM_APP;
-        }
-    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_FLAGS) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            return WMError::WM_ERROR_NOT_SYSTEM_APP;
-        }
-    } else if (action == WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            return WMError::WM_ERROR_NOT_SYSTEM_APP;
-        }
     }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
+    if (!isSystemCalling && isNeedSystemPermissionByAction(action)) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     property->SetSystemCalling(isSystemCalling);
     wptr<SceneSession> weak = this;
     auto task = [weak, property, action]() -> WMError {
@@ -2761,6 +2766,25 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         return WMError::WM_OK;
     }
     return PostSyncTask(task, "UpdateProperty");
+}
+
+bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action)
+{
+    switch (action) {
+        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
+        case WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP:
+        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
+        case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
+        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
+        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
+        case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+            return true;
+        default:
+            break;
+    }
+    return false;
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
@@ -3034,10 +3058,6 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (property != nullptr && !property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "update decor enable permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDecorEnable(property->IsDecorEnable());
@@ -3062,11 +3082,6 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDragEnabled(property->GetDragEnabled());
@@ -3077,11 +3092,6 @@ WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
@@ -3092,10 +3102,6 @@ WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property hideNonSystemFloatingWindows permission denied!");
-        return WMError::WM_OK;
-    }
     auto currentProperty = sceneSession->GetSessionProperty();
     if (currentProperty != nullptr) {
         sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
@@ -3130,11 +3136,6 @@ WMError SceneSession::HandleActionUpdateWindowMask(const sptr<WindowSessionPrope
 WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     sceneSession->SetTopmost(property->IsTopmost());
     return WMError::WM_OK;
 }
@@ -3281,7 +3282,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -3816,11 +3817,6 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());

@@ -142,21 +142,8 @@ ohos_static_library("libwm_static") {
     external_deps += [ "accessibility:accessibility_common" ]
   }
 
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
-
-  if (defined(global_parts_info)) {
-    if (defined(
-        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
-    } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-    }
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
@@ -248,6 +235,7 @@ ohos_shared_library("libwm") {
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
@@ -256,7 +244,6 @@ ohos_shared_library("libwm") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
-    "../utils:libwmutil",
   ]
 
   external_deps = [
@@ -294,16 +281,8 @@ ohos_shared_library("libwm") {
     external_deps += [ "accessibility:accessibility_common" ]
   }
 
-  if (defined(global_parts_info)) {
-    if (defined(
-        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
-    } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-    }
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
@@ -329,7 +308,7 @@ ohos_shared_library("libwm") {
     external_deps += [ "imf:inputmethod_client" ]
     defines += [ "IMF_ENABLE" ]
   }
-  innerapi_tags = [ "platformsdk" ]
+
   part_name = "window_manager"
   subsystem_name = "window"
 }
@@ -338,18 +317,11 @@ ohos_shared_library("libwm") {
 ohos_shared_library("libwm_lite") {
   defines = [ "USE_ADAPTER_LITE" ]
   include_dirs = [
+    "../interfaces/innerkits/wm",
     "../utils/include",
-    "../window_scene/session_manager_service/include",
-    "../window_scene/session_manager/include",
-    "../dm/include",
-    "../window_scene/session_manager/include/zidl",
   ]
   sources = [
     "../utils/src/window_visibility_info.cpp",
-    "../window_scene/session_manager/src/session_manager_lite.cpp",
-    "../window_scene/session_manager/src/zidl/scene_session_manager_lite_proxy.cpp",
-    "../window_scene/session_manager_service/src/session_manager_service_proxy.cpp",
-    "../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "src/window_adapter_lite.cpp",
     "src/window_manager_agent_lite.cpp",
     "src/window_manager_lite.cpp",
@@ -364,39 +336,26 @@ ohos_shared_library("libwm_lite") {
 
   deps = [
     "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager:session_manager_lite",
   ]
 
   public_configs = [ ":libwm_public_config" ]
 
   external_deps = [
-    "ability_runtime:extension_manager",
+    "ability_runtime:ability_manager",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "init:libbegetutil",
-    "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
-
-  if (defined(global_parts_info)) {
-    if (defined(
-        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
-    } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
-      defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-    }
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {

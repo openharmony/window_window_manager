@@ -164,7 +164,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
-    void SaveSnapshot(bool useSnapshotThread);
+    void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -319,6 +319,9 @@ public:
     bool IsTerminated() const;
     bool IsSessionForeground() const;
     virtual bool IsAnco() const { return false; }
+    virtual void SetBlankFlag(bool isAddBlank) {};
+    virtual bool GetBlankFlag() const { return false; }
+    virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;

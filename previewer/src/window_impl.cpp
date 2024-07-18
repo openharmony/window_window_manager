@@ -1128,6 +1128,10 @@ WMError WindowImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     return WMError::WM_OK;
 }
 
+void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+}
+
 WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 {
     return WMError::WM_OK;

@@ -1588,7 +1588,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     avoidArea = hostSession->GetAvoidAreaByType(type);
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
-          "top{%{public}d, %{public}d, %{public}d, %{public}d}, down{%{public}d, %{public}d, %{public}d, %{public}d}",
+          "top{%{public}d,%{public}d,%{public}d,%{public}d}, down{%{public}d,%{public}d,%{public}d,%{public}d}",
           GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_,
           avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
           avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
@@ -1932,7 +1932,7 @@ WMError WindowSceneSessionImpl::Maximize()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> presentation)
+WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "maximize fail, not main window");
@@ -1941,8 +1941,7 @@ WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> pre
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    MaximizePresentation maximizePresentation = presentation.value_or(MaximizePresentation::ENTER_IMMERSIVE);
-    switch (maximizePresentation) {
+    switch (presentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
             enableImmersiveMode_ = true;
             break;
@@ -1953,7 +1952,7 @@ WMError WindowSceneSessionImpl::Maximize(std::optional<MaximizePresentation> pre
             break;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
-        maximizePresentation, enableImmersiveMode_);
+        presentation, enableImmersiveMode_);
     return SetLayoutFullScreen(enableImmersiveMode_);
 }
 
@@ -2153,58 +2152,6 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
     windowSystemConfig_.isSystemDecorEnable_ = false;
     UpdateDecorEnable(true);
     return WMError::WM_OK;
-}
-
-WSError WindowSceneSessionImpl::HandleBackEvent()
-{
-    TLOGI(WmsLogTag::WMS_EVENT, "called");
-    bool isConsumed = false;
-    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        inputEventConsumer = inputEventConsumer_;
-    }
-    if (inputEventConsumer != nullptr) {
-        WLOGFD("Transfer back event to inputEventConsumer");
-        std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
-        backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
-        backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
-        isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
-    } else {
-        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-        if (uiContent != nullptr) {
-            WLOGFD("Transfer back event to uiContent");
-            isConsumed = uiContent->ProcessBackPressed();
-        } else {
-            WLOGFE("There is no back event consumer");
-        }
-    }
-
-    if (isConsumed) {
-        WLOGD("Back key event is consumed");
-        return WSError::WS_OK;
-    }
-    WLOGFD("report Back");
-    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
-    if (handler_ == nullptr) {
-        WLOGFE("HandleBackEvent handler_ is nullptr!");
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    // notify back event to host session
-    wptr<WindowSceneSessionImpl> weak = this;
-    auto task = [weak]() {
-        auto weakSession = weak.promote();
-        if (weakSession == nullptr) {
-            WLOGFE("HandleBackEvent session wptr is nullptr");
-            return;
-        }
-        weakSession->PerformBack();
-    };
-    if (!handler_->PostTask(task, "wms:PerformBack")) {
-        WLOGFE("Failed to post PerformBack");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
-    return WSError::WS_OK;
 }
 
 void WindowSceneSessionImpl::PerformBack()

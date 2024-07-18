@@ -149,6 +149,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
             return HandleAddExtensionWindowStageToSCB(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB):
+            return HandleRemoveExtensionWindowStageFromSCB(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB):
             return HandleUpdateModalExtensionRect(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB):
@@ -309,10 +311,10 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 
 int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleRequestFocusStatus!");
+    WLOGFI("run");
     int32_t persistentId = data.ReadInt32();
     bool isFocused = data.ReadBool();
-    WMError ret = RequestFocusStatus(persistentId, isFocused, false, FocusChangeReason::CLIENT_REQUEST);
+    WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -688,7 +690,7 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
 int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleBindDialogTarget!");
-    auto persistentId = data.ReadUint64();
+    uint64_t persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     const WSError& ret = BindDialogSessionTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -875,6 +877,18 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
+    if (sessionStage == nullptr) {
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    RemoveExtensionWindowStageFromSCB(sessionStage, token);
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -962,7 +976,7 @@ int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply)
 {
     WindowModeType windowModeType = Rosen::WindowModeType::WINDOW_MODE_OTHER;
     WMError errCode = GetWindowModeType(windowModeType);

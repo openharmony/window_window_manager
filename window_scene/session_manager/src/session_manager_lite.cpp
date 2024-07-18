@@ -88,7 +88,6 @@ public:
         : SceneSessionManagerLiteProxy(impl) {}
     virtual ~SceneSessionManagerLiteProxyMock() = default;
 
-#ifndef USE_ADAPTER_LITE
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
         TLOGI(WmsLogTag::DEFAULT, "called");
@@ -106,7 +105,6 @@ public:
         SessionManagerLite::GetInstance().DeleteSessionListener(listener);
         return ret;
     }
-#endif
 private:
     static inline BrokerDelegator<SceneSessionManagerLiteProxyMock> delegator_;
 };
@@ -162,7 +160,6 @@ sptr<ISessionManagerService> SessionManagerLite::GetSessionManagerServiceProxy()
     return sessionManagerServiceProxy_;
 }
 
-#ifndef USE_ADAPTER_LITE
 void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
@@ -188,14 +185,11 @@ void SessionManagerLite::DeleteSessionListener(const sptr<ISessionListener>& lis
         sessionListeners_.erase(it);
     }
 }
-#endif
 
 void SessionManagerLite::DeleteAllSessionListeners()
 {
-#ifndef USE_ADAPTER_LITE
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     sessionListeners_.clear();
-#endif
 }
 
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
@@ -218,7 +212,7 @@ void SessionManagerLite::ReregisterSessionListener() const
         TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy_ is null");
         return;
     }
-#ifndef USE_ADAPTER_LITE
+
     TLOGI(WmsLogTag::WMS_RECOVER, "RecoverSessionListeners, listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
@@ -227,7 +221,6 @@ void SessionManagerLite::ReregisterSessionListener() const
             TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}" PRId32, ret);
         }
     }
-#endif
 }
 
 void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
@@ -290,27 +283,12 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-            WLOGFE("Failed to get system ability mgr.");
-            return;
-        }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject) {
-        WLOGFE("Remote object is nullptr");
+    auto ret = InitMockSMSProxy();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Init mock session manager service failed in Lite");
         return;
     }
-    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    if (!mockSessionManagerServiceProxy_) {
-        WLOGFW("Get mock session manager service proxy failed, nullptr");
-        return;
-    }
-    if (!recoverListenerRegistered_) {
-        recoverListenerRegistered_ = true;
-        smsRecoverListener_ = new SessionManagerServiceLiteRecoverListener();
-        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
-    }
+    RegisterSMSRecoverListener();
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
         WLOGFE("Remote object2 is nullptr");

@@ -65,9 +65,9 @@ JsPipController::JsPipController(const sptr<PictureInPictureController>& pipCont
     : pipController_(pipController)
 {
     listenerCodeMap_ = {
-        {STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB},
-        {CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB},
-        {CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB},
+        { STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB },
+        { CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB },
+        { CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB },
     };
 }
 
@@ -488,6 +488,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
+
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             WmErrorCode ret = UnRegisterListener(type, it->second);
@@ -625,9 +626,7 @@ void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& ac
 void JsPipController::PiPControlObserverImpl::OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
-    napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = engine_, task = napiAsyncTask.get()]() {
+    auto napiTask = [jsCallback = jsCallBack_, controlType, statusCode, env = engine_]() {
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
@@ -638,12 +637,14 @@ void JsPipController::PiPControlObserverImpl::OnControlEvent(PiPControlType cont
         napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
         napi_value argv[] = {propertyValue};
         CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        delete task;
     };
-    if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(engine_, CreateJsError(engine_, 1, "send event failed"));
+    if (engine_ != nullptr) {
+        napi_status ret = napi_send_event(engine_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
+        }
     } else {
-        napiAsyncTask.release();
+        TLOGE(WmsLogTag::WMS_PIP, "engine is null");
     }
 }
 } // namespace Rosen
