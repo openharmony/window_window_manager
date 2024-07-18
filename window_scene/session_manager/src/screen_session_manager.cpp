@@ -3367,7 +3367,7 @@ const std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetRSDisplayNodeByScr
     return screen->GetDisplayNode();
 }
 
-std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetScreenSnapshotDisplayNode(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId)
 {
     ScreenId screenId = SCREEN_ID_INVALID;
     std::shared_ptr<RSDisplayNode> displayNode = nullptr;
@@ -3400,29 +3400,8 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetScreenSnapshotDisplayNod
         TLOGE(WmsLogTag::DMS, "GetScreenSnapshot displayNode == nullptr!");
         return nullptr;
     }
-    return displayNode;
-}
-
-std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId)
-{
-    std::shared_ptr<RSDisplayNode> displayNode = GetScreenSnapshotDisplayNode(displayId);
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetScreenSnapshot GetScreenSnapshotDisplayNode is nullptr!");
-        return nullptr;
-    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = false;
-    if (isScreenShotByPicker_) {
-        TLOGI(WmsLogTag::DMS, "GetScreenSnapshot isScreenShotByPicker_ is true.");
-        ret = rsInterface_.TakeSurfaceCapture(displayNode, callback);
-        isScreenShotByPicker_ = false;
-    } else {
-        TLOGI(WmsLogTag::DMS, "GetScreenSnapshot isScreenShotByPicker_ is false.");
-        RSSurfaceCaptureConfig config = {
-            .useDma = true,
-        };
-        ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
-    }
+    bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "GetScreenSnapshot TakeSurfaceCapture failed");
         return nullptr;
@@ -3501,7 +3480,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     }
     DisplayId displayId = displayInfo->GetDisplayId();
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSnapshotByPicker(%" PRIu64")", displayId);
-    isScreenShotByPicker_ = true;
     auto pixelMap = GetScreenSnapshot(displayId);
     if (pixelMap != nullptr && IS_BETA) {
         CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
