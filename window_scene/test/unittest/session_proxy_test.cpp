@@ -540,18 +540,18 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: GetStatusBarVectorHeight
+ * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, GetStatusBarVectorHeight, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    int32_t res = sProxy->GetStatusBarVectorHeight();
+    int32_t res = sProxy->GetStatusBarHeight();
     ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight end";
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
 }
 } // namespace
 } // namespace Rosen

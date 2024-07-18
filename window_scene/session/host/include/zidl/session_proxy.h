@@ -85,7 +85,7 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
-    int32_t GetStatusBarVectorHeight() override;
+    int32_t GetStatusBarHeight() override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

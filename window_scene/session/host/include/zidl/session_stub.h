@@ -72,7 +72,7 @@ private:
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeMode(MessageParcel& data, MessageParcel& reply);
-    int HandleGetStatusBarVectorHeight(MessageParcel& data, MessageParcel& reply);
+    int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

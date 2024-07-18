@@ -3837,7 +3837,7 @@ int32_t SceneSession::GetAppForceLandscapeMode(const std::string& bundleName)
     return forceSplitFunc_(bundleName);
 }
 
-int32_t SceneSession::GetStatusBarVectorHeight()
+int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
