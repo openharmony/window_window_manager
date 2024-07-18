@@ -236,9 +236,9 @@ HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest
 {
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    session.property_ = new WindowSessionProperty();
     session->property_->SetWindowFlags(0);
     auto sessionProperty = session->GetSessionProperty();
+    ASSERT_NE(sessionProperty, nullptr);
 
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON,
         property, sessionProperty));
