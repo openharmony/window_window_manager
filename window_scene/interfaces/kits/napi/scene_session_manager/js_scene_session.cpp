@@ -1236,7 +1236,7 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
 
 napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetUniqueDensityDpiFromSCB");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetUniqueDensityDpiFromSCB(env, info) : nullptr;
 }
@@ -3138,7 +3138,7 @@ napi_value JsSceneSession::OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callb
             errMsg = "Failed to convert parameter to useUnique";
             paramValidFlag = false;
         }
-        if (!ConvertFromJsValue(env, argv[1], densityDpi)) {
+        if (paramValidFlag && !ConvertFromJsValue(env, argv[1], densityDpi)) {
             TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to densityDpi");
             errMsg = "Failed to convert parameter to densityDpi";
             paramValidFlag = false;
