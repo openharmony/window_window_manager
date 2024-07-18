@@ -114,6 +114,20 @@ void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
     dumpInfo_.append(oss.str());
 }
 
+void ScreenSessionDumper::DumpMultiUserInfo(std::vector<int32_t> oldScbPids, int32_t userId, int32_t ScbPid)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS Multi User Info --------------" << std::endl;
+    oss << std::left << "[oldScbPid:] ";
+    for (auto oldScbPid : oldScbPids) {
+        oss << oldScbPid  << " ";
+    }
+    oss << std::endl;
+    oss << std::left << "[userId:] " << userId << std::endl;
+    oss << std::left << "[ScbPid:] " << ScbPid << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
 void ScreenSessionDumper::DumpFreezedPidList(std::set<int32_t> pidList)
 {
     std::ostringstream oss;

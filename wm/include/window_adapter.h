@@ -96,6 +96,8 @@ public:
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
     virtual WMError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener);
+    virtual WMError RaiseWindowToTop(int32_t persistentId);
+    virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -116,10 +118,10 @@ public:
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
-    virtual WMError RaiseWindowToTop(int32_t persistentId);
-    virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId);
+    virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token);
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect);
     virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);

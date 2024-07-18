@@ -49,7 +49,7 @@ void JsWindowStage::Finalizer(napi_env env, void* data, void* hint)
 
 napi_value JsWindowStage::SetUIContent(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]SetUIContent");
+    WLOGFI("[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
@@ -84,14 +84,14 @@ napi_value JsWindowStage::Off(napi_env env, napi_callback_info info)
 
 napi_value JsWindowStage::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]LoadContent");
+    WLOGFI("[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsWindowStage::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]LoadContentByName");
+    WLOGFI("[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }

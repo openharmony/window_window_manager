@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "display_manager_service.h"
+#include "display_manager_service_inner.h"
 #include "sensor_connector.h"
 #include "screen_rotation_controller.h"
 
@@ -469,6 +470,51 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation
     ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
     ASSERT_EQ(orientation, Orientation::REVERSE_HORIZONTAL);
 
+    orientation = ScreenRotationController::lastOrientationType_;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::REVERSE_HORIZONTAL);
+}
+
+/**
+ * @tc.name: GetPreferredOrientation
+ * @tc.desc: GetPreferredOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, GetPreferredOrientation, Function | SmallTest | Level3)
+{
+    ScreenRotationController::defaultDisplayId_ = 1003;
+    auto ret = ScreenRotationController::GetPreferredOrientation();
+    ASSERT_EQ(ret, Orientation::UNSPECIFIED);
+    ScreenRotationController::defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+}
+
+/**
+ * @tc.name: ProcessSwitchToAutoRotationLandscapeRestricted
+ * @tc.desc: ProcessSwitchToAutoRotationLandscapeRestricted
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotationLandscapeRestricted, Function | SmallTest | Level3)
+{
+    ScreenRotationController::rotationLockedRotation_ =
+        ScreenRotationController::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
+    ScreenRotationController::ProcessSwitchToAutoRotationLandscapeRestricted();
+    ASSERT_TRUE(ScreenRotationController::IsDisplayRotationHorizontal(
+    ScreenRotationController::rotationLockedRotation_));
+}
+
+/**
+ * @tc.name: ConvertRotationToDisplayOrientation
+ * @tc.desc: ConvertRotationToDisplayOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, ConvertRotationToDisplayOrientation, Function | SmallTest | Level3)
+{
+    ASSERT_FALSE(ScreenRotationController::displayToDisplayOrientationMap_.empty());
+    Rotation rotation = Rotation::ROTATION_0;
+    ScreenRotationController::ConvertRotationToDisplayOrientation(rotation);
+    ScreenRotationController::displayToDisplayOrientationMap_.clear();
+    ASSERT_TRUE(ScreenRotationController::displayToDisplayOrientationMap_.empty());
+    ScreenRotationController::ConvertRotationToDisplayOrientation(rotation);
 }
 
 #ifdef SENSOR_ENABLE

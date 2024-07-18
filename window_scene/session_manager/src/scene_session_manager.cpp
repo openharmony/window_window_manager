@@ -102,7 +102,8 @@
 #include "focus_change_info.h"
 #include "anr_manager.h"
 #include "dms_reporter.h"
-
+#include "res_sched_client.h"
+#include "res_type.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
 #include "anomaly_detection.h"
@@ -110,10 +111,6 @@
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
 #endif
-
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "suspend_manager_client.h"
-#endif // EFFICIENCY_MANAGER_ENABLE
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
 #include "sec_comp_enhance_kit.h"
@@ -252,7 +249,6 @@ void SceneSessionManager::Init()
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
-    RegisterSecSurfaceInfoListener();
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
@@ -2346,8 +2342,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG ||
-        type == WindowType::WINDOW_TYPE_PIP) {
+    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
         return true;
     }
@@ -3650,30 +3645,27 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
         return;
     }
     NotifySessionSnapshotFunc sessionSnapshotFunc = [this](int32_t persistentId) {
-        auto task = [this, persistentId]() {
-            auto scnSession = GetSceneSession(persistentId);
-            if (scnSession == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
-                return;
-            }
-            if (scnSession->GetSessionInfo().isSystem_) {
-                WLOGFW("NotifySessionSnapshotFunc, id: %{public}d is system", scnSession->GetPersistentId());
-                return;
-            }
-            auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
-            if (abilityInfoPtr == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
-                return;
-            }
-            if (listenerController_ == nullptr) {
-                WLOGFW("NotifySessionSnapshotFunc, listenerController_ is nullptr");
-                return;
-            }
-            if (!(abilityInfoPtr->excludeFromMissions)) {
-                listenerController_->NotifySessionSnapshotChanged(persistentId);
-            }
-        };
-        taskScheduler_->PostVoidSyncTask(task, "sessionSnapshot");
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, Not found session, id: %{public}d", persistentId);
+            return;
+        }
+        if (sceneSession->GetSessionInfo().isSystem_) {
+            WLOGFW("NotifySessionSnapshotFunc, id: %{public}d is system", sceneSession->GetPersistentId());
+            return;
+        }
+        auto abilityInfoPtr = sceneSession->GetSessionInfo().abilityInfo;
+        if (abilityInfoPtr == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, abilityInfoPtr is nullptr");
+            return;
+        }
+        if (listenerController_ == nullptr) {
+            WLOGFW("NotifySessionSnapshotFunc, listenerController_ is nullptr");
+            return;
+        }
+        if (!abilityInfoPtr->excludeFromMissions) {
+            listenerController_->NotifySessionSnapshotChanged(persistentId);
+        }
     };
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("RegisterSessionSnapshotFunc success, id: %{public}d", sceneSession->GetPersistentId());
@@ -4341,6 +4333,11 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
             // return ok if focused session is topmost
             return WSError::WS_OK;
         }
+        if (reason == FocusChangeReason::CLIENT_REQUEST && sceneSession->IsAppSession() &&
+            sceneSession->GetMissionId() == focusedSession->GetMissionId()) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "client request from the same app, skip blocking check");
+            byForeground = false;
+        }
         if (byForeground && CheckFocusIsDownThroughBlockingType(sceneSession,  focusedSession,  true))  {
             TLOGD(WmsLogTag::WMS_FOCUS, "check, need to be intercepted");
             return WSError::WS_DO_NOTHING;
@@ -4355,11 +4352,6 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
         }
         bool isBlockingType = focusedSession->IsAppSession() ||
             (focusedSession->GetSessionInfo().isSystem_ && focusedSession->GetBlockingFocus());
-        if (byForeground && isBlockingType && sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "session %{public}d is lower than focused session %{public}d",
-                persistentId, focusedSessionId_);
-            return WSError::WS_DO_NOTHING;
-        }
         // temp check
         if (isBlockingType && focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
             sceneSession->GetZOrder() < focusedSession->GetZOrder()) {
@@ -4567,10 +4559,7 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
         sceneSession->GetWindowType(),
         sceneSession->GetAbilityToken()
     );
-#ifdef EFFICIENCY_MANAGER_ENABLE
-        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(focusChangeInfo->uid_,
-            "", "THAW_BY_FOCUS_CHANGED");
-#endif // EFFICIENCY_MANAGER_ENABLE
+    SceneSessionManager::NotifyRssThawApp(focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     sceneSession->NotifyFocusStatus(isFocused);
     std::string sName = "FoucusWindow:";
@@ -4590,6 +4579,19 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
         NotifyFocusStatusByMission(prevSession, sceneSession);
     }
+}
+
+int32_t SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::string &bundleName,
+    const std::string &reason)
+{
+    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_THAW_ONE_APP;
+    nlohmann::json payload;
+    payload.emplace("uid", uid);
+    payload.emplace("bundleName", bundleName);
+    payload.emplace("reason", reason);
+    nlohmann::json reply;
+    int32_t ret = ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    return ret;
 }
 
 void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession)
@@ -5522,8 +5524,8 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -5550,8 +5552,8 @@ WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListen
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -5906,13 +5908,24 @@ WSError SceneSessionManager::TerminateSessionNew(
     TLOGI(WmsLogTag::WMS_LIFE,
         "bundleName=%{public}s, needStartCaller=%{public}d, isFromBroker=%{public}d",
         info->want.GetElement().GetBundleName().c_str(), needStartCaller, isFromBroker);
-    auto task = [this, info, needStartCaller, isFromBroker]() {
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    uint32_t callerToken = IPCSkeleton::GetCallingTokenID();
+    auto task = [this, info, needStartCaller, isFromBroker, callingPid, callerToken]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
+        const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
+        if (!pidCheck &&
+            !SessionPermission::VerifyPermissionByCallerToken(callerToken,
+                PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+            TLOGE(WmsLogTag::WMS_LIFE,
+                "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
+                sceneSession->GetCallingPid(), callingPid);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        WSError errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
         return errCode;
     };
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
@@ -6749,7 +6762,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
         CheckAndNotifyWaterMarkChangedResult();
     }
     if (windowVisibilityInfos.size() != 0) {
-        WLOGI("Notify window visibility info changed, size: %{public}zu, %{public}s", windowVisibilityInfos.size(),
+        WLOGI("Visibility changed, size: %{public}zu, %{public}s", windowVisibilityInfos.size(),
             visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
@@ -7503,8 +7516,8 @@ WSError SceneSessionManager::ClearSession(int32_t persistentId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, persistentId]() {
@@ -7537,8 +7550,8 @@ WSError SceneSessionManager::ClearAllSessions()
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this]() {
@@ -7572,8 +7585,8 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -7595,8 +7608,8 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -8367,7 +8380,8 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             return;
         }
 
-        TLOGD(WmsLogTag::WMS_UIEXT, "Remote died, id: %{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_UIEXT, "DestroyExtensionSession: persistentId=%{public}d, parentId=%{public}d",
+            persistentId, parentId);
         auto sceneSession = GetSceneSession(parentId);
         if (sceneSession != nullptr) {
             auto oldFlags = sceneSession->GetCombinedExtWindowFlags();
@@ -8492,6 +8506,31 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         }
     };
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
+}
+
+void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+    const sptr<IRemoteObject>& token)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    auto task = [this, sessionStage, token]() {
+        if (sessionStage == nullptr || token == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
+            return;
+        }
+        auto remoteExtSession = sessionStage->AsObject();
+        if (remoteExtSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage object is nullptr");
+            return;
+        }
+        auto iter = remoteExtSessionMap_.find(remoteExtSession);
+        if (iter->second != token) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token not match");
+            return;
+        }
+
+        DestroyExtensionSession(remoteExtSession);
+    };
+    taskScheduler_->PostAsyncTask(task, "RemoveExtensionWindowStageFromSCB");
 }
 
 void SceneSessionManager::CalculateCombinedExtWindowFlags()
@@ -9240,6 +9279,10 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
         TLOGE(WmsLogTag::WMS_MAIN, "Clear main sessions failed, only support SA calling.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     clearFailedIds.clear();
     for (const auto persistentId : persistentIds) {
         auto sceneSession = GetSceneSession(persistentId);
@@ -9366,7 +9409,7 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 
 void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
 {
-    if (currentUserId_ != userid) {
+    if (currentUserId_ != static_cast<int32_t>(userid)) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_, userid);
         return;
     }
@@ -9375,7 +9418,7 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostAsyncTask(task, "UpdateSecSurfaceInfo");
+    taskScheduler_->PostAsyncTask(task, "UpdateSecSurfaceInfo");
 }
 
 void SceneSessionManager::RegisterSecSurfaceInfoListener()

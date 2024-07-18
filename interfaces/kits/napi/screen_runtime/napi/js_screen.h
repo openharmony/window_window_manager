@@ -43,8 +43,6 @@ private:
     napi_value OnSetOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetScreenActiveMode(napi_env env, napi_callback_info info);
     napi_value OnSetDensityDpi(napi_env env, napi_callback_info info);
-    void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
-        std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask);
 };
 }  // namespace Rosen
 }  // namespace OHOS

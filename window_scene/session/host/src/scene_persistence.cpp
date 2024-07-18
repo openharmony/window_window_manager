@@ -36,12 +36,11 @@ constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
 
 constexpr uint8_t SUCCESS = 0;
-const std::string SNAPSHOT_THREAD = "OS_SnapshotThread";
 } // namespace
 
 std::string ScenePersistence::snapshotDirectory_;
 std::string ScenePersistence::updatedIconDirectory_;
-std::shared_ptr<TaskScheduler> ScenePersistence::snapshotScheduler_;
+std::shared_ptr<WSFFRTHelper> ScenePersistence::snapshotFfrtHelper_;
 
 bool ScenePersistence::CreateSnapshotDir(const std::string& directory)
 {
@@ -74,8 +73,8 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
             std::to_string(persistentId) + IMAGE_SUFFIX;
     }
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    if (snapshotScheduler_ == nullptr) {
-        snapshotScheduler_ = std::make_shared<TaskScheduler>(SNAPSHOT_THREAD);
+    if (snapshotFfrtHelper_ == nullptr) {
+        snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
 }
 
@@ -84,9 +83,9 @@ ScenePersistence::~ScenePersistence()
     remove(snapshotPath_.c_str());
 }
 
-std::shared_ptr<TaskScheduler> ScenePersistence::GetSnapshotScheduler() const
+std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
 {
-    return snapshotScheduler_;
+    return snapshotFfrtHelper_;
 }
 
 bool ScenePersistence::IsAstcEnabled()
@@ -138,8 +137,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         }
         WLOGFD("Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotScheduler_->RemoveTask("SaveSnapshot" + snapshotPath_);
-    snapshotScheduler_->PostAsyncTask(task, "SaveSnapshot" + snapshotPath_);
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
 
 bool ScenePersistence::IsSavingSnapshot()
@@ -172,7 +170,8 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
                 oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         }
     };
-    snapshotScheduler_->PostAsyncTask(task, "RenameSnapshotFromOldPersistentId");
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "RenameSnapshotFromOldPersistentId"
+        + std::to_string(oldPersistentId));
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()
