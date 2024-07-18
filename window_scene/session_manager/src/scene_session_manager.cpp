@@ -4607,11 +4607,12 @@ void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession>& prevSes
 
 void SceneSessionManager::NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession)
 {
-    if (listenerController_ != nullptr) {
-        if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "NotifyMissionUnfocused, id: %{public}d", sceneSession->GetMissionId());
-            listenerController_->NotifySessionUnfocused(sceneSession->GetMissionId());
-        }
+    if (listenerController_ == nullptr) {
+        return;
+    }
+    if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "NotifyMissionUnfocused, id: %{public}d", sceneSession->GetMissionId());
+        listenerController_->NotifySessionUnfocused(sceneSession->GetMissionId());
     }
 }
 
