@@ -2782,7 +2782,7 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            auto sessionProperty = this->GetSessionProperty();
+            auto sessionProperty = GetSessionProperty();
             uint32_t flags = property->GetWindowFlags();
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
             if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
