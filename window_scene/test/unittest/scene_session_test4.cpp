@@ -234,28 +234,33 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
  */
 HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest | Level2)
 {
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->property_->SetWindowFlags(0);
+    ASSERT_NE(session->GetSessionProperty(), nullptr);
+    
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED,
-        property));
+        property, sessionProperty));
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO,
-        property));
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    uint32_t remove = sessionProperty->GetWindowFlags() &
+        property, sessionProperty));
+
+    uint32_t oldFlag = sessionProperty->GetWindowFlags() &
         (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)));
-    uint32_t add = sessionProperty->GetWindowFlags() | (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
-    sessionProperty->SetWindowFlags(remove);
-    property->SetWindowFlags(add);
+    uint32_t newFlag = sessionProperty->GetWindowFlags() | static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sessionProperty->SetWindowFlags(oldFlag);
+    property->SetWindowFlags(newFlag);
     ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS,
         property));
     ASSERT_FALSE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE,

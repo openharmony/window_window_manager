@@ -2744,8 +2744,15 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         }
     }
 
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr)
+    {
+        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property)) {
+    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property, sessionProperty)) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -2769,7 +2776,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 }
 
 bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
-    const sptr<WindowSessionProperty>& property)
+    const sptr<WindowSessionProperty>& property, const sptr<WindowSessionProperty>& sessionProperty)
 {
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
@@ -2782,9 +2789,8 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            auto sessionProperty = GetSessionProperty();
-            uint32_t flags = property->GetWindowFlags();
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
+            uint32_t flags = property->GetWindowFlags();
             if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
                 return true;
             }
