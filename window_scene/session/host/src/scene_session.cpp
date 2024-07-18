@@ -2731,50 +2731,7 @@ void SceneSession::HandleCastScreenConnection(SessionInfo& info, sptr<SceneSessi
     }
 }
 
-WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
-        if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
-    }
-
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property, sessionProperty)) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-    property->SetSystemCalling(isSystemCalling);
-    wptr<SceneSession> weak = this;
-    auto task = [weak, property, action]() -> WMError {
-        auto sceneSession = weak.promote();
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
-            return WMError::WM_DO_NOTHING;
-        }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
-        return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
-    };
-    if (AppExecFwk::EventRunner::IsAppMainThread()) {
-        PostTask(task, "UpdateProperty");
-        return WMError::WM_OK;
-    }
-    return PostSyncTask(task, "UpdateProperty");
-}
-
-bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
+static bool isNeedSystemPermissionByAction(WSPropertyChangeAction action,
     const sptr<WindowSessionProperty>& property, const sptr<WindowSessionProperty>& sessionProperty)
 {
     switch (action) {
@@ -2799,6 +2756,48 @@ bool SceneSession::isNeedSystemPermissionByAction(WSPropertyChangeAction action,
             break;
     }
     return false;
+}
+
+WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
+        if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    }
+
+    bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
+    if (!isSystemCalling && isNeedSystemPermissionByAction(action, property, sessionProperty)) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    property->SetSystemCalling(isSystemCalling);
+    wptr<SceneSession> weak = this;
+    auto task = [weak, property, action]() -> WMError {
+        auto sceneSession = weak.promote();
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
+            return WMError::WM_DO_NOTHING;
+        }
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
+        return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
+    };
+    if (AppExecFwk::EventRunner::IsAppMainThread()) {
+        PostTask(task, "UpdateProperty");
+        return WMError::WM_OK;
+    }
+    return PostSyncTask(task, "UpdateProperty");
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
