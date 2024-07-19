@@ -83,6 +83,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using NotifyForceSplitFunc = std::function<int32_t(const std::string& bundleName)>;
 class SceneSession : public Session {
 public:
+    friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
