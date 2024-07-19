@@ -92,13 +92,13 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     if (context_) {
         abilityToken_ = context_->GetToken();
     }
+    AddExtensionWindowStageToSCB();
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
-    AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
