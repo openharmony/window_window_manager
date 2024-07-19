@@ -16,6 +16,8 @@
 #ifndef INTERFACES_INNERKITS_WINDOW_SCENE_H
 #define INTERFACES_INNERKITS_WINDOW_SCENE_H
 
+#include <mutex>
+
 #include <refbase.h>
 #include <iremote_object.h>
 
@@ -80,10 +82,11 @@ public:
 
     /**
      * Get shared pointer of main window.
+     * Locks mainWindowMutex_
      *
      * @return the shared pointer of window
      */
-    const sptr<Window>& GetMainWindow() const;
+    sptr<Window> GetMainWindow() const;
 
     /**
      * Get a set of sub window.
@@ -173,7 +176,10 @@ private:
     std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;
 
 private:
+    mutable std::mutex mainWindowMutex_;
     sptr<Window> mainWindow_ = nullptr;
+    // Above guarded by mainWindowMutex_
+
     static inline std::atomic<uint32_t> count { 0 };
     DisplayId displayId_ = DEFAULT_DISPLAY_ID;
     std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
