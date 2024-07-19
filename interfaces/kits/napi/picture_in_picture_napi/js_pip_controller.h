@@ -69,48 +69,7 @@ private:
 
     sptr<PictureInPictureController> pipController_;
     std::map<std::string, ListenerType> listenerCodeMap_;
-    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsPiPWindowListener>>> jsCbMap_;
-
-public:
-    class PiPLifeCycleImpl : public IPiPLifeCycle {
-    public:
-        PiPLifeCycleImpl(napi_env env, std::shared_ptr<NativeReference> callback)
-            : engine_(env), jsCallBack_(callback) {}
-        ~PiPLifeCycleImpl() {}
-        void OnPreparePictureInPictureStart() override;
-        void OnPictureInPictureStart() override;
-        void OnPreparePictureInPictureStop() override;
-        void OnPictureInPictureStop() override;
-        void OnPictureInPictureOperationError(int32_t errorCode) override;
-        void OnRestoreUserInterface() override;
-
-    private:
-        void OnPipListenerCallback(PiPState state, int32_t errorCode);
-        napi_env engine_ = nullptr;
-        std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-    };
-
-    class PiPActionObserverImpl : public IPiPActionObserver {
-    public:
-        PiPActionObserverImpl(napi_env env, std::shared_ptr<NativeReference> callback)
-            : engine_(env), jsCallBack_(callback) {}
-        ~PiPActionObserverImpl() {}
-        void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
-    private:
-        napi_env engine_ = nullptr;
-        std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-    };
-
-    class PiPControlObserverImpl : public IPiPControlObserver {
-    public:
-        PiPControlObserverImpl(napi_env env, std::shared_ptr<NativeReference> callback)
-            : engine_(env), jsCallBack_(callback) {}
-        ~PiPControlObserverImpl() {}
-        void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
-    private:
-        napi_env engine_ = nullptr;
-        std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
-    };
+    std::map<std::string, std::set< sptr<JsPiPWindowListener>> jsCbMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

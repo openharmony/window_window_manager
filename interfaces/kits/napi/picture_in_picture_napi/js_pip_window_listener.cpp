@@ -42,6 +42,11 @@ JsPiPWindowListener::~JsPiPWindowListener()
     TLOGI(WmsLogTag::WMS_PIP, "~JsWindowListener");
 }
 
+std::shared_ptr<NativeReference> JsPiPWindowListener::GetCallbackRef()
+{
+    return jsCallBack_;
+}
+
 void JsPiPWindowListener::OnPreparePictureInPictureStart()
 {
     OnPipListenerCallback(PiPState::ABOUT_TO_START, 0);
