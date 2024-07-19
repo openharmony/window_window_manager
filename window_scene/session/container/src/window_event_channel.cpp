@@ -365,11 +365,11 @@ WSError WindowEventChannel::TransferAccessibilityChildTreeUnregister()
 WSError WindowEventChannel::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
         return WSError::WS_ERROR_NULLPTR;
     }
+#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     return sessionStage_->NotifyAccessibilityDumpChildInfo(params, info);
 #else
     info.emplace_back("not support in user build variant");
