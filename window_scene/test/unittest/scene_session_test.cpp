@@ -1081,8 +1081,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
-        WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
