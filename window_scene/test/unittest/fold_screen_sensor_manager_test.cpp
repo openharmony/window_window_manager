@@ -192,6 +192,7 @@ namespace {
     HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest | Level3)
     {
         FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
         mgr.globalHall = HALL_FOLDED_THRESHOLD;
         mgr.TriggerDisplaySwitch();
         EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
