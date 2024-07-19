@@ -478,13 +478,18 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
 void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
     MMI::WindowInfo& windowInfo) const
 {
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return {};
+    }
     windowInfo.privacyMode = MMI::SecureFlag::DEFAULT_MODE;
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
     if (windowSessionProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowSessionProperty is nullptr");
         return;
     }
-    if (windowSessionProperty->GetPrivacyMode() || windowSessionProperty->GetSystemPrivacyMode()) {
+    if (windowSessionProperty->GetPrivacyMode() || windowSessionProperty->GetSystemPrivacyMode() ||
+        sceneSession->GetCombinedExtWindowFlags().privacyModeFlag) {
         windowInfo.privacyMode = MMI::SecureFlag::PRIVACY_MODE;
     }
 }
