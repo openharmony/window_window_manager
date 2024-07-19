@@ -22,6 +22,8 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 #include <hitrace_meter.h>
+#include "parameters.h"
+#include "xcollie/xcollie.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -31,6 +33,10 @@ constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
+constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
+constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
+static const bool IS_BETA = OHOS::system::GetParameter("const.logsystem.versiontype", "").find("beta") !=
+    std::string::npos;
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
@@ -91,6 +97,11 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
+    if (IS_BETA) {
+        // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
+        int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
+            FREQUENT_CLICK_COUNT_LIMIT);
+    }
     return true;
 }
 
@@ -239,6 +250,14 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             MMI::PointerEvent::PointerItem pointerItem;
             if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
                 sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            }
+            if (IS_BETA) {
+                /*
+                * Triggers input down event recorded.
+                * If the special num of the events reached within the sepcial time interval,
+                * a panic behavior is reported.
+                */
+                HiviewDFX::XCollie::GetInstance().TriggerTimerCount("FREQUENT_CLICK_WARNING", true, "");
             }
         }
     } else {
