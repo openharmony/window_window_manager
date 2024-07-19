@@ -2373,7 +2373,7 @@ napi_value JsSceneSessionManager::OnNotifySessionRecoverStatus(napi_env env, nap
     if (!ConvertInt32ArrayFromJs(env, argv[1], recoveredPersistentIds)) {
         WLOGFE("[NAPI]Failed to convert recovered persistentId array");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                            "Input parameter is missing or invalid"));
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     if (!isRecovering) {
