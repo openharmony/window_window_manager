@@ -234,8 +234,8 @@ bool SubSession::IsTopmost() const
 
 bool SubSession::IsModal() const
 {
-    auto property = GetSessionProperty();
     bool isModal = false;
+    auto property = GetSessionProperty();
     if (property != nullptr) {
         isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     }
