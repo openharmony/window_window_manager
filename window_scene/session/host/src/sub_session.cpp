@@ -17,6 +17,7 @@
 #include "screen_session_manager/include/screen_session_manager_client.h"
 
 #include "key_event.h"
+#include "window_helper.h"
 #include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
@@ -229,5 +230,15 @@ bool SubSession::IsTopmost() const
     }
     TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
     return isTopmost;
+}
+
+bool SubSession::IsModal() const
+{
+    auto property = GetSessionProperty();
+    bool isModal = false;
+    if (property != nullptr) {
+        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isModal;
 }
 } // namespace OHOS::Rosen
