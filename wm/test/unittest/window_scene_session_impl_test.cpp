@@ -1698,6 +1698,19 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
     }
 }
+
+/*
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetStatusBarHeight");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_EQ(0, window->GetStatusBarHeight());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

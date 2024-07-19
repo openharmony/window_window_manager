@@ -147,6 +147,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_MODE):
             return HandleGetAppForceLandscapeMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
+            return HandleGetStatusBarHeight(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -766,6 +768,14 @@ int SessionStub::HandleGetAppForceLandscapeMode(MessageParcel& data, MessageParc
     }
     int32_t ret = GetAppForceLandscapeMode(bundleName);
     reply.WriteInt32(ret);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t height = GetStatusBarHeight();
+    TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
+    reply.WriteInt32(height);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
