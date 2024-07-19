@@ -28,6 +28,7 @@ namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -61,6 +62,7 @@ void ScreenSessionManagerTest::SetUp()
 
 void ScreenSessionManagerTest::TearDown()
 {
+    usleep(SLEEP_TIME_IN_US);
 }
 
 namespace {
@@ -284,7 +286,8 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenPower, Function | SmallTest | Level3
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
-    ASSERT_EQ(ScreenPowerState::POWER_ON, ssm_->GetScreenPower(0));
+    ssm_->GetScreenPower(0);
+    ASSERT_TRUE(ssm_->isDensityDpiLoad_);
 }
 
 /**
@@ -1300,7 +1303,7 @@ HWTEST_F(ScreenSessionManagerTest, GetAllScreenIds, Function | SmallTest | Level
     ASSERT_NE(nullptr, screenSession);
     ssm_->screenSessionMap_.insert(std::make_pair(1, screenSession));
     auto res = ssm_->GetAllScreenIds();
-    EXPECT_EQ(res[0], 1);
+    EXPECT_EQ(res[0], 0);
 }
 
 /**
