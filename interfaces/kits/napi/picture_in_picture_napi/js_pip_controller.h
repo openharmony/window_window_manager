@@ -69,7 +69,7 @@ private:
 
     sptr<PictureInPictureController> pipController_;
     std::map<std::string, ListenerType> listenerCodeMap_;
-    std::map<std::string, std::set< sptr<JsPiPWindowListener>> jsCbMap_;
+    std::map<std::string, std::set<sptr<JsPiPWindowListener>>> jsCbMap_;
 };
 } // namespace Rosen
 } // namespace OHOS
