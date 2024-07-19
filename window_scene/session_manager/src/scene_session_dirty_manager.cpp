@@ -480,7 +480,7 @@ void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession>& scene
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
-        return {};
+        return;
     }
     windowInfo.privacyMode = MMI::SecureFlag::DEFAULT_MODE;
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
