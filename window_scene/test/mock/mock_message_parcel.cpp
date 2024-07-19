@@ -21,6 +21,8 @@ namespace {
 bool g_setWriteBoolErrorFlag = false;
 bool g_setWriteInt32ErrorFlag = false;
 bool g_setWriteInt64ErrorFlag = false;
+bool g_setWriteUint32ErrorFlag = false;
+bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
 bool g_setWriteInterfaceTokenErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
@@ -29,6 +31,7 @@ bool g_setReadInt64ErrorFlag = false;
 const static std::string ERROR_FLAG = "error";
 #endif
 constexpr int32_t ERROR_INT = -1;
+constexpr float ERROR_FLOAT = -1.0f;
 #ifdef ENABLE_MOCK_WRITE_STRING_VECTOR
 constexpr int32_t ERROR_SIZE = 1;
 #endif
@@ -40,6 +43,8 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteBoolErrorFlag = false;
     g_setWriteInt32ErrorFlag = false;
     g_setWriteInt64ErrorFlag = false;
+    g_setWriteUint32ErrorFlag = false;
+    g_setWriteFloatErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
@@ -59,6 +64,16 @@ void MockMessageParcel::SetWriteInt32ErrorFlag(bool flag)
 void MockMessageParcel::SetWriteInt64ErrorFlag(bool flag)
 {
     g_setWriteInt64ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetWriteUint32ErrorFlag(bool flag)
+{
+    g_setWriteUint32ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetWriteFloatErrorFlag(bool flag)
+{
+    g_setWriteFloatErrorFlag = flag;
 }
 
 void MockMessageParcel::SetWriteParcelableErrorFlag(bool flag)
@@ -129,6 +144,24 @@ bool Parcel::WriteInt64(int64_t value)
 {
     (void)value;
     if (g_setWriteInt64ErrorFlag || value == ERROR_INT) {
+        return false;
+    }
+    return true;
+}
+
+bool Parcel::WriteUint32(uint32_t value)
+{
+    (void)value;
+    if (g_setWriteUint32ErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
+bool Parcel::WriteFloat(float value)
+{
+    (void)value;
+    if (g_setWriteFloatErrorFlag || value == ERROR_FLOAT) {
         return false;
     }
     return true;

@@ -351,6 +351,128 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest 
 }
 
 /**
+ * @tc.name: TransferAccessibilityHoverEvent01
+ * @tc.desc: TransferAccessibilityHoverEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent01, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = mockEventChannel_;
+    EXPECT_CALL(*mockEventChannel_, TransferAccessibilityHoverEvent);
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError result = extensionSession_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent02
+ * @tc.desc: TransferAccessibilityHoverEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent02, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = nullptr;
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError result = extensionSession_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferAccessibilityChildTreeRegister01
+ * @tc.desc: TransferAccessibilityChildTreeRegister01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister01, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = mockEventChannel_;
+    EXPECT_CALL(*mockEventChannel_, TransferAccessibilityChildTreeRegister);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    WSError result = extensionSession_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferAccessibilityChildTreeRegister02
+ * @tc.desc: TransferAccessibilityChildTreeRegister02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister02, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = nullptr;
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    WSError result = extensionSession_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferAccessibilityChildTreeUnregister01
+ * @tc.desc: TransferAccessibilityChildTreeUnregister01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister01, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = mockEventChannel_;
+    EXPECT_CALL(*mockEventChannel_, TransferAccessibilityChildTreeUnregister);
+    WSError result = extensionSession_->TransferAccessibilityChildTreeUnregister();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferAccessibilityChildTreeUnregister02
+ * @tc.desc: TransferAccessibilityChildTreeUnregister02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister02, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = nullptr;
+    WSError result = extensionSession_->TransferAccessibilityChildTreeUnregister();
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferAccessibilityDumpChildInfo01
+ * @tc.desc: TransferAccessibilityDumpChildInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo01, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = mockEventChannel_;
+    EXPECT_CALL(*mockEventChannel_, TransferAccessibilityDumpChildInfo);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    WSError result = extensionSession_->TransferAccessibilityDumpChildInfo(params, info);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferAccessibilityDumpChildInfo02
+ * @tc.desc: TransferAccessibilityDumpChildInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, Function | SmallTest | Level1)
+{
+    extensionSession_->windowEventChannel_ = nullptr;
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    WSError result = extensionSession_->TransferAccessibilityDumpChildInfo(params, info);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: TransferKeyEventForConsumed01
  * @tc.desc: TransferKeyEventForConsumed not timeout
  * @tc.type: FUNC
