@@ -30,11 +30,14 @@ public:
     using LoadContentFunc =
         std::function<void(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)>;
     RootSceneSession() : SceneSession({}, nullptr) {}
+    RootSceneSession(const sptr<SpecificSessionCallback>& specificCallback) : SceneSession({}, specificCallback) {}
     virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
+
+    WSRect GetSessionRectByType(AvoidAreaType);
 
 private:
     LoadContentFunc loadContentFunc_;
