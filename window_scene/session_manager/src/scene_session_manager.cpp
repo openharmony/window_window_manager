@@ -1103,6 +1103,19 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             return rootSceneSession_;
         }
         system::SetParameter("bootevent.wms.fullscreen.ready", "true");
+        sptr<SceneSession::SpecificSessionCallback> specificCallback =
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        if (specificCallback != nullptr) {
+            specificCallback->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) ->
+                std::vector<sptr<SceneSession>> {
+                    return this->GetSceneSessionVectorByType(type, displayId);
+                }
+            rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCallback);
+            WLOGFD("set specificSessionCallback to root scene session");
+        } else {
+            WLOGFD("SpecificSessionCallback is nullptr");
+            rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
+        }
         rootSceneSession_ = new RootSceneSession();
         rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());

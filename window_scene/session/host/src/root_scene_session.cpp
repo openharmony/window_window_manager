@@ -28,4 +28,41 @@ void RootSceneSession::LoadContent(
         loadContentFunc_(contentUrl, env, storage, context);
     }
 }
+
+WSRect RootSceneSession::GetSessionRectByType(AvoidAreaType type)
+{
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr) {
+        TLOGD(WmsLogTag::WMS_IMMS, "get scene session vector callback is not set");
+        return {};
+    }
+    std::vector<sptr<SceneSession>> sessionVector;
+    int dispId = GetSessionProperty()->GetDisplayId();
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            sessionVector = specificCallback_->onGetSceneSessionVectorByType_(
+                WindowType::WINDOW_TYPE_STATUS_BAR, dispId);
+            break;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            sessionVector = specificCallback_->onGetSceneSessionVectorByType_(
+                WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, dispId);
+            break;
+        }
+        default: {
+            TLOGD(WmsLogTag::WMS_IMMS, "type %{public}u don't need to handle", type);
+            return {};
+        }
+    }
+
+    for (auto& statusBar : sessionVector) {
+        if (!(statusBar->IsVisible())) {
+            continue;
+        }
+        const WSRect rect = statusBar->GetSessionRect();
+        TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect %{public}s", type, rect.ToString().c_str());
+        return rect;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "no satisfied session rect found, type: %{public}u", type);
+    return {};
+}
 } // namespace OHOS::Rosen

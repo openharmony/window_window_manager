@@ -27,6 +27,8 @@
 #include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
+#include "root_scene_session.h"
+#include "scene_session_manager.h"
 
 #include "anr_manager.h"
 #include "intention_event_manager.h"
@@ -244,6 +246,17 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
+{
+    sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
+    if (rootSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    rect = rootSceneSession->GetSessionRectByType(type);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -189,6 +189,7 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/window_scene/intention_event/include",
+    "${window_base_path}/window_scene/session/host/include",
   ]
 
   sources = [
@@ -243,6 +244,7 @@ ohos_shared_library("libwm") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "../dm:libdm",
   ]
 
@@ -272,6 +274,7 @@ ohos_shared_library("libwm") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "ffrt:libffrt",
   ]
 
   defines = []

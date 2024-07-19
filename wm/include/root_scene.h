@@ -20,6 +20,8 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "ws_common.h"
+
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {
@@ -91,6 +93,8 @@ public:
     }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+
+    WMError GetSessionRectByType(AvoidAreaType, WSRect&);
 
     static sptr<RootScene> staticRootScene_;
 
