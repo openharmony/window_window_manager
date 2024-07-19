@@ -2089,6 +2089,13 @@ public:
      * @return true means the immersive mode is enabled, and false means the opposite.
      */
     virtual bool GetImmersiveModeEnabledState() const { return true; }
+
+    /**
+     * @brief Get the height of status bar.
+     *
+     * @return the height of status bar.
+     */
+    virtual uint32_t GetStatusBarHeight() { return 0; }
 };
 }
 }

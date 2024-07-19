@@ -3849,4 +3849,23 @@ int32_t SceneSession::GetAppForceLandscapeMode(const std::string& bundleName)
     }
     return forceSplitFunc_(bundleName);
 }
+
+int32_t SceneSession::GetStatusBarHeight()
+{
+    int32_t height = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
+        GetSessionProperty() == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
+        return height;
+    }
+    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > height) {
+            height = statusBar->GetSessionRect().height_;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
+    return height;
+}
 } // namespace OHOS::Rosen
