@@ -19,6 +19,7 @@
 #include <iremote_proxy.h>
 
 #include "session/host/include/zidl/session_interface.h"
+#include "ws_common.h"
 
 namespace OHOS::Rosen {
 class SessionProxy : public IRemoteProxy<ISession> {
@@ -73,6 +74,7 @@ public:
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
+    WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
@@ -82,6 +84,9 @@ public:
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
+    int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
+    int32_t GetStatusBarHeight() override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

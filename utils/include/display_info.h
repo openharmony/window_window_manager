@@ -67,6 +67,8 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::vector<uint32_t>, ColorSpaces, colorSpaces, std::vector<uint32_t>());
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::vector<uint32_t>, HdrFormats, hdrFormats, std::vector<uint32_t>());
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, DefaultDeviceRotationOffset, defaultDeviceRotationOffset, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, AvailableWidth, availableWidth, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, AvailableHeight, availableHeight, 0);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

@@ -49,7 +49,7 @@ JsExtensionWindow::~JsExtensionWindow() {}
 
 napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::Window> window, int32_t hostWindowId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsExtensionWindow CreateJsExtensionWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 

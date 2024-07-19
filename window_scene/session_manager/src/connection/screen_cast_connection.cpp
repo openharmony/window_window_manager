@@ -26,9 +26,8 @@ ScreenCastConnection &ScreenCastConnection::GetInstance()
 
 bool ScreenCastConnection::CastConnectExtension()
 {
-    if (bundleName_ == "" || abilityName_ == "") {
-        TLOGE(WmsLogTag::DMS, "screen cast bundleName: %{public}s or abilityName: %{public}s is empty",
-            bundleName_.c_str(), abilityName_.c_str());
+    if (bundleName_.empty() || abilityName_.empty()) {
+        TLOGE(WmsLogTag::DMS, "screen cast bundleName or abilityName is empty");
         return false;
     }
     TLOGI(WmsLogTag::DMS, "bundleName: %{public}s, abilityName: %{public}s",
@@ -58,6 +57,7 @@ void ScreenCastConnection::CastDisconnectExtension()
         return;
     }
     abilityConnection_->ScreenSessionDisconnectExtension();
+    abilityConnection_ = nullptr;
     TLOGI(WmsLogTag::DMS, "CastDisconnectExtension exit");
 }
 
@@ -88,5 +88,15 @@ bool ScreenCastConnection::IsConnectedSync()
         return false;
     }
     return abilityConnection_->IsConnectedSync();
+}
+
+int32_t ScreenCastConnection::SendMessageToCastService(const int32_t &transCode, MessageParcel &data,
+    MessageParcel &reply)
+{
+    if (abilityConnection_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
+        return -1;
+    }
+    return abilityConnection_->SendMessage(transCode, data, reply);
 }
 } // namespace OHOS::Rosen

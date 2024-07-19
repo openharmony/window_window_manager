@@ -58,6 +58,7 @@ ohos_shared_library("scene_session") {
     "host/src/session.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
+    "host/src/ws_ffrt_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -83,6 +84,7 @@ ohos_shared_library("scene_session") {
     "ability_runtime:process_options",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -98,7 +100,7 @@ ohos_shared_library("scene_session") {
   public_external_deps = [
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
   defines = []
 
@@ -136,6 +138,10 @@ ohos_shared_library("scene_session") {
     defines += [ "IMF_ENABLE" ]
   }
 
+  if (build_variant == "root") {
+    defines += [ "ACCESSIBILITY_DUMP_FOR_TEST" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -171,7 +177,7 @@ ohos_shared_library("screen_session") {
   ]
   public_external_deps = [
     "accessibility:accessibility_common",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
 
   innerapi_tags = [ "platformsdk" ]

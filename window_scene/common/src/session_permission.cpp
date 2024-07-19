@@ -27,6 +27,7 @@
 #include <singleton.h>
 #include <singleton_container.h>
 #include "common/include/session_permission.h"
+#include "parameters.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -245,6 +246,7 @@ bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::string callingBundleName;
     bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
+    IPCSkeleton::SetCallingIdentity(identity);
     if (callingBundleName == bundleName) {
         WLOGFI("verify bundle name success");
         return true;
@@ -306,6 +308,12 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
         return false;
     }
     return isUserTestMode;
+}
+
+bool SessionPermission::IsBetaVersion()
+{
+    std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
+    return betaName.find("beta") != std::string::npos;
 }
 
 } // namespace Rosen

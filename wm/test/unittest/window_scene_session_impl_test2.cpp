@@ -1206,13 +1206,13 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    WindowLimits windowLimits = {100, 100, 100, 100, 0.0f, 0.0f};
+    WindowLimits windowLimits = {2000, 2000, 2000, 2000, 0.0f, 0.0f};
     if (WMError::WM_OK == window->SetWindowLimits(windowLimits)) {
         WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-        ASSERT_EQ(windowSizeLimits.maxWidth_, 100);
-        ASSERT_EQ(windowSizeLimits.maxHeight_, 100);
-        ASSERT_EQ(windowSizeLimits.minWidth_, 100);
-        ASSERT_EQ(windowSizeLimits.minHeight_, 100);
+        ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
+        ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
+        ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
+        ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
     }
 }
 
@@ -1368,19 +1368,19 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    MaximizeLayoutOption layoutOption;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     // not support subWinodw call
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(layoutOption));
-
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
+ 
     // window not support fullscreen
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
-    ASSERT_EQ(WMError::WM_OK, window->Maximize(layoutOption));
+    window->property_->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(presentation));
 }
 
 /**
  * @tc.name: Maximize03
- * @tc.desc: test maximizeLayoutOption
+ * @tc.desc: test presentation
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
@@ -1402,17 +1402,29 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     window->hostSession_ = session;
 
     ASSERT_NE(nullptr, window);
-    MaximizeLayoutOption layoutOption;
-    // dock can not be hide from maximize interface!
-    layoutOption.dock = ShowType::FORBIDDEN;
-    auto ret = window->Maximize(layoutOption);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    layoutOption.dock = ShowType::HIDE;
-    layoutOption.decor = ShowType::HIDE;
-    ASSERT_NE(WMError::WM_ERROR_INVALID_PARAM, window->Maximize(layoutOption));
-    layoutOption.dock = ShowType::HIDE;
-    layoutOption.decor = ShowType::SHOW;
-    ASSERT_NE(WMError::WM_ERROR_INVALID_PARAM, window->Maximize(layoutOption));
+    // case1: only set maximize()
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    auto ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
+
+    // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
+    presentation = MaximizePresentation::EXIT_IMMERSIVE;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+    
+    // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
+    presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+
+    // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
+    presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 }
 
 /**

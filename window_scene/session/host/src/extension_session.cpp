@@ -370,6 +370,45 @@ WSError ExtensionSession::TransferAccessibilityEvent(const Accessibility::Access
     return WSError::WS_OK;
 }
 
+WSError ExtensionSession::TransferAccessibilityHoverEvent(
+    float pointX, float pointY, int32_t sourceType, int32_t eventType, int64_t timeMs)
+{
+    if (!windowEventChannel_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+WSError ExtensionSession::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    if (!windowEventChannel_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+WSError ExtensionSession::TransferAccessibilityChildTreeUnregister()
+{
+    if (!windowEventChannel_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityChildTreeUnregister();
+}
+
+WSError ExtensionSession::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (!windowEventChannel_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
 WSError ExtensionSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (!IsSessionValid()) {

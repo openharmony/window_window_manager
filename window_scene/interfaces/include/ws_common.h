@@ -160,6 +160,34 @@ enum class ManagerState : uint32_t {
     MANAGER_STATE_SCREEN_LOCKED = 0,
 };
 
+/**
+ * @brief Enumerates picture in picture control status.
+ */
+enum class WsPiPControlStatus : int32_t {
+    PLAY = 1,
+    PAUSE = 0,
+    OPEN = 1,
+    CLOSE = 0,
+    ENABLED = -2,
+    DISABLED = -3,
+};
+
+/**
+ * @brief Enumerates picture in picture control type.
+ */
+enum class WsPiPControlType : uint32_t {
+    VIDEO_PLAY_PAUSE = 0,
+    VIDEO_PREVIOUS = 1,
+    VIDEO_NEXT = 2,
+    FAST_FORWARD = 3,
+    FAST_BACKWARD = 4,
+    HANG_UP_BUTTON = 5,
+    MICROPHONE_SWITCH = 6,
+    CAMERA_SWITCH = 7,
+    MUTE_SWITCH = 8,
+    END,
+};
+
 enum class FocusChangeReason {
     /**
      * default focus change reason
@@ -284,6 +312,8 @@ struct SessionInfo {
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     uint32_t uiExtensionUsage_ = 0;
+    bool fullScreenStart_ = false;
+    bool isAtomicService_ = false;
 };
 
 enum class SessionFlag : uint32_t {

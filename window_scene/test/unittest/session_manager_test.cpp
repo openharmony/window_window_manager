@@ -94,7 +94,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
 {
     SessionManager sessionManager;
     sessionManager.wmsConnectionChangedFunc_ = nullptr;
-    sessionManager.OnWMSConnectionChangedCallback(0, 0, true);
+    sessionManager.OnWMSConnectionChangedCallback(0, 0, true, false);
 
     int32_t userId = 2;
     int32_t screenId = 0;
@@ -115,7 +115,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sessionManager.currentWMSUserId_ = SYSTEM_USERID;
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -217,7 +217,7 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     sSMDeathRecipient.OnRemoteDied(wptrDeath);
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 }
 }

@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 #include <pointer_event.h>
 #include "input_manager.h"
+#include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 
 #include "display_manager.h"
@@ -57,6 +58,11 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
         pidChangeCallback_(persistentId_, isServerPid);
         WLOGFI("id: %{public}d, isServerPid:%{public}d", persistentId_, isServerPid);
     }
+}
+
+bool MoveDragController::HasPointDown()
+{
+    return hasPointDown_;
 }
 
 void MoveDragController::SetStartMoveFlag(bool flag)
@@ -236,8 +242,9 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
-            WLOGFI("setFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
+            WLOGFI("begin setFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransaction::FlushImplicitTransaction();
         }
         return;
     }
@@ -245,6 +252,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
+        RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
     }
 }

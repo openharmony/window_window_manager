@@ -78,6 +78,9 @@ public:
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static ProcessStatusBarEnabledChangeFunc statusBarEnabledCallbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
@@ -115,12 +118,11 @@ void SceneSessionManagerTest2::TearDownTestCase()
 
 void SceneSessionManagerTest2::SetUp()
 {
-    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest2::TearDown()
 {
-    ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 void SceneSessionManagerTest2::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)
@@ -156,7 +158,7 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigaionEnabled, Function | SmallT
     ASSERT_NE(callbackFunc_, nullptr);
 
     WMError result00 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result00, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(result00, WMError::WM_OK);
 
     ssm_->SetGestureNavigationEnabledChangeListener(callbackFunc_);
     WMError result01 = ssm_->SetGestureNavigaionEnabled(true);
@@ -171,7 +173,7 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigaionEnabled, Function | SmallT
 
     ssm_->SetGestureNavigationEnabledChangeListener(nullptr);
     WMError result03 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result03, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(result03, WMError::WM_OK);
 }
 
 /**

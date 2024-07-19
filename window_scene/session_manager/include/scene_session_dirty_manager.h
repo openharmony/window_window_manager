@@ -27,7 +27,11 @@
 #include "input_manager.h"
 
 namespace OHOS::Rosen {
+struct SecSurfaceInfo;
+struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode);
+std::string DumpWindowInfo(const MMI::WindowInfo& info);
+std::string DumpRect(const std::vector<MMI::Rect>& rects);
 class SceneSessionDirtyManager {
 private:
     enum WindowAction : uint32_t {
@@ -49,14 +53,16 @@ public:
     std::vector<MMI::WindowInfo> GetFullWindowInfoList();
     void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
     void ResetSessionDirty();
+    void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
-    void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
-    void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform) const;
-    void UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
+    void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
+        bool useUIExtension = false) const;
+    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;
+    void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
@@ -65,13 +71,26 @@ private:
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
-    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
-
+    void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
+        const sptr<SceneSession>& sceneSession);
+    std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
+        const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
+    MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
+        const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession,
+        const Matrix3f hostTransform) const;
+    MMI::WindowInfo GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
+        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
+    MMI::WindowInfo MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
+        const MMI::WindowInfo& hostWindowinfo) const;
+    void ResetFlushWindowInfoTask();
     std::mutex mutexlock_;
+    mutable std::shared_mutex secSurfaceInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };
     std::atomic_bool hasPostTask_ { false };
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap_;
 };
 } //namespace OHOS::Rosen
 

@@ -379,6 +379,15 @@ struct ExpandOption {
 };
 
 /**
+ * @brief fold display physical resolution
+ */
+struct DisplayPhysicalResolution {
+    FoldDisplayMode foldDisplayMode_;
+    uint32_t physicalWidth_;
+    uint32_t physicalHeight_;
+};
+
+/**
  * @brief displayRect
  */
 struct DMRect {

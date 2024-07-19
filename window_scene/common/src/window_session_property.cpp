@@ -21,8 +21,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-    constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -78,6 +79,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -133,6 +136,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
+        &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -707,6 +712,32 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
             return false;
         }
     }
+    auto controlStatusSize = pipTemplateInfo_.pipControlStatusInfoList.size();
+    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+        return false;
+    }
+    if (!parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
+        return false;
+    }
+    for (uint32_t i = 0; i < controlStatusSize; i++) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].controlType)) ||
+            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].status))) {
+            return false;
+        }
+    }
+    auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
+    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+        return false;
+    }
+    if (!parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
+        return false;
+    }
+    for (uint32_t i = 0; i < controlEnableSize; i++) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
+            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -724,11 +755,40 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t controlGroupId = 0;
-        if (parcel.ReadUint32(controlGroupId)) {
-            pipTemplateInfo.controlGroup.push_back(controlGroupId);
-        } else {
+        if (!parcel.ReadUint32(controlGroupId)) {
             return;
         }
+        pipTemplateInfo.controlGroup.push_back(controlGroupId);
+    }
+    auto controlStatusSize = parcel.ReadUint32();
+    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+        return;
+    }
+    for (uint32_t i = 0; i < controlStatusSize; i++) {
+        PiPControlStatusInfo pipControlStatusInfo;
+        uint32_t controlType = 0;
+        int32_t status = 0;
+        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
+            return;
+        }
+        pipControlStatusInfo.controlType = static_cast<PiPControlType>(controlType);
+        pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
+        pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
+    }
+    auto controlEnableSize = parcel.ReadUint32();
+    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+        return;
+    }
+    for (uint32_t i = 0; i < controlEnableSize; i++) {
+        PiPControlEnableInfo pipControlEnableInfo;
+        uint32_t controlType = 0;
+        int32_t enabled = 0;
+        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
+            return;
+        }
+        pipControlEnableInfo.controlType = static_cast<PiPControlType>(controlType);
+        pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
+        pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
     }
     property->SetPiPTemplateInfo(pipTemplateInfo);
 }
@@ -756,6 +816,26 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
             property->SetWindowMask(std::shared_ptr<Media::PixelMap>(windowMask));
         }
     }
+}
+
+void WindowSessionProperty::SetCompatibleModeInPc(bool compatibleModeInPc)
+{
+    compatibleModeInPc_ = compatibleModeInPc;
+}
+
+bool WindowSessionProperty::GetCompatibleModeInPc() const
+{
+    return compatibleModeInPc_;
+}
+
+void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
+{
+    isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
+}
+
+bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
+{
+    return isSupportDragInPcCompatibleMode_;
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -791,8 +871,11 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_);
+        parcel.WriteParcelable(&keyboardLayoutParams_) &&
+        parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteBool(isSupportDragInPcCompatibleMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -847,6 +930,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
+    property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -854,6 +938,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
+    property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     return property;
 }
 
@@ -1026,6 +1112,12 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
     return parcel.WriteBool(topmost_);
 }
 
+
+bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    return parcel.WriteUint32(modeSupportInfo_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
@@ -1152,6 +1244,11 @@ void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
     SetTopmost(parcel.ReadBool());
 }
 
+void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
+{
+    SetModeSupportInfo(parcel.ReadUint32());
+}
+
 void WindowSessionProperty::SetTransform(const Transform& trans)
 {
     trans_ = trans;
@@ -1205,6 +1302,16 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
+}
+
+void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
+{
+    uiExtensionUsage_ = uiExtensionUsage;
+}
+
+UIExtensionUsage WindowSessionProperty::GetUIExtensionUsage() const
+{
+    return uiExtensionUsage_;
 }
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)
@@ -1265,6 +1372,16 @@ void WindowSessionProperty::SetLastLimitsVpr(float vpr)
 float WindowSessionProperty::GetLastLimitsVpr() const
 {
     return lastVpr_;
+}
+
+bool WindowSessionProperty::GetFullScreenStart() const
+{
+    return fullScreenStart_;
+}
+
+void WindowSessionProperty::SetFullScreenStart(bool fullScreenStart)
+{
+    fullScreenStart_ = fullScreenStart;
 }
 } // namespace Rosen
 } // namespace OHOS

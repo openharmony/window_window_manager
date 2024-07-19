@@ -31,7 +31,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+    if (moveDragController_ != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
@@ -41,7 +41,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "~SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
@@ -55,8 +55,10 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
         // use property from client
-        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-            session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+        auto sessionProperty = session->GetSessionProperty();
+        if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
+            sessionProperty) {
+            sessionProperty->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
         }
         auto ret = session->SceneSession::Foreground(property);
@@ -81,8 +83,9 @@ WSError SubSession::Hide()
         }
         // background will remove surfaceNode, custom not execute
         // not animation playing when already background; inactive may be animation playing
-        if (session->GetSessionProperty() &&
-            session->GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty &&
+            sessionProperty->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
@@ -152,11 +155,18 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
     }
-    if (GetSessionProperty() && GetSessionProperty()->GetRaiseEnabled()) {
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
+}
+
+int32_t SubSession::GetMissionId() const
+{
+    auto parentSession = GetParentSession();
+    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -176,12 +186,6 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 
     WSError ret = Session::TransferKeyEvent(keyEvent);
     return ret;
-}
-
-int32_t SubSession::GetMissionId() const
-{
-    auto parentSession = GetParentSession();
-    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 void SubSession::UpdatePointerArea(const WSRect& rect)
@@ -219,8 +223,9 @@ void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 bool SubSession::IsTopmost() const
 {
     bool isTopmost = false;
-    if (GetSessionProperty()) {
-        isTopmost = GetSessionProperty()->IsTopmost();
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        isTopmost = sessionProperty->IsTopmost();
     }
     TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
     return isTopmost;

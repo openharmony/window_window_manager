@@ -169,7 +169,7 @@ int32_t CJWindowImpl::ShowWithAnimation()
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
-            
+
 int32_t CJWindowImpl::DestroyWindow()
 {
     ResWindow result = CheckWindow();
@@ -183,7 +183,6 @@ int32_t CJWindowImpl::DestroyWindow()
     windowToken_ = nullptr;
     return static_cast<int32_t>(ret);
 }
-
 
 int32_t CJWindowImpl::MoveWindowTo(int32_t x, int32_t y)
 {

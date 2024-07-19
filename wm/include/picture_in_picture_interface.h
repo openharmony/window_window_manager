@@ -16,6 +16,8 @@
 #ifndef OHOS_PICTURE_IN_PICTURE_INTERFACE_H
 #define OHOS_PICTURE_IN_PICTURE_INTERFACE_H
 
+#include "wm_common.h"
+
 namespace OHOS {
 namespace Rosen {
 /**
@@ -41,6 +43,16 @@ public:
 class IPiPActionObserver : virtual public RefBase {
 public:
     virtual void OnActionEvent(const std::string& name, int32_t status) {}
+};
+
+/**
+ * @class IPiPControlObserver
+ *
+ * @brief Pip control observer.
+ */
+class IPiPControlObserver : virtual public RefBase {
+public:
+    virtual void OnControlEvent(PiPControlType controlType, PiPControlStatus status) {}
 };
 } // namespace Rosen
 } // namespace OHOS

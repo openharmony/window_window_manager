@@ -169,6 +169,11 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
+
+    virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
+    {
+        return std::vector<DisplayPhysicalResolution> {};
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

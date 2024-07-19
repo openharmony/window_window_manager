@@ -33,8 +33,9 @@ namespace {
     const static uint32_t MAX_RETRY_NUM = 6;
     const static uint32_t RETRY_WAIT_MS = 500;
     const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 15000;
+    const static uint32_t MAX_INTERVAL_US = 25000;
     std::atomic<bool> g_dmIsDestroyed = false;
+    std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -42,12 +43,13 @@ class DisplayManager::Impl : public RefBase {
 public:
     Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
-    
+
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     sptr<Display> GetDefaultDisplay();
     sptr<Display> GetDefaultDisplaySync();
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
@@ -677,8 +679,14 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
+    std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
+    if (!lock.try_lock()) {
+        WLOGFE("DisplayManager::GetSnapshotByPicker try_lock failed!");
+        return nullptr;
+    }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetSnapshotByPicker(rect, errorCode);
+    lock.unlock();
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetSnapshotByPicker failed!");
         return nullptr;
@@ -686,6 +694,10 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
     WLOGFI("snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         rect.left, rect.top, rect.width, rect.height);
     // create crop pixel map
+    if (rect.width == 0 || rect.height == 0) {
+        WLOGFE("width or height is invalid!");
+        return nullptr;
+    }
     Media::InitializationOptions opt;
     opt.size.width = rect.width;
     opt.size.height = rect.height;
@@ -750,6 +762,16 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync()
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManager::Impl::GetAllDisplayPhysicalResolution()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalResolution()
+{
+    return pImpl_->GetAllDisplayPhysicalResolution();
 }
 
 std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
@@ -1747,7 +1769,7 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFI("[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -1875,4 +1897,4 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
-} // namespace OHOS::Rosen
+} // namespace OHOS::Rosen

@@ -15,17 +15,17 @@
 
 #include "typec_port_info.h"
 
-#include <string>
 #include <fstream>
 #include <dirent.h>
+#include <string>
 #include <sys/types.h>
 
 namespace OHOS::Rosen {
-static std::vector<std::string> getDirList()
+static std::vector<std::string> GetDirList()
 {
     DIR* dir = opendir("sys/class/thermal");
     if (dir == nullptr) {
-        return std::vector<std::string>();
+        return {};
     }
 
     std::vector<std::string> allPath;
@@ -33,8 +33,7 @@ static std::vector<std::string> getDirList()
     while ((entry = readdir(dir)) != nullptr) {
         std::string name = entry->d_name;
         if (name.find("thermal_zone") == 0) {
-            std::string thermalDir = "sys/class/thermal/" + name;
-            allPath.emplace_back(thermalDir);
+            allPath.emplace_back("sys/class/thermal/" + name);
         }
     }
     closedir(dir);
@@ -55,14 +54,19 @@ static bool IsStringNumeric(const char* buffer)
 
 static bool GetTypeCFileNode(const std::vector<std::string>& allDirName, std::string& typeCMappingPath)
 {
-    constexpr int bufferSize = 20;
     for (const auto& dir : allDirName) {
         std::string absoluteTypePath = dir + "/type";
-        char buffer[bufferSize] = {0};
-        std::ifstream srcFile(absoluteTypePath.c_str(), std::ifstream::in);
+        char realPathResult[PATH_MAX] = { 0 };
+        if (!realpath(absoluteTypePath.c_str(), realPathResult)) {
+            return false;
+        }
+
+        std::ifstream srcFile(realPathResult, std::ifstream::in);
         if (!srcFile.is_open()) {
             continue;
         }
+        constexpr int bufferSize = 20;
+        char buffer[bufferSize] = {0};
         srcFile.getline(buffer, bufferSize);
         if (strcmp(buffer, "usb_port") == 0) {
             typeCMappingPath = dir + "/temp";
@@ -76,7 +80,7 @@ bool TypeCPortInfo::GetTypeCThermal(int32_t& thermal)
 {
     static std::string typeCMappingPath;
     if (typeCMappingPath.empty()) {
-        std::vector<std::string> allDirName = getDirList();
+        std::vector<std::string> allDirName = GetDirList();
         if (allDirName.empty()) {
             return false;
         }
@@ -85,13 +89,17 @@ bool TypeCPortInfo::GetTypeCThermal(int32_t& thermal)
         }
     }
 
-    constexpr int bufferSize = 20;
-    char buffer[bufferSize] = {0};
+    char realPathResult[PATH_MAX] = { 0 };
+    if (!realpath(typeCMappingPath.c_str(), realPathResult)) {
+        return false;
+    }
 
-    std::ifstream typeCThermalFile(typeCMappingPath.c_str(), std::ifstream::in);
+    std::ifstream typeCThermalFile(realPathResult, std::ifstream::in);
     if (!typeCThermalFile.is_open()) {
         return false;
     }
+    constexpr int bufferSize = 20;
+    char buffer[bufferSize] = {0};
     typeCThermalFile.getline(buffer, bufferSize);
     if (!IsStringNumeric(buffer)) {
         return false;

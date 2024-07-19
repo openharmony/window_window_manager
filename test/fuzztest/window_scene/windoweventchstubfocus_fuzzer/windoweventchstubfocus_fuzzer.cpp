@@ -64,14 +64,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         parcel, reply, option);
     parcel.RewindRead(0);
     eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_CLEAR_FOCUS),
         parcel, reply, option);
     return true;

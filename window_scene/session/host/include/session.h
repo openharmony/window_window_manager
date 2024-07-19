@@ -111,6 +111,7 @@ struct DetectTaskInfo {
 
 class Session : public SessionStub {
 public:
+    friend class HidumpController;
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
@@ -150,19 +151,6 @@ public:
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    virtual WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
-    virtual WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info);
-    virtual WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info);
-    virtual WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent);
-    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
-        int64_t timeMs);
-
     virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
@@ -177,7 +165,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
-    void SaveSnapshot(bool useSnapshotThread);
+    void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -230,6 +218,8 @@ public:
     void SetBufferAvailable(bool bufferAvailable);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
+    virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
+    virtual bool IsExitSplitOnBackground() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
@@ -293,6 +283,7 @@ public:
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
+    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
@@ -329,6 +320,9 @@ public:
     bool IsTerminated() const;
     bool IsSessionForeground() const;
     virtual bool IsAnco() const { return false; }
+    virtual void SetBlankFlag(bool isAddBlank) {};
+    virtual bool GetBlankFlag() const { return false; }
+    virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
@@ -451,6 +445,7 @@ protected:
     virtual bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
+    void NotifySessionInfoChange();
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
@@ -491,6 +486,7 @@ protected:
     Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
+    std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
@@ -555,8 +551,8 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     void NotifyPointerEventToRs(int32_t pointAction);
-    void NotifySessionInfoChange();
     WSError HandleSubWindowClick(int32_t action);
+    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

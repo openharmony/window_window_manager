@@ -16,6 +16,8 @@
 #include "iremote_object_mocker.h"
 #include <gtest/gtest.h>
 #include "accessibility_event_info.h"
+#include "ws_common.h"
+
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
@@ -89,6 +91,23 @@ HWTEST_F(SessionProxyTest, Disconnect, Function | SmallTest | Level2)
     WSError res = sProxy->Disconnect();
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: Disconnect end";
+}
+
+/**
+ * @tc.name: DrawingCompleted
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->DrawingCompleted();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted end";
 }
 
 /**
@@ -499,6 +518,40 @@ HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Le
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent end";
+}
+
+/**
+ * @tc.name: UpdatePiPControlStatus
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = WsPiPControlStatus::PLAY;
+    WSError res = sProxy->UpdatePiPControlStatus(controlType, status);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPControlStatus end";
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    int32_t res = sProxy->GetStatusBarHeight();
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
 }
 } // namespace
 } // namespace Rosen

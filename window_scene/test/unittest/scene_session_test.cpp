@@ -789,6 +789,42 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ModalUIExtension
+ * @tc.desc: ModalUIExtension
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalUIExtension";
+    info.bundleName_ = "ModalUIExtension";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    ExtensionWindowEventInfo extensionInfo;
+    extensionInfo.persistentId = 12345;
+    extensionInfo.pid = 1234;
+    extensionInfo.windowRect = { 1, 2, 3, 4 };
+    sceneSession->AddModalUIExtension(extensionInfo);
+    EXPECT_TRUE(sceneSession->HasModalUIExtension());
+
+    auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    EXPECT_EQ(getInfo.persistentId, extensionInfo.persistentId);
+    EXPECT_EQ(getInfo.pid, extensionInfo.pid);
+    EXPECT_EQ(getInfo.windowRect, extensionInfo.windowRect);
+
+    Rect windowRect = { 5, 6, 7, 8 };
+    extensionInfo.windowRect = windowRect;
+    sceneSession->UpdateModalUIExtension(extensionInfo);
+    getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    EXPECT_EQ(getInfo.windowRect, windowRect);
+
+    sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+}
+
+/**
  * @tc.name: NotifySessionRectChange
  * @tc.desc: NotifySessionRectChange
  * @tc.type: FUNC
@@ -1811,6 +1847,42 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = scensession->UpdateSessionRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetStatusBarHeight";
+    info.bundleName_ = "GetStatusBarHeight";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    int32_t height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 0);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
+    height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 0);
+    WSRect rect({0, 0, 0, 1});
+    sceneSession->winRect_ = rect;
+    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+        uint64_t displayId)->std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    sceneSession->property_ = property;
+    height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 1);
 }
 }
 }

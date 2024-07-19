@@ -401,21 +401,23 @@ public:
     {
         TransformHelper::Matrix4 ret = TransformHelper::Matrix4::Identity;
         // set scale
-        if ((transform.scaleX_ - 1) || (transform.scaleY_ - 1) || (transform.scaleY_ - 1)) {
+        if (!MathHelper::NearZero(transform.scaleX_ - 1.0f) || !MathHelper::NearZero(transform.scaleY_ - 1.0f) ||
+            !MathHelper::NearZero(transform.scaleZ_ - 1.0f)) {
             ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, transform.scaleZ_);
         }
         // set rotation
-        if (transform.rotationX_) {
+        if (!MathHelper::NearZero(transform.rotationX_)) {
             ret *= TransformHelper::CreateRotationX(MathHelper::ToRadians(transform.rotationX_));
         }
-        if (transform.rotationY_) {
+        if (!MathHelper::NearZero(transform.rotationY_)) {
             ret *= TransformHelper::CreateRotationY(MathHelper::ToRadians(transform.rotationY_));
         }
-        if (transform.rotationZ_) {
+        if (!MathHelper::NearZero(transform.rotationZ_)) {
             ret *= TransformHelper::CreateRotationZ(MathHelper::ToRadians(transform.rotationZ_));
         }
         // set translation
-        if (transform.translateX_ || transform.translateY_ || transform.translateZ_) {
+        if (!MathHelper::NearZero(transform.translateX_) || !MathHelper::NearZero(transform.translateY_) ||
+            !MathHelper::NearZero(transform.translateZ_)) {
             ret *= TransformHelper::CreateTranslation(TransformHelper::Vector3(transform.translateX_,
                 transform.translateY_, transform.translateZ_));
         }

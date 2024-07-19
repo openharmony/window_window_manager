@@ -155,8 +155,8 @@ HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
 {
     ScreenScene screenScene("UNKNOW");
     uint32_t rate = 120;
-    bool isAnimatorStopped = true;
-    screenScene.FlushFrameRate(rate, isAnimatorStopped);
+    int32_t animatorExpectedFrameRate = -1;
+    screenScene.FlushFrameRate(rate, animatorExpectedFrameRate);
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
 

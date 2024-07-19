@@ -23,7 +23,6 @@
 
 namespace OHOS::Rosen {
 class SceneSessionManagerStub;
-using SceneSessionManagerStubFunc = int (SceneSessionManagerStub::*)(MessageParcel &data, MessageParcel &reply);
 
 class SceneSessionManagerStub : public IRemoteStub<ISceneSessionManager> {
 public:
@@ -33,8 +32,6 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    static const std::map<uint32_t, SceneSessionManagerStubFunc> stubFuncMap_;
-
     int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
     int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
@@ -89,12 +86,17 @@ private:
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply);
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
+
+    int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

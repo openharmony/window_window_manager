@@ -26,6 +26,7 @@ namespace {
     static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
     static const  std::string SINGLE_DISPLAY = "1";
     static const std::string DUAL_DISPLAY = "2";
+    static const std::string SINGLE_POCKET_DISPLAY = "4";
 }
 class FoldScreenStateInternel {
 public:
@@ -56,6 +57,18 @@ public:
             return false;
         }
         return foldTypes[0] == SINGLE_DISPLAY;
+    }
+
+    static bool IsSingleDisplayPocketFoldDevice()
+    {
+        if (!IsValidFoldType(g_foldScreenType)) {
+            return false;
+        }
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return false;
+        }
+        return foldTypes[0] == SINGLE_POCKET_DISPLAY;
     }
 
     static std::vector<std::string> StringSplit(const std::string& str, char delim)

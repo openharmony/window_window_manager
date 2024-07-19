@@ -615,6 +615,13 @@ public:
     */
     DMError ResetAllFreezeStatus();
 
+    /**
+     * @brief get all display physical resolution
+     *
+     * @return all physical resolution
+     */
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

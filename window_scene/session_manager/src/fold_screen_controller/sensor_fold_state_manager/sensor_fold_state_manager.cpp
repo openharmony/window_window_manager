@@ -97,9 +97,9 @@ void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatu
         std::chrono::duration_cast<std::chrono::seconds>(timeNow - mLastStateClock_).count());
     mLastStateClock_ = timeNow;
 
-    std::vector<int32_t> screenFoldInfo {static_cast<int32_t>(currentStatus), static_cast<int32_t>(nextStatus),
-        duration};
-    ScreenSessionManager::GetInstance().ReportFoldStatusToScb(postureAngle, screenFoldInfo);
+    std::vector<std::string> screenFoldInfo {std::to_string(static_cast<int32_t>(currentStatus)),
+        std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration), std::to_string(postureAngle)};
+    ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
 }
 
 } // namespace OHOS::Rosen

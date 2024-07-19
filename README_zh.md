@@ -97,8 +97,8 @@ foundation/window/window_manager/
 
 ## 接口说明
 
-- [Window](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-window.md)
-- [Display](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-display.md)
+- [Window](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/js-apis-window.md)
+- [Display](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/js-apis-display.md)
 
 ## 相关仓
 - [graphic_graphic_2d](https://gitee.com/openharmony/graphic_graphic_2d)

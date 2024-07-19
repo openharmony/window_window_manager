@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -328,6 +329,9 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::DoLocateSource();
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::PLAY;
+    PictureInPictureManager::DoControlEvent(controlType, status);
     ASSERT_EQ(result, 0);
     
     PictureInPictureManager::SetActiveController(pipController);

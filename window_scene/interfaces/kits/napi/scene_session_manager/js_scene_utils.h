@@ -57,13 +57,14 @@ enum class JsSessionType : uint32_t {
     TYPE_VOICE_INTERACTION,
     TYPE_SYSTEM_TOAST,
     TYPE_SYSTEM_FLOAT,
-    TYPE_PIP,
     TYPE_THEME_EDITOR,
+    TYPE_PIP,
     TYPE_NAVIGATION_INDICATOR,
     TYPE_SEARCHING_BAR,
     TYPE_SYSTEM_SUB_WINDOW,
     TYPE_HANDWRITE,
     TYPE_KEYBOARD_PANEL,
+    TYPE_DIVIDER,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -94,13 +95,14 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_VOICE_INTERACTION,        JsSessionType::TYPE_VOICE_INTERACTION       },
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,             JsSessionType::TYPE_SYSTEM_TOAST            },
     { WindowType::WINDOW_TYPE_SYSTEM_FLOAT,             JsSessionType::TYPE_SYSTEM_FLOAT            },
-    { WindowType::WINDOW_TYPE_PIP,                      JsSessionType::TYPE_PIP                     },
     { WindowType::WINDOW_TYPE_THEME_EDITOR,             JsSessionType::TYPE_THEME_EDITOR            },
+    { WindowType::WINDOW_TYPE_PIP,                      JsSessionType::TYPE_PIP                     },
     { WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,     JsSessionType::TYPE_NAVIGATION_INDICATOR    },
     { WindowType::WINDOW_TYPE_SEARCHING_BAR,            JsSessionType::TYPE_SEARCHING_BAR           },
     { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,        JsSessionType::TYPE_SYSTEM_SUB_WINDOW       },
     { WindowType::WINDOW_TYPE_HANDWRITE,                JsSessionType::TYPE_HANDWRITE               },
     { WindowType::WINDOW_TYPE_KEYBOARD_PANEL,           JsSessionType::TYPE_KEYBOARD_PANEL          },
+    { WindowType::WINDOW_TYPE_DOCK_SLICE,               JsSessionType::TYPE_DIVIDER                 },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -131,39 +133,42 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_VOICE_INTERACTION,        WindowType::WINDOW_TYPE_VOICE_INTERACTION       },
     { JsSessionType::TYPE_SYSTEM_TOAST,             WindowType::WINDOW_TYPE_SYSTEM_TOAST,           },
     { JsSessionType::TYPE_SYSTEM_FLOAT,             WindowType::WINDOW_TYPE_SYSTEM_FLOAT,           },
-    { JsSessionType::TYPE_PIP,                      WindowType::WINDOW_TYPE_PIP,                    },
     { JsSessionType::TYPE_THEME_EDITOR,             WindowType::WINDOW_TYPE_THEME_EDITOR            },
+    { JsSessionType::TYPE_PIP,                      WindowType::WINDOW_TYPE_PIP,                    },
     { JsSessionType::TYPE_NAVIGATION_INDICATOR,     WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR    },
     { JsSessionType::TYPE_SEARCHING_BAR,            WindowType::WINDOW_TYPE_SEARCHING_BAR           },
     { JsSessionType::TYPE_SYSTEM_SUB_WINDOW,        WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW       },
     { JsSessionType::TYPE_HANDWRITE,                WindowType::WINDOW_TYPE_HANDWRITE               },
     { JsSessionType::TYPE_KEYBOARD_PANEL,           WindowType::WINDOW_TYPE_KEYBOARD_PANEL          },
+    { JsSessionType::TYPE_DIVIDER,                  WindowType::WINDOW_TYPE_DOCK_SLICE              },
 };
 
 JsSessionType GetApiType(WindowType type);
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
-bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
-bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
-bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
-    std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector);
+bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);
+napi_value CreateJsWindowVisibility(napi_env env);
 napi_value CreateJsSessionProcessMode(napi_env env);
 napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
+napi_value CreateJsSessionPiPControlType(napi_env env);
+napi_value CreateJsSessionPiPControlStatus(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
+napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);

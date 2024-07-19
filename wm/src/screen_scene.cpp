@@ -48,7 +48,6 @@ ScreenScene::~ScreenScene()
 
 WMError ScreenScene::Destroy()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!uiContent_) {
         TLOGD(WmsLogTag::DMS, "Destroy uiContent_ is nullptr!");
         return WMError::WM_OK;
@@ -152,14 +151,14 @@ int64_t ScreenScene::GetVSyncPeriod()
     return vsyncStation_->GetVSyncPeriod();
 }
 
-void ScreenScene::FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType)
+void ScreenScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "FlushFrameRate failed, vsyncStation is nullptr");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate, isAnimatorStopped, rateType);
+    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)

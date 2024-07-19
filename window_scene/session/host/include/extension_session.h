@@ -91,6 +91,11 @@ public:
                                           AAFwk::WantParams& reWantParams);
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
+    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs);
+    WSError TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    WSError TransferAccessibilityChildTreeUnregister();
+    WSError TransferAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue = 1.0f);

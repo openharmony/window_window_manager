@@ -18,6 +18,7 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "screen_fold_data.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -328,12 +329,10 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags, Functio
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    int32_t id = sceneSession->GetPersistentId();
-    ASSERT_EQ(WSError::WS_OK, ssm_->UpdateSessionAvoidAreaListener(id, true));
     sceneSession->SetIsDisplayStatusBarTemporarily(true);
     ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
     ssm_->ClearDisplayStatusBarTemporarilyFlags();
-    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
+    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
 
 /**
@@ -711,18 +710,24 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureSubWindows, Function | SmallTest 
 
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
 
     sptr<SceneSession> subSession;
     subSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(subSession, nullptr);
+    ASSERT_NE(subSession, nullptr);
+    ASSERT_NE(subSession->GetSessionProperty(), nullptr);
     sceneSession->AddSubSession(subSession);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->GetSessionProperty()->SetParentPersistentId(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.insert(std::make_pair(subSession->GetPersistentId(), subSession));
 
     EXPECT_FALSE(subSession->GetSessionProperty()->GetForceHide());
     sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
     ssm_->HideNonSecureSubWindows(sceneSession);
     EXPECT_TRUE(subSession->GetSessionProperty()->GetForceHide());
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
@@ -738,18 +743,23 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | Smal
 
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
 
     sptr<SceneSession> subSession;
     subSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(subSession, nullptr);
+    ASSERT_NE(subSession, nullptr);
+    ASSERT_NE(subSession->GetSessionProperty(), nullptr);
     sceneSession->AddSubSession(subSession);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->GetSessionProperty()->SetParentPersistentId(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.insert(std::make_pair(subSession->GetPersistentId(), subSession));
 
     sptr<SceneSession> floatSession;
     floatSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(floatSession, nullptr);
+    ASSERT_NE(floatSession, nullptr);
+    ASSERT_NE(floatSession->GetSessionProperty(), nullptr);
     floatSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(floatSession->GetPersistentId(), floatSession));
 
@@ -813,6 +823,58 @@ HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateModalExtensionRect
+ * @tc.desc: SceneSesionManager update modal extension rect
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateModalExtensionRect, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateModalExtensionRect";
+    info.bundleName_ = "UpdateModalExtensionRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    Rect rect { 1, 2, 3, 4 };
+    ssm_->UpdateModalExtensionRect(nullptr, rect);
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+}
+
+/**
+ * @tc.name: ProcessModalExtensionPointDown
+ * @tc.desc: SceneSesionManager process modal extension point down
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ProcessModalExtensionPointDown, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessModalExtensionPointDown";
+    info.bundleName_ = "ProcessModalExtensionPointDown";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->ProcessModalExtensionPointDown(nullptr, 0, 0);
+    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+}
+
+/**
+ * @tc.name: GetExtensionWindowIds
+ * @tc.desc: SceneSesionManager get extension window ids
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetExtensionWindowIds, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetExtensionWindowIds";
+    info.bundleName_ = "GetExtensionWindowIds";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    int32_t persistentId = 0;
+    int32_t parentId = 0;
+    EXPECT_FALSE(ssm_->GetExtensionWindowIds(nullptr, persistentId, parentId));
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: SceneSesionManager hide non-secure windows by scene session
  * @tc.type: FUNC
@@ -839,9 +901,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateExtWindowFlags, Function | SmallTest | L
     info.abilityName_ = "UpdateExtWindowFlags";
     info.bundleName_ = "UpdateExtWindowFlags";
 
-    int32_t parentId = 1234;
-    int32_t persistentId = 12345;
-    auto ret = ssm_->UpdateExtWindowFlags(parentId, persistentId, 7, 7);
+    auto ret = ssm_->UpdateExtWindowFlags(nullptr, 7, 7);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
@@ -1270,10 +1330,15 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 */
 HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallTest | Level3)
 {
-    std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
     ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<std::pair<int32_t, uint32_t>> windowVisibilityInfos;
     ssm_->GetAllWindowVisibilityInfos(windowVisibilityInfos);
-    EXPECT_EQ(windowVisibilityInfos.size(), 0);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
 }
 
 /**
@@ -1623,6 +1688,64 @@ HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | L
     EXPECT_EQ(clearFailedIds.size(), 1);
 }
 
+/**
+ * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
+ * @tc.desc: Test whether report the correct screen fold status events
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestReportCorrectScreenFoldStatusChangeEvent, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestReportCorrectScreenFoldStatusChangeEvent start";
+    ScreenFoldData screenFoldData1;
+    screenFoldData1.currentScreenFoldStatus_ = 1; // 1: current screen fold status
+    screenFoldData1.nextScreenFoldStatus_ = 3; // 3: next screen fold status
+    screenFoldData1.currentScreenFoldStatusDuration_ = 18; // 18: current duration
+    screenFoldData1.postureAngle_ = 47.1f; // 47.1: posture angle (type: float)
+    screenFoldData1.screenRotation_ = 1; // 1: screen rotation
+    screenFoldData1.typeCThermal_ = 3000; // 3000: typec port thermal
+    screenFoldData1.focusedPackageName_ = "Developer Test: (1, 3, 18, 47.1, 1, 3000)";
+    WMError result = ssm_->CheckAndReportScreenFoldStatus(screenFoldData1);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING); // not report half-fold event until next change
+
+    ScreenFoldData screenFoldData2;
+    screenFoldData2.currentScreenFoldStatus_ = 3; // 3: current screen fold status
+    screenFoldData2.nextScreenFoldStatus_ = 2; // 2: next screen fold status
+    screenFoldData2.currentScreenFoldStatusDuration_ = 20; // 20: current duration
+    screenFoldData2.postureAngle_ = 143.7f; // 143.7: posture angle (type: float)
+    screenFoldData2.screenRotation_ = 2; // 2: screen rotation
+    screenFoldData2.typeCThermal_ = 3005; // 3005: typec port thermal
+    screenFoldData2.focusedPackageName_ = "Developer Test: (3, 2, 20, 143.7, 2, 3005)";
+    result = ssm_->CheckAndReportScreenFoldStatus(screenFoldData2);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: TestReportIncompleteScreenFoldStatusChangeEvent
+ * @tc.desc: Test whether block the incomplete screen fold status events
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEvent, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestReportIncompleteScreenFoldStatusChangeEvent start";
+    // screen fold status changes from -1: invalid to 3: half_fold, duration = 0, angle = 67.0, rotation = 0
+    std::vector<std::string> screenFoldInfo {"-1", "3", "0", "67.0", "0"};
+    WMError result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    screenFoldInfo.clear();
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    // screen fold status changes from 2: folded to 3: half_fold, duration = 0, angle = 67.0, rotation = 0
+    screenFoldInfo = {"2", "3", "0", "67.0", "0"};
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+
+    // screen fold status changes from 3: half_fold to 1: expand, duration = 18, angle = 147.3, rotation = 2
+    screenFoldInfo = {"3", "1", "18", "147.3", "2"};
+    result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
+    ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

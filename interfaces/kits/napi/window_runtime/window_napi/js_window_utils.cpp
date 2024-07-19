@@ -77,6 +77,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREENSHOT)));
     napi_set_named_property(env, objValue, "TYPE_SYSTEM_TOAST", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_DIVIDER", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_DIVIDER)));
     napi_set_named_property(env, objValue, "TYPE_GLOBAL_SEARCH", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
@@ -270,6 +272,23 @@ napi_value BlurStyleInit(napi_env env)
         static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_REGULAR)));
     napi_set_named_property(env, objValue, "THICK", CreateJsValue(env,
         static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)));
+    return objValue;
+}
+
+napi_value MaximizePresentationInit(napi_env env)
+{
+    WLOGD("MaximizePresentationInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "FOLLOW_APP_IMMERSIVE_SETTING", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING)));
+    napi_set_named_property(env, objValue, "EXIT_IMMERSIVE", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::EXIT_IMMERSIVE)));
+    napi_set_named_property(env, objValue, "ENTER_IMMERSIVE", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE)));
     return objValue;
 }
 
@@ -479,6 +498,10 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
         CreateJsValue(env, GetHexColor(navi.contentColor_)));
     napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
         CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+    napi_set_named_property(env, objValue, "enableStatusBarAnimation",
+                            CreateJsValue(env, status.enableAnimation_));
+    napi_set_named_property(env, objValue, "enableNavigationBarAnimation",
+                            CreateJsValue(env, navi.enableAnimation_));
     return objValue;
 }
 
@@ -504,6 +527,38 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
         tint.type_, tint.prop_.enable_, bkgColor.c_str(), contentColor.c_str());
     WLOGFD("Region [%{public}d %{public}d %{public}u %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
+    return objValue;
+}
+
+napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < infos.size(); i++) {
+        auto info = infos[i];
+        auto windowType = info->GetWindowType();
+        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
+        }
+    }
+    return arrayValue;
+}
+
+napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
+    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
+    napi_set_named_property(env, objValue, "windowStatusType",
+        CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
     return objValue;
 }
 
@@ -546,12 +601,16 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     }
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     statusProperty.enable_ = false;
     navProperty.enable_ = false;
+    navIndicatorProperty.enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -562,12 +621,14 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
         }
         if (name.compare("status") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
+            systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = true;
         } else if (name.compare("navigation") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
         }
     }
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
 }
 
@@ -885,6 +946,17 @@ bool CheckCallingPermission(std::string permission)
     return true;
 }
 
+bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType)
+{
+    if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(apiWindowType)) != 0) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowType));
+        if (WindowHelper::IsSystemWindow(windowType)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
 {
     napi_value global;
@@ -929,6 +1001,25 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
         windowMask.emplace_back(elementArray);
     }
     return true;
+}
+
+napi_value ExtensionWindowAttributeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SYSTEM_WINDOW)));
+    napi_set_named_property(env, objValue, "SUB_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SUB_WINDOW)));
+    return objValue;
 }
 } // namespace Rosen
 } // namespace OHOS

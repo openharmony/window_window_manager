@@ -21,6 +21,8 @@ namespace OHOS::Rosen {
 constexpr int32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
 constexpr int32_t RES_FAILURE = -1;
 constexpr int32_t RES_SUCCESS = 0;
+constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
+constexpr uint32_t ERRCODE_RECV_PRIVACY_WINDOW = 1;
 
 ScreenSnapshotPickerConnection &ScreenSnapshotPickerConnection::GetInstance()
 {
@@ -30,9 +32,8 @@ ScreenSnapshotPickerConnection &ScreenSnapshotPickerConnection::GetInstance()
 
 bool ScreenSnapshotPickerConnection::SnapshotPickerConnectExtension()
 {
-    if (bundleName_ == "" || abilityName_ == "") {
-        TLOGE(WmsLogTag::DMS, "screen snapshot bundleName:%{public}s or abilityName:%{public}s is empty",
-            bundleName_.c_str(), abilityName_.c_str());
+    if (bundleName_.empty() || abilityName_.empty()) {
+        TLOGE(WmsLogTag::DMS, "screen snapshot bundleName or abilityName is empty");
         return false;
     }
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s",
@@ -59,23 +60,44 @@ int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect &rect,
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString16(Str8ToStr16("SA"));
-    data.WriteString16(Str8ToStr16("ScreenSessionManager"));
 
     if (abilityConnection_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
         return RES_FAILURE;
     }
-    int32_t ret = abilityConnection_->SendMessage(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
+
+    if (abilityConnection_->GetScreenSessionAbilityConnectionStub() == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ScreenSessionAbilityConnectionStud is nullptr");
+        return RES_FAILURE;
+    }
+
+    if (!data.WriteInterfaceToken(GetScreenSessionAbilityConnectionStub()->GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return RES_FAILURE;
+    }
+
+    if (!data.WriteRemoteObject(abilityConnection_->GetScreenSessionAbilityConnectionStub()->AsObject())) {
+        TLOGE(WmsLogTag::DMS, "WriteRemoteObject failed");
+        return RES_FAILURE;
+    }
+    int32_t ret = abilityConnection_->SendMessageBlock(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "send message failed");
         return RES_FAILURE;
     }
-    screenId = static_cast<ScreenId>(reply.ReadInt32());
-    rect.left = reply.ReadInt32();
-    rect.top = reply.ReadInt32();
-    rect.width = reply.ReadInt32();
-    rect.height = reply.ReadInt32();
+
+    //Screenshot privacy window returns error
+    if (GetScreenSessionAbilityConnectionStub()->GetErrCode() == ERRCODE_RECV_PRIVACY_WINDOW) {
+        GetScreenSessionAbilityConnectionStub()->EraseErrCode();
+        return RES_FAILURE_FOR_PRIVACY_WINDOW;
+    }
+
+    screenId = static_cast<ScreenId>(GetScreenSessionAbilityConnectionStub()->GetScreenId());
+    rect.left = GetScreenSessionAbilityConnectionStub()->GetLeft();
+    rect.top = GetScreenSessionAbilityConnectionStub()->GetTop();
+    rect.width = GetScreenSessionAbilityConnectionStub()->GetWidth();
+    rect.height = GetScreenSessionAbilityConnectionStub()->GetHeight();
+
     TLOGI(WmsLogTag::DMS, "snapshot area info screenId:%{public}" PRIu64", \
         left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         screenId, rect.left, rect.top, rect.width, rect.height);
@@ -91,7 +113,13 @@ void ScreenSnapshotPickerConnection::SnapshotPickerDisconnectExtension()
     }
 
     abilityConnection_->ScreenSessionDisconnectExtension();
+    abilityConnection_ = nullptr;
     TLOGI(WmsLogTag::DMS, "SnapshotPickerDisconnectExtension exit");
+}
+
+sptr<ScreenSessionAbilityConnectionStub> ScreenSnapshotPickerConnection::GetScreenSessionAbilityConnectionStub()
+{
+    return abilityConnection_->GetScreenSessionAbilityConnectionStub();
 }
 
 void ScreenSnapshotPickerConnection::SetBundleName(const std::string &bundleName)

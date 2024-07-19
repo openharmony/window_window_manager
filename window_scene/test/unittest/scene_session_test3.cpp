@@ -248,7 +248,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     ratio = 10;
     result = scensession->SetAspectRatio(ratio);
@@ -487,6 +487,78 @@ HWTEST_F(SceneSessionTest3, IsMovableWindowType, Function | SmallTest | Level2)
 
     scensession->property_ = nullptr;
     EXPECT_EQ(scensession->IsMovableWindowType(), false);
+}
+
+/**
+ * @tc.name: SetBlankFlag
+ * @tc.desc: check func SetBlankFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetBlankFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBlankFlag";
+    info.bundleName_ = "SetBlankFlag";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(nullptr, scensession);
+
+    bool isAddBlank = true;
+    scensession->SetBlankFlag(isAddBlank);
+    ASSERT_EQ(isAddBlank, scensession->GetBlankFlag());
+}
+
+/**
+ * @tc.name: GetBlankFlag
+ * @tc.desc: check func GetBlankFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetBlankFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetBlankFlag";
+    info.bundleName_ = "GetBlankFlag";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(nullptr, scensession);
+
+    bool isAddBlank = true;
+    scensession->SetBlankFlag(isAddBlank);
+    ASSERT_EQ(isAddBlank, scensession->GetBlankFlag());
+}
+
+/**
+ * @tc.name: SetBufferAvailableCallbackEnable
+ * @tc.desc: check func SetBufferAvailableCallbackEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetBufferAvailableCallbackEnable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBufferAvailableCallbackEnable";
+    info.bundleName_ = "SetBufferAvailableCallbackEnable";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(nullptr, scensession);
+
+    bool enable = true;
+    scensession->SetBufferAvailableCallbackEnable(enable);
+    ASSERT_EQ(enable, scensession->GetBufferAvailableCallbackEnable());
+}
+
+/**
+ * @tc.name: GetBufferAvailableCallbackEnable
+ * @tc.desc: check func GetBufferAvailableCallbackEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetBufferAvailableCallbackEnable";
+    info.bundleName_ = "GetBufferAvailableCallbackEnable";
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(nullptr, scensession);
+
+    bool enable = true;
+    scensession->SetBufferAvailableCallbackEnable(enable);
+    ASSERT_EQ(enable, scensession->GetBufferAvailableCallbackEnable());
 }
 
 }

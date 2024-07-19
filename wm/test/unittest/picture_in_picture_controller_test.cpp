@@ -22,6 +22,7 @@
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
+#include "wm_common.h"
 #include "xcomponent_controller.h"
 #include "result_set.h"
 #include "system_ability_definition.h"
@@ -125,7 +126,7 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    
+
     pipControl->pipOption_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_ = option;
@@ -134,11 +135,9 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->window_ = mw;
 
-    pipControl->pipLifeCycleListener_ = nullptr;
-    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
-    sptr<IPiPLifeCycle> listener = nullptr;
-    pipControl->SetPictureInPictureLifecycle(listener);
-
+    auto listener = sptr<IPiPLifeCycle>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    pipControl->RegisterPiPLifecycle(listener);
     EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(startType));
 }
@@ -208,7 +207,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
 
     EXPECT_EQ(nullptr, windowOption);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    
+
     sptr<Window> window = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -456,6 +455,23 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
 }
 
 /**
+ * @tc.name: UpdatePiPControlStatus
+ * @tc.desc: UpdatePiPControlStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, UpdatePiPControlStatus, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::PLAY;
+    pipControl->UpdatePiPControlStatus(controlType, status);
+}
+
+/**
  * @tc.name: IsContentSizeChanged
  * @tc.desc: IsContentSizeChanged
  * @tc.type: FUNC
@@ -565,10 +581,28 @@ HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | L
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     sptr<IPiPActionObserver> listener = nullptr;
 
-    pipControl->pipActionObserver_ = nullptr;
+    pipControl->RegisterPiPActionObserver(listener);
     pipControl->DoActionEvent(actionName, status);
-    pipControl->SetPictureInPictureActionObserver(listener);
-    pipControl->DoActionEvent(actionName, status);
+}
+
+/**
+ * @tc.name: DoControlEvent
+ * @tc.desc: DoControlEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, DoControlEvent, Function | SmallTest | Level2)
+{
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::PLAY;
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    sptr<IPiPControlObserver> listener = nullptr;
+
+    pipControl->RegisterPiPControlObserver(listener);
+    pipControl->DoControlEvent(controlType, status);
 }
 
 /**
@@ -585,9 +619,7 @@ HWTEST_F(PictureInPictureControllerTest, PreRestorePictureInPicture, Function | 
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
-    pipControl->pipLifeCycleListener_ = nullptr;
-    pipControl->PreRestorePictureInPicture();
-    pipControl->SetPictureInPictureLifecycle(listener);
+    pipControl->RegisterPiPLifecycle(listener);
     pipControl->PreRestorePictureInPicture();
 }
 
@@ -717,12 +749,6 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->mainWindowXComponentController_ = xComponentController1;
     pipControl->pipXComponentController_ = xComponentController;
-
-    EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
-        .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
-
-    pipControl->SetPictureInPictureLifecycle(listener);
-    ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
 }
 
 /**

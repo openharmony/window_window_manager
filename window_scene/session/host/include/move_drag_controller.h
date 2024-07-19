@@ -47,6 +47,7 @@ public:
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
+    bool HasPointDown();
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
@@ -123,8 +124,8 @@ private:
     WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
-    void NotifyWindowInputPidChange(bool isServerPid);
     void PerfRequest(int32_t cmdId, bool onOffTag);
+    void NotifyWindowInputPidChange(bool isServerPid);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
@@ -170,14 +171,14 @@ private:
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
     const std::map<AreaType, Gravity> GRAVITY_MAP = {
-        {AreaType::LEFT,            Gravity::RIGHT},
-        {AreaType::TOP,             Gravity::BOTTOM},
-        {AreaType::RIGHT,           Gravity::LEFT},
-        {AreaType::BOTTOM,          Gravity::TOP},
-        {AreaType::LEFT_TOP,        Gravity::BOTTOM_RIGHT},
-        {AreaType::RIGHT_TOP,       Gravity::BOTTOM_LEFT},
-        {AreaType::RIGHT_BOTTOM,    Gravity::TOP_LEFT},
-        {AreaType::LEFT_BOTTOM,     Gravity::TOP_RIGHT}
+        {AreaType::LEFT,          Gravity::RIGHT},
+        {AreaType::TOP,           Gravity::BOTTOM},
+        {AreaType::RIGHT,         Gravity::LEFT},
+        {AreaType::BOTTOM,        Gravity::TOP},
+        {AreaType::LEFT_TOP,      Gravity::BOTTOM_RIGHT},
+        {AreaType::RIGHT_TOP,     Gravity::BOTTOM_LEFT},
+        {AreaType::RIGHT_BOTTOM,  Gravity::TOP_LEFT},
+        {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
     };
 };
 } // namespace OHOS::Rosen

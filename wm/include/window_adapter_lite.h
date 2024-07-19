@@ -58,12 +58,16 @@ private:
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
 
-    std::recursive_mutex mutex_;
+    sptr<IWindowManagerLite> GetWindowManagerServiceProxy() const;
+
+    mutable std::mutex mutex_;
     sptr<IWindowManagerLite> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
-    bool isProxyValid_ { false };
+    bool isProxyValid_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    std::shared_mutex windowManagerLiteAgentMapMutex_;
+    // above guarded by mutex_
+
+    std::mutex windowManagerLiteAgentMapMutex_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerLiteAgentMap_;
 };
 } // namespace Rosen

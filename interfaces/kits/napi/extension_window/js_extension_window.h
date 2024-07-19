@@ -79,8 +79,9 @@ private:
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
     napi_value OnSetWindowBrightness(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
-    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
+
+    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 

@@ -80,7 +80,7 @@ public:
     void SwitchingCurrentUser();
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
-    void OnFoldStatusChangeReportUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
+    void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
 
 protected:
     ScreenSessionManagerClient() = default;

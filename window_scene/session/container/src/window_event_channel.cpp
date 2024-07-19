@@ -14,6 +14,7 @@
  */
 
 #include "session/container/include/window_event_channel.h"
+#include "scene_board_judgement.h"
 
 #include <functional>
 #include <utility>
@@ -24,10 +25,16 @@
 
 #include "anr_handler.h"
 #include "window_manager_hilog.h"
+#include "session_permission.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
+const std::set<int32_t> VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION({ MMI::KeyEvent::KEYCODE_HOME,
+    MMI::KeyEvent::KEYCODE_TAB, MMI::KeyEvent::KEYCODE_ESCAPE, MMI::KeyEvent::KEYCODE_DPAD_UP,
+    MMI::KeyEvent::KEYCODE_DPAD_DOWN, MMI::KeyEvent::KEYCODE_DPAD_LEFT, MMI::KeyEvent::KEYCODE_DPAD_RIGHT,
+    MMI::KeyEvent::KEYCODE_MOVE_HOME, MMI::KeyEvent::KEYCODE_MOVE_END });
+constexpr int32_t SIZE_TWO = 2;
 }
 
 void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyEventId, bool isPreImeEvent,
@@ -64,6 +71,16 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyE
     }
 }
 
+void WindowEventChannel::SetIsUIExtension(bool isUIExtension)
+{
+    isUIExtension_ = isUIExtension;
+}
+
+void WindowEventChannel::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
+{
+    uiExtensionUsage_ = uiExtensionUsage;
+}
+
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     WLOGFD("WindowEventChannel receive key event");
@@ -76,6 +93,17 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
 {
     WLOGFD("WindowEventChannel receive pointer event");
     PrintPointerEvent(pointerEvent);
+    if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ &&
+        (uiExtensionUsage_ == UIExtensionUsage::MODAL ||
+        uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Point event blocked because of modal/constrained UIExtension:%{public}u",
+                uiExtensionUsage_);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension:%{public}u", uiExtensionUsage_);
+        }
+    }
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
@@ -124,6 +152,9 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("keyEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ && IsUIExtensionKeyEventBlocked(keyEvent)) {
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     if (isPreImeEvent) {
         isConsumed = sessionStage_->NotifyOnKeyPreImeEvent(keyEvent);
         TLOGI(WmsLogTag::WMS_EVENT, "NotifyOnKeyPreImeEvent id:%{public}d isConsumed:%{public}d",
@@ -134,6 +165,38 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
+}
+
+bool WindowEventChannel::IsUIExtensionKeyEventBlocked(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (uiExtensionUsage_ == UIExtensionUsage::MODAL) {
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Modal UIExtension.");
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_EVENT, "SystemCalling UIExtension.");
+            return false;
+        }
+    }
+    if (uiExtensionUsage_ == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        auto keyCode = keyEvent->GetKeyCode();
+        if (VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION.find(keyCode) ==
+            VALID_KEYCODE_FOR_CONSTRAINED_EMBEDDED_UIEXTENSION.end()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Unsupported keyCode due to Constrained embedded UIExtension.");
+            return true;
+        }
+        auto pressedKeys = keyEvent->GetPressedKeys();
+        if (pressedKeys.size() == SIZE_TWO && keyCode == MMI::KeyEvent::KEYCODE_TAB &&
+            (pressedKeys[0] == MMI::KeyEvent::KEYCODE_SHIFT_LEFT ||
+            pressedKeys[0] == MMI::KeyEvent::KEYCODE_SHIFT_RIGHT)) {
+            // only allows combined keys SHIFT+TAB
+            return false;
+        } else if (pressedKeys.size() >= SIZE_TWO) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Invalid size of PressedKeys due to Constrained embedded UIExtension.");
+            return true;
+        }
+    }
+    return false;
 }
 
 WSError WindowEventChannel::TransferKeyEventForConsumedAsync(
@@ -252,10 +315,8 @@ void WindowEventChannel::PrintInfoPointerEvent(const std::shared_ptr<MMI::Pointe
             WLOGFE("Invalid pointer: %{public}d.", pointerId);
             return;
         }
-        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-            "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
-            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
-            item.GetWindowX(), item.GetWindowY());
+        WLOGFI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d",
+            pointerId, item.GetDownTime(), item.IsPressed());
     }
 }
 
@@ -270,64 +331,47 @@ WSError WindowEventChannel::TransferFocusState(bool focusState)
     return WSError::WS_OK;
 }
 
-WSError WindowEventChannel::TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
-}
-
-WSError WindowEventChannel::TransferSearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifySearchElementInfosByText(elementId, text, baseParent, infos);
-}
-
-WSError WindowEventChannel::TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info);
-}
-
-WSError WindowEventChannel::TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyFocusMoveSearch(elementId, direction, baseParent, info);
-}
-
-WSError WindowEventChannel::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action,
-    int64_t baseParent)
-{
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyExecuteAction(elementId, actionArguments, action, baseParent);
-}
-
 WSError WindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
     if (!sessionStage_) {
-        WLOGFE("session stage is null!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+WSError WindowEventChannel::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+WSError WindowEventChannel::TransferAccessibilityChildTreeUnregister()
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityChildTreeUnregister();
+}
+
+WSError WindowEventChannel::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+#ifdef ACCESSIBILITY_DUMP_FOR_TEST
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAccessibilityDumpChildInfo(params, info);
+#else
+    info.emplace_back("not support in user build variant");
+    return WSError::WS_OK;
+#endif
 }
 } // namespace OHOS::Rosen

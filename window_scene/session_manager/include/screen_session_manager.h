@@ -219,6 +219,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
+    void RegisterSettingRotationObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -247,6 +248,7 @@ public:
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -262,7 +264,8 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
 
-    void ReportFoldStatusToScb(float angle, std::vector<int32_t>& screenFoldInfo);
+    void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
 protected:
     ScreenSessionManager();
@@ -290,10 +293,13 @@ private:
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
-    void PublishCastEvent(const bool &isPlugIn);
+    void SendCastEvent(const bool &isPlugIn);
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
 
     void SetClientInner();
+    void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
 
@@ -316,6 +322,9 @@ private:
     bool IsValidDigitString(const std::string& idStr) const;
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
+#ifdef DEVICE_STATUS_ENABLE
+    void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
+#endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     class ScreenIdManager {
@@ -345,15 +354,17 @@ private:
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 
+    std::mutex oldScbPidsMutex_;
+    std::condition_variable scbSwitchCV_;
     int32_t currentUserId_ { 0 };
     int32_t currentScbPId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
-    mutable std::mutex currentUserIdMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
+    std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
 
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
@@ -401,6 +412,7 @@ private:
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex snapBypickerMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -412,6 +424,7 @@ private:
     std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
+    std::atomic<bool> isPhyScreenConnected_ = false;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
@@ -421,6 +434,7 @@ private:
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
+    void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
