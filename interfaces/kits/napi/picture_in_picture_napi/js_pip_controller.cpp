@@ -380,9 +380,9 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return false;
     }
-    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); ++iter) {
+    for (auto& listener : jsCbMap_[type]) {
         bool isEquals = false;
-        napi_strict_equals(env, jsListenerObject, (*iter)->GetCallbackRef()->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, listener->GetCallbackRef()->GetNapiValue(), &isEquals);
         if (isEquals) {
             TLOGE(WmsLogTag::WMS_PIP, "Callback already registered!");
             return true;
