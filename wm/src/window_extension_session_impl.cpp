@@ -174,6 +174,9 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         }
     }
     NotifyBeforeDestroy(GetWindowName());
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -190,11 +193,6 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Erase windowExtensionSession in set, id: %{public}d.", GetPersistentId());
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
-    NotifyAfterDestroy();
-    TLOGI(WmsLogTag::WMS_LIFE, "After NotifyAfterDestroy, id: %{public}d.", GetPersistentId());
-    if (needClearListener) {
-        ClearListenersById(GetPersistentId());
-    }
     if (context_) {
         context_.reset();
     }
@@ -707,7 +705,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
-            [name:%{public}s,id:%{public}d,type: %{public}u]",
+            [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
