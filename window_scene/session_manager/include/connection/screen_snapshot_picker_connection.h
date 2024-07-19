@@ -40,9 +40,10 @@ private:
     ~ScreenSnapshotPickerConnection() = default;
 
 private:
-    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_;
+    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ = nullptr;
     std::string bundleName_{""};
     std::string abilityName_{""};
+    sptr<ScreenSessionAbilityConnectionStub> GetScreenSessionAbilityConnectionStub();
 };
 } // OHOS::Rosen
 

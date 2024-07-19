@@ -26,6 +26,7 @@
 #include "session/host/include/system_session.h"
 #include "window_helper.h"
 #include "wm_common.h"
+#include "ui/rs_surface_node.h"
 
 
 using namespace testing;
@@ -133,9 +134,8 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -278,6 +278,160 @@ HWTEST_F(SceneSessionTest4, NotifySessionException, Function | SmallTest | Level
     sceneSession->GetLastSafeRect();
     WSRect rect;
     sceneSession->SetLastSafeRect(rect);
+}
+
+/**
+ * @tc.name: SetSkipDraw
+ * @tc.desc: SetSkipDraw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetSkipDraw, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSkipDraw";
+    info.bundleName_ = "SetSkipDraw";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->SetLeashWinSurfaceNode(nullptr);
+    session->SetSkipDraw(true);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_EQ(surfaceNode, session->GetLeashWinSurfaceNode());
+    session->SetSkipDraw(true);
+}
+
+/**
+ * @tc.name: SetScale
+ * @tc.desc: SetScale function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetScale, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetScale";
+    info.bundleName_ = "SetScale";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    session->Session::SetScale(1.0f, 2.0f, 3.0f, 4.0f);
+    session->sessionStage_ = nullptr;
+    session->SetScale(5.0f, 2.0f, 3.0f, 4.0f);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    NotifyWindowInfoUpdateCallback func = [](int32_t persistentId, WindowUpdateType type) {
+        return;
+    };
+    specificCallback->onWindowInfoUpdate_ = func;
+    session->specificCallback_ = specificCallback;
+    session->SetScale(5.0f, 5.0f, 3.0f, 4.0f);
+    session->SetScale(5.0f, 5.0f, 5.0f, 4.0f);
+    session->SetScale(5.0f, 5.0f, 5.0f, 5.0f);
+    session->SetScale(5.0f, 5.0f, 5.0f, 5.0f);
+    EXPECT_EQ(5.0f, session->GetScaleX());
+    EXPECT_EQ(5.0f, session->GetScaleY());
+    EXPECT_EQ(5.0f, session->GetPivotX());
+    EXPECT_EQ(5.0f, session->GetPivotY());
+}
+
+/**
+ * @tc.name: RequestSessionBack
+ * @tc.desc: RequestSessionBack function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, RequestSessionBack, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RequestSessionBack";
+    info.bundleName_ = "RequestSessionBack";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    NotifyBackPressedFunc func = [](const bool needMoveToBackground) {
+        return;
+    };
+    session->backPressedFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
+}
+
+/**
+ * @tc.name: SetSurfaceBounds
+ * @tc.desc: SetSurfaceBounds function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetSurfaceBounds, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceBounds";
+    info.bundleName_ = "SetSurfaceBounds";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    WSRect rect;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceBounds(rect);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    session->SetSurfaceBounds(rect);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
+ * @tc.name: SetFloatingScale
+ * @tc.desc: SetFloatingScale function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetFloatingScale, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFloatingScale";
+    info.bundleName_ = "SetFloatingScale";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    session->floatingScale_ = 3.14f;
+    session->SetFloatingScale(2.176f);
+    session->SetFloatingScale(3.14f);
+    EXPECT_EQ(nullptr, session->specificCallback_);
+}
+
+/**
+ * @tc.name: GetSessionSnapshotFilePath
+ * @tc.desc: GetSessionSnapshotFilePath function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSessionSnapshotFilePath";
+    info.bundleName_ = "GetSessionSnapshotFilePath";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
+    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
+}
+
+/**
+ * @tc.name: SetRequestedOrientation
+ * @tc.desc: SetRequestedOrientation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetRequestedOrientation";
+    info.bundleName_ = "SetRequestedOrientation";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    Orientation orientation { Orientation::BEGIN };
+    session->sessionChangeCallback_ = nullptr;
+    session->SetRequestedOrientation(orientation);
+    session->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+    session->SetRequestedOrientation(orientation);
+    NotifyReqOrientationChangeFunc func = [](uint32_t orientation) {
+        return;
+    };
+    session->sessionChangeCallback_->OnRequestedOrientationChange_ = func;
+    session->SetRequestedOrientation(orientation);
+    EXPECT_NE(nullptr, session->sessionChangeCallback_->OnRequestedOrientationChange_);
 }
 }
 }

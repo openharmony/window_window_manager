@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
 #include "session/host/include/zidl/session_interface.h"
@@ -108,7 +109,7 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
-    void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType = 0) override;
+    void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -120,7 +121,7 @@ public:
     bool IsFocused() const override;
     WMError RequestFocus() const override;
     WSError UpdateWindowMode(WindowMode mode) override;
-    WSError HandleBackEvent() override { return WSError::WS_OK; }
+    WSError HandleBackEvent() override;
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
@@ -206,8 +207,10 @@ public:
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
+    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
 
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
+    void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -366,6 +369,12 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsFreeMultiWindowMode() const
+    {
+        return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
+    }
+    bool IsAppSupportForceSplit(const std::string& bundleName);
+    void SetForceSplitEnable(bool isForceSplit);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;

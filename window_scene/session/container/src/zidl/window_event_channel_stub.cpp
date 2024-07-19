@@ -28,35 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStub"};
-constexpr int32_t MAX_ARGUMENTS_KEY_SIZE = 1000;
 }
-
-const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
-        &WindowEventChannelStub::HandleTransferKeyEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
-        &WindowEventChannelStub::HandleTransferKeyEventAsync),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT),
-        &WindowEventChannelStub::HandleTransferPointerEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusActiveEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusStateEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
-        &WindowEventChannelStub::HandleTransferBackpressedEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO),
-        &WindowEventChannelStub::HandleTransferSearchElementInfo),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_SEARCH_ELEMENT_INFO_BY_TEXT),
-        &WindowEventChannelStub::HandleTransferSearchElementInfosByText),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FIND_FOCUSED_ELEMENT_INFO),
-        &WindowEventChannelStub::HandleTransferFindFocusedElementInfo),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_MOVE_SEARCH),
-        &WindowEventChannelStub::HandleTransferFocusMoveSearch),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_EXECUTE_ACTION),
-        &WindowEventChannelStub::HandleTransferExecuteAction),
-    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
-        &WindowEventChannelStub::HandleTransferAccessibilityHoverEvent),
-};
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
@@ -67,13 +39,31 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return ERR_INVALID_STATE;
     }
 
-    const auto func = stubFuncMap_.find(code);
-    if (func == stubFuncMap_.end()) {
-        WLOGFE("Failed to find function handler!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    switch (code) {
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT):
+            return HandleTransferKeyEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC):
+            return HandleTransferKeyEventAsync(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT):
+            return HandleTransferPointerEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT):
+            return HandleTransferFocusActiveEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT):
+            return HandleTransferFocusStateEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT):
+            return HandleTransferBackpressedEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT):
+            return HandleTransferAccessibilityHoverEvent(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_REGISTER):
+            return HandleTransferAccessibilityChildTreeRegister(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_UNREGISTER):
+            return HandleTransferAccessibilityChildTreeUnregister(data, reply);
+        case static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_DUMP_CHILD_INFO):
+            return HandleTransferAccessibilityDumpChildInfo(data, reply);
+        default:
+            WLOGFE("Failed to find function handler!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-
-    return (this->*(func->second))(data, reply);
 }
 
 int WindowEventChannelStub::HandleTransferBackpressedEvent(MessageParcel& data, MessageParcel& reply)
@@ -168,188 +158,6 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data, MessageParcel& reply)
-{
-    int64_t elementId = 0;
-    if (!data.ReadInt64(elementId)) {
-        WLOGFE("Parameter elementId is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int32_t mode = 0;
-    if (!data.ReadInt32(mode)) {
-        WLOGFE("Parameter mode is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int64_t baseParent = 0;
-    if (!data.ReadInt64(baseParent)) {
-        WLOGFE("Parameter baseParent is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    std::list<Accessibility::AccessibilityElementInfo> infos;
-    WSError errCode = TransferSearchElementInfo(elementId, mode, baseParent, infos);
-    if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferSearchElementInfo:%{public}d", static_cast<int32_t>(errCode));
-        return static_cast<int32_t>(errCode);
-    }
-    int64_t count = static_cast<int64_t>(infos.size());
-    if (!reply.WriteInt64(count)) {
-        WLOGFE("Failed to write count!");
-        return ERR_INVALID_DATA;
-    }
-    for (auto &info : infos) {
-        Accessibility::AccessibilityElementInfoParcel infoParcel(info);
-        if (!reply.WriteParcelable(&infoParcel)) {
-            WLOGFE("Failed to WriteParcelable info");
-            return ERR_INVALID_DATA;
-        }
-    }
-    return ERR_NONE;
-}
-
-int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel& data, MessageParcel& reply)
-{
-    int64_t elementId = 0;
-    if (!data.ReadInt64(elementId)) {
-        WLOGFE("Parameter elementId is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    std::string text;
-    if (!data.ReadString(text)) {
-        WLOGFE("Parameter text is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int64_t baseParent = 0;
-    if (!data.ReadInt64(baseParent)) {
-        WLOGFE("Parameter baseParent is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    std::list<Accessibility::AccessibilityElementInfo> infos;
-    WSError errCode = TransferSearchElementInfosByText(elementId, text, baseParent, infos);
-    if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to HandleTransferSearchElementInfosByText:%{public}d", static_cast<int32_t>(errCode));
-        return static_cast<int32_t>(errCode);
-    }
-    int64_t count = static_cast<int64_t>(infos.size());
-    if (!reply.WriteInt64(count)) {
-        WLOGFE("Failed to write count!");
-        return ERR_INVALID_DATA;
-    }
-    for (auto &info : infos) {
-        Accessibility::AccessibilityElementInfoParcel infoParcel(info);
-        if (!reply.WriteParcelable(&infoParcel)) {
-            WLOGFE("Failed to WriteParcelable info");
-            return ERR_INVALID_DATA;
-        }
-    }
-    return ERR_NONE;
-}
-
-int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply)
-{
-    int64_t elementId = 0;
-    if (!data.ReadInt64(elementId)) {
-        WLOGFE("Parameter elementId is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int32_t focusType = 0;
-    if (!data.ReadInt32(focusType)) {
-        WLOGFE("Parameter focusType is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int64_t baseParent = 0;
-    if (!data.ReadInt64(baseParent)) {
-        WLOGFE("Parameter baseParent is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    Accessibility::AccessibilityElementInfo info;
-    WSError errCode = TransferFindFocusedElementInfo(elementId, focusType, baseParent, info);
-    if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFindFocusedElementInfo:%{public}d", static_cast<int32_t>(errCode));
-        return static_cast<int32_t>(errCode);
-    }
-    Accessibility::AccessibilityElementInfoParcel infoParcel(info);
-    if (!reply.WriteParcelable(&infoParcel)) {
-        WLOGFE("Failed to WriteParcelable info");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply)
-{
-    int64_t elementId = 0;
-    if (!data.ReadInt64(elementId)) {
-        WLOGFE("Parameter elementId is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int32_t direction = 0;
-    if (!data.ReadInt32(direction)) {
-        WLOGFE("Parameter direction is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int64_t baseParent = 0;
-    if (!data.ReadInt64(baseParent)) {
-        WLOGFE("Parameter baseParent is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    Accessibility::AccessibilityElementInfo info;
-    WSError errCode = TransferFocusMoveSearch(elementId, direction, baseParent, info);
-    if (errCode != WSError::WS_OK) {
-        WLOGFE("Failed to TransferFocusMoveSearch:%{public}d", static_cast<int32_t>(errCode));
-        return static_cast<int32_t>(errCode);
-    }
-    Accessibility::AccessibilityElementInfoParcel infoParcel(info);
-    if (!reply.WriteParcelable(&infoParcel)) {
-        WLOGFE("Failed to WriteParcelable info");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int WindowEventChannelStub::HandleTransferExecuteAction(MessageParcel& data, MessageParcel& reply)
-{
-    int64_t elementId = 0;
-    if (!data.ReadInt64(elementId)) {
-        WLOGFE("Parameter elementId is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    int32_t action = 0;
-    if (!data.ReadInt32(action)) {
-        WLOGFE("Parameter action is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    std::vector<std::string> actionArgumentsKey;
-    std::vector<std::string> actionArgumentsValue;
-    std::map<std::string, std::string> actionArguments;
-    if (!data.ReadStringVector(&actionArgumentsKey)) {
-        WLOGFE("ReadStringVector actionArgumentsKey failed");
-        return ERR_INVALID_VALUE;
-    }
-    if (!data.ReadStringVector(&actionArgumentsValue)) {
-        WLOGFE("ReadStringVector actionArgumentsValue failed");
-        return ERR_INVALID_VALUE;
-    }
-    if (actionArgumentsKey.size() != actionArgumentsValue.size()) {
-        WLOGFE("Read actionArguments failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (actionArgumentsKey.size() > MAX_ARGUMENTS_KEY_SIZE) {
-        WLOGFE("ActionArguments over max size");
-        return ERR_INVALID_VALUE;
-    }
-    for (size_t i = 0; i < actionArgumentsKey.size(); i++) {
-        actionArguments.insert(make_pair(actionArgumentsKey[i], actionArgumentsValue[i]));
-    }
-    int64_t baseParent = 0;
-    if (!data.ReadInt64(baseParent)) {
-        WLOGFE("Parameter baseParent is invalid!");
-        return ERR_INVALID_DATA;
-    }
-    WSError errCode = TransferExecuteAction(elementId, actionArguments, action, baseParent);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel& data, MessageParcel& reply)
 {
     float pointX = 0;
@@ -367,6 +175,43 @@ int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel&
     };
     WSError errCode = TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeRegister(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t windowId = 0;
+    int32_t treeId = -1;
+    int64_t accessibilityId = -1;
+    if (!data.ReadUint32(windowId) ||
+        !data.ReadInt32(treeId) ||
+        !data.ReadInt64(accessibilityId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read HandleTransferAccessibilityChildTreeRegister data failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeUnregister(
+    MessageParcel &data, MessageParcel &reply)
+{
+    WSError errCode = TransferAccessibilityChildTreeUnregister();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int32_t WindowEventChannelStub::HandleTransferAccessibilityDumpChildInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read HandleTransferAccessibilityDumpChildInfo data failed!");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> info;
+    TransferAccessibilityDumpChildInfo(params, info);
+    reply.WriteStringVector(info);
     return ERR_NONE;
 }
 }

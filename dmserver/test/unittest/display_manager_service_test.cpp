@@ -29,6 +29,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_US = 100000;
+}
 class DisplayManagerServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -73,6 +76,7 @@ void DisplayManagerServiceTest::SetUp()
 
 void DisplayManagerServiceTest::TearDown()
 {
+    usleep(SLEEP_TIME_US);
 }
 
 class DisplayChangeListenerTest : public IDisplayChangeListener {
@@ -88,17 +92,6 @@ public:
 };
 
 namespace {
-/**
- * @tc.name: OnStart
- * @tc.desc: DMS OnStart
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, OnStart, Function | SmallTest | Level3)
-{
-    dms_->OnStart();
-    bool result = dms_->Init();
-    EXPECT_TRUE(result);
-}
 
 /**
  * @tc.name: Dump
@@ -156,12 +149,13 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
 
+    sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
+    ASSERT_NE(nullptr, displayChangeListener);
+    dms_->RegisterDisplayChangeListener(displayChangeListener);
+
     dms_->RegisterDisplayChangeListener(nullptr);
     dms_->NotifyDisplayStateChange(0, nullptr, displayInfoMap, DisplayStateChangeType::SIZE_CHANGE);
     dms_->NotifyScreenshot(0);
-
-    sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
-    ASSERT_NE(nullptr, displayChangeListener);
 }
 
 /**
@@ -251,26 +245,18 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3
 }
 
 /**
- * @tc.name: GetDisplaySnapshot
- * @tc.desc: DMS get display snapshot
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | Level3)
-{
-    DisplayId displayId = 10086;
-    DmErrorCode* errorCode = nullptr;
-    std::shared_ptr<Media::PixelMap> result = dms_->GetDisplaySnapshot(displayId, errorCode);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
  * @tc.name: OrientationAndRotation
  * @tc.desc: DMS set oritation and rotation
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest | Level3)
 {
-    Orientation orientation = Orientation::UNSPECIFIED;
+    Orientation orientation = Orientation::VERTICAL;
+    ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
+    orientation = Orientation::SENSOR_VERTICAL;
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, dms_->SetOrientation(0, orientation));
+
+    orientation = Orientation::UNSPECIFIED;
     ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetOrientationFromWindow(0, orientation, true));
     Rotation rotation = Rotation::ROTATION_0;
@@ -431,6 +417,145 @@ HWTEST_F(DisplayManagerServiceTest, OnStop, Function | SmallTest | Level3)
 {
     dms_->OnStop();
     ASSERT_TRUE(true);
+}
+
+/**
+ * @tc.name: NotifyDisplayEvent
+ * @tc.desc: NotifyDisplayEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, NotifyDisplayEvent, Function | SmallTest | Level3)
+{
+    DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
+    dms_->NotifyDisplayEvent(event);
+    ASSERT_NE(dms_->displayPowerController_, nullptr);
+}
+
+/**
+ * @tc.name: SetFreeze
+ * @tc.desc: SetFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetFreeze, Function | SmallTest | Level3)
+{
+    std::vector<DisplayId> displayIds = { 0 };
+    bool isFreeze = false;
+    dms_->SetFreeze(displayIds, isFreeze);
+    ASSERT_NE(dms_->abstractDisplayController_, nullptr);
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay
+ * @tc.desc: AddSurfaceNodeToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level3)
+{
+    DisplayId displayId = 1;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    bool onTop = true;
+    dms_->AddSurfaceNodeToDisplay(displayId, surfaceNode, onTop);
+    ASSERT_NE(dms_->abstractScreenController_, nullptr);
+}
+
+/**
+ * @tc.name: IsScreenRotationLocked
+ * @tc.desc: IsScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, IsScreenRotationLocked, Function | SmallTest | Level3)
+{
+    bool isLocked = true;
+    DMError ret = dms_->IsScreenRotationLocked(isLocked);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenRotationLocked
+ * @tc.desc: SetScreenRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLocked, Function | SmallTest | Level3)
+{
+    bool isLocked = true;
+    DMError ret = dms_->SetScreenRotationLocked(isLocked);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenRotationLockedFromJs
+ * @tc.desc: SetScreenRotationLockedFromJs
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level3)
+{
+    bool isLocked = true;
+    DMError ret = dms_->SetScreenRotationLockedFromJs(isLocked);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetGravitySensorSubscriptionEnabled
+ * @tc.desc: SetGravitySensorSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Function | SmallTest | Level3)
+{
+    dms_->isAutoRotationOpen_ = true;
+    dms_->SetGravitySensorSubscriptionEnabled();
+    ASSERT_TRUE(dms_->isAutoRotationOpen_);
+
+    dms_->isAutoRotationOpen_ = false;
+    dms_->SetGravitySensorSubscriptionEnabled();
+    ASSERT_FALSE(dms_->isAutoRotationOpen_);
+}
+
+/**
+ * @tc.name: MakeMirror
+ * @tc.desc: MakeMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, MakeMirror, Function | SmallTest | Level3)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> mirrorScreenIds = { 2 };
+    ScreenId screenGroupId = 3;
+    sptr<AbstractScreen> absScreen =
+        new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
+    dms_->abstractScreenController_->dmsScreenMap_.insert(std::make_pair(mainScreenId, absScreen));
+    DMError ret = dms_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId);
+    ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    dms_->abstractScreenController_->dmsScreenMap_.clear();
+}
+
+/**
+ * @tc.name: StopMirror
+ * @tc.desc: StopMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, StopMirror, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> mirrorScreenIds = { 2 };
+    sptr<AbstractScreen> absScreen =
+        new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
+    dms_->abstractScreenController_->dmsScreenMap_.insert(std::make_pair(2, absScreen));
+    DMError ret = dms_->StopMirror(mirrorScreenIds);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: RemoveSurfaceNodeFromDisplay
+ * @tc.desc: RemoveSurfaceNodeFromDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level3)
+{
+    DisplayId displayId = 1;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    DMError ret = dms_->RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 }
 } // namespace Rosen

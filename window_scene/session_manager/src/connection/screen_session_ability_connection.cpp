@@ -28,6 +28,8 @@ constexpr int32_t DEFAULT_VALUE = -1;
 constexpr int32_t RES_FAILURE = -1;
 constexpr int32_t RES_SUCCESS = 0;
 constexpr uint32_t SEND_MESSAGE_SYNC_OUT_TIME = 800; // ms
+constexpr uint32_t TRANS_RELEASE_BLOCK = 0;
+constexpr uint32_t TRANS_FAILED_FOR_PRIVACY = 1;
 
 void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element,
@@ -43,7 +45,10 @@ void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
         TLOGE(WmsLogTag::DMS, "get remoteObject failed");
         return;
     }
-    remoteObject_ = remoteObject;
+    {
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
+        remoteObject_ = remoteObject;
+    }
     if (!AddObjectDeathRecipient()) {
         TLOGE(WmsLogTag::DMS, "AddObjectDeathRecipient failed");
         return;
@@ -65,6 +70,7 @@ void ScreenSessionAbilityConnectionStub::OnAbilityDisconnectDone(
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s, resultCode:%{public}d",
         element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
 
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "remoteObject member is nullptr");
         return;
@@ -80,6 +86,10 @@ bool ScreenSessionAbilityConnectionStub::AddObjectDeathRecipient()
     sptr<ScreenSessionAbilityDeathRecipient> deathRecipient(
         new(std::nothrow) ScreenSessionAbilityDeathRecipient([this] {
         TLOGI(WmsLogTag::DMS, "add death recipient handler");
+        sendMessageWaitFlag_ = true;
+        blockSendMessageCV_.notify_all();
+        TLOGI(WmsLogTag::DMS, "blockSendMessageCV_ notify");
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
         remoteObject_ = nullptr;
         isConnected_.store(false);
     }));
@@ -89,6 +99,7 @@ bool ScreenSessionAbilityConnectionStub::AddObjectDeathRecipient()
         return false;
     }
     deathRecipient_ = deathRecipient;
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "get the remoteObject failed");
         return false;
@@ -124,6 +135,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
     }
     lock.unlock();
     MessageOption option;
+    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
         return RES_FAILURE;
@@ -133,6 +145,41 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
         TLOGE(WmsLogTag::DMS, "remoteObject send request failed");
         return RES_FAILURE;
     }
+    return RES_SUCCESS;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCode,
+    MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_lock<std::mutex> lock(connectedMutex_);
+    connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    if (!IsAbilityConnected()) {
+        TLOGE(WmsLogTag::DMS, "ability connection is not established");
+        lock.unlock();
+        return RES_FAILURE;
+    }
+    lock.unlock();
+    MessageOption option;
+    {
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
+        if (remoteObject_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
+            return RES_FAILURE;
+        }
+        int32_t ret = remoteObject_->SendRequest(transCode, data, reply, option);
+        if (ret != ERR_OK) {
+            TLOGE(WmsLogTag::DMS, "remoteObject send request failed");
+            return RES_FAILURE;
+        }
+    }
+
+    std::unique_lock<std::mutex> lockSendMessage(sendMessageMutex_);
+    TLOGI(WmsLogTag::DMS, "LockSendMessage wait");
+    sendMessageWaitFlag_ = false;
+    while (!sendMessageWaitFlag_) {
+        blockSendMessageCV_.wait(lockSendMessage);
+    }
+
     return RES_SUCCESS;
 }
 
@@ -208,6 +255,87 @@ int32_t ScreenSessionAbilityConnection::SendMessage(
     return RES_SUCCESS;
 }
 
+int32_t ScreenSessionAbilityConnection::SendMessageBlock(
+    const int32_t &transCode, MessageParcel &data, MessageParcel &reply)
+{
+    if (abilityConnectionStub_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
+        return RES_FAILURE;
+    }
+    int32_t ret = abilityConnectionStub_->SendMessageSyncBlock(transCode, data, reply);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "send message failed");
+        return RES_FAILURE;
+    }
+    return RES_SUCCESS;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    TLOGI(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t msgId = code;
+    switch (msgId) {
+        case TRANS_RELEASE_BLOCK: {
+            screenId_ = data.ReadInt32();
+            left_ = data.ReadInt32();
+            top_ = data.ReadInt32();
+            width_ = data.ReadInt32();
+            height_ = data.ReadInt32();
+            break;
+        }
+        case TRANS_FAILED_FOR_PRIVACY: {
+            errCode_ = msgId;
+            break;
+        }
+        default:
+            TLOGI(WmsLogTag::DMS, "unknown transaction code");
+    }
+    sendMessageWaitFlag_ = true;
+    blockSendMessageCV_.notify_all();
+    TLOGI(WmsLogTag::DMS, "blockSendMessageCV_ notify");
+    return msgId;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetScreenId()
+{
+    return screenId_;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetLeft()
+{
+    return left_;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetTop()
+{
+    return top_;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetWidth()
+{
+    return width_;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetHeight()
+{
+    return height_;
+}
+
+int32_t ScreenSessionAbilityConnectionStub::GetErrCode()
+{
+    return errCode_;
+}
+
+void ScreenSessionAbilityConnectionStub::EraseErrCode()
+{
+    errCode_ = 0;
+}
+
 bool ScreenSessionAbilityConnection::IsConnected()
 {
     if (abilityConnectionStub_ == nullptr) {
@@ -225,4 +353,10 @@ bool ScreenSessionAbilityConnection::IsConnectedSync()
     }
     return abilityConnectionStub_->IsAbilityConnectedSync();
 }
+
+sptr<ScreenSessionAbilityConnectionStub> ScreenSessionAbilityConnection::GetScreenSessionAbilityConnectionStub()
+{
+    return abilityConnectionStub_;
+}
+
 } // namespace OHOS::Rosen

@@ -59,7 +59,7 @@ public:
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
-    WMError Maximize(MaximizeLayoutOption option) override;
+    WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
@@ -69,7 +69,6 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
-    WSError HandleBackEvent() override;
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
@@ -159,6 +158,7 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+    uint32_t GetStatusBarHeight() override;
 
 protected:
     void DestroySubWindow();

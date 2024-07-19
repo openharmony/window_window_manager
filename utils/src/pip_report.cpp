@@ -128,6 +128,22 @@ void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &
     }
 }
 
+void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType controlType)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "templateType:%{public}d, controlType:%{public}d", templateType, controlType);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, "CONTROL_CONTROL_EVENT",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PNAMEID, PNAMEID,
+        EVENT_KEY_PVERSION, PVERSION,
+        EVENT_KEY_TEMPLATE_TYPE, templateType,
+        EVENT_KEY_ACTION_EVENT, static_cast<uint32_t>(controlType),
+        EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
 void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report pip widow ratio");

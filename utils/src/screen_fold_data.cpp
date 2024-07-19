@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "fold_screen_controller/screen_fold_data.h"
+#include "screen_fold_data.h"
 
 #include "typec_port_info.h"
 

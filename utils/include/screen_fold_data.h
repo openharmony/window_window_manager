@@ -21,11 +21,7 @@
 
 namespace OHOS::Rosen {
 
-class ScreenFoldData {
-public:
-    ScreenFoldData(int32_t currentStatus, int32_t nextStatus, int32_t duration, int32_t rotation, float angle)
-        : currentScreenFoldStatus_(currentStatus), nextScreenFoldStatus_(nextStatus),
-          currentScreenFoldStatusDuration_(duration), windowRotation_(rotation), postureAngle_(angle) {}
+struct ScreenFoldData {
     ScreenFoldData() {}
     ~ScreenFoldData() {}
 
@@ -33,20 +29,20 @@ public:
     void SetFocusedPkgName(const std::string& packageName);
     void SetInvalid();
 
-    constexpr static int32_t INIT_PARAM_NUMBER = 4;
+    constexpr static int32_t DMS_PARAM_NUMBER = 5;
     constexpr static int32_t INVALID_VALUE = -1;
-    constexpr static int32_t HALF_FOLD_UE_TRIGGER = 15;
+    constexpr static int32_t HALF_FOLD_REPORT_TRIGGER_DURATION = 15;
 
     // DMS
     int32_t currentScreenFoldStatus_ = INVALID_VALUE;
     int32_t nextScreenFoldStatus_ = 0;
     int32_t currentScreenFoldStatusDuration_ = 0;
-    int32_t windowRotation_ = 0;
-    float postureAngle_ = 0.0;
+    int32_t screenRotation_ = 0;
+    float postureAngle_ = 0.0f;
 
     // WMS
     int32_t screenDisplayMode_ = 0;
-    std::string focusedPackageName_ = "";
+    std::string focusedPackageName_;
 
     // Others
     int32_t typeCThermal_ = 0;

@@ -200,7 +200,7 @@ public:
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual int64_t GetVSyncPeriod() = 0;
-    virtual void FlushFrameRate(uint32_t rate, bool isAnimatorStopped, uint32_t rateType) {}
+    virtual void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType) {}
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
@@ -293,10 +293,10 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -340,7 +340,7 @@ public:
     }
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
 
-    virtual WMError Maximize(MaximizeLayoutOption option) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError Maximize(MaximizePresentation presentation) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
@@ -354,7 +354,7 @@ public:
      *
      * @param dvsyncSwitch bool.
      * @return * void
-    */
+     */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }

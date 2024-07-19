@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <message_option.h>
 #include <message_parcel.h>
+
+#include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session/container/include/window_event_channel.h"
@@ -1107,22 +1109,90 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetVisibilityWindowInfo, Function | 
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Function | SmallTest | Level2)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(stub_, nullptr);
 
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
     data.WriteRemoteObject(sessionStage->AsObject());
-
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-    int32_t parentId = 12345;
-    data.WriteInt32(parentId);
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteUint64(12345);
 
     int res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveExtensionWindowStageFromSCB
+ * @tc.desc: test HandleRemoveExtensionWindowStageFromSCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+{
+    ASSERT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+
+    int res = stub_->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateModalExtensionRect
+ * @tc.desc: test HandleUpdateModalExtensionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    Rect rect { 1, 2, 3, 4 };
+    data.WriteInt32(rect.posX_);
+    data.WriteInt32(rect.posY_);
+    data.WriteInt32(rect.width_);
+    data.WriteInt32(rect.height_);
+
+    int res = stub_->HandleUpdateModalExtensionRect(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleProcessModalExtensionPointDown
+ * @tc.desc: test HandleProcessModalExtensionPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Function | SmallTest | Level2)
+{
+    ASSERT_NE(stub_, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    int32_t posX = 114;
+    data.WriteInt32(posX);
+    int32_t posY = 514;
+    data.WriteInt32(posY);
+
+    int res = stub_->HandleProcessModalExtensionPointDown(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1183,8 +1253,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | Sma
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteInt32(1234);
-    data.WriteInt32(12345);
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
     data.WriteInt32(7);
     data.WriteInt32(7);
 

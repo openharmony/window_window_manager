@@ -215,6 +215,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: SetAndGetUIExtensionUsage
+ * @tc.desc: SetUIExtensionUsage and GetUIExtensionUsage test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    EXPECT_EQ(UIExtensionUsage::MODAL, property->GetUIExtensionUsage());
+    property->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
+    EXPECT_EQ(UIExtensionUsage::EMBEDDED, property->GetUIExtensionUsage());
+}
+
+/**
  * @tc.name: AddWindowFlag
  * @tc.desc: AddWindowFlag test
  * @tc.type: FUNC

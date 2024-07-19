@@ -405,8 +405,7 @@ void ScreenSessionManagerClientProxy::SetVirtualPixelRatioSystem(ScreenId screen
     }
 }
 
-void ScreenSessionManagerClientProxy::OnFoldStatusChangeReportUE(const std::vector<int32_t>& screenFoldInfo,
-    float angle)
+void ScreenSessionManagerClientProxy::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -415,16 +414,13 @@ void ScreenSessionManagerClientProxy::OnFoldStatusChangeReportUE(const std::vect
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteInt32Vector(screenFoldInfo)) {
+    if (!data.WriteStringVector(screenFoldInfo)) {
         WLOGFE("Write screenFoldInfo failed");
         return;
     }
-    if (!data.WriteFloat(angle)) {
-        WLOGFE("Write angle failed");
-        return;
-    }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGE_REPORT_UE), data, reply, option) != ERR_NONE) {
+        ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
     }

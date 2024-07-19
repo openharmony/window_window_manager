@@ -24,7 +24,6 @@
 
 namespace OHOS::Rosen {
 class SessionStageStub;
-using SessionStageStubFunc = int (SessionStageStub::*)(MessageParcel& data, MessageParcel& reply);
 
 class SessionStageStub : public IRemoteStub<ISessionStage> {
 public:
@@ -35,8 +34,6 @@ public:
         MessageOption &option) override;
 
 private:
-    static const std::map<uint32_t, SessionStageStubFunc> stubFuncMap_;
-
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
@@ -63,6 +60,7 @@ private:
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSetPiPControlEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDisplayId(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDisplayMove(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply);

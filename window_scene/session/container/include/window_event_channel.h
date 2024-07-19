@@ -50,6 +50,8 @@ public:
     }
     ~WindowEventChannel() = default;
 
+    void SetIsUIExtension(bool isUIExtension);
+    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -59,27 +61,25 @@ public:
         const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferFocusState(bool focusState) override;
-    WSError TransferSearchElementInfo(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferSearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError TransferFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent) override;
     WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs) override;
+    WSError TransferAccessibilityChildTreeRegister(
+        uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    WSError TransferAccessibilityChildTreeUnregister() override;
+    WSError TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
     void PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event);
     void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     void PrintInfoPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     static void OnDispatchEventProcessed(int32_t eventId, int64_t actionTime);
+    bool IsUIExtensionKeyEventBlocked(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
+    bool isUIExtension_ { false };
+    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     std::function<void(int32_t, int64_t)> dispatchCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen

@@ -152,6 +152,17 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
 }
 
 /**
+ * @tc.name: RemoveExtensionWindowStageFromSCB
+ * @tc.desc: RemoveExtensionWindowStageFromSCB Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->RemoveExtensionWindowStageFromSCB();
+}
+
+/**
  * @tc.name: UpdateConfiguration01
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
@@ -807,234 +818,19 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
 }
 
 /**
- * @tc.name: NotifySearchElementInfoByAccessibilityId01
- * @tc.desc: NotifySearchElementInfoByAccessibilityId Test
+ * @tc.name: NotifyAccessibilityChildTreeRegister01
+ * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfoByAccessibilityId01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01, Function | SmallTest | Level3)
 {
-    int64_t elementId = 0;
-    int32_t mode = 0;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK, window_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos));
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId));
 }
-
-/**
- * @tc.name: NotifySearchElementInfoByAccessibilityId02
- * @tc.desc: NotifySearchElementInfoByAccessibilityId Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfoByAccessibilityId02, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    int32_t mode = 0;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifySearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos));
-}
-
-/**
- * @tc.name: NotifySearchElementInfosByText01
- * @tc.desc: NotifySearchElementInfosByText Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfosByText01, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    string text;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK, window_->NotifySearchElementInfosByText(elementId, text, baseParent, infos));
-}
-
-/**
- * @tc.name: NotifySearchElementInfosByText02
- * @tc.desc: NotifySearchElementInfosByText Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifySearchElementInfosByText02, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    string text;
-    int64_t baseParent = 0;
-    list<AccessibilityElementInfo> infos;
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifySearchElementInfosByText(elementId, text, baseParent, infos));
-}
-
-/**
- * @tc.name: NotifyFindFocusedElementInfo01
- * @tc.desc: NotifyFindFocusedElementInfo Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFindFocusedElementInfo01, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    int32_t focusType = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK,
-        window_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info));
-}
-
-/**
- * @tc.name: NotifyFindFocusedElementInfo02
- * @tc.desc: NotifyFindFocusedElementInfo Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFindFocusedElementInfo02, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    int32_t focusType = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifyFindFocusedElementInfo(elementId, focusType, baseParent, info));
-}
-
-/**
- * @tc.name: NotifyFocusMoveSearch01
- * @tc.desc: NotifyFocusMoveSearch Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusMoveSearch01, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    int32_t direction = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK,
-        window_->NotifyFocusMoveSearch(elementId, direction, baseParent, info));
-}
-
-/**
- * @tc.name: NotifyFocusMoveSearch02
- * @tc.desc: NotifyFocusMoveSearch Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusMoveSearch02, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    int32_t direction = 0;
-    int64_t baseParent = 0;
-    AccessibilityElementInfo info;
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifyFocusMoveSearch(elementId, direction, baseParent, info));
-}
-
-/**
- * @tc.name: NotifyExecuteAction01
- * @tc.desc: NotifyExecuteAction Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExecuteAction01, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    std::map<std::string, std::string> actionAguments;
-    int32_t action = 0;
-    int64_t baseParent = 0;
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR,
-        window_->NotifyExecuteAction(elementId, actionAguments, action, baseParent));
-}
-
-/**
- * @tc.name: NotifyExecuteAction02
- * @tc.desc: NotifyExecuteAction Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExecuteAction02, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    std::map<std::string, std::string> actionAguments;
-    int32_t action = 0;
-    int64_t baseParent = 0;
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifyExecuteAction(elementId, actionAguments, action, baseParent));
-}
-
-/**
- * @tc.name: NotifyExecuteAction03
- * @tc.desc: NotifyExecuteAction Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExecuteAction03, Function | SmallTest | Level3)
-{
-    int64_t elementId = 0;
-    std::map<std::string, std::string> actionAguments;
-    int32_t action = 0;
-    int64_t baseParent = 0;
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, NotifyExecuteAction).WillOnce(Return(true));
-    ASSERT_EQ(WSError::WS_OK, window_->NotifyExecuteAction(elementId, actionAguments, action, baseParent));
-}
-
-/**
- * @tc.name: NotifyAccessibilityHoverEvent01
- * @tc.desc: NotifyExecuteAction Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR, window_->NotifyAccessibilityHoverEvent(0.0f, 0.0f, 0, 0, 0));
-}
-
-/**
- * @tc.name: NotifyAccessibilityHoverEvent02
- * @tc.desc: NotifyExecuteAction Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Function | SmallTest | Level3)
-{
-    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityHoverEvent(0.0f, 0.0f, 0, 0, 0));
-}
-
-
-/**
- * @tc.name: TransferAccessibilityEvent01
- * @tc.desc: TransferAccessibilityEvent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent01, Function | SmallTest | Level3)
-{
-    AccessibilityEventInfo info;
-    int64_t uiExtensionIdLevel = 0;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-        window_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
-}
-
-/**
- * @tc.name: TransferAccessibilityEvent02
- * @tc.desc: TransferAccessibilityEvent01 Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent02, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, window_->hostSession_);
-    ASSERT_NE(nullptr, window_->property_);
-    window_->property_->SetPersistentId(1);
-    AccessibilityEventInfo info;
-    int64_t uiExtensionIdLevel = 0;
-    ASSERT_EQ(WMError::WM_OK, window_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
-}
-
 
 /**
  * @tc.name: NotifyOccupiedAreaChangeInfo01
@@ -1384,9 +1180,32 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
 }
- 
+
+/**
+ * @tc.name: HideNonSecureWindows05
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows05, Function | SmallTest | Level3)
+{
+    window_->property_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
+}
+
+/**
+ * @tc.name: HideNonSecureWindows06
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window_->HideNonSecureWindows(false));
+}
+
 /**
  * @tc.name: SetWaterMarkFlag01
  * @tc.desc: SetWaterMarkFlag Test
@@ -1432,7 +1251,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, Function | SmallTes
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->SetWaterMarkFlag(true));
 }
 
 /**
@@ -1504,7 +1323,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
 
 /**
@@ -1527,6 +1346,70 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, Function | SmallTe
 {
     Rect rect;
     ASSERT_EQ(rect, window_->GetHostWindowRect(0));
+}
+
+/**
+ * @tc.name: ConsumePointerEvent
+ * @tc.desc: ConsumePointerEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    window_->state_ = WindowState::STATE_SHOWN;
+
+    auto pointerEvent = MMI::PointerEvent::Create();
+    window_->ConsumePointerEvent(nullptr);
+
+    window_->ConsumePointerEvent(pointerEvent);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->ConsumePointerEvent(pointerEvent);
+
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    item.SetPointerId(0);
+    item.SetDisplayX(15); // 15 : position x
+    item.SetDisplayY(15); // 15 : position y
+    item.SetWindowX(15); // 15 : position x
+    item.SetWindowY(15); // 15 : position y
+    pointerEvent->AddPointerItem(item);
+    window_->ConsumePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    pointerEvent->UpdatePointerItem(0, item);
+    window_->ConsumePointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: PreNotifyKeyEvent
+ * @tc.desc: PreNotifyKeyEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level3)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(nullptr, keyEvent);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    bool ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, true);
+
+    window_->focusState_ = false;
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, true);
+
+    window_->focusState_ = true;
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, false);
 }
 }
 } // namespace Rosen

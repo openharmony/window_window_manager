@@ -56,8 +56,6 @@ private:
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     uint32_t GetCallingSessionId();
-
-    int32_t GetStatusBarHeight();
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RaiseCallingSession(const WSRect& keyboardPanelRect,
@@ -69,7 +67,6 @@ private:
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError CheckAdjustKeyboardLayoutParam(const KeyboardLayoutParams& params);
     std::shared_ptr<RSTransaction> GetRSTransaction();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;

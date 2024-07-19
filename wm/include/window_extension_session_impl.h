@@ -23,6 +23,12 @@
 
 namespace OHOS {
 namespace Rosen {
+struct AccessibilityChildTreeInfo {
+    uint32_t windowId = 0;
+    int32_t treeId = -1;
+    int64_t accessibilityId = -1;
+};
+
 class WindowExtensionSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowExtensionSessionImpl(const sptr<WindowOption>& option);
@@ -48,24 +54,20 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
-    WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError NotifySearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos) override;
-    WSError NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info) override;
-    WSError NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
-        int32_t action, int64_t baseParent) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
+    WSError NotifyAccessibilityChildTreeRegister(
+        uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    WSError NotifyAccessibilityChildTreeUnregister() override;
+    WSError NotifyAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
     WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
@@ -87,30 +89,35 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
-    void AddExtensionWindowStageToSCB();
-    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
+    void AddExtensionWindowStageToSCB();
+    void RemoveExtensionWindowStageFromSCB();
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
+    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateAccessibilityTreeInfo();
+    void ArkUIFrameworkSupport();
 
+    sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
+    std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
-    int16_t rotationAnimationCount_ { 0 };
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

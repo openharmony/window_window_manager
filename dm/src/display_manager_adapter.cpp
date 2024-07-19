@@ -65,7 +65,7 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
-    
+
     return displayManagerServiceProxy_->GetSnapshotByPicker(rect, errorCode);
 }
 
@@ -166,7 +166,7 @@ DMError ScreenManagerAdapter::GetScreenColorSpace(ScreenId screenId,
     GraphicCM_ColorSpaceType& colorSpace)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    
+
     WLOGFI("ScreenManagerAdapter::GetScreenColorSpace");
     return displayManagerServiceProxy_->GetScreenColorSpace(screenId, colorSpace);
 }
@@ -761,5 +761,11 @@ DMError DisplayManagerAdapter::ResetAllFreezeStatus()
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     return displayManagerServiceProxy_->ResetAllFreezeStatus();
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManagerAdapter::GetAllDisplayPhysicalResolution()
+{
+    INIT_PROXY_CHECK_RETURN(std::vector<DisplayPhysicalResolution>{});
+    return displayManagerServiceProxy_->GetAllDisplayPhysicalResolution();
 }
 } // namespace OHOS::Rosen

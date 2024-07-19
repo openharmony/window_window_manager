@@ -68,6 +68,12 @@ HWTEST_F(ScreenSceneConfigTest, IsNumber, Function | SmallTest | Level1)
     ASSERT_EQ(true, result);
     result = ScreenSceneConfig::IsNumber("a123");
     ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("");
+    ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("-123");
+    ASSERT_EQ(false, result);
+    result = ScreenSceneConfig::IsNumber("123.456");
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -128,6 +134,21 @@ HWTEST_F(ScreenSceneConfigTest, IsValidNode2, Function | SmallTest | Level1)
     node.type = XML_TEXT_NODE;
     auto result = ScreenSceneConfig::IsValidNode(node);
     ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: IsValidNode3
+ * @tc.desc: test function : IsValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsValidNode3, Function | SmallTest | Level1)
+{
+    const xmlChar xmlStringText[] = { 't', 'e', 'x', 't', 0 };
+    xmlNode node;
+    node.name = xmlStringText;
+    node.type = XML_COMMENT_NODE;
+    auto result = ScreenSceneConfig::IsValidNode(node);
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -269,7 +290,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
         }
     }
 
-    ASSERT_LE(ScreenSceneConfig::stringConfig_.size(), readCount);
+    ASSERT_GT(ScreenSceneConfig::stringConfig_.size(), readCount);
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
 }
@@ -305,6 +326,17 @@ HWTEST_F(ScreenSceneConfigTest, GetStringConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetStringConfig();
     ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: GetStringListConfig
+ * @tc.desc: test function : GetStringListConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetStringListConfig, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetStringListConfig();
+    ASSERT_EQ(0, result.size());
 }
 
 /**
@@ -505,6 +537,216 @@ HWTEST_F(ScreenSceneConfigTest, GetExternalScreenDefaultMode02, Function | Small
     ASSERT_EQ("", res);
 }
 
+/**
+ * @tc.name: GetCurvedCompressionAreaInLandscape01
+ * @tc.desc: GetCurvedCompressionAreaInLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape01, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::isWaterfallDisplay_ = false;
+    ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+    auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    ASSERT_TRUE(result == 0);
+}
+
+/**
+ * @tc.name: GetCurvedCompressionAreaInLandscape02
+ * @tc.desc: GetCurvedCompressionAreaInLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape02, Function | SmallTest | Level3)
+{
+    ScreenSceneConfig::isWaterfallDisplay_ = true;
+    ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+    auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    ASSERT_TRUE(result == 0);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo01
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo01, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = nullptr;
+    ScreenSceneConfig::ReadStringListConfigInfo(nullptr, "");
+    EXPECT_EQ(rootNode, nullptr);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo02
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo02, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->name = nullptr;
+    std::string name = "testName";
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
+    xmlFreeNode(rootNode);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo03
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo03, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
+    ASSERT_NE(rootNode, nullptr);
+    std::string name = "testName";
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
+    xmlFreeNode(rootNode);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo04
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo04, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
+    ASSERT_NE(rootNode, nullptr);
+    xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
+    rootNode->children = curNode;
+    std::string name = "testName";
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
+    xmlFreeNode(rootNode);
+}
+
+/**
+ * @tc.name: ReadStringListConfigInfo05
+ * @tc.desc: ReadStringListConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo05, Function | SmallTest | Level3)
+{
+    xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
+    ASSERT_NE(rootNode, nullptr);
+    xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
+    xmlNodeSetContent(curNode, BAD_CAST "validContent");
+    rootNode->children = curNode;
+    std::string name = "testName";
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
+    xmlFreeNode(rootNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo01
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo01, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*> ("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo02
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo02, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>(" "));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo03
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo03, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("100:200"));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo04
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo04, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL:100:200"));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo05
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo05, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_MAIN:100:200"));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo06
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo0, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_SUB:100:200"));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo07
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo07, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("UNKNOWN:100:200"));
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadPhysicalDisplayConfigInfo08
+ * @tc.desc: ReadPhysicalDisplayConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo08, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(currNode);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL:abc:def"));
+    xmlFreeNode(currNode);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

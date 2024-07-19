@@ -125,7 +125,11 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    jsCbMap_[cbType] = callbackRef;
+    {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession set jsCbMap[%s]", cbType.c_str());
+        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        jsCbMap_[cbType] = callbackRef;
+    }
     WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -193,6 +197,8 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
 
 bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession::IsCallbackRegistered[%s]", type.c_str());
+    std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
         return false;
@@ -209,16 +215,24 @@ bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& t
     return false;
 }
 
+std::shared_ptr<NativeReference> JsRootSceneSession::GetJSCallback(const std::string& functionName) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession::GetJSCallback[%s]", functionName.c_str());
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+    auto iter = jsCbMap_.find(functionName);
+    if (iter == jsCbMap_.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "%{public}s callback not found!", functionName.c_str());
+    } else {
+        jsCallBack = iter->second;
+    }
+    return jsCallBack;
+}
+
 void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
-    auto iter = jsCbMap_.find(PENDING_SCENE_CB);
-    if (iter == jsCbMap_.end()) {
-        WLOGFE("[NAPI]PendingSessionActivationInner find callback failed.");
-        return;
-    }
-    auto jsCallBack = iter->second;
     napi_env& env_ref = env_;
-    auto task = [sessionInfo, jsCallBack, env_ref]() {
+    auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SCENE_CB), env_ref]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -233,7 +247,7 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

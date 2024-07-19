@@ -37,18 +37,25 @@ public:
         CaseType caseType, napi_env env, napi_value value);
 
 private:
+    enum class ListenerType : uint32_t {
+        WINDOW_SIZE_CHANGE_CB,
+        AVOID_AREA_CHANGE_CB,
+        WINDOW_EVENT_CB,
+        WINDOW_STAGE_EVENT_CB,
+    };
+
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
     WmErrorCode ProcessWindowChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
-    using Func = WmErrorCode(JsExtensionWindowRegisterManager::*)(sptr<JsExtensionWindowListener>,
-        sptr<Window> window, bool);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsExtensionWindowListener>>> jsCbMap_;
     std::mutex mtx_;
-    std::map<CaseType, std::map<std::string, Func>> listenerProcess_;
+    std::map<CaseType, std::map<std::string, ListenerType>> listenerCodeMap_;
 };
 }  // namespace Rosen
 }  // namespace OHOS

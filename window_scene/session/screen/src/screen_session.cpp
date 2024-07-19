@@ -222,6 +222,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetColorSpaces(colorSpaces_);
     displayInfo->SetDisplayState(property_.GetDisplayState());
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
+    displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
+    displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
     return displayInfo;
 }
 
@@ -533,9 +535,7 @@ void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 {
     if (foldToExpand) {
-        if (property_.GetRotation() != currentSensorRotation_) {
-            SensorRotationChange(currentSensorRotation_);
-        }
+        SensorRotationChange(currentSensorRotation_);
     }
 }
 
@@ -1288,7 +1288,11 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshot");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, scaleX, scaleY);
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleX,
+        .scaleY = scaleY,
+    };
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, config);
     if (!ret) {
         WLOGFE("get screen snapshot TakeSurfaceCapture failed");
         return nullptr;

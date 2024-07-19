@@ -69,6 +69,7 @@ public:
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
+    virtual WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) = 0;
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
@@ -90,36 +91,26 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError NotifySearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& infos)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& info)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t baseParent)
-    {
-        return WSError::WS_OK;
-    }
     virtual WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs)
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyAccessibilityChildTreeRegister(
+        uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyAccessibilityChildTreeUnregister()
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError NotifyAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info)
+    {
+        return WSError::WS_OK;
+    }
+
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
 };
 } // namespace OHOS::Rosen

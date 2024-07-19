@@ -28,7 +28,9 @@
 #endif
 
 #include "window_option.h"
+#include "window_visibility_info.h"
 #include "wm_common.h"
+#include "window_helper.h"
 namespace OHOS {
 namespace Rosen {
 constexpr int32_t RGB_LENGTH = 6;
@@ -268,6 +270,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
+    napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
+    napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
@@ -292,6 +296,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     bool CheckCallingPermission(std::string permission);
+    bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType);
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
@@ -301,12 +306,14 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);
+    napi_value MaximizePresentationInit(napi_env env);
     napi_value WindowErrorCodeInit(napi_env env);
     napi_value WindowErrorInit(napi_env env);
     napi_value WindowStatusTypeInit(napi_env env);
     napi_value RectChangeReasonInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
+    napi_value ExtensionWindowAttributeInit(napi_env env);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,

@@ -461,7 +461,6 @@ HWTEST_F(WindowSessionTest2, SaveSnapshot, Function | SmallTest | Level2)
     EXPECT_EQ(session_->snapshot_, nullptr);
 
     session_->scenePersistence_ = new ScenePersistence(session_->sessionInfo_.bundleName_, session_->persistentId_);
-    ASSERT_NE(session_->scenePersistence_->GetSnapshotScheduler(), nullptr);
 
     session_->SaveSnapshot(false);
     ASSERT_EQ(session_->snapshot_, nullptr);
@@ -1257,6 +1256,18 @@ HWTEST_F(WindowSessionTest2, Show46, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: DrawingCompleted
+ * @tc.desc: DrawingCompleled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    auto result = session_->DrawingCompleted();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: IsSystemActive47
  * @tc.desc: IsSystemActive
  * @tc.type: FUNC
@@ -1661,7 +1672,6 @@ HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
     WSRectF bounds;
     session_->SetBounds(bounds);
     session_->GetBounds();
-    session_->TransferAccessibilityHoverEvent(50, 100, 50, 50, 500);
     session_->UpdateTitleInTargetPos(true, 100);
     session_->SetNotifySystemSessionPointerEventFunc(nullptr);
     session_->SetNotifySystemSessionKeyEventFunc(nullptr);

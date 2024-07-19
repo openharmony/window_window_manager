@@ -45,7 +45,7 @@ private:
     int HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
     int HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply);
-    int HandleOnFoldStatusChangeReportUE(MessageParcel& data, MessageParcel& reply);
+    int HandleOnFoldStatusChangedReportUE(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

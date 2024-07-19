@@ -47,6 +47,7 @@ namespace {
         PiPControlGroup::VIDEO_MEETING_MICROPHONE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_LIVE_CONTROLS {
+        PiPControlGroup::VIDEO_PLAY_PAUSE,
         PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH,
     };
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
@@ -107,10 +108,17 @@ static int32_t checkOptionParams(PipOption& option)
     return checkControlsRules(pipTemplateType, option.GetControlGroup());
 }
 
-static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t> &controls)
+static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::vector<std::uint32_t>& controls,
+    uint32_t templateType)
 {
     if (controlGroup == nullptr) {
         return false;
+    }
+    napi_valuetype type;
+    napi_typeof(env, controlGroup, &type);
+    if (type == napi_undefined && templateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
+        TLOGI(WmsLogTag::WMS_PIP, "controls is undefined");
+        controls.push_back(static_cast<uint32_t>(PiPControlGroup::VIDEO_PLAY_PAUSE));
     }
     uint32_t size = 0;
     napi_get_array_length(env, controlGroup, &size);
@@ -120,7 +128,7 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
         napi_get_element(env, controlGroup, i, &getElementValue);
         if (!ConvertFromJsValue(env, getElementValue, controlType)) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to controlType");
-            return false;
+            continue;
         }
         auto iter = std::find(controls.begin(), controls.end(), controlType);
         if (iter != controls.end()) {
@@ -164,9 +172,9 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     ConvertFromJsValue(env, templateTypeValue, templateType);
     ConvertFromJsValue(env, widthValue, width);
     ConvertFromJsValue(env, heightValue, height);
-    GetControlGroupFromJs(env, controlGroup, controls);
+    GetControlGroupFromJs(env, controlGroup, controls, templateType);
     std::shared_ptr<XComponentController> xComponentControllerResult =
-        XComponentController::GetXComponentControllerFromNapiValue(xComponentControllerValue);
+        XComponentController::GetXComponentControllerFromNapiValue(env, xComponentControllerValue);
     option.SetContext(contextPtr);
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);

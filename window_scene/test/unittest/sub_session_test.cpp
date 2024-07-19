@@ -26,6 +26,8 @@
 #include "window_event_channel_base.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_property.h"
+#include "window_session_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,9 +42,10 @@ public:
     void TearDown() override;
     SessionInfo info;
     sptr<SubSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SubSession> subSession_;
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    sptr<SubSession> subSession_;
+    SystemSessionConfig systemConfig_;
 };
 
 void SubSessionTest::SetUpTestCase()
@@ -150,7 +153,22 @@ HWTEST_F(SubSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: IsTopmost
+ * @tc.name: TransferKeyEvent03
+ * @tc.desc: check func TransferKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
+{
+    ASSERT_NE(subSession_, nullptr);
+    subSession_->state_ = SessionState::STATE_CONNECT;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    subSession_->SetParentSession(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
+}
+
+/**
+ * @tc.name: IsTopmost01
  * @tc.desc: check func IsTopmost
  * @tc.type: FUNC
  */
@@ -164,11 +182,11 @@ HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Hide
- * @tc.desc: check func Reconnect
+ * @tc.name: Hide01
+ * @tc.desc: check func Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, Hide, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, Hide01, Function | SmallTest | Level1)
 {
     subSession_->Hide();
     subSession_->GetMissionId();
@@ -177,6 +195,211 @@ HWTEST_F(SubSessionTest, Hide, Function | SmallTest | Level1)
     subSession_->UpdatePointerArea(rect);
     subSession_->RectCheck(50, 100);
     ASSERT_EQ(WSError::WS_OK, subSession_->ProcessPointDownSession(50, 100));
+}
+
+/**
+ * @tc.name: Hide02
+ * @tc.desc: check func Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Hide02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionProperty(property);
+    auto result = subSession_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Hide03
+ * @tc.desc: check func Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Hide03, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = nullptr;
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionProperty(property);
+    auto result = subSession_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Hide04
+ * @tc.desc: check func Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Hide04, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    ASSERT_NE(nullptr, winPropSrc);
+    uint32_t animationFlag = 1;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc->GetAnimationFlag();
+    ASSERT_NE(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    animationFlag = 3;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    res = winPropSrc->GetAnimationFlag();
+    ASSERT_EQ(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    ASSERT_TRUE(subSession_ != nullptr);
+    result = subSession_->Hide();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Show01
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show01, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = nullptr;
+    ASSERT_EQ(nullptr, property);
+    
+    ASSERT_TRUE(subSession_ != nullptr);
+    ASSERT_EQ(WSError::WS_OK, subSession_->Show(property));
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    ASSERT_NE(nullptr, winPropSrc);
+    uint32_t animationFlag = 1;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc->GetAnimationFlag();
+    ASSERT_NE(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->Show(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: Show03
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, Show03, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    ASSERT_NE(nullptr, winPropSrc);
+    uint32_t animationFlag = 3;
+    winPropSrc->SetAnimationFlag(animationFlag);
+    uint32_t res = winPropSrc->GetAnimationFlag();
+    ASSERT_EQ(res, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->Show(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch01
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    systemConfig_.uiType_ = "phone";
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch02
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    systemConfig_.uiType_ = "pc";
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch03
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    systemConfig_.uiType_ = "pc";
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
+    subSession_->UpdateSessionState(SessionState::STATE_ACTIVE);
+    auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch04
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    systemConfig_.uiType_ = "pc";
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
+    subSession_->UpdateSessionState(SessionState::STATE_INACTIVE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+    auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointerEventDispatch05
+ * @tc.desc: check func CheckPointerEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    systemConfig_.uiType_ = "pc";
+
+    ASSERT_TRUE(subSession_ != nullptr);
+    subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
+    subSession_->UpdateSessionState(SessionState::STATE_INACTIVE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_TRUE(result);
 }
 }
 }

@@ -46,7 +46,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
-    void OnFoldStatusChangeReportUE(const std::vector<int32_t>& screenFoldInfo, float angle) override;
+    void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

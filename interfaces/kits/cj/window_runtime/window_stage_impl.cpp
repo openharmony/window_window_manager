@@ -184,5 +184,13 @@ std::shared_ptr<CJWindowStageImpl> CJWindowStageImpl::CreateCJWindowStage(
     auto windowStagePtr = std::shared_ptr<CJWindowStageImpl>(ptr.GetRefPtr());
     return windowStagePtr;
 }
+
+extern "C" {
+FFI_EXPORT int64_t OHOS_CreateCJWindowStage(const std::shared_ptr<WindowScene>& windowScene)
+{
+    auto ptr = OHOS::FFI::FFIData::Create<OHOS::Rosen::CJWindowStageImpl>(windowScene);
+    return ptr->GetID();
+}
+}
 }
 }

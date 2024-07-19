@@ -55,6 +55,7 @@ ohos_shared_library("window_native_kit") {
     debug = false
   }
   sources = [
+    "window_napi/js_extension_window_config.cpp",
     "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
     "window_napi/js_window_listener.cpp",
@@ -74,13 +75,6 @@ ohos_shared_library("window_native_kit") {
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
   ]
-
-  defines = []
-  if (scene_board_enabled) {
-    deps +=
-        [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
-    defines += [ "SCENE_BOARD_ENABLE" ]
-  }
 
   external_deps = [
     "ability_runtime:ability_manager",

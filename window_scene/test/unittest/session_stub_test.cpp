@@ -23,6 +23,8 @@
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "want.h"
+#include "ws_common.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -170,6 +172,8 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
+    res = session_->HandleGetStatusBarHeight(data, reply);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -233,6 +237,25 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleUpdatePiPRect(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleUpdatePiPControlStatus
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = WsPiPControlStatus::PLAY;
+    data.WriteUint32(static_cast<uint32_t>(controlType));
+    data.WriteInt32(static_cast<int32_t>(status));
+    auto res = session_->HandleUpdatePiPControlStatus(data, reply);
     ASSERT_EQ(0, res);
 }
 
@@ -311,6 +334,20 @@ HWTEST_F(SessionStubTest, HandleHide010, Function | SmallTest | Level2)
     MessageParcel reply;
     data.WriteBool(true);
     auto res = session_->HandleHide(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleDrawingCompleted
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleDrawingCompleted, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleDrawingCompleted(data, reply);
     ASSERT_EQ(0, res);
 }
 

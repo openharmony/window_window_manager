@@ -44,8 +44,17 @@ public:
         const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
     int32_t SendMessageSync(int32_t transCode, MessageParcel &data, MessageParcel &reply);
+    int32_t SendMessageSyncBlock(int32_t transCode, MessageParcel &data, MessageParcel &reply);
     bool IsAbilityConnected();
     bool IsAbilityConnectedSync();
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int32_t GetScreenId();
+    int32_t GetLeft();
+    int32_t GetTop();
+    int32_t GetWidth();
+    int32_t GetHeight();
+    int32_t GetErrCode();
+    void EraseErrCode();
 
 private:
     bool AddObjectDeathRecipient();
@@ -53,9 +62,19 @@ private:
 private:
     std::atomic<bool> isConnected_{false};
     sptr<IRemoteObject> remoteObject_;
+    std::mutex remoteObjectMutex_;
     sptr<ScreenSessionAbilityDeathRecipient> deathRecipient_;
     std::mutex connectedMutex_;
     std::condition_variable connectedCv_;
+    std::mutex sendMessageMutex_;
+    std::condition_variable blockSendMessageCV_;
+    std::atomic<bool> sendMessageWaitFlag_{false};
+    int32_t screenId_ = 0;
+    int32_t left_ = 0;
+    int32_t top_ = 0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+    uint32_t errCode_ = 0;
 };
 
 class ScreenSessionAbilityConnection {
@@ -66,8 +85,10 @@ public:
     bool ScreenSessionConnectExtension(const std::string &bundleName, const std::string &abilityName);
     void ScreenSessionDisconnectExtension();
     int32_t SendMessage(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
+    int32_t SendMessageBlock(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
     bool IsConnected();
     bool IsConnectedSync();
+    sptr<ScreenSessionAbilityConnectionStub> GetScreenSessionAbilityConnectionStub();
 
 private:
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub_;

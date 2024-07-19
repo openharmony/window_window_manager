@@ -26,79 +26,6 @@ constexpr uint32_t MAX_VECTOR_SIZE = 100;
 constexpr uint32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
-
-const std::map<uint32_t, SceneSessionManagerLiteStubFunc> SceneSessionManagerLiteStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL),
-        &SceneSessionManagerLiteStub::HandleSetSessionLabel),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON),
-        &SceneSessionManagerLiteStub::HandleSetSessionIcon),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_VALID_SESSION_IDS),
-        &SceneSessionManagerLiteStub::HandleIsValidSessionIds),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
-        &SceneSessionManagerLiteStub::HandlePendingSessionToForeground),
-    std::make_pair(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
-        &SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
-        &SceneSessionManagerLiteStub::HandleGetFocusSessionToken),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT),
-        &SceneSessionManagerLiteStub::HandleGetFocusSessionElement),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
-        &SceneSessionManagerLiteStub::HandleRegisterSessionListener),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER),
-        &SceneSessionManagerLiteStub::HandleUnRegisterSessionListener),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS),
-        &SceneSessionManagerLiteStub::HandleGetSessionInfos),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
-        &SceneSessionManagerLiteStub::HandleGetSessionInfo),
-    std::make_pair(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID),
-        &SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
-        &SceneSessionManagerLiteStub::HandleTerminateSessionNew),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
-        &SceneSessionManagerLiteStub::HandleGetSessionSnapshot),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
-        &SceneSessionManagerLiteStub::HandleSetSessionContinueState),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION),
-        &SceneSessionManagerLiteStub::HandleClearSession),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
-        &SceneSessionManagerLiteStub::HandleClearAllSessions),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION),
-        &SceneSessionManagerLiteStub::HandleLockSession),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION),
-        &SceneSessionManagerLiteStub::HandleUnlockSession),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
-        &SceneSessionManagerLiteStub::HandleMoveSessionsToForeground),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
-        &SceneSessionManagerLiteStub::HandleMoveSessionsToBackground),
-    // for window manager service
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
-        &SceneSessionManagerLiteStub::HandleGetFocusSessionInfo),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
-                   &SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
-                   &SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID),
-                   &SceneSessionManagerLiteStub::HandleCheckWindowId),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
-                   &SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE),
-        &SceneSessionManagerLiteStub::HandleGetWindowModeType),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO),
-        &SceneSessionManagerLiteStub::HandleGetMainWinodowInfo),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO),
-        &SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS),
-        &SceneSessionManagerLiteStub::HandleClearMainSessions),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
-        &SceneSessionManagerLiteStub::HandleRaiseWindowToTop),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR),
-        &SceneSessionManagerLiteStub::HandleRegisterCollaborator),
-    std::make_pair(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
-        &SceneSessionManagerLiteStub::HandleUnregisterCollaborator),
-};
-
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -108,13 +35,84 @@ int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
         return ERR_INVALID_STATE;
     }
 
-    const auto& func = stubFuncMap_.find(code);
-    if (func == stubFuncMap_.end()) {
-        WLOGFE("Failed to find function handler!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
+    return ProcessRemoteRequest(code, data, reply, option);
+}
 
-    return (this->*(func->second))(data, reply);
+int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    switch (code) {
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL):
+            return HandleSetSessionLabel(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON):
+            return HandleSetSessionIcon(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_VALID_SESSION_IDS):
+            return HandleIsValidSessionIds(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND):
+            return HandlePendingSessionToForeground(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR):
+            return HandlePendingSessionToBackgroundForDelegator(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN):
+            return HandleGetFocusSessionToken(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT):
+            return HandleGetFocusSessionElement(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
+            return HandleRegisterSessionListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER):
+            return HandleUnRegisterSessionListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS):
+            return HandleGetSessionInfos(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID):
+            return HandleGetSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID):
+            return HandleGetSessionInfoByContinueSessionId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW):
+            return HandleTerminateSessionNew(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT):
+            return HandleGetSessionSnapshot(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE):
+            return HandleSetSessionContinueState(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION):
+            return HandleClearSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_ALL_SESSIONS):
+            return HandleClearAllSessions(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION):
+            return HandleLockSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION):
+            return HandleUnlockSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND):
+            return HandleMoveSessionsToForeground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND):
+            return HandleMoveSessionsToBackground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO):
+            return HandleGetFocusSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT):
+            return HandleRegisterWindowManagerAgent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT):
+            return HandleUnregisterWindowManagerAgent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID):
+            return HandleCheckWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
+            return HandleGetVisibilityWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
+            return HandleGetWindowModeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP):
+            return HandleRaiseWindowToTop(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO):
+            return HandleGetMainWinodowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR):
+            return HandleRegisterCollaborator(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_COLLABORATOR):
+            return HandleUnregisterCollaborator(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO):
+            return HandleGetAllMainWindowInfos(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS):
+            return HandleClearMainSessions(data, reply);
+        default:
+            WLOGFE("Failed to find function handler!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
 }
 
 int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply)
@@ -172,6 +170,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
     WLOGFD("run HandleRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "listener is nullptr!");
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }
@@ -365,7 +364,7 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel &d
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetFocusSessionInfo lite!");
+    WLOGFD("run");
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo);
     reply.WriteParcelable(&focusInfo);

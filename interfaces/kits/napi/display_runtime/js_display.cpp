@@ -16,6 +16,7 @@
 #include "js_display.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <map>
 #include <set>
 
@@ -203,46 +204,57 @@ napi_valuetype GetType(napi_env env, napi_value value)
 napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
 {
     WLOGD("OnGetCutoutInfo is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
-            if (cutoutInfo != nullptr) {
-                task.Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
-                WLOGD("JsDisplay::OnGetCutoutInfo success");
-            } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
-            }
-        };
+    napi_value result = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = nullptr;
-    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
-        GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
+    if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr && GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
         lastParam = argv[ARGC_ONE - 1];
     }
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnGetCutoutInfo",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnGetCutoutInfo");
+        sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
+        if (cutoutInfo != nullptr) {
+            task->Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
+            WLOGD("JsDisplay::OnGetCutoutInfo success");
+        } else {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
+}
+
+std::unique_ptr<NapiAsyncTask> JsDisplay::CreateEmptyAsyncTask(napi_env env, napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
 }
 
 napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
 {
     WLOGI("OnGetAvailableArea is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            DMRect area;
-            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetAvailableArea(area));
-            if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(env, CreateJsRectObject(env, area));
-                WLOGI("JsDisplay::OnGetAvailableArea success");
-            } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
-                    "JsDisplay::OnGetAvailableArea failed."));
-            }
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -252,26 +264,32 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
         lastParam = argv[ARGC_ONE - 1];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnGetAvailableArea",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = JsDisplay::CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnGetAvailableArea");
+        DMRect area;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetAvailableArea(area));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsRectObject(env, area));
+            WLOGI("JsDisplay::OnGetAvailableArea success");
+        } else {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                "JsDisplay::OnGetAvailableArea failed."));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 
 napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("OnHasImmersiveWindow is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [this](napi_env env, NapiAsyncTask& task, int32_t status) {
-            bool immersive = false;
-            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->HasImmersiveWindow(immersive));
-            if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(env, CreateJsValue(env, immersive));
-                WLOGI("JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d", immersive);
-            } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(ret), "JsDisplay::OnHasImmersiveWindow failed."));
-            }
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -281,8 +299,26 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
         lastParam = argv[ARGC_ONE - 1];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnHasImmersiveWindow",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = JsDisplay::CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnHasImmersiveWindow");
+        bool immersive = false;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->HasImmersiveWindow(immersive));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsValue(env, immersive));
+            WLOGI("JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d", immersive);
+        } else {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(ret), "JsDisplay::OnHasImmersiveWindow failed."));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 
@@ -322,19 +358,6 @@ static napi_value CreateJsColorSpaceArray(napi_env env, const std::vector<uint32
 napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info info)
 {
     WLOGI("OnGetSupportedColorSpaces is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::vector<uint32_t> colorSpaces;
-            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedColorSpaces(colorSpaces));
-            if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(env, CreateJsColorSpaceArray(env, colorSpaces));
-                WLOGI("OnGetSupportedColorSpaces success");
-            } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
-                                               "JsDisplay::OnGetSupportedColorSpaces failed."));
-                WLOGFE("OnGetSupportedColorSpaces failed");
-            }
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -344,8 +367,27 @@ napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info
         lastParam = argv[ARGC_ONE - 1];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnGetSupportedColorSpaces",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = JsDisplay::CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnGetSupportedColorSpaces");
+        std::vector<uint32_t> colorSpaces;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedColorSpaces(colorSpaces));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsColorSpaceArray(env, colorSpaces));
+            WLOGI("OnGetSupportedColorSpaces success");
+        } else {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                                            "JsDisplay::OnGetSupportedColorSpaces failed."));
+            WLOGFE("OnGetSupportedColorSpaces failed");
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 
@@ -385,19 +427,6 @@ static napi_value CreateJsHDRFormatArray(napi_env env, const std::vector<uint32_
 napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info info)
 {
     WLOGI("OnGetSupportedHDRFormats is called");
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::vector<uint32_t> hdrFormats;
-            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedHDRFormats(hdrFormats));
-            if (ret == DmErrorCode::DM_OK) {
-                task.Resolve(env, CreateJsHDRFormatArray(env, hdrFormats));
-                WLOGI("OnGetSupportedHDRFormats success");
-            } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
-                                               "JsDisplay::OnGetSupportedHDRFormats failed."));
-                WLOGFE("OnGetSupportedHDRFormats failed");
-            }
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -407,8 +436,27 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
         lastParam = argv[ARGC_ONE - 1];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplay::OnGetSupportedHDRFormats",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = JsDisplay::CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplay::OnGetSupportedHDRFormats");
+        std::vector<uint32_t> hdrFormats;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedHDRFormats(hdrFormats));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsHDRFormatArray(env, hdrFormats));
+            WLOGI("OnGetSupportedHDRFormats success");
+        } else {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                                            "JsDisplay::OnGetSupportedHDRFormats failed."));
+            WLOGFE("OnGetSupportedHDRFormats failed");
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 
@@ -448,6 +496,16 @@ napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
     napi_set_named_property(env, objValue, "boundingRects", CreateJsBoundingRectsArrayObject(env, boundingRects));
     napi_set_named_property(env, objValue, "waterfallDisplayAreaRects",
         CreateJsWaterfallDisplayAreaRectsObject(env, waterfallDisplayAreaRects));
+    return objValue;
+}
+
+napi_value CreateJsDisplayPhysicalInfoObject(napi_env env, DisplayPhysicalResolution physicalInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "foldDisplayMode", CreateJsValue(env, physicalInfo.foldDisplayMode_));
+    napi_set_named_property(env, objValue, "physicalWidth", CreateJsValue(env, physicalInfo.physicalWidth_));
+    napi_set_named_property(env, objValue, "physicalHeight", CreateJsValue(env, physicalInfo.physicalHeight_));
     return objValue;
 }
 
@@ -509,6 +567,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "yDPI", CreateJsValue(env, info->GetYDpi()));
     napi_set_named_property(env, objValue, "colorSpaces", CreateJsColorSpaceArray(env, info->GetColorSpaces()));
     napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
+    napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
+    napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

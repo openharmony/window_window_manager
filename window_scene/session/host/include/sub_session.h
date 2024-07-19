@@ -30,9 +30,8 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
-    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-
     int32_t GetMissionId() const override;
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

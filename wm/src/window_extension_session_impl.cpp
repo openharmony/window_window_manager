@@ -28,13 +28,14 @@
 #include "session_permission.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
+#include "input_transfer_station.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
-constexpr int32_t ANIMATION_TIME = 400;
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -58,6 +59,15 @@ std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
 
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
+    if (property_ == nullptr) {
+        return;
+    }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
+        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+        property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
 
 WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
@@ -67,7 +77,7 @@ WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Called.");
+    TLOGD(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {
         TLOGE(WmsLogTag::WMS_LIFE, "context is nullptr: %{public}u or sessionToken is nullptr: %{public}u",
             context == nullptr, iSession == nullptr);
@@ -79,24 +89,50 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         hostSession_ = iSession;
     }
     context_ = context;
+    if (context_) {
+        abilityToken_ = context_->GetToken();
+    }
+    AddExtensionWindowStageToSCB();
     WMError ret = Connect();
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
-    AddExtensionWindowStageToSCB();
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
-    TLOGI(WmsLogTag::WMS_LIFE, "Created %{public}d successfully.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
+        property_->GetWindowName().c_str(), GetPersistentId());
+    sptr<Window> self(this);
+    InputTransferStation::GetInstance().AddInputWindow(self);
+    needRemoveWindowInputChannel_ = true;
     return WMError::WM_OK;
 }
 
 void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
 {
-    sptr<ISessionStage> iSessionStage(this);
-    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(iSessionStage, property_->GetPersistentId(),
-        property_->GetParentId());
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return;
+    }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
+        return;
+    }
+
+    SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
+        surfaceNode_->GetId());
+}
+
+void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
+{
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return;
+    }
+
+    SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(sptr<ISessionStage>(this),
+        abilityToken_);
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -121,11 +157,15 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+    if (needRemoveWindowInputChannel_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d Destroy", GetPersistentId());
+        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+        needRemoveWindowInputChannel_ = false;
+    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    CheckAndRemoveExtWindowFlags();
     {
         auto hostSession = GetHostSession();
         if (hostSession != nullptr) {
@@ -134,6 +174,9 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         }
     }
     NotifyBeforeDestroy(GetWindowName());
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -150,15 +193,11 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Erase windowExtensionSession in set, id: %{public}d.", GetPersistentId());
     DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
-    NotifyAfterDestroy();
-    TLOGI(WmsLogTag::WMS_LIFE, "After NotifyAfterDestroy, id: %{public}d.", GetPersistentId());
-    if (needClearListener) {
-        ClearListenersById(GetPersistentId());
-    }
     if (context_) {
         context_.reset();
     }
     ClearVsyncStation();
+    RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
@@ -225,7 +264,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -305,6 +344,10 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
         NotifyWindowAfterUnfocused();
     }
     focusState_ = focusState;
+    if (focusState_ != std::nullopt) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "persistentId:%{public}d  focusState:%{public}d",
+            GetPersistentId(), static_cast<int32_t>(focusState_.value()));
+    }
 }
 
 void WindowExtensionSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
@@ -376,8 +419,9 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isConsumedFuture = isConsumedPromise->get_future().share();
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
-            std::bind(&WindowExtensionSessionImpl::InputMethodKeyEventResultCallback, this,
-                std::placeholders::_1, std::placeholders::_2, isConsumedPromise, isTimeout));
+            [this, isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
+                this->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+            });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
             DispatchKeyEventCallback(keyEvent, isConsumed);
@@ -396,6 +440,23 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
     }
 #endif // IMF_ENABLE
     DispatchKeyEventCallback(keyEvent, isConsumed);
+}
+
+void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI new framework support after API10
+    if (version < 10) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        if (!isSystembarPropertiesSet_) {
+            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
+        }
+    } else if (isIgnoreSafeAreaNeedNotify_) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+    }
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -420,30 +481,20 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
+        if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
+        }
         uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
+    UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (focusState_ != std::nullopt) {
         focusState_.value() ? uiContent->Focus() : uiContent->UnFocus();
     }
-
-    uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
-    }
-    // 10 ArkUI new framework support after API10
-    if (version < 10) {
-        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
-        if (!isSystembarPropertiesSet_) {
-            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
-        }
-    } else if (isIgnoreSafeAreaNeedNotify_) {
-        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
-    }
-
+    ArkUIFrameworkSupport();
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -469,6 +520,15 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
             rect.height_, static_cast<int>(reason));
     }
     property_->SetWindowRect(wmRect);
+
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) {
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, wmRect);
+    }
+
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else {
@@ -490,12 +550,12 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (!window) {
             return;
         }
-        int32_t duration = ANIMATION_TIME;
+        int32_t duration = UIEXTENTION_ROTATION_ANIMATION_TIME;
         bool needSync = false;
         if (rsTransaction && rsTransaction->GetSyncId() > 0) {
             // extract high 32 bits of SyncId as pid
             auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
-            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetChildPid()) {
+            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetParentPid()) {
                 needSync = true;
             }
         }
@@ -509,6 +569,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
+        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
             auto window = weak.promote();
@@ -534,77 +595,12 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
-WSError WindowExtensionSessionImpl::NotifySearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFE("NotifySearchElementInfoByAccessibilityId error, no uiContent");
-        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
-    }
-    uiContent->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, infos);
-    return WSError::WS_OK;
-}
-
-WSError WindowExtensionSessionImpl::NotifySearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& infos)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFE("NotifySearchElementInfosByText error, no uiContent");
-        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
-    }
-    uiContent->SearchElementInfosByText(elementId, text, baseParent, infos);
-    return WSError::WS_OK;
-}
-
-WSError WindowExtensionSessionImpl::NotifyFindFocusedElementInfo(int64_t elementId, int32_t focusType,
-    int64_t baseParent, Accessibility::AccessibilityElementInfo& info)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFE("NotifyFindFocusedElementInfo error, no uiContent");
-        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
-    }
-    uiContent->FindFocusedElementInfo(elementId, focusType, baseParent, info);
-    return WSError::WS_OK;
-}
-
-WSError WindowExtensionSessionImpl::NotifyFocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& info)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFE("NotifyFocusMoveSearch error, no uiContent");
-        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
-    }
-    uiContent->FocusMoveSearch(elementId, direction, baseParent, info);
-    return WSError::WS_OK;
-}
-
-WSError WindowExtensionSessionImpl::NotifyExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionAguments, int32_t action,
-    int64_t baseParent)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFE("NotifyExecuteAction error, no uiContent");
-        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
-    }
-    bool ret = uiContent->NotifyExecuteAction(elementId, actionAguments, action, baseParent);
-    if (!ret) {
-        WLOGFE("NotifyExecuteAction fail");
-        return WSError::WS_ERROR_INTERNAL_ERROR;
-    }
-    return WSError::WS_OK;
-}
-
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFE("NotifyExecuteAction error, no uiContent");
+        WLOGFE("NotifyAccessibilityHoverEvent error, no uiContent");
         return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
     }
     uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
@@ -679,11 +675,15 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
     CheckAndAddExtWindowFlags();
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WindowExtensionSessionImpl::Show display is null!");
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "display is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "display info is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     float density = GetVirtualPixelRatio(displayInfo);
     if (!MathHelper::NearZero(virtualPixelRatio_ - density)) {
         UpdateDensity();
@@ -705,7 +705,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden \
-            [name:%{public}s,id:%{public}d,type: %{public}u]",
+            [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
@@ -767,6 +767,16 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
+        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
+        extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property to false is not allowed in %{public}s UIExtension.",
+            property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = shouldHide;
         return WMError::WM_OK;
@@ -823,6 +833,80 @@ void WindowExtensionSessionImpl::CheckAndRemoveExtWindowFlags()
     }
 }
 
+WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    if (!handler_) {
+        return WSError::WS_ERROR_INTERNAL_ERROR;
+    }
+    auto uiContentSharedPtr = GetUIContentSharedPtr();
+    if (uiContentSharedPtr == nullptr) {
+        accessibilityChildTreeInfo_ = {
+            .windowId = windowId,
+            .treeId = treeId,
+            .accessibilityId = accessibilityId
+        };
+        TLOGD(WmsLogTag::WMS_UIEXT, "uiContent is null, save the accessibility child tree info.");
+        return WSError::WS_OK;
+    }
+
+    handler_->PostTask([uiContent = GetUIContentSharedPtr(), windowId, treeId, accessibilityId]() {
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeRegister error, no uiContent");
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "NotifyAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
+        uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
+    });
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeUnregister()
+{
+    if (!handler_) {
+        return WSError::WS_ERROR_INTERNAL_ERROR;
+    }
+    handler_->PostTask([uiContent = GetUIContentSharedPtr()]() {
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeUnregister error, no uiContent");
+            return;
+        }
+        uiContent->DeregisterAccessibilityChildTree();
+    });
+    return WSError::WS_OK;
+}
+
+WSError WindowExtensionSessionImpl::NotifyAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (!handler_) {
+        return WSError::WS_ERROR_INTERNAL_ERROR;
+    }
+    handler_->PostSyncTask([uiContent = GetUIContentSharedPtr(), params, &info]() {
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityDumpChildInfo error, no uiContent");
+            return;
+        }
+        uiContent->AccessibilityDumpChildInfo(params, info);
+    });
+    return WSError::WS_OK;
+}
+
+void WindowExtensionSessionImpl::UpdateAccessibilityTreeInfo()
+{
+    if (accessibilityChildTreeInfo_ == std::nullopt) {
+        return;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        return;
+    }
+    uiContent->RegisterAccessibilityChildTree(accessibilityChildTreeInfo_->windowId,
+        accessibilityChildTreeInfo_->treeId, accessibilityChildTreeInfo_->accessibilityId);
+    accessibilityChildTreeInfo_.reset();
+}
+
 WMError WindowExtensionSessionImpl::UpdateExtWindowFlags(const ExtensionWindowFlags& flags,
     const ExtensionWindowFlags& actions)
 {
@@ -831,8 +915,13 @@ WMError WindowExtensionSessionImpl::UpdateExtWindowFlags(const ExtensionWindowFl
         TLOGI(WmsLogTag::WMS_UIEXT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(property_->GetParentId(), GetPersistentId(),
-        flags.bitData, actions.bitData);
+
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().UpdateExtWindowFlags(abilityToken_, flags.bitData, actions.bitData);
 }
 
 Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
@@ -844,6 +933,70 @@ Rect WindowExtensionSessionImpl::GetHostWindowRect(int32_t hostWindowId)
     }
     SingletonContainer::Get<WindowAdapter>().GetHostWindowRect(hostWindowId, rect);
     return rect;
+}
+
+void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        return;
+    }
+    if (hostSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        TLOGW(WmsLogTag::WMS_EVENT, "invalid pointerEvent, windowId: %{public}d", GetWindowId());
+        pointerEvent->MarkProcessed();
+        return;
+    }
+    auto action = pointerEvent->GetPointerAction();
+    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    if (property_ && (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL) && isPointDown) {
+        if (!abilityToken_) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
+            return;
+        }
+        SingletonContainer::Get<WindowAdapter>().ProcessModalExtensionPointDown(abilityToken_,
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    }
+    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
+            "pointId:%{public}d,sourceType:%{public}d", pointerEvent->GetId(), GetWindowId(),
+            pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
+    }
+    NotifyPointerEvent(pointerEvent);
+}
+
+bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
+        return false;
+    }
+    RefreshNoInteractionTimeoutMonitor();
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        if (focusState_ == std::nullopt) {
+            TLOGW(WmsLogTag::WMS_EVENT, "focusState is null");
+            keyEvent->MarkProcessed();
+            return true;
+        }
+        if (!focusState_.value()) {
+            keyEvent->MarkProcessed();
+            return true;
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking:%{public}d wid:%{public}d",
+            keyEvent->GetId(), keyEvent->GetAgentWindowId());
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent != nullptr) {
+        return uiContent->ProcessKeyEvent(keyEvent, true);
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

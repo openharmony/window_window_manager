@@ -84,6 +84,9 @@ public:
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_GET_FOCUS_WINDOW_INFO,
+        TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
+        TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB,
+        TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB,
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
@@ -198,13 +201,17 @@ public:
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, int32_t persistentId,
-        int32_t parentId) {}
+    virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
+    virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token) {}
+    virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}
+    virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) {}
     virtual WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
     {
         return WSError::WS_OK;
     }
-    virtual WSError UpdateExtWindowFlags(int32_t parentId, int32_t persistentId, uint32_t extWindowFlags,
+    virtual WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions)
     {
         return WSError::WS_OK;

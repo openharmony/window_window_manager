@@ -238,6 +238,13 @@ public:
     void SetExtensionTag(bool isExtensionTag);
 
     /**
+     * @brief Set UIExtension usage.
+     *
+     * @param uiExtensionUsage UIExtension usage.
+     */
+    void SetUIExtensionUsage(uint32_t uiExtensionUsage);
+
+    /**
      * @brief Set Dialog Decor Enable Or Not.
      *
      * @param decorEnable true means enable, default disabled.
@@ -413,6 +420,13 @@ public:
     bool GetExtensionTag() const;
 
     /**
+     * @brief Get UIExtension usage.
+     *
+     * @param Return UIExtension usage.
+     */
+    uint32_t GetUIExtensionUsage() const;
+
+    /**
      * @brief Get dialog decor enable
      *
      * @return true means the dialog decor is enabled, otherwise not.
@@ -461,6 +475,7 @@ private:
     bool subWindowDecorEnable_ = false;
     bool onlySupportSceneBoard_ = false;
     bool isExtensionTag_ = false;
+    uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
