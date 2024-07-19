@@ -308,7 +308,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureFromClient, Functio
     
     auto option1 = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option1);
-    auto windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr();
+    auto windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(WMError::WM_DO_NOTHING, windowSceneSessionImpl->NotifyPrepareClosePiPWindow());
