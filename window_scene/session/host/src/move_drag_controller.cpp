@@ -685,7 +685,8 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
         return;
     }
     int32_t action = pointerEvent->GetPointerAction();
-    if (!(pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if (!(sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         (action == MMI::PointerEvent::POINTER_ACTION_MOVE ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN))) {
@@ -710,8 +711,9 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
     uint32_t oriStyleID = mouseStyleID_;
     uint32_t newStyleID = 0;
 
-    CalculateStartRectExceptHotZone(GetVirtualPixelRatio(), winRect);
-    if (IsPointInDragHotZone(mousePointX, mousePointY, pointerEvent->GetSourceType(), winRect)) {
+    float vpr = GetVirtualPixelRatio();
+    CalculateStartRectExceptHotZone(vpr, winRect);
+    if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType, winRect)) {
         UpdateDragType(mousePointX, mousePointY);
         newStyleID = STYLEID_MAP.at(dragType_);
     } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
