@@ -1321,6 +1321,10 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             return {};
         }
 
+        if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
+            return {};
+        }
+
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
         TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidAreaByType type:%{public}u", type);
