@@ -4309,7 +4309,7 @@ bool SceneSessionManager::CheckTopmostWindowFocus(sptr<SceneSession>& focusedSes
 bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
 {
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-        (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsModal())) &&
+        (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsTopmost())) &&
         (ProcessModalTopmostRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
             TLOGD(WmsLogTag::WMS_FOCUS, "dialog or modal topmost subwindow get focused");
