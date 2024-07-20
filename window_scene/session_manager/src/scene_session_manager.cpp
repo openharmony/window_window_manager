@@ -3058,7 +3058,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str(), selectedTypes)) {
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA)) {
         WLOGFW("Add resource %{private}s failed.", loadPath.c_str());
     }
     return resourceMgr;
@@ -3067,8 +3067,7 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
-    auto resourceMgr = GetResourceManager(abilityInfo,
-        Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA);
+    auto resourceMgr = GetResourceManager(abilityInfo);
     if (!resourceMgr) {
         WLOGFE("resourceMgr is nullptr.");
         return false;
@@ -5918,10 +5917,27 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     if (abilityInfo.orientationId == 0) {
         return;
     }
-    auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::SELECT_STRING);
-    if (!resourceMgr) {
-        TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "resConfig is nullptr.");
         return;
+    }
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(
+        abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig));
+    if (resourceMgr == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
+        return nullptr;
+    }
+    resourceMgr->UpdateResConfig(*resConfig);
+    std::string loadPath;
+    if (!abilityInfo.hapPath.empty()) { // zipped hap
+        loadPath = abilityInfo.hapPath;
+    } else {
+        loadPath = abilityInfo.resourcePath;
+    }
+
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
+        TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
     std::string orientation;
     auto ret = resourceMgr->GetStringById(static_cast<uint32_t>(abilityInfo.orientationId), orientation);
