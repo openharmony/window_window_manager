@@ -1116,7 +1116,6 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             WLOGFD("SpecificSessionCallback is nullptr");
             rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
         }
-        rootSceneSession_ = new RootSceneSession();
         rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
         return rootSceneSession_;
