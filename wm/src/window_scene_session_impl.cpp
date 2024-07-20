@@ -1635,14 +1635,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
             GetWindowId(), static_cast<int32_t>(status));
         WMError ret = WMError::WM_OK;
         if (status) {
-            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "RemoveWindowFlag errCode:%{public}d winId:%{public}u",
                     static_cast<int32_t>(ret), GetWindowId());
                 return ret;
             }
         } else {
-            AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            ret = AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "RemoveWindowFlag errCode:%{public}d winId:%{public}u",
                     static_cast<int32_t>(ret), GetWindowId());
