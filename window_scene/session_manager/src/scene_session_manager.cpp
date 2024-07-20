@@ -3025,7 +3025,7 @@ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResourceManager(
-    const AppExecFwk::AbilityInfo& abilityInfo, uint32_t selectedTypes)
+    const AppExecFwk::AbilityInfo& abilityInfo)
 {
     auto context = rootSceneContextWeak_.lock();
     if (!context) {
@@ -5926,7 +5926,7 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
         abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig));
     if (resourceMgr == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
-        return nullptr;
+        return;
     }
     resourceMgr->UpdateResConfig(*resConfig);
     std::string loadPath;
@@ -5935,7 +5935,6 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     } else {
         loadPath = abilityInfo.resourcePath;
     }
-
     if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
         TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
