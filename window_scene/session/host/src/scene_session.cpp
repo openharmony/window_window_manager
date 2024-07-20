@@ -48,6 +48,7 @@
 #include "screen.h"
 #include "singleton_container.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
+#include "fold_screen_state_internel.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -608,14 +609,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
             return;
         }
-        static bool isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-        static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-        bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
-        const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
-            sessionProperty->GetDisplayId());
-        Rotation rotation = (screenSession != nullptr) ? screenSession->GetRotation() : Rotation::ROTATION_0;
-        bool isKeyboardNeedLeftOffset = (isPhone && (!isFoldable || (isFolded)) &&
-            (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270));
+        bool isKeyboardNeedLeftOffset = IsKeyboardNeedLeftOffset(sessionProperty);
         if (isKeyboardNeedLeftOffset) {
             keyboardSession->winRect_.posX_ += panelSession->winRect_.posX_;
         } else {
@@ -630,6 +624,25 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
         "keyboardRect:%{public}s, gravity:%{public}d", panelSession->GetPersistentId(),
         keyboardSession->GetPersistentId(), panelSession->winRect_.ToString().c_str(),
         keyboardSession->winRect_.ToString().c_str(), gravity);
+}
+
+bool SceneSession::IsKeyboardNeedLeftOffset(sptr<WindowSessionProperty> sessionProperty)
+{
+    static bool isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
+    bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
+    bool isDualDevice = FoldScreenStateInternel::IsDualDisplayFoldDevice();
+    
+    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
+        sessionProperty->GetDisplayId());
+    Rotation rotation = (screenSession != nullptr) ? screenSession->GetRotation() : Rotation::ROTATION_0;
+    bool isLandscape = (rotation == Rotation::ROTATION_90) || (rotation == Rotation::ROTATION_270);
+    
+    bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
+        "isDualDevice:%{public}d, rotation:%{public}d, isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable,
+        isFolded, isDualDevice, rotation, isKeyboardNeedLeftOffset);
+    return result;
 }
 
 WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction)

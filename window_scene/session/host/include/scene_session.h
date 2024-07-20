@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "window_session_property.h"
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
@@ -392,6 +393,7 @@ private:
     bool IsFullScreenMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
+    bool IsKeyboardNeedLeftOffset(sptr<WindowSessionProperty> sessionProperty);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
     bool IsFreeMultiWindowMode() const
     {
