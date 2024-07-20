@@ -213,8 +213,9 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
-    virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; };
-    virtual bool IsTopmost() const { return false; };
+    virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual bool IsTopmost() const { return false; }
+    virtual bool IsModal() const { return false; }
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
