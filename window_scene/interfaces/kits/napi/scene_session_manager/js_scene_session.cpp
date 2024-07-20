@@ -2055,8 +2055,11 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, windowMode %{public}d", info.bundleName_.c_str(),
+        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.windowMode);
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        info.fullScreenStart_ = true;
+    }
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
