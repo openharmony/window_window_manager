@@ -2493,11 +2493,11 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
-        "down{%{public}d,%{public}d,%{public}d,%{public}d}", GetPersistentId(), type,
-        avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_, avoidArea->topRect_.height_,
-        avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
-        avoidArea->bottomRect_.height_);
+          "id: %{public}d, type: %{public}d, "
+          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
+          GetPersistentId(), type,
+          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
+          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
