@@ -4279,7 +4279,7 @@ void ScreenSessionManager::SwitchUser()
     auto userId = GetUserIdByCallingUid();
     auto newScbPid = IPCSkeleton::GetCallingPid();
     SwitchScbNodeHandle(userId, newScbPid, false);
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(newScbPid, GetDefaultScreenId(), false);
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), false);
 }
 
 void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid)
