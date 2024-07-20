@@ -405,9 +405,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         }
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
-            transactionProxy->Begin();
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
-            transactionProxy->Commit();
             transactionProxy->FlushImplicitTransaction();
         } else {
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
