@@ -9434,7 +9434,7 @@ WSError SceneSessionManager::SetAppForceLandscapeMode(const std::string& bundleN
     }
     WLOGFD("set app force landscape mode, app: %{public}s, mode: %{public}d", bundleName.c_str(), mode);
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-    appForceLandscapeMap_.emplace(bundleName, mode);
+    appForceLandscapeMap_[bundleName] = mode;
     return WSError::WS_OK;
 }
 
