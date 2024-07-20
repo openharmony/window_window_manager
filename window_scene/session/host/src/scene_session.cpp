@@ -615,9 +615,6 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
         } else {
             keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
-            "rotation:%{public}d, isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable,
-            isFolded, rotation, isKeyboardNeedLeftOffset);
     }
     keyboardSession->winRect_.posY_ = panelSession->winRect_.posY_;
     TLOGI(WmsLogTag::WMS_LAYOUT, "panelId:%{public}d, keyboardId:%{public}d, panelRect:%{public}s, "
