@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DISPLAY_RUNTIME, "JsDisplayListener"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
 }
 
 JsDisplayListener::JsDisplayListener(napi_env env) : env_(env)
