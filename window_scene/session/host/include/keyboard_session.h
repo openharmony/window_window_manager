@@ -42,6 +42,7 @@ public:
     WSError Hide() override;
     WSError Disconnect(bool isFromClient = false) override;
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+
     void BindKeyboardPanelSession(sptr<SceneSession> panelSession) override;
     sptr<SceneSession> GetKeyboardPanelSession() const override;
     SessionGravity GetKeyboardGravity() const override;
@@ -56,6 +57,7 @@ private:
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     uint32_t GetCallingSessionId();
+
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RaiseCallingSession(const WSRect& keyboardPanelRect,
