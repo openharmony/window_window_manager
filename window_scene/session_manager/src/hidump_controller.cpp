@@ -289,7 +289,7 @@ void HidumpController::DumpKeyboardParamList(std::ostringstream& oss)
         << std::endl
         << "keyboardLayoutParams"
         << std::endl
-        << "lastSafeRect restoringRectForKeyboard"
+        << "lastSafeRect oriPosYBeforeRaisedBykeyboard_"
         << std::endl;
 }
 
@@ -298,7 +298,7 @@ void HidumpController::DumpKeyboardParam(
 {
     constexpr int precision = 1;
     WSRect lastSafeRect = session->GetLastSafeRect();
-    WSRect restoringRectForKeyboard = session->GetRestoringRectForKeyboard();
+    int32_t oriPosYBeforeRaisedBykeyboard = session->GetOriPosYBeforeRaisedByKeyboard();
     KeyboardLayoutParams keyboardLayoutParams = property->GetKeyboardLayoutParams();
     Rect LandscapeKeyboardRect = keyboardLayoutParams.LandscapeKeyboardRect_;
     Rect PortraitKeyboardRect = keyboardLayoutParams.PortraitKeyboardRect_;
@@ -336,10 +336,7 @@ void HidumpController::DumpKeyboardParam(
         << lastSafeRect.posY_ << " "
         << lastSafeRect.width_ << " "
         << lastSafeRect.height_ << "]|"
-        << "[" << restoringRectForKeyboard.posX_ << " "
-        << restoringRectForKeyboard.posY_ << " "
-        << restoringRectForKeyboard.width_ << " "
-        << restoringRectForKeyboard.height_ << "]|"
+        << "[" << oriPosYBeforeRaisedBykeyboard << "]|"
         << std::endl;
 }
 
