@@ -100,7 +100,6 @@ const unsigned int XCOLLIE_TIMEOUT_S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
-constexpr int32_t ROTATE_ANIMATION_TIME_MS = 600;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -4275,8 +4274,7 @@ void ScreenSessionManager::AddScbClientDeathRecipient(const sptr<IScreenSessionM
 void ScreenSessionManager::SwitchUser()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "permission denied");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "permission denied, calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
@@ -4312,15 +4310,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
     } else {
         screenSession->UpdateRotationAfterBoot(true);
     }
-    auto delayTask = [this, oldScbPids, newScbPid] {
-        if (!clientProxy_) {
-            TLOGE(WmsLogTag::DMS, "clientProxy is null");
-            return;
-        }
-        clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
-    };
-    // Wait for the display to stabilize
-    taskScheduler_->PostAsyncTask(delayTask, "SwitchUserCallback", ROTATE_ANIMATION_TIME_MS);
+    clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -4335,20 +4325,20 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         return;
     }
     clientProxy_ = client;
-
     auto userId = GetUserIdByCallingUid();
     auto newScbPid = IPCSkeleton::GetCallingPid();
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
-    NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
-    SetClientInner();
-    SwitchScbNodeHandle(userId, newScbPid, true);
-    AddScbClientDeathRecipient(client, newScbPid);
 
     std::ostringstream oss;
     oss << "set client userId: " << userId
         << " clientName: " << SysCapUtil::GetClientName();
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
+    
+    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
+    NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
+    SetClientInner();
+    SwitchScbNodeHandle(userId, newScbPid, true);
+    AddScbClientDeathRecipient(client, newScbPid);
 }
 
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
