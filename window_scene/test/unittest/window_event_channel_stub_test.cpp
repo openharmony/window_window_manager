@@ -195,6 +195,116 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusStateEvent, Function | S
 }
 
 /**
+ * @tc.name: HandleTransferAccessibilityHoverEvent01
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent01, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent01 begin");
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteFloat(0.0f);
+    data.WriteFloat(0.0f);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt64(0);
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent01 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityHoverEvent02
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent02, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent02 begin");
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent02 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityHoverEvent03
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent03, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent03 begin");
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteFloat(0.0f);
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent03 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityHoverEvent04
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent04, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent04 begin");
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteFloat(0.0f);
+    data.WriteFloat(0.0f);
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent04 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityHoverEvent05
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent05, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent05 begin");
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteFloat(0.0f);
+    data.WriteFloat(0.0f);
+    data.WriteInt32(0);
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent05 end");
+}
+
+/**
+ * @tc.name: HandleTransferAccessibilityHoverEvent06
+ * @tc.desc: test function : HandleTransferAccessibilityHoverEvent06
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent06, Function | SmallTest | Level1)
+{
+    WLOGI("HandleTransferAccessibilityHoverEvent06 begin");
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteFloat(0.0f);
+    data.WriteFloat(0.0f);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityHoverEvent(data, reply));
+    WLOGI("HandleTransferAccessibilityHoverEvent06 end");
+}
+
+/**
  * @tc.name: HandleTransferAccessibilityChildTreeRegister01
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
@@ -208,7 +318,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
     data.WriteUint32(0);
     data.WriteInt32(0);
     data.WriteInt64(0);
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister01 end");
 }
@@ -224,7 +334,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
     MessageParcel data;
     MessageParcel reply;
     
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 end");
 }
@@ -241,7 +351,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
     MessageParcel reply;
 
     data.WriteUint32(0);
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister03 end");
 }
@@ -259,7 +369,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
 
     data.WriteUint32(0);
     data.WriteInt32(0);
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister04 end");
 }
@@ -274,7 +384,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeUnregis
     WLOGI("HandleTransferAccessibilityChildTreeUnregister01 begin");
     MessageParcel data;
     MessageParcel reply;
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityChildTreeUnregister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeUnregister01 end");
 }
@@ -292,7 +402,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityDumpChildInfo01,
 
     std::vector<std::string> params;
     data.WriteStringVector(params);
-    ASSERT_TRUE((windowEventChannelStub_ != nullptr));
+    ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityDumpChildInfo(data, reply));
     WLOGI("HandleTransferAccessibilityDumpChildInfo01 end");
 }

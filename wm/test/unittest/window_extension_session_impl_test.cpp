@@ -818,6 +818,41 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
 }
 
 /**
+ * @tc.name: NotifyAccessibilityHoverEvent01
+ * @tc.desc: NotifyAccessibilityHoverEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Function | SmallTest | Level3)
+{
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    ASSERT_EQ(WSError::WS_OK,
+        window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+}
+
+/**
+ * @tc.name: NotifyAccessibilityHoverEvent02
+ * @tc.desc: NotifyAccessibilityHoverEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Function | SmallTest | Level3)
+{
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    window_->uiContent_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
+        window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+}
+
+/**
  * @tc.name: NotifyAccessibilityChildTreeRegister01
  * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
@@ -830,6 +865,32 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01,
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId));
+}
+
+/**
+ * @tc.name: NotifyAccessibilityChildTreeUnregister01
+ * @tc.desc: NotifyAccessibilityChildTreeUnregister Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister01, Function | SmallTest | Level3)
+{
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeUnregister());
+}
+
+/**
+ * @tc.name: NotifyAccessibilityDumpChildInfo01
+ * @tc.desc: NotifyAccessibilityDumpChildInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Function | SmallTest | Level3)
+{
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityDumpChildInfo(params, info));
 }
 
 /**

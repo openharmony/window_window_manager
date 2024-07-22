@@ -499,6 +499,7 @@ ohos_unittest("ws_extension_session_test") {
   include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
 
   deps = [ ":ws_unittest_common" ]
+  defines = [ "ACCESSIBILITY_MOCK" ]
 
   external_deps = [
     "ability_base:session_info",
