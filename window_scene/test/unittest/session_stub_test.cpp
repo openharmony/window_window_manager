@@ -317,7 +317,7 @@ HWTEST_F(SessionStubTest, HandleShow009, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
+    data.WriteBool(false);
     auto res = session_->HandleShow(data, reply);
     ASSERT_EQ(0, res);
 }
