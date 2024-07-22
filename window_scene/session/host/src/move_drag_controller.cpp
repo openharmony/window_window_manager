@@ -242,7 +242,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
-            WLOGFI("begin setFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
+            WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
             RSTransaction::FlushImplicitTransaction();
         }
@@ -292,8 +292,8 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
-            NotifyWindowInputPidChange(isStartDrag_);
             PerfRequest(PERF_RESIZE_WINDOW_CMDID, false);
+            NotifyWindowInputPidChange(isStartDrag_);
             break;
         }
         default:
@@ -367,7 +367,6 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     } else {
         vpr_ = 1.5f; // 1.5f: default virtual pixel ratio
     }
-
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ :
         HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
@@ -691,7 +690,12 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
         (action == MMI::PointerEvent::POINTER_ACTION_MOVE ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN))) {
-        WLOGFD("Not mouse type or not dowm/move/up event");
+        WLOGFD("Not mouse type or not down/move/up event");
+        return;
+    }
+
+    if (mouseStyleID_ != MMI::MOUSE_ICON::DEFAULT && isStartDrag_ &&
+        action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
         return;
     }
 
