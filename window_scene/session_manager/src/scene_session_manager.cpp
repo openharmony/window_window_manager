@@ -8396,8 +8396,8 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             actions.SetAllActive();
             HandleSpecialExtWindowFlagsChange(persistentId, ExtensionWindowFlags(), actions);
         }
-        remoteExtSessionMap_.erase(iter);
         extSessionInfoMap_.erase(iter->second);
+        remoteExtSessionMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroyExtensionSession");
 }
