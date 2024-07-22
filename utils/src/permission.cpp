@@ -70,7 +70,7 @@ bool Permission::IsSystemCalling()
 
 bool Permission::IsLocalSystemCalling()
 {
-    if (IsLocalSystemServiceCalling()) {
+    if (IsSystemServiceCalling(false, true)) {
         return true;
     }
     auto tokenId = IPCSkeleton::GetSelfTokenID();
@@ -102,6 +102,7 @@ bool Permission::IsLocalStartByHdcd()
     }
     return false;
 }
+
 bool Permission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;

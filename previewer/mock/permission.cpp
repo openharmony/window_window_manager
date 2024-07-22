@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 
-bool Permission::IsSystemServiceCalling(bool needPrintLog,bool IsLocalSysCalling)
+bool Permission::IsSystemServiceCalling(bool needPrintLog, bool IsLocalSysCalling)
 {
     return true;
 }
