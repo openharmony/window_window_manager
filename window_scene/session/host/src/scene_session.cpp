@@ -1251,7 +1251,7 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
         if (iter == modalUIExtensionInfoList_.end()) {
             return;
         }
-        modalUIExtensionInfoList_.erase(iter, modalUIExtensionInfoList_.end());
+        modalUIExtensionInfoList_.erase(iter);
     }
     NotifySessionInfoChange();
 }
