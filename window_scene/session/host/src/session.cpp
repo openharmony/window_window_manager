@@ -939,6 +939,12 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
 
 WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     HandleDialogForeground();
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
@@ -1016,6 +1022,13 @@ void Session::HandleDialogForeground()
 
 WSError Session::Background(bool isFromClient)
 {
+    if (GetSessionProperty() &&
+        GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     HandleDialogBackground();
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32, GetPersistentId(),

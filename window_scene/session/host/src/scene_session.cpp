@@ -146,6 +146,12 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
     // return when screen is locked and show without ShowWhenLocked flag
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
         sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
@@ -204,6 +210,13 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
 
 WSError SceneSession::Background(bool isFromClient)
 {
+    if (GetSessionProperty() &&
+        GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
@@ -2752,6 +2765,9 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
+        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
+            return (property != nullptr) &&
+                (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM));
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
             uint32_t flags = property->GetWindowFlags();

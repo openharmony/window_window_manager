@@ -75,6 +75,12 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
         !SessionPermission::IsSystemCalling()) {
@@ -110,6 +116,13 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
+    if (GetSessionProperty() &&
+        GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {
         // Do not need to verify the permission to hide the input method status bar.
