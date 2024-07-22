@@ -4032,6 +4032,11 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
     auto session = GetScreenSession(screenId);
     if (session == nullptr) {
         TLOGE(WmsLogTag::DMS, "session is null");
@@ -4042,6 +4047,12 @@ void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, floa
         TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
+    TLOGD(WmsLogTag::DMS,
+        "scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+        scaleX,
+        scaleY,
+        pivotX,
+        pivotY);
     displayNode->SetScale(scaleX, scaleY);
     displayNode->SetPivot(pivotX, pivotY);
     auto transactionProxy = RSTransactionProxy::GetInstance();
