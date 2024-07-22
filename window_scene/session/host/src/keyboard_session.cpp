@@ -67,6 +67,12 @@ SessionGravity KeyboardSession::GetKeyboardGravity() const
 
 WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -86,6 +92,13 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
 
 WSError KeyboardSession::Hide()
 {
+    if (GetSessionProperty() &&
+        GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
