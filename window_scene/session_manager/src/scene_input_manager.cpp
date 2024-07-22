@@ -398,7 +398,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
             std::to_string(e.zOrder) + "|" +
             std::to_string(e.pid) + "|" +
-            std::to_string(e.defaultHotAreas.size()) + " ";
+            std::to_string(e.defaultHotAreas.size()) + ",";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
         }
@@ -409,7 +409,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;
-        TLOGI(WmsLogTag::WMS_EVENT, "EventID:%{public}d ListSize:%{public}d idList:%{public}s",
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",
             windowEventID, windowListSize, idList.c_str());
         lastIdList = idList;
     }
