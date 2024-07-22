@@ -1174,7 +1174,8 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
         if (windowToken_) {
             auto winType = windowToken_->GetType();
             if (!WindowHelper::IsSystemWindow(winType)) {
-                WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
                 errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
             }
         } else {
