@@ -1564,7 +1564,11 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    HandlerSensor(status, reason);
+    if (isMultiScreenCollaboration_) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not handler sensor");
+    } else {
+        HandlerSensor(status, reason);
+    }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
