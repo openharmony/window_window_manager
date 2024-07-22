@@ -2841,7 +2841,6 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             parentSession->RemoveDialogToParentSession(sceneSession);
         }
-        sceneSession->NotifyDestroy();
     }
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_TOAST) {
         auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
