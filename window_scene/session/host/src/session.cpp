@@ -444,19 +444,15 @@ void Session::UpdateSessionTouchable(bool touchable)
     NotifySessionTouchableChange(touchable);
 }
 
-WSError Session::IsAnimationBySystemCallingOrHdcd(sptr<WindowSessionProperty> property)
+bool Session::CheckPermissionWithPropertyAnimation(sptr<WindowSessionProperty> property) const
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "property is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
     if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
             TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+            return false;
         }
     }
-    return WSError::WS_OK;
+    return true;
 }
 
 WSError Session::SetFocusable(bool isFocusable)
@@ -954,9 +950,8 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
 
 WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -1035,10 +1030,8 @@ void Session::HandleDialogForeground()
 
 WSError Session::Background(bool isFromClient)
 {
-    auto property = GetSessionProperty();
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     HandleDialogBackground();
     SessionState state = GetSessionState();

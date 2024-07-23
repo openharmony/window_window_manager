@@ -75,9 +75,8 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
@@ -114,10 +113,8 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
-    auto property = GetSessionProperty();
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {
