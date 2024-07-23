@@ -178,7 +178,7 @@ public:
 
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
-    FocusChangeReason GetFocusChangeReason() const {return focusChangeReason_;};
+    FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
