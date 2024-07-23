@@ -169,7 +169,11 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             return WSError::WS_OK;
         }
     }
+    return ForegroundTask(property);
+}
 
+WSError SceneSession::ForegroundTask(sptr<WindowSessionProperty> property)
+{
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -2766,7 +2770,8 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
-            return (property != nullptr) && (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM));
+            return (property != nullptr) &&
+                (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM));
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
             uint32_t flags = property->GetWindowFlags();
