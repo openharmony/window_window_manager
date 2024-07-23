@@ -71,7 +71,7 @@ private:
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
-    int HandleGetAppForceLandscapeMode(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
 
     // extension extension

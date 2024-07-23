@@ -373,8 +373,8 @@ private:
     {
         return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
     }
-    bool IsAppSupportForceSplit(const std::string& bundleName);
-    void SetForceSplitEnable(bool isForceSplit);
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;

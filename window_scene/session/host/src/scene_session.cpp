@@ -3854,12 +3854,13 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-int32_t SceneSession::GetAppForceLandscapeMode(const std::string& bundleName)
+WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
-        return 0;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    return forceSplitFunc_(bundleName);
+    config = forceSplitFunc_(sessionInfo_.bundleName_);
+    return WMError::WM_OK;
 }
 
 int32_t SceneSession::GetStatusBarHeight()
