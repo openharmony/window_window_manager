@@ -4027,6 +4027,11 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 
 bool ScreenSessionManager::IsFoldable()
 {
+    // Most applications do not adapt to Lem rotation and are temporarily treated as non fold device
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        return false;
+    }
+    
     if (!g_foldScreenFlag) {
         return false;
     }
