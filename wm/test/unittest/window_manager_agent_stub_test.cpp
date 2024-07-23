@@ -347,7 +347,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    data.WriteUint8(static_cast<uint32_t>(1));
+    data.WriteUint8(static_cast<uint8_t>(1));
     data.WriteBool(true);
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT);
@@ -368,7 +368,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    data.WriteUint8(static_cast<uint32_t>(1));
+    data.WriteUint8(static_cast<uint8_t>(1));
     data.WriteBool(true);
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS);
