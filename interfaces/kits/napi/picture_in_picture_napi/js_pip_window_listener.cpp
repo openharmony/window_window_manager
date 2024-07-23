@@ -42,7 +42,7 @@ JsPiPWindowListener::~JsPiPWindowListener()
     TLOGI(WmsLogTag::WMS_PIP, "~JsWindowListener");
 }
 
-std::shared_ptr<NativeReference> const JsPiPWindowListener::GetCallbackRef()
+std::shared_ptr<NativeReference> JsPiPWindowListener::GetCallbackRef() const
 {
     return jsCallBack_;
 }

@@ -29,7 +29,7 @@ public:
     JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
         : env_(env), jsCallBack_(callback) {}
     ~JsPiPWindowListener();
-    std::shared_ptr<NativeReference> const GetCallbackRef();
+    std::shared_ptr<NativeReference> GetCallbackRef() const;
     void OnPreparePictureInPictureStart() override;
     void OnPictureInPictureStart() override;
     void OnPreparePictureInPictureStop() override;
