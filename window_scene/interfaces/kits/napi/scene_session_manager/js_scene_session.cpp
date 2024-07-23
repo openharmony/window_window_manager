@@ -419,6 +419,13 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 
 void JsSceneSession::ProcessKeyboardGravityChangeRegister()
 {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    OnKeyboardGravityChange(session->GetKeyboardGravity());
+    
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
