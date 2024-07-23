@@ -157,10 +157,10 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 {
     std::string infoStr =  "DisplayInfo: ";
     infoStr = infoStr + " id: " + std::to_string(info.id) + " x: " + std::to_string(info.x) +
-        "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) + 
+        "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string( static_cast<int>(info.direction));
+        " direction : " + std::to_string(static_cast<int>(info.direction));
     return infoStr;
 }
 } //namespace
@@ -227,7 +227,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
 void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList)
 {
-    int mainScreenWidth = 0; 
+    int mainScreenWidth = 0;
     int mainScreenHeight = 0;
     if (!displayInfos.empty()) {
         mainScreenWidth = displayInfos[0].width;
@@ -264,7 +264,8 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .width = 0,
             .height = 0,
             .focusWindowId = EMPTY_FOCUS_WINDOW_ID,
-            .currentUserId = currentUserId_};
+            .currentUserId = currentUserId_,
+        };
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
     if (eventHandler_) {
