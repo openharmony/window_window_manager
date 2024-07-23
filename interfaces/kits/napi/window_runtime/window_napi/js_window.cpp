@@ -979,14 +979,18 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_ == nullptr) {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    } else {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_ == nullptr) {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        } else {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "Window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
         }
     }
     wptr<Window> weakToken(windowToken_);
@@ -1114,14 +1118,20 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env, info);
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    return HideWindowFunction(env, info, errCode);
 }
 
-napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
+napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, WmErrorCode errCode)
 {
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WmErrorCode::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
+                return;
+            }
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr or get invalid param");
@@ -1158,15 +1168,19 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_) {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_) {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
+        } else {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
-    } else {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -5292,7 +5306,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_OK && WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env, info);
+        return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
 
     wptr<Window> weakToken(windowToken_);
