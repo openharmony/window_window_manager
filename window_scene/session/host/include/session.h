@@ -231,7 +231,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
-    WSError Clear();
+    WSError Clear(const bool needStartCaller = false);
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);

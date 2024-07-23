@@ -198,6 +198,14 @@ public:
      */
     WMError UnregisterWMSConnectionChangedListener();
 
+    /**
+     * @brief Terminate session by persistentId and start caller.
+     * @persistentId persistentId to be terminated.
+     *
+     * @return WM_OK means Terminate success, others means Terminate failed.
+     */
+    WMError TerminateSessionByPersistentId(const int32_t persistentId);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();

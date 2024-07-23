@@ -68,6 +68,7 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
+    WMError TerminateSessionByPersistentId(const int32_t persistentId) override;
     
 private:
     template<typename T>

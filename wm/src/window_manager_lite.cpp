@@ -638,5 +638,14 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
         pImpl_->NotifyWMSDisconnected(userId, screenId);
     }
 }
+
+WMError WindowManagerLite::TerminateSessionByPersistentId(const int32_t persistentId)
+{
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "persistentId:%{public}d is invalid.", persistentId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
+}
 } // namespace Rosen
 } // namespace OHOS
