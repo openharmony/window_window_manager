@@ -48,9 +48,8 @@ SubSession::~SubSession()
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
@@ -76,10 +75,8 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
-    auto property = GetSessionProperty();
-    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
