@@ -116,8 +116,8 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
-    if (GetSessionProperty() &&
-        GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+    auto property = GetSessionProperty();
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
             TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
             return WSError::WS_ERROR_NOT_SYSTEM_APP;
