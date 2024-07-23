@@ -979,7 +979,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = Permission::IsLocalSystemCallingOrStartByHdcd() ?
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
         WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
     if (errCode == WmErrorCode::WM_OK) {
         if (windowToken_ == nullptr) {
@@ -1118,7 +1118,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = Permission::IsLocalSystemCallingOrStartByHdcd() ?
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
         WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
     return HideWindowFunction(env, info, errCode);
 }
@@ -1168,7 +1168,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
 
 napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = Permission::IsLocalSystemCallingOrStartByHdcd() ?
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
         WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
     if (errCode == WmErrorCode::WM_OK) {
         if (windowToken_) {

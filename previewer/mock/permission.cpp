@@ -38,7 +38,7 @@ bool Permission::IsStartByHdcd(bool isLocalSysCalling)
     return true;
 }
 
-bool Permission::IsLocalSystemCallingOrStartByHdcd()
+bool Permission::IsSystemCallingOrStartByHdcd(bool isLocalSysCalling)
 {
     return true;
 }
