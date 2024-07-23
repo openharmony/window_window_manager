@@ -638,7 +638,7 @@ bool SceneSession::IsKeyboardNeedLeftOffset(sptr<WindowSessionProperty> sessionP
     bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
     TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
         "isDualDevice:%{public}d, rotation:%{public}d, isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable,
-        isFolded, isDualDevice, rotation, isKeyboardNeedLeftOffset);
+        isFolded, isDualDevice, rotation, result);
     return result;
 }
 
