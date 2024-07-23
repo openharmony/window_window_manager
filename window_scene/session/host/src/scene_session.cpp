@@ -1251,7 +1251,7 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
         if (iter == modalUIExtensionInfoList_.end()) {
             return;
         }
-        modalUIExtensionInfoList_.erase(iter, modalUIExtensionInfoList_.end());
+        modalUIExtensionInfoList_.erase(iter);
     }
     NotifySessionInfoChange();
 }
@@ -1599,9 +1599,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
             auto isPC = systemConfig_.uiType_ == "pc";
-            bool freeMultiWindowSupportDevices = systemConfig_.freeMultiWindowSupport_ &&
-                systemConfig_.freeMultiWindowEnable_;
-            if ((isPC || freeMultiWindowSupportDevices) &&
+            if ((isPC || IsFreeMultiWindowMode()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
@@ -2681,9 +2679,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             return WSError::WS_ERROR_NULLPTR;
         }
         auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-        bool isFreeMutiWindowMode = session->systemConfig_.freeMultiWindowSupport_ &&
-            session->systemConfig_.freeMultiWindowEnable_;
-        if (!(isPC || isFreeMutiWindowMode) && !isSACalling &&
+        if (!(isPC || session->IsFreeMultiWindowMode()) && !isSACalling &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
@@ -2912,6 +2908,9 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (sceneSession->IsTurnScreenOn()) {
             TLOGI(WmsLogTag::DEFAULT, "turn screen on");
+            if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+                isDeviceWakeupByApplication_.store(true);
+            }
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
         // set ipc identity to raw
@@ -3792,6 +3791,11 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+bool SceneSession::IsDeviceWakeupByApplication() const
+{
+    return isDeviceWakeupByApplication_.load();
 }
 
 bool SceneSession::IsSystemSpecificSession() const

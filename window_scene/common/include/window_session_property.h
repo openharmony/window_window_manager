@@ -429,6 +429,11 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
+
+    bool IsFreeMultiWindowMode() const
+    {
+        return freeMultiWindowEnable_ && freeMultiWindowSupport_;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

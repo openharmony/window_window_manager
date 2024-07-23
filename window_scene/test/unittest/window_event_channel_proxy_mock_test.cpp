@@ -60,6 +60,127 @@ void WindowEventChannelProxyMockTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: TransferAccessibilityHoverEvent
+ * @tc.desc: test function : TransferAccessibilityHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent begin");
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent1
+ * @tc.desc: test function : TransferAccessibilityHoverEvent1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent1, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent1 begin");
+    float pointX = -1.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent1 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent2
+ * @tc.desc: test function : TransferAccessibilityHoverEvent2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent2, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent2 begin");
+    float pointX = 0.0f;
+    float pointY = -1.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent2 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent3
+ * @tc.desc: test function : TransferAccessibilityHoverEvent3
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent3, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent3 begin");
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = -1;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent3 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent4
+ * @tc.desc: test function : TransferAccessibilityHoverEvent4
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent4, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent4 begin");
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = -1;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent4 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent5
+ * @tc.desc: test function : TransferAccessibilityHoverEvent5
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent5, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityHoverEvent5 begin");
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = -1;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityHoverEvent5 end");
+}
+
+/**
  * @tc.name: TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
@@ -107,6 +228,24 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister
     WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     WLOGI("TransferAccessibilityChildTreeRegister2 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityChildTreeRegister
+ * @tc.desc: test function : TransferAccessibilityChildTreeRegister
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister3, Function | SmallTest | Level1)
+{
+    WLOGI("TransferAccessibilityChildTreeRegister3 begin");
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("TransferAccessibilityChildTreeRegister3 end");
 }
 
 /**

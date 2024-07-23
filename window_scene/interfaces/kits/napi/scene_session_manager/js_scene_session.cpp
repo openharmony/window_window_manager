@@ -270,6 +270,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
+    BindNativeFunction(env, objValue, "isDeviceWakeupByApplication", moduleName,
+        JsSceneSession::IsDeviceWakeupByApplication);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -419,6 +421,13 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 
 void JsSceneSession::ProcessKeyboardGravityChangeRegister()
 {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    OnKeyboardGravityChange(session->GetKeyboardGravity());
+    
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
@@ -1242,6 +1251,13 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBufferAvailableCallbackEnable");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::IsDeviceWakeupByApplication(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]called");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnIsDeviceWakeupByApplication(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2271,7 +2287,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
-        napi_value argv[] = {[0] = jsSessionInfo, [1] = jsNeedRemoveSession};
+        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);
@@ -3167,6 +3183,19 @@ napi_value JsSceneSession::OnSetBufferAvailableCallbackEnable(napi_env env, napi
     }
     session->SetBufferAvailableCallbackEnable(enable);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnIsDeviceWakeupByApplication(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    auto result = session->IsDeviceWakeupByApplication();
+    napi_value jsResult;
+    napi_get_boolean(env, result, &jsResult);
+    return jsResult;
 }
 
 } // namespace OHOS::Rosen

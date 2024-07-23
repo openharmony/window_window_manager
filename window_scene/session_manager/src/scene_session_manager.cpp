@@ -8370,7 +8370,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
         if (!GetExtensionWindowIds(iter->second, persistentId, parentId)) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
+            TLOGD(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
 
@@ -8396,8 +8396,8 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             actions.SetAllActive();
             HandleSpecialExtWindowFlagsChange(persistentId, ExtensionWindowFlags(), actions);
         }
-        remoteExtSessionMap_.erase(iter);
         extSessionInfoMap_.erase(iter->second);
+        remoteExtSessionMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroyExtensionSession");
 }
