@@ -507,7 +507,7 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
                 continue;
             }
             foundCallbackValue = true;
-            WmErrorCode ret = UnRegisterListener(type,listener);
+            WmErrorCode ret = UnRegisterListener(type, listener);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
                 return ret;
