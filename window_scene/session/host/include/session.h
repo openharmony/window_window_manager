@@ -220,6 +220,7 @@ public:
     void SetNeedSnapshot(bool needSnapshot);
     virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
     virtual bool IsExitSplitOnBackground() const;
+    virtual bool NeedStartingWindowExitAnimation() const { return true; }
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
