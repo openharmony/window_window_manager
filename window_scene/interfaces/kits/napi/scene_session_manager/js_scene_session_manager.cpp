@@ -380,18 +380,18 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
 }
 
-void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t windowId)
+void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingSessionIdChange");
-    auto task = [this, windowId, jsCallBack = GetJSCallback(CALLING_WINDOW_ID_CHANGE_CB), env = env_]() {
+    auto task = [this, sessionId, jsCallBack = GetJSCallback(CALLING_WINDOW_ID_CHANGE_CB), env = env_]() {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = { CreateJsValue(env, windowId) };
+        napi_value argv[] = { CreateJsValue(env, sessionId) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnCallingSessionIdChange, windowId:" + std::to_string(windowId));
+    taskScheduler_->PostMainThreadTask(task, "OnCallingSessionIdChange, sessionId:" + std::to_string(sessionId));
 }
 
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
