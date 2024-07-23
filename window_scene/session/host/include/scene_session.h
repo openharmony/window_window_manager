@@ -263,6 +263,7 @@ public:
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     bool GetIsDisplayStatusBarTemporarily() const;
+    bool IsDeviceWakeupByApplication() const;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -472,6 +473,7 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;
+    std::atomic_bool isDeviceWakeupByApplication_ = false;
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };

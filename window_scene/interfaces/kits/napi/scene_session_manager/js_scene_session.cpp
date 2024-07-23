@@ -270,6 +270,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
+    BindNativeFunction(env, objValue, "isDeviceWakeupByApplication", moduleName,
+        JsSceneSession::IsDeviceWakeupByApplication);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1242,6 +1244,13 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBufferAvailableCallbackEnable");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::IsDeviceWakeupByApplication(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]called");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnIsDeviceWakeupByApplication(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3167,6 +3176,19 @@ napi_value JsSceneSession::OnSetBufferAvailableCallbackEnable(napi_env env, napi
     }
     session->SetBufferAvailableCallbackEnable(enable);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnIsDeviceWakeupByApplication(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    auto result = session->IsDeviceWakeupByApplication();
+    napi_value jsResult;
+    napi_get_boolean(env, result, &jsResult);
+    return jsResult;
 }
 
 } // namespace OHOS::Rosen
