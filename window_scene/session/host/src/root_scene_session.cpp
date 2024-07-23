@@ -45,24 +45,23 @@ WSRect RootSceneSession::GetSessionRectByType(AvoidAreaType type)
         }
         case AvoidAreaType::TYPE_KEYBOARD: {
             sessionVector = specificCallback_->onGetSceneSessionVectorByType_(
-                WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, dispId);
+                WindowType::WINDOW_TYPE_KEYBOARD_PANEL, dispId);
             break;
         }
         default: {
-            TLOGD(WmsLogTag::WMS_IMMS, "type %{public}u don't need to handle", type);
+            TLOGD(WmsLogTag::WMS_IMMS, "unsupported type %{public}u", type);
             return {};
         }
     }
 
-    for (auto& statusBar : sessionVector) {
-        if (!(statusBar->IsVisible())) {
+    for (auto& session : sessionVector) {
+        if (!(session->IsVisible())) {
             continue;
         }
-        const WSRect rect = statusBar->GetSessionRect();
+        const WSRect rect = session->GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect %{public}s", type, rect.ToString().c_str());
         return rect;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "no satisfied session rect found, type: %{public}u", type);
     return {};
 }
 } // namespace OHOS::Rosen
