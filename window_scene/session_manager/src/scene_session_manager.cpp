@@ -1405,8 +1405,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     if (sceneSession != nullptr) {
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         sceneSession->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
-        sceneSession->RegisterForceSplitListener(std::bind(&SceneSessionManager::GetAppForceLandscapeMode,
-            this, std::placeholders::_1));
+        sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
+            return this->GetAppForceLandscapeConfig(bundleName);
+        });
     }
     return sceneSession;
 }
@@ -9426,28 +9427,30 @@ void SceneSessionManager::RegisterSecSurfaceInfoListener()
     }
 }
 
-WSError SceneSessionManager::SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode)
+WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundleName,
+    const AppForceLandscapeConfig& config)
 {
     if (bundleName.empty()) {
-        WLOGFE("bundle name is empty");
+        TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("set app force landscape mode, app: %{public}s, mode: %{public}d", bundleName.c_str(), mode);
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-    appForceLandscapeMap_[bundleName] = mode;
+    appForceLandscapeMap_[bundleName] = config;
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s",
+        bundleName.c_str(), config.mode_, config.homePage_.c_str());
     return WSError::WS_OK;
 }
 
-int32_t SceneSessionManager::GetAppForceLandscapeMode(const std::string& bundleName)
+AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const std::string& bundleName)
 {
     if (bundleName.empty()) {
-        WLOGFE("bundle name is empty");
-        return 0;
+        return {};
     }
     std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-    if (appForceLandscapeMap_.empty()
-        || appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
-        return 0;
+    if (appForceLandscapeMap_.empty() ||
+        appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
+        TLOGD(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+        return {};
     }
     return appForceLandscapeMap_[bundleName];
 }

@@ -80,7 +80,7 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
 using SystemSessionBufferAvailableCallback = std::function<void()>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
-using NotifyForceSplitFunc = std::function<int32_t(const std::string& bundleName)>;
+using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -342,7 +342,7 @@ public:
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
-    int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     int32_t GetStatusBarHeight() override;
 
 protected:
