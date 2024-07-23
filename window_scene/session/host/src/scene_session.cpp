@@ -2913,7 +2913,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
         if (sceneSession->IsTurnScreenOn()) {
             TLOGI(WmsLogTag::DEFAULT, "turn screen on");
             if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-                isDeviceWakeupByApplication_ = true;
+                isDeviceWakeupByApplication_.store(true);
             }
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
