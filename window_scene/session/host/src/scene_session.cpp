@@ -145,10 +145,10 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
 
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
-    // return when screen is locked and show without ShowWhenLocked flag
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    // return when screen is locked and show without ShowWhenLocked flag
     if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
         sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
@@ -169,7 +169,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     return ForegroundTask(property);
 }
 
-WSError SceneSession::ForegroundTask(sptr<WindowSessionProperty> property)
+WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property)
 {
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
