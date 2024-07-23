@@ -51,7 +51,7 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCallin
 
 bool Permission::IsLocalSystemCallingOrStartByHdcd()
 {
-    if (!IsSystemCalling(true) && !IsLocalStartByHdcd(true)) {
+    if (!IsSystemCalling(true) && !IsStartByHdcd(true)) {
         TLOGE(WmsLogTag::DEFAULT, "not system calling, not start by hdcd");
         return false;
     }
