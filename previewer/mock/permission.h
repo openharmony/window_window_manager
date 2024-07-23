@@ -26,7 +26,7 @@ public:
     static bool IsSystemCalling(bool isLocalSysCalling = false);
     static bool CheckCallingPermission(const std::string& permission);
     static bool IsStartByHdcd(bool isLocalSysCalling = false);
-    static bool IsLocalSystemCallingOrStartByHdcd();
+    static bool IsSystemCallingOrStartByHdcd(bool isLocalSysCalling = false);
 };
 } // Rosen
 } // OHOS

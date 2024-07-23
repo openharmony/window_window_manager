@@ -1829,7 +1829,7 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
 
 WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
 {
-    if (!Permission::IsLocalSystemCallingOrStartByHdcd()) {
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right, displayId %{public}" PRIu64, displayId);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1839,7 +1839,7 @@ WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError SceneSessionManagerProxy::ToggleShownStateForAllAppWindows()
 {
-    if (!Permission::IsLocalSystemCallingOrStartByHdcd()) {
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
