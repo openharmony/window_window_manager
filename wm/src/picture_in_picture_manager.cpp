@@ -36,7 +36,8 @@ namespace {
         {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
         {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
         {ACTION_RESTORE, PictureInPictureManager::DoRestore},
-        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource}
+        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
+        {ACTION_DESTROY, PictureInPictureManager::DoDestroy}
     };
 }
 
@@ -227,8 +228,10 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
     }
     StopPipType currentStopType = StopPipType::NULL_STOP;
     if (!byPriority) {
+        activeController_->destroyWindowImmediately_ = false;
         currentStopType = StopPipType::USER_STOP;
     } else {
+        activeController_->destroyWindowImmediately_ = true;
         currentStopType = StopPipType::OTHER_PACKAGE_STOP;
     }
     activeController_->StopPictureInPicture(destroyWindow, currentStopType);
@@ -238,6 +241,15 @@ void PictureInPictureManager::DoActionClose()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     DoClose(true, false);
+}
+
+void PictureInPictureManager::DoDestroy()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->DestroyPictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
