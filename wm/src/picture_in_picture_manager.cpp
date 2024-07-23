@@ -31,7 +31,7 @@ namespace {
     const std::string ACTION_RESTORE = "restore";
     const std::string ACTION_DESTROY = "destroy";
     const std::string ACTION_LOCATE_SOURCE = "locate_source";
-    
+
     const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
         {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
         {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
