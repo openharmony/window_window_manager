@@ -1822,7 +1822,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
-        .useCurWindow = systemConfig_.uiType_ == "pc",
+        .useCurWindow = false,
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
     if (!ret) {
@@ -2877,12 +2877,11 @@ void Session::ResetSnapshot()
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
-    WLOGFI("GetSnapshotPixelMap id %{public}d", GetPersistentId());
-    if (scenePersistence_ != nullptr && scenePersistence_->IsSavingSnapshot()) {
-        return snapshot_;
-    } else if (scenePersistence_ != nullptr && !scenePersistence_->IsSavingSnapshot()) {
-        return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
+    TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
+    if (scenePersistence_ == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 } // namespace OHOS::Rosen
