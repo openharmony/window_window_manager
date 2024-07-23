@@ -80,6 +80,7 @@ public:
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    WMError SetDialogBackEventEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
     WMError SetWindowLimits(WindowLimits& windowLimits) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
