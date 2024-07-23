@@ -340,7 +340,6 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         syncTransactionController->OpenSyncTransaction();
     }
     ResetExtController();
-    DestroyPictureInPictureWindow();
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
     }

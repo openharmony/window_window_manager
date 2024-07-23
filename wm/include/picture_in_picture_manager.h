@@ -50,6 +50,7 @@ public:
     static void DoClose(bool destroyWindow, bool needAnim);
     static void DoActionClose();
     static void DoLocateSource();
+    static void DoActionDestroy();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     static void AutoStartPipWindow(std::string navigationId);
