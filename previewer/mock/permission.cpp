@@ -18,17 +18,12 @@
 namespace OHOS {
 namespace Rosen {
 
-bool Permission::IsSystemServiceCalling(bool needPrintLog, bool IsLocalSysCalling)
+bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCalling)
 {
     return true;
 }
 
-bool Permission::IsSystemCalling()
-{
-    return true;
-}
-
-bool Permission::IsLocalSystemCalling()
+bool Permission::IsSystemCalling(bool isLocalSysCalling)
 {
     return true;
 }
@@ -38,12 +33,7 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsStartByHdcd()
-{
-    return true;
-}
-
-bool Permission::IsLocalStartByHdcd()
+bool Permission::IsStartByHdcd(bool isLocalSysCalling)
 {
     return true;
 }

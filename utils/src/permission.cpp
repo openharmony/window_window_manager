@@ -34,9 +34,9 @@ namespace {
 
 bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCalling)
 {
-    const auto tokenId = isLocalSysCalling ?
+    uint32_t tokenId = isLocalSysCalling ?
         static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
-        static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+        IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
@@ -51,30 +51,22 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCallin
 
 bool Permission::IsLocalSystemCallingOrStartByHdcd()
 {
-    if (!IsLocalSystemCalling() && !IsLocalStartByHdcd()) {
+    if (!IsSystemCalling(true) && !IsLocalStartByHdcd(true)) {
         TLOGE(WmsLogTag::DEFAULT, "not system calling, not start by hdcd");
         return false;
     }
     return true;
 }
 
-bool Permission::IsSystemCalling()
+bool Permission::IsSystemCalling(bool isLocalSysCalling)
 {
-    if (IsSystemServiceCalling(false)) {
+    if (IsSystemServiceCalling(false, isLocalSysCalling)) {
         return true;
     }
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    uint64_t accessTokenIDEx = isLocalSysCalling ?
+        IPCSkeleton::GetSelfTokenID() : IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
     return isSystemApp;
-}
-
-bool Permission::IsLocalSystemCalling()
-{
-    if (IsSystemServiceCalling(false, true)) {
-        return true;
-    }
-    auto tokenId = IPCSkeleton::GetSelfTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
 bool Permission::CheckCallingPermission(const std::string& permission)
@@ -90,23 +82,13 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsLocalStartByHdcd()
+bool Permission::IsStartByHdcd(bool isLocalSysCalling)
 {
+    uint32_t tokenId = isLocalSysCalling ?
+        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
+        IPCSkeleton::GetCallingTokenID();
     OHOS::Security::AccessToken::NativeTokenInfo info;
-    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(
-        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()), info) != 0) {
-        return false;
-    }
-    if (info.processName.compare("hdcd") == 0) {
-        return true;
-    }
-    return false;
-}
-
-bool Permission::IsStartByHdcd()
-{
-    OHOS::Security::AccessToken::NativeTokenInfo info;
-    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
         return false;
     }
     if (info.processName.compare("hdcd") == 0) {
