@@ -31,13 +31,12 @@ namespace {
     const std::string ACTION_RESTORE = "restore";
     const std::string ACTION_DESTROY = "destroy";
     const std::string ACTION_LOCATE_SOURCE = "locate_source";
-    const std::string ACTION_RESTORE_SURFACE = "restore_surface";
+    
     const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
         {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
         {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
         {ACTION_RESTORE, PictureInPictureManager::DoRestore},
-        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
-        {ACTION_DESTROY, PictureInPictureManager::DoActionDestroy}
+        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource}
     };
 }
 
@@ -239,15 +238,6 @@ void PictureInPictureManager::DoActionClose()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     DoClose(true, false);
-}
-
-void PictureInPictureManager::DoActionDestroy()
-{
-    TLOGI(WmsLogTag::WMS_PIP, "called");
-    if(!HasActiveController) {
-        return;
-    }
-    activeController_->DestroyPictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
