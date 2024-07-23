@@ -75,11 +75,9 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
-        }
+    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
+    if (errCode != WSError::WS_OK) {
+        return errCode;
     }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
@@ -117,11 +115,9 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 WSError SystemSession::Hide()
 {
     auto property = GetSessionProperty();
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
-        }
+    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
+    if (errCode != WSError::WS_OK) {
+        return errCode;
     }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {

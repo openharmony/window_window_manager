@@ -444,6 +444,21 @@ void Session::UpdateSessionTouchable(bool touchable)
     NotifySessionTouchableChange(touchable);
 }
 
+WSError Session::IsAnimationBySystemCallingOrHdcd(sptr<WindowSessionProperty> property)
+{
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+            return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::SetFocusable(bool isFocusable)
 {
     WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
@@ -939,11 +954,9 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
 
 WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
-        }
+    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
+    if (errCode != WSError::WS_OK) {
+        return errCode;
     }
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -1023,11 +1036,9 @@ void Session::HandleDialogForeground()
 WSError Session::Background(bool isFromClient)
 {
     auto property = GetSessionProperty();
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
-        }
+    WSError errCode = IsAnimationBySystemCallingOrHdcd(property);
+    if (errCode != WSError::WS_OK) {
+        return errCode;
     }
     HandleDialogBackground();
     SessionState state = GetSessionState();
