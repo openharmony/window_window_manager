@@ -15,8 +15,8 @@
 
 #include "typec_port_info.h"
 
-#include <fstream>
 #include <dirent.h>
+#include <fstream>
 #include <string>
 #include <sys/types.h>
 
