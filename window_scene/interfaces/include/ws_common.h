@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
-#include <ability_context.h>
+#include "ability_info.h"
 #include <inttypes.h>
 #include <iomanip>
 #include <map>
