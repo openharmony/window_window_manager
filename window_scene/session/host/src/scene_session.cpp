@@ -61,7 +61,7 @@ constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr const char* APP_PHONE_CALL_BUNDLE_NAME = "com.ohos.callui";
 constexpr const char* APP_PHONE_CALL_ABILITY_NAME = "com.ohos.callui.MainAbility";
 constexpr const char* APP_MEETIME_BUNDLE_NAME = "com.huawei.hmos.meetimeservice";
-constexpr const char* APP_MEETIME_ABILITY_NAME = "com.ohos.callui.MainAbility";
+constexpr const char* APP_MEETIME_ABILITY_NAME = "CallUIKitAbility";
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
