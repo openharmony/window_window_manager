@@ -490,42 +490,40 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
     }
 
     if (value == nullptr) {
-        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = UnRegisterListener(type, *it);
+        for (auto& listener : jsCbMap_[type]) {
+            WmErrorCode ret = UnRegisterListener(type, listener);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            jsCbMap_[type].erase(it++);
         }
+        jsCbMap_.erase(type);
     } else {
         bool foundCallbackValue = false;
-        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        for (auto& listener : jsCbMap_[type]) {
             bool isEquals = false;
-            napi_strict_equals(env, value, (*it)->GetCallbackRef()->GetNapiValue(), &isEquals);
+            napi_strict_equals(env, value, listener->GetCallbackRef()->GetNapiValue(), &isEquals);
             if (!isEquals) {
-                ++it;
                 continue;
             }
             foundCallbackValue = true;
-            WmErrorCode ret = UnRegisterListener(type, *it);
+            WmErrorCode ret = UnRegisterListener(type,listener);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
-            it = jsCbMap_[type].erase(it);
+            jsCbMap_[type].erase(listener);
             break;
         }
         if (!foundCallbackValue) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
+        if (jsCbMap_[type].empty()) {
+            jsCbMap_.erase(type);
+        }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success! callback map size: %{public}zu",
-        type.c_str(), jsCbMap_[type].size());
-    if (jsCbMap_[type].empty()) {
-        jsCbMap_.erase(type);
-    }
+    TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success!", type.c_str());
     return WmErrorCode::WM_OK;
 }
 
