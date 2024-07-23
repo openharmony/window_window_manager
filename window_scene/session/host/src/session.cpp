@@ -444,17 +444,6 @@ void Session::UpdateSessionTouchable(bool touchable)
     NotifySessionTouchableChange(touchable);
 }
 
-bool Session::CheckPermissionWithPropertyAnimation(sptr<WindowSessionProperty> property) const
-{
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
-            return false;
-        }
-    }
-    return true;
-}
-
 WSError Session::SetFocusable(bool isFocusable)
 {
     WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
@@ -2901,5 +2890,16 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
     }
     return nullptr;
+}
+
+bool Session::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
+{
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no permission");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

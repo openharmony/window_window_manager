@@ -146,7 +146,6 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError ForegroundTask(sptr<WindowSessionProperty> property);
     WSError Background(bool isFromClient = false) override;
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
@@ -376,6 +375,7 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+    WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
     WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 #ifdef DEVICE_STATUS_ENABLE
