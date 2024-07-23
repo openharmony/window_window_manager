@@ -39,6 +39,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    WSError TransferAccessibilityHoverEvent(bool isChannelNull);
     WSError TransferAccessibilityChildTreeRegister(bool isChannelNull);
     WSError TransferAccessibilityChildTreeUnregister(bool isChannelNull);
     WSError TransferAccessibilityDumpChildInfo(bool isChannelNull);
@@ -61,6 +62,19 @@ void WindowEventChannelTest::SetUp()
 
 void WindowEventChannelTest::TearDown()
 {
+}
+
+WSError WindowEventChannelTest::TransferAccessibilityHoverEvent(bool isChannelNull)
+{
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    if (isChannelNull) {
+        windowEventChannel_->sessionStage_ = nullptr;
+    }
+    return windowEventChannel_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 WSError WindowEventChannelTest::TransferAccessibilityChildTreeRegister(bool isChannelNull)
@@ -330,6 +344,32 @@ HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: TransferAccessibilityHoverEvent01
+ * @tc.desc: normal function TransferAccessibilityHoverEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent01, Function | SmallTest | Level2)
+{
+    WLOGFI("TransferAccessibilityHoverEvent01 begin");
+    auto res = TransferAccessibilityHoverEvent(true);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    WLOGFI("TransferAccessibilityHoverEvent01 end");
+}
+
+/**
+ * @tc.name: TransferAccessibilityHoverEvent02
+ * @tc.desc: normal function TransferAccessibilityHoverEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent02, Function | SmallTest | Level2)
+{
+    WLOGFI("TransferAccessibilityHoverEvent02 begin");
+    auto res = TransferAccessibilityHoverEvent(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+    WLOGFI("TransferAccessibilityHoverEvent02 end");
+}
+
+/**
  * @tc.name: TransferAccessibilityChildTreeRegister01
  * @tc.desc: normal function TransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
@@ -343,8 +383,8 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister01, Funct
 }
 
 /**
- * @tc.name: TransferAccessibilityChildTreeRegister01
- * @tc.desc: normal function TransferAccessibilityChildTreeRegister01
+ * @tc.name: TransferAccessibilityChildTreeRegister02
+ * @tc.desc: normal function TransferAccessibilityChildTreeRegister02
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister02, Function | SmallTest | Level2)

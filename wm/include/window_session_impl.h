@@ -308,6 +308,10 @@ protected:
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
     std::atomic_bool enableSetBufferAvailableCallback_ = false;
+    bool IsFreeMultiWindowMode() const
+    {
+        return windowSystemConfig_.IsFreeMultiWindowMode();
+    }
 
 private:
     //Trans between colorGamut and colorSpace
@@ -369,10 +373,6 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
-    bool IsFreeMultiWindowMode() const
-    {
-        return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
-    }
     bool IsAppSupportForceSplit(const std::string& bundleName);
     void SetForceSplitEnable(bool isForceSplit);
 

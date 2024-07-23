@@ -30,16 +30,14 @@
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 
-#ifdef SOC_PERF_ENABLE
-#include "socperf_client.h"
+#ifdef RES_SCHED_ENABLE
+#include "res_type.h"
+#include "res_sched_client.h"
 #endif
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
-
-constexpr int32_t PERF_RESIZE_WINDOW_CMDID = 10018;
-constexpr int32_t PERF_MOVE_WINDOW_CMDID = 10019;
 }
 
 MoveDragController::MoveDragController(int32_t persistentId)
@@ -74,7 +72,7 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     }
     NotifyWindowInputPidChange(flag);
     isStartMove_ = flag;
-    PerfRequest(PERF_MOVE_WINDOW_CMDID, flag);
+    ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_MOVE_WINDOW, flag);
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
@@ -242,7 +240,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
-            WLOGFI("begin setFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
+            WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
             RSTransaction::FlushImplicitTransaction();
         }
@@ -279,7 +277,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
                 return false;
             }
             reason = SizeChangeReason::DRAG_START;
-            PerfRequest(PERF_RESIZE_WINDOW_CMDID, true);
+            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, true);
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
@@ -292,8 +290,8 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
+            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
             NotifyWindowInputPidChange(isStartDrag_);
-            PerfRequest(PERF_RESIZE_WINDOW_CMDID, false);
             break;
         }
         default:
@@ -367,7 +365,6 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     } else {
         vpr_ = 1.5f; // 1.5f: default virtual pixel ratio
     }
-
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ :
         HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
@@ -691,7 +688,12 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
         (action == MMI::PointerEvent::POINTER_ACTION_MOVE ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
          action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN))) {
-        WLOGFD("Not mouse type or not dowm/move/up event");
+        WLOGFD("Not mouse type or not down/move/up event");
+        return;
+    }
+
+    if (mouseStyleID_ != MMI::MOUSE_ICON::DEFAULT && isStartDrag_ &&
+        action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
         return;
     }
 
@@ -889,11 +891,17 @@ void MoveDragController::OnLostFocus()
     }
 }
 
-void MoveDragController::PerfRequest(int32_t cmdId, bool onOffTag)
+void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
 {
-#ifdef SOC_PERF_ENABLE
-    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, "");
-    WLOGFD("PerfRequestEx success cmdId: %{public}d onOffTag: %{public}d", cmdId, onOffTag);
+#ifdef RES_SCHED_ENABLE
+    std::unordered_map<std::string, std::string> payload;
+    // 0 is start, 1 is end
+    if (onOffTag) {
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 0, payload);
+    } else {
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 1, payload);
+    }
+    WLOGFD("ResSchedReportData success type: %{public}d onOffTag: %{public}d", type, onOffTag);
 #endif
 }
 } // namespace OHOS::Rosen
