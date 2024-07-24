@@ -3191,7 +3191,9 @@ napi_value JsSceneSession::OnIsDeviceWakeupByApplication(napi_env env, napi_call
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "session is null"));
         return NapiGetUndefined(env);
     }
     auto result = session->IsDeviceWakeupByApplication();
