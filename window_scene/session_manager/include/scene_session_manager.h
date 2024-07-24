@@ -499,6 +499,7 @@ private:
     void EraseSceneSessionMapById(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
+    void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
