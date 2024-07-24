@@ -237,7 +237,7 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
 }
 
-WMError SceneSessionManagerLite::TerminateSessionByPersistentId(const int32_t persistentId)
+WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }

@@ -278,7 +278,7 @@ sptr<IWindowManagerLite> WindowAdapterLite::GetWindowManagerServiceProxy() const
     return windowManagerServiceProxy_;
 }
 
-WMError WindowAdapterLite::TerminateSessionByPersistentId(const int32_t persistentId)
+WMError WindowAdapterLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 

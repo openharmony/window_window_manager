@@ -161,7 +161,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WMError TerminateSessionByPersistentId(const int32_t persistentId) override
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override
     {
         return WMError::WM_OK;
     }

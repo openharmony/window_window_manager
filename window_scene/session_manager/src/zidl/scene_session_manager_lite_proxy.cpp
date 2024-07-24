@@ -958,7 +958,8 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
-WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(const int32_t persistentId)
+
+WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(int32_t persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -972,7 +973,7 @@ WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(const int32
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<int32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENTID), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
         return WMError::WM_ERROR_IPC_FAILED;
     }

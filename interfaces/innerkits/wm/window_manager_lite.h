@@ -204,7 +204,7 @@ public:
      *
      * @return WM_OK means Terminate success, others means Terminate failed.
      */
-    WMError TerminateSessionByPersistentId(const int32_t persistentId);
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 private:
     WindowManagerLite();

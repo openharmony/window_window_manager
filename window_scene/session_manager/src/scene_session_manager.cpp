@@ -9452,7 +9452,7 @@ int32_t SceneSessionManager::GetAppForceLandscapeMode(const std::string& bundleN
     return appForceLandscapeMap_[bundleName];
 }
 
-WMError SceneSessionManager::TerminateSessionByPersistentId(const int32_t persistentId)
+WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)
 {
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_APP_PROCESS) ||
         !SessionPermission::IsSystemCalling()) {
