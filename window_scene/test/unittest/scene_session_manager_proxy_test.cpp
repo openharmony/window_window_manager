@@ -1050,6 +1050,24 @@ HWTEST_F(sceneSessionManagerProxyTest, GetVisibilityWindowInfo, Function | Small
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetVisibilityWindowInfo(infos));
     sceneSessionManagerProxy_ = nullptr;
 }
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
+            new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+
+    WindowStyleType styleType;
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetWindowStyleType(styleType));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
 }  // namespace
 }
 }

@@ -394,6 +394,23 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | L
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(IPC_STUB_UNKNOW_TRANS_ERR));
 }
+
+/**
+ * @tc.name: OnRemoteRequest19
+ * @tc.desc: test TRANS_ID_UPDATE_WINDOW_STYLE_TYPE success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }
