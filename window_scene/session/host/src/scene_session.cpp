@@ -3798,6 +3798,17 @@ bool SceneSession::IsDeviceWakeupByApplication() const
     return isDeviceWakeupByApplication_.load();
 }
 
+void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "SetStartingWindowExitAnimationFlag %{public}d", enable);
+    needStartingWindowExitAnimation_.store(enable);
+}
+
+bool SceneSession::NeedStartingWindowExitAnimation() const
+{
+    return needStartingWindowExitAnimation_.load();
+}
+
 bool SceneSession::IsSystemSpecificSession() const
 {
     return isSystemSpecificSession_;
