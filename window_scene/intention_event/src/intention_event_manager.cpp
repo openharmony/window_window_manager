@@ -236,8 +236,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     SetPointerId(pointerEvent);
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
-            "windowName:%{public}s action:%{public}d isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
+            ",windowName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
@@ -332,8 +332,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     }
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
     static uint32_t eventId = 0;
-    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, wid:%{public}u "
-        "focusedSessionId:%{public}d, isSystem:%{public}d",
+    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
+        ",focusId:%{public}d,isSystem:%{public}d",
         eventId++, keyEvent->GetId(), keyEvent->GetTargetWindowId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
