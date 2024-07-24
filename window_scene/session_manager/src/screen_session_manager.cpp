@@ -1563,11 +1563,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    if (isMultiScreenCollaboration_) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not handler sensor");
-    } else {
-        HandlerSensor(status, reason);
-    }
+    HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1606,7 +1602,11 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
             TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
-            ScreenSensorConnector::UnsubscribeRotationSensor();
+            if (isMultiScreenCollaboration_) {
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
+            } else {
+                ScreenSensorConnector::UnsubscribeRotationSensor();
+            }
 #ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();

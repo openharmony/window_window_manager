@@ -173,6 +173,7 @@ napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);
 napi_value SessionTypeInit(napi_env env);
+napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
