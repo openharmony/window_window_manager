@@ -393,6 +393,8 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     PictureInPictureManager::activeController_ = pipController;
