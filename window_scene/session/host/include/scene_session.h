@@ -345,6 +345,10 @@ public:
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
     int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
     int32_t GetStatusBarHeight() override;
+    bool IsFreeMultiWindowMode() const
+    {
+        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+    }
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -397,10 +401,6 @@ private:
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
-    bool IsFreeMultiWindowMode() const
-    {
-        return systemConfig_.IsFreeMultiWindowMode();
-    }
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
