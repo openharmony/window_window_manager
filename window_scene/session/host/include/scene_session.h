@@ -264,6 +264,8 @@ public:
     bool IsVisibleForAccessibility() const;
     bool GetIsDisplayStatusBarTemporarily() const;
     bool IsDeviceWakeupByApplication() const;
+    void SetStartingWindowExitAnimationFlag(bool enable);
+    bool NeedStartingWindowExitAnimation() const override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
@@ -474,6 +476,7 @@ private:
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool isDeviceWakeupByApplication_ { false };
+    std::atomic_bool needStartingWindowExitAnimation_ { false };
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };
