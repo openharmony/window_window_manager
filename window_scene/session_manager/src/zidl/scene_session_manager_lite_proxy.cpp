@@ -646,7 +646,7 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
     }
 }
 
-WSError SceneSessionManagerLiteProxy::GetSessionVerificationInfo(const int32_t persistentId,
+WSError SceneSessionManagerLiteProxy::GetSessionVerificationInfo(int32_t persistentId,
     SessionVerificationInfo& verificationInfo)
 {
     MessageParcel data;

@@ -107,7 +107,7 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
-WSError SceneSessionManagerLite::GetSessionVerificationInfo(const int32_t persistentId,
+WSError SceneSessionManagerLite::GetSessionVerificationInfo(int32_t persistentId,
     SessionVerificationInfo& verificationInfo)
 {
     TLOGD(WmsLogTag::DEFAULT, "run");

@@ -88,7 +88,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError GetSessionVerificationInfo(const int32_t persistentId, SessionVerificationInfo& verificationInfo) override
+    WSError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo) override
     {
         return WSError::WS_OK;
     }

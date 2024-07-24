@@ -192,7 +192,7 @@ void SessionManagerLite::DeleteAllSessionListeners()
     sessionListeners_.clear();
 }
 
-WMError SessionManagerLite::GetSessionVerificationInfo(const int32_t persistentId,
+WMError SessionManagerLite::GetSessionVerificationInfo(int32_t persistentId,
     SessionVerificationInfo& verificationInfo)
 {
     auto sceneSessionManagerLiteProxy = GetSceneSessionManagerLiteProxy();

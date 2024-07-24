@@ -5969,7 +5969,7 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
-WSError SceneSessionManager::GetSessionVerificationInfo(const int32_t persistentId,
+WSError SceneSessionManager::GetSessionVerificationInfo(int32_t persistentId,
     SessionVerificationInfo& verificationInfo)
 {
     TLOGI(WmsLogTag::DEFAULT, "persistentId: %{public}d", persistentId);
@@ -5989,11 +5989,15 @@ WSError SceneSessionManager::GetSessionVerificationInfo(const int32_t persistent
     }
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+    if (display == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to get display object with id=%{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
     auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get displayInfo with id=%{public}" PRIu64, displayId);
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
     verificationInfo.pid = session->GetCallingPid();
     verificationInfo.displayId = displayId;
     verificationInfo.density = displayInfo->GetVirtualPixelRatio();
