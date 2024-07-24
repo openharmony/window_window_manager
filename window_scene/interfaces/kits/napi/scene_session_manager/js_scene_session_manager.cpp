@@ -2511,7 +2511,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t scaleValue;
+    double scaleValue;
     if (!ConvertFromJsValue(env, argv[1], scaleValue)) {
         WLOGFE("[NAPI]Failed to convert parameter to scaleValue");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -2519,7 +2519,8 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
         return NapiGetUndefined(env);
     }
 
-    const float scaleParam = (scaleValue > 0.0 && scaleValue < 1.0) ? static_cast<float>(scaleValue) : 0.0f;
+    float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
+        static_cast<float>(scaleValue) : 0.0f;
     NapiAsyncTask::CompleteCallback complete =
         [persistentId, scaleParam](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto pixelMap = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam);
