@@ -201,7 +201,6 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
                 vpr = screenSession->GetScreenProperty().GetDensity();
             }
         }
-        WLOGFD("[WMSEvent] UpdateDefaultHotAreas, vpr: %{public}f", vpr);
         touchOffset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
         pointerOffset = static_cast<uint32_t>(HOTZONE_POINTER * vpr);
     }
@@ -253,7 +252,6 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
             break;
         }
     }
-
     if (touchHotAreas.empty()) {
         return UpdateDefaultHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     }
@@ -263,7 +261,6 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
     const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
 {
     std::map<int32_t, sptr<SceneSession>> dialogMap;
-
     for (const auto& elem: sessionMap) {
         const auto& session = elem.second;
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -449,7 +446,6 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         }
         int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
         int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
-
         if (sceneSession->GetSessionInfo().isSetPointerAreas_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
                 POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, pointerAreaSixteenPx,
@@ -478,13 +474,18 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
 void SceneSessionDirtyManager::UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
     MMI::WindowInfo& windowInfo) const
 {
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return;
+    }
     windowInfo.privacyMode = MMI::SecureFlag::DEFAULT_MODE;
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
     if (windowSessionProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowSessionProperty is nullptr");
         return;
     }
-    if (windowSessionProperty->GetPrivacyMode() || windowSessionProperty->GetSystemPrivacyMode()) {
+    if (windowSessionProperty->GetPrivacyMode() || windowSessionProperty->GetSystemPrivacyMode() ||
+        sceneSession->GetCombinedExtWindowFlags().privacyModeFlag) {
         windowInfo.privacyMode = MMI::SecureFlag::PRIVACY_MODE;
     }
 }
@@ -512,7 +513,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     }
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
     if (windowSessionProperty == nullptr) {
-        WLOGFE("SceneSession property is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "GetSessionProperty is nullptr");
         return {};
     }
     Matrix3f transform;
@@ -549,18 +550,17 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .defaultHotAreas = touchHotAreas,
         .pointerHotAreas = pointerHotAreas,
         .agentWindowId = agentWindowId,
-        .displayId = displayId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
-        .pointerChangeAreas = pointerChangeAreas,
+        .displayId = displayId,
         .zOrder = zOrder,
+        .pointerChangeAreas = pointerChangeAreas,
         .transform = transformData,
         .pixelMap = pixelMap,
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
-    if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
+    if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
     }
     UpdatePrivacyMode(sceneSession, windowInfo);

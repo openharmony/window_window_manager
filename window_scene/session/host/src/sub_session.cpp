@@ -16,7 +16,9 @@
 #include "session/host/include/sub_session.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 
+#include "common/include/session_permission.h"
 #include "key_event.h"
+#include "window_helper.h"
 #include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
@@ -46,6 +48,9 @@ SubSession::~SubSession()
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -70,6 +75,9 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -229,5 +237,23 @@ bool SubSession::IsTopmost() const
     }
     TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
     return isTopmost;
+}
+
+bool SubSession::IsModal() const
+{
+    bool isModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isModal;
+}
+
+bool SubSession::IsVisibleForeground() const
+{
+    if (parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
 }
 } // namespace OHOS::Rosen

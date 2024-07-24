@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
             std::cout << "snapshot "<< mainId << " write to " <<
                 (FILE_NAME + std::to_string(fileIndex)).c_str() << " failed!" << std::endl;
         }
+        surfaceReaderHandler->ResetFlag();
         fileIndex++;
     }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
