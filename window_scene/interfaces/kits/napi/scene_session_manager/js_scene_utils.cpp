@@ -243,7 +243,7 @@ bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, Sessio
 bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsProcessOption) != napi_undefined) {
-        std::shared_ptr<AAFwk::ProcessOptions> processOptions;
+        std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
         if (!ConvertProcessOptionFromJs(env, jsProcessOption, processOptions)) {
             WLOGFE("[NAPI]Failed to convert parameter to processOptions");
             return false;
