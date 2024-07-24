@@ -541,7 +541,6 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
-    bool scbKeepKeyboardFlag_ = false;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
