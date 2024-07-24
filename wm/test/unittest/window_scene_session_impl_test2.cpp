@@ -876,6 +876,23 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
 }
 
 /**
+ * @tc.name: NotifySessionFullScreen
+ * @tc.desc: NotifySessionFullScreen
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("NotifySessionFullScreen");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    bool status = true;
+    windowSceneSession->NotifySessionFullScreen(status);
+}
+
+/**
  * @tc.name: NotifyPrepareClosePiPWindow01
  * @tc.desc: NotifyPrepareClosePiPWindow
  * @tc.type: FUNC

@@ -100,6 +100,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
+            return HandleNotifySessionFullScreen(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -322,6 +324,14 @@ int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, Message
     uint32_t reason = data.ReadUint32();
     bool withAnimation = data.ReadBool();
     NotifySessionForeground(reason, withAnimation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifySessionFullScreen");
+    bool status = data.ReadBool();
+    NotifySessionFullScreen(status);
     return ERR_NONE;
 }
 

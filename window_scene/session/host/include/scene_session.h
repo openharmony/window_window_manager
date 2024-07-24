@@ -301,6 +301,7 @@ public:
     void RemoveExtWindowFlags(int32_t extPersistentId);
     void ClearExtWindowFlags();
     void NotifyDisplayMove(DisplayId from, DisplayId to);
+    void NotifySessionFullScreen(bool status);
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;

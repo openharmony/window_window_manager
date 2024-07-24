@@ -3511,6 +3511,14 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
+void SceneSession::NotifySessionFullScreen(bool status)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    return sessionStage_->NotifySessionFullScreen(status);
+}
+
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
