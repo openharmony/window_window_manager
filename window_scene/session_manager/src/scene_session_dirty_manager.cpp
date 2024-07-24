@@ -231,7 +231,6 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         WLOGFE("sceneSession is nullptr");
         return;
     }
-
     WSRect windowRect = sceneSession->GetSessionRect();
     const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
     for (auto area : hotAreas) {
@@ -416,6 +415,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         } else if (sceneSessionValue->HasModalUIExtension()) {
             AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
         }
+
         windowInfoList.emplace_back(windowInfo);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
             maxHotAreasNum = windowInfo.defaultHotAreas.size();
