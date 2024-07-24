@@ -248,4 +248,12 @@ bool SubSession::IsModal() const
     }
     return isModal;
 }
+
+bool SubSession::IsVisibleForeground() const
+{
+    if (parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
+}
 } // namespace OHOS::Rosen
