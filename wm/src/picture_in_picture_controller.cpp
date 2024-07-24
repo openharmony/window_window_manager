@@ -290,9 +290,9 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
     return res;
 }
 
-WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType)
+WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
+    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
     std::lock_guard<std::mutex> lock(mutex_);
     if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);
@@ -320,10 +320,10 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
-    return StopPictureInPictureInner(stopPipType);
+    return StopPictureInPictureInner(stopPipType, withAnim);
 }
 
-WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
+WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType, bool withAnim)
 {
     uint32_t templateType = 0;
     if (pipOption_ != nullptr) {
@@ -340,7 +340,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         syncTransactionController->OpenSyncTransaction();
     }
     ResetExtController();
-    if (destroyWindowImmediately_) {
+    if (!withAnim) {
         DestroyPictureInPictureWindow();
     }
     if (syncTransactionController) {
@@ -568,8 +568,7 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
-    destroyWindowImmediately_ = true;
-    StopPictureInPicture(true, StopPipType::NULL_STOP);
+    StopPictureInPicture(true, StopPipType::NULL_STOP, true);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }

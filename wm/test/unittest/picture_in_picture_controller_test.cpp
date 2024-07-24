@@ -798,10 +798,10 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
 
     sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 
-    EXPECT_CALL(*(window), Destroy(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 
@@ -844,10 +844,8 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP));
     auto window = sptr<MockWindow>::MakeSptr();
     pipControl->window_ = window;
-    pipControl->destroyWindowImmediately_ = true;
-    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP));
-    pipControl->destroyWindowImmediately_ = false;
-    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP));
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
 }
 }
 }
