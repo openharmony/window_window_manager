@@ -421,6 +421,14 @@ enum class BackupAndRestoreType : int32_t {
 };
 
 /**
+ * @brief Enumerates window Style type.
+ */
+enum class WindowStyleType : uint8_t {
+    WINDOW_STYLE_DEFAULT = 0,
+    WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.

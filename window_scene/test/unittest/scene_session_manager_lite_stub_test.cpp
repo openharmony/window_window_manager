@@ -161,6 +161,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
+    {
+        return WMError::WM_OK;
+    }
     WMError TerminateSessionByPersistentId(int32_t persistentId) override
     {
         return WMError::WM_OK;
@@ -656,6 +660,19 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, 
     EXPECT_EQ(ERR_NONE, res);
 }
 
+/**
+ * @tc.name: HandleGetWindowStyleType
+ * @tc.desc: test function : HandleGetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowStyleType, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
 }
 }
 }

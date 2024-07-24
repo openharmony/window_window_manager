@@ -48,6 +48,7 @@ public:
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
+    void NotifyWindowStyleChange(WindowStyleType type);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -65,6 +66,8 @@ public:
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangedListeners_;
     sptr<WindowManagerAgentLite> cameraWindowChangedListenerAgent_;
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener_;
+    std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners_;
+    sptr<WindowManagerAgentLite> windowStyleListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -196,6 +199,22 @@ void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, b
     }
     for (auto& listener : cameraWindowChangeListeners) {
         listener->OnCameraWindowChange(accessTokenId, isShowing);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyWindowStyleChange(WindowStyleType type)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "WindowManagerLite::Impl NotifyWindowStyleChange type: %{public}d",
+          static_cast<uint8_t>(type));
+    std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowStyleListeners = windowStyleListeners_;
+    }
+    for (auto &listener : windowStyleListeners) {
+        TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl real NotifyWindowStyleChange type: %{public}d",
+              static_cast<uint8_t>(type));
+        listener->OnWindowStyleUpdate(type);
     }
 }
 
@@ -638,6 +657,75 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
         pImpl_->NotifyWMSDisconnected(userId, screenId);
     }
 }
+
+WMError WindowManagerLite::NotifyWindowStyleChange(WindowStyleType type)
+{
+    pImpl_->NotifyWindowStyleChange(type);
+    return WMError::WM_OK;
+}
+
+WMError WindowManagerLite::RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "RegisterWindowStyleChangedListener");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowStyleListenerAgent_ == nullptr) {
+        pImpl_->windowStyleListenerAgent_ = new WindowManagerAgentLite();
+    }
+    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
+        pImpl_->windowStyleListenerAgent_ = nullptr;
+        return ret;
+    }
+    auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
+    if (iter != pImpl_->windowStyleListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Listener is already registered.");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowStyleListeners_.push_back(listener);
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "UnregisterWindowStyleChangedListener");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
+    if (iter == pImpl_->windowStyleListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowStyleListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowStyleListeners_.empty() && pImpl_->windowStyleListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowStyleListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WindowStyleType WindowManagerLite::GetWindowStyleType()
+{
+    WindowStyleType styleType;
+    if (SingletonContainer::Get<WindowAdapterLite>().GetWindowStyleType(styleType) == WMError::WM_OK) {
+        return styleType;
+    }
+    return styleType;
+}
+
 
 WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {

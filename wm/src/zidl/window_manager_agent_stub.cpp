@@ -140,6 +140,11 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateCameraWindowStatus(accessTokenId, isShowing);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE: {
+            WindowStyleType type = static_cast<WindowStyleType>(data.ReadUint8());
+            NotifyWindowStyleChange(type);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
