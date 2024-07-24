@@ -8603,7 +8603,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
         }
         if (!pixelMap) {
             WLOGFI("get local snapshot pixelmap start");
-            pixelMap = scnSession->GetSnapshotPixelMap (snapshotScale_, scaleParam);
+            pixelMap = scnSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
         }
         return pixelMap;
     };
