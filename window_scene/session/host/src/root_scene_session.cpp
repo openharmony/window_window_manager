@@ -29,7 +29,7 @@ void RootSceneSession::LoadContent(
     }
 }
 
-WSRect RootSceneSession::GetSessionRectByType(AvoidAreaType type)
+WSRect RootSceneSession::GetSessionRectByType(const AvoidAreaType& type)
 {
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr) {
         TLOGD(WmsLogTag::WMS_IMMS, "get scene session vector callback is not set");

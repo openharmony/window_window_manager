@@ -249,7 +249,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
+WMError RootScene::GetSessionRectByType(const AvoidAreaType& type, WSRect& rect)
 {
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
