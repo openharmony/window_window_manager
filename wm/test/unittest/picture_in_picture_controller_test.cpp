@@ -304,7 +304,6 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureFromClient, Functio
     pipControl->curState_ = PiPWindowState::STATE_RESTORING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPictureFromClient());
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-    
     pipControl->window_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     EXPECT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureFromClient());
 }
