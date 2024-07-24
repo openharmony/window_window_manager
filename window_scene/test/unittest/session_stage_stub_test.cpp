@@ -299,6 +299,21 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTe
 }
 
 /**
+ * @tc.name: NotifySessionFullScreen
+ * @tc.desc: test function : NotifySessionFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
+}
+
+/**
  * @tc.name: NotifySessionBackground
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC

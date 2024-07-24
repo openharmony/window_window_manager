@@ -258,8 +258,11 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, windowMode %{public}d", info.bundleName_.c_str(),
+        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.windowMode);
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        info.fullScreenStart_ = true;
+    }
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -310,6 +313,9 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        sceneSession->NotifySessionFullScreen(true);
+    }
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 

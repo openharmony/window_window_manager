@@ -585,6 +585,27 @@ void  SessionStageProxy::NotifySessionForeground(uint32_t reason, bool withAnima
     }
 }
 
+void SessionStageProxy::NotifySessionFullScreen(bool status)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteBool(status)) {
+        WLOGFE("Write status failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("Send NotifySessionFullScreen Request failed");
+    }
+}
+
 void SessionStageProxy::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     MessageParcel data;

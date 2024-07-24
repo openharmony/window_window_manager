@@ -66,6 +66,7 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifySessionFullScreen(bool status) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

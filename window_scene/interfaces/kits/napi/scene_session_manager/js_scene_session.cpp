@@ -2084,6 +2084,9 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        sceneSession->NotifySessionFullScreen(true);
+    }
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
