@@ -1416,7 +1416,7 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
     if (displayX < 0 || displayY < 0) {
-        WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
+        TLOGE(WmsLogTag::WMS_EVENT, "Illegal parameter, displayX:%{private}d, displayY:%{private}d", displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
