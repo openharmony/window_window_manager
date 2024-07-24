@@ -42,8 +42,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
     }
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
     static uint32_t eventId = 0;
-    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, Receive keyEvent,"
-        " windowId:%{public}u",
+    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u",
         eventId++, keyEvent->GetId(), windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
@@ -78,8 +77,8 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, "
-            "windowId:%{public}u action = %{public}d", eventId++, pointerEvent->GetId(), windowId,
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d"
+            ",wid:%{public}u,action:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
