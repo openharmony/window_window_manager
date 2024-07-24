@@ -97,9 +97,9 @@ public:
     int32_t Opacity(double opacity);
     std::shared_ptr<Media::PixelMap> Snapshot(int32_t* errCode);
     int32_t SetWindowSystemBarEnable(char** arr, uint32_t size);
-    int32_t OnRegisterWindowCallback(std::string type, int64_t funcId);
-    int32_t UnregisterWindowCallback(std::string type, int64_t funcId);
-    int32_t SetWindowSystemBarProperties(CBarProperties cProperties);
+    int32_t OnRegisterWindowCallback(const std::string& type, int64_t funcId);
+    int32_t UnregisterWindowCallback(const std::string& type, int64_t funcId);
+    int32_t SetWindowSystemBarProperties(const CBarProperties& cProperties);
     ResWindow CheckWindow();
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
