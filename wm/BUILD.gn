@@ -189,7 +189,6 @@ ohos_shared_library("libwm") {
     "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/window_scene/intention_event/include",
-    "${window_base_path}/window_scene/session/host/include",
   ]
 
   sources = [
@@ -243,7 +242,6 @@ ohos_shared_library("libwm") {
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
   ]
@@ -263,7 +261,6 @@ ohos_shared_library("libwm") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hilog:libhilog",

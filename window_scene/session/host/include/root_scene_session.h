@@ -30,7 +30,8 @@ public:
     using LoadContentFunc =
         std::function<void(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)>;
     RootSceneSession() : SceneSession({}, nullptr) {}
-    RootSceneSession(const sptr<SpecificSessionCallback>& specificCallback) : SceneSession({}, specificCallback) {}
+    explicit RootSceneSession(
+        const sptr<SpecificSessionCallback>& specificCallback) : SceneSession({}, specificCallback) {}
     virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);

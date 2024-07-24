@@ -1209,7 +1209,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     }
 
     if (rootScene_ == nullptr) {
-        rootScene_ = new RootScene();
+        rootScene_ = new RootScene(wptr<RootSceneSession>(rootSceneSession));
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
