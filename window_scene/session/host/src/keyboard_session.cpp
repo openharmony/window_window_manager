@@ -164,8 +164,8 @@ WSError KeyboardSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction>
 
 void KeyboardSession::OnKeyboardPanelUpdated()
 {
-    if (!IsSessionForeground()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground no need raise callingSession");
+    if (!isKeyboardPanelEnabled_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
         return;
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
@@ -252,7 +252,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onAdjustKeyboardLayout_) {
             session->sessionChangeCallback_->onAdjustKeyboardLayout_(params);
         }
-
         return WSError::WS_OK;
     };
     PostTask(task, "AdjustKeyboardLayout");
@@ -336,8 +335,9 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
         (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     if (isCallingSessionFloating && isMainOrParentFloating &&
-        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad")) {
+        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
     }
@@ -419,7 +419,7 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     if (GetSceneSession(GetCallingSessionId()) != nullptr) {
         return;
     }
-    int32_t focusedSessionId = GetFocusedSessionId();
+    uint32_t focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
     if (GetSceneSession(focusedSessionId) == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Focused session is null, id: %{public}d", focusedSessionId);
     } else {
@@ -459,20 +459,24 @@ void KeyboardSession::RelayoutKeyBoard()
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr, relayout keyboard failed");
         return;
     }
+
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t percent = 0;
     sessionProperty->GetSessionGravity(gravity, percent);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d", gravity, percent);
+    auto displayId = sessionProperty->GetDisplayId();
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d, displayId: %{public}" PRIu64"",
+        gravity, percent, displayId);
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
-    auto displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
     if (screenSession != nullptr) {
         screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
         screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
     }
 
     auto requestRect = sessionProperty->GetRequestRect();
