@@ -27,8 +27,6 @@
 #include "input_transfer_station.h"
 #include "singleton.h"
 #include "singleton_container.h"
-#include "root_scene_session.h"
-#include "scene_session_manager.h"
 
 #include "anr_manager.h"
 #include "intention_event_manager.h"
@@ -68,7 +66,7 @@ private:
 sptr<RootScene> RootScene::staticRootScene_;
 std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> RootScene::configurationUpdatedCallback_;
 
-RootScene::RootScene(wptr<RootSceneSession> hostSession)
+RootScene::RootScene(const wptr<RootSceneSession> hostSession)
 {
     this->hostSession_ = hostSession;
     launcherService_ = new AppExecFwk::LauncherService();
@@ -255,7 +253,7 @@ WMError RootScene::GetSessionRectByType(const AvoidAreaType& type, WSRect& rect)
         TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    rect = rootSceneSession->GetSessionRectByType(type);
+    rect = hostSession_->GetSessionRectByType(type);
     return WMError::WM_OK;
 }
 } // namespace Rosen

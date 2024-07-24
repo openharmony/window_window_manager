@@ -38,7 +38,7 @@ namespace OHOS {
 namespace Rosen {
 class RootScene : public Window {
 public:
-    explicit RootScene(wptr<RootSceneSession> hostSession);
+    explicit RootScene(const wptr<RootSceneSession> hostSession);
     virtual ~RootScene();
 
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
