@@ -263,7 +263,7 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
     auto pointerAction = event->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        TLOGD(WmsLogTag::WMS_EVENT, "PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
+        WLOGFD("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
             "VerticalAxisValue:%{public}.2f,HorizontalAxisValue:%{public}.2f,"
             "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
             "BufferCount:%{public}zu,Buffer:%{public}s",
