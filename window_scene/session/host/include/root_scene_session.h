@@ -36,8 +36,6 @@ public:
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
-    WSRect GetSessionRectByType(const AvoidAreaType& type);
-
 private:
     LoadContentFunc loadContentFunc_;
 };
