@@ -169,6 +169,7 @@ private:
     napi_env env_;
     std::mutex mutex_;
     int32_t handleId_ = -1;
+    bool isStoppedFromClient_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

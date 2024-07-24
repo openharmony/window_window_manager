@@ -24,6 +24,7 @@
 
 #include <iremote_broker.h>
 #include <want.h>
+#include "ability_info.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -106,6 +107,24 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
     { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+};
+
+const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
+    {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
+    {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
+    {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
+    {"follow_recent",                       OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT},
+    {"landscape_inverted",                  OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED},
+    {"portrait_inverted",                   OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED},
+    {"auto_rotation",                       OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION},
+    {"auto_rotation_landscape",             OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE},
+    {"auto_rotation_portrait",              OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT},
+    {"auto_rotation_restricted",            OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED},
+    {"auto_rotation_landscape_restricted",  OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {"auto_rotation_portrait_restricted",   OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
+    {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
+    {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
 enum class SessionState : uint32_t {
@@ -263,12 +282,22 @@ enum class FocusChangeReason {
     MAX,
 };
 
+enum class SceneType : uint8_t {
+    DEFAULT = 0,
+    WINDOW_SCENE,
+    SYSTEM_WINDOW_SCENE,
+    TRANSFORM_SCENE,
+    PANEL_SCENE,
+    INPUT_SCENE,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
     int32_t appIndex_ = 0;
     bool isSystem_ = false;
+    SceneType sceneType_ = SceneType::WINDOW_SCENE;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
@@ -304,7 +333,6 @@ struct SessionInfo {
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
-    bool isSystemInput_ = false;
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
@@ -588,6 +616,47 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
+};
+
+/**
+ * @brief Session UI parameters
+ */
+struct SessionUIParam {
+    bool interactive_ { true };
+    WSRect rect_;
+    float scaleX_ { 1.0f };
+    float scaleY_ { 1.0f };
+    float pivotX_ { 1.0f };
+    float pivotY_ { 1.0f };
+    uint32_t zOrder_ { 0 };
+    std::string sessionName_;
+};
+
+enum class SessionUIDirtyFlag {
+    NONE = 0,
+    VISIBLE = 1,
+    INTERACTIVE = 1 << 1,
+    RECT = 1 << 2,
+    SCALE = 1 << 3,
+    TOUCH_HOT_AREA = 1 << 4,
+    Z_ORDER = 1 << 5,
+    AVOID_AREA = 1 << 6,
+};
+
+/**
+ * @brief State for post-process focus
+ */
+struct PostProcessFocusState {
+    bool enabled_ { false };
+    bool isFocused_ { false };
+    FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
+
+    void Reset()
+    {
+        enabled_ = false;
+        isFocused_ = false;
+        reason_ = FocusChangeReason::DEFAULT;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

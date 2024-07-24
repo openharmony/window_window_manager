@@ -25,7 +25,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+    constexpr uint32_t SLEEP_TIME_US = 500000;
     const std::string DUAL_DISPLAY_FOLD_POLICY_TEST = "DualDisplayFoldPolicyTest";
 }
 

@@ -28,6 +28,15 @@ public:
     MOCK_METHOD1(TransferPointerEvent, WSError(const std::shared_ptr<MMI::PointerEvent>& pointerEvent));
     MOCK_METHOD3(TransferKeyEventForConsumedAsync, WSError(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
         bool isPreImeEvent, const sptr<IRemoteObject>& listener));
+#ifdef ACCESSIBILITY_MOCK
+    MOCK_METHOD5(TransferAccessibilityHoverEvent, WSError(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs));
+    MOCK_METHOD3(TransferAccessibilityChildTreeRegister, WSError(
+        uint32_t windowId, int32_t treeId, int64_t accessibilityId));
+    MOCK_METHOD0(TransferAccessibilityChildTreeUnregister, WSError());
+    MOCK_METHOD2(TransferAccessibilityDumpChildInfo, WSError(
+        const std::vector<std::string>& params, std::vector<std::string>& info));
+#endif
 };
 } // namespace Rosen
 } // namespace OHOS

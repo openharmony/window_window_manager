@@ -202,9 +202,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if ((isPC || isFreeMutiWindowMode) && windowOption_ != nullptr) {
+    if ((isPC || IsFreeMultiWindowMode()) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -746,6 +744,10 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (rect.width_ == 0 || rect.height_ == 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
+        return;
+    }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("display is null!");
@@ -820,12 +822,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDialogWindow)) {
+    if ((isPC || IsFreeMultiWindowMode()) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true);
         return;
@@ -1991,9 +1991,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if (!(isPC || isFreeMutiWindowMode)) {
+    if (!(isPC || IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -2493,11 +2491,11 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
-        "down{%{public}d,%{public}d,%{public}d,%{public}d}", GetPersistentId(), type,
-        avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_, avoidArea->topRect_.height_,
-        avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
-        avoidArea->bottomRect_.height_);
+          "id: %{public}d, type: %{public}d, "
+          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
+          GetPersistentId(), type,
+          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
+          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
