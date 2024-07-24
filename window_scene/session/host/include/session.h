@@ -398,17 +398,12 @@ public:
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
-    //ForegroundInteractiveStatus interface only for event use
+    // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    virtual int32_t GetCustomDecorHeight()
-    {
-        return 0;
-    };
-    WSError SwitchFreeMultiWindow(bool enable);
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
@@ -421,6 +416,11 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
+    WSError SwitchFreeMultiWindow(bool enable);
+    virtual int32_t GetCustomDecorHeight()
+    {
+        return 0;
+    };
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
 protected:
@@ -534,7 +534,6 @@ protected:
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
     bool isDirty_ = false;
-    std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
@@ -611,10 +610,10 @@ private:
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
     std::atomic<bool> isAttach_{ false };
+    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex;
-    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };
