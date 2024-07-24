@@ -560,8 +560,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .windowType = static_cast<int32_t>(windowType),
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
-    if (windowSessionProperty != nullptr && (windowSessionProperty->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING))) {
+    if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
     }
     UpdatePrivacyMode(sceneSession, windowInfo);
