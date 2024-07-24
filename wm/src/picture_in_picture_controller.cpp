@@ -185,6 +185,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     PictureInPictureManager::SetActiveController(this);
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
         pipOption_->GetPipTemplate(), PIP_SUCCESS, "show pip success");
+    isStoppedFromClient_ = false;
     return WMError::WM_OK;
 }
 
@@ -211,7 +212,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    isStoppedFromClient_ = false;
     curState_ = PiPWindowState::STATE_STARTING;
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
