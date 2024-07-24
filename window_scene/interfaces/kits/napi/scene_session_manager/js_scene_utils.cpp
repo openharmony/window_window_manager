@@ -614,6 +614,22 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         return false;
     }
     pointerEvent.SetPointerId(pointerId);
+    if (!ConvertDeviceIdFromJs(env, jsObject, pointerEvent)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
+{
+    napi_value jsDeviceId = nullptr;
+    napi_get_named_property(env, jsObject, "deviceId", &jsDeviceId);
+    int32_t deviceId;
+    if(!ConvertFromJsValue(env, jsDeviceId, deviceId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to deviceId");
+        return false;
+    }
+    pointerEvent.SetDeviceId(deviceId);
     return true;
 }
 
