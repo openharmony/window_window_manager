@@ -249,6 +249,10 @@ public:
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
+    // Session recover
+    bool IsRecovered() const { return isRecovered_; }
+    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
+
     bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
@@ -532,6 +536,9 @@ private:
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
+
+    // Session recover
+    bool isRecovered_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
