@@ -1569,6 +1569,7 @@ bool Session::IsTopDialog() const
         auto dialogSession = *iter;
         if (dialogSession && (dialogSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             dialogSession->GetSessionState() == SessionState::STATE_FOREGROUND)) {
+            WLOGFI("Dialog id: %{public}d, current dialog id: %{public}d", dialogSession->GetPersistentId(), currentPersistentId);
             return dialogSession->GetPersistentId() == currentPersistentId;
         }
     }
