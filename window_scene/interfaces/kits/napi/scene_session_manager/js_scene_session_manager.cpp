@@ -1209,7 +1209,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     }
 
     if (rootScene_ == nullptr) {
-        rootScene_ = new RootScene(wptr<RootSceneSession>(rootSceneSession));
+        rootScene_ = new RootScene();
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
@@ -1223,6 +1223,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     rootScene_->SetFrameLayoutFinishCallback([]() {
         SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
         SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+    });
+    rootScene_->SetGetSessionRectCallback([](const AvoidAreaType& type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
     });
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);

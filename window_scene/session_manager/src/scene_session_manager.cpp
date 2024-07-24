@@ -1103,19 +1103,44 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             return rootSceneSession_;
         }
         system::SetParameter("bootevent.wms.fullscreen.ready", "true");
-        sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-        specificCallback->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-            return this->GetSceneSessionVectorByType(type, displayId);
-        };
-        rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCallback);
-        WLOGFD("set specificSessionCallback to root scene session");
+        rootSceneSession_ = new RootSceneSession();
         rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
         return rootSceneSession_;
     };
 
     return taskScheduler_->PostSyncTask(task, "GetRootSceneSession");
+}
+
+WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(const AvoidAreaType& type)
+{
+    sptr<RootSceneSession> rootSession = GetRootSceneSession();
+    int dispId = rootSession->GetSessionProperty()->GetDisplayId();
+    std::vector<sptr<SceneSession>> sessionVector;
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            sessionVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_STATUS_BAR, dispId);
+            break;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            sessionVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, dispId);
+            break;
+        }
+        default: {
+            TLOGD(WmsLogTag::WMS_IMMS, "unsupported type %{public}u", type);
+            return {};
+        }
+    }
+
+    for (auto& session : sessionVector) {
+        if (!(session->IsVisible())) {
+            continue;
+        }
+        const WSRect rect = session->GetSessionRect();
+        TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect %{public}s", type, rect.ToString().c_str());
+        return rect;
+    }
+    return {};
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)

@@ -28,40 +28,4 @@ void RootSceneSession::LoadContent(
         loadContentFunc_(contentUrl, env, storage, context);
     }
 }
-
-WSRect RootSceneSession::GetSessionRectByType(const AvoidAreaType& type)
-{
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr) {
-        TLOGD(WmsLogTag::WMS_IMMS, "get scene session vector callback is not set");
-        return {};
-    }
-    std::vector<sptr<SceneSession>> sessionVector;
-    int dispId = GetSessionProperty()->GetDisplayId();
-    switch (type) {
-        case AvoidAreaType::TYPE_SYSTEM: {
-            sessionVector = specificCallback_->onGetSceneSessionVectorByType_(
-                WindowType::WINDOW_TYPE_STATUS_BAR, dispId);
-            break;
-        }
-        case AvoidAreaType::TYPE_KEYBOARD: {
-            sessionVector = specificCallback_->onGetSceneSessionVectorByType_(
-                WindowType::WINDOW_TYPE_KEYBOARD_PANEL, dispId);
-            break;
-        }
-        default: {
-            TLOGD(WmsLogTag::WMS_IMMS, "unsupported type %{public}u", type);
-            return {};
-        }
-    }
-
-    for (auto& session : sessionVector) {
-        if (!(session->IsVisible())) {
-            continue;
-        }
-        const WSRect rect = session->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect %{public}s", type, rect.ToString().c_str());
-        return rect;
-    }
-    return {};
-}
 } // namespace OHOS::Rosen
