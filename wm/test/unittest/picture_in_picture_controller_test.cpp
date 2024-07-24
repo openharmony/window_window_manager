@@ -157,7 +157,13 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
     pipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    pipControl->isStoppedFromClient_ = true;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
+
+    pipControl->isStoppedFromClient_ = false;
     ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
+    pipControl->curState_ = PiPWindowState::STATE_STOPPING;
+
     pipControl->curState_ = PiPWindowState::STATE_STOPPED;
     ASSERT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
@@ -167,6 +173,10 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
 
     pipControl->window_ = mw;
+    pipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(false, StopPipType::NULL_STOP));
+
+    pipControl->curState_ = PiPWindowState::STATE_STARTED;
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(false, StopPipType::NULL_STOP));
 
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
