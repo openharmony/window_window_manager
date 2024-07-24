@@ -71,8 +71,8 @@ using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(cons
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
-using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
+using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
@@ -335,20 +335,20 @@ public:
     int32_t GetCallingUid() const;
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
-    WindowMode GetWindowMode();
+    WindowMode GetWindowMode() const;
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
-    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
-    bool GetSCBKeepKeyboardFlag() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
     float GetScaleX() const;
     float GetScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
+    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
+    bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
@@ -398,11 +398,17 @@ public:
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
+    //ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    virtual int32_t GetCustomDecorHeight()
+    {
+        return 0;
+    };
+    WSError SwitchFreeMultiWindow(bool enable);
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
@@ -415,11 +421,6 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
-    WSError SwitchFreeMultiWindow(bool enable);
-    virtual int32_t GetCustomDecorHeight()
-    {
-        return 0;
-    };
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
 protected:
@@ -532,12 +533,13 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
-    bool scbKeepKeyboardFlag_ = false;
     bool isDirty_ = false;
+    std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
+    bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     mutable std::shared_mutex parentSessionMutex_;
@@ -551,7 +553,6 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    void NotifyPointerEventToRs(int32_t pointAction);
     WSError HandleSubWindowClick(int32_t action);
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
@@ -594,6 +595,7 @@ private:
     bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
     WSRect preRect_;
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
@@ -609,10 +611,10 @@ private:
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
     std::atomic<bool> isAttach_{ false };
-    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex;
+    sptr<IPatternDetachCallback> detachCallback_ = nullptr;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };

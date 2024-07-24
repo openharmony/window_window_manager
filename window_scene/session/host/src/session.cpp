@@ -81,7 +81,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
         mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
         area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
@@ -1020,8 +1019,7 @@ WSError Session::Background(bool isFromClient)
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32, GetPersistentId(),
         static_cast<uint32_t>(state));
-    if ((state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) &&
-        GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         UpdateSessionState(SessionState::STATE_INACTIVE);
         state = SessionState::STATE_INACTIVE;
         isActive_ = false;
@@ -1148,7 +1146,8 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
         TLOGD(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
-        if (isAttach && session->detachCallback_ != nullptr) {
+
+        if (!isAttach && session->detachCallback_ != nullptr) {
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
@@ -1476,8 +1475,10 @@ void Session::SetParentSession(const sptr<Session>& session)
         WLOGFW("Session is nullptr");
         return;
     }
-    std::unique_lock<std::shared_mutex> lock(parentSessionMutex_);
-    parentSession_ = session;
+    {
+        std::unique_lock<std::shared_mutex> lock(parentSessionMutex_);
+        parentSession_ = session;
+    }
     TLOGD(WmsLogTag::WMS_SUB, "[WMSDialog][WMSSub]Set parent success, parentId: %{public}d, id: %{public}d",
         session->GetPersistentId(), GetPersistentId());
 }
@@ -1632,14 +1633,6 @@ void Session::HandlePointDownDialog()
     }
 }
 
-void Session::NotifyPointerEventToRs(int32_t pointAction)
-{
-    if ((pointAction == MMI::PointerEvent::POINTER_ACTION_UP) |
-        (pointAction == MMI::PointerEvent::POINTER_ACTION_DOWN)) {
-        // RSInterfaces::GetInstance().NotifyTouchEvent(pointAction);
-    }
-}
-
 WSError Session::HandleSubWindowClick(int32_t action)
 {
     auto parentSession = GetParentSession();
@@ -1670,7 +1663,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     auto pointerAction = pointerEvent->GetPointerAction();
-    NotifyPointerEventToRs(pointerAction);
     bool isPointDown = (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) ||
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -1718,7 +1710,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     } else {
         pointerEvent->MarkProcessed();
     }
-
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
@@ -1896,7 +1887,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
             return;
         }
         session->NotifySessionStateChange(changedState);
-        TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
             session->GetPersistentId(), session->GetSessionState(), changedState);
     };
     PostTask(task, "SetSessionStateChangeListenser");
@@ -2385,7 +2376,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
-    if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(g_persistentId)) {
+    if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;
         return;
@@ -2429,7 +2420,7 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
     sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
 }
 
-WindowMode Session::GetWindowMode()
+WindowMode Session::GetWindowMode() const
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -2756,6 +2747,18 @@ Rotation Session::GetRotation() const
     return rotation_;
 }
 
+WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    WLOGFD("Session update title in target position, id: %{public}d, isShow: %{public}d, height: %{public}d",
+        GetPersistentId(), isShow, height);
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateTitleInTargetPos(isShow, height);
+}
+
 void Session::SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func)
 {
     sessionInfoLockedStateChangeFunc_ = func;
@@ -2767,18 +2770,6 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     if (sessionInfoLockedStateChangeFunc_) {
         sessionInfoLockedStateChangeFunc_(lockedState);
     }
-}
-
-WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
-{
-    WLOGFD("Session update title in target position, id: %{public}d, isShow: %{public}d, height: %{public}d",
-        GetPersistentId(), isShow, height);
-    if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
 
 WSError Session::SwitchFreeMultiWindow(bool enable)
