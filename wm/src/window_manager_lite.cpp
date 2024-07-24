@@ -639,10 +639,10 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
     }
 }
 
-WMError WindowManagerLite::TerminateSessionByPersistentId(const int32_t persistentId)
+WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     if (persistentId == INVALID_SESSION_ID) {
-        TLOGE(WmsLogTag::WMS_LIFE, "persistentId:%{public}d is invalid.", persistentId);
+        TLOGE(WmsLogTag::WMS_LIFE, "persistentId is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);

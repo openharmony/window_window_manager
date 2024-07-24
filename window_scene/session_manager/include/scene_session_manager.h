@@ -347,7 +347,7 @@ public:
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WSError SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode);
     int32_t GetAppForceLandscapeMode(const std::string& bundleName);
-    WMError TerminateSessionByPersistentId(const int32_t persistentId);
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 protected:
     SceneSessionManager();
