@@ -909,7 +909,7 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     }
     auto iterFuncType = ListenerFunctionTypeMap.find(cbType);
     if (iterFuncType == ListenerFunctionTypeMap.end()) {
-        WLOGFE("Failed to find function handler! type = %{public}s", cbType.c_str());
+        TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to find function handler! type = %{public}s", cbType.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
