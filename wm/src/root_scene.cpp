@@ -249,7 +249,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 WMError RootScene::GetSessionRectByType(const AvoidAreaType& type, WSRect& rect)
 {
     if (getSessionRectCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "getSessionRectCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     rect = getSessionRectCallback_(type);
