@@ -135,6 +135,7 @@ public:
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
+    WSRect GetRootSessionAvoidSessionRect(const AvoidAreaType& type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,

@@ -66,9 +66,8 @@ private:
 sptr<RootScene> RootScene::staticRootScene_;
 std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> RootScene::configurationUpdatedCallback_;
 
-RootScene::RootScene(const wptr<RootSceneSession> hostSession)
+RootScene::RootScene()
 {
-    this->hostSession_ = hostSession;
     launcherService_ = new AppExecFwk::LauncherService();
     if (!launcherService_->RegisterCallback(new BundleStatusCallback(this))) {
         WLOGFE("Failed to register bundle status callback.");
@@ -249,11 +248,11 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 
 WMError RootScene::GetSessionRectByType(const AvoidAreaType& type, WSRect& rect)
 {
-    if (hostSession_ == nullptr) {
+    if (getSessionRectCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    rect = hostSession_->GetSessionRectByType(type);
+    rect = getSessionRectCallback_(type);
     return WMError::WM_OK;
 }
 } // namespace Rosen

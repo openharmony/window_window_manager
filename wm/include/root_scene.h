@@ -18,7 +18,6 @@
 
 #include <mutex>
 
-#include "session/host/include/root_scene_session.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "ws_common.h"
@@ -38,7 +37,7 @@ namespace OHOS {
 namespace Rosen {
 class RootScene : public Window {
 public:
-    explicit RootScene(const wptr<RootSceneSession> hostSession);
+    RootScene();
     virtual ~RootScene();
 
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
@@ -55,6 +54,10 @@ public:
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
+
+    void SetGetSessionRectCallback(std::function<WSRect(const AvoidAreaType&)> callback) {
+        getSessionRectCallback_ = callback;
+    }
 
     void SetDisplayDensity(float density)
     {
@@ -115,7 +118,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    wptr<RootSceneSession> hostSession_;
+    std::function<WSRect(const AvoidAreaType&)> getSessionRectCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
