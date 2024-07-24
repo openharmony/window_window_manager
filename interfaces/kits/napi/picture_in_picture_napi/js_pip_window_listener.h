@@ -46,4 +46,12 @@ private:
 };
 }  // namespace Rosen
 }  // namespace OHOS
+namespace std {
+    template<>
+    struct hash<OHOS::sptr<OHOS::Rosen::JsPiPWindowListener>> {
+        size_t operate()(const OHOS::sptr<OHOS::Rosen::JsPiPWindowListener>& listener) const {
+            return hash<decltype>(listener->GetCallbackRef())>()(listener->GetCallbackRef());
+        }
+    };
+}
 #endif /* OHOS_JS_PIP_WINDOW_LISTENER_H */
