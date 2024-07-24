@@ -58,10 +58,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
-constexpr const char* APP_PHONE_CALL_BUNDLE_NAME = "com.ohos.callui";
-constexpr const char* APP_PHONE_CALL_ABILITY_NAME = "com.ohos.callui.MainAbility";
-constexpr const char* APP_MEETIME_BUNDLE_NAME = "com.huawei.hmos.meetimeservice";
-constexpr const char* APP_MEETIME_ABILITY_NAME = "com.ohos.callui.MainAbility";
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
@@ -77,19 +73,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     GeneratePersistentId(false, info.persistentId_);
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
-    needStartingWindowExitAnimation_ = !IsPhoneCallScene(info);
     TLOGI(WmsLogTag::WMS_LIFE, "Create session, id: %{public}d", GetPersistentId());
 }
 
 SceneSession::~SceneSession()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
-}
-
-bool SceneSession::IsPhoneCallScene(const SessionInfo& info)
-{
-    return (info.bundleName_ == APP_PHONE_CALL_BUNDLE_NAME && info.abilityName_ == APP_PHONE_CALL_ABILITY_NAME) ||
-        (info.bundleName_ == APP_MEETIME_BUNDLE_NAME && info.abilityName_ == APP_MEETIME_ABILITY_NAME);
 }
 
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
@@ -3813,9 +3802,15 @@ bool SceneSession::IsDeviceWakeupByApplication() const
     return isDeviceWakeupByApplication_.load();
 }
 
+void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "SetStartingWindowExitAnimationFlag %{public}d", enable);
+    needStartingWindowExitAnimation_.store(enable);
+}
+
 bool SceneSession::NeedStartingWindowExitAnimation() const
 {
-    return needStartingWindowExitAnimation_;
+    return needStartingWindowExitAnimation_.load();
 }
 
 bool SceneSession::IsSystemSpecificSession() const
