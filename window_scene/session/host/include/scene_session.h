@@ -378,7 +378,7 @@ private:
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
     WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    //session lifecycle funcs
+    // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
 #ifdef DEVICE_STATUS_ENABLE
