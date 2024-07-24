@@ -318,7 +318,7 @@ struct SessionInfo {
 
 struct SessionVerificationInfo : public Parcelable {
     int32_t pid = -1;
-    uint64_t displayId = -1;
+    uint64_t displayId = 0;
     float density = 0.0;
     int32_t orientation = 0;
 
