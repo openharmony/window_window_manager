@@ -55,7 +55,8 @@ public:
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetGetSessionRectCallback(std::function<WSRect(const AvoidAreaType&)> callback) {
+    void SetGetSessionRectCallback(std::function<WSRect(const AvoidAreaType&)> callback)
+    {
         getSessionRectCallback_ = callback;
     }
 
