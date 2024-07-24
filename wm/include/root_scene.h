@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "session/host/include/root_scene_session.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "ws_common.h"
@@ -37,7 +38,7 @@ namespace OHOS {
 namespace Rosen {
 class RootScene : public Window {
 public:
-    RootScene();
+    explicit RootScene(wptr<RootSceneSession> hostSession);
     virtual ~RootScene();
 
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
@@ -113,6 +114,8 @@ private:
     static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+
+    wptr<RootSceneSession> hostSession_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -68,8 +68,9 @@ private:
 sptr<RootScene> RootScene::staticRootScene_;
 std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> RootScene::configurationUpdatedCallback_;
 
-RootScene::RootScene()
+RootScene::RootScene(wptr<RootSceneSession> hostSession)
 {
+    this->hostSession_ = hostSession;
     launcherService_ = new AppExecFwk::LauncherService();
     if (!launcherService_->RegisterCallback(new BundleStatusCallback(this))) {
         WLOGFE("Failed to register bundle status callback.");
@@ -250,8 +251,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 
 WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
 {
-    sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
-    if (rootSceneSession == nullptr) {
+    if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "root scene session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
