@@ -5987,7 +5987,6 @@ WSError SceneSessionManager::GetSessionVerificationInfo(int32_t persistentId,
         TLOGE(WmsLogTag::DEFAULT, "Invalid displayId.");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
-
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to get display object with id=%{public}" PRIu64, displayId);
