@@ -263,7 +263,7 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
     auto pointerAction = event->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        WLOGFD("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
+        TLOGD(WmsLogTag::WMS_EVENT, "PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
             "VerticalAxisValue:%{public}.2f,HorizontalAxisValue:%{public}.2f,"
             "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
             "BufferCount:%{public}zu,Buffer:%{public}s",
@@ -278,8 +278,8 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
                 WLOGFE("Invalid pointer: %{public}d.", pointerId);
                 return;
             }
-            WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-                "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+            TLOGD(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+                "DisplayX:%{private}d,DisplayY:%{private}d,WindowX:%{private}d,WindowY:%{private}d,",
                 pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
                 item.GetWindowX(), item.GetWindowY());
         }

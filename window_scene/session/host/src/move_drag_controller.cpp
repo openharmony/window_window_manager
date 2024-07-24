@@ -718,9 +718,9 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
         newStyleID = MMI::MOUSE_ICON::DEFAULT;
     }
 
-    WLOGFI("Id: %{public}d, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
-        "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
-        "newStyle : %{public}u, oldStyle : %{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}d, Mouse posX:%{private}u, posY:%{private}u, Pointer action:%{public}u, "
+        "winRect posX:%{public}u, posY:%{public}u, W:%{public}u, H:%{public}u, "
+        "newStyle:%{public}u, oldStyle:%{public}u",
         persistentId_, mousePointX, mousePointY, action, winRect.posX_,
         winRect.posY_, winRect.width_, winRect.height_, newStyleID, oriStyleID);
     if (oriStyleID != newStyleID) {

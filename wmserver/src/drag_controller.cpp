@@ -472,9 +472,9 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
                 moveDragProperty_->startMoveFlag_ = false;
                 moveDragProperty_->startDragFlag_ = false;
             }
-            WLOGFD("[Server Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
-                   "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
-                   "%{public}d, pointPos: [%{public}d, %{public}d]", activeWindowId_, pointId, sourceType,
+            TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u, pointId:%{public}d, sourceType:%{public}d, "
+                   "hasPointStarted:%{public}d, startMove:%{public}d, startDrag:%{public}d, targetDisplayId:"
+                   "%{public}d, pointPos:[%{private}d, %{private}d]", activeWindowId_, pointId, sourceType,
                    moveDragProperty_->pointEventStarted_, moveDragProperty_->startMoveFlag_,
                    moveDragProperty_->startDragFlag_, targetDisplayId, pointPosX, pointPosY);
             break;

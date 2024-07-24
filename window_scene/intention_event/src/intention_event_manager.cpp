@@ -54,9 +54,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{public}d,"
-            "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-            "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
+        TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{private}d,"
+            "displayy:%{private}d,windowx:%{private}d,windowy:%{private}d,action:%{public}d pressure:"
+            "%{public}f, tiltx:%{public}f,tiltY:%{public}f",
             windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
             pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
     }
@@ -64,8 +64,8 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     for (auto&& id :ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            TLOGD(WmsLogTag::WMS_EVENT, "all point info: id: %{public}d, x:%{public}d, y:%{public}d, "
-                "isPressend:%{public}d, pressure:%{public}f, tiltX:%{public}f, tiltY:%{public}f",
+            TLOGD(WmsLogTag::WMS_EVENT, "all point info: id:%{public}d,x:%{private}d,y:%{private}d,"
+                "isPressend:%{public}d,pressure:%{public}f,tiltX:%{public}f,tiltY:%{public}f",
             actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
             item.GetTiltX(), item.GetTiltY());
         }
