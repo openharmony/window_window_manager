@@ -197,11 +197,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
-
-    sleep(1);
-    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
-    sleep(1);
-    
+    WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
