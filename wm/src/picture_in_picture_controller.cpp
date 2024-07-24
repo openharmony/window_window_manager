@@ -568,7 +568,7 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
-    StopPictureInPicture(true, StopPipType::NULL_STOP, true);
+    StopPictureInPicture(true, StopPipType::NULL_STOP, false);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
