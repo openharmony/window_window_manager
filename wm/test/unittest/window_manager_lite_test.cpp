@@ -29,6 +29,15 @@ public:
     void OnCameraWindowChange(uint32_t accessTokenId, bool isShowing) override {};
 };
 
+class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
+public:
+    void OnWindowStyleUpdate(WindowStyleType styleType)
+    {
+        TLOGI(WmsLogTag::DMS, "TestWindowStyleChangedListener");
+    }
+};
+
+
 class WindowManagerLiteTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -465,6 +474,103 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected, Function | SmallTest | Level
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
 
+
+/**
+ * @tc.name: RegisterWindowStyleChangedListener
+ * @tc.desc: check RegisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(nullptr));
+
+    sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    windowManager.pImpl_->windowStyleListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowStyleListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowStyleChangedListener
+ * @tc.desc: check UnregisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowStyleChangedListener(nullptr));
+
+    sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
+    sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowStyleChangedListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowStyleChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->windowStyleListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->windowStyleListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+
+    windowManager.pImpl_->windowStyleListeners_.push_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->windowStyleListeners_.size());
+    windowManager.pImpl_->windowStyleListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowStyleListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyWindowStyleChange
+ * @tc.desc: check NotifyWindowStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+{
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    auto ret = WindowManagerLite::GetInstance().NotifyWindowStyleChange(type);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: check GetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    WindowStyleType type = WindowManagerLite::GetInstance().GetWindowStyleType();
+    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
+}
+
+
 /**
  * @tc.name: TerminateSessionByPersistentId001
  * @tc.desc: TerminateSessionByPersistentId001
@@ -475,7 +581,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, Function | Sm
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 1;
     EXPECT_CALL(m->Mock(), TerminateSessionByPersistentId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -490,7 +596,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 0;
     EXPECT_CALL(m->Mock(), TerminateSessionByPersistentId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }

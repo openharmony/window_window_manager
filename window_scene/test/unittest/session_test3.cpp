@@ -977,6 +977,21 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess, Function | SmallTest | Level2)
     session_->RectCheckProcess();
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
 }
+
+/**
+ * @tc.name: RectCheckProcess
+ * @tc.desc: RectCheckProcess Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isPcAppInPad = false;
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    auto result = session_->SetIsPcAppInPad(isPcAppInPad);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -232,6 +232,10 @@ public:
     {
         return WMError::WM_OK;
     };
+    virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType)
+    {
+        return WMError::WM_OK;
+    };
 };
 }
 }
