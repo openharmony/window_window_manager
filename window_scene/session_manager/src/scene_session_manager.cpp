@@ -1109,7 +1109,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             specificCallback->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) ->
                 std::vector<sptr<SceneSession>> {
                     return this->GetSceneSessionVectorByType(type, displayId);
-                }
+                };
             rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCallback);
             WLOGFD("set specificSessionCallback to root scene session");
         } else {
