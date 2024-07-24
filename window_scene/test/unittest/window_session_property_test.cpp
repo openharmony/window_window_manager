@@ -948,6 +948,25 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | Small
     ASSERT_EQ(result, false);
     delete property;
 }
+
+/**
+ * @tc.name: SetIsPcAppInPad/GetIsPcAppInPad
+ * @tc.desc: SetIsPcAppInPad/GetIsPcAppInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Level2)
+{
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    if (property == nullptr) {
+        return;
+    }
+    bool isPcAppInPad = true;
+    property->SetIsPcAppInPad(isPcAppInPad);
+    auto result = property->GetIsPcAppInPad();
+    ASSERT_EQ(result, isPcAppInPad);
+    delete property;
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

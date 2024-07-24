@@ -562,6 +562,9 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         }
         sceneSession->SwitchFreeMultiWindow(enable);
     }
+    WindowStyleType type = enable ?
+            WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
+    SessionManagerAgentController::GetInstance().NotifyWindowStyleChange(type);
     return WSError::WS_OK;
 }
 
@@ -1885,7 +1888,8 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (systemConfig_.backgroundswitch) {
+        auto isPcAppInpad = scnSession->GetSessionProperty()->GetIsPcAppInPad();
+        if (systemConfig_.backgroundswitch || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -9493,6 +9497,17 @@ WMError SceneSessionManager::GetWindowModeType(WindowModeType& windowModeType)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     windowModeType = CheckWindowModeType();
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyletype)
+{
+    if (!SessionPermission::IsSACalling()) {
+        WLOGFE("GetWindowStyleType permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    windowStyletype = systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_ ?
+        WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
     return WMError::WM_OK;
 }
 

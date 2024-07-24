@@ -236,4 +236,9 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
 {
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
 }
+
+WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
+{
+    return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
+}
 } // namespace OHOS::Rosen

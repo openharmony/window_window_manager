@@ -40,6 +40,8 @@ public:
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo) override;
     void NotifyGestureNavigationEnabledResult(bool enable) override;
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
+    void NotifyWindowStyleChange(WindowStyleType type) override;
+
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;
 };
