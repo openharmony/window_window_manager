@@ -107,8 +107,7 @@ public:
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
-    virtual WSError GetSessionVerificationInfo(const int32_t persistentId,
-        SessionVerificationInfo& verificationInfo) = 0;
+    virtual WSError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

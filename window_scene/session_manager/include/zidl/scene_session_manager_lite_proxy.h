@@ -54,7 +54,7 @@ public:
     WSError ClearAllSessions() override;
  
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError GetSessionVerificationInfo(const int32_t persistentId, SessionVerificationInfo& verificationInfo) override;
+    WSError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

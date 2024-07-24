@@ -69,7 +69,6 @@ HWTEST_F(SceneSessionManagerLiteTest, GetInstance, Function | SmallTest | Level1
 HWTEST_F(SceneSessionManagerLiteTest, GetSessionVerificationInfo, Function | SmallTest | Level1)
 {
     SceneSessionManagerLite& sceneSessionManagerLite = SceneSessionManagerLite::GetInstance();
-    ASSERT_NE(nullptr, &sceneSessionManagerLite);
     SessionVerificationInfo sessionVerificationInfo;
     auto ret = sceneSessionManagerLite.GetSessionVerificationInfo(0, sessionVerificationInfo);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
