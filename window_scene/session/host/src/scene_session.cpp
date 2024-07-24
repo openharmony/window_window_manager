@@ -3896,4 +3896,15 @@ int32_t SceneSession::GetStatusBarHeight()
     TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     return height;
 }
+
+bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
+{
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no permission");
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Rosen

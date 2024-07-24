@@ -939,9 +939,6 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
 
 WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
-    if (!CheckPermissionWithPropertyAnimation(property)) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     HandleDialogForeground();
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
@@ -1019,9 +1016,6 @@ void Session::HandleDialogForeground()
 
 WSError Session::Background(bool isFromClient)
 {
-    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     HandleDialogBackground();
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32, GetPersistentId(),
@@ -2890,16 +2884,5 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
     }
     return nullptr;
-}
-
-bool Session::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
-{
-    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no permission");
-            return false;
-        }
-    }
-    return true;
 }
 } // namespace OHOS::Rosen
