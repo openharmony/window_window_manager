@@ -734,7 +734,7 @@ HWTEST_F(SceneSessionTest2, NotifySessionFullScreen, Function | SmallTest | Leve
     EXPECT_NE(scensession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    bool withAnimation = true;
+    bool status = true;
     int ret = 1;
 
     scensession->sessionStage_ = mockSessionStage;
