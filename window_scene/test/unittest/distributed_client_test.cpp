@@ -27,7 +27,6 @@
 using namespace testing;
 using namespace testing::ext;
 
-// using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
 
