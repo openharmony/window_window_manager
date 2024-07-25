@@ -2883,7 +2883,7 @@ WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken
     return ret;
 }
 
-WMError WindowSceneSessionImpl::SetDialogBackEventEnabled(bool isEnabled)
+WMError WindowSceneSessionImpl::SetDialogBackGestureEnabled(bool isEnabled)
 {
     WindowType windowType = GetType();
     if (windowType != WindowType::WINDOW_TYPE_DIALOG) {
@@ -2896,7 +2896,7 @@ WMError WindowSceneSessionImpl::SetDialogBackEventEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_DIALOG, "set window failed because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError ret = static_cast<WMError>(hostSession->SetDialogSessionBackEventEnabled(isEnabled));
+    WMError ret = static_cast<WMError>(hostSession->SetDialogSessionBackGestureEnabled(isEnabled));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "set window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }
