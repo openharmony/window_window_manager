@@ -734,11 +734,11 @@ HWTEST_F(SceneSessionTest2, NotifySessionFullScreen, Function | SmallTest | Leve
     EXPECT_NE(scensession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    bool status = true;
+    bool fullScreen = true;
     int ret = 1;
 
     scensession->sessionStage_ = mockSessionStage;
-    scensession->NotifySessionFullScreen(status);
+    scensession->NotifySessionFullScreen(fullScreen);
     ASSERT_EQ(ret, 1);
 }
 

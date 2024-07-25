@@ -288,9 +288,9 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
  */
 HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, Function | SmallTest | Level1)
 {
-    bool status = true;
+    bool fullScreen = true;
     ASSERT_TRUE(sessionStage_ != nullptr);
-    sessionStage_->NotifySessionFullScreen(status);
+    sessionStage_->NotifySessionFullScreen(fullScreen);
 }
 
 /**

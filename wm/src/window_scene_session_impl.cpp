@@ -3052,10 +3052,10 @@ void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withA
     Show(reason, withAnimation);
 }
 
-void WindowSceneSessionImpl::NotifySessionFullScreen(bool status)
+void WindowSceneSessionImpl::NotifySessionFullScreen(bool fullScreen)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u", GetWindowId());
-    SetLayoutFullScreen(status);
+    SetLayoutFullScreen(fullScreen);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)

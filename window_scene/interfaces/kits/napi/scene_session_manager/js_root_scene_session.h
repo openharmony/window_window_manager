@@ -48,7 +48,6 @@ private:
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     void VerifyCallerToken(SessionInfo& info);
-    static int32_t GetRealCallerSessionId(sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 
