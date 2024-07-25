@@ -594,7 +594,6 @@ void SessionStageProxy::NotifySessionFullScreen(bool status)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
     if (!data.WriteBool(status)) {
         WLOGFE("Write status failed");
         return;

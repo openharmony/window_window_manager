@@ -329,7 +329,7 @@ int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, Message
 
 int SessionStageStub::HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleNotifySessionFullScreen");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "called");
     bool status = data.ReadBool();
     NotifySessionFullScreen(status);
     return ERR_NONE;

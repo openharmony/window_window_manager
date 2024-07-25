@@ -90,7 +90,6 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void NotifySessionFullScreen(bool status) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

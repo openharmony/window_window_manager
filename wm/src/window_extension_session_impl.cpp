@@ -627,10 +627,6 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 {
 }
 
-void WindowExtensionSessionImpl::NotifySessionFullScreen(bool status)
-{
-}
-
 void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                                               const std::shared_ptr<RSTransaction>& rsTransaction)
 {
