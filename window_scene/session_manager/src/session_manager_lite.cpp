@@ -192,8 +192,8 @@ void SessionManagerLite::DeleteAllSessionListeners()
     sessionListeners_.clear();
 }
 
-WMError SessionManagerLite::GetSessionVerificationInfo(int32_t persistentId,
-    SessionVerificationInfo& verificationInfo)
+WMError SessionManagerLite::GetSessionDisplayInfo(int32_t persistentId,
+    SessionDisplayInfo& sessionDisplayInfo)
 {
     auto sceneSessionManagerLiteProxy = GetSceneSessionManagerLiteProxy();
     if (sceneSessionManagerLiteProxy == nullptr) {
@@ -201,7 +201,7 @@ WMError SessionManagerLite::GetSessionVerificationInfo(int32_t persistentId,
         return WMError::WM_ERROR_SAMGR;
     }
     return static_cast<WMError>(
-        sceneSessionManagerLiteProxy->GetSessionVerificationInfo(persistentId, verificationInfo));
+        sceneSessionManagerLiteProxy->GetSessionDisplayInfo(persistentId, sessionDisplayInfo));
 }
 
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)

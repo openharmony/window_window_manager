@@ -364,14 +364,14 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | Small
 }
 
 /**
- * @tc.name: GetSessionVerificationInfo
- * @tc.desc: GetSessionVerificationInfo
+ * @tc.name: GetSessionDisplayInfo
+ * @tc.desc: GetSessionDisplayInfo
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest5, GetSessionVerificationInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, GetSessionDisplayInfo, Function | SmallTest | Level3)
 {
-    SessionVerificationInfo verificationInfo;
-    auto ret = ssm_->GetSessionVerificationInfo(0, verificationInfo);
+    SessionDisplayInfo sessionDisplayInfo;
+    auto ret = ssm_->GetSessionDisplayInfo(0, sessionDisplayInfo);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 

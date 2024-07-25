@@ -5969,8 +5969,8 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
 }
 
-WSError SceneSessionManager::GetSessionVerificationInfo(int32_t persistentId,
-    SessionVerificationInfo& verificationInfo)
+WSError SceneSessionManager::GetSessionDisplayInfo(int32_t persistentId,
+    SessionDisplayInfo& sessionDisplayInfo)
 {
     TLOGI(WmsLogTag::DEFAULT, "persistentId: %{public}d", persistentId);
     if (!SessionPermission::IsSACalling()) {
@@ -5997,10 +5997,10 @@ WSError SceneSessionManager::GetSessionVerificationInfo(int32_t persistentId,
         TLOGE(WmsLogTag::DEFAULT, "Failed to get displayInfo with id=%{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
-    verificationInfo.pid = session->GetCallingPid();
-    verificationInfo.displayId = displayId;
-    verificationInfo.density = displayInfo->GetVirtualPixelRatio();
-    verificationInfo.orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    sessionDisplayInfo.pid = session->GetCallingPid();
+    sessionDisplayInfo.displayId = displayId;
+    sessionDisplayInfo.density = displayInfo->GetVirtualPixelRatio();
+    sessionDisplayInfo.orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     return WSError::WS_OK;
 }
 
