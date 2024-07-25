@@ -149,6 +149,7 @@ public:
     WSError Background(bool isFromClient = false) override;
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
+    WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
     virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
@@ -248,6 +249,10 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
+
+    // Session recover
+    bool IsRecovered() const { return isRecovered_; }
+    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
     bool IsVisible() const;
     bool IsDecorEnable() const;
@@ -532,6 +537,9 @@ private:
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
+
+    // Session recover
+    bool isRecovered_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

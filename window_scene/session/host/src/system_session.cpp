@@ -262,7 +262,7 @@ WSError SystemSession::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+    if (!dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
@@ -374,5 +374,24 @@ bool SystemSession::IsVisibleForeground() const
         return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
     }
     return Session::IsVisibleForeground();
+}
+
+WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
+{
+    return PostSyncTask([weakThis = wptr(this), isEnabled]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WindowType windowType = session->GetWindowType();
+        if (windowType != WindowType::WINDOW_TYPE_DIALOG) {
+            TLOGE(WmsLogTag::WMS_DIALOG, "windowType not support. WinId:%{public}u, WindowType:%{public}u",
+                session->GetWindowId(), static_cast<uint32_t>(windowType));
+            return WSError::WS_ERROR_INVALID_CALLING;
+        }
+        session->dialogSessionBackGestureEnabled_ = isEnabled;
+        return WSError::WS_OK;
+    });
 }
 } // namespace OHOS::Rosen

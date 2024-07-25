@@ -128,7 +128,7 @@ public:
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(
-        const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
+        const sptr<SceneSession>& sceneSession, bool needRemoveSession = true, bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession> &scnSession, sptr<AAFwk::SessionInfo> scnSessionInfo,
         const bool needRemoveSession);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);

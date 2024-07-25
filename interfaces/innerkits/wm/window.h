@@ -926,6 +926,16 @@ public:
      */
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) { return WMError::WM_OK; }
     /**
+     * @brief Set whether the dialog window responds to back gesture.
+     *
+     * @param isEnabled Responds to back gesture if true, or ignore back gesture if false.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
      * @brief Raise zorder of window to the top of APP Mainwindow.
      *
      * @return WM_OK means raise success, others means raise failed.

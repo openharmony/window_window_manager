@@ -3054,9 +3054,9 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
             if (IsPointerEventConsumed()) {
                 ResSchedReport::GetInstance().TrigClick();
             }
-            WLOGFD("[Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
-                  "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
-                  "%{public}d, pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
+            TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u, pointId:%{public}d, sourceType:%{public}d, "
+                  "hasPointStarted:%{public}d, startMove:%{public}d, startDrag:%{public}d, targetDisplayId:"
+                  "%{public}d, pointPos:[%{private}d, %{private}d], winRect:[%{public}d, %{public}d, %{public}u, "
                   "%{public}u]", GetWindowId(), pointId, sourceType, moveDragProperty_->pointEventStarted_,
                   moveDragProperty_->startMoveFlag_, moveDragProperty_->startDragFlag_, targetDisplayId,
                   pointDisplayX, pointDisplayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -3158,9 +3158,9 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
             newStyleID = MMI::MOUSE_ICON::DEFAULT; // when receive up event, set default style
         }
     }
-    WLOGD("winId : %{public}u, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
-           "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
-           "newStyle : %{public}u, oldStyle : %{public}u",
+    TLOGD(WmsLogTag::WMS_EVENT, "winId:%{public}u, Mouse posX:%{private}u, posY:%{private}u, action:%{public}u, "
+           "winRect posX:%{public}u, posY:%{public}u, W:%{public}u, H:%{public}u, "
+           "newStyle:%{public}u, oldStyle:%{public}u",
            windowId, mousePointX, mousePointY, action, GetRect().posX_,
            GetRect().posY_, GetRect().width_, GetRect().height_, newStyleID, oldStyleID);
     if (oldStyleID != newStyleID) {
