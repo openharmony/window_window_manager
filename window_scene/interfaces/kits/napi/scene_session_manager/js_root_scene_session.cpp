@@ -260,10 +260,7 @@ static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
     int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (realCallerSessionId == sceneSession->GetPersistentId()) {
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
-        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
-        if (sceneSession != nullptr) {
-            realCallerSessionId = sceneSession->GetSessionInfo().callerPersistentId_;
-        }
+        realCallerSessionId = sceneSession->GetSessionInfo().callerPersistentId_;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
     return realCallerSessionId;
