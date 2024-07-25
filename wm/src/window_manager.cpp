@@ -1315,7 +1315,7 @@ WindowStyleType WindowManager::GetWindowStyleType()
 {
     WindowStyleType styleType;
     if (SingletonContainer::Get<WindowAdapter>().GetWindowStyleType(styleType) == WMError::WM_OK) {
-       return styleType;
+        return styleType;
     }
     return styleType;
 }
