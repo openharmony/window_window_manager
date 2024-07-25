@@ -2738,7 +2738,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         if (property != nullptr) {
             isPcAppInPad = property->GetIsPcAppInPad();
         }
-        if (!(isPC || session->IsFreeMultiWindowMode()) || isPcAppInPad) && !isSACalling &&
+        if (!(isPC || session->IsFreeMultiWindowMode() || isPcAppInPad) && !isSACalling &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
