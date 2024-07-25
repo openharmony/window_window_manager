@@ -51,7 +51,7 @@ public:
         TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM = 8,
         TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS,
-        TRANS_ID_UPDATE_WINDOW_MODE_TYPE
+        TRANS_ID_UPDATE_WINDOW_MODE_TYPE,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
