@@ -23,7 +23,7 @@
 #include "window_stage_impl.h"
 
 extern "C" {
-    //window maneger
+    // window maneger
     FFI_EXPORT RetDataI64 FfiOHOSCreateWindow(char* name, uint32_t windowType, OHOS::AbilityRuntime::Context* context,
         int64_t displayId, int64_t parentId);
     FFI_EXPORT int32_t FfiOHOSWindowSetWindowLayoutMode(uint32_t mode);

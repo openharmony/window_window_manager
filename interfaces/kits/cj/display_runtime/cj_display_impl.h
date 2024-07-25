@@ -24,19 +24,8 @@ namespace OHOS {
 namespace Rosen {
 class DisplayImpl final : public OHOS::FFI::FFIData {
 public:
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
-private:
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType *GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType =
-            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("DisplayImpl");
-        return &runtimeType;
-    }
-public:
     explicit DisplayImpl(const sptr<Display>& display);
-    ~DisplayImpl();
+    ~DisplayImpl() override;
     static sptr<DisplayImpl> CreateDisplayImpl(sptr<Display>& display);
     static sptr<DisplayImpl> FindDisplayObject(uint64_t displayId);
     uint32_t GetInfoId();
@@ -53,8 +42,17 @@ public:
     float GetXDPI();
     float GetYDPI();
     RetStruct GetCutoutInfo();
+    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
     sptr<Display> display_ = nullptr;
+    friend class OHOS::FFI::RuntimeType;
+    friend class OHOS::FFI::TypeBase;
+    static OHOS::FFI::RuntimeType *GetClassType()
+    {
+        static OHOS::FFI::RuntimeType runtimeType =
+            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("DisplayImpl");
+        return &runtimeType;
+    }
 };
 
 enum class DisplayStateMode : uint32_t {

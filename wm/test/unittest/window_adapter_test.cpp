@@ -312,6 +312,32 @@ HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, Function | SmallTest
 }
 
 /**
+ * @tc.name: AddExtensionWindowStageToSCB
+ * @tc.desc: WindowAdapter/AddExtensionWindowStageToSCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    windowAdapter.AddExtensionWindowStageToSCB(nullptr, nullptr, 0);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: RemoveExtensionWindowStageFromSCB
+ * @tc.desc: WindowAdapter/RemoveExtensionWindowStageFromSCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    windowAdapter.RemoveExtensionWindowStageFromSCB(nullptr, nullptr);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: AddOrRemoveSecureSession
  * @tc.desc: WindowAdapter/AddOrRemoveSecureSession
  * @tc.type: FUNC

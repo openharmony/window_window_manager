@@ -38,7 +38,7 @@ constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
 constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_RUNTIME, "JsScreenManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
 }
 
 class JsScreenManager {
@@ -465,7 +465,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [options, env, task = napiAsyncTask.get()]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeMirror");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeExpand");
         ScreenId screenGroupId = INVALID_SCREEN_ID;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().MakeExpand(options, screenGroupId));

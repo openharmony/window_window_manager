@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace PermissionConstants {
     constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
+    constexpr const char* PERMISSION_KILL_APP_PROCESS = "ohos.permission.KILL_APP_PROCESSES";
 }
 class SessionPermission {
 public:
@@ -33,12 +34,13 @@ public:
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
     static bool IsSACalling();
-    static bool IsSACallingByCallerToken(const uint32_t callerToken);
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);
     static bool IsSameBundleNameAsCalling(const std::string& bundleName);
     static bool IsStartedByUIExtension();
     static bool CheckCallingIsUserTestMode(pid_t pid);
+    static bool IsBetaVersion();
+    static bool IsSystemAppCall();
 };
 } // Rosen
 } // OHOS

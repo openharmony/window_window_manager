@@ -59,7 +59,7 @@ ohos_fuzztest("SceneSessionMgrLStubRegFuzzTest") {
     "accessibility:accessibility_common",
     "graphic_2d:window_animation",
     "input:libmmi-client",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
   external_deps = [
     "ability_base:configuration",

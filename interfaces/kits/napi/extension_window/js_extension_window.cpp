@@ -49,7 +49,7 @@ JsExtensionWindow::~JsExtensionWindow() {}
 
 napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::Window> window, int32_t hostWindowId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsExtensionWindow CreateJsExtensionWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -924,7 +924,7 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to title");
         return false;
     }
-    bool decorEnabled;
+    bool decorEnabled = false;
     if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to decorEnabled");
         return false;
