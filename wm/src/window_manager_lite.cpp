@@ -726,5 +726,14 @@ WindowStyleType WindowManagerLite::GetWindowStyleType()
     return styleType;
 }
 
+
+WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "persistentId is invalid.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
+}
 } // namespace Rosen
 } // namespace OHOS

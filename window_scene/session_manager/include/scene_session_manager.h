@@ -354,6 +354,7 @@ public:
     WSError SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode);
     int32_t GetAppForceLandscapeMode(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 protected:
     SceneSessionManager();

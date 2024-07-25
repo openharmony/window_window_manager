@@ -557,4 +557,14 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
+
+int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    WMError errCode = TerminateSessionByPersistentId(persistentId);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen
