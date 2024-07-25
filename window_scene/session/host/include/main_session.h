@@ -30,15 +30,16 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+    void NotifyClientToUpdateInteractive(bool interactive) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

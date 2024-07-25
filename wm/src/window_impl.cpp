@@ -95,7 +95,6 @@ std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathR
 std::recursive_mutex WindowImpl::globalMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
-bool WindowImpl::enableImmersiveMode_ = true;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -2920,8 +2919,8 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
     Rect rectWithHotzone;
     rectWithHotzone.posX_ = GetRect().posX_ - static_cast<int32_t>(HOTZONE_POINTER);
     rectWithHotzone.posY_ = GetRect().posY_ - static_cast<int32_t>(HOTZONE_POINTER);
-    rectWithHotzone.width_ = GetRect().width_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
-    rectWithHotzone.height_ = GetRect().height_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
+    rectWithHotzone.width_ = GetRect().width_ + HOTZONE_POINTER * 2;   // 2: calculate width need
+    rectWithHotzone.height_ = GetRect().height_ + HOTZONE_POINTER * 2; // 2: calculate height need
 
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         !WindowHelper::IsPointInTargetRectWithBound(startPointPosX, startPointPosY, rectWithHotzone)) {
@@ -3055,9 +3054,9 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
             if (IsPointerEventConsumed()) {
                 ResSchedReport::GetInstance().TrigClick();
             }
-            WLOGFD("[Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
-                  "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
-                  "%{public}d, pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
+            TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u, pointId:%{public}d, sourceType:%{public}d, "
+                  "hasPointStarted:%{public}d, startMove:%{public}d, startDrag:%{public}d, targetDisplayId:"
+                  "%{public}d, pointPos:[%{private}d, %{private}d], winRect:[%{public}d, %{public}d, %{public}u, "
                   "%{public}u]", GetWindowId(), pointId, sourceType, moveDragProperty_->pointEventStarted_,
                   moveDragProperty_->startMoveFlag_, moveDragProperty_->startDragFlag_, targetDisplayId,
                   pointDisplayX, pointDisplayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -3130,7 +3129,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     auto action = pointerEvent->GetPointerAction();
-    uint32_t windowId = pointerEvent->GetAgentWindowId();
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     int32_t mousePointX = pointerItem.GetDisplayX();
     int32_t mousePointY = pointerItem.GetDisplayY();
     int32_t sourceType = pointerEvent->GetSourceType();
@@ -3159,14 +3158,14 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
             newStyleID = MMI::MOUSE_ICON::DEFAULT; // when receive up event, set default style
         }
     }
-    WLOGD("winId : %{public}u, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
-           "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
-           "newStyle : %{public}u, oldStyle : %{public}u",
+    TLOGD(WmsLogTag::WMS_EVENT, "winId:%{public}u, Mouse posX:%{private}u, posY:%{private}u, action:%{public}u, "
+           "winRect posX:%{public}u, posY:%{public}u, W:%{public}u, H:%{public}u, "
+           "newStyle:%{public}u, oldStyle:%{public}u",
            windowId, mousePointX, mousePointY, action, GetRect().posX_,
            GetRect().posY_, GetRect().width_, GetRect().height_, newStyleID, oldStyleID);
     if (oldStyleID != newStyleID) {
         MMI::PointerStyle pointerStyle;
-        pointerStyle.id = newStyleID;
+        pointerStyle.id = static_cast<int32_t>(newStyleID);
         int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
         if (res != 0) {
             WLOGFE("set pointer style failed, res is %{public}u", res);

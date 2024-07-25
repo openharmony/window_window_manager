@@ -68,6 +68,7 @@ private:
     std::condition_variable connectedCv_;
     std::mutex sendMessageMutex_;
     std::condition_variable blockSendMessageCV_;
+    std::atomic<bool> sendMessageWaitFlag_{false};
     int32_t screenId_ = 0;
     int32_t left_ = 0;
     int32_t top_ = 0;
