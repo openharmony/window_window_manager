@@ -1965,11 +1965,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
 
-    if (property_->GetCompatibleModeInPc()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not MaximizeFloating");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3098,6 +3093,34 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    Recover();
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    }
+    Minimize();
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    Close();
     return WSError::WS_OK;
 }
 
