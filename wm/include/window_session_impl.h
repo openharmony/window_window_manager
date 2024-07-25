@@ -235,7 +235,6 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
-    void NotifySessionFullScreen(bool status) override;
 
 protected:
     WMError Connect();
