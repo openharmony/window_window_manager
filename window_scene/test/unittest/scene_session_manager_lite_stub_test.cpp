@@ -88,7 +88,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo) override
+    WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) override
     {
         return WSError::WS_OK;
     }
@@ -423,16 +423,16 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
 }
 
 /**
- * @tc.name: HandleGetSessionVerificationInfo
- * @tc.desc: test function : HandleGetSessionVerificationInfo
+ * @tc.name: HandleGetSessionDisplayInfo
+ * @tc.desc: test function : HandleGetSessionDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionVerificationInfo, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionDisplayInfo, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionVerificationInfo(data, reply);
+        SceneSessionManagerLiteStub::HandleGetSessionDisplayInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

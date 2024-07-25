@@ -316,7 +316,7 @@ struct SessionInfo {
     bool isAtomicService_ = false;
 };
 
-struct SessionVerificationInfo : public Parcelable {
+struct SessionDisplayInfo : public Parcelable {
     int32_t pid = -1;
     uint64_t displayId = 0;
     float density = 0.0f;
@@ -328,9 +328,9 @@ struct SessionVerificationInfo : public Parcelable {
             parcel.WriteInt32(orientation);
     }
 
-    static SessionVerificationInfo* Unmarshalling(Parcel& parcel)
+    static SessionDisplayInfo* Unmarshalling(Parcel& parcel)
     {
-        SessionVerificationInfo* info = new SessionVerificationInfo;
+        SessionDisplayInfo* info = new SessionDisplayInfo;
         bool res = parcel.ReadInt32(info->pid) && parcel.ReadUint64(info->displayId) &&
             parcel.ReadFloat(info->density) && parcel.ReadInt32(info->orientation);
         if (res) {

@@ -69,7 +69,7 @@ public:
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
-        TRANS_ID_GET_SESSION_VERIFICATION_INFO,
+        TRANS_ID_GET_SESSION_DISPLAY_INFO,
         TRANS_ID_GET_ALL_MAIN_WINDOW_INFO,
         TRANS_ID_CLEAR_MAIN_SESSIONS,
         TRANS_ID_RAISE_WINDOW_TO_TOP,
@@ -107,7 +107,7 @@ public:
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
-    virtual WSError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo) = 0;
+    virtual WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

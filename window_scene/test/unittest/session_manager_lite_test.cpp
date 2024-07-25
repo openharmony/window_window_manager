@@ -91,15 +91,15 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallT
 }
 
 /**
- * @tc.name: GetSessionVerificationInfo
- * @tc.desc: GetSessionVerificationInfo
+ * @tc.name: GetSessionDisplayInfo
+ * @tc.desc: GetSessionDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, GetSessionVerificationInfo, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, GetSessionDisplayInfo, Function | SmallTest | Level2)
 {
     SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    SessionVerificationInfo sessionVerificationInfo;
-    auto ret = sessionManagerLite.GetSessionVerificationInfo(0, sessionVerificationInfo);
+    SessionDisplayInfo sessionDisplayInfo;
+    auto ret = sessionManagerLite.GetSessionDisplayInfo(0, sessionDisplayInfo);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
     sessionManagerLite.ClearSessionManagerProxy();

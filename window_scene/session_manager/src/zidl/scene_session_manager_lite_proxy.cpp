@@ -646,8 +646,8 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
     }
 }
 
-WSError SceneSessionManagerLiteProxy::GetSessionVerificationInfo(int32_t persistentId,
-    SessionVerificationInfo& verificationInfo)
+WSError SceneSessionManagerLiteProxy::GetSessionDisplayInfo(int32_t persistentId,
+    SessionDisplayInfo& sessionDisplayInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -661,17 +661,17 @@ WSError SceneSessionManagerLiteProxy::GetSessionVerificationInfo(int32_t persist
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_VERIFICATION_INFO),
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    sptr<SessionVerificationInfo> info(reply.ReadParcelable<SessionVerificationInfo>());
+    sptr<SessionDisplayInfo> info(reply.ReadParcelable<SessionDisplayInfo>());
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read sessionVerificationInfo");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read sessionDisplayInfo");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    verificationInfo = *info;
+    sessionDisplayInfo = *info;
     return static_cast<WSError>(reply.ReadUint32());
 }
 

@@ -53,7 +53,7 @@ public:
     void SaveSessionListener(const sptr<ISessionListener>& listener);
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
-    WMError GetSessionVerificationInfo(int32_t persistentId, SessionVerificationInfo& verificationInfo);
+    WMError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo);
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
     void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
