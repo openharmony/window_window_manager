@@ -47,6 +47,7 @@ public:
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError TerminateSessionByPersistentId(int32_t persistentId) = 0;
 };
 }
 }

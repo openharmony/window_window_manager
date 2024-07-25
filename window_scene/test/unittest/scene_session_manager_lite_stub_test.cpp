@@ -165,6 +165,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -637,6 +641,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | Sma
     data.WriteInt32(persistentId);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleTerminateSessionByPersistentId
+ * @tc.desc: test function : HandleTerminateSessionByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
