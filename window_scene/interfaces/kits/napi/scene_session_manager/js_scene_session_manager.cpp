@@ -1463,12 +1463,6 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
 
-    bool needRemoveSession = false;
-    if (argc == ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
-        ConvertFromJsValue(env, argv[1], needRemoveSession);
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]needRemoveSession: %{public}u", needRemoveSession);
-    }
-
     sptr<SceneSession> sceneSession = nullptr;
     JsSceneSession* jsSceneSession;
     if (errCode == WSErrorCode::WS_OK) {
@@ -1495,13 +1489,36 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
             "sceneSession is nullptr"));
         return NapiGetUndefined(env);
     }
+
+    bool needRemoveSession = false;
+    if (argc >= ARGC_TWO && GetType(env, argv[ARGC_ONE]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[ARGC_ONE], needRemoveSession)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to needRemoveSession");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]needRemoveSession: %{public}u", needRemoveSession);
+    }
+
+    bool isSaveSnapshot = true;
+    if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[ARGC_TWO], isSaveSnapshot)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isSaveSnapshot");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isSaveSnapshot: %{public}u", isSaveSnapshot);
+    }
+
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
+    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot);
     auto localScheduler = SceneSessionManager::GetInstance().GetTaskScheduler();
     auto clearTask = [jsSceneSession, needRemoveSession, persistentId = sceneSession->GetPersistentId()]() {
         if (jsSceneSession != nullptr) {
