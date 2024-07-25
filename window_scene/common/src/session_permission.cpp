@@ -105,8 +105,8 @@ bool SessionPermission::IsSystemCalling()
 
 bool SessionPermission::IsSystemAppCall()
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+    uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
 
 bool SessionPermission::IsSACalling()
