@@ -35,6 +35,8 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
+
 class RootScene : public Window {
 public:
     RootScene();
@@ -55,9 +57,9 @@ public:
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetGetSessionRectCallback(std::function<WSRect(const AvoidAreaType&)> callback)
+    void SetGetSessionRectCallback(GetSessionRectCallback&& callback)
     {
-        getSessionRectCallback_ = callback;
+        getSessionRectCallback_ = std::move(callback);
     }
 
     void SetDisplayDensity(float density)
@@ -99,7 +101,7 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
-    WMError GetSessionRectByType(const AvoidAreaType& type, WSRect& rect);
+    WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
 
     static sptr<RootScene> staticRootScene_;
 
@@ -119,7 +121,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    std::function<WSRect(const AvoidAreaType&)> getSessionRectCallback_ = nullptr;
+    GetSessionRectCallback getSessionRectCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
