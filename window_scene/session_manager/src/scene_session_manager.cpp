@@ -1116,7 +1116,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(AvoidAreaType type)
 {
     sptr<RootSceneSession> rootSession = GetRootSceneSession();
-    int displayId = rootSession->GetSessionProperty()->GetDisplayId();
+    DisplayId displayId = rootSession->GetSessionProperty()->GetDisplayId();
     std::vector<sptr<SceneSession>> sessionVector;
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
