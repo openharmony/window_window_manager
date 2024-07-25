@@ -130,6 +130,21 @@ bool IsJsIsSystemUndefind(napi_env env, napi_value jsIsSystem, SessionInfo& sess
     return true;
 }
 
+bool IsJsSceneTypeUndefined(napi_env env, napi_value jsSceneType, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsSceneType) != napi_undefined) {
+        uint32_t sceneType;
+        if (!ConvertFromJsValue(env, jsSceneType, sceneType)) {
+            WLOGFE("[NAPI]Failed to convert parameter to sceneType");
+            return false;
+        }
+        sessionInfo.sceneType_ = static_cast<SceneType>(sceneType);
+    } else if (sessionInfo.isSystem_) {
+        sessionInfo.sceneType_ = SceneType::SYSTEM_WINDOW_SCENE;
+    }
+    return true;
+}
+
 bool IsJsPersistentIdUndefind(napi_env env, napi_value jsPersistentId, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsPersistentId) != napi_undefined) {
@@ -227,19 +242,6 @@ bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInf
     return true;
 }
 
-bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, SessionInfo& sessionInfo)
-{
-    if (GetType(env, jsIsSystemInput) != napi_undefined) {
-        bool isSystemInput = false;
-        if (!ConvertFromJsValue(env, jsIsSystemInput, isSystemInput)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isSystemInput");
-            return false;
-        }
-        sessionInfo.isSystemInput_ = isSystemInput;
-    }
-    return true;
-}
-
 bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsProcessOption) != napi_undefined) {
@@ -291,6 +293,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
+    napi_value jsSceneType = nullptr;
+    napi_get_named_property(env, jsObject, "sceneType", &jsSceneType);
     napi_value jsWindowInputType = nullptr;
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
@@ -308,6 +312,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
         return false;
     }
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
@@ -358,8 +365,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsRotable = nullptr;
     napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
-    napi_value jsIsSystemInput = nullptr;
-    napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
     napi_value jsIsSetPointerAreas = nullptr;
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
@@ -381,9 +386,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsRotatableUndefined(env, jsIsRotable, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
         return false;
     }
     if (!IsJsIsSetPointerAreasUndefined(env, jsIsSetPointerAreas, sessionInfo)) {
@@ -1218,7 +1220,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value SessionTypeInit(napi_env env)
 {
-    WLOGFD("SessionTypeInit");
+    WLOGFD("in");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -1269,6 +1271,35 @@ napi_value SessionTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value SceneTypeInit(napi_env env)
+{
+    WLOGFD("in");
+
+    if (env == nullptr) {
+        WLOGFE("Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "DEFAULT",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::DEFAULT)));
+    napi_set_named_property(env, objValue, "WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::SYSTEM_WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "TRANSFORM_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::TRANSFORM_SCENE)));
+    napi_set_named_property(env, objValue, "PANEL_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::PANEL_SCENE)));
+    napi_set_named_property(env, objValue, "INPUT_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::INPUT_SCENE)));
+    return objValue;
+}
 
 struct AsyncInfo {
     napi_env env;

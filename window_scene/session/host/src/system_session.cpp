@@ -75,6 +75,9 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
         !SessionPermission::IsSystemCalling()) {
@@ -110,6 +113,9 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {
         // Do not need to verify the permission to hide the input method status bar.
@@ -256,7 +262,7 @@ WSError SystemSession::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+    if (!dialogSessionBackEventEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
@@ -276,11 +282,15 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
             return ret;
         }
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            if (Session::IsScbCoreEnabled()) {
+                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+            } else {
+                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            }
         }
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
-            session->isDirty_ = false;
+            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         }
         return ret;
     };
@@ -291,10 +301,10 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto currentRect = winRect_;
-    if (!GetVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
+    if (!GetRSVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
         WLOGE("Error size: [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
             " persistentId: %{public}d",
-            currentRect.width_, currentRect.height_, GetVisible(), GetPersistentId());
+            currentRect.width_, currentRect.height_, GetRSVisible(), GetPersistentId());
         return false;
     }
 
@@ -355,5 +365,33 @@ void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
     uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
     uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
     RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+}
+
+bool SystemSession::IsVisibleForeground() const
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
+}
+
+WSError SystemSession::SetDialogSessionBackEventEnabled(bool isEnabled)
+{
+    return PostSyncTask([weakThis = wptr(this), isEnabled]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WindowType windowType = session->GetWindowType();
+        if (windowType != WindowType::WINDOW_TYPE_DIALOG) {
+            TLOGE(WmsLogTag::WMS_DIALOG, "windowType not support. WinId:%{public}u, WindowType:%{public}u",
+                session->GetWindowId(), static_cast<uint32_t>(windowType));
+            return WSError::WS_ERROR_INVALID_CALLING;
+        }
+        session->dialogSessionBackEventEnabled_ = isEnabled;
+        return WSError::WS_OK;
+    });
 }
 } // namespace OHOS::Rosen
