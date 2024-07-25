@@ -279,7 +279,7 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
                 return;
             }
             TLOGD(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-                "DisplayX:%{private}d,DisplayY:%{private}d,WindowX:%{private}d,WindowY:%{private}d,",
+                "DisplayX:%{private}d,DisplayY:%{private}d,WindowX:%{private}d,WindowY:%{private}d",
                 pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
                 item.GetWindowX(), item.GetWindowY());
         }
