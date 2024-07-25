@@ -1375,7 +1375,7 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
 
 WSError Session::Clear(bool needStartCaller)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
     auto task = [this, needStartCaller]() {
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
