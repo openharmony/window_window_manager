@@ -1792,7 +1792,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    if (systemConfig_.backgroundswitch == false) {
+    auto sessionProperty = scnSession->GetSessionProperty();
+    bool isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+    if (systemConfig_.backgroundswitch == false || isCompatibleModeInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
@@ -1885,7 +1887,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (systemConfig_.backgroundswitch) {
+        auto sessionProperty = scnSession->GetSessionProperty();
+        bool isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+        if (systemConfig_.backgroundswitch && !isCompatibleModeInPc) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
