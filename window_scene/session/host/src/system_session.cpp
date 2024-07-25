@@ -262,7 +262,7 @@ WSError SystemSession::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (!dialogSessionBackEventEnabled_) {
+    if (!dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
@@ -376,7 +376,7 @@ bool SystemSession::IsVisibleForeground() const
     return Session::IsVisibleForeground();
 }
 
-WSError SystemSession::SetDialogSessionBackEventEnabled(bool isEnabled)
+WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
 {
     return PostSyncTask([weakThis = wptr(this), isEnabled]() {
         auto session = weakThis.promote();
@@ -390,7 +390,7 @@ WSError SystemSession::SetDialogSessionBackEventEnabled(bool isEnabled)
                 session->GetWindowId(), static_cast<uint32_t>(windowType));
             return WSError::WS_ERROR_INVALID_CALLING;
         }
-        session->dialogSessionBackEventEnabled_ = isEnabled;
+        session->dialogSessionBackGestureEnabled_ = isEnabled;
         return WSError::WS_OK;
     });
 }

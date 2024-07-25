@@ -62,7 +62,7 @@ public:
     static napi_value RegisterWindowCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterWindowCallback(napi_env env, napi_callback_info info);
     static napi_value BindDialogTarget(napi_env env, napi_callback_info info);
-    static napi_value SetDialogBackEventEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetDialogBackGestureEnabled(napi_env env, napi_callback_info info);
     static napi_value LoadContent(napi_env env, napi_callback_info info);
     static napi_value LoadContentByName(napi_env env, napi_callback_info info);
     static napi_value GetUIContext(napi_env env, napi_callback_info info);
@@ -185,7 +185,7 @@ private:
     napi_value OnRegisterWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnBindDialogTarget(napi_env env, napi_callback_info info);
-    napi_value OnSetDialogBackEventEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetDialogBackGestureEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);

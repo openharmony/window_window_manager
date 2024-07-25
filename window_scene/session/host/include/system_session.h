@@ -39,7 +39,7 @@ public:
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
-    WSError SetDialogSessionBackEventEnabled(bool isEnabled) override;
+    WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -49,7 +49,7 @@ private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
 
-    bool dialogSessionBackEventEnabled_ = false;
+    bool dialogSessionBackGestureEnabled_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H
