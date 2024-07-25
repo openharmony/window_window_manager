@@ -227,14 +227,12 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
         return;
     }
     StopPipType currentStopType = StopPipType::NULL_STOP;
-    bool withAnim = true;
     if (!byPriority) {
         currentStopType = StopPipType::USER_STOP;
     } else {
         currentStopType = StopPipType::OTHER_PACKAGE_STOP;
-        withAnim = false;
     }
-    activeController_->StopPictureInPicture(destroyWindow, currentStopType, withAnim);
+    activeController_->StopPictureInPicture(destroyWindow, currentStopType, !byPriority);
 }
 
 void PictureInPictureManager::DoActionClose()
