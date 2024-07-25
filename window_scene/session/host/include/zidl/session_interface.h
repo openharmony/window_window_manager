@@ -86,9 +86,36 @@ public:
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
 
-    // PictureInPicture
+    /**
+     * @brief Close pip window while stopPip is called.
+     *
+     * Notify system that pip window is stopping and execute animation.
+     */
     virtual void NotifyPiPWindowPrepareClose() {}
+
+    /**
+     * @brief Update the required params to system.
+     *
+     * Update the required rect and reason to determine the final size of pip window. Called when start pip,
+     * show pip window, update pip size and pip restore.\n
+     * Make sure the caller's process is same with the process which created pip window.\n
+     *
+     * @param rect Indicates the {@link Rect} structure containing required size and position.
+     * @param reason Indicates the {@link SizeChangeReason} reason.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) { return WSError::WS_OK; }
+
+    /**
+     * @brief Update the pip control status to pip control panel.
+     *
+     * Called when the specified component's status needs to be updated.\n
+     * Make sure the caller's process is same with the process which created pip window.\n
+     *
+     * @param controlType Indicates the {@link WsPiPControlType} component in pip control panel.
+     * @param status Indicates the {@link WsPiPControlStatus} status of specified component.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status)
     {
         return WSError::WS_OK;
