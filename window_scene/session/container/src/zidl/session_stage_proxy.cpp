@@ -585,7 +585,7 @@ void  SessionStageProxy::NotifySessionForeground(uint32_t reason, bool withAnima
     }
 }
 
-void SessionStageProxy::NotifySessionFullScreen(bool status)
+void SessionStageProxy::NotifySessionFullScreen(bool fullScreen)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -594,8 +594,8 @@ void SessionStageProxy::NotifySessionFullScreen(bool status)
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteBool(status)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write status failed");
+    if (!data.WriteBool(fullScreen)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write fullScreen failed");
         return;
     }
     if (Remote()->SendRequest(

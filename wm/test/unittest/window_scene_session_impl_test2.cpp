@@ -889,8 +889,8 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallT
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
 
-    bool status = true;
-    windowSceneSession->NotifySessionFullScreen(status);
+    bool fullScreen = true;
+    windowSceneSession->NotifySessionFullScreen(fullScreen);
 }
 
 /**

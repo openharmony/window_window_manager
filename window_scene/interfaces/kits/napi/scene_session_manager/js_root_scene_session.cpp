@@ -255,7 +255,7 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
 
-int32_t JsRootSceneSession::GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
+static int32_t GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
 {
     int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (realCallerSessionId == sceneSession->GetPersistentId()) {

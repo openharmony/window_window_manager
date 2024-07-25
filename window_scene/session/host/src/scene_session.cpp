@@ -3514,13 +3514,13 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
-void SceneSession::NotifySessionFullScreen(bool status)
+void SceneSession::NotifySessionFullScreen(bool fullScreen)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return;
     }
-    return sessionStage_->NotifySessionFullScreen(status);
+    return sessionStage_->NotifySessionFullScreen(fullScreen);
 }
 
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
