@@ -378,8 +378,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
     if (!navId.empty() && mainWindow_) {
-        auto navController = NavigationController::GetNavigationController(
-                mainWindow_->GetUIContent(), navId);
+        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
         if (navController) {
             navController->DeletePIPMode(handleId_);
             TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
