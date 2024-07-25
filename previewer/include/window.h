@@ -182,7 +182,7 @@ public:
     virtual bool IsPrivacyMode() const = 0;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
-    virtual WMError SetDialogBackEventEnabled(bool isEnabled) = 0;
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled) = 0;
     virtual WmErrorCode RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;

@@ -926,12 +926,12 @@ public:
      */
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) { return WMError::WM_OK; }
     /**
-     * @brief Set whether the dialog window responds to back events.
+     * @brief Set whether the dialog window responds to back gesture.
      *
-     * @param isEnabled Responds to back events if true, or ignore back events if false.
+     * @param isEnabled Responds to back gesture if true, or ignore back gesture if false.
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetDialogBackEventEnabled(bool isEnabled)
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
