@@ -3381,7 +3381,6 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
         WLOGFE("set wake up screen permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
-    
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
@@ -3393,7 +3392,6 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool wakeUp = false;
-
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         WLOGFE("Failed to convert parameter to keepScreenOn");
