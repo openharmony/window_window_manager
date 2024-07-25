@@ -274,7 +274,7 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((GetHostSession() == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        WLOGW("[WMSLife] already destroyed or not created! id: %{public}d state_: %{public}u",
+        TLOGW(WmsLogTag::WMS_LIFE, "already destroyed or not created! id: %{public}d state_: %{public}u",
             GetPersistentId(), state_);
     }
     return res;
@@ -389,9 +389,9 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
     if (displayId == DISPLAY_ID_INVALID) {
         auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
-        defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
+        defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        WLOGFI("Reset displayId to %{public}" PRIu64, defaultDisplayId);
+        TLOGI(WmsLogTag::WMS_LIFE, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -771,7 +771,6 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
         return;
     }
     if (IsNotifyInteractiveDuplicative(interactive)) {
@@ -821,7 +820,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
-
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation,deviceRotation,transformHint,virtualPixelRatio]:[%{public}u,"
         "%{public}u,%{public}u,%{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
@@ -840,13 +838,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         uiContent->UpdateViewportConfig(config, reason, rsTransaction);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,\
-            %{public}u,%{public}u] displayOrientation:%{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
-            rect.width_, rect.height_, orientation);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
+            "%{public}u,%{public}u] displayOrientation:%{public}d",
+            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,\
-            %{public}u,%{public}u] displayOrientation:%{public}d", GetPersistentId(), reason, rect.posX_, rect.posY_,
-            rect.width_, rect.height_, orientation);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
+            "%{public}u,%{public}u] displayOrientation:%{public}d",
+            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
     }
 }
 
@@ -1141,7 +1139,7 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
 
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
 {
-    if (mode == WindowMode::WINDOW_MODE_UNDEFINED){
+    if (mode == WindowMode::WINDOW_MODE_UNDEFINED) {
         mode = GetMode();
     }
     if (needNotify) {
@@ -1507,7 +1505,7 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
 
 WMError WindowSessionImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    WLOGFD("start register");
+    WLOGFD("Start register");
     std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
     return RegisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
@@ -2075,7 +2073,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         CALL_UI_CONTENT(Foreground);
     }
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable ture failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable true failed, vsyncStation is nullptr");
         return;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: true, linkerId = %{public}" PRIu64,
@@ -2119,8 +2117,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 #ifdef IMF_ENABLE
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Get instance failed, Notify Input framework close keyboard failed.");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
     }
@@ -2136,7 +2133,6 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
     auto task = [weak = wptr(this)]() {
         auto window = weak.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is null, Notify input framework close keyboard failed.");
             return;
         }
         bool isNeedKeyboard = false;
@@ -2838,11 +2834,11 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
             pointerEvent->GetId(), pointerEvent->GetPointerAction());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
-            TLOGI(WmsLogTag::WMS_EVENT, "UI content dose not consume this pointer event");
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
         }
     } else {
-        TLOGW(WmsLogTag::WMS_EVENT, "pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
     }
 }
@@ -3253,12 +3249,12 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         ", occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u", rsTransaction != nullptr,
         info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler_ is nullptr, notify occupied area change info failed.");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler_ is nullptr, notify occupied area change info failed");
     }
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed.");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
             return;
         }
         if (rsTransaction) {
@@ -3270,7 +3266,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             rsTransaction->Commit();
         }
     };
-    handler_->PostTask(task, "WindowSessionImpl_NotifyOccupiedAreaChangeInfo");
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyOccupiedAreaChangeInfo");
 }
 
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
