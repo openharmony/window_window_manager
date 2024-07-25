@@ -2303,7 +2303,6 @@ void Session::RectCheckProcess()
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
-      })
         RectCheck(curWidth, curHeight);
     }
 }
