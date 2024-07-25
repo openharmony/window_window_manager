@@ -48,13 +48,16 @@ ScreenScene::~ScreenScene()
 
 WMError ScreenScene::Destroy()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!uiContent_) {
         TLOGD(WmsLogTag::DMS, "Destroy uiContent_ is nullptr!");
         return WMError::WM_OK;
     }
     std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
     uiContent_ = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        vsyncStation_ = nullptr;
+    }
     auto task = [uiContent]() {
         if (uiContent != nullptr) {
             uiContent->Destroy();

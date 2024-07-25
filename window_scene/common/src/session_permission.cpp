@@ -27,6 +27,7 @@
 #include <singleton.h>
 #include <singleton_container.h>
 #include "common/include/session_permission.h"
+#include "parameters.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -102,6 +103,12 @@ bool SessionPermission::IsSystemCalling()
     return isSystemApp;
 }
 
+bool SessionPermission::IsSystemAppCall()
+{
+    uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
+}
+
 bool SessionPermission::IsSACalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
@@ -111,17 +118,6 @@ bool SessionPermission::IsSACalling()
         return true;
     }
     WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
-    return false;
-}
-
-bool SessionPermission::IsSACallingByCallerToken(const uint32_t callerToken)
-{
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        TLOGI(WmsLogTag::WMS_LIFE, "SA called, flag:%{public}u", flag);
-        return true;
-    }
-    TLOGW(WmsLogTag::WMS_LIFE, "Not SA called, flag:%{public}u", flag);
     return false;
 }
 
@@ -318,6 +314,12 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
         return false;
     }
     return isUserTestMode;
+}
+
+bool SessionPermission::IsBetaVersion()
+{
+    std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
+    return betaName.find("beta") != std::string::npos;
 }
 
 } // namespace Rosen

@@ -278,8 +278,8 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
                 WLOGFE("Invalid pointer: %{public}d.", pointerId);
                 return;
             }
-            WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-                "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+            TLOGD(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+                "DisplayX:%{private}d,DisplayY:%{private}d,WindowX:%{private}d,WindowY:%{private}d",
                 pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
                 item.GetWindowX(), item.GetWindowY());
         }
@@ -363,11 +363,11 @@ WSError WindowEventChannel::TransferAccessibilityChildTreeUnregister()
 WSError WindowEventChannel::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
         return WSError::WS_ERROR_NULLPTR;
     }
+#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     return sessionStage_->NotifyAccessibilityDumpChildInfo(params, info);
 #else
     info.emplace_back("not support in user build variant");

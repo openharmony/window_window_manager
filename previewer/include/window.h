@@ -182,6 +182,7 @@ public:
     virtual bool IsPrivacyMode() const = 0;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled) = 0;
     virtual WmErrorCode RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
@@ -293,10 +294,10 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -340,10 +341,7 @@ public:
     }
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
 
-    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
@@ -351,13 +349,13 @@ public:
     }
 
     virtual WMError SetGrayScale(float grayScale) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Set the Dvsync object
      *
      * @param dvsyncSwitch bool.
      * @return * void
-    */
+     */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }

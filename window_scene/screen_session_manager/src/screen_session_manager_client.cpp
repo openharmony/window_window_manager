@@ -25,7 +25,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_CLIENT, "ScreenSessionManagerClient" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClient" };
 std::mutex g_instanceMutex;
 } // namespace
 
@@ -405,9 +405,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         }
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
-            transactionProxy->Begin();
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
-            transactionProxy->Commit();
             transactionProxy->FlushImplicitTransaction();
         } else {
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);

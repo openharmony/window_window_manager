@@ -22,6 +22,7 @@
 
 #include "root_scene.h"
 #include "window_manager_hilog.h"
+#include "window_visibility_info.h"
 #include "process_options.h"
 
 namespace OHOS::Rosen {
@@ -129,6 +130,21 @@ bool IsJsIsSystemUndefind(napi_env env, napi_value jsIsSystem, SessionInfo& sess
     return true;
 }
 
+bool IsJsSceneTypeUndefined(napi_env env, napi_value jsSceneType, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsSceneType) != napi_undefined) {
+        uint32_t sceneType;
+        if (!ConvertFromJsValue(env, jsSceneType, sceneType)) {
+            WLOGFE("[NAPI]Failed to convert parameter to sceneType");
+            return false;
+        }
+        sessionInfo.sceneType_ = static_cast<SceneType>(sceneType);
+    } else if (sessionInfo.isSystem_) {
+        sessionInfo.sceneType_ = SceneType::SYSTEM_WINDOW_SCENE;
+    }
+    return true;
+}
+
 bool IsJsPersistentIdUndefind(napi_env env, napi_value jsPersistentId, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsPersistentId) != napi_undefined) {
@@ -187,11 +203,11 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
     return true;
 }
 
-bool IsJsScreenIdUndefind(napi_env env, napi_value JsScreenId, SessionInfo& sessionInfo)
+bool IsJsScreenIdUndefind(napi_env env, napi_value jsScreenId, SessionInfo& sessionInfo)
 {
-    if (GetType(env, JsScreenId) != napi_undefined) {
+    if (GetType(env, jsScreenId) != napi_undefined) {
         int32_t screenId = -1;
-        if (!ConvertFromJsValue(env, JsScreenId, screenId)) {
+        if (!ConvertFromJsValue(env, jsScreenId, screenId)) {
             WLOGFE("[NAPI]Failed to convert parameter to screenId");
             return false;
         }
@@ -226,23 +242,10 @@ bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInf
     return true;
 }
 
-bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, SessionInfo& sessionInfo)
-{
-    if (GetType(env, jsIsSystemInput) != napi_undefined) {
-        bool isSystemInput = false;
-        if (!ConvertFromJsValue(env, jsIsSystemInput, isSystemInput)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isSystemInput");
-            return false;
-        }
-        sessionInfo.isSystemInput_ = isSystemInput;
-    }
-    return true;
-}
-
 bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsProcessOption) != napi_undefined) {
-        std::shared_ptr<AAFwk::ProcessOptions> processOptions;
+        std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
         if (!ConvertProcessOptionFromJs(env, jsProcessOption, processOptions)) {
             WLOGFE("[NAPI]Failed to convert parameter to processOptions");
             return false;
@@ -290,6 +293,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
+    napi_value jsSceneType = nullptr;
+    napi_get_named_property(env, jsObject, "sceneType", &jsSceneType);
     napi_value jsWindowInputType = nullptr;
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
@@ -307,6 +312,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
         return false;
     }
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
@@ -328,11 +336,13 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
 
     int32_t processMode;
     if (!ConvertFromJsValue(env, jsProcessMode, processMode)) {
+        WLOGFE("[NAPI]Failed to convert parameter to processMode");
         return false;
     }
 
     int32_t startupVisibility;
     if (!ConvertFromJsValue(env, jsStartupVisibility, startupVisibility)) {
+        WLOGFE("[NAPI]Failed to convert parameter to startupVisibility");
         return false;
     }
     processOptions->processMode = static_cast<AAFwk::ProcessMode>(processMode);
@@ -349,14 +359,12 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
     napi_get_named_property(env, jsObject, "sessionType", &jsSessionType);
-    napi_value jsScreenId = nullptr;
-    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsPersistentRecover = nullptr;
     napi_get_named_property(env, jsObject, "isPersistentRecover", &jsIsPersistentRecover);
+    napi_value jsScreenId = nullptr;
+    napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsRotable = nullptr;
     napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
-    napi_value jsIsSystemInput = nullptr;
-    napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
     napi_value jsIsSetPointerAreas = nullptr;
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
@@ -378,9 +386,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsRotatableUndefined(env, jsIsRotable, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
         return false;
     }
     if (!IsJsIsSetPointerAreasUndefined(env, jsIsSetPointerAreas, sessionInfo)) {
@@ -940,6 +945,30 @@ napi_value CreateJsSessionStartupVisibility(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsWindowVisibility(napi_env env)
+{
+    if (env == nullptr) {
+        WLOGFE("Env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "NO_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
+    napi_set_named_property(env, objValue, "PARTIAL_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
+    napi_set_named_property(env, objValue, "COMPLETE_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_LAYER_STATE_MAX)));
+    return objValue;
+}
+
 napi_value CreateJsSessionProcessMode(napi_env env)
 {
     if (env == nullptr) {
@@ -1191,7 +1220,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value SessionTypeInit(napi_env env)
 {
-    WLOGFD("SessionTypeInit");
+    WLOGFD("in");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -1204,6 +1233,7 @@ napi_value SessionTypeInit(napi_env env)
         WLOGFE("Failed to get object");
         return nullptr;
     }
+
     SetTypeProperty(objValue, env, "TYPE_UNDEFINED", JsSessionType::TYPE_UNDEFINED);
     SetTypeProperty(objValue, env, "TYPE_APP", JsSessionType::TYPE_APP);
     SetTypeProperty(objValue, env, "TYPE_SUB_APP", JsSessionType::TYPE_SUB_APP);
@@ -1232,14 +1262,44 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_VOICE_INTERACTION", JsSessionType::TYPE_VOICE_INTERACTION);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_TOAST", JsSessionType::TYPE_SYSTEM_TOAST);
     SetTypeProperty(objValue, env, "TYPE_SYSTEM_FLOAT", JsSessionType::TYPE_SYSTEM_FLOAT);
-    SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_THEME_EDITOR", JsSessionType::TYPE_THEME_EDITOR);
+    SetTypeProperty(objValue, env, "TYPE_PIP", JsSessionType::TYPE_PIP);
     SetTypeProperty(objValue, env, "TYPE_NAVIGATION_INDICATOR", JsSessionType::TYPE_NAVIGATION_INDICATOR);
     SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
+    SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     return objValue;
 }
 
+napi_value SceneTypeInit(napi_env env)
+{
+    WLOGFD("in");
+
+    if (env == nullptr) {
+        WLOGFE("Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "DEFAULT",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::DEFAULT)));
+    napi_set_named_property(env, objValue, "WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::SYSTEM_WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "TRANSFORM_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::TRANSFORM_SCENE)));
+    napi_set_named_property(env, objValue, "PANEL_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::PANEL_SCENE)));
+    napi_set_named_property(env, objValue, "INPUT_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::INPUT_SCENE)));
+    return objValue;
+}
 
 struct AsyncInfo {
     napi_env env;
@@ -1247,7 +1307,7 @@ struct AsyncInfo {
     std::function<void()> func;
 };
 
-void NapiAsyncWork(napi_env env, std::function<void()> task)
+static void NapiAsyncWork(napi_env env, std::function<void()> task)
 {
     napi_value resource = nullptr;
     AsyncInfo* info = new AsyncInfo();

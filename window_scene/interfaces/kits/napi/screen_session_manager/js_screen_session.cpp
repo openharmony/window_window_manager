@@ -525,10 +525,10 @@ void JsScreenSession::OnScreenDensityChange()
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenConnected: Failed to SendEvent.");
+            WLOGFE("OnScreenDensityChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenConnected: env is nullptr");
+        WLOGFE("OnScreenDensityChange: env is nullptr");
     }
 }
 

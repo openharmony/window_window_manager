@@ -157,10 +157,10 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 {
     std::string infoStr =  "DisplayInfo: ";
     infoStr = infoStr + " id: " + std::to_string(info.id) + " x: " + std::to_string(info.x) +
-        "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) + 
+        "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string( static_cast<int>(info.direction));
+        " direction : " + std::to_string(static_cast<int>(info.direction));
     return infoStr;
 }
 } //namespace
@@ -227,7 +227,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
 void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList)
 {
-    int mainScreenWidth = 0; 
+    int mainScreenWidth = 0;
     int mainScreenHeight = 0;
     if (!displayInfos.empty()) {
         mainScreenWidth = displayInfos[0].width;
@@ -264,7 +264,8 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .width = 0,
             .height = 0,
             .focusWindowId = EMPTY_FOCUS_WINDOW_ID,
-            .currentUserId = currentUserId_};
+            .currentUserId = currentUserId_,
+        };
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
     if (eventHandler_) {
@@ -361,6 +362,29 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
     }
 }
 
+void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
+{
+    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is null");
+        return;
+    }
+    auto surfaceId = surfaceNode->GetId();
+    TLOGI(WmsLogTag::WMS_EVENT, "HostId:%{public}d surfaceId:%{public}" PRIu64
+        " uiExtentionWindowInfo:%{public}d",
+        windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
+    for (auto uiExWindowinfo : windowInfo.uiExtentionWindowInfo) {
+        auto str = DumpWindowInfo(uiExWindowinfo);
+        str = "sec:" + std::to_string(uiExWindowinfo.privacyUIFlag) + " " + str;
+        TLOGI(WmsLogTag::WMS_EVENT, "uiExWindowinfo:%{public}s", str.c_str());
+    }
+}
+
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
@@ -375,15 +399,19 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
             std::to_string(e.zOrder) + "|" +
             std::to_string(e.pid) + "|" +
-            std::to_string(e.defaultHotAreas.size()) + " ";
+            std::to_string(e.defaultHotAreas.size()) + ",";
+
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
+        }
+        if (e.uiExtentionWindowInfo.size() > 0) {
+            DumpUIExtentionWindowInfo(e);
         }
     }
     idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;
-        TLOGI(WmsLogTag::WMS_EVENT, "EventID:%{public}d ListSize:%{public}d idList:%{public}s",
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",
             windowEventID, windowListSize, idList.c_str());
         lastIdList = idList;
     }

@@ -464,5 +464,35 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected, Function | SmallTest | Level
     auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
+
+/**
+ * @tc.name: TerminateSessionByPersistentId001
+ * @tc.desc: TerminateSessionByPersistentId001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    int32_t persistentId = 1;
+    EXPECT_CALL(m->Mock(), TerminateSessionByPersistentId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: TerminateSessionByPersistentId002
+ * @tc.desc: TerminateSessionByPersistentId002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    int32_t persistentId = 0;
+    EXPECT_CALL(m->Mock(), TerminateSessionByPersistentId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    
+    auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
+}
 }
 }
