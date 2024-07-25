@@ -356,7 +356,6 @@ public:
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
-    void NotifySessionFullScreen(bool fullScreen);
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
     virtual void PresentFocusIfPointDown();

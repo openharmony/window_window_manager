@@ -255,14 +255,14 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
 
-static int32_t GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
+static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 {
     int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (realCallerSessionId == sceneSession->GetPersistentId()) {
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
-        auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
-        if (scnSession != nullptr) {
-            realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
+        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
+        if (sceneSession != nullptr) {
+            realCallerSessionId = sceneSession->GetSessionInfo().callerPersistentId_;
         }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
@@ -272,8 +272,8 @@ static int32_t GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d, windowMode %{public}d", info.bundleName_.c_str(),
-        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.windowMode);
+        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(),
+        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -315,10 +315,10 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
-    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+    if (info.fullScreenStart_) {
         sceneSession->NotifySessionFullScreen(true);
     }
-    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
 void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)

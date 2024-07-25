@@ -879,7 +879,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
  * @tc.name: NotifySessionFullScreen
  * @tc.desc: NotifySessionFullScreen
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
