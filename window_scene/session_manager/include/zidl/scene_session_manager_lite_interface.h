@@ -110,7 +110,7 @@ public:
     /**
      * @brief Get SessionDisplayInfo by session's persistentId
      * 
-     * The data structure includes session's pid, along with some related elements of its screen displayInfo.\n
+     * The data returned includes session's pid, along with some related elements of its screen displayInfo.\n
      * It is mainly used for the host security check and info transmission when creating UIExtension.\n
      * The caller requires SA permission.\n
      * 
