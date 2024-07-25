@@ -56,7 +56,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     if (pointerEvent->GetPointerItem(actionId, item)) {
         TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{private}d,"
             "displayy:%{private}d,windowx:%{private}d,windowy:%{private}d,action:%{public}d pressure:"
-            "%{public}f, tiltx:%{public}f,tiltY:%{public}f",
+            "%{public}f,tiltx:%{public}f,tiltY:%{public}f",
             windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
             pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
     }
