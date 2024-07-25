@@ -1853,8 +1853,14 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
     // screenId要在rotation前进行设置
-    ScreenSettingHelper::SetSettingRotationScreenId(static_cast<int32_t>(displayInfo->GetScreenId()));
-    ScreenSettingHelper::SetSettingRotation(static_cast<int32_t>(displayInfo->GetRotation()));
+    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
+    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
+    auto task = [settingScreenId, settingRotation]() {
+        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
+        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
+        ScreenSettingHelper::SetSettingRotation(settingRotation);
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
