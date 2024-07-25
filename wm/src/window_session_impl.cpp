@@ -527,7 +527,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
