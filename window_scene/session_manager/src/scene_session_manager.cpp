@@ -9455,7 +9455,7 @@ int32_t SceneSessionManager::GetAppForceLandscapeMode(const std::string& bundleN
 WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)
 {
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_APP_PROCESS) ||
-        !SessionPermission::IsSystemCalling()) {
+        !SessionPermission::IsSystemAppCall()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
