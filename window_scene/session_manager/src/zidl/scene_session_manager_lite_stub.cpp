@@ -310,7 +310,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionDisplayInfo(MessageParcel& data
     TLOGD(WmsLogTag::DEFAULT, "run");
     int32_t persistentId = data.ReadInt32();
     SessionDisplayInfo sessionDisplayInfo;
-    const WSError& ret = GetSessionDisplayInfo(persistentId, sessionDisplayInfo);
+    WSError ret = GetSessionDisplayInfo(persistentId, sessionDisplayInfo);
     if (!reply.WriteParcelable(&sessionDisplayInfo)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to get sessionDisplayInfo");
         return ERR_INVALID_DATA;
