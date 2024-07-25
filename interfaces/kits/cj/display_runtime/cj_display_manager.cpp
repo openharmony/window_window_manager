@@ -114,7 +114,7 @@ static CFoldCreaseRegion* CreateCFoldCreaseRegionObject(sptr<FoldCreaseRegion> &
 
 RetStruct CJDisplayManager::GetDefaultDisplaySync()
 {
-    RetStruct ret;
+    RetStruct ret = {.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr};
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DisplayManager] Get default display is nullptr");
@@ -135,7 +135,7 @@ RetStruct CJDisplayManager::GetDefaultDisplaySync()
 
 RetStruct CJDisplayManager::GetAllDisplays()
 {
-    RetStruct ret;
+    RetStruct ret = {.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr};
     std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
     if (displays.empty()) {
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
@@ -148,13 +148,8 @@ RetStruct CJDisplayManager::GetAllDisplays()
 
 RetStruct CJDisplayManager::HasPrivateWindow(uint32_t displayId)
 {
-    RetStruct ret;
+    RetStruct ret = {.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr};
     int64_t displayId_ = static_cast<int64_t>(displayId);
-    if (displayId_ < 0) {
-        ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM);
-        return ret;
-    }
-
     bool *hasPrivateWindow = static_cast<bool*>(malloc(sizeof(bool)));
     if (hasPrivateWindow == nullptr) {
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
@@ -199,7 +194,7 @@ uint32_t CJDisplayManager::GetFoldDisplayMode()
 
 RetStruct CJDisplayManager::GetCurrentFoldCreaseRegion()
 {
-    RetStruct result;
+    RetStruct result = {.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr};
     sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
     if (region == nullptr) {
         result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);

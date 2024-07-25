@@ -28,18 +28,11 @@ multimedia_path = "//foundation/multimedia/image_framework"
 multimodalinput_path = "//foundation/multimodalinput"
 sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
-ability_runtime_native_path = "${ability_runtime_path}/frameworks/native"
 
 declare_args() {
-  efficiency_manager_enable = true
   device_status_enable = true
   window_manager_feature_subscribe_motion = false
   window_manager_feature_tp_enable = false
-
-  if (defined(global_parts_info) &&
-      !defined(global_parts_info.resourceschedule_efficiency_manager)) {
-    efficiency_manager_enable = false
-  }
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {

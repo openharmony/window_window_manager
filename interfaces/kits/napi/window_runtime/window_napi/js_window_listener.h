@@ -44,8 +44,8 @@ const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
-const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
+const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
@@ -94,8 +94,9 @@ public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
-    void OnWindowStatusChange(WindowStatus windowstatus) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+
+    void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;

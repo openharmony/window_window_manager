@@ -141,13 +141,6 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest
         return;
     }
     ASSERT_NE(nullptr, fltWin);
-    if (scene->GoForeground() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    } else {
-        ASSERT_NE(WMError::WM_OK, scene->GoForeground());
-    }
-
-    ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());

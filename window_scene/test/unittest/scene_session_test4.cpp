@@ -228,25 +228,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
 }
 
 /**
- * @tc.name: isNeedSystemPermissionByAction
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, isNeedSystemPermissionByAction, Function | SmallTest | Level2)
-{
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_FLAGS));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-    ASSERT_TRUE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
-
-    ASSERT_FALSE(sceneSession->isNeedSystemPermissionByAction(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-}
-
-/**
  * @tc.name: SetWindowFlags
  * @tc.desc: normal function
  * @tc.type: FUNC

@@ -118,6 +118,8 @@ ohos_static_library("window_extension_unittest_common") {
     "input:libmmi-client",
     "ipc:ipc_single",
   ]
+
+  public_external_deps = [ "ability_base:want" ]
   subsystem_name = "window"
   part_name = "window_manager"
 }
