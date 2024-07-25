@@ -591,17 +591,17 @@ void SessionStageProxy::NotifySessionFullScreen(bool status)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteBool(status)) {
-        WLOGFE("Write status failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write status failed");
         return;
     }
     if (Remote()->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("Send NotifySessionFullScreen Request failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Send Request failed");
     }
 }
 

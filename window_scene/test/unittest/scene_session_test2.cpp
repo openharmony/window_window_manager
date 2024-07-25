@@ -725,10 +725,10 @@ HWTEST_F(SceneSessionTest2, NotifySessionFullScreen, Function | SmallTest | Leve
     info.abilityName_ = "FullScreen01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<Rosen::ISession> session;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
+    EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
