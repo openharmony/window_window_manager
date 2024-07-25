@@ -109,11 +109,11 @@ public:
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     /**
      * @brief Get SessionDisplayInfo by session's persistentId
-     * 
+     *
      * The data returned includes session's pid, along with some related elements of its screen displayInfo.\n
      * It is mainly used for the host security check and info transmission when creating UIExtension.\n
      * The caller requires SA permission.\n
-     * 
+     *
      * @param persistentId session's persistentId
      * @param sessionDisplayInfo result data
      * @return WSError
