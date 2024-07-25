@@ -108,16 +108,16 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     /**
-     * @brief 根据persistentId获取SessionDisplayInfo
+     * @brief Get SessionDisplayInfo by session's persistentId
      * 
-     * 返回的数据结构体内包含对应session的pid，和session所在屏幕的displayInfo相关属性。\n
-     * 主要用于创建UIExtension时对宿主进行安全相关的校验和信息传递。\n
-     * 调用方需要SA权限。\n
+     * The data structure includes session's pid, along with some related elements of its screen displayInfo.\n
+     * It is mainly used for the host security check and info transmission when creating UIExtension.\n
+     * The caller requires SA permission.\n
      * 
-     * @param persistentId 待查询的session的persistentId
-     * @param sessionDisplayInfo 查询结果
+     * @param persistentId session's persistentId
+     * @param sessionDisplayInfo result data
      * @return WSError
-     * @permission 需要SA权限
+     * @permission SA permission required
      */
     virtual WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) = 0;
 };
