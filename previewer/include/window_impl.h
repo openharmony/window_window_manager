@@ -119,6 +119,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     // window effect

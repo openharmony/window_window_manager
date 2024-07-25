@@ -30,9 +30,9 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 

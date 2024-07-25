@@ -296,7 +296,12 @@ WSError SceneSession::Disconnect(bool isFromClient)
             return WSError::WS_OK;
         }
     }
-    PostTask([weakThis = wptr(this), isFromClient]() {
+    return DisconnectTask(isFromClient, true);
+}
+
+WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
+{
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -310,7 +315,7 @@ WSError SceneSession::Disconnect(bool isFromClient)
         }
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
-        if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
+        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) && isSaveSnapshot) {
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
@@ -1328,10 +1333,10 @@ void SceneSession::RemoveUIExtSurfaceNodeId(int32_t persistentId)
     auto pairIter = std::find_if(uiExtNodeIdToPersistentIdMap_.begin(), uiExtNodeIdToPersistentIdMap_.end(),
         [persistentId](const auto& entry) { return entry.second == persistentId; });
     if (pairIter != uiExtNodeIdToPersistentIdMap_.end()) {
-        uiExtNodeIdToPersistentIdMap_.erase(pairIter);
         TLOGI(WmsLogTag::WMS_UIEXT,
             "Successfully removed uiExtension pair surfaceNodeId=%{public}" PRIu64 ", persistentId=%{public}d",
             pairIter->first, persistentId);
+        uiExtNodeIdToPersistentIdMap_.erase(pairIter);
         return;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "Failed to remove uiExtension by persistentId=%{public}d", persistentId);
@@ -1449,7 +1454,8 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
     if (displayX < 0 || displayY < 0) {
-        WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
+        TLOGE(WmsLogTag::WMS_EVENT, "Illegal parameter, displayX:%{private}d, displayY:%{private}d",
+            displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
