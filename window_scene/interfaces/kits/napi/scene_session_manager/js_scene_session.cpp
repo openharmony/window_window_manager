@@ -2055,8 +2055,8 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d, windowMode %{public}d", info.bundleName_.c_str(),
-        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.windowMode);
+        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(),
+        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse);
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
@@ -2081,10 +2081,10 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
-    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+    if (info.fullScreenStart_) {
         sceneSession->NotifySessionFullScreen(true);
     }
-    sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
 }
 
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
