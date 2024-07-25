@@ -113,7 +113,7 @@ public:
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual int32_t GetAppForceLandscapeMode(const std::string& bundleName) { return 0; }
     virtual int32_t GetStatusBarHeight() { return 0; }
-    virtual WSError SetDialogSessionBackEventEnabled(bool isEnabled) { return WSError::WS_OK; }
+    virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 
