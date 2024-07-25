@@ -14,6 +14,7 @@
  */
 
 #include "anomaly_detection.h"
+#include <hitrace_meter.h>
 
 #include "dfx_hisysevent.h"
 #include "interfaces/include/ws_common.h"
@@ -31,10 +32,11 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "
 
 void AnomalyDetection::SceneZOrderCheckProcess()
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::SceneZOrderCheckProcess");
     bool keyGuardFlag = false;
     uint32_t curZOrder = 0;
     auto func = [&curZOrder, &keyGuardFlag](sptr<SceneSession> session) {
-        if ((session == nullptr) || (!SceneSessionManager::GetInstance().IsSessionVisible(session))) {
+        if ((session == nullptr) || (!SceneSessionManager::GetInstance().IsSessionVisibleForeground(session))) {
             return false;
         }
         // check zorder = 0
@@ -99,7 +101,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             return false;
         }
         if (focusSessionFlag && session->GetBlockingFocus() && session->GetSystemTouchable() &&
-            SceneSessionManager::GetInstance().IsSessionVisible(session)) {
+            SceneSessionManager::GetInstance().IsSessionVisibleForeground(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
             ReportFocusException("check blockingFocus", focusedId, nextId, session);

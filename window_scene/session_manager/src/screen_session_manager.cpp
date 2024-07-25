@@ -1563,11 +1563,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
             rsInterface_.SetScreenPowerStatus(screenId, status);
         }
     }
-    if (isMultiScreenCollaboration_) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not handler sensor");
-    } else {
-        HandlerSensor(status, reason);
-    }
+    HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1606,7 +1602,11 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
         } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
             TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
-            ScreenSensorConnector::UnsubscribeRotationSensor();
+            if (isMultiScreenCollaboration_) {
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
+            } else {
+                ScreenSensorConnector::UnsubscribeRotationSensor();
+            }
 #ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
@@ -4769,6 +4769,10 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
 
 DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     {
         std::lock_guard<std::mutex> lock(freezedPidListMutex_);
         for (auto pid : pidList) {
@@ -4803,6 +4807,10 @@ DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, b
 
 DMError ScreenSessionManager::ResetAllFreezeStatus()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     std::lock_guard<std::mutex> lock(freezedPidListMutex_);
     freezedPidList_.clear();
     TLOGI(WmsLogTag::DMS, "freezedPidList_ has been clear.");
@@ -4825,6 +4833,10 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 
 void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
     if (windowIdList.empty()) {
         TLOGE(WmsLogTag::DMS, "WindowIdList is empty");
@@ -4846,6 +4858,10 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
 
 void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {

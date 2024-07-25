@@ -222,7 +222,7 @@ void HidumpController::DumpLayoutParam(
         << session->GetZOrder() << "|"
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
-        << session->isDirty_ << "|"
+        << session->IsDirtyWindow() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl
@@ -307,7 +307,7 @@ void HidumpController::DumpKeyboardParam(
     oss << "Keyboard:"
         << std::endl
         << session->GetSCBKeepKeyboardFlag() << "|"
-        << session->sessionInfo_.isSystemInput_ << "|"
+        << session->IsSystemInput() << "|"
         << static_cast<uint32_t>(property->sessionGravity_) << "|"
         << property->sessionGravitySizePercent_ << "|"
         << property->GetKeepKeyboardFlag() << "|"
@@ -505,7 +505,7 @@ void HidumpController::DumpVisibleParamList(std::ostringstream& oss)
 void HidumpController::DumpVisibleParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "Visible: "
-        << session->GetVisible() << "|"
+        << session->GetRSVisible() << "|"
         << static_cast<uint32_t>(session->GetVisibilityState()) << "|"
         << std::endl;
 }
