@@ -2488,6 +2488,7 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     property->SetMaximizeMode(mode);
     return sessionStage_->UpdateMaximizeMode(mode);
 }
+
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
