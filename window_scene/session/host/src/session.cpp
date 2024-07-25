@@ -2291,11 +2291,8 @@ void Session::RectCheckProcess()
             oss << " RectCheck err ratio ";
             oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-
-
             oss << " windowName: " << property->GetWindowName() << ",";
             oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
-
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
             oss << " setting ratio: " << ratio << ",";
