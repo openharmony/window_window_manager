@@ -1928,6 +1928,10 @@ void SceneSession::SetMoveDragCallback()
 
 void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 {
+    if (!moveDragController_) {
+        WLOGE("moveDragController_ is null");
+        return;
+    }
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "property is null");

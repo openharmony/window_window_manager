@@ -442,14 +442,24 @@ void Session::UpdateSessionState(SessionState state)
 
 void Session::UpdateSessionTouchable(bool touchable)
 {
-    GetSessionProperty()->SetTouchable(touchable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
+        return;
+    }
+    property->SetTouchable(touchable);
     NotifySessionTouchableChange(touchable);
 }
 
 WSError Session::SetFocusable(bool isFocusable)
 {
     WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
-    GetSessionProperty()->SetFocusable(isFocusable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetFocusable(isFocusable);
     if (isFocused_ && !GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
         NotifyRequestFocusStatusNotifyManager(false, true, reason);
@@ -515,7 +525,12 @@ WSError Session::SetTouchable(bool touchable)
 
 bool Session::GetTouchable() const
 {
-    return GetSessionProperty()->GetTouchable();
+    auto property = GetSessionProperty();
+    if (property) {
+        return property->GetTouchable();
+    }
+    TLOGE(WmsLogTag::WMS_EVENT, "property is null");
+    return true;
 }
 
 void Session::SetForceTouchable(bool forceTouchable)
@@ -1484,8 +1499,10 @@ void Session::SetParentSession(const sptr<Session>& session)
         WLOGFW("Session is nullptr");
         return;
     }
-    std::unique_lock<std::shared_mutex> lock(parentSessionMutex_);
-    parentSession_ = session;
+    {
+        std::unique_lock<std::shared_mutex> lock(parentSessionMutex_);
+        parentSession_ = session;
+    }
     TLOGD(WmsLogTag::WMS_SUB, "[WMSDialog][WMSSub]Set parent success, parentId: %{public}d, id: %{public}d",
         session->GetPersistentId(), GetPersistentId());
 }
@@ -1656,13 +1673,17 @@ WSError Session::HandleSubWindowClick(int32_t action)
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     bool raiseEnabled = property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession_) {
+    } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
-        parentSession_->NotifyClick();
+        parentSession->NotifyClick();
     }
     return WSError::WS_OK;
 }
@@ -2254,7 +2275,12 @@ void Session::RectCheckProcess()
     if (!(IsSessionForeground() || isVisible_)) {
         return;
     }
-    auto displayId = GetSessionProperty()->GetDisplayId();
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        return;
+    }
+    auto displayId = property->GetDisplayId();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
@@ -2273,11 +2299,8 @@ void Session::RectCheckProcess()
             oss << " RectCheck err ratio ";
             oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-            auto property = GetSessionProperty();
-            if (property) {
-                oss << " windowName: " << property->GetWindowName() << ",";
-                oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
-            }
+            oss << " windowName: " << property->GetWindowName() << ",";
+            oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
             oss << " setting ratio: " << ratio << ",";
@@ -2466,6 +2489,10 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
         mode = MaximizeMode::MODE_FULL_FILL;
     }
     auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     property->SetMaximizeMode(mode);
     return sessionStage_->UpdateMaximizeMode(mode);
 }
