@@ -68,6 +68,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsScreenPropertyChangeReason(env));
     napi_set_named_property(env, exportObj, "FoldStatus",
         JsScreenUtils::CreateJsFoldStatus(env));
+    napi_set_named_property(env, exportObj, "ScreenPropertyChangeType",
+        JsScreenUtils::CreateJsScreenPropertyChangeType(env));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);
@@ -408,9 +410,9 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateScreenRotationProperty");
     size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    napi_value argv[5] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) { // 3: params num
+    if (argc < 3) { // at least 3: params num
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -439,7 +441,18 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
+    ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
+    if (argc > ARGC_THREE) {
+        if (!ConvertFromJsValue(env, argv[ARGC_THREE], type) || type < ScreenPropertyChangeType::UNSPECIFIED ||
+            type > ScreenPropertyChangeType::ROTATION_END) { // 3: the 4rd argv
+            TLOGE(WmsLogTag::DMS, "[NAPI]screenPropertyChangeType is invalid");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        type);
     return NapiGetUndefined(env);
 }
 
