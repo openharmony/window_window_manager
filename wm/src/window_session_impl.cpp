@@ -202,9 +202,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if ((isPC || isFreeMutiWindowMode) && windowOption_ != nullptr) {
+    if ((isPC || IsFreeMultiWindowMode()) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -824,12 +822,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDialogWindow)) {
+    if ((isPC || IsFreeMultiWindowMode()) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true);
         return;
@@ -1996,9 +1992,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if (!(isPC || isFreeMutiWindowMode)) {
+    if (!(isPC || IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
