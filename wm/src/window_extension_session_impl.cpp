@@ -192,7 +192,6 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         windowExtensionSessionSet_.erase(this);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Erase windowExtensionSession in set, id: %{public}d.", GetPersistentId());
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     if (context_) {
         context_.reset();
     }

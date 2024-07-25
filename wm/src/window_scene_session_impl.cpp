@@ -1289,7 +1289,6 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
 	}
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
