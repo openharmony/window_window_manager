@@ -89,6 +89,24 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallT
     ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: GetSessionDisplayInfo
+ * @tc.desc: GetSessionDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, GetSessionDisplayInfo, Function | SmallTest | Level2)
+{
+    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
+    SessionDisplayInfo sessionDisplayInfo;
+    auto ret = sessionManagerLite.GetSessionDisplayInfo(0, sessionDisplayInfo);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    sessionManagerLite.ClearSessionManagerProxy();
+    sessionManagerLite.Clear();
+    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
+}
+
 /**
  * @tc.name: ReregisterSessionListener
  * @tc.desc: normal function
