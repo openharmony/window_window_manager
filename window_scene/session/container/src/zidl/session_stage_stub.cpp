@@ -100,6 +100,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER):
+            return HandleCompatibleFullScreenRecover(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE):
+            return HandleCompatibleFullScreenMinimize(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
+            return HandleCompatibleFullScreenClose(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -450,6 +456,30 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
     }
     NotifyKeyboardPanelInfoChange(*keyboardPanelInfo);
 
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenRecover!");
+    WSError errCode = CompatibleFullScreenRecover();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenMinimize!");
+    WSError errCode = CompatibleFullScreenMinimize();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenClose!");
+    WSError errCode = CompatibleFullScreenClose();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
