@@ -309,7 +309,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTe
     MessageParcel reply;
 
     data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
 }
 

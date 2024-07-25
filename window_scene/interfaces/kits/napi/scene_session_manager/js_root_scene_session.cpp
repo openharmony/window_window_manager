@@ -255,14 +255,25 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
 
+int32_t JsRootSceneSession::GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
+{
+    int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
+    if (realCallerSessionId == sceneSession->GetPersistentId()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
+        auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
+        if (scnSession != nullptr) {
+            realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
+    return realCallerSessionId;
+}
+
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
         "appIndex %{public}d, reuse %{public}d, windowMode %{public}d", info.bundleName_.c_str(),
         info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.windowMode);
-    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        info.fullScreenStart_ = true;
-    }
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -308,20 +319,6 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession->NotifySessionFullScreen(true);
     }
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
-}
-
-int32_t JsRootSceneSession::GetRealCallerSessionId(sptr<SceneSession>& sceneSession)
-{
-    int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
-    if (realCallerSessionId == sceneSession->GetPersistentId()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
-        auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
-        if (scnSession != nullptr) {
-            realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
-        }
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
-    return realCallerSessionId;
 }
 
 void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
