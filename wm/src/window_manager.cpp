@@ -329,7 +329,7 @@ void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
           static_cast<uint8_t>(type));
     std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners;
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         windowStyleListeners = windowStyleListeners_;
     }
     for (auto &listener : windowStyleListeners) {
@@ -1264,7 +1264,7 @@ WMError WindowManager::RegisterWindowStyleChangedListener(const sptr<IWindowStyl
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowStyleListenerAgent_ == nullptr) {
         pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
@@ -1293,7 +1293,7 @@ WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowSt
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
     if (iter == pImpl_->windowStyleListeners_.end()) {
         TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
