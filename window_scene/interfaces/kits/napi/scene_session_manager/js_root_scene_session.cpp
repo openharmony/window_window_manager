@@ -126,6 +126,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession set jsCbMap[%s]", cbType.c_str());
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
@@ -196,6 +197,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
 
 bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession::IsCallbackRegistered[%s]", type.c_str());
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
@@ -215,6 +217,7 @@ bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& t
 
 std::shared_ptr<NativeReference> JsRootSceneSession::GetJSCallback(const std::string& functionName) const
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession::GetJSCallback[%s]", functionName.c_str());
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
     auto iter = jsCbMap_.find(functionName);

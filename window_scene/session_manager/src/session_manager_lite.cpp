@@ -117,9 +117,6 @@ SessionManagerLite::~SessionManagerLite()
     DeleteAllSessionListeners();
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
-    if (recoverListenerRegistered_ && mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_->UnregisterSMSLiteRecoverListener();
-    }
 }
 
 void SessionManagerLite::ClearSessionManagerProxy()

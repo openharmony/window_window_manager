@@ -28,7 +28,6 @@ multimedia_path = "//foundation/multimedia/image_framework"
 multimodalinput_path = "//foundation/multimodalinput"
 sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
-ability_runtime_native_path = "${ability_runtime_path}/frameworks/native"
 
 declare_args() {
   device_status_enable = true

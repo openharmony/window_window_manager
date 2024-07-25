@@ -202,21 +202,21 @@ sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
     }
 }
 
-sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
-{
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return WindowSceneSessionImpl::GetMainWindowWithContext(context);
-    } else {
-        return nullptr;
-    }
-}
-
 sptr<Window> Window::GetWindowWithId(uint32_t windId)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return WindowSceneSessionImpl::GetWindowWithId(windId);
     } else {
         return WindowImpl::GetWindowWithId(windId);
+    }
+}
+
+sptr<Window> Window::GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetMainWindowWithContext(context);
+    } else {
+        return nullptr;
     }
 }
 

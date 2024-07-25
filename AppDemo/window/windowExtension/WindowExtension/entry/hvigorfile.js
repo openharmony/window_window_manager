@@ -1,4 +1,3 @@
-// Script for compiling build behavior. It is built in the build plug-in and cannot be modified currently.
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,4 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Script for compiling build behavior. It is built in the build plug-in and cannot be modified currently.
 module.exports = require('@ohos/hvigor-ohos-plugin').hapTasks
