@@ -9464,6 +9464,10 @@ WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId
         TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", persistentId);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     sceneSession->Clear(true);
     TLOGI(WmsLogTag::WMS_LIFE, "Terminate success, id:%{public}d.", persistentId);
     return WMError::WM_OK;
