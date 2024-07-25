@@ -924,7 +924,7 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to title");
         return false;
     }
-    bool decorEnabled;
+    bool decorEnabled = false;
     if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to decorEnabled");
         return false;
