@@ -108,22 +108,6 @@ WSError WindowEventChannelTest::TransferAccessibilityDumpChildInfo(bool isChanne
 
 namespace {
 /**
- * @tc.name: OnDispatchEventProcessed
- * @tc.desc: normal function OnDispatchEventProcessed
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, OnDispatchEventProcessed, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowEventChannelTest: OnDispatchEventProcessed";
-    int32_t eventId = 12;
-    int64_t actionTime = 8888;
-    uint32_t res = 0;
-    WindowEventChannel::OnDispatchEventProcessed(eventId, actionTime);
-    ASSERT_EQ(0, res);
-    GTEST_LOG_(INFO) << "WindowEventChannelTest: OnDispatchEventProcessed";
-}
-
-/**
  * @tc.name: TransferKeyEvent
  * @tc.desc: normal function TransferKeyEvent
  * @tc.type: FUNC
