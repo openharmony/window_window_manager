@@ -3110,7 +3110,6 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    }
     Minimize();
     return WSError::WS_OK;
 }
