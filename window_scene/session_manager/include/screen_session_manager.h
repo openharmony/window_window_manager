@@ -330,7 +330,6 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
-    std::shared_ptr<RSDisplayNode> GetScreenSnapshotDisplayNode(DisplayId displayId);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -416,6 +415,7 @@ private:
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex snapBypickerMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -427,9 +427,7 @@ private:
     std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
-    std::atomic<bool> isScreenShotByPicker_ = false;
     std::atomic<bool> isPhyScreenConnected_ = false;
-    std::atomic<bool> isInGetSnapshotByPicker_ = false;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;

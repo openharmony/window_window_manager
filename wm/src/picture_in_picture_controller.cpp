@@ -185,6 +185,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     PictureInPictureManager::SetActiveController(this);
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
         pipOption_->GetPipTemplate(), PIP_SUCCESS, "show pip success");
+    isStoppedFromClient_ = false;
     return WMError::WM_OK;
 }
 
@@ -281,11 +282,16 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
             pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
+    isStoppedFromClient_ = true;
     WMError res = window_->NotifyPrepareClosePiPWindow();
     if (res != WMError::WM_OK) {
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(StopPipType::USER_STOP),
             pipOption_->GetPipTemplate(), FAILED, "window destroy failed");
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
+    }
+    curState_ = PiPWindowState::STATE_STOPPING;
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPreparePictureInPictureStop();
     }
     return res;
 }
@@ -294,7 +300,8 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
 {
     TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
     std::lock_guard<std::mutex> lock(mutex_);
-    if (curState_ == PiPWindowState::STATE_STOPPING || curState_ == PiPWindowState::STATE_STOPPED) {
+    if ((!isStoppedFromClient_ && curState_ == PiPWindowState::STATE_STOPPING) ||
+        curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopPipType),
             pipOption_->GetPipTemplate(), FAILED, "Repeat stop request");
@@ -306,9 +313,11 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
             pipOption_->GetPipTemplate(), FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    curState_ = PiPWindowState::STATE_STOPPING;
-    for (auto& listener : pipLifeCycleListeners_) {
-        listener->OnPreparePictureInPictureStop();
+    if (curState_ != PiPWindowState::STATE_STOPPING) {
+        curState_ = PiPWindowState::STATE_STOPPING;
+        for (auto& listener : pipLifeCycleListeners_) {
+            listener->OnPreparePictureInPictureStop();
+        }
     }
     if (!destroyWindow) {
         ResetExtController();

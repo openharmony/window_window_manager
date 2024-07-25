@@ -642,7 +642,7 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetDecorEnable(true);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
-    ASSERT_EQ(false, scensession->IsDecorEnable());
+    ASSERT_EQ(true, scensession->IsDecorEnable());
 
     sptr<SceneSession> scensession_;
     scensession_ = new (std::nothrow) SceneSession(info, nullptr);
@@ -1081,8 +1081,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
-        WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -1847,6 +1846,42 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = scensession->UpdateSessionRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetStatusBarHeight";
+    info.bundleName_ = "GetStatusBarHeight";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    int32_t height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 0);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
+    height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 0);
+    WSRect rect({0, 0, 0, 1});
+    sceneSession->winRect_ = rect;
+    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+        uint64_t displayId)->std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    sceneSession->property_ = property;
+    height = sceneSession->GetStatusBarHeight();
+    ASSERT_EQ(height, 1);
 }
 }
 }

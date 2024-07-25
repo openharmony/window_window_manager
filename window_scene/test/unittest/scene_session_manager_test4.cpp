@@ -769,7 +769,7 @@ HWTEST_F(SceneSessionManagerTest4, CacVisibleWindowNum, Function | SmallTest | L
     ASSERT_NE(sceneSession04, nullptr);
     ASSERT_NE(sceneSession01->property_, nullptr);
     sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_WALLPAPER;
-    sceneSession01->SetVisible(true);
+    sceneSession01->SetRSVisible(true);
     sceneSession02->state_ = SessionState::STATE_BACKGROUND;
     ASSERT_NE(sceneSession03->property_, nullptr);
     sceneSession03->property_->type_ = WindowType::APP_MAIN_WINDOW_END;

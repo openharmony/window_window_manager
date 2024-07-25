@@ -55,6 +55,10 @@ sptr<CJWindowImpl> CreateCjWindowObject(sptr<Window>& window)
     }
 
     windowImpl = FFI::FFIData::Create<CJWindowImpl>(window);
+    if (windowImpl == nullptr) {
+        TLOGI(WmsLogTag::WMS_DIALOG, "Failed to create window %{public}s", windowName.c_str());
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_cjWindowMap[windowName] = windowImpl;
     return windowImpl;
@@ -990,7 +994,7 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
 void SetBarPropertyMap(
     std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
-    CBarProperties cProperties,
+    const CBarProperties& cProperties,
     sptr<Window> nativeWindow)
 {
     auto statusProperty = nativeWindow->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -1030,7 +1034,7 @@ void SetBarPropertyMap(
     }
 }
 
-int32_t CJWindowImpl::SetWindowSystemBarProperties(CBarProperties cProperties)
+int32_t CJWindowImpl::SetWindowSystemBarProperties(const CBarProperties& cProperties)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
@@ -1088,7 +1092,7 @@ int32_t CJWindowImpl::SetWindowSystemBarEnable(char** arr, uint32_t size)
     return static_cast<int32_t>(ret);
 }
 
-int32_t CJWindowImpl::OnRegisterWindowCallback(std::string type, int64_t funcId)
+int32_t CJWindowImpl::OnRegisterWindowCallback(const std::string& type, int64_t funcId)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
@@ -1102,7 +1106,7 @@ int32_t CJWindowImpl::OnRegisterWindowCallback(std::string type, int64_t funcId)
     return static_cast<int32_t>(ret);
 }
 
-int32_t CJWindowImpl::UnregisterWindowCallback(std::string type, int64_t funcId)
+int32_t CJWindowImpl::UnregisterWindowCallback(const std::string& type, int64_t funcId)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");

@@ -29,7 +29,6 @@ using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ModalSystemUiExtension" };
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 constexpr int32_t VALUE_TYPE_STRING = 9;
@@ -50,13 +49,13 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     if (g_isDialogShow) {
         AppExecFwk::ElementName element;
         dialogConnectionCallback_->OnAbilityConnectDone(element, g_remoteObject, INVALID_USERID);
-        WLOGI("ConnectSystemUi dialog has been show");
+        TLOGI(WmsLogTag::WMS_UIEXT, "dialog has been shown");
         return true;
     }
 
     auto abilityManagerClient = AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
-        WLOGFE("ConnectSystemUi AbilityManagerClient is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "AbilityManagerClient is nullptr");
         return false;
     }
 
@@ -64,10 +63,10 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     systemUIWant.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
     auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
-        WLOGFE("ConnectSystemUi ConnectAbility dialog failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result = %{public}d", result);
         return false;
     }
-    WLOGI("ConnectSystemUi ConnectAbility dialog success");
+    TLOGI(WmsLogTag::WMS_UIEXT, "ConnectAbility success");
     return true;
 }
 
@@ -98,10 +97,10 @@ std::string ModalSystemUiExtension::ToString(const AAFwk::WantParams& wantParams
 void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    WLOGI("OnAbilityConnectDone show dialog begin");
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     std::lock_guard lock(mutex_);
     if (remoteObject == nullptr) {
-        WLOGFE("OnAbilityConnectDone remoteObject is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is nullptr");
         return;
     }
     if (g_remoteObject == nullptr) {
@@ -110,26 +109,35 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
-    data.WriteString16(u"bundleName");
-    data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()));
-    data.WriteString16(u"abilityName");
-    data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()));
-    data.WriteString16(u"parameters");
-    data.WriteString16(Str8ToStr16(ModalSystemUiExtension::ToString(want_.GetParams())));
+    if (!data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write message parcel key size failed");
+        return;
+    }
+    if (!data.WriteString16(u"bundleName") || !data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write bundleName failed");
+        return;
+    }
+    if (!data.WriteString16(u"abilityName") || !data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write abilityName failed");
+        return;
+    }
+    if (!data.WriteString16(u"parameters") ||
+        !data.WriteString16(Str8ToStr16(ModalSystemUiExtension::ToString(want_.GetParams())))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write parameters failed");
+        return;
+    }
     int32_t ret = remoteObject->SendRequest(AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     if (ret != ERR_OK) {
-        WLOGFE("OnAbilityConnectDone show dialog is failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "show dialog failed");
         return;
     }
     g_isDialogShow = true;
-    WLOGI("OnAbilityConnectDone show dialog is success");
 }
 
 void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element,
     int resultCode)
 {
-    WLOGI("OnAbilityDisconnectDone");
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     std::lock_guard lock(mutex_);
     g_isDialogShow = false;
     g_remoteObject = nullptr;

@@ -1118,27 +1118,27 @@ HWTEST_F(WindowSessionTest2, GetSystemTouchable35, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: SetVisible36
- * @tc.desc: SetVisible
+ * @tc.name: SetRSVisible36
+ * @tc.desc: SetRSVisible
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest2, SetVisible36, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool isVisible = false;
-    ASSERT_EQ(WSError::WS_OK, session_->SetVisible(isVisible));
+    ASSERT_EQ(WSError::WS_OK, session_->SetRSVisible(isVisible));
 }
 
 /**
- * @tc.name: GetVisible37
- * @tc.desc: GetVisible
+ * @tc.name: GetRSVisible37
+ * @tc.desc: GetRSVisible
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest2, GetVisible37, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    if (!session_->GetVisible()) {
-        ASSERT_EQ(false, session_->GetVisible());
+    if (!session_->GetRSVisible()) {
+        ASSERT_EQ(false, session_->GetRSVisible());
     }
 }
 

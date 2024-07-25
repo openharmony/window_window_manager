@@ -28,6 +28,7 @@ void FinishTraceForSyncTask();
 class TaskScheduler {
 public:
     explicit TaskScheduler(const std::string& threadName);
+    explicit TaskScheduler(const std::string& threadName, AppExecFwk::ThreadMode threadMode);
     ~TaskScheduler() = default;
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
