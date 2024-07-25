@@ -391,6 +391,7 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
     EXPECT_NE(nullptr, sceneSession);
+    EXPECT_EQ(-1, sceneSession->GetPersistenId());
     
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     sceneSession->TransferPointerEvent(pointerEvent, true);
@@ -400,6 +401,7 @@ HWTEST_F(IntentionEventManagerTest, ProcessEnterLeaveEventAsync1, Function | Med
     SceneSession::ClearEnterWindow();
     info.persistentId_ = 2024;
     sceneSession = new SceneSession(info, callback);
+    EXPECT_EQ(2024, sceneSession->GetPersistenId());
     sceneSession->TransferPointerEvent(pointerEvent, true);
     inputEventListener_->ProcessEnterLeaveEventAsync();
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener2 =
