@@ -3105,7 +3105,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
@@ -3123,7 +3123,7 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
@@ -3141,7 +3141,7 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
