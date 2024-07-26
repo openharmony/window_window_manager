@@ -3248,21 +3248,6 @@ WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::CompatibleFullScreenRecover()
-{
-    return WSError::WS_OK;
-}
-
-WSError WindowSessionImpl::CompatibleFullScreenMinimize()
-{
-    return WSError::WS_OK;
-}
-
-WSError WindowSessionImpl::CompatibleFullScreenClose()
-{
-    return WSError::WS_OK;
-}
-
 WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
 {
     return WSError::WS_OK;
