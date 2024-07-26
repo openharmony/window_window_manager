@@ -565,9 +565,9 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
 {
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
     WMError errCode = GetWindowStyleType(windowStyleType);
-    WLOGFI("run HandleGetWindowStyleType, windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
+    TLOGI(WmsLogTag::WMS_MAIN, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
     if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
-        WLOGE("Failed to WriteBool");
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
