@@ -663,7 +663,7 @@ void PictureInPictureController::UpdatePiPSourceRect() const
     float height = 0;
     mainWindowXComponentController_->GetGlobalPosition(posX, posY);
     mainWindowXComponentController_->GetSize(width, height);
-    if (static_cast<uint32_t>(width) == 0 && static_cast<uint32_t>(height) == 0 ) {
+    if (static_cast<uint32_t>(width) == 0 && static_cast<uint32_t>(height) == 0) {
         TLOGE(WmsLogTag::WMS_PIP, "get xComponent size failed");
         width = windowRect_.width_;
         height = windowRect_.height_;
