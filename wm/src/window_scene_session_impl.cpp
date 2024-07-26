@@ -3105,14 +3105,15 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!property_->GetCompatibleModeInPc()) {
-        WLOGFE("is not CompatibleModeInPc, can not Recover");
+        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Recover");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Recover();
@@ -3122,14 +3123,15 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!property_->GetCompatibleModeInPc()) {
-        WLOGFE("is not CompatibleModeInPc, can not Minimize");
+        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Minimize");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Minimize();
@@ -3139,14 +3141,15 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "CompatibleFullScreenRecover permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!property_->GetCompatibleModeInPc()) {
-        WLOGFE("is not CompatibleModeInPc, can not Close");
+        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Close");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Close();
