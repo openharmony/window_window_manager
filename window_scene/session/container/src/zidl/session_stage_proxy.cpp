@@ -587,6 +587,11 @@ void  SessionStageProxy::NotifySessionForeground(uint32_t reason, bool withAnima
 
 void SessionStageProxy::NotifySessionFullScreen(bool fullScreen)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -598,7 +603,7 @@ void SessionStageProxy::NotifySessionFullScreen(bool fullScreen)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write fullScreen failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send Request failed");
