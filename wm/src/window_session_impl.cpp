@@ -527,7 +527,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
@@ -715,11 +714,26 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
+{
+    if (interactive == interactive_ && hasFirstNotifyInteractive_) {
+        return true;
+    }
+    hasFirstNotifyInteractive_ = true;
+    if (interactive_ != interactive) {
+        interactive_ = interactive;
+    }
+    return false;
+}
+
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
+        return;
+    }
+    if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (state_ == WindowState::STATE_SHOWN) {

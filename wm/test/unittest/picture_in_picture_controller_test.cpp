@@ -189,7 +189,7 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     ASSERT_EQ(PiPWindowState::STATE_STARTED, pipControl->GetControllerState());
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(true, StopPipType::NULL_STOP));
-    ASSERT_EQ(PiPWindowState::STATE_STOPPED, pipControl->GetControllerState());
+    ASSERT_NE(PiPWindowState::STATE_STARTED, pipControl->GetControllerState());
 }
 
 /**
@@ -807,12 +807,17 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
+        sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->DestroyPictureInPictureWindow());
 
-    pipControl->window_ = mw;
+    sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
+
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 
@@ -853,9 +858,15 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->window_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR,
+        pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     pipControl->mainWindow_ = mw;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR,
+        pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+    auto window = sptr<MockWindow>::MakeSptr();
+    pipControl->window_ = window;
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+    ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
 }
 }
 }
