@@ -67,8 +67,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleDrawingCompleted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED):
             return HandleUpdateRectChangeListenerRegistered(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS):
-            return HandleUpdateActivateStatus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
@@ -414,15 +412,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
     const WSError& errCode = PendingSessionActivation(abilitySessionInfo);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleUpdateActivateStatus!");
-    bool isActive = data.ReadBool();
-    const WSError& errCode = UpdateActiveStatus(isActive);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
