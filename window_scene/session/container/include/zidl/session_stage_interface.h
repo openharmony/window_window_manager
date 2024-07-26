@@ -76,7 +76,7 @@ public:
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
     virtual WSError CompatibleFullScreenRecover()
     {
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
     virtual WSError CompatibleFullScreenMinimize()
     {
