@@ -145,8 +145,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPControlStatus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_MODE):
-            return HandleGetAppForceLandscapeMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
+            return HandleGetAppForceLandscapeConfig(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
             return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
@@ -760,16 +760,13 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetAppForceLandscapeMode(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "called");
-    std::string bundleName = data.ReadString();
-    if (bundleName.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "read bundle name filed");
-        return ERR_INVALID_DATA;
-    }
-    int32_t ret = GetAppForceLandscapeMode(bundleName);
-    reply.WriteInt32(ret);
+    AppForceLandscapeConfig config;
+    WMError ret = GetAppForceLandscapeConfig(config);
+    reply.WriteParcelable(&config);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
