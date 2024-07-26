@@ -71,6 +71,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleTerminateSessionNew(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT):
             return HandleGetSessionSnapshot(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_DISPLAY_INFO):
+            return HandleGetSessionDisplayInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE):
             return HandleSetSessionContinueState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION):
@@ -299,6 +301,20 @@ int SceneSessionManagerLiteStub::HandleGetSessionSnapshot(MessageParcel &data, M
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetSessionDisplayInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "run");
+    int32_t persistentId = data.ReadInt32();
+    SessionDisplayInfo sessionDisplayInfo;
+    WSError ret = GetSessionDisplayInfo(persistentId, sessionDisplayInfo);
+    if (!reply.WriteParcelable(&sessionDisplayInfo)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get sessionDisplayInfo");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -540,6 +556,16 @@ int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& dat
     int32_t type = data.ReadInt32();
     WSError ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    WMError errCode = TerminateSessionByPersistentId(persistentId);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

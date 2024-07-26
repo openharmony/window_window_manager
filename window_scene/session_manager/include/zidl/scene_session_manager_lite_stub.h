@@ -47,6 +47,7 @@ private:
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSessionDisplayInfo(MessageParcel& data, MessageParcel& reply);
     int HandleClearSession(MessageParcel& data, MessageParcel& reply);
     int HandleClearAllSessions(MessageParcel& data, MessageParcel& reply);
     int HandleLockSession(MessageParcel& data, MessageParcel& reply);
@@ -66,6 +67,7 @@ private:
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
+    int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

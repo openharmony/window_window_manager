@@ -120,10 +120,6 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFI("InputTracking id:%{public}d, Dispatch by skipping receipt, action:%{public}s,"
             " persistentId:%{public}d", pointerEvent->GetId(),
             pointerEvent->DumpPointerAction(), sessionStage_->GetPersistentId());
-    } else {
-        DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(pointerEvent->GetId(), sessionStage_);
-        WLOGFD("Dispatch normally, action:%{public}s, eventId:%{public}d, persistentId:%{public}d",
-            pointerEvent->DumpPointerAction(), pointerEvent->GetId(), sessionStage_->GetPersistentId());
     }
     sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
@@ -161,7 +157,6 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
             keyEvent->GetId(), static_cast<int>(isConsumed));
         return WSError::WS_OK;
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
@@ -226,11 +221,6 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     }
     sessionStage_->NotifyFocusActiveEvent(isFocusActive);
     return WSError::WS_OK;
-}
-
-void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
-{
-    DelayedSingleton<ANRHandler>::GetInstance()->HandleEventConsumed(eventId, actionTime);
 }
 
 void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)

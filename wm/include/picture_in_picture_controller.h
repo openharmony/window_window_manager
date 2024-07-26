@@ -67,7 +67,7 @@ public:
     PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
     ~PictureInPictureController();
     WMError StartPictureInPicture(StartPipType startType);
-    WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType);
+    WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim = true);
     WMError StopPictureInPictureFromClient();
     WMError DestroyPictureInPictureWindow();
     sptr<Window> GetPipWindow() const;
@@ -145,7 +145,7 @@ private:
     WMError CreatePictureInPictureWindow(StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
-    WMError StopPictureInPictureInner(StopPipType stopType);
+    WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
     void UpdateXComponentPositionAndSize();
     void UpdatePiPSourceRect() const;
     void ResetExtController();
