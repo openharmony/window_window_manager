@@ -175,7 +175,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateDisplayHookInfo);
     BindNativeFunction(env, exportObj, "initScheduleUtils", moduleName,
         JsSceneSessionManager::InitScheduleUtils);
-    BindNativeFunction(env, exportObj, "SetAppForceLandscapeConfig", moduleName,
+    BindNativeFunction(env, exportObj, "setAppForceLandscapeConfig", moduleName,
         JsSceneSessionManager::SetAppForceLandscapeConfig);
     BindNativeFunction(env, exportObj, "isScbCoreEnabled", moduleName,
         JsSceneSessionManager::IsScbCoreEnabled);
