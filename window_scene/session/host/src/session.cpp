@@ -1152,11 +1152,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
         }
+        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
+            !session->IsFocused() && session->GetFocusable()) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "need re RequestFocusStatus, id:%{public}d", GetPersistentId());
+        }
     };
-    if (isAttach_ && GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
-        !isFocused_ && GetFocusable()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "need re RequestFocusStatus, id:%{public}d", GetPersistentId());
-    }
     PostTask(task, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
 }
