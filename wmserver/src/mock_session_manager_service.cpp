@@ -165,8 +165,6 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string> &a
         return -1;
     }
     (void) signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE crash
-    UniqueFd ufd = UniqueFd(fd); // auto close
-    fd = ufd.Get();
     std::vector<std::string> params;
     for (auto& arg : args) {
         params.emplace_back(Str16ToStr8(arg));
