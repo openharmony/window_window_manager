@@ -373,8 +373,8 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
-    bool IsAppSupportForceSplit(const std::string& bundleName);
-    void SetForceSplitEnable(bool isForceSplit);
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     bool IsNotifyInteractiveDuplicative(bool interactive);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
