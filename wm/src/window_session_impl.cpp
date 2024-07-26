@@ -461,7 +461,7 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (state_ == WindowState::STATE_SHOWN) {
         TLOGD(WmsLogTag::WMS_LIFE, "window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
-        NotifyAfterForeground(true, true);
+        NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
 
