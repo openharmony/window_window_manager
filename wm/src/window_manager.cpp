@@ -333,7 +333,7 @@ void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
         windowStyleListeners = windowStyleListeners_;
     }
     for (auto &listener : windowStyleListeners) {
-        TLOGI(WmsLogTag::WMS_MAIN, "jry WindowManager::Impl real NotifyWindowStyleChange type: %{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "WindowManager::Impl real NotifyWindowStyleChange type: %{public}d",
               static_cast<uint8_t>(type));
         listener->OnWindowStyleUpdate(type);
     }
