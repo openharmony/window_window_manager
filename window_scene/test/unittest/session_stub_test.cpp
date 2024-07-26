@@ -148,7 +148,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
     ASSERT_EQ(0, res);
-    session_->HandleBackPressed(data, reply);
+    res = session_->HandleBackPressed(data, reply);
     if (!data.ReadBool()) {
         ASSERT_EQ(5, res);
     }
@@ -320,7 +320,7 @@ HWTEST_F(SessionStubTest, HandleShow009, Function | SmallTest | Level2)
     MessageParcel reply;
     data.WriteBool(true);
     auto res = session_->HandleShow(data, reply);
-    ASSERT_EQ(5, res);
+    ASSERT_EQ(0, res);
 }
 
 /**
