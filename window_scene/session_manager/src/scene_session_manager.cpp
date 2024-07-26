@@ -4423,8 +4423,9 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "topmost window do not block");
             return false;
         }
-        if (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) &&
-        session->GetParentSession() != nullptr && session->GetParentSession()->IsTopmost()) {
+        auto parentSession = GetSceneSession(session->GetParentPersistentId());
+        if (SessionHelper::IsSubWindow(session->GetWindowType()) &&
+            parentSession != nullptr && parentSession->IsTopmost()) {
             return false;
         }
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
