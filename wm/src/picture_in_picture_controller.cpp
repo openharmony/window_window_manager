@@ -296,9 +296,9 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
     return res;
 }
 
-WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType)
+WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
+    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
     std::lock_guard<std::mutex> lock(mutex_);
     if ((!isStoppedFromClient_ && curState_ == PiPWindowState::STATE_STOPPING) ||
         curState_ == PiPWindowState::STATE_STOPPED) {
@@ -329,10 +329,10 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
-    return StopPictureInPictureInner(stopPipType);
+    return StopPictureInPictureInner(stopPipType, withAnim);
 }
 
-WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
+WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType, bool withAnim)
 {
     uint32_t templateType = 0;
     if (pipOption_ != nullptr) {
@@ -349,23 +349,13 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         syncTransactionController->OpenSyncTransaction();
     }
     ResetExtController();
-    DestroyPictureInPictureWindow();
+    if (!withAnim) {
+        DestroyPictureInPictureWindow();
+    }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
     }
-    for (auto& listener : pipLifeCycleListeners_) {
-        listener->OnPictureInPictureStop();
-    }
-    curState_ = PiPWindowState::STATE_STOPPED;
-    std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
-    if (!navId.empty() && mainWindow_) {
-        auto navController = NavigationController::GetNavigationController(
-            mainWindow_->GetUIContent(), navId);
-        if (navController) {
-            navController->DeletePIPMode(handleId_);
-            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
-        }
-    }
+
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PIP_SUCCESS, "pip window stop success");
     return WMError::WM_OK;
@@ -390,6 +380,19 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     PictureInPictureManager::RemoveActiveController(this);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
+
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPictureInPictureStop();
+    }
+    curState_ = PiPWindowState::STATE_STOPPED;
+    std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
+    if (!navId.empty() && mainWindow_) {
+        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+        if (navController) {
+            navController->DeletePIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+        }
+    }
     return WMError::WM_OK;
 }
 
@@ -573,7 +576,7 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
-    StopPictureInPicture(true, StopPipType::NULL_STOP);
+    StopPictureInPicture(true, StopPipType::NULL_STOP, false);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
