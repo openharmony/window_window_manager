@@ -42,7 +42,6 @@ private:
     int HandleDrawingCompleted(MessageParcel& data, MessageParcel& reply);
 
     // scene session
-    int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
