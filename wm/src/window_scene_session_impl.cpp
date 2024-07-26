@@ -1892,6 +1892,12 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     }
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
+    bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
+    bool isVerticalOrientation = IsVerticalOrientation(property_->GetRequestedOrientation());
+    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        (isVerticalOrientation || property_->GetRequestedOrientation() == Orientation::UNSPECIFIED)) {
+        enable = false;
+    }
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
@@ -3098,7 +3104,15 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!property_->GetCompatibleModeInPc()) {
+        WLOGFE("is not CompatibleModeInPc, can not Recover");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Recover();
@@ -3107,7 +3121,15 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!property_->GetCompatibleModeInPc()) {
+        WLOGFE("is not CompatibleModeInPc, can not Minimize");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Minimize();
@@ -3116,7 +3138,15 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("CompatibleFullScreenRecover permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!property_->GetCompatibleModeInPc()) {
+        WLOGFE("is not CompatibleModeInPc, can not Close");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     Close();
