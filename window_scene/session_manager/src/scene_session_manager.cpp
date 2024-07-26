@@ -1116,6 +1116,9 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(AvoidAreaType type)
 {
     sptr<RootSceneSession> rootSession = GetRootSceneSession();
+    if (rootSession == nullptr || rootSession->GetSessionProperty() == nullptr) {
+        return {};
+    }
     DisplayId displayId = rootSession->GetSessionProperty()->GetDisplayId();
     std::vector<sptr<SceneSession>> sessionVector;
     switch (type) {
