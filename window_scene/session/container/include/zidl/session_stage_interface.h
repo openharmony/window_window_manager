@@ -74,9 +74,18 @@ public:
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
-    virtual WSError CompatibleFullScreenRecover() {}
-    virtual WSError CompatibleFullScreenMinimize() {}
-    virtual WSError CompatibleFullScreenClose() {}
+    virtual WSError CompatibleFullScreenRecover()
+    {
+        return WSError::WS_OK; 
+    }
+    virtual WSError CompatibleFullScreenMinimize()
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError CompatibleFullScreenClose()
+    {
+        return WSError::WS_OK;
+    }
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
