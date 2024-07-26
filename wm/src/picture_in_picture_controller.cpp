@@ -365,7 +365,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
                 return;
             }
             if (pipController->curState_ == PiPWindowState::STATE_STOPPED) {
-
+                TLOGI(WmsLogTag::WMS_PIP, "pip window already destroyed");
                 return;
             }
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
