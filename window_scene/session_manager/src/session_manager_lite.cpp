@@ -189,18 +189,6 @@ void SessionManagerLite::DeleteAllSessionListeners()
     sessionListeners_.clear();
 }
 
-WMError SessionManagerLite::GetSessionDisplayInfo(int32_t persistentId,
-    SessionDisplayInfo& sessionDisplayInfo)
-{
-    auto sceneSessionManagerLiteProxy = GetSceneSessionManagerLiteProxy();
-    if (sceneSessionManagerLiteProxy == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSessionManagerLiteProxy is null");
-        return WMError::WM_ERROR_SAMGR;
-    }
-    return static_cast<WMError>(
-        sceneSessionManagerLiteProxy->GetSessionDisplayInfo(persistentId, sessionDisplayInfo));
-}
-
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
 {
     {
