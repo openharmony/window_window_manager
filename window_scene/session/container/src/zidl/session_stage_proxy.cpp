@@ -828,7 +828,7 @@ WSError SessionStageProxy::CompatibleFullScreenRecover()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel data;
     MessageParcel reply;
@@ -853,7 +853,7 @@ WSError SessionStageProxy::CompatibleFullScreenMinimize()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel data;
     MessageParcel reply;
@@ -878,7 +878,7 @@ WSError SessionStageProxy::CompatibleFullScreenClose()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel data;
     MessageParcel reply;
