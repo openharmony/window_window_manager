@@ -461,7 +461,6 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
 
 int SessionStageStub::HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenRecover!");
     WSError errCode = CompatibleFullScreenRecover();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -469,7 +468,6 @@ int SessionStageStub::HandleCompatibleFullScreenRecover(MessageParcel& data, Mes
 
 int SessionStageStub::HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenMinimize!");
     WSError errCode = CompatibleFullScreenMinimize();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -477,7 +475,6 @@ int SessionStageStub::HandleCompatibleFullScreenMinimize(MessageParcel& data, Me
 
 int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "HandleCompatibleFullScreenClose!");
     WSError errCode = CompatibleFullScreenClose();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
