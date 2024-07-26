@@ -1549,8 +1549,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
 
-    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
-        gotScreenlockFingerprint_ == true) {
+    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) &&
+        prePowerStateChangeReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
         gotScreenlockFingerprint_ = false;
         return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
             DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
