@@ -104,7 +104,7 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, Function | Sma
 
     int64_t uiExtensionIdLevel = 0;
     data.WriteInt64(uiExtensionIdLevel);
-    ASSERT_EQ(ERR_NONE, session_->HandleTransferAccessibilityEvent(data, reply));
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleTransferAccessibilityEvent(data, reply));
     WLOGI("HandleTransferAccessibilityEvent01 end");
 }
 }

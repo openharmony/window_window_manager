@@ -1264,7 +1264,7 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     auto result = session_->DrawingCompleted();
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**

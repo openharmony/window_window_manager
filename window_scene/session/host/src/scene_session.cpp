@@ -1590,14 +1590,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     int32_t action = pointerEvent->GetPointerAction();
     {
         bool isSystemWindow = GetSessionInfo().isSystem_;
+        std::lock_guard<std::mutex> guard(enterSessionMutex_);
         if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
-            std::lock_guard<std::mutex> guard(enterSessionMutex_);
             WLOGFD("Set enter session, persistentId:%{public}d", GetPersistentId());
             enterSession_ = wptr<SceneSession>(this);
         }
         if ((enterSession_ != nullptr) &&
             (isSystemWindow && (action != MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW))) {
-            std::lock_guard<std::mutex> guard(enterSessionMutex_);
             WLOGFD("Remove enter session, persistentId:%{public}d", GetPersistentId());
             enterSession_ = nullptr;
         }
@@ -3930,12 +3929,13 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-int32_t SceneSession::GetAppForceLandscapeMode(const std::string& bundleName)
+WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
-        return 0;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    return forceSplitFunc_(bundleName);
+    config = forceSplitFunc_(sessionInfo_.bundleName_);
+    return WMError::WM_OK;
 }
 
 int32_t SceneSession::GetStatusBarHeight()
