@@ -211,7 +211,7 @@ void SessionManagerAgentController::NotifyGestureNavigationEnabledResult(bool en
 
 void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "SessionManagerAgentController NotifyWindowStyleChange type: %{public}d",
+    TLOGD(WmsLogTag::WMS_MAIN, "windowStyletype: %{public}d",
           static_cast<uint8_t>(type));
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE)) {

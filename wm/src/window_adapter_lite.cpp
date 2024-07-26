@@ -275,8 +275,6 @@ WMError WindowAdapterLite::RegisterWMSConnectionChangedListener(const WMSConnect
 WMError WindowAdapterLite::GetWindowStyleType(WindowStyleType& windowStyleType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    WLOGFD("get window style type");
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetWindowStyleType(windowStyleType);

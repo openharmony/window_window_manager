@@ -1853,7 +1853,7 @@ WMError SceneSessionManagerProxy::GetWindowStyleType(WindowStyleType& windowStyl
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetwindowStyleType Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "GetwindowStyleType Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(

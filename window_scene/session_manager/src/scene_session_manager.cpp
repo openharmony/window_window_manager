@@ -9552,7 +9552,7 @@ WMError SceneSessionManager::GetWindowModeType(WindowModeType& windowModeType)
 WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyletype)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetWindowStyleType permission denied!");
+        TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     windowStyletype = systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_ ?
