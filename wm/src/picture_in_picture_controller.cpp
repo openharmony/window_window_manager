@@ -371,7 +371,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
             pipController->DestroyPictureInPictureWindow();
         };
-        handler_->PostTask(delayTask, DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
+        handler_->PostTask(timeoutTask, DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
     }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
