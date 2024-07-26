@@ -2954,7 +2954,7 @@ bool Session::IsScbCoreEnabled()
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
 
-WSError UpdateActiveStatus(bool isActive)
+WSError Session::UpdateActiveStatus(bool isActive)
 {
     return WSError::WS_OK;
 }
