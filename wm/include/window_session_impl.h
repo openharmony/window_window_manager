@@ -306,9 +306,6 @@ protected:
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
-    WSError CompatibleFullScreenRecover() override;
-    WSError CompatibleFullScreenMinimize() override;
-    WSError CompatibleFullScreenClose() override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
     std::atomic_bool enableSetBufferAvailableCallback_ = false;
