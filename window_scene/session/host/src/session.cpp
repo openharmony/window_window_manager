@@ -2953,9 +2953,4 @@ bool Session::IsScbCoreEnabled()
     return system::GetParameter("const.product.devicetype", "unknown") == "phone" &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
-
-WSError Session::UpdateActiveStatus(bool isActive)
-{
-    return WSError::WS_OK;
-}
 } // namespace OHOS::Rosen
