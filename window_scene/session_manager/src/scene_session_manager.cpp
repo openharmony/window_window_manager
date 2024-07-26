@@ -9201,6 +9201,7 @@ void SceneSessionManager::CacVisibleWindowNum()
         sceneSessionMapCopy = sceneSessionMap_;
     }
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+    bool isFullScreen = true;
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
@@ -9214,6 +9215,12 @@ void SceneSessionManager::CacVisibleWindowNum()
 
         bool isWindowVisible = curSession->GetRSVisible();
         if (isWindowVisible) {
+            auto windowMode = curSession->GetWindowMode();
+            if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+                windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_PIP) {
+                isFullScreen = false;
+            }
             uint32_t displayId = static_cast<uint32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
@@ -9225,6 +9232,10 @@ void SceneSessionManager::CacVisibleWindowNum()
                 it->visibleWindowNum++;
             }
         }
+    }
+    if (isFullScreen) {
+        std::for_each(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
+                      [](auto &info) { info.visibleWindowNum = 1; });
     }
     std::unique_lock<std::shared_mutex> lock(lastInfoMutex_);
     if (visibleWindowNumInfo.size() > 0 && !IsVectorSame(lastInfo_, visibleWindowNumInfo)) {
