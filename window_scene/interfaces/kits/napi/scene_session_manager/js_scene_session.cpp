@@ -218,6 +218,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
+    BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -265,8 +266,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
         JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
-    BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
-        JsSceneSession::SetCompatibleModeInPc);
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
@@ -274,6 +273,12 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::IsDeviceWakeupByApplication);
     BindNativeFunction(env, objValue, "setStartingWindowExitAnimationFlag", moduleName,
         JsSceneSession::SetStartingWindowExitAnimationFlag);
+}
+
+void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
+         JsSceneSession::SetCompatibleModeInPc);
     BindNativeFunction(env, objValue, "compatibleFullScreenRecover", moduleName,
         JsSceneSession::CompatibleFullScreenRecover);
     BindNativeFunction(env, objValue, "compatibleFullScreenMinimize", moduleName,
