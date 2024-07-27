@@ -272,6 +272,7 @@ protected:
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
+    WindowStatus GetWindowStatusInner(WindowMode mode);
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
