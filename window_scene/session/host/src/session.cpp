@@ -2166,9 +2166,9 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
 
 WSError Session::CompatibleFullScreenRecover()
 {
-    TLOGD(WmsLogTag::WMS_SCB, "recover compatible full screen windowId:%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_MAIN, "recover compatible full screen windowId:%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -2177,9 +2177,9 @@ WSError Session::CompatibleFullScreenRecover()
 
 WSError Session::CompatibleFullScreenMinimize()
 {
-    TLOGD(WmsLogTag::WMS_SCB, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_MAIN, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -2188,9 +2188,9 @@ WSError Session::CompatibleFullScreenMinimize()
 
 WSError Session::CompatibleFullScreenClose()
 {
-    TLOGD(WmsLogTag::WMS_SCB, "close compatible full screen windowId:%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "close compatible full screen windowId:%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
