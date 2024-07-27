@@ -286,6 +286,9 @@ void ScreenSession::SetScreenScale(const float scaleX, const float scaleY, const
     property_.SetScaleY(scaleY);
     property_.SetPivotX(pivotX);
     property_.SetPivotY(pivotY);
+    if (updateScreenPivotCallback_ != null) {
+        updateScreenPivotCallback_(pivotX, pivotY);
+    }
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
@@ -465,6 +468,11 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
 void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
 {
     updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
+void ScreenSession::SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback)
+{
+    updateScreenPivotCallback_ = updateScreenPivotCallback;
 }
 
 VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
