@@ -3104,10 +3104,6 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
@@ -3122,10 +3118,6 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
@@ -3140,10 +3132,6 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
 
 WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
         return WSError::WS_ERROR_INVALID_WINDOW;
