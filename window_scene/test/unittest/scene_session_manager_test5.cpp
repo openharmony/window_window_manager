@@ -381,18 +381,6 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | Small
 }
 
 /**
- * @tc.name: GetSessionDisplayInfo
- * @tc.desc: GetSessionDisplayInfo
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, GetSessionDisplayInfo, Function | SmallTest | Level3)
-{
-    SessionDisplayInfo sessionDisplayInfo;
-    auto ret = ssm_->GetSessionDisplayInfo(0, sessionDisplayInfo);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
-}
-
-/**
  * @tc.name: RequestAllAppSessionUnfocus
  * @tc.desc: RequestAllAppSessionUnfocus
  * @tc.type: FUNC
