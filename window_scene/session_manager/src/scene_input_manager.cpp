@@ -43,6 +43,8 @@ constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
+constexpr unsigned int TRANSFORM_DATA_LEN = 9;
+
 bool operator!=(const MMI::Rect& a, const MMI::Rect& b)
 {
     if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
@@ -57,7 +59,8 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.height != b.height || a.dpi != b.dpi || a.name != b.name || a.uniq != b.uniq ||
         static_cast<int32_t>(a.direction) != static_cast<int32_t>(b.direction) ||
         static_cast<int32_t>(a.displayDirection) != static_cast<int32_t>(b.displayDirection) ||
-        static_cast<int32_t>(a.displayMode) != static_cast<int32_t>(b.displayMode)) {
+        static_cast<int32_t>(a.displayMode) != static_cast<int32_t>(b.displayMode) ||
+        a.transform != b.transform) {
         return false;
     }
     return true;
@@ -153,6 +156,16 @@ bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const s
     return true;
 }
 
+std::string DumpTransformInDisplayInfo(const std::vector<float> &transform)
+{
+    std::stringstream stream("[");
+    for (float transformItem : transform) {
+        stream << transformItem << ",";
+    }
+    stream << "]";
+    return stream.str();
+}
+
 std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 {
     std::string infoStr =  "DisplayInfo: ";
@@ -160,7 +173,8 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
         "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string(static_cast<int>(info.direction));
+        " direction : " + std::to_string(static_cast<int>(info.direction)) +
+        " transform: " + DumpTransformInDisplayInfo(info.transform);
     return infoStr;
 }
 } //namespace
@@ -207,19 +221,28 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
                 static_cast<MMI::DisplayMode>(displayMode));
         }
+        auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+        auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+        auto transform = Matrix3f::IDENTITY;
+        Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
+        transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
+            screenProperty.GetPivotY() * screenHeight);
+        transform = transform.Inverse();
+        std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
             .x = screenProperty.GetOffsetX(),
             .y = screenProperty.GetOffsetY(),
-            .width = screenProperty.GetBounds().rect_.GetWidth(),
-            .height = screenProperty.GetBounds().rect_.GetHeight(),
+            .width = screenWidth,
+            .height = screenHeight,
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
             .name = "display" + std::to_string(screenId),
             .uniq = "default" + std::to_string(screenId),
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
                 static_cast<MMI::DisplayMode>(displayMode)),
             .displayDirection = displayRotation,
-            .displayMode = static_cast<MMI::DisplayMode>(displayMode)};
+            .displayMode = static_cast<MMI::DisplayMode>(displayMode),
+            .transform = transformData};
         displayInfos.emplace_back(displayInfo);
     }
 }

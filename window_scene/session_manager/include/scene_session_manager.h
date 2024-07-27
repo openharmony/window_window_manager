@@ -350,6 +350,8 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
+    void ProcessDisplayScale(sptr<DisplayInfo> displayInfo);
+
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;

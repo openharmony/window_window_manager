@@ -4002,6 +4002,44 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
+void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
+    float pivotY)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    auto displayNode = GetDisplayNode(screenId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS,
+        "scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+        scaleX,
+        scaleY,
+        pivotX,
+        pivotY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetPivot(pivotX, pivotY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
+
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(),
+        emptyMap, DisplayStateChangeType::UPDATE_SCALE);
+}
+
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 {
     if (!g_foldScreenFlag) {
