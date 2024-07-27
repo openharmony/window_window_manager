@@ -995,7 +995,7 @@ int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, Messa
 {
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
     WMError errCode = GetWindowStyleType(windowStyleType);
-    TLOGE(WmsLogTag::WMS_LIFE, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
+    TLOGI(WmsLogTag::WMS_LIFE, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
     if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to WriteBool");
         return ERR_INVALID_DATA;

@@ -901,6 +901,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 
 void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
+    if (property == nullptr) {
+        return;
+    }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
         property->SetIsNeedUpdateWindowMode(true);
@@ -924,7 +927,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
     }
-    if (sessionProperty && property && SessionHelper::IsMainWindow(GetWindowType())) {
+    if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
     }
 }
