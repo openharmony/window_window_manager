@@ -71,8 +71,8 @@ using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(cons
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
-using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
+using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
@@ -232,7 +232,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
-    WSError Clear();
+    WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
@@ -338,20 +338,20 @@ public:
     int32_t GetCallingUid() const;
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
-    WindowMode GetWindowMode();
+    WindowMode GetWindowMode() const;
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
-    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
-    bool GetSCBKeepKeyboardFlag() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
     float GetScaleX() const;
     float GetScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
+    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
+    bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
@@ -401,6 +401,7 @@ public:
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
+    // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
@@ -543,11 +544,11 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
-    bool scbKeepKeyboardFlag_ = false;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
+    bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     mutable std::shared_mutex parentSessionMutex_;
@@ -564,7 +565,6 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    void NotifyPointerEventToRs(int32_t pointAction);
     WSError HandleSubWindowClick(int32_t action);
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
@@ -607,6 +607,7 @@ private:
     bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
     WSRect preRect_;
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;

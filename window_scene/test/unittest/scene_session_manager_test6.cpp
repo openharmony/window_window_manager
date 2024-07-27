@@ -1214,6 +1214,44 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
     ASSERT_NE(nullptr, ssm_);
     ssm_->DeleteStateDetectTask();
 }
+
+/**
+ * @tc.name: TerminateSessionByPersistentId
+ * @tc.desc: Success to terminate session by persistentId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId001, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    auto result = ssm_->TerminateSessionByPersistentId(sceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: TerminateSessionByPersistentId
+ * @tc.desc: Fail to terminate session by persistentId, invalid persistentId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    auto result = ssm_->TerminateSessionByPersistentId(INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

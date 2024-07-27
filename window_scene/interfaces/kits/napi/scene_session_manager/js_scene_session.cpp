@@ -2132,6 +2132,9 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+    if (info.fullScreenStart_) {
+        sceneSession->NotifySessionFullScreen(true);
+    }
 }
 
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)

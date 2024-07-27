@@ -22,7 +22,6 @@
 
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
-#include "window_drawing_content_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -86,6 +85,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual void NotifySessionFullScreen(bool fullScreen) {}
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}

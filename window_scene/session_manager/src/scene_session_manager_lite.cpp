@@ -236,4 +236,9 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
 {
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
 }
+
+WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
+}
 } // namespace OHOS::Rosen
