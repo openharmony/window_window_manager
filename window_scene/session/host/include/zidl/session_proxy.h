@@ -84,9 +84,9 @@ public:
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
-    int32_t GetAppForceLandscapeMode(const std::string& bundleName) override;
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     int32_t GetStatusBarHeight() override;
-    WSError SetDialogSessionBackEventEnabled(bool isEnabled) override;
+    WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

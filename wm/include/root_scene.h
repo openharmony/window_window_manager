@@ -20,6 +20,8 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "ws_common.h"
+
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {
@@ -33,6 +35,8 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
+
 class RootScene : public Window {
 public:
     RootScene();
@@ -52,6 +56,11 @@ public:
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
+
+    void SetGetSessionRectCallback(GetSessionRectCallback&& callback)
+    {
+        getSessionRectCallback_ = std::move(callback);
+    }
 
     void SetDisplayDensity(float density)
     {
@@ -92,6 +101,8 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
+    WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
+
     static sptr<RootScene> staticRootScene_;
 
 private:
@@ -109,6 +120,8 @@ private:
     static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+
+    GetSessionRectCallback getSessionRectCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

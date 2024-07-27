@@ -52,7 +52,6 @@ public:
     MOCK_METHOD3(NotifySessionBackground, void(uint32_t reason, bool withAnimation, bool isFromInnerkits));
     MOCK_METHOD2(UpdateTitleInTargetPos, WSError(bool isShow, int32_t height));
     MOCK_METHOD2(NotifyDensityFollowHost, WSError(bool isFollowHost, float densityValue));
-    MOCK_METHOD1(UpdateWindowDrawingContentInfo, void(const WindowDrawingContentInfo& info));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
@@ -62,6 +61,7 @@ public:
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
+    MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
 };
 } // namespace Rosen
 } // namespace OHOS

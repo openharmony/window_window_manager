@@ -527,7 +527,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
@@ -715,11 +714,26 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
+{
+    if (interactive == interactive_ && hasFirstNotifyInteractive_) {
+        return true;
+    }
+    hasFirstNotifyInteractive_ = true;
+    if (interactive_ != interactive) {
+        interactive_ = interactive;
+    }
+    return false;
+}
+
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
+        return;
+    }
+    if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (state_ == WindowState::STATE_SHOWN) {
@@ -974,9 +988,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         }
     }
 
-    if (context_ != nullptr && WindowHelper::IsMainWindow(GetType())
-        && IsAppSupportForceSplit(context_->GetBundleName())) {
-        SetForceSplitEnable(true);
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.mode_ == FORCE_SPLIT_MODE) {
+        SetForceSplitEnable(true, config.homePage_);
     }
 
     uint32_t version = 0;
@@ -3391,27 +3406,27 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-bool WindowSessionImpl::IsAppSupportForceSplit(const std::string& bundleName)
+WMError WindowSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
-    if (bundleName.empty()) {
-        return false;
-    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
-        return false;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return hostSession_->GetAppForceLandscapeMode(bundleName) == FORCE_SPLIT_MODE;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit)
+void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFW("uiContent is null!");
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
         return;
     }
-    uiContent->SetForceSplitEnable(isForceSplit);
-    WLOGFI("set app force split success");
+    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    uiContent->SetForceSplitEnable(isForceSplit, homePage);
 }
 } // namespace Rosen
 } // namespace OHOS

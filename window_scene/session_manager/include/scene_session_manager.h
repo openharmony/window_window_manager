@@ -128,7 +128,7 @@ public:
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(
-        const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
+        const sptr<SceneSession>& sceneSession, bool needRemoveSession = true, bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession> &scnSession, sptr<AAFwk::SessionInfo> scnSessionInfo,
         const bool needRemoveSession);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
@@ -137,6 +137,7 @@ public:
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
+    WSRect GetRootSessionAvoidSessionRect(AvoidAreaType type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
@@ -353,8 +354,9 @@ public:
 
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
-    WSError SetAppForceLandscapeMode(const std::string& bundleName, int32_t mode);
-    int32_t GetAppForceLandscapeMode(const std::string& bundleName);
+    WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
+    AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -593,7 +595,7 @@ private:
     std::shared_mutex startingWindowMapMutex_;
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
-    std::map<std::string, int32_t> appForceLandscapeMap_;
+    std::unordered_map<std::string, AppForceLandscapeConfig> appForceLandscapeMap_;
     std::shared_mutex appForceLandscapeMutex_;
 
     std::mutex privacyBundleMapMutex_;

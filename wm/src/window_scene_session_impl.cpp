@@ -1288,7 +1288,6 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
 	}
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -1679,8 +1678,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        windowSystemConfig_.uiType_ != "phone" &&
-        windowSystemConfig_.uiType_ != "pad") {
+        ((windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad") ||
+         IsFreeMultiWindowMode())) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1714,8 +1713,6 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
-        GetWindowId(), static_cast<uint32_t>(type));
     if (property_ == nullptr) {
         return SystemBarProperty();
     }
@@ -1776,7 +1773,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     }
     setSameSystembarPropertyCnt_ = 0;
     TLOGI(WmsLogTag::WMS_IMMS, "windowId:%{public}u %{public}s type:%{public}u, "
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnim:%{public}u settingFlag:%{public}u",
+        "%{public}u %{public}x %{public}x %{public}u %{public}u",
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
         property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
@@ -2883,7 +2880,7 @@ WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken
     return ret;
 }
 
-WMError WindowSceneSessionImpl::SetDialogBackEventEnabled(bool isEnabled)
+WMError WindowSceneSessionImpl::SetDialogBackGestureEnabled(bool isEnabled)
 {
     WindowType windowType = GetType();
     if (windowType != WindowType::WINDOW_TYPE_DIALOG) {
@@ -2896,7 +2893,7 @@ WMError WindowSceneSessionImpl::SetDialogBackEventEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_DIALOG, "set window failed because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError ret = static_cast<WMError>(hostSession->SetDialogSessionBackEventEnabled(isEnabled));
+    WMError ret = static_cast<WMError>(hostSession->SetDialogSessionBackGestureEnabled(isEnabled));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "set window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }
@@ -3069,6 +3066,12 @@ void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withA
 {
     WLOGFI("NotifySessionForeground");
     Show(reason, withAnimation);
+}
+
+void WindowSceneSessionImpl::NotifySessionFullScreen(bool fullScreen)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u", GetWindowId());
+    SetLayoutFullScreen(fullScreen);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)

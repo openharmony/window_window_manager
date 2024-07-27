@@ -179,6 +179,49 @@ HWTEST_F(SceneSessionTest, BackgroundTask01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: DisconnectTask01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, DisconnectTask01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisconnectTask01";
+    info.bundleName_ = "DisconnectTask01";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+
+    int resultValue = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    specificCallback->onCreate_ =
+        [&resultValue, specificCallback](const SessionInfo& info,
+        sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
+        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        EXPECT_NE(sceneSessionReturn, nullptr);
+        resultValue = 1;
+        return sceneSessionReturn;
+    };
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetGlobalMaximizeMode01
  * @tc.desc: SetGlobalMaximizeMode
  * @tc.type: FUNC
@@ -1395,6 +1438,33 @@ HWTEST_F(SceneSessionTest, BackgroundTask02, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
     sceneSession->isActive_ = true;
     result = sceneSession->BackgroundTask(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DisconnectTask02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, DisconnectTask02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisconnectTask02";
+    info.bundleName_ = "DisconnectTask02";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

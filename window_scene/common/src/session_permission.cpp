@@ -103,6 +103,12 @@ bool SessionPermission::IsSystemCalling()
     return isSystemApp;
 }
 
+bool SessionPermission::IsSystemAppCall()
+{
+    uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
+}
+
 bool SessionPermission::IsSACalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
