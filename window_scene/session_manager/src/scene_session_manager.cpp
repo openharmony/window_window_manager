@@ -147,9 +147,9 @@ constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int OFFSET_MAX_WIDTH = 8;
+constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
-constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
 constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
@@ -1504,7 +1504,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
         sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
     } else {
         TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, bundleName: %{public}s, "
-            "moduleName: %{public}s, abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
+            "moduleName: %{public}s, abilityName: %{public}s want: %{public}s", sceneSession->GetPersistentId(),
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
@@ -2001,7 +2001,7 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
 void SceneSessionManager::DestroyToastSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("sceneSession is nullptr");
+        TLOGW(WmsLogTag::WMS_LIFE, "ToastSession is nullptr");
         return;
     }
     for (const auto& elem : sceneSession->GetToastSession()) {
@@ -2156,7 +2156,7 @@ void SceneSessionManager::AddClientDeathRecipient(const sptr<ISessionStage>& ses
 
 void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remoteObject)
 {
-    auto task = [this, remoteObject] {
+    auto task = [this, remoteObject]() {
         auto iter = remoteObjectMap_.find(remoteObject);
         if (iter == remoteObjectMap_.end()) {
             WLOGFE("Invalid remoteObject");
@@ -3747,7 +3747,6 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scn
     WLOGFI("NotifySessionClosed, id: %{public}d", scnSession->GetPersistentId());
     listenerController_->NotifySessionClosed(scnSession->GetPersistentId());
 }
-
 
 void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId)
 {
@@ -8310,57 +8309,24 @@ WSError SceneSessionManager::UpdateTitleInTargetPos(int32_t persistentId, bool i
     return sceneSession->UpdateTitleInTargetPos(isShow, height);
 }
 
-const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSessionMap()
+void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
 {
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        retSceneSessionMap = sceneSessionMap_;
+    WLOGFI("AppAnrListener OnAppDebugStarted");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
+        return;
     }
-    EraseIf(retSceneSessionMap, [this](const auto& pair) {
-        if (pair.second == nullptr) {
-            return true;
-        }
-
-        if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
-            if (pair.second->IsVisible()) {
-                return false;
-            }
-            return true;
-        }
-
-        if (pair.second->IsSystemInput()) {
-            return false;
-        } else if (pair.second->IsSystemSession() && pair.second->IsVisible() && pair.second->IsSystemActive()) {
-            return false;
-        }
-
-        if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(pair.second)) {
-            return true;
-        }
-        return false;
-    });
-    return retSceneSessionMap;
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
 }
 
-void SceneSessionManager::NotifyUpdateRectAfterLayout()
+void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
 {
-    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (transactionController) {
-        rsTransaction = transactionController->GetRSTransaction();
+    WLOGFI("AppAnrListener OnAppDebugStoped");
+    if (debugInfos.empty()) {
+        WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
+        return;
     }
-    auto task = [this, rsTransaction]() {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& iter: sceneSessionMap_) {
-            auto sceneSession = iter.second;
-            if (sceneSession && sceneSession->IsDirtyWindow()) {
-                sceneSession->NotifyClientToUpdateRect(rsTransaction);
-            }
-        }
-    };
-    // need sync task since animation transcation need
-    return taskScheduler_->PostAsyncTask(task, "NotifyUpdateRectAfterLayout");
+    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 
 void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams)
@@ -8665,38 +8631,57 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotPixelMap" + std::to_string(persistentId));
 }
 
-void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSessionMap()
 {
-    WLOGFI("AppAnrListener OnAppDebugStarted");
-    if (debugInfos.empty()) {
-        WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
-        return;
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        retSceneSessionMap = sceneSessionMap_;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
+    EraseIf(retSceneSessionMap, [this](const auto& pair) {
+        if (pair.second == nullptr) {
+            return true;
+        }
+
+        if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+            if (pair.second->IsVisible()) {
+                return false;
+            }
+            return true;
+        }
+
+        if (pair.second->IsSystemInput()) {
+            return false;
+        } else if (pair.second->IsSystemSession() && pair.second->IsVisible() && pair.second->IsSystemActive()) {
+            return false;
+        }
+
+        if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(pair.second)) {
+            return true;
+        }
+        return false;
+    });
+    return retSceneSessionMap;
 }
 
-void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
-    WLOGFI("AppAnrListener OnAppDebugStoped");
-    if (debugInfos.empty()) {
-        WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
-        return;
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    if (transactionController) {
+        rsTransaction = transactionController->GetRSTransaction();
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
-}
-
-void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
-{
-    if (SceneInputManager::GetInstance().IsUserBackground()) {
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
-        return;
-    }
-    auto task = [forceFlush]()-> WSError {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
-        return WSError::WS_OK;
+    auto task = [this, rsTransaction]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter: sceneSessionMap_) {
+            auto sceneSession = iter.second;
+            if (sceneSession && sceneSession->IsDirtyWindow()) {
+                sceneSession->NotifyClientToUpdateRect(rsTransaction);
+            }
+        }
     };
-    return taskScheduler_->PostAsyncTask(task);
+    // need sync task since animation transcation need
+    return taskScheduler_->PostAsyncTask(task, "NotifyUpdateRectAfterLayout");
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
@@ -8735,6 +8720,20 @@ void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int3
         uint32_t visibilityState = static_cast<uint32_t>(session->GetVisibilityState());
         windowVisibilityInfos.push_back(std::make_pair(id, visibilityState));
     }
+}
+
+void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
+{
+    if (SceneInputManager::GetInstance().IsUserBackground()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+        return;
+    }
+    auto task = [forceFlush]()-> WSError {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
