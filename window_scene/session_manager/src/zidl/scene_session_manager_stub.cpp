@@ -991,7 +991,6 @@ int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-
 int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
 {
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
