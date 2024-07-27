@@ -1836,8 +1836,11 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
+    bool isCompatibleModeInPc = false;
     auto sessionProperty = scnSession->GetSessionProperty();
-    bool isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+    if (sessionProperty != nullptr) {
+        isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+    }
     if (systemConfig_.backgroundswitch == false || isCompatibleModeInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
@@ -1931,8 +1934,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
+        bool isCompatibleModeInPc = false;
         auto sessionProperty = scnSession->GetSessionProperty();
-        bool isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+        if (sessionProperty != nullptr) {
+            isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+        }
         if (systemConfig_.backgroundswitch && !isCompatibleModeInPc) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
