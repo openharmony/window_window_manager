@@ -663,11 +663,6 @@ void PictureInPictureController::UpdatePiPSourceRect() const
     float height = 0;
     mainWindowXComponentController_->GetGlobalPosition(posX, posY);
     mainWindowXComponentController_->GetSize(width, height);
-    if (static_cast<uint32_t>(width) == 0 && static_cast<uint32_t>(height) == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "get xComponent size failed");
-        width = windowRect_.width_;
-        height = windowRect_.height_;
-    }
     Rect rect = { posX, posY, width, height };
     TLOGI(WmsLogTag::WMS_PIP, "result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
