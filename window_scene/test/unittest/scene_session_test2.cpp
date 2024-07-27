@@ -715,6 +715,31 @@ HWTEST_F(SceneSessionTest2, NotifySessionForeground, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: NotifySessionFullScreen01
+ * @tc.desc: NotifySessionFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, NotifySessionFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "FullScreen01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    bool fullScreen = true;
+    int ret = 1;
+    sceneSession->sessionStage_ = mockSessionStage;
+    sceneSession->NotifySessionFullScreen(fullScreen);
+    ASSERT_EQ(ret, 1);
+}
+
+/**
  * @tc.name: NotifySessionBackground01
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC

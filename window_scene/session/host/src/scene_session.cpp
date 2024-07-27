@@ -2696,6 +2696,9 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
         TLOGI(WmsLogTag::WMS_LIFE, "want: screenId %{public}" PRIu64, info.screenId_);
     }
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        info.fullScreenStart_ = true;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
@@ -3556,6 +3559,15 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
         return;
     }
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
+
+void SceneSession::NotifySessionFullScreen(bool fullScreen)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is null");
+        return;
+    }
+    sessionStage_->NotifySessionFullScreen(fullScreen);
 }
 
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
