@@ -245,5 +245,15 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
+
+WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
+{
+    if (getSessionRectCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getSessionRectCallback is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    rect = getSessionRectCallback_(type);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
