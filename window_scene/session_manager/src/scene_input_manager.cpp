@@ -241,7 +241,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
                 static_cast<MMI::DisplayMode>(displayMode)),
             .displayDirection = displayRotation,
-            .displayMode = static_cast<MMI::DisplayMode>(displayMode)};
+            .displayMode = static_cast<MMI::DisplayMode>(displayMode),
+            .transform = transformData};
         displayInfos.emplace_back(displayInfo);
     }
 }

@@ -286,7 +286,7 @@ void ScreenSession::SetScreenScale(const float scaleX, const float scaleY, const
     property_.SetScaleY(scaleY);
     property_.SetPivotX(pivotX);
     property_.SetPivotY(pivotY);
-    if (updateScreenPivotCallback_ != null) {
+    if (updateScreenPivotCallback_ != nullptr) {
         updateScreenPivotCallback_(pivotX, pivotY);
     }
 }
