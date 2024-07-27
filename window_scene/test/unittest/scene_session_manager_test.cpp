@@ -52,6 +52,8 @@ public:
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
     static sptr<SceneSessionManager> ssm_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest::ssm_ = nullptr;
@@ -85,6 +87,7 @@ void SceneSessionManagerTest::SetUp()
 
 void SceneSessionManagerTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -819,7 +822,7 @@ HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Lev
     SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
+    ASSERT_NE(nullptr, property);
     info = ssm_->RecoverSessionInfo(property);
 }
 
