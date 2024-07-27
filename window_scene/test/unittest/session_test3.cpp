@@ -979,8 +979,8 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: RectCheckProcess
- * @tc.desc: RectCheckProcess Test
+ * @tc.name: SetIsPcAppInPad
+ * @tc.desc: SetIsPcAppInPad Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
