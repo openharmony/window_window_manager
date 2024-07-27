@@ -553,7 +553,11 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin) && !isDecorDialog) {
-        hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (!isFixedSubWin && !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
+            hostSession->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     } else {
         if (dragType != AreaType::UNDEFINED) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
@@ -2094,6 +2098,33 @@ void WindowSceneSessionImpl::StartMove()
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
+}
+
+WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
+{
+    auto hostSession = GetHostSession();
+    if(hostSession) {
+        WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
+        TLOGD(WmsLogTag::WMS_SYSTEM, "hostSession id: %{public}d , errorCode: %{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+        switch (errorCode) {
+            case WSError::WS_ERROR_REPEAT_OPERATION: {
+                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+            }
+            case WSError::WS_ERROR_NOT_SYSTEM_APP: {
+                return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+            }
+            case WSError::WS_ERROR_NULLPTR: {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
+            default: {
+                return WmErrorCode::WM_OK;
+            }                   
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
 }
 
 WMError WindowSceneSessionImpl::Close()
