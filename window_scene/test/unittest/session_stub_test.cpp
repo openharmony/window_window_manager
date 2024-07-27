@@ -415,6 +415,21 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
     auto res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: HandleGetAppForceLandscapeConfig
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleGetAppForceLandscapeConfig(data, reply);
+    ASSERT_EQ(0, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
