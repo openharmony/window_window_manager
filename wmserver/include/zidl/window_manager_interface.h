@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -217,6 +218,10 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
     {
         return WSError::WS_OK;
     }

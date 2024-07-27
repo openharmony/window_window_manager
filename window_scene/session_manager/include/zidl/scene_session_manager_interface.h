@@ -108,6 +108,7 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -239,6 +240,10 @@ public:
         return WSError::WS_OK;
     }
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable) override
     {
         return WSError::WS_OK;
     }

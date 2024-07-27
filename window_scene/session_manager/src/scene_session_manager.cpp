@@ -565,6 +565,27 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "GetFreeMultiWindowEnableState permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, hostWindowId, &enable]() {
+        auto sceneSession = GetSceneSession(hostWindowId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        bool isEnable = sceneSession->IsFreeMultiWindowEnable();
+        enable = isEnable;
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "GetFreeMultiWindowEnableState");
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
