@@ -109,7 +109,7 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
-    void SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback); 
+    void SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
