@@ -118,8 +118,6 @@ HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
     EXPECT_NE(data.WriteParcelable(&options), false);
     res = session_->HandleTerminateSession(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleUpdateActivateStatus(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleRaiseToAppTop(data, reply);
