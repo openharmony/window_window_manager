@@ -3587,5 +3587,20 @@ uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
     TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     return height;
 }
+
+WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property_ is null, WinId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowStatus = GetWindowStatusInner(GetMode());
+    TLOGD(WmsLogTag::DEFAULT, "WinId:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
