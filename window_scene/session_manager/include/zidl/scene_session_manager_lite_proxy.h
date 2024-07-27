@@ -54,7 +54,6 @@ public:
     WSError ClearAllSessions() override;
  
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
