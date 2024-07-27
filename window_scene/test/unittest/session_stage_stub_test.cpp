@@ -466,6 +466,21 @@ HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, Function | SmallTest | 
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleSetPiPControlEvent(data, reply));
 }
+
+/**
+ * @tc.name: HandleSetUniqueVirtualPixelRatio
+ * @tc.desc: test function : HandleSetUniqueVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    data.WriteFloat(3.25f);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetUniqueVirtualPixelRatio(data, reply));
+}
 }
 }
 }

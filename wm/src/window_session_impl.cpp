@@ -668,6 +668,46 @@ void WindowSessionImpl::UpdateDensity()
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
 
+void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
+{
+    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "\
+        "new {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}",
+        useUniqueDensity_, virtualPixelRatio_, useUniqueDensity, virtualPixelRatio);
+    bool oldUseUniqueDensity = useUniqueDensity_;
+    useUniqueDensity_ = useUniqueDensity;
+    if (useUniqueDensity_) {
+        float oldVirtualPixelRatio = virtualPixelRatio_;
+        virtualPixelRatio_ = virtualPixelRatio;
+        if (!MathHelper::NearZero(oldVirtualPixelRatio - virtualPixelRatio)) {
+            UpdateDensity();
+            SetUniqueVirtualPixelRatioForSub(useUniqueDensity, virtualPixelRatio);
+        }
+    } else {
+        if (oldUseUniqueDensity) {
+            UpdateDensity();
+            SetUniqueVirtualPixelRatioForSub(useUniqueDensity, virtualPixelRatio);
+        }
+    }
+}
+
+void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow)
+{
+    if (parentWindow) {
+        useUniqueDensity_ = parentWindow->useUniqueDensity_;
+        virtualPixelRatio_ = parentWindow->virtualPixelRatio_;
+    }
+}
+
+void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)
+{
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->SetUniqueVirtualPixelRatio(useUniqueDensity, virtualPixelRatio);
+    }
+}
+
 WSError WindowSessionImpl::UpdateOrientation()
 {
     TLOGD(WmsLogTag::DMS, "UpdateOrientation, wid: %{public}d", GetPersistentId());
@@ -752,6 +792,9 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
 
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 {
+    if (useUniqueDensity_) {
+        return virtualPixelRatio_;
+    }
     return displayInfo->GetVirtualPixelRatio();
 }
 
