@@ -196,24 +196,6 @@ HWTEST_F(SessionProxyTest, NotifySessionException, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: UpdateActiveStatus
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, UpdateActiveStatus, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateActiveStatus start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo, nullptr);
-
-    WSError res = sProxy->UpdateActiveStatus(abilitySessionInfo);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateActiveStatus end";
-}
-
-/**
  * @tc.name: OnSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC

@@ -448,6 +448,7 @@ protected:
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
     void UpdateSessionTouchable(bool touchable);
+    virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
 
     WSRectF UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
