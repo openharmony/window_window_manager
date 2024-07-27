@@ -790,7 +790,9 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHoo
 
     std::unique_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (enable) {
-        displayHookMap_[uid] = hookInfo;
+        if (uid != 0) {
+            displayHookMap_[uid] = hookInfo;
+        }
     } else {
         displayHookMap_.erase(uid);
     }
