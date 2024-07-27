@@ -267,6 +267,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
+    BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
+        JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
@@ -1248,6 +1250,13 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetUniqueDensityDpiFromSCB(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
@@ -3153,6 +3162,48 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     session->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    bool paramValidFlag = true;
+    bool useUnique = false;
+    uint32_t densityDpi = 0;
+    std::string errMsg = "";
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_SCB, "Params not match %{public}zu", argc);
+        errMsg = "Invalid args count, need two arg!";
+        paramValidFlag = false;
+    } else {
+        if (!ConvertFromJsValue(env, argv[0], useUnique)) {
+            TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to useUnique");
+            errMsg = "Failed to convert parameter to useUnique";
+            paramValidFlag = false;
+        }
+        if (paramValidFlag && !ConvertFromJsValue(env, argv[1], densityDpi)) {
+            TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to densityDpi");
+            errMsg = "Failed to convert parameter to densityDpi";
+            paramValidFlag = false;
+        }
+    }
+    if (!paramValidFlag) {
+        TLOGE(WmsLogTag::WMS_SCB, "paramValidFlag error");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (!session) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] session is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing  or invalid"));
+        return NapiGetUndefined(env);
+    }
+    session->SetUniqueDensityDpi(useUnique, densityDpi);
     return NapiGetUndefined(env);
 }
 
