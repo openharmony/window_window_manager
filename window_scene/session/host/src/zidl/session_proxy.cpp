@@ -1285,26 +1285,27 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     return static_cast<WMError>(ret);
 }
 
-int32_t SessionProxy::GetAppForceLandscapeMode(const std::string& bundleName)
+WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
-        return 0;
-    }
-    if (!data.WriteString(bundleName)) {
-        TLOGE(WmsLogTag::DEFAULT, "bundle name write failed");
-        return 0;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_MODE),
+        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
-        return 0;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    return reply.ReadInt32();
+    sptr<AppForceLandscapeConfig> replyConfig = reply.ReadParcelable<AppForceLandscapeConfig>();
+    if (replyConfig) {
+        config = *replyConfig;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 
 int32_t SessionProxy::GetStatusBarHeight()
@@ -1326,7 +1327,7 @@ int32_t SessionProxy::GetStatusBarHeight()
     return height;
 }
 
-WSError SessionProxy::SetDialogSessionBackEventEnabled(bool isEnabled)
+WSError SessionProxy::SetDialogSessionBackGestureEnabled(bool isEnabled)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1340,7 +1341,7 @@ WSError SessionProxy::SetDialogSessionBackEventEnabled(bool isEnabled)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKEVENT_ENABLE),
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

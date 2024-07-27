@@ -239,10 +239,10 @@ napi_value JsWindow::BindDialogTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnBindDialogTarget(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetDialogBackEventEnabled(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetDialogBackGestureEnabled(napi_env env, napi_callback_info info)
 {
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetDialogBackEventEnabled(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetDialogBackGestureEnabled(env, info) : nullptr;
 }
 
 napi_value JsWindow::LoadContent(napi_env env, napi_callback_info info)
@@ -1825,7 +1825,7 @@ napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetDialogBackEventEnabled(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1853,7 +1853,7 @@ napi_value JsWindow::OnSetDialogBackEventEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDialogBackEventEnabled(isEnabled));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDialogBackGestureEnabled(isEnabled));
         TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set dialog window end",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
@@ -3437,7 +3437,6 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
         WLOGFE("set wake up screen permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
@@ -3449,18 +3448,12 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool wakeUp = false;
-    if (errCode == WmErrorCode::WM_OK) {
-        napi_value nativeVal = argv[0];
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to keepScreenOn");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &wakeUp));
-        }
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to keepScreenOn");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    } else {
+        napi_get_value_bool(env, nativeVal, &wakeUp);
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTurnScreenOn(wakeUp));
@@ -6032,7 +6025,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "on", moduleName, JsWindow::RegisterWindowCallback);
     BindNativeFunction(env, object, "off", moduleName, JsWindow::UnregisterWindowCallback);
     BindNativeFunction(env, object, "bindDialogTarget", moduleName, JsWindow::BindDialogTarget);
-    BindNativeFunction(env, object, "setDialogBackEventEnabled", moduleName, JsWindow::SetDialogBackEventEnabled);
+    BindNativeFunction(env, object, "setDialogBackGestureEnabled", moduleName, JsWindow::SetDialogBackGestureEnabled);
     BindNativeFunction(env, object, "loadContent", moduleName, JsWindow::LoadContent);
     BindNativeFunction(env, object, "loadContentByName", moduleName, JsWindow::LoadContentByName);
     BindNativeFunction(env, object, "getUIContext", moduleName, JsWindow::GetUIContext);

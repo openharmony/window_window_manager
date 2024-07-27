@@ -22,7 +22,6 @@
 
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
-#include "window_drawing_content_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -74,6 +73,7 @@ public:
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
+    virtual void NotifySessionFullScreen(bool fullScreen) {}
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}

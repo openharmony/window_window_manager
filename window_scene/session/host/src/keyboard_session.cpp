@@ -109,7 +109,9 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
-        if (session->systemConfig_.uiType_ == "pc") {
+        if (session->systemConfig_.uiType_ == "pc" || session->GetSessionScreenName() == "HiCar"
+            || session->GetSessionScreenName() == "SuperLauncher") {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             session->RestoreCallingSession();
             auto sessionProperty = session->GetSessionProperty();
             if (sessionProperty) {
@@ -596,5 +598,18 @@ std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
         rsTransaction = transactionController->GetRSTransaction();
     }
     return rsTransaction;
+}
+
+std::string KeyboardSession::GetSessionScreenName()
+{
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        auto displayId = sessionProperty->GetDisplayId();
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+        if (screenSession != nullptr) {
+            return screenSession->GetName();
+        }
+    }
+    return "";
 }
 } // namespace OHOS::Rosen

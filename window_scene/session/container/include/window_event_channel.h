@@ -45,8 +45,6 @@ class WindowEventChannel : public WindowEventChannelStub {
 public:
     explicit WindowEventChannel(sptr<ISessionStage> iSessionStage) : sessionStage_(iSessionStage)
     {
-        dispatchCallback_ =
-            [this](int32_t eventId, int64_t actionTime) { this->OnDispatchEventProcessed(eventId, actionTime); };
     }
     ~WindowEventChannel() = default;
 
@@ -80,7 +78,6 @@ private:
     sptr<ISessionStage> sessionStage_ = nullptr;
     bool isUIExtension_ { false };
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
-    std::function<void(int32_t, int64_t)> dispatchCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_H

@@ -422,6 +422,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             std::to_string(e.zOrder) + "|" +
             std::to_string(e.pid) + "|" +
             std::to_string(e.defaultHotAreas.size()) + ",";
+
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
         }

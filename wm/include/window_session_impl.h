@@ -373,8 +373,9 @@ private:
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
-    bool IsAppSupportForceSplit(const std::string& bundleName);
-    void SetForceSplitEnable(bool isForceSplit);
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    bool IsNotifyInteractiveDuplicative(bool interactive);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
@@ -426,6 +427,8 @@ private:
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+    bool hasFirstNotifyInteractive_ = false;
+    bool interactive_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

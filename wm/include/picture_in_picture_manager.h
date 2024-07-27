@@ -53,6 +53,7 @@ public:
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     static void AutoStartPipWindow(std::string navigationId);
+    static void DoDestroy();
 private:
     // controller in use
     static sptr<PictureInPictureController> activeController_;
