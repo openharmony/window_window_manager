@@ -1934,12 +1934,14 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
+        bool isPcAppInpad = false;
         bool isCompatibleModeInPc = false;
-        auto sessionProperty = scnSession->GetSessionProperty();
-        if (sessionProperty != nullptr) {
-            isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+        auto property = scnSession->GetSessionProperty();
+        if (property) {
+            isPcAppInpad = property->GetIsPcAppInPad();
+            isCompatibleModeInPc = property->GetCompatibleModeInPc();
         }
-        if (systemConfig_.backgroundswitch && !isCompatibleModeInPc) {
+        if ((systemConfig_.backgroundswitch && !isCompatibleModeInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
