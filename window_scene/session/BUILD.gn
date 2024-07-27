@@ -58,6 +58,7 @@ ohos_shared_library("scene_session") {
     "host/src/session.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
+    "host/src/ws_ffrt_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -77,12 +78,11 @@ ohos_shared_library("scene_session") {
 
   external_deps = [
     "ability_base:base",
-    "ability_base:session_info",
-    "ability_base:want",
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -96,9 +96,11 @@ ohos_shared_library("scene_session") {
     external_deps += [ "preferences:native_preferences" ]
   }
   public_external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
   defines = []
 
@@ -114,9 +116,9 @@ ohos_shared_library("scene_session") {
   }
 
   if (defined(global_parts_info) &&
-      defined(global_parts_info.resourceschedule_soc_perf)) {
-    external_deps += [ "soc_perf:socperf_client" ]
-    defines += [ "SOC_PERF_ENABLE" ]
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RES_SCHED_ENABLE" ]
   }
 
   if (device_status_enable) {
@@ -174,8 +176,9 @@ ohos_shared_library("screen_session") {
     "init:libbegetutil",
   ]
   public_external_deps = [
+    "ability_base:want",
     "accessibility:accessibility_common",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
 
   innerapi_tags = [ "platformsdk" ]

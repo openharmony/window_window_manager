@@ -88,6 +88,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) override
+    {
+        return WSError::WS_OK;
+    }
     WSError ClearSession(int32_t persistentId) override
     {
         return WSError::WS_OK;
@@ -160,6 +164,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
     {
         return WSError::WS_OK;
+    }
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override
+    {
+        return WMError::WM_OK;
     }
     sptr<IRemoteObject> AsObject() override
     {
@@ -419,6 +427,20 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
 }
 
 /**
+ * @tc.name: HandleGetSessionDisplayInfo
+ * @tc.desc: test function : HandleGetSessionDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionDisplayInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionDisplayInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleClearSession
  * @tc.desc: test function : HandleClearSession
  * @tc.type: FUNC
@@ -633,6 +655,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | Sma
     data.WriteInt32(persistentId);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleTerminateSessionByPersistentId
+ * @tc.desc: test function : HandleTerminateSessionByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

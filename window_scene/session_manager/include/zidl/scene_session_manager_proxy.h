@@ -101,6 +101,8 @@ public:
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override;
+    void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token) override;
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override;
     void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override;
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override;
@@ -109,6 +111,8 @@ public:
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError ToggleShownStateForAllAppWindows() override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
 
 private:

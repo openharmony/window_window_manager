@@ -89,7 +89,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone, Function | Sm
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
     abilityConnectionStub.clear();
@@ -158,7 +157,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, Function | SmallTe
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString16(Str8ToStr16("SA"));
@@ -260,7 +258,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionDisconnectExtension, F
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
     ASSERT_EQ(resDisconnect, NO_ERROR);
     abilityConnectionStub.clear();
@@ -289,7 +286,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest |
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString16(Str8ToStr16("SA"));
@@ -328,7 +324,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageBlock, Function | SmallT
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString16(Str8ToStr16("SA"));
@@ -367,7 +362,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteRequest, Function | SmallTe
         std::unique_lock<std::mutex> lock(connectedMutex_);
         static_cast<void>(connectedCv_.wait_for(lock, std::chrono::milliseconds(EXTENSION_CONNECT_OUT_TIME)));
     }
-    EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), true);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

@@ -317,7 +317,7 @@ WMError WindowManagerLite::UnregisterVisibilityChangedListener(const sptr<IVisib
 
 void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
-    WLOGFD("Get Focus window info lite");
+    WLOGFD("In");
     SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo);
 }
 
@@ -637,6 +637,15 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
     } else {
         pImpl_->NotifyWMSDisconnected(userId, screenId);
     }
+}
+
+WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "persistentId is invalid.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -35,6 +35,7 @@ using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
 class WindowSessionProperty : public Parcelable {
 public:
+    friend class HidumpController;
     WindowSessionProperty() = default;
     ~WindowSessionProperty() = default;
     explicit WindowSessionProperty(const sptr<WindowSessionProperty>& property);
@@ -330,6 +331,34 @@ struct FreeMultiWindowConfig : public Parcelable {
     }
 };
 
+struct AppForceLandscapeConfig : public Parcelable {
+    int32_t mode_ = 0;
+    std::string homePage_;
+
+    AppForceLandscapeConfig() {}
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage) : mode_(mode), homePage_(homePage) {}
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(mode_) ||
+            !parcel.WriteString(homePage_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static AppForceLandscapeConfig* Unmarshalling(Parcel& parcel)
+    {
+        AppForceLandscapeConfig* config = new (std::nothrow) AppForceLandscapeConfig();
+        if (config == nullptr) {
+            return nullptr;
+        }
+        config->mode_ = parcel.ReadInt32();
+        config->homePage_ = parcel.ReadString();
+        return config;
+    }
+};
+
 struct SystemSessionConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
@@ -427,6 +456,11 @@ struct SystemSessionConfig : public Parcelable {
         config->uiType_ = parcel.ReadString();
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
+    }
+
+    bool IsFreeMultiWindowMode() const
+    {
+        return freeMultiWindowEnable_ && freeMultiWindowSupport_;
     }
 };
 } // namespace Rosen

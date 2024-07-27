@@ -1577,10 +1577,10 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
-    bool result01 = ssm_->IsSessionVisible(sceneSession);
+    bool result01 = ssm_->IsSessionVisibleForeground(sceneSession);
     EXPECT_FALSE(result01);
     sceneSession->UpdateNativeVisibility(true);
-    bool result02 = ssm_->IsSessionVisible(sceneSession);
+    bool result02 = ssm_->IsSessionVisibleForeground(sceneSession);
     ASSERT_TRUE(result02);
 }
 
@@ -1887,6 +1887,8 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRecoveredSessionInfo02, Function | Smal
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -2019,29 +2021,6 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | Small
     mainFloat02.SetValue(subFloat);
     mainFloat02.SetValue({{"miniHeight", mainFloat02}});
     ssm_->ConfigSubWindowSizeLimits(mainFloat02);
-}
-
-/**
- * @tc.name: NotifyStackEmpty
- * @tc.desc: SceneSesionManager notify stack empty
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, NotifyStackEmpty, Function | SmallTest | Level3)
-{
-    WSError ret;
-    int32_t persistentId = 10086;
-    ret = ssm_->NotifyStackEmpty(persistentId);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    SessionInfo info;
-    info.abilityName_ = "SceneSessionManagerTest3";
-    info.bundleName_ = "NotifyStackEmpty";
-    info.screenId_ = 0;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({10086, sceneSession});
-    ret = ssm_->NotifyStackEmpty(persistentId);
-    ASSERT_EQ(WSError::WS_OK, ret);
 }
 }
 } // namespace Rosen

@@ -21,6 +21,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "marshalling_helper.h"
+#include "permission.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 
@@ -1610,6 +1611,10 @@ void SceneSessionManagerProxy::ProcessModalExtensionPointDown(const sptr<IRemote
 void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
     const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
 {
+    if (sessionStage == nullptr || token == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
+        return;
+    }
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
@@ -1631,6 +1636,35 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
                               SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB),
+                              data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    }
+}
+
+void SceneSessionManagerProxy::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+    const sptr<IRemoteObject>& token)
+{
+    if (sessionStage == nullptr || token == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
+        return;
+    }
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write InterfaceToken failed!");
+        return;
+    }
+    if (!data.WriteRemoteObject(sessionStage->AsObject())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write ISessionStage failed!");
+        return;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write token failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+                              SceneSessionManagerMessage::TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB),
                               data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
     }
@@ -1791,5 +1825,25 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     }
     windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
+{
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right, displayId %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGE(WmsLogTag::WMS_LIFE, "Not support minimize, displayId %{public}" PRIu64, displayId);
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+WMError SceneSessionManagerProxy::ToggleShownStateForAllAppWindows()
+{
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGE(WmsLogTag::WMS_LIFE, "Not support call toggleShownState");
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
 } // namespace OHOS::Rosen

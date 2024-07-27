@@ -439,6 +439,11 @@ WMError WindowImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetDialogBackGestureEnabled(bool isEnabled)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::Destroy()
 {
     if (uiContent_) {

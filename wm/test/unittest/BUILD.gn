@@ -81,11 +81,6 @@ ohos_unittest("wm_window_manager_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
   ]
-
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines = [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
 }
 
 ohos_unittest("wm_window_display_change_adapter_test") {
@@ -676,7 +671,6 @@ config("wm_unittest_common_public_config") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
-    "${ability_runtime_path}/test/mock/frameworks_kits_ability_native_test/include",
 
     # for abilityContext
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
@@ -704,7 +698,6 @@ ohos_static_library("wm_unittest_common") {
   public_deps = [
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "${ability_runtime_native_path}/appkit:app_context",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",

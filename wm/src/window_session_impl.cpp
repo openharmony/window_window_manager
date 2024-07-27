@@ -202,9 +202,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if ((isPC || isFreeMutiWindowMode) && windowOption_ != nullptr) {
+    if ((isPC || IsFreeMultiWindowMode()) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -529,7 +527,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(GetPersistentId());
     NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
@@ -757,11 +754,26 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
+{
+    if (interactive == interactive_ && hasFirstNotifyInteractive_) {
+        return true;
+    }
+    hasFirstNotifyInteractive_ = true;
+    if (interactive_ != interactive) {
+        interactive_ = interactive;
+    }
+    return false;
+}
+
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
+        return;
+    }
+    if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (state_ == WindowState::STATE_SHOWN) {
@@ -789,6 +801,10 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (rect.width_ == 0 || rect.height_ == 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
+        return;
+    }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("display is null!");
@@ -863,12 +879,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || isFreeMutiWindowMode) && (isSubWindow || isDialogWindow)) {
+    if ((isPC || IsFreeMultiWindowMode()) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true);
         return;
@@ -1017,9 +1031,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         }
     }
 
-    if (context_ != nullptr && WindowHelper::IsMainWindow(GetType())
-        && IsAppSupportForceSplit(context_->GetBundleName())) {
-        SetForceSplitEnable(true);
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.mode_ == FORCE_SPLIT_MODE) {
+        SetForceSplitEnable(true, config.homePage_);
     }
 
     uint32_t version = 0;
@@ -1611,8 +1626,9 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         height = uiContent->GetContainerModalTitleHeight();
     }
     if (height == -1) {
+        height = 0;
         WLOGFE("Get app window decor height failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -2033,9 +2049,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isFreeMutiWindowMode = windowSystemConfig_.freeMultiWindowSupport_ &&
-        windowSystemConfig_.freeMultiWindowEnable_;
-    if (!(isPC || isFreeMutiWindowMode)) {
+    if (!(isPC || IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -2535,11 +2549,11 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-        "NotifyAvoidAreaChange: id:%{public}d, type:%{public}d, top{%{public}d,%{public}d,%{public}d,%{public}d}, "
-        "down{%{public}d,%{public}d,%{public}d,%{public}d}", GetPersistentId(), type,
-        avoidArea->topRect_.posX_, avoidArea->topRect_.posY_, avoidArea->topRect_.width_, avoidArea->topRect_.height_,
-        avoidArea->bottomRect_.posX_, avoidArea->bottomRect_.posY_, avoidArea->bottomRect_.width_,
-        avoidArea->bottomRect_.height_);
+          "id: %{public}d, type: %{public}d, "
+          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
+          GetPersistentId(), type,
+          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
+          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
@@ -2810,7 +2824,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d",
+            TLOGI(WmsLogTag::WMS_EVENT, "Input id:%{public}d",
                 pointerEvent->GetId());
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
@@ -3435,27 +3449,27 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-bool WindowSessionImpl::IsAppSupportForceSplit(const std::string& bundleName)
+WMError WindowSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
-    if (bundleName.empty()) {
-        return false;
-    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
-        return false;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return hostSession_->GetAppForceLandscapeMode(bundleName) == FORCE_SPLIT_MODE;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit)
+void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFW("uiContent is null!");
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
         return;
     }
-    uiContent->SetForceSplitEnable(isForceSplit);
-    WLOGFI("set app force split success");
+    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    uiContent->SetForceSplitEnable(isForceSplit, homePage);
 }
 } // namespace Rosen
 } // namespace OHOS

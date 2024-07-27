@@ -1368,7 +1368,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    std::optional<MaximizePresentation> presentation ;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     // not support subWinodw call
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
  
@@ -1403,25 +1403,25 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
 
     ASSERT_NE(nullptr, window);
     // case1: only set maximize()
-    std::optional<MaximizePresentation> presentation;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
     // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
-    presentation.emplace(MaximizePresentation::EXIT_IMMERSIVE);
+    presentation = MaximizePresentation::EXIT_IMMERSIVE;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
     
     // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
-    presentation.emplace(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING);
+    presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
     // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
-    presentation.emplace(MaximizePresentation::ENTER_IMMERSIVE);
+    presentation = MaximizePresentation::ENTER_IMMERSIVE;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);

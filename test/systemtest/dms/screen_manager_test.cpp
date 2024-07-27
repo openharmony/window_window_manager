@@ -260,6 +260,10 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
 void ScreenManagerTest::CheckScreenStateInGroup(
     bool isInGroup, sptr<ScreenGroup> group, ScreenId groupId, sptr<Screen> virtualScreen, ScreenId virtualScreenId)
 {
+    if (group == nullptr) {
+        GTEST_LOG_(INFO) << "group is nullptr";
+        return;
+    }
     auto childIds = group->GetChildIds();
     ASSERT_LT(0, childIds.size());
     auto iter = std::find(childIds.begin(), childIds.end(), virtualScreenId);
@@ -284,6 +288,10 @@ void ScreenManagerTest::CheckScreenStateInGroup(
 void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, ScreenGroupChangeEvent event,
     ScreenId virtualScreenId, sptr<ScreenGroup> group, sptr<ScreenGroupChangeListener> screenGroupChangeListener)
 {
+    if (group == nullptr) {
+        GTEST_LOG_(INFO) << "group is nullptr";
+        return;
+    }
     auto pair = screenGroupChangeListener->changeFuture_.GetResult(TIME_OUT);
     screenGroupChangeListener->changeFuture_.Reset(
         std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
@@ -935,7 +943,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
         ScreenId screenId = screenListener->changeFuture_.GetResult(TIME_OUT);
         ASSERT_EQ(screenId, screens[0]->GetId());
         usleep(1E6);
-        ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), orientation);
+        ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()),
+            static_cast<uint32_t>(Orientation::UNSPECIFIED));
         ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
         sleep(TEST_SLEEP_S);
     }

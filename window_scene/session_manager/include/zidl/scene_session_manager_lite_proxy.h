@@ -54,6 +54,7 @@ public:
     WSError ClearAllSessions() override;
  
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -68,6 +69,7 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override;
     
 private:
     template<typename T>

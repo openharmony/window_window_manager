@@ -926,6 +926,16 @@ public:
      */
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) { return WMError::WM_OK; }
     /**
+     * @brief Set whether the dialog window responds to back gesture.
+     *
+     * @param isEnabled Responds to back gesture if true, or ignore back gesture if false.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
      * @brief Raise zorder of window to the top of APP Mainwindow.
      *
      * @return WM_OK means raise success, others means raise failed.
@@ -1427,7 +1437,7 @@ public:
      * @param presentation the value means use presentation enum to layout when maximize window
      * @return WM_OK means maximize window ok, others means failed.
      */
-    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
+    virtual WMError Maximize(MaximizePresentation presentation)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1694,7 +1704,7 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
@@ -1702,10 +1712,10 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
-    /*
+    /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
      *
      * @param listener IWindowNoInteractionListenerSptr.
@@ -2067,13 +2077,14 @@ public:
      * @return WM_OK means set success, others means set failed
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
     /*
      * @brief Set the Dvsync Switch
      *
      * @param dvsyncSwitch bool.
      * @return * void
      */
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {};
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     /**
      * @brief Set whether to enable immersive mode.
@@ -2088,6 +2099,13 @@ public:
      * @return true means the immersive mode is enabled, and false means the opposite.
      */
     virtual bool GetImmersiveModeEnabledState() const { return true; }
+
+    /**
+     * @brief Get the height of status bar.
+     *
+     * @return the height of status bar.
+     */
+    virtual uint32_t GetStatusBarHeight() { return 0; }
 };
 }
 }

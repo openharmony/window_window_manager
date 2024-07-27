@@ -81,7 +81,7 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::WMS_EVENT, "InterfaceToken check failed");
-        return -1;
+        return ERR_INVALID_STATE;
     }
 
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
@@ -98,7 +98,7 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
             TLOGE(WmsLogTag::WMS_EVENT, "unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 
 void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
@@ -152,9 +152,10 @@ WSError ExtensionSession::ConnectInner(
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
     const std::string& identityToken)
 {
-    // Get pid and uid before posting task.
-    pid = pid == -1 ? IPCSkeleton::GetCallingRealPid() : pid;
-    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
+    if (pid == INVALID_PID || uid == INVALID_UID) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid pid or uid");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode,
         &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
