@@ -417,6 +417,7 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
+    bool IsFreeMultiWindowEnable();
     virtual int32_t GetCustomDecorHeight()
     {
         return 0;
