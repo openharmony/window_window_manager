@@ -1895,6 +1895,9 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         (isVerticalOrientation || property_->GetRequestedOrientation() == Orientation::UNSPECIFIED)) {
         enable = false;
     }
+    if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
+        enable = true;
+    }
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
@@ -3145,6 +3148,18 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
     }
     Close();
     return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("NotifySessionForeground");
+    Show(reason, withAnimation);
+}
+
+void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    WLOGFI("NotifySessionBackground");
+    Hide(reason, withAnimation, isFromInnerkits);
 }
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
