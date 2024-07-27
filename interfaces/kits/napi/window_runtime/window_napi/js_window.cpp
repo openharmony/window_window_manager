@@ -4947,8 +4947,10 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (argv[0] == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    CHECK_NAPI_RETCODE(ret, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_double(env, argv[0], &result));
+    napi_status statusCode = napi_get_value_double(env, argv[0], &result)
+    if (statusCode != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     if (MathHelper::LessNotEqual(result, 0.0)) {
         return NapiThrowError(env,  WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
