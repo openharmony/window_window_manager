@@ -1849,6 +1849,17 @@ void WindowSessionImpl::RecoverSessionListener()
         !touchOutsideListeners_[persistentId].empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(persistentId, true);
     }
+    if (windowVisibilityChangeListeners_.find(persistentId) != windowVisibilityChangeListeners_.end() &&
+        !windowVisibilityChangeListeners_[persistentId].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, true);
+    }
+    if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
+        !windowRectChangeListeners_[persistentId].empty()) {
+        auto hostSession = GetHostSession();
+        if (hostSession != nullptr) {
+            hostSession->UpdateRectChangeListenerRegistered(true);
+        }
+    }
 }
 
 template<typename T>
