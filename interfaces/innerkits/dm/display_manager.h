@@ -562,7 +562,7 @@ public:
 
     /**
      * @brief Set display scale.
-     * 
+     *
      * @param screenId screenId used in DisplayManager.
      * @param scaleX screen scale in x axis.
      * @param scaleY screen scale in y axis.

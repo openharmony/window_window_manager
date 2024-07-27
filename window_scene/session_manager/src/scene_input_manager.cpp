@@ -59,7 +59,7 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.height != b.height || a.dpi != b.dpi || a.name != b.name || a.uniq != b.uniq ||
         static_cast<int32_t>(a.direction) != static_cast<int32_t>(b.direction) ||
         static_cast<int32_t>(a.displayDirection) != static_cast<int32_t>(b.displayDirection) ||
-        static_cast<int32_t>(a.displayMode) != static_cast<int32_t>(b.displayMode) || 
+        static_cast<int32_t>(a.displayMode) != static_cast<int32_t>(b.displayMode) ||
         a.transform != b.transform) {
         return false;
     }
