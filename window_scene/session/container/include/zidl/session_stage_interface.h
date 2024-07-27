@@ -74,6 +74,7 @@ public:
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
+    virtual void NotifySessionFullScreen(bool fullScreen) {}
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
