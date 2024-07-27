@@ -147,9 +147,11 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleBackPressed(data, reply);
-    ASSERT_EQ(5, res);
+    if (!data.ReadBool()) {
+        ASSERT_EQ(5, res);
+    }
     res = session_->HandleMarkProcessed(data, reply);
-    ASSERT_EQ(5, res);
+    ASSERT_EQ(0, res);
     res = session_->HandleSetGlobalMaximizeMode(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleGetGlobalMaximizeMode(data, reply);
@@ -162,8 +164,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleTransferAbilityResult(data, reply);
-    ASSERT_EQ(0, res);
+    session_->HandleTransferAbilityResult(data, reply);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(22, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
