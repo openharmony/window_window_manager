@@ -1472,6 +1472,11 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief start move system window. It is called by application.
+     *
+     */
+    virtual void StartMoveSystemWindow() {return WMErrorCode::WM_OK;}    
+    /**
      * @brief Set flag that need remove window input channel.
      *
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
