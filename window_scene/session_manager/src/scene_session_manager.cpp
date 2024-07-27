@@ -1899,8 +1899,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         bool isPcAppInpad = false;
-        if (scnSession->GetSessionProperty() != nullptr) {
-            isPcAppInpad = scnSession->GetSessionProperty()->GetIsPcAppInPad();
+        auto property = scnSession->GetSessionProperty();
+        if (property) {
+            isPcAppInpad = property->GetIsPcAppInPad();
         }
         if (systemConfig_.backgroundswitch || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
