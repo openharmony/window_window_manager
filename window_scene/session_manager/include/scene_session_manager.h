@@ -352,6 +352,7 @@ public:
     void InitScheduleUtils();
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
+    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     WMError TerminateSessionByPersistentId(int32_t persistentId);

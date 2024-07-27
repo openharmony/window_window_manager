@@ -1846,4 +1846,21 @@ WMError SceneSessionManagerProxy::ToggleShownStateForAllAppWindows()
     TLOGE(WmsLogTag::WMS_LIFE, "Not support call toggleShownState");
     return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
+
+WMError SceneSessionManagerProxy::GetWindowStyleType(WindowStyleType& windowStyleType)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetwindowStyleType Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    windowStyleType = static_cast<WindowStyleType>(reply.ReadUint32());
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

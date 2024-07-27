@@ -369,6 +369,7 @@ public:
     bool GetPostProcessProperty() const;
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
+    bool IsPcOrPadEnableActivation() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
