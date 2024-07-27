@@ -2177,10 +2177,12 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
-    if (isFromBroker == true) {
-        needStartCaller = true;
+    bool needRemoveSession = false;
+    if (!needStartCaller && !isFromBroker) {
+        needRemoveSession = true;
     }
-    auto task = [needStartCaller, jsCallBack = GetJSCallback(TERMINATE_SESSION_CB_NEW), env = env_]() {
+    auto task = [needStartCaller, needRemoveSession, jsCallBack = GetJSCallback(
+        TERMINATE_SESSION_CB_NEW), env = env_]() {
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2190,7 +2192,12 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsNeedStartCaller is nullptr");
             return;
         }
-        napi_value argv[] = {jsNeedStartCaller};
+        napi_value jsNeedRemoveSession = CreateJsValue(env, needRemoveSession);
+        if (jsNeedRemoveSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsNeedRemoveSession is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsNeedStartCaller, jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "TerminateSessionNew, name:" + info.abilityName_);
