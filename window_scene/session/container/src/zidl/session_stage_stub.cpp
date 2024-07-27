@@ -106,6 +106,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleCompatibleFullScreenMinimize(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
             return HandleCompatibleFullScreenClose(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
+            return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
         default:
@@ -487,6 +489,15 @@ int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, Messa
 {
     WSError errCode = CompatibleFullScreenClose();
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
+    bool useUniqueDensity = data.ReadBool();
+    float densityValue = data.ReadFloat();
+    SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
