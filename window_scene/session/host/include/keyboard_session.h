@@ -70,6 +70,7 @@ private:
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     std::shared_ptr<RSTransaction> GetRSTransaction();
+    std::string GetSessionScreenName();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

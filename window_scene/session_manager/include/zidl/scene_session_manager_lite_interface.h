@@ -75,7 +75,6 @@ public:
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
-        TRANS_ID_GET_SESSION_DISPLAY_INFO,
         TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID,
     };
 
@@ -110,19 +109,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
-    /**
-     * @brief Get SessionDisplayInfo by session's persistentId
-     *
-     * The data returned includes session's pid, along with some related elements of its screen displayInfo.\n
-     * It is mainly used for the host security check and info transmission when creating UIExtension.\n
-     * The caller requires SA permission.\n
-     *
-     * @param persistentId session's persistentId
-     * @param sessionDisplayInfo result data
-     * @return WSError
-     * @permission SA permission required
-     */
-    virtual WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

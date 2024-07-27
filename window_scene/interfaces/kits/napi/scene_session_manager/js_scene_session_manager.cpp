@@ -1233,6 +1233,9 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
+    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
+    });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([]() {
             SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
