@@ -4578,10 +4578,8 @@ napi_value JsWindow::OnOpacity(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double alpha = 0.0;
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_double(env, nativeVal, &alpha));
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_status statusCode = napi_get_value_double(env, nativeVal, &alpha);
+    if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(alpha, 0.0) || MathHelper::GreatNotEqual(alpha, 1.0)) {
@@ -4911,10 +4909,8 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_double(env, nativeVal, &radius));
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
+    if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -5008,10 +5004,8 @@ napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_double(env, nativeVal, &radius));
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
+    if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -5051,10 +5045,8 @@ napi_value JsWindow::OnSetBackdropBlur(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_double(env, nativeVal, &radius));
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
+    if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -5095,10 +5087,8 @@ napi_value JsWindow::OnSetBackdropBlurStyle(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t resultValue = 0;
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_uint32(env, nativeMode, &resultValue));
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    napi_status statusCode = napi_get_value_uint32(env, nativeMode, &resultValue);
+    if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (resultValue > static_cast<uint32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)) {
@@ -5134,7 +5124,7 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
     }
 
     bool isAddSafetyLayer = false;
-    napi_status statusCode =  napi_get_value_bool(env, nativeBool, &isAddSafetyLayer);
+    napi_status statusCode = napi_get_value_bool(env, nativeBool, &isAddSafetyLayer);
     if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
