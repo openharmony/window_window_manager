@@ -39,6 +39,7 @@ namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
 namespace {
     constexpr int32_t DELAY_RESET = 100;
+    constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
@@ -47,6 +48,7 @@ namespace {
     const std::string KEY = "auto_start_pip_status";
     const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
     const std::string SETTING_COLUMN_VALUE = "VALUE";
+    const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
         "settingsdata/SETTINGSDATA?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
@@ -296,9 +298,9 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
     return res;
 }
 
-WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType)
+WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u", destroyWindow);
+    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
     std::lock_guard<std::mutex> lock(mutex_);
     if ((!isStoppedFromClient_ && curState_ == PiPWindowState::STATE_STOPPING) ||
         curState_ == PiPWindowState::STATE_STOPPED) {
@@ -329,10 +331,10 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
-    return StopPictureInPictureInner(stopPipType);
+    return StopPictureInPictureInner(stopPipType, withAnim);
 }
 
-WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType)
+WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopType, bool withAnim)
 {
     uint32_t templateType = 0;
     if (pipOption_ != nullptr) {
@@ -349,23 +351,32 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         syncTransactionController->OpenSyncTransaction();
     }
     ResetExtController();
-    DestroyPictureInPictureWindow();
+    if (!withAnim) {
+        DestroyPictureInPictureWindow();
+    } else {
+        // handle destroy timeout
+        if (handler_ == nullptr) {
+            handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+        }
+        auto timeoutTask = [weakThis = wptr(this)]() {
+            auto pipController = weakThis.promote();
+            if (pipController == nullptr) {
+                TLOGE(WmsLogTag::WMS_PIP, "execute destroy timeout task failed, pipController is null");
+                return;
+            }
+            if (pipController->curState_ == PiPWindowState::STATE_STOPPED) {
+                TLOGI(WmsLogTag::WMS_PIP, "pip window already destroyed");
+                return;
+            }
+            TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
+            pipController->DestroyPictureInPictureWindow();
+        };
+        handler_->PostTask(timeoutTask, DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
+    }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
     }
-    for (auto& listener : pipLifeCycleListeners_) {
-        listener->OnPictureInPictureStop();
-    }
-    curState_ = PiPWindowState::STATE_STOPPED;
-    std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
-    if (!navId.empty() && mainWindow_) {
-        auto navController = NavigationController::GetNavigationController(
-            mainWindow_->GetUIContent(), navId);
-        if (navController) {
-            navController->DeletePIPMode(handleId_);
-            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
-        }
-    }
+
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PIP_SUCCESS, "pip window stop success");
     return WMError::WM_OK;
@@ -374,6 +385,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
+    handler_->RemoveTask(DESTROY_TIMEOUT_TASK);
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -390,6 +402,19 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     PictureInPictureManager::RemoveActiveController(this);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
+
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPictureInPictureStop();
+    }
+    curState_ = PiPWindowState::STATE_STOPPED;
+    std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
+    if (!navId.empty() && mainWindow_) {
+        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+        if (navController) {
+            navController->DeletePIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+        }
+    }
     return WMError::WM_OK;
 }
 
@@ -573,7 +598,7 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
 
 void PictureInPictureController::RestorePictureInPictureWindow()
 {
-    StopPictureInPicture(true, StopPipType::NULL_STOP);
+    StopPictureInPicture(true, StopPipType::NULL_STOP, true);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
@@ -638,6 +663,11 @@ void PictureInPictureController::UpdatePiPSourceRect() const
     float height = 0;
     mainWindowXComponentController_->GetGlobalPosition(posX, posY);
     mainWindowXComponentController_->GetSize(width, height);
+    if (static_cast<uint32_t>(width) == 0 && static_cast<uint32_t>(height) == 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "get xComponent size failed");
+        width = windowRect_.width_;
+        height = windowRect_.height_;
+    }
     Rect rect = { posX, posY, width, height };
     TLOGI(WmsLogTag::WMS_PIP, "result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);

@@ -69,6 +69,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    void NotifySessionFullScreen(bool fullScreen) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

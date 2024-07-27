@@ -74,6 +74,7 @@ public:
         TRANS_ID_RAISE_WINDOW_TO_TOP,
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
+        TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

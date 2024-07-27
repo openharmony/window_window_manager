@@ -106,6 +106,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleCompatibleFullScreenMinimize(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
             return HandleCompatibleFullScreenClose(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
+            return HandleNotifySessionFullScreen(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -328,6 +330,14 @@ int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, Message
     uint32_t reason = data.ReadUint32();
     bool withAnimation = data.ReadBool();
     NotifySessionForeground(reason, withAnimation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "called");
+    bool fullScreen = data.ReadBool();
+    NotifySessionFullScreen(fullScreen);
     return ERR_NONE;
 }
 

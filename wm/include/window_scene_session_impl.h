@@ -163,6 +163,7 @@ public:
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
     uint32_t GetStatusBarHeight() override;
+    void NotifySessionFullScreen(bool fullScreen) override;
 
 protected:
     void DestroySubWindow();

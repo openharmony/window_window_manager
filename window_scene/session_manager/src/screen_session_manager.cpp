@@ -143,11 +143,11 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
+    auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
-    oss << "SetScreenCorrection g_screenRotationOffSet : " << g_screenRotationOffSet;
+    oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << "  ret value: " << ret;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    TLOGI(WmsLogTag::DMS, "SetScreenCorrection g_screenRotationOffSet : %{public}d", g_screenRotationOffSet);
-    rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     FoldScreenPowerInit();
 }
 
@@ -1549,8 +1549,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
 
-    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
-        gotScreenlockFingerprint_ == true) {
+    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) &&
+        prePowerStateChangeReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
         gotScreenlockFingerprint_ = false;
         return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
             DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
@@ -1853,8 +1854,14 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
     // screenId要在rotation前进行设置
-    ScreenSettingHelper::SetSettingRotationScreenId(static_cast<int32_t>(displayInfo->GetScreenId()));
-    ScreenSettingHelper::SetSettingRotation(static_cast<int32_t>(displayInfo->GetRotation()));
+    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
+    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
+    auto task = [settingScreenId, settingRotation]() {
+        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
+        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
+        ScreenSettingHelper::SetSettingRotation(settingRotation);
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
