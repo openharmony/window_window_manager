@@ -199,6 +199,28 @@ public:
     WMError UnregisterWMSConnectionChangedListener();
 
     /**
+     * @brief Register WindowStyle changed listener.
+     *
+     * @param listener IWindowStyleChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+    /**
+    * @brief Unregister WindowStyle changed listener.
+    *
+    * @param listener IWindowStyleChangedListener
+    * @return WM_OK means unregister success, others means unregister failed.
+    */
+    WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+    /**
+     * @brief Get window style type.
+     *
+     * @param windowStyleType WindowType
+     * @return @return WM_OK means get window style success, others means failed.
+     */
+    WindowStyleType GetWindowStyleType();
+
+    /**
      * @brief Terminate session by persistentId and start caller.
      * @persistentId persistentId to be terminated.
      *
@@ -225,6 +247,7 @@ private:
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void OnRemoteDied();
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
+    WMError NotifyWindowStyleChange(WindowStyleType type);
 };
 } // namespace Rosen
 } // namespace OHOS

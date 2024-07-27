@@ -285,6 +285,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
+        reply.WriteBool(property->GetIsPcAppInPad());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
