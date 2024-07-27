@@ -1675,6 +1675,32 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
     result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 }
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager SetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "SetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = { 0, "MainPage" };
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "GetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
+    ASSERT_EQ(config.mode_, 0);
+    ASSERT_EQ(config.homePage_, "");
+}
 }
 } // namespace Rosen
 } // namespace OHOS
