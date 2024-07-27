@@ -115,6 +115,10 @@ void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &
     TLOGI(WmsLogTag::WMS_PIP, "Report pip widow action event");
     std::string eventName = "CONTROL_PANNEL_ACTION_EVENT";
     int32_t currentAction = CONTROL_ACTION_MAP[actionEvent];
+    if (CONTROL_ACTION_MAP.find(actionEvent) == CONTROL_ACTION_MAP.end()) {
+        TLOGE(WmsLogTag::WMS_PIP, "actionEvent %{public}s not find", actionEvent.c_str());
+        return;
+    }
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
