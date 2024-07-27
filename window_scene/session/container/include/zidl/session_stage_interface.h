@@ -85,6 +85,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
 
     // **Non** IPC interface
