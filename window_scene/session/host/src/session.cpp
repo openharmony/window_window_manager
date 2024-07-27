@@ -556,6 +556,17 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
+bool Session::IsSystemActive() const
+{
+    return isSystemActive_;
+}
+
+void Session::SetSystemActive(bool systemActive)
+{
+    isSystemActive_ = systemActive;
+    NotifySessionInfoChange();
+}
+
 WSError Session::SetRSVisible(bool isVisible)
 {
     isRSVisible_ = isVisible;
@@ -668,17 +679,6 @@ bool Session::IsActive() const
 bool Session::IsSystemSession() const
 {
     return sessionInfo_.isSystem_;
-}
-
-bool Session::IsSystemActive() const
-{
-    return isSystemActive_;
-}
-
-void Session::SetSystemActive(bool systemActive)
-{
-    isSystemActive_ = systemActive;
-    NotifySessionInfoChange();
 }
 
 bool Session::IsTerminated() const
