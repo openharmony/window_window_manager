@@ -67,6 +67,7 @@ public:
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
+    void NotifySessionFullScreen(bool fullScreen) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

@@ -1122,6 +1122,40 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
     return taskScheduler_->PostSyncTask(task, "GetRootSceneSession");
 }
 
+WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(AvoidAreaType type)
+{
+    sptr<RootSceneSession> rootSession = GetRootSceneSession();
+    if (rootSession == nullptr || rootSession->GetSessionProperty() == nullptr) {
+        return {};
+    }
+    DisplayId displayId = rootSession->GetSessionProperty()->GetDisplayId();
+    std::vector<sptr<SceneSession>> sessionVector;
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            sessionVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_STATUS_BAR, displayId);
+            break;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            sessionVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
+            break;
+        }
+        default: {
+            TLOGD(WmsLogTag::WMS_IMMS, "unsupported type %{public}u", type);
+            return {};
+        }
+    }
+
+    for (auto& session : sessionVector) {
+        if (!session->IsVisible()) {
+            continue;
+        }
+        const WSRect rect = session->GetSessionRect();
+        TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect: %{public}s", type, rect.ToString().c_str());
+        return rect;
+    }
+    return {};
+}
+
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -6176,41 +6210,6 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "GetSessionSnapshot");
-}
-
-WSError SceneSessionManager::GetSessionDisplayInfo(int32_t persistentId,
-    SessionDisplayInfo& sessionDisplayInfo)
-{
-    TLOGI(WmsLogTag::DEFAULT, "persistentId: %{public}d", persistentId);
-    if (!SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
-    auto session = GetSceneSession(persistentId);
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to find session with persistentId=%{public}d", persistentId);
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    uint64_t displayId = session->GetSessionInfo().screenId_;
-    if (displayId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId.");
-        return WSError::WS_ERROR_INVALID_DISPLAY;
-    }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get display object with id=%{public}" PRIu64, displayId);
-        return WSError::WS_ERROR_INVALID_DISPLAY;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get displayInfo with id=%{public}" PRIu64, displayId);
-        return WSError::WS_ERROR_INVALID_DISPLAY;
-    }
-    sessionDisplayInfo.pid = session->GetCallingPid();
-    sessionDisplayInfo.displayId = displayId;
-    sessionDisplayInfo.density = displayInfo->GetVirtualPixelRatio();
-    sessionDisplayInfo.orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
-    return WSError::WS_OK;
 }
 
 WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot)

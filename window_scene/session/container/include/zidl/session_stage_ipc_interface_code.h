@@ -54,6 +54,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE,
     TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST,
     TRANS_ID_NOTIFY_DENSITY_UNIQUE,
+    TRANS_ID_NOTIFY_SESSION_FULLSCREEN,
 };
 }   // namespace Rosen
 }   // namespace OHOS
