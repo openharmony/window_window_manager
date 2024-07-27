@@ -1268,8 +1268,8 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
 
 napi_value JsSceneSession::SetIsPcAppInPad(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetIsPcAppInPad");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]called");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetIsPcAppInPad(env, info) : nullptr;
 }
 
