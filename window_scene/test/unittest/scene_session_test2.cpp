@@ -764,7 +764,7 @@ HWTEST_F(SceneSessionTest2, NotifyClientToUpdateRect01, Function | SmallTest | L
     EXPECT_NE(scensession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    scensession->isDirty_ = true;
+    scensession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     scensession->sessionStage_ = mockSessionStage;
     auto ret = scensession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
@@ -790,7 +790,7 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, Function | SmallTest | Lev
     EXPECT_NE(scensession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    scensession->isDirty_ = true;
+    scensession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     scensession->sessionStage_ = mockSessionStage;
     scensession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
     ASSERT_EQ(scensession->reason_, SizeChangeReason::ROTATION);

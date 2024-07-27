@@ -117,9 +117,6 @@ SessionManagerLite::~SessionManagerLite()
     DeleteAllSessionListeners();
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
-    if (recoverListenerRegistered_ && mockSessionManagerServiceProxy_ != nullptr) {
-        mockSessionManagerServiceProxy_->UnregisterSMSLiteRecoverListener();
-    }
 }
 
 void SessionManagerLite::ClearSessionManagerProxy()
@@ -190,6 +187,18 @@ void SessionManagerLite::DeleteAllSessionListeners()
 {
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     sessionListeners_.clear();
+}
+
+WMError SessionManagerLite::GetSessionDisplayInfo(int32_t persistentId,
+    SessionDisplayInfo& sessionDisplayInfo)
+{
+    auto sceneSessionManagerLiteProxy = GetSceneSessionManagerLiteProxy();
+    if (sceneSessionManagerLiteProxy == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sceneSessionManagerLiteProxy is null");
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return static_cast<WMError>(
+        sceneSessionManagerLiteProxy->GetSessionDisplayInfo(persistentId, sessionDisplayInfo));
 }
 
 void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
@@ -283,27 +292,12 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-            WLOGFE("Failed to get system ability mgr.");
-            return;
-        }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject) {
-        WLOGFE("Remote object is nullptr");
+    auto ret = InitMockSMSProxy();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Init mock session manager service failed in Lite");
         return;
     }
-    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    if (!mockSessionManagerServiceProxy_) {
-        WLOGFW("Get mock session manager service proxy failed, nullptr");
-        return;
-    }
-    if (!recoverListenerRegistered_) {
-        recoverListenerRegistered_ = true;
-        smsRecoverListener_ = new SessionManagerServiceLiteRecoverListener();
-        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
-    }
+    RegisterSMSRecoverListener();
     sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
     if (!remoteObject2) {
         WLOGFE("Remote object2 is nullptr");

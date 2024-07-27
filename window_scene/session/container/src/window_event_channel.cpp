@@ -120,10 +120,6 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFI("InputTracking id:%{public}d, Dispatch by skipping receipt, action:%{public}s,"
             " persistentId:%{public}d", pointerEvent->GetId(),
             pointerEvent->DumpPointerAction(), sessionStage_->GetPersistentId());
-    } else {
-        DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(pointerEvent->GetId(), sessionStage_);
-        WLOGFD("Dispatch normally, action:%{public}s, eventId:%{public}d, persistentId:%{public}d",
-            pointerEvent->DumpPointerAction(), pointerEvent->GetId(), sessionStage_->GetPersistentId());
     }
     sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
@@ -161,7 +157,6 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
             keyEvent->GetId(), static_cast<int>(isConsumed));
         return WSError::WS_OK;
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
     keyEvent->MarkProcessed();
     return WSError::WS_OK;
@@ -228,11 +223,6 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     return WSError::WS_OK;
 }
 
-void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
-{
-    DelayedSingleton<ANRHandler>::GetInstance()->HandleEventConsumed(eventId, actionTime);
-}
-
 void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)
 {
     if (event == nullptr) {
@@ -278,8 +268,8 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
                 WLOGFE("Invalid pointer: %{public}d.", pointerId);
                 return;
             }
-            WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
-                "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+            TLOGD(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+                "DisplayX:%{private}d,DisplayY:%{private}d,WindowX:%{private}d,WindowY:%{private}d",
                 pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
                 item.GetWindowX(), item.GetWindowY());
         }
@@ -363,11 +353,11 @@ WSError WindowEventChannel::TransferAccessibilityChildTreeUnregister()
 WSError WindowEventChannel::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null.");
         return WSError::WS_ERROR_NULLPTR;
     }
+#ifdef ACCESSIBILITY_DUMP_FOR_TEST
     return sessionStage_->NotifyAccessibilityDumpChildInfo(params, info);
 #else
     info.emplace_back("not support in user build variant");

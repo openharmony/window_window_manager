@@ -23,6 +23,12 @@ TaskScheduler::TaskScheduler(const std::string& threadName)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
 
+TaskScheduler::TaskScheduler(const std::string& threadName, AppExecFwk::ThreadMode threadMode)
+{
+    auto runner = AppExecFwk::EventRunner::Create(threadName, threadMode);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+}
+
 std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 {
     return handler_;

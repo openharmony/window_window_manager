@@ -60,6 +60,19 @@ HWTEST_F(SceneSessionManagerLiteTest, GetInstance, Function | SmallTest | Level1
     SceneSessionManagerLite& instance2 = SceneSessionManagerLite::GetInstance();
     EXPECT_EQ(&instance1, &instance2);
 }
+
+/**
+ * @tc.name: GetSessionDisplayInfo
+ * @tc.desc: GetSessionDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, GetSessionDisplayInfo, Function | SmallTest | Level1)
+{
+    SceneSessionManagerLite& sceneSessionManagerLite = SceneSessionManagerLite::GetInstance();
+    SessionDisplayInfo sessionDisplayInfo;
+    auto ret = sceneSessionManagerLite.GetSessionDisplayInfo(0, sessionDisplayInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
 }
 }
 }

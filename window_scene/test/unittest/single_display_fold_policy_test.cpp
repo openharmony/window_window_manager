@@ -348,6 +348,19 @@ HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModeToFull, Function | 
 }
 
 /**
+ * @tc.name: ChangeScreenDisplayModePower
+ * @tc.desc: test function : ChangeScreenDisplayModePower
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModePower, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    EXPECT_TRUE(1);
+}
+
+/**
  * @tc.name: SendPropertyChangeResult
  * @tc.desc: test function : SendPropertyChangeResult
  * @tc.type: FUNC

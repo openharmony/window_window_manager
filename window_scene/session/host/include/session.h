@@ -71,8 +71,8 @@ using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(cons
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
-using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySessionInfoLockedStateChangeFunc = std::function<void(const bool lockedState)>;
+using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
@@ -111,6 +111,7 @@ struct DetectTaskInfo {
 
 class Session : public SessionStub {
 public:
+    friend class HidumpController;
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
@@ -164,7 +165,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
-    void SaveSnapshot(bool useSnapshotThread);
+    void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -219,6 +220,7 @@ public:
     void SetNeedSnapshot(bool needSnapshot);
     virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
     virtual bool IsExitSplitOnBackground() const;
+    virtual bool NeedStartingWindowExitAnimation() const { return true; }
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
@@ -230,7 +232,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
-    WSError Clear();
+    WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
@@ -295,8 +297,8 @@ public:
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
-    virtual WSError SetVisible(bool isVisible);
-    bool GetVisible() const;
+    virtual WSError SetRSVisible(bool isVisible);
+    bool GetRSVisible() const;
     bool GetFocused() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
@@ -333,20 +335,20 @@ public:
     int32_t GetCallingUid() const;
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
-    WindowMode GetWindowMode();
+    WindowMode GetWindowMode() const;
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
-    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
-    bool GetSCBKeepKeyboardFlag() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
     float GetScaleX() const;
     float GetScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
+    void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
+    bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
@@ -396,6 +398,7 @@ public:
     void SetNotifySystemSessionPointerEventFunc(const NotifySystemSessionPointerEventFunc& func);
     void SetNotifySystemSessionKeyEventFunc(const NotifySystemSessionKeyEventFunc& func);
     bool IsSystemInput();
+    // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
@@ -419,6 +422,14 @@ public:
         return 0;
     };
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
+
+    virtual bool IsVisibleForeground() const;
+    void SetIsStarting(bool isStarting);
+    void SetUIStateDirty(bool dirty);
+    void SetMainSessionUIStateDirty(bool dirty);
+    bool GetUIStateDirty() const;
+    void ResetDirtyFlags();
+    static bool IsScbCoreEnabled();
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -530,12 +541,11 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
-    bool scbKeepKeyboardFlag_ = false;
-    bool isDirty_ = false;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
+    bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     mutable std::shared_mutex parentSessionMutex_;
@@ -545,11 +555,13 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
+    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
+    bool isStarting_ = false;   // when start app, session is starting state until foreground
+    std::atomic_bool mainUIStateDirty_ = false;
 
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    void NotifyPointerEventToRs(int32_t pointAction);
     WSError HandleSubWindowClick(int32_t action);
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
@@ -592,6 +604,7 @@ private:
     bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
     WSRect preRect_;
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;

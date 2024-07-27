@@ -306,8 +306,10 @@ HWTEST_F(SceneInputManagerTest, FlushFullInfoToMMI, Function | SmallTest | Level
     MMI::DisplayInfo displayInfo;
     displayInfos.emplace_back(displayInfo);
     SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
     SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
     ASSERT_EQ(ret, 0);
 }
 
@@ -694,6 +696,26 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, Function | SmallTest | Level3)
     result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
     ASSERT_TRUE(result);
     windowInfoList[0].privacyMode = SceneInputManager::GetInstance().lastWindowInfoList_[0].privacyMode;
+}
+
+/**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> emptyMap;
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    ASSERT_NE(oldDirty, nullptr);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SceneInputManager::GetInstance().UpdateSecSurfaceInfo(emptyMap);
+    ASSERT_EQ(ret, 0);
+
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    SceneInputManager::GetInstance().UpdateSecSurfaceInfo(emptyMap);
+    ASSERT_EQ(ret, 0);
 }
 
 /**

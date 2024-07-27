@@ -86,6 +86,7 @@ bool ScreenSessionAbilityConnectionStub::AddObjectDeathRecipient()
     sptr<ScreenSessionAbilityDeathRecipient> deathRecipient(
         new(std::nothrow) ScreenSessionAbilityDeathRecipient([this] {
         TLOGI(WmsLogTag::DMS, "add death recipient handler");
+        sendMessageWaitFlag_ = true;
         blockSendMessageCV_.notify_all();
         TLOGI(WmsLogTag::DMS, "blockSendMessageCV_ notify");
         std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
@@ -159,20 +160,25 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
     }
     lock.unlock();
     MessageOption option;
-    std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
-    if (remoteObject_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
-        return RES_FAILURE;
-    }
-    int32_t ret = remoteObject_->SendRequest(transCode, data, reply, option);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "remoteObject send request failed");
-        return RES_FAILURE;
+    {
+        std::lock_guard<std::mutex> remoteObjLock(remoteObjectMutex_);
+        if (remoteObject_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
+            return RES_FAILURE;
+        }
+        int32_t ret = remoteObject_->SendRequest(transCode, data, reply, option);
+        if (ret != ERR_OK) {
+            TLOGE(WmsLogTag::DMS, "remoteObject send request failed");
+            return RES_FAILURE;
+        }
     }
 
     std::unique_lock<std::mutex> lockSendMessage(sendMessageMutex_);
     TLOGI(WmsLogTag::DMS, "LockSendMessage wait");
-    blockSendMessageCV_.wait(lockSendMessage);
+    sendMessageWaitFlag_ = false;
+    while (!sendMessageWaitFlag_) {
+        blockSendMessageCV_.wait(lockSendMessage);
+    }
 
     return RES_SUCCESS;
 }
@@ -289,6 +295,7 @@ int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, Messa
         default:
             TLOGI(WmsLogTag::DMS, "unknown transaction code");
     }
+    sendMessageWaitFlag_ = true;
     blockSendMessageCV_.notify_all();
     TLOGI(WmsLogTag::DMS, "blockSendMessageCV_ notify");
     return msgId;

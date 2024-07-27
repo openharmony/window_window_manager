@@ -55,6 +55,7 @@ ohos_shared_library("window_scene_common") {
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "imf:inputmethod_client",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_core",
     "ipc:ipc_single",

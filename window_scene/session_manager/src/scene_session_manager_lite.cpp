@@ -107,6 +107,13 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
+WSError SceneSessionManagerLite::GetSessionDisplayInfo(int32_t persistentId,
+    SessionDisplayInfo& sessionDisplayInfo)
+{
+    TLOGD(WmsLogTag::DEFAULT, "run");
+    return SceneSessionManager::GetInstance().GetSessionDisplayInfo(persistentId, sessionDisplayInfo);
+}
+
 WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
     WLOGFD("run PendingSessionToForeground");
@@ -235,5 +242,10 @@ WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t typ
 WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t type)
 {
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
+}
+
+WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace OHOS::Rosen
