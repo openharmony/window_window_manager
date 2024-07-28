@@ -1839,7 +1839,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    if (systemConfig_.backgroundswitch == false) {
+    bool isCompatibleModeInPc = false;
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+    }
+    if (systemConfig_.backgroundswitch == false || isCompatibleModeInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
@@ -1933,11 +1938,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         bool isPcAppInpad = false;
+        bool isCompatibleModeInPc = false;
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
+            isCompatibleModeInPc = property->GetCompatibleModeInPc();
         }
-        if (systemConfig_.backgroundswitch || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isCompatibleModeInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
