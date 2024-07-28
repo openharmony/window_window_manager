@@ -152,6 +152,19 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
+    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -184,22 +197,9 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
-    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
-    {
-        return WSError::WS_OK;
-    }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
-    }
-    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
-    {
-        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
