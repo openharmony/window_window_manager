@@ -2182,6 +2182,51 @@ WSError Session::SetIsPcAppInPad(bool enable)
     return WSError::WS_OK;
 }
 
+WSError Session::CompatibleFullScreenRecover()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "recover compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenRecover();
+}
+
+WSError Session::CompatibleFullScreenMinimize()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenMinimize();
+}
+
+WSError Session::CompatibleFullScreenClose()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "close compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenClose();
+}
+
+WSError Session::SetIsPcAppInPad(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsPcAppInPad(enable);
+    return WSError::WS_OK;
+}
+
 WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),

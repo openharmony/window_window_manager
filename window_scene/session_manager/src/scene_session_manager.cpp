@@ -1839,7 +1839,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    if (systemConfig_.backgroundswitch == false) {
+    bool isCompatibleModeInPc = false;
+    auto sessionProperty = scnSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+    }
+    if (systemConfig_.backgroundswitch == false || isCompatibleModeInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
@@ -1933,11 +1938,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         bool isPcAppInpad = false;
+        bool isCompatibleModeInPc = false;
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
+            isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
         }
-        if (systemConfig_.backgroundswitch || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isCompatibleModeInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -7702,6 +7709,26 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
 }
 
+void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
+        return;
+    }
+
+    auto task = [displayInfo]() -> WSError {
+        ScreenSessionManagerClient::GetInstance().UpdateDisplayScale(displayInfo->GetScreenId(),
+            displayInfo->GetScaleX(),
+            displayInfo->GetScaleY(),
+            displayInfo->GetPivotX(),
+            displayInfo->GetPivotY());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostAsyncTask(task);
+}
+
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -7716,6 +7743,9 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
             SceneSessionManager::GetInstance().ProcessUpdateRotationChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
             break;
+        }
+        case DisplayStateChangeType::UPDATE_SCALE: {
+            SceneSessionManager::GetInstance().ProcessDisplayScale(displayInfo);
         }
         default:
             return;
