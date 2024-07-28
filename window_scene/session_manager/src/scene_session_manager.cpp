@@ -1942,7 +1942,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
-            isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+            isCompatibleModeInPc = property->GetCompatibleModeInPc();
         }
         if ((systemConfig_.backgroundswitch && !isCompatibleModeInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);

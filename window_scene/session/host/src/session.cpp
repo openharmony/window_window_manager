@@ -2215,18 +2215,6 @@ WSError Session::CompatibleFullScreenClose()
     return sessionStage_->CompatibleFullScreenClose();
 }
 
-WSError Session::SetIsPcAppInPad(bool enable)
-{
-    TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    property->SetIsPcAppInPad(enable);
-    return WSError::WS_OK;
-}
-
 WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
