@@ -906,6 +906,7 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SNAPSHOT),
         data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
         return nullptr;
     }
 
