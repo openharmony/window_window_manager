@@ -275,6 +275,7 @@ private:
     // Transform info
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
+    mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
