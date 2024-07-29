@@ -999,7 +999,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     }
     return false;
 }
-bool WindowExtensionSessionImpl::GetFreeMultiWindowEnabledState()
+bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     bool enable = false;
     int32_t hostWindowId = property_->GetParentId();
