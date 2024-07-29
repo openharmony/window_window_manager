@@ -2264,9 +2264,8 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
     }
-    auto sessionProperty = GetSessionProperty();
     NotifySessionInfoChange();
-    if (sessionProperty == nullptr) {
+    if (property == nullptr) {
         return WSError::WS_OK;
     }
 
@@ -2278,7 +2277,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         }
         session->NotifySessionInfoChange();
     };
-    sessionProperty->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 
