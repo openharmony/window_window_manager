@@ -2828,7 +2828,7 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
 
 bool Session::IsFreeMultiWindowEnable()
 {
-    retrun systemConfig_.freeMultiWindowEnable_;
+    return systemConfig_.freeMultiWindowEnable_;
 }
 
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
