@@ -410,9 +410,9 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateScreenRotationProperty");
     size_t argc = 4;
-    napi_value argv[5] = {nullptr};
+    napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) { // at least 3: params num
+    if (argc < ARGC_THREE) { // at least 3: params num
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
