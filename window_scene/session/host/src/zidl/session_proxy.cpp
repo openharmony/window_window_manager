@@ -326,7 +326,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(abilitySessionInfo->canStartAbilityFromBackground)) {
-        WLOGFE("Write canStartAbilityFromBackground failed");
+        TLOGE("Write canStartAbilityFromBackground failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(abilitySessionInfo->isAtomicService)) {
