@@ -1239,11 +1239,8 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
     info.abilityName_ = "OnSystemSessionEvent";
     info.bundleName_ = "OnSystemSessionEvent";
     sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(scensession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);

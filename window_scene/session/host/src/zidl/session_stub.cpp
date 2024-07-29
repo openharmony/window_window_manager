@@ -313,7 +313,7 @@ int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& re
     uint32_t eventId = data.ReadUint32();
     WLOGFD("HandleSystemSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
