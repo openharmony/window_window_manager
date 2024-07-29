@@ -545,10 +545,10 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
     {
         std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
         if (GetPersistentId() != 0 && rects != touchHotAreas_) {
-            std::string rectStr = "";
+            std::string rectStr;
             for (const auto& rect : rects) {
-                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
-                " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) + " , " + std::to_string(rect.posY_) +
+                    " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
             }
             TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
         }
