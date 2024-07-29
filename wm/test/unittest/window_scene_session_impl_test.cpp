@@ -659,7 +659,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
  * @tc.desc: StartMoveSystemWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, StartMoveSystemWindow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("StartMoveSystemWindow01");
