@@ -430,10 +430,10 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
         return WSError::WS_ERROR_NULLPTR;
     } else if (!SessionPermission::IsSystemCalling()) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
-        return WSError::WM_ERROR_NOT_SYSTEM_APP;
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     } else if (session->moveDragController_->GetStartDragFlag()) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation, window is moving");
-        return WSError::WM_ERROR_REPEAT_OPERATION;
+        return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError errorCode = OnSessionEvent(event);
     return errorCode;
