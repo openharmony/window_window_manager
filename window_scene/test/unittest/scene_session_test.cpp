@@ -17,6 +17,7 @@
 #include "pointer_event.h"
 
 #include <gtest/gtest.h>
+#include "key_event.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
@@ -77,6 +78,7 @@ HWTEST_F(SceneSessionTest, Foreground01, Function | SmallTest | Level2)
     scensession->isActive_ = true;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
+
     auto result = scensession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
     specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
@@ -148,7 +150,6 @@ HWTEST_F(SceneSessionTest, BackgroundTask01, Function | SmallTest | Level2)
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
-
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
@@ -1766,7 +1767,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**

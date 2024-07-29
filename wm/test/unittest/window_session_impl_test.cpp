@@ -2764,6 +2764,22 @@ HWTEST_F(WindowSessionImplTest, GetTitleButtonVisible03, Function | SmallTest | 
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
 }
+
+/**
+ * @tc.name: SetUniqueVirtualPixelRatio
+ * @tc.desc: SetUniqueVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUniqueVirtualPixelRatio");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUniqueVirtualPixelRatio(true, 3.25f);
+    window->SetUniqueVirtualPixelRatio(false, 3.25f);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
