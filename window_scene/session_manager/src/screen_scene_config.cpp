@@ -276,8 +276,8 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
         physicalSize.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
     }
     if (IsNumber(displaySizeArray[0]) && IsNumber(displaySizeArray[1])) {
-        physicalSize.physicalWidth_ = std::stoi(displaySizeArray[0]);
-        physicalSize.physicalHeight_ = std::stoi(displaySizeArray[1]);
+        physicalSize.physicalWidth_ = static_cast<uint32_t>(std::stoi(displaySizeArray[0]));
+        physicalSize.physicalHeight_ = static_cast<uint32_t>(std::stoi(displaySizeArray[1]));
     }
     displayPhysicalResolution_.emplace_back(physicalSize);
     xmlFree(displayModeContext);
