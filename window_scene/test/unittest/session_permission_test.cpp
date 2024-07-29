@@ -213,7 +213,7 @@ HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, Function | SmallTest | L
 */
 HWTEST_F(SessionPermissionTest, IsFoundationCall, Function | SmallTest | Level1)
 {
-    const uint32_t uid = 1000;
+    const int32_t uid = 1000;
     bool result = SessionPermission::IsFoundationCall(uid);
     ASSERT_EQ(false, result);
 }
