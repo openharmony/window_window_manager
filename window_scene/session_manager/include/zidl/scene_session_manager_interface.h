@@ -109,6 +109,7 @@ public:
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
+        TRANS_ID_GET_WINDOW_STYLE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -256,6 +257,8 @@ public:
         return WMError::WM_OK;
     }
     WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
+
+    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

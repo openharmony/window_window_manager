@@ -959,6 +959,23 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerLiteProxy::GetWindowStyleType(WindowStyleType& windowStyleType)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "GetwindowStyleType Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    windowStyleType = static_cast<WindowStyleType>(reply.ReadUint32());
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(int32_t persistentId)
 {
     MessageParcel data;

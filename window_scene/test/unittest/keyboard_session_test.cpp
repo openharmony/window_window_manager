@@ -40,6 +40,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    sptr<KeyboardSession> GetKeyboardSession(std::string &abilityName, std::string &bundleName);
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -56,6 +58,27 @@ void KeyboardSessionTest::SetUp()
 
 void KeyboardSessionTest::TearDown()
 {
+}
+
+sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(std::string &abilityName, std::string &bundleName)
+{
+    SessionInfo info;
+    info.abilityName_ = abilityName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    sptr<WindowSessionProperty> keyboardProperty = new (std::nothrow) WindowSessionProperty();
+    keyboardProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    keyboardSession->SetSessionProperty(keyboardProperty);
+
+    return keyboardSession;
 }
 
 namespace {
@@ -619,17 +642,9 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
  */
 HWTEST_F(KeyboardSessionTest, OpenKeyboardSyncTransaction, Function | SmallTest | Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "OpenKeyboardSyncTransaction";
-    info.bundleName_ = "OpenKeyboardSyncTransaction";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
+    std::string abilityName = "OpenKeyboardSyncTransaction";
+    std::string bundleName = "OpenKeyboardSyncTransaction";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
     // isKeyBoardSyncTransactionOpen_ is false
     keyboardSession->OpenKeyboardSyncTransaction();
@@ -645,26 +660,34 @@ HWTEST_F(KeyboardSessionTest, OpenKeyboardSyncTransaction, Function | SmallTest 
  */
 HWTEST_F(KeyboardSessionTest, CloseKeyboardSyncTransaction1, Function | SmallTest | Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "CloseKeyboardSyncTransaction1";
-    info.bundleName_ = "CloseKeyboardSyncTransaction1";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    sptr<WindowSessionProperty> keyboardProperty = new (std::nothrow) WindowSessionProperty();
-    keyboardProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    keyboardSession->SetSessionProperty(keyboardProperty);
+    std::string abilityName = "CloseKeyboardSyncTransaction1";
+    std::string bundleName = "CloseKeyboardSyncTransaction1";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
     bool isRotating = false;
 
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+}
+
+/**
+ * @tc.name: CloseKeyboardSyncTransaction2
+ * @tc.desc: CloseKeyboardSyncTransaction2
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, CloseKeyboardSyncTransaction2, Function | SmallTest | Level1)
+{
+    std::string abilityName = "CloseKeyboardSyncTransaction2";
+    std::string bundleName = "CloseKeyboardSyncTransaction2";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    bool isKeyboardShow = true;
+    bool isRotating = false;
+
+    // isKeyBoardSyncTransactionOpen_ is true
+    keyboardSession->OpenKeyboardSyncTransaction();
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
 }
 

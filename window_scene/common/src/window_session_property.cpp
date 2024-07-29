@@ -542,15 +542,18 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
 
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
-    if (GetPersistentId() != 0 && rects != touchHotAreas_) {
-        std::string rectStr = "";
-        for (const auto& rect : rects) {
-            rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
-            " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+    {
+        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+        if (GetPersistentId() != 0 && rects != touchHotAreas_) {
+            std::string rectStr = "";
+            for (const auto& rect : rects) {
+                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
+                " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+            }
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+        touchHotAreas_ = rects;
     }
-    touchHotAreas_ = rects;
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
     }
@@ -558,6 +561,7 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
+    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
     rects = touchHotAreas_;
 }
 
@@ -828,6 +832,16 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
+{
+    isPcAppInPad_ = isPcAppInPad;
+}
+
+bool WindowSessionProperty::GetIsPcAppInPad() const
+{
+    return isPcAppInPad_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -875,7 +889,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_);
+        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isPcAppInPad_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -940,6 +955,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
+    property->SetIsPcAppInPad(parcel.ReadBool());
     return property;
 }
 

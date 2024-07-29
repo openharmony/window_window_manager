@@ -109,6 +109,7 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
+    void SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
@@ -118,6 +119,8 @@ public:
 
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
+
+    void SetScreenScale(const float scaleX, const float scaleY, const float pivotX, const float pivotY);
 
     std::string GetName();
     ScreenId GetScreenId();
@@ -223,6 +226,7 @@ private:
     std::recursive_mutex mutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
+    std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
