@@ -414,6 +414,21 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
     auto res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: HandleSetDialogSessionBackGestureEnabled01
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
+    ASSERT_EQ(0, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
