@@ -646,35 +646,6 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
     }
 }
 
-WSError SceneSessionManagerLiteProxy::GetSessionDisplayInfo(int32_t persistentId,
-    SessionDisplayInfo& sessionDisplayInfo)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write persistentId failed");
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_DISPLAY_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<SessionDisplayInfo> info(reply.ReadParcelable<SessionDisplayInfo>());
-    if (info == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read sessionDisplayInfo");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sessionDisplayInfo = *info;
-    return static_cast<WSError>(reply.ReadUint32());
-}
-
 WMError SceneSessionManagerLiteProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
@@ -986,6 +957,23 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerLiteProxy::GetWindowStyleType(WindowStyleType& windowStyleType)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "GetwindowStyleType Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    windowStyleType = static_cast<WindowStyleType>(reply.ReadUint32());
+    return static_cast<WMError>(reply.ReadInt32());
 }
 
 WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(int32_t persistentId)

@@ -542,6 +542,45 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: UpdateDisplayHookInfo001
+ * @tc.desc: UpdateDisplayHookInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo001, Function | SmallTest | Level3)
+{
+    uint32_t uid = 20020001;
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = 100;
+    dmHookInfo.height_ = 100;
+    dmHookInfo.density_ = 1.0;
+    std::map<uint32_t, DMHookInfo> displayHookMap = {};
+    displayHookMap[uid] = dmHookInfo;
+    ASSERT_EQ(displayHookMap.find(uid) != displayHookMap.end(), true);
+    auto info = displayHookMap[uid];
+    ASSERT_EQ(info.width_, 100);
+    ASSERT_EQ(info.height_, 100);
+    ASSERT_EQ(info.density_, 1.0);
+}
+
+/**
+ * @tc.name: UpdateDisplayHookInfo002
+ * @tc.desc: UpdateDisplayHookInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, Function | SmallTest | Level3)
+{
+    uint32_t uid = 20020001;
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = 100;
+    dmHookInfo.height_ = 100;
+    dmHookInfo.density_ = 1.0;
+    std::map<uint32_t, DMHookInfo> displayHookMap = {};
+    displayHookMap[uid] = dmHookInfo;
+    displayHookMap.erase(uid);
+    ASSERT_EQ(displayHookMap.find(uid) != displayHookMap.end(), false);
+}
+
+/**
  * @tc.name: SetVirtualPixelRatio
  * @tc.desc: SetVirtualPixelRatio virtual screen
  * @tc.type: FUNC
@@ -1709,6 +1748,23 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, Function | S
     } else {
         ASSERT_TRUE(allSize.empty());
     }
+}
+
+/**
+ * @tc.name: SetDisplayScale
+ * @tc.desc: SetDisplayScale test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDisplayScale, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId fakeScreenId = static_cast<ScreenId>(-1);
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float pivotX = 0.5f;
+    float pivotY = 0.5f;
+    ssm_->SetDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
+    ssm_->SetDisplayScale(ssm_->GetDefaultScreenId(), scaleX, scaleY, pivotX, pivotY);
 }
 }
 } // namespace Rosen

@@ -653,6 +653,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState, Function | 
 }
 
 /**
+ * @tc.name: HandleSetSessionContinueState1
+ * @tc.desc: test HandleSetSessionContinueState1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t x = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    data.WriteInt32(x);
+
+    int res = stub_->HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetSessionDump
  * @tc.desc: test HandleGetSessionDump
  * @tc.type: FUNC
@@ -1325,6 +1344,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, Function | Sma
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
+/**
+ * @tc.name: HandleGetWindowStyleType
+ * @tc.desc: test HandleGetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    int res = stub_->HandleGetWindowStyleType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

@@ -143,11 +143,11 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     foldScreenController_->SetOnBootAnimation(true);
+    auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
-    oss << "SetScreenCorrection g_screenRotationOffSet : " << g_screenRotationOffSet;
+    oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << "  ret value: " << ret;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    TLOGI(WmsLogTag::DMS, "SetScreenCorrection g_screenRotationOffSet : %{public}d", g_screenRotationOffSet);
-    rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     FoldScreenPowerInit();
 }
 
@@ -790,7 +790,9 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHoo
 
     std::unique_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (enable) {
-        displayHookMap_[uid] = hookInfo;
+        if (uid != 0) {
+            displayHookMap_[uid] = hookInfo;
+        }
     } else {
         displayHookMap_.erase(uid);
     }
@@ -1549,8 +1551,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return true;
     }
 
-    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
-        gotScreenlockFingerprint_ == true) {
+    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        gotScreenlockFingerprint_ == true) &&
+        prePowerStateChangeReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
         gotScreenlockFingerprint_ = false;
         return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
             DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
@@ -3999,6 +4002,44 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+}
+
+void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
+    float pivotY)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    auto displayNode = GetDisplayNode(screenId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS,
+        "scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+        scaleX,
+        scaleY,
+        pivotX,
+        pivotY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetPivot(pivotX, pivotY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
+
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(),
+        emptyMap, DisplayStateChangeType::UPDATE_SCALE);
 }
 
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)

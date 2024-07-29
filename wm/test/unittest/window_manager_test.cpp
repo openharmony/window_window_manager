@@ -103,6 +103,14 @@ public:
     };
 };
 
+class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
+public:
+    void OnWindowStyleUpdate(WindowStyleType styleType)
+    {
+        TLOGI(WmsLogTag::DMS, "TestWindowStyleChangedListener");
+    }
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1069,6 +1077,104 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Lev
     // no repeated notification is sent if parameters do not change
     windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
 }
+
+/**
+ * @tc.name: RegisterWindowStyleChangedListener
+ * @tc.desc: check RegisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(nullptr));
+
+    sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    windowManager.pImpl_->windowStyleListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowStyleListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowStyleChangedListener
+ * @tc.desc: check UnregisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowStyleChangedListener(nullptr));
+
+    sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
+    sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowStyleChangedListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowStyleChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->windowStyleListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->windowStyleListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+
+    windowManager.pImpl_->windowStyleListeners_.push_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->windowStyleListeners_.size());
+
+    windowManager.pImpl_->windowStyleListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowStyleListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyWindowStyleChange
+ * @tc.desc: check NotifyWindowStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+{
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    auto ret = WindowManager::GetInstance().NotifyWindowStyleChange(type);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: check GetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    WindowStyleType type;
+    type = WindowManager::GetInstance().GetWindowStyleType();
+    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

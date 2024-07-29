@@ -94,6 +94,7 @@ public:
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
+    void SetIsPcAppInPad(bool isPcAppInPad);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -145,6 +146,7 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -273,6 +275,7 @@ private:
     // Transform info
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
+    mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
@@ -295,6 +298,7 @@ private:
     static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
+    bool isPcAppInPad_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

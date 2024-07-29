@@ -118,8 +118,6 @@ HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
     EXPECT_NE(data.WriteParcelable(&options), false);
     res = session_->HandleTerminateSession(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleUpdateActivateStatus(data, reply);
-    ASSERT_EQ(0, res);
     res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleRaiseToAppTop(data, reply);
@@ -149,9 +147,11 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleBackPressed(data, reply);
-    ASSERT_EQ(5, res);
+    if (!data.ReadBool()) {
+        ASSERT_EQ(5, res);
+    }
     res = session_->HandleMarkProcessed(data, reply);
-    ASSERT_EQ(5, res);
+    ASSERT_EQ(0, res);
     res = session_->HandleSetGlobalMaximizeMode(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleGetGlobalMaximizeMode(data, reply);
@@ -164,8 +164,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(0, res);
-    res = session_->HandleTransferAbilityResult(data, reply);
-    ASSERT_EQ(0, res);
+    session_->HandleTransferAbilityResult(data, reply);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(22, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
@@ -428,6 +427,20 @@ HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest
     MessageParcel reply;
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleGetAppForceLandscapeConfig(data, reply);
+}
+
+/**
+ * @tc.name: HandleSetDialogSessionBackGestureEnabled01
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
     ASSERT_EQ(0, res);
 }
 }

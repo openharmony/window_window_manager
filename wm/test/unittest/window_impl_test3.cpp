@@ -913,8 +913,6 @@ HWTEST_F(WindowImplTest3, GetRequestRect, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     Rect a{0, 0, 0, 0};
     ASSERT_EQ(a, window->GetRequestRect());
-    delete window;
-    delete option;
 }
 
 /**
@@ -927,8 +925,6 @@ HWTEST_F(WindowImplTest3, GetAlpha, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_EQ(1.0f, window->GetAlpha());
-    delete window;
-    delete option;
 }
 
 /**
@@ -941,8 +937,6 @@ HWTEST_F(WindowImplTest3, GetWindowState, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_EQ(WindowState::STATE_INITIAL, window->GetWindowState());
-    delete window;
-    delete option;
 }
 
 /**
@@ -956,8 +950,6 @@ HWTEST_F(WindowImplTest3, SetFocusable03, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     WMError err = window->SetFocusable(false);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, err);
-    delete window;
-    delete option;
 }
 
 /**

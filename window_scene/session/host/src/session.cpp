@@ -901,6 +901,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 
 void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
+    if (property == nullptr) {
+        return;
+    }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetIsNeedUpdateWindowMode() && property) {
         property->SetIsNeedUpdateWindowMode(true);
@@ -923,6 +926,9 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         if (sessionProperty->GetCompatibleModeInPc()) {
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
+    }
+    if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
+        property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
     }
 }
 
@@ -1173,6 +1179,10 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
+        }
+        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
+            !session->IsFocused() && session->GetFocusable()) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "SetAttachState");
@@ -2151,13 +2161,58 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
         TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
-    
+
     property->SetCompatibleModeInPc(enable);
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     if (enable) {
         property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
+}
+
+WSError Session::SetIsPcAppInPad(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsPcAppInPad(enable);
+    return WSError::WS_OK;
+}
+
+WSError Session::CompatibleFullScreenRecover()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "recover compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenRecover();
+}
+
+WSError Session::CompatibleFullScreenMinimize()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenMinimize();
+}
+
+WSError Session::CompatibleFullScreenClose()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "close compatible full screen windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->CompatibleFullScreenClose();
 }
 
 WSError Session::UpdateWindowMode(WindowMode mode)

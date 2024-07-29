@@ -182,6 +182,52 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
     int ret = 0;
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: NotifyClientToUpdateRect
+ * @tc.desc: check func NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, scbSystemSession_);
+    scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+}
+
+/**
+ * @tc.name: SetSystemSceneBlockingFocus
+ * @tc.desc: check func SetSystemSceneBlockingFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, scbSystemSession_);
+    WSError ret = scbSystemSession_->SetSystemSceneBlockingFocus(true);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: PresentFocusIfPointDown
+ * @tc.desc: check func PresentFocusIfPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, scbSystemSession_);
+    scbSystemSession_->PresentFocusIfPointDown();
+}
+
+/**
+ * @tc.name: GetKeyboardSession
+ * @tc.desc: check func GetKeyboardSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, scbSystemSession_);
+    scbSystemSession_->GetKeyboardSession();
+}
+
 }
 }
 }

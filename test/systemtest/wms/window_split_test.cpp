@@ -188,8 +188,8 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
 
     Utils::UpdateSplitRects(fullWindow);
 
-    Utils::RectEqualTo(fullWindow, Utils::splitRects_.secondaryRect);
-    Utils::RectEqualTo(priWindow, Utils::splitRects_.primaryRect);
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.secondaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(priWindow, Utils::splitRects_.primaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -223,8 +223,8 @@ HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
 
     Utils::UpdateSplitRects(fullWindow);
 
-    Utils::RectEqualTo(fullWindow, Utils::splitRects_.primaryRect);
-    Utils::RectEqualTo(secWindow, Utils::splitRects_.secondaryRect);
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.primaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(secWindow, Utils::splitRects_.secondaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);

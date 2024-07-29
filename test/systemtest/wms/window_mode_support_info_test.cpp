@@ -190,7 +190,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
     usleep(WAIT_SYANC_US);
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window1->GetMode());
-    window2->GetMode();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetMode());
 
     window1->Destroy();
     window2->Destroy();

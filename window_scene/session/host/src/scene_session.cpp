@@ -1634,7 +1634,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
             auto isPC = systemConfig_.uiType_ == "pc";
-            if ((isPC || IsFreeMultiWindowMode()) &&
+            if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
@@ -2696,6 +2696,9 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.screenId_ = static_cast<uint64_t>(info.want->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, -1));
         TLOGI(WmsLogTag::WMS_LIFE, "want: screenId %{public}" PRIu64, info.screenId_);
     }
+    if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        info.fullScreenStart_ = true;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
@@ -2723,8 +2726,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-        if (!(isPC || session->IsFreeMultiWindowMode()) && !isSACalling &&
+        if (!session->IsPcOrPadEnableActivation() && !isSACalling &&
             WindowHelper::IsMainWindow(session->GetWindowType())) {
             auto sessionState = session->GetSessionState();
             if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
@@ -3558,6 +3560,15 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
+void SceneSession::NotifySessionFullScreen(bool fullScreen)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is null");
+        return;
+    }
+    sessionStage_->NotifySessionFullScreen(fullScreen);
+}
+
 WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
 {
     if (!WindowHelper::IsPipWindow(GetWindowType())) {
@@ -3901,6 +3912,27 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
     return;
 }
 
+WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
+{
+    TLOGI(WmsLogTag::DEFAULT, "SceneSession set unique dpi: id = %{public}d, dpi = %{public}f",
+        GetPersistentId(), dpi);
+    if (useUnique && (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE)) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+            DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi;
+    if (!IsSessionValid()) {
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sessionStage_->SetUniqueVirtualPixelRatio(useUnique, density);
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
@@ -4126,5 +4158,16 @@ bool SceneSession::IsImmersiveType() const
     return type == WindowType::WINDOW_TYPE_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
         type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+}
+
+bool SceneSession::IsPcOrPadEnableActivation() const
+{
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto property = GetSessionProperty();
+    bool isPcAppInPad = false;
+    if (property != nullptr) {
+        isPcAppInPad = property->GetIsPcAppInPad();
+    }
+    return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
 }
 } // namespace OHOS::Rosen

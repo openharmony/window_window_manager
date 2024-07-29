@@ -69,6 +69,10 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, DefaultDeviceRotationOffset, defaultDeviceRotationOffset, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, AvailableWidth, availableWidth, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, AvailableHeight, availableHeight, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, ScaleX, scaleX, 1.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, ScaleY, scaleY, 1.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, PivotX, pivotX, 0.5f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, PivotY, pivotY, 0.5f);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H
