@@ -506,11 +506,11 @@ WSError SessionProxy::OnSystemSessionEvent(SessionEvent event)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(event)))) {
+    if (!(data.WriteInt32(static_cast<int32_t>(event)))) {
         WLOGFE("Write event id failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
+    if (Remote()->SendRequest(static_cast<int32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
