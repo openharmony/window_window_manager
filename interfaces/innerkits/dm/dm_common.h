@@ -99,6 +99,14 @@ enum class ScreenPowerState : uint32_t {
     INVALID_STATE,
 };
 
+enum class ScreenPropertyChangeType : uint32_t {
+    UNSPECIFIED = 0,
+    /* Screen connection. */
+    ROTATION_BEGIN,
+    /* Screen disconnection. */
+    ROTATION_END,
+};
+
 /**
  * @brief Enumerates the state of the display.
  */
