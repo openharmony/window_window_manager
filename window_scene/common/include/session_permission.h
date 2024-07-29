@@ -41,6 +41,7 @@ public:
     static bool CheckCallingIsUserTestMode(pid_t pid);
     static bool IsBetaVersion();
     static bool IsSystemAppCall();
+    static bool IsFoundationCall(uint32_t uid = 0);
 };
 } // Rosen
 } // OHOS
