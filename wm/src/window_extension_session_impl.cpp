@@ -999,5 +999,13 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     }
     return false;
 }
+bool WindowExtensionSessionImpl::GetFreeMultiWindowEnabledState()
+{
+    bool enable = false;
+    int32_t hostWindowId = property_->GetParentId();
+    SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(hostWindowId, enable);
+    TLOGI(WmsLogTag::WMS_IMMS, "GetFreeMultiWindowEnableState = %{public}u", enable);
+    return enable;
+}
 } // namespace Rosen
 } // namespace OHOS
