@@ -544,7 +544,7 @@ private:
     bool postProcessProperty_ { false };
 
     // Session recover
-    bool isRecovered_;
+    bool isRecovered_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
