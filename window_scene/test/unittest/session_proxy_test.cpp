@@ -535,6 +535,21 @@ HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
 }
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
