@@ -4986,12 +4986,10 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
           displayId, needNotify);
     if (needNotify) {
         reSendTimes = MAX_RESEND_TIMES;
+        privacyBundleMap_[displayId] = privacyBundles;
     } else if (reSendTimes > 0) {
         needNotify = true;
         reSendTimes--;
-    }
-          
-    if (needNotify) {
         privacyBundleMap_[displayId] = privacyBundles;
     }
     return needNotify;
