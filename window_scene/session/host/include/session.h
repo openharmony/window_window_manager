@@ -544,7 +544,7 @@ protected:
     bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
-    bool isTerminating = false;
+    bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
@@ -628,7 +628,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex;
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };
