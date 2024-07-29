@@ -579,9 +579,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
-            session->reason_ != SizeChangeReason::DRAG_END) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d!", session->GetPersistentId());
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
+            (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
+                session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
