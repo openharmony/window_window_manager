@@ -839,6 +839,41 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetDialogBackGestureEnabled01
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetDialogBackGestureEnabled01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetDialogBackGestureEnabled02
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetDialogBackGestureEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: NotifySessionForeground
  * @tc.type: FUNC
