@@ -2113,7 +2113,7 @@ public:
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
-    virtual bool GetFreeMultiWindowModeEnabledState() { return true; }
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
 };
 }
 }
