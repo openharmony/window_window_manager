@@ -1830,10 +1830,22 @@ DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "update screen rotation property permission denied!");
+        return;
+    }
+
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
+        // Rs is used to mark the start of the rotation animation
+        TLOGI(WmsLogTag::DMS, "EnableCacheForRotation");
+        RSInterfaces::GetInstance().EnableCacheForRotation();
+    } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        // Rs is used to mark the end of the rotation animation
+        TLOGI(WmsLogTag::DMS, "DisableCacheForRotation");
+        RSInterfaces::GetInstance().DisableCacheForRotation();
         return;
     }
 

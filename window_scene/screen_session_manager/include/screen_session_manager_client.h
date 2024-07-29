@@ -50,7 +50,8 @@ public:
     std::map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
     FoldDisplayMode GetFoldDisplayMode() const;
 
-    void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation);
+    void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType);
     uint32_t GetCurvedCompressionArea();
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
     void SetScreenPrivacyState(bool hasPrivate);

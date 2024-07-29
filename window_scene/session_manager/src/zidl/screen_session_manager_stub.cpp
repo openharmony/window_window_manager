@@ -633,7 +633,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             auto rotation = data.ReadFloat();
-            UpdateScreenRotationProperty(screenId, bounds, rotation);
+            auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
+            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {
