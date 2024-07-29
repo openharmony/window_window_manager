@@ -427,6 +427,7 @@ HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest
     MessageParcel reply;
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleGetAppForceLandscapeConfig(data, reply);
+    ASSERT_EQ(0, res);
 }
 
 /**
