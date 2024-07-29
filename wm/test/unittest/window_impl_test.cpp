@@ -361,8 +361,6 @@ HWTEST_F(WindowImplTest, ClearVsync, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     window->ClearVsyncStation();
     ASSERT_EQ(window->vsyncStation_, nullptr);
-    delete window;
-    delete option;
 }
 
 /**
