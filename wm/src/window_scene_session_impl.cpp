@@ -3097,7 +3097,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-WSError WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
+bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     return windowSystemConfig_.freeMultiWindowEnable_ &&
         windowSystemConfig_.freeMultiWindowSupport_;
