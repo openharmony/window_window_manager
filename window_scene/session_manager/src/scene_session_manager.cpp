@@ -145,6 +145,7 @@ const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
+constexpr int MAX_RESEND_TIMES = 6;
 constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int OFFSET_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
@@ -4965,6 +4966,7 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
     const std::unordered_set<std::string>& privacyBundles)
 {
     bool needNotify = false;
+    static int reSendTimes = MAX_RESEND_TIMES;
     std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
     do {
         if (privacyBundleMap_.find(displayId) == privacyBundleMap_.end()) {
@@ -4990,6 +4992,11 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
     TLOGD(WmsLogTag::WMS_MAIN, "display[%{public}" PRIu64 "] need notify privacy state: %{public}d.",
           displayId, needNotify);
     if (needNotify) {
+        reSendTimes = MAX_RESEND_TIMES;
+        privacyBundleMap_[displayId] = privacyBundles;
+    } else if (reSendTimes > 0) {
+        needNotify = true;
+        reSendTimes--;
         privacyBundleMap_[displayId] = privacyBundles;
     }
     return needNotify;
