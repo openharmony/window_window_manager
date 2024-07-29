@@ -2656,6 +2656,31 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest124, Function | SmallTest 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest125
+ * @tc.desc: TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest125, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ScreenId screenId = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float pivotX = 0.5f;
+    float pivotY = 0.5f;
+    ASSERT_TRUE(data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor()) &&
+                data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteFloat(scaleX) &&
+                data.WriteFloat(scaleY) && data.WriteFloat(pivotX) && data.WriteFloat(pivotY));
+    uint32_t code =
+        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }

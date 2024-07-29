@@ -282,6 +282,18 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: NotifySessionFullScreen
+ * @tc.desc: test function : NotifySessionFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, Function | SmallTest | Level1)
+{
+    bool fullScreen = true;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->NotifySessionFullScreen(fullScreen);
+}
+
+/**
  * @tc.name: NotifyWindowVisibility
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC

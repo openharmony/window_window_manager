@@ -1628,6 +1628,23 @@ HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, Function | SmallTest 
     bool isConsumed = false;
     ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
 }
+
+/**
+ * @tc.name: SetCompatibleModeInPc
+ * @tc.desc: SetCompatibleModeInPc test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    bool enable = true;
+    bool isSupportDragInPcCompatibleMode = true;
+    property->SetCompatibleModeInPc(enable);
+    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
+    ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

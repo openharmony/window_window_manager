@@ -1026,7 +1026,6 @@ WMError WindowImpl::SetAspectRatio(float ratio)
     auto ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
     if (ret != WMError::WM_OK) {
         WLOGFE("Set AspectRatio failed. errorCode: %{public}u", ret);
-        return ret;
     }
     return ret;
 }
@@ -1053,7 +1052,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         return;
     }
 
-    WLOGFI("MapFloatingWindowToAppIfNeeded: enter this");
+    WLOGFI("In");
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1276,7 +1275,7 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        WLOGFI("Reset displayId to %{public}" PRIu64, defaultDisplayId);
+        TLOGI(WmsLogTag::WMS_LIFE, "Reset displayId: %{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -1417,7 +1416,7 @@ void WindowImpl::DestroyDialogWindow()
 void WindowImpl::DestroyFloatingWindow()
 {
     // remove from appFloatingWindowMap_
-    WLOGFI("DestroyFloatingWindow:remove from appFloatingWindowMap_");
+    TLOGI(WmsLogTag::WMS_LIFE, "Remove from appFloatingWindowMap_");
     for (auto& floatingWindows: appFloatingWindowMap_) {
         for (auto iter = floatingWindows.second.begin(); iter != floatingWindows.second.end(); ++iter) {
             if ((*iter) == nullptr) {
@@ -1431,7 +1430,7 @@ void WindowImpl::DestroyFloatingWindow()
     }
 
     // Destroy app floating window if exist
-    WLOGFI("DestroyFloatingWindow:Destroy app floating window if exist");
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroy app floating window if exist");
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
         auto& floatingWindows = appFloatingWindowMap_.at(GetWindowId());
         for (auto iter = floatingWindows.begin(); iter != floatingWindows.end(); iter = floatingWindows.begin()) {
@@ -3339,7 +3338,6 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetPosition(rect.posX_, rect.posY_);
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
-
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo != nullptr) {
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
@@ -3988,6 +3986,7 @@ WMError WindowImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     }
     return result;
 }
+
 void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 {
     property_->GetTouchHotAreas(rects);
@@ -4018,6 +4017,7 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
     WLOGI("Set app window icon success");
     return WMError::WM_OK;
 }
+
 bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 {
     if (type != WindowType::WINDOW_TYPE_FLOAT_CAMERA) {

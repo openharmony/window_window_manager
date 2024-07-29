@@ -228,6 +228,7 @@ public:
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
+    WMError SetUniqueDensityDpi(bool useUnique, float dpi);
 
     bool IsAnco() const override;
     void SetBlankFlag(bool isAddBlank) override;
@@ -308,6 +309,7 @@ public:
     void RemoveExtWindowFlags(int32_t extPersistentId);
     void ClearExtWindowFlags();
     void NotifyDisplayMove(DisplayId from, DisplayId to);
+    void NotifySessionFullScreen(bool fullScreen);
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
@@ -367,6 +369,7 @@ public:
     bool GetPostProcessProperty() const;
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
+    bool IsPcOrPadEnableActivation() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -541,7 +544,7 @@ private:
     bool postProcessProperty_ { false };
 
     // Session recover
-    bool isRecovered_;
+    bool isRecovered_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

@@ -29,10 +29,6 @@ public:
     void TearDown() override;
 };
 
-std::map<ScenePersistentStorageType, std::string> ScenePersistentStorage::storagePath_ = {
-    {ScenePersistentStorageType::ASPECT_RATIO, "aspect_ratio"},
-    {ScenePersistentStorageType::MAXIMIZE_STATE, "maximize_state"}};
-
 void ScenePersistentStorageTest::SetUpTestCase()
 {
 }

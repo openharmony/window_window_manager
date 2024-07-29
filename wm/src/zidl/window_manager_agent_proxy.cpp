@@ -301,6 +301,26 @@ void WindowManagerAgentProxy::UpdateCameraWindowStatus(uint32_t accessTokenId, b
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::NotifyWindowStyleChange(WindowStyleType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint8(static_cast<uint8_t>(type))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write displayId failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

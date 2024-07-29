@@ -47,7 +47,6 @@ public:
     MOCK_METHOD2(HandleForeground, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleBackground, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleDisconnect, int(MessageParcel& data, MessageParcel& reply));
-    MOCK_METHOD2(HandleUpdateActivateStatus, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleSessionEvent, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleUpdateSessionRect, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleRaiseToAppTop, int(MessageParcel& data, MessageParcel& reply));

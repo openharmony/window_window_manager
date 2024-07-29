@@ -1216,6 +1216,19 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: GetWindowStyleType
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest6, GetWindowStyleType, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    WindowStyleType windowModeType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    ssm_->GetWindowStyleType(windowModeType);
+    ASSERT_EQ(windowModeType, Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT);
+}
+
+/**
  * @tc.name: TerminateSessionByPersistentId
  * @tc.desc: Success to terminate session by persistentId.
  * @tc.type: FUNC

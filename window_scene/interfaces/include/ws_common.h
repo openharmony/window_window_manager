@@ -344,31 +344,6 @@ struct SessionInfo {
     bool isAtomicService_ = false;
 };
 
-struct SessionDisplayInfo : public Parcelable {
-    int32_t pid = -1;
-    uint64_t displayId = 0;
-    float density = 0.0f;
-    int32_t orientation = 0;
-
-    bool Marshalling(Parcel& parcel) const
-    {
-        return parcel.WriteInt32(pid) && parcel.WriteUint64(displayId) && parcel.WriteFloat(density) &&
-            parcel.WriteInt32(orientation);
-    }
-
-    static SessionDisplayInfo* Unmarshalling(Parcel& parcel)
-    {
-        SessionDisplayInfo* info = new SessionDisplayInfo;
-        bool res = parcel.ReadInt32(info->pid) && parcel.ReadUint64(info->displayId) &&
-            parcel.ReadFloat(info->density) && parcel.ReadInt32(info->orientation);
-        if (res) {
-            return info;
-        }
-        delete info;
-        return nullptr;
-    }
-};
-
 enum class SessionFlag : uint32_t {
     SESSION_FLAG_NEED_AVOID = 1,
     SESSION_FLAG_PARENT_LIMIT = 1 << 1,

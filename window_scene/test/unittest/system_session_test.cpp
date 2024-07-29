@@ -431,6 +431,46 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
     systemSession_->RectCheck(curWidth, curHeight);
 }
 
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled01
+ * @tc.desc: test function : SetDialogSessionBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetDialogSessionBackGestureEnabled";
+    info.moduleName_ = "SetDialogSessionBackGestureEnabled";
+    info.bundleName_ = "SetDialogSessionBackGestureEnabled";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = systemSession_->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled02
+ * @tc.desc: test function : SetDialogSessionBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetDialogSessionBackGestureEnabled02";
+    info.moduleName_ = "SetDialogSessionBackGestureEnabled02";
+    info.bundleName_ = "SetDialogSessionBackGestureEnabled02";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    auto ret = systemSession_->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

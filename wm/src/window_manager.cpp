@@ -64,6 +64,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
+    void NotifyWindowStyleChange(WindowStyleType type);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -89,6 +90,8 @@ public:
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
     std::vector<sptr<IVisibleWindowNumChangedListener>> visibleWindowNumChangedListeners_;
     sptr<WindowManagerAgent> visibleWindowNumChangedListenerAgent_;
+    std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners_;
+    sptr<WindowManagerAgent> windowStyleListenerAgent_;
     std::map<sptr<IRemoteObject>,
         std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
 };
@@ -317,6 +320,22 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
 
     for (auto& listener : displayInfoChangedListeners) {
         listener->OnDisplayInfoChange(token, displayId, density, orientation);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "WindowStyleChange type: %{public}d",
+          static_cast<uint8_t>(type));
+    std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowStyleListeners = windowStyleListeners_;
+    }
+    for (auto &listener : windowStyleListeners) {
+        TLOGI(WmsLogTag::WMS_MAIN, "WindowStyleChange type: %{public}d",
+              static_cast<uint8_t>(type));
+        listener->OnWindowStyleUpdate(type);
     }
 }
 
@@ -1103,6 +1122,12 @@ WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
     return ret;
 }
 
+WMError WindowManager::NotifyWindowStyleChange(WindowStyleType type)
+{
+    pImpl_->NotifyWindowStyleChange(type);
+    return WMError::WM_OK;
+}
+
 WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
 {
     if (listener == nullptr) {
@@ -1229,5 +1254,80 @@ void WindowManager::UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInf
 {
     pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
+
+
+WMError WindowManager::RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "start register");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (pImpl_->windowStyleListenerAgent_ == nullptr) {
+            pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
+        }
+        auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
+        if (iter != pImpl_->windowStyleListeners_.end()) {
+            TLOGW(WmsLogTag::WMS_MAIN, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowStyleListeners_.push_back(listener);
+    }
+    WMError ret = WMError::WM_OK;
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        delete(pImpl_->windowStyleListenerAgent_);
+        pImpl_->windowStyleListenerAgent_ = nullptr;
+        auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
+        if (iter != pImpl_->windowStyleListeners_.end()) {
+            pImpl_->windowStyleListeners_.erase(iter);
+        }
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "start unregister");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
+        if (iter == pImpl_->windowStyleListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowStyleListeners_.erase(iter);
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowStyleListeners_.empty() && pImpl_->windowStyleListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+            delete(pImpl_->windowStyleListenerAgent_);
+            pImpl_->windowStyleListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WindowStyleType WindowManager::GetWindowStyleType()
+{
+    WindowStyleType styleType;
+    if (SingletonContainer::Get<WindowAdapter>().GetWindowStyleType(styleType) == WMError::WM_OK) {
+        return styleType;
+    }
+    return styleType;
+}
+
 } // namespace Rosen
 } // namespace OHOS

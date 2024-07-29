@@ -71,8 +71,6 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleTerminateSessionNew(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_SNAPSHOT):
             return HandleGetSessionSnapshot(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_DISPLAY_INFO):
-            return HandleGetSessionDisplayInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE):
             return HandleSetSessionContinueState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_SESSION):
@@ -111,6 +109,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetAllMainWindowInfos(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS):
             return HandleClearMainSessions(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
+            return HandleGetWindowStyleType(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -301,20 +301,6 @@ int SceneSessionManagerLiteStub::HandleGetSessionSnapshot(MessageParcel &data, M
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
-    reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleGetSessionDisplayInfo(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::DEFAULT, "run");
-    int32_t persistentId = data.ReadInt32();
-    SessionDisplayInfo sessionDisplayInfo;
-    WSError ret = GetSessionDisplayInfo(persistentId, sessionDisplayInfo);
-    if (!reply.WriteParcelable(&sessionDisplayInfo)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get sessionDisplayInfo");
-        return ERR_INVALID_DATA;
-    }
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -556,6 +542,19 @@ int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& dat
     int32_t type = data.ReadInt32();
     WSError ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
+{
+    WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    WMError errCode = GetWindowStyleType(windowStyleType);
+    TLOGI(WmsLogTag::WMS_MAIN, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
+    if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to WriteBool");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

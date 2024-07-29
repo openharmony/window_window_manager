@@ -137,6 +137,7 @@ public:
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
+    WSRect GetRootSessionAvoidSessionRect(AvoidAreaType type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
@@ -237,7 +238,6 @@ public:
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
-    WSError GetSessionDisplayInfo(int32_t persistentId, SessionDisplayInfo& sessionDisplayInfo);
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
     WSError ClearSession(int32_t persistentId) override;
@@ -350,8 +350,11 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     void InitScheduleUtils();
+    void ProcessDisplayScale(sptr<DisplayInfo> displayInfo);
+
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
+    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
