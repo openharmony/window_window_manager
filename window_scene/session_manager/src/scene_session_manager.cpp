@@ -4569,15 +4569,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
             TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
-        bool parentVisible = true;
-        if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
-            session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
-            GetSceneSession(session->GetParentPersistentId()) &&
-            !IsSessionVisibleForeground(GetSceneSession(session->GetParentPersistentId()))) {
-                parentVisible = false;
-        }
         if (previousFocusedSessionFound && session->GetFocusable() &&
-            IsSessionVisibleForeground(session) && parentVisible) {
+            IsSessionVisible(session) && CheckParentSessionVisible(session)) {
             ret = session;
             return true;
         }
