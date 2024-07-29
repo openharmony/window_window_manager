@@ -2107,7 +2107,6 @@ public:
      */
     virtual uint32_t GetStatusBarHeight() { return 0; }
 
-    
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
      *
