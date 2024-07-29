@@ -1756,7 +1756,7 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
+WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "run SceneSessionManagerProxy::GetFreeMultiWindowEnableState");
     MessageParcel data;
