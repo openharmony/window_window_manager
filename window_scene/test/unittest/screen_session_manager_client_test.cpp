@@ -400,7 +400,9 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateScreenRotationProperty, Function 
     float rotation = 90;
     float scaleX = 1.0;
     float scaleY = 1.0;
-    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+    ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType);
     screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
@@ -426,7 +428,9 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     float rotation = 90;
-    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+    ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType);
     screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
     std::shared_ptr<Media::PixelMap> res = screenSessionManagerClient_->GetScreenSnapshot(screenId, scaleX, scaleY);
     EXPECT_EQ(nullptr, res);

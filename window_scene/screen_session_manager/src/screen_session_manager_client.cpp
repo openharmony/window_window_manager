@@ -271,13 +271,14 @@ FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
     return displayMode_;
 }
 
-void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
 
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {

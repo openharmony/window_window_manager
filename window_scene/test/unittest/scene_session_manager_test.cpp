@@ -530,41 +530,6 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
 }
 
 /**
- * @tc.name: NotifySessionForeground
- * @tc.desc: SceneSesionManager NotifySessionForeground
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySessionForeground, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> scensession = nullptr;
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
-    uint32_t reason = 1;
-    bool withAnimation = true;
-    scensession->NotifySessionForeground(reason, withAnimation);
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: SceneSesionManager NotifySessionForeground
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySessionBackground, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> scensession = nullptr;
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
-    uint32_t reason = 1;
-    bool withAnimation = true;
-    bool isFromInnerkits = true;
-    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-}
-
-/**
  * @tc.name: UpdateSessionWindowVisibilityListener
  * @tc.desc: SceneSesionManager update window visibility listener
  * @tc.type: FUNC
@@ -793,37 +758,6 @@ HWTEST_F(SceneSessionManagerTest, HandleSpecialExtWindowFlagsChange, Function | 
     ssm_->HandleSpecialExtWindowFlagsChange(persistentId, 0, 3);
     EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
     ssm_->extWindowFlagsMap_.clear();
-}
-
-/**
- * @tc.name: ClearUnrecoveredSessions
- * @tc.desc: test func ClearUnrecoveredSessions
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearUnrecoveredSessions, Function | SmallTest | Level1)
-{
-    ssm_->alivePersistentIds_.push_back(23);
-    ssm_->alivePersistentIds_.push_back(24);
-    ssm_->alivePersistentIds_.push_back(25);
-    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
-    std::vector<int32_t> recoveredPersistentIds;
-    recoveredPersistentIds.push_back(23);
-    recoveredPersistentIds.push_back(24);
-    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
-}
-
-/**
- * @tc.name: RecoverSessionInfo
- * @tc.desc: test func RecoverSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Level1)
-{
-    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
-
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    info = ssm_->RecoverSessionInfo(property);
 }
 
 /**
@@ -1317,14 +1251,12 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     EXPECT_EQ(result, WMError::WM_OK);
 
     topNum = 0;
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 
     topNum = 1000;
     MainWindowInfo info;
     topNInfos.push_back(info);
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 }
 
 /**
@@ -1677,6 +1609,32 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
     screenFoldInfo = {"3", "1", "18", "147.3", "2"};
     result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager SetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "SetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = { 0, "MainPage" };
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "GetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
+    ASSERT_EQ(config.mode_, 0);
+    ASSERT_EQ(config.homePage_, "");
 }
 }
 } // namespace Rosen

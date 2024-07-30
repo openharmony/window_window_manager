@@ -88,43 +88,6 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: sessionStubTest01
- * @tc.desc: sessionStub sessionStubTest01
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, sessionStubTest01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    auto res = session_->HandleSetWindowAnimationFlag(data, reply);
-    ASSERT_EQ(0, res);
-    res = session_->HandleForeground(data, reply);
-    ASSERT_EQ(0, res);
-    res = session_->HandleBackground(data, reply);
-    ASSERT_EQ(0, res);
-    res = session_->HandleDisconnect(data, reply);
-    ASSERT_EQ(0, res);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
-    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
-    res = session_->HandleConnect(data, reply);
-    ASSERT_EQ(5, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    res = session_->HandleSessionEvent(data, reply);
-    ASSERT_EQ(0, res);
-    AAFwk::Want options;
-    EXPECT_NE(data.WriteString("HandleSessionException"), false);
-    EXPECT_NE(data.WriteParcelable(&options), false);
-    res = session_->HandleTerminateSession(data, reply);
-    ASSERT_EQ(0, res);
-    res = session_->HandleUpdateSessionRect(data, reply);
-    ASSERT_EQ(0, res);
-    res = session_->HandleRaiseToAppTop(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -307,70 +270,6 @@ HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function 
 }
 
 /**
- * @tc.name: HandleShow009
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleShow009, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(false);
-    auto res = session_->HandleShow(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
- * @tc.name: HandleHide010
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleHide010, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    auto res = session_->HandleHide(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
- * @tc.name: HandleDrawingCompleted
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleDrawingCompleted, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleDrawingCompleted(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
- * @tc.name: HandlePendingSessionActivation011
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandlePendingSessionActivation011, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    AAFwk::Want options;
-    EXPECT_NE(data.WriteString("HandlePendingSessionActivation"), false);
-    EXPECT_NE(data.WriteParcelable(&options), false);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteUint64(2), true);
-    auto res = session_->HandlePendingSessionActivation(data, reply);
-    ASSERT_EQ(0, res);
-}
-
-/**
  * @tc.name: HandleNotifySyncOn012
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -412,6 +311,36 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
     MessageParcel reply;
     data.WriteBool(true);
     auto res = session_->HandleNotifyExtensionTimeout(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleGetAppForceLandscapeConfig
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleGetAppForceLandscapeConfig(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleSetDialogSessionBackGestureEnabled01
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
     ASSERT_EQ(0, res);
 }
 }

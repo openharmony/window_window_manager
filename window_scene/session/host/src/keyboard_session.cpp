@@ -77,11 +77,10 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
-        auto ret = session->SceneSession::Foreground(property);
         session->UseFocusIdIfCallingSessionIdInvalid();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
-        return ret;
+        return session->SceneSession::Foreground(property);
     };
     PostTask(task, "Show");
     return WSError::WS_OK;

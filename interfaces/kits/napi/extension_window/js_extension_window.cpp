@@ -310,7 +310,6 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
-    return;
 }
 
 napi_value JsExtensionWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info)
