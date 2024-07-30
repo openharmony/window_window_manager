@@ -410,7 +410,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
     } else {
         bool isSubWindow = WindowHelper::IsSubWindow(windowType);
         bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-        bool isSysytemWindow = WindowHelper::IsSystemWindow(WindowType);
+        bool isSysytemWindow = WindowHelper::IsSystemWindow(windowType);
         UpdateWindowSizeLimits();
         if ((isSubWindow || isDialogWindow || isSysytemWindow) && property_->GetDragEnabled()) {
             WLOGFD("sync window limits to server side in order to make size limits work while resizing");
@@ -2098,7 +2098,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled());
+    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
     bool isValidWindow = isMainWindow ||
             ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog || isDragEnabledSystemWin));
     auto hostSession = GetHostSession();
