@@ -992,5 +992,257 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallT
     uint64_t fakeScreenId = 100;
     screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
 }
+
+/**
+ * @tc.name: RegisterScreenConnectionListener02
+ * @tc.desc: RegisterScreenConnectionListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, RegisterScreenConnectionListener02, Function | SmallTest | Level2)
+{
+    IScreenConnectionListener* listener = nullptr;
+    screenSessionManagerClient_->RegisterScreenConnectionListener(listener);
+    EXPECT_EQ(screenSessionManagerClient_->screenConnectionListener_, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenSession02
+ * @tc.desc: GetScreenSession test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetScreenSession02, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession, nullptr);
+
+    screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
+    auto screenSession2 = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession2, screenSession);
+
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession, nullptr);
+}
+
+/**
+ * @tc.name: SwitchingCurrentUser02
+ * @tc.desc: SwitchingCurrentUser test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SwitchingCurrentUser02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SwitchingCurrentUser();
+}
+
+/**
+ * @tc.name: GetFoldStatus02
+ * @tc.desc: GetFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetFoldStatus02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetFoldStatus();
+}
+
+/**
+ * @tc.name: GetDefaultScreenId02
+ * @tc.desc: GetDefaultScreenId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetDefaultScreenId02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetDefaultScreenId();
+}
+
+/**
+ * @tc.name: IsFoldable02
+ * @tc.desc: IsFoldable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, IsFoldable02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->IsFoldable();
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatioSystem02
+ * @tc.desc: SetVirtualPixelRatioSystem test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetVirtualPixelRatioSystem02, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    float virtualPixelRatio = 1.0f;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
+}
+
+/**
+ * @tc.name: UpdateDisplayHookInfo02
+ * @tc.desc: UpdateDisplayHookInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayHookInfo02, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    bool enable = false;
+    DMHookInfo hookInfo;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
+
+/**
+ * @tc.name: OnFoldStatusChangedReportUE02
+ * @tc.desc: OnFoldStatusChangedReportUE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnFoldStatusChangedReportUE02, Function | SmallTest | Level2)
+{
+    std::vector<std::string> screenFoldInfo;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->OnFoldStatusChangedReportUE(screenFoldInfo);
+}
+
+/**
+ * @tc.name: SetPrivacyStateByDisplayId03
+ * @tc.desc: SetPrivacyStateByDisplayId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId03, Function | SmallTest | Level2)
+{
+    DisplayId id = 0;
+    bool hasPrivate = false;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+}
+
+/**
+ * @tc.name: UpdateAvailableArea02
+ * @tc.desc: UpdateAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, UpdateAvailableArea02, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    DMRect area;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
+}
+
+/**
+ * @tc.name: NotifyFoldToExpandCompletion02
+ * @tc.desc: NotifyFoldToExpandCompletion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifyFoldToExpandCompletion02, Function | SmallTest | Level2)
+{
+    bool foldToExpand = true;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+/**
+ * @tc.name: OnPowerStatusChanged02
+ * @tc.desc: OnPowerStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPowerStatusChanged02, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    DisplayPowerEvent event = DisplayPowerEvent::WAKE_UP;
+    EventStatus status = EventStatus::BEGIN;
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_ACCESS;
+    screenSessionManagerClient_->OnPowerStatusChanged(event, status, reason);
+    sptr<ScreenSession> screenSession1 = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_NE(screenSession1, nullptr);
+}
+
+/**
+ * @tc.name: GetAllScreensProperties02
+ * @tc.desc: GetAllScreensProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetAllScreensProperties02, Function | SmallTest | Level2)
+{
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    EXPECT_EQ(1, screenSessionManagerClient_->GetAllScreensProperties().size());
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowList02
+ * @tc.desc: SetScreenPrivacyWindowList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList02, Function | SmallTest | Level2)
+{
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    EXPECT_EQ(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->ConnectToServer();
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+
+    DisplayId id = 0;
+    std::vector<std::string> privacyWindowList{"win0", "win1"};
+    std::vector<std::string> privacyWindowList2{"win0"};
+    sptr<DisplayManager::IPrivateWindowListChangeListener> listener_ = new DmPrivateWindowListChangeListener();
+    listener_->setCallback([privacyWindowList, privacyWindowList2](std::vector<std::string> windowList)
+    {
+        EXPECT_EQ(windowList, privacyWindowList);
+        EXPECT_NE(windowList, privacyWindowList2);
+    });
+    DisplayManager::GetInstance().RegisterPrivateWindowListChangeListener(listener_);
+
+    screenSessionManagerClient_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+/**
+ * @tc.name: UpdateScreenRotationProperty02
+ * @tc.desc: UpdateScreenRotationProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, UpdateScreenRotationProperty02, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    ScreenId displayNodeScreenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    DMRect area;
+    bool foldToExpand = true;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    float rotation = 90;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType);
+    screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
+    screenSessionManagerClient_->GetPhyScreenProperty(screenId);
+    screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
+    screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
+    screenSessionManagerClient_->GetScreenSnapshot(screenId, scaleX, scaleY);
+    sptr<ScreenSession> screenSession1 = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_NE(screenSession1, nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS
