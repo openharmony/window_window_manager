@@ -67,7 +67,6 @@ HWTEST_F(SceneSessionTest3, Disconnect2, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "Disconnect2";
     info.bundleName_ = "Disconnect2";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -94,7 +93,6 @@ HWTEST_F(SceneSessionTest3, UpdateActiveStatus1, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus1";
     info.bundleName_ = "UpdateActiveStatus1";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -135,7 +133,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio1, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio11";
     info.bundleName_ = "SetAspectRatio11";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -159,7 +156,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio12";
     info.bundleName_ = "SetAspectRatio12";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -193,7 +189,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio15";
     info.bundleName_ = "SetAspectRatio15";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -211,7 +206,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     scensession->SetAspectRatio(ratio);
-
     limits.maxHeight_ = 0;
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
@@ -230,7 +224,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio8";
     info.bundleName_ = "SetAspectRatio8";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -248,6 +241,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
     auto result = scensession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 
     ratio = 10;
     result = scensession->SetAspectRatio(ratio);
@@ -264,7 +258,6 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateRect1";
     info.bundleName_ = "UpdateRect1";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -302,7 +295,6 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | Small
     SessionInfo info;
     info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
     info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -329,7 +321,6 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | Smal
     SessionInfo info;
     info.abilityName_ = "FixKeyboardPositionByKeyboardPanel1";
     info.bundleName_ = "FixKeyboardPositionByKeyboardPanel1";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -356,7 +347,6 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRectTask";
     info.bundleName_ = "NotifyClientToUpdateRectTask";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -383,7 +373,6 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     SessionInfo info;
     info.abilityName_ = "BindDialogSessionTarget1";
     info.bundleName_ = "BindDialogSessionTarget1";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
@@ -425,12 +414,10 @@ HWTEST_F(SceneSessionTest3, HandlePointerStyle1, Function | SmallTest | Level2)
     info.abilityName_ = "HandlePointerStyle1";
     info.bundleName_ = "HandlePointerStyle1";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent), WSError::WS_ERROR_NULLPTR);
