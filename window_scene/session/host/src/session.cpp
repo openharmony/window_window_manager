@@ -556,6 +556,17 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
+bool Session::IsSystemActive() const
+{
+    return isSystemActive_;
+}
+
+void Session::SetSystemActive(bool systemActive)
+{
+    isSystemActive_ = systemActive;
+    NotifySessionInfoChange();
+}
+
 WSError Session::SetRSVisible(bool isVisible)
 {
     isRSVisible_ = isVisible;
@@ -668,17 +679,6 @@ bool Session::IsActive() const
 bool Session::IsSystemSession() const
 {
     return sessionInfo_.isSystem_;
-}
-
-bool Session::IsSystemActive() const
-{
-    return isSystemActive_;
-}
-
-void Session::SetSystemActive(bool systemActive)
-{
-    isSystemActive_ = systemActive;
-    NotifySessionInfoChange();
 }
 
 bool Session::IsTerminated() const
@@ -2264,9 +2264,8 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
     }
-    auto sessionProperty = GetSessionProperty();
     NotifySessionInfoChange();
-    if (sessionProperty == nullptr) {
+    if (property == nullptr) {
         return WSError::WS_OK;
     }
 
@@ -2278,7 +2277,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         }
         session->NotifySessionInfoChange();
     };
-    sessionProperty->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 

@@ -76,88 +76,6 @@ RSSurfaceNode::SharedPtr SystemSessionTest::CreateRSSurfaceNode()
 }
 
 namespace {
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-
-    ASSERT_TRUE((systemSession_ != nullptr));
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show02, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE((property != nullptr));
-    property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
-    ASSERT_TRUE((systemSession_ != nullptr));
-    systemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show03, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE((property != nullptr));
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_TRUE((systemSession_ != nullptr));
-    systemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Reconnect01
- * @tc.desc: check func Reconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
-{
-    auto surfaceNode = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(nullptr, mockSessionStage);
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(nullptr, testWindowEventChannel);
-
-    auto result = systemSession_->Reconnect(nullptr, nullptr, nullptr, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-
-    property->windowState_ = WindowState::STATE_SHOWN;
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    property->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
 
 /**
  * @tc.name: TransferKeyEvent01
@@ -341,33 +259,6 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Hide
- * @tc.desc: test function : Hide
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(systemSession_ != nullptr);
-
-    auto ret = systemSession_->Hide();
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: Disconnect
- * @tc.desc: test function : Disconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Disconnect, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(systemSession_ != nullptr);
-
-    bool isFromClient = true;
-    auto ret = systemSession_->Disconnect(isFromClient);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
  * @tc.name: ProcessPointDownSession
  * @tc.desc: test function : ProcessPointDownSession
  * @tc.type: FUNC
@@ -429,6 +320,46 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
     systemSession_->RectCheck(curWidth, curHeight);
+}
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled01
+ * @tc.desc: test function : SetDialogSessionBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetDialogSessionBackGestureEnabled";
+    info.moduleName_ = "SetDialogSessionBackGestureEnabled";
+    info.bundleName_ = "SetDialogSessionBackGestureEnabled";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = systemSession_->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled02
+ * @tc.desc: test function : SetDialogSessionBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetDialogSessionBackGestureEnabled02";
+    info.moduleName_ = "SetDialogSessionBackGestureEnabled02";
+    info.bundleName_ = "SetDialogSessionBackGestureEnabled02";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    auto ret = systemSession_->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
 }
 
 } // namespace

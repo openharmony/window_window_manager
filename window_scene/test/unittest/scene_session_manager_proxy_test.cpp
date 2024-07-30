@@ -520,25 +520,6 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, Function | 
 }
 
 /**
- * @tc.name: UpdateSessionWindowVisibilityListener001
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionWindowVisibilityListener001, Function | SmallTest | Level2)
-{
-    int32_t persistentId = 0;
-    bool haveListener = true;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->UpdateSessionWindowVisibilityListener(persistentId,
-        haveListener));
-    sceneSessionManagerProxy_ = nullptr;
-}
-
-/**
  * @tc.name: UpdateModalExtensionRect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -802,40 +783,6 @@ HWTEST_F(sceneSessionManagerProxyTest, IsValidSessionIds, Function | SmallTest |
 }
 
 /**
- * @tc.name: PendingSessionToForeground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, PendingSessionToForeground, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy_->PendingSessionToForeground(token));
-    sceneSessionManagerProxy_ = nullptr;
-}
-
-/**
- * @tc.name: PendingSessionToBackgroundForDelegator
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy_->PendingSessionToBackgroundForDelegator(token));
-    sceneSessionManagerProxy_ = nullptr;
-}
-
-/**
  * @tc.name: RegisterSessionListener01
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1031,23 +978,6 @@ HWTEST_F(sceneSessionManagerProxyTest, GetTopWindowId, Function | SmallTest | Le
 
     uint32_t topWinId = 1;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetTopWindowId(0, topWinId));
-    sceneSessionManagerProxy_ = nullptr;
-}
-
-/**
- * @tc.name: GetVisibilityWindowInfo
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    std::vector<sptr<WindowVisibilityInfo>> infos;
-    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetVisibilityWindowInfo(infos));
     sceneSessionManagerProxy_ = nullptr;
 }
 

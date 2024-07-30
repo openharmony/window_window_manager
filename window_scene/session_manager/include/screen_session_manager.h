@@ -240,7 +240,8 @@ public:
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
-    void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation) override;
+    void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;

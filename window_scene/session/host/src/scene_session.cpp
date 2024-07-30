@@ -151,15 +151,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    // return when screen is locked and show without ShowWhenLocked flag
-    if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
-        sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
-        sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
-        TLOGW(WmsLogTag::WMS_LIFE, "failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
-            GetPersistentId());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
@@ -579,9 +570,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
-            session->reason_ != SizeChangeReason::DRAG_END) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d!", session->GetPersistentId());
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
+            (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
+                session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {

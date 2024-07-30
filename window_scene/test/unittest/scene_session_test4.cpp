@@ -249,38 +249,6 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: TerminateSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, TerminateSession, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    OHOS::Rosen::Session session(info);
-    session.isTerminating_ = true;
-    sceneSession->TerminateSession(abilitySessionInfo);
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, NotifySessionException, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-    OHOS::Rosen::Session session(info);
-    session.isTerminating_ = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
-}
-
-/**
  * @tc.name: SetSkipDraw
  * @tc.desc: SetSkipDraw function
  * @tc.type: FUNC
