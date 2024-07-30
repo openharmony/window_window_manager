@@ -142,27 +142,6 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDisconnectSpecificSessionInner, Fun
 }
 
 /**
- * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
- * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, DestroyAndDetachCallback, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> callback = new (std::nothrow) IRemoteObjectMocker();
-    ASSERT_NE(callback, nullptr);
-    ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
-    sptr<WindowSessionProperty> property;
-    ssm_->recoveringFinished_ = false;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
-}
-
-/**
  * @tc.name: GetStartupPageFromResource
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC

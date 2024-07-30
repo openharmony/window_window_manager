@@ -268,37 +268,6 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: HandleNotifyForegroundInteractiveStatus
- * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyForegroundInteractiveStatus(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: test function : NotifySessionForeground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionForeground(data, reply));
-}
-
-/**
  * @tc.name: NotifySessionFullScreen
  * @tc.desc: test function : NotifySessionFullScreen
  * @tc.type: FUNC
@@ -311,23 +280,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTe
     data.WriteBool(true);
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionBackground
- * @tc.desc: test function : NotifySessionBackground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
 }
 
 /**

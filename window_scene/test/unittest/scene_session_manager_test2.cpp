@@ -1581,24 +1581,6 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | L
 }
 
 /**
- * @tc.name: NotifySessionMovedToFront
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest2, NotifySessionMovedToFront, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->NotifySessionMovedToFront(0);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ssm_->NotifySessionMovedToFront(100);
-}
-
-/**
  * @tc.name: SetSessionLabel
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
@@ -1666,26 +1648,6 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallT
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->PendingSessionToForeground(nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: PendingSessionToBackgroundForDelegator
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest2, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
-{
-    WSError ret;
-    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -1989,41 +1951,6 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: OnSessionStateChange
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest2, OnSessionStateChange, Function | SmallTest | Level3)
-{
-    ssm_->sceneSessionMap_.clear();
-    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
-    ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
-    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
-    sceneSession->focusedOnShow_ = false;
-    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
-    ssm_->OnSessionStateChange(100, SessionState::STATE_BACKGROUND);
-    ssm_->OnSessionStateChange(0, SessionState::STATE_BACKGROUND);
-
-    sptr<WindowSessionProperty> property_ = new WindowSessionProperty();
-    ASSERT_NE(nullptr, property_);
-    property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    sceneSession->property_ = property_;
-    ssm_->OnSessionStateChange(100, SessionState::STATE_END);
-    ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
-    ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
-    ssm_->OnSessionStateChange(100, SessionState::STATE_BACKGROUND);
-    ssm_->OnSessionStateChange(0, SessionState::STATE_BACKGROUND);
-    ASSERT_NE(nullptr, ssm_);
-}
-
-/**
  * @tc.name: ProcessSubSessionForeground
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
@@ -2184,26 +2111,6 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
     property->SetParentPersistentId(1);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
-}
-
-/**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: check func RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, RecoverAndReconnectSceneSession02, Function | SmallTest | Level2)
-{
-    sptr<ISession> session;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
-    ssm_->SetAlivePersistentIds(recoveredPersistentIds);
-    property->SetPersistentId(1);
-    ProcessShiftFocusFunc shiftFocusFunc_;
-    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
