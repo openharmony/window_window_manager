@@ -852,6 +852,11 @@ napi_ref PictureInPictureController::GetCustomNodeController()
     return pipOption_ == nullptr ? nullptr : pipOption_->GetNodeControllerRef();
 }
 
+napi_ref PictureInPictureController::GetTypeNode()
+{
+    return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
+}
+
 PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl(const sptr<Window> window)
 {
     mode_ = window ? window->GetMode() : WindowMode::WINDOW_MODE_UNDEFINED;

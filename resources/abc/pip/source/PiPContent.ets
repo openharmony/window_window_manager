@@ -14,35 +14,87 @@
  */
 
 import pip from '@ohos.pip';
-import { NodeController } from '@kit.ArkUI';
+import { NodeController, FrameNode, TypedFrameNode, UIContext } from '@kit.ArkUI';
 
 const TAG: string = 'PiPContent';
+
+class XCNodeController extends NodeController {
+  private mXComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>;
+  private node: FrameNode | null = null;
+
+  constructor(xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>) {
+    super();
+    this.mXComponent = xComponent;
+  }
+
+  makeNode(uiContext: UIContext): FrameNode | null {
+    this.node = new FrameNode(uiContext);
+    this.mXComponent.getParent()?.removeChild(this.mXComponent);
+    this.node.appendChild(this.mXComponent);
+    return this.node;
+  }
+
+  removeNode() {
+    this.node?.removeChild(this.mXComponent);
+  }
+}
 
 @Entry
 @Component
 export struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
   private nodeController: NodeController | null = null;
+  private mXCNodeController: XCNodeController | null = null;
+  private useNode: boolean = false;
+  private xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute> | null = null;
   xComponentId: string = 'pipContent';
   xComponentType: string = 'surface';
 
   aboutToAppear(): void {
     this.nodeController = pip.getCustomUIController();
+    this.xComponent = pip.getTypeNode;
+    if (this.xComponent === null || this.xComponent === undefined) {
+      return;
+    }
+    let type: string = this.xComponent.getNodeType();
+    if (type !== 'XComponent') {
+      console.error(TAG, `xComponent type mismatch: ${type}`);
+      return;
+    }
+    this.useNode = true;
+    this.mXCNodeController = new XCNodeController(this.xComponent);
+    console.info(TAG, 'use Node Controller');
+
+    pip.on('stateChange', (state: number) => {
+      console.info(TAG, `stateChange state:${state}}`);
+      if (state === 3 || state === 4) {
+        this.mXCNodeController?.removeNode();
+      }
+    })
+  }
+
+  aboutToDisappear(): void {
+    pip.off('stateChange');
   }
 
   build() {
     Stack() {
-      XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
-        .onLoad(() => {
-          pip.initXComponentController(this.xComponentController);
-          console.debug(TAG, 'XComponent onLoad done');
-        })
-        .size({ width: '100%', height: '100%' })
-        .backgroundColor(Color.Transparent);
+      if (this.useNode) {
+        NodeContainer(this.mXCNodeController)
+          .size({ width: '100%', height: '100%' })
+      } else {
+        XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
+          .onLoad(() => {
+            pip.initXComponentController(this.xComponentController);
+            console.debug(TAG, 'XComponent onLoad done');
+          })
+          .size({ width: '100%', height: '100%' })
+          .backgroundColor(Color.Transparent);
+      }
       if (this.nodeController !== null) {
         NodeContainer(this.nodeController)
           .size({ width: '100%', height: '100%' });
-      }  
+      }
     }
     .size({ width: '100%', height: '100%' });
   }

@@ -82,6 +82,16 @@ napi_ref PipOption::GetNodeControllerRef() const
     return customNodeController_;
 }
 
+void PipOption::SetTypeNodeRef(napi_ref ref)
+{
+    typeNode_ = ref;
+}
+
+napi_ref PipOption::GetTypeNodeRef() const
+{
+    return typeNode_;
+}
+
 void* PipOption::GetContext() const
 {
     return contextPtr_;

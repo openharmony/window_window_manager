@@ -122,6 +122,97 @@ napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_inf
     return uiController;
 }
 
+napi_value JsPipManager::GetTypeNode(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnGetTypeNode(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        return NapiGetUndefined(env);
+    }
+    napi_ref ref = pipController->GetTypeNode();
+    if (ref == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
+        return NapiGetUndefined(env);
+    }
+    napi_value typeNode = nullptr;
+    napi_get_reference_value(env, ref, &typeNode);
+    return typeNode;
+}
+
+void JsPipManager::RegisterListener(napi_env env, const std::string type, napi_value value)
+{
+    std::shared_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    PictureInPictureManager::callbackRef_ = callbackRef;
+    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", type.c_str());
+}
+
+napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
+}
+
+bool NapiIsCallable(napi_env env, napi_value value)
+{
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
+}
+
+napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) {
+        TLOGE(WmsLogTag::WMS_PIP, "Params count not match: %{public}zu", argc);
+        return NapiThrowInvalidParam(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert param to cbType");
+        return NapiThrowInvalidParam(env);
+    }
+    napi_value value = argv[1];
+    if (value == nullptr || !NapiIsCallable(env, value)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
+        return NapiThrowInvalidParam(env);
+    }
+    RegisterListener(env, cbType, value);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsPipManager::UnregisterCallback(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnUnregisterCallback(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+    PictureInPictureManager::callbackRef_ = nullptr;
+    return NapiGetUndefined(env);
+}
+
 napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::JsPipManagerInit");
@@ -134,6 +225,9 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     const char* moduleName = "JsPipManager";
     BindNativeFunction(env, exportObj, "initXComponentController", moduleName, JsPipManager::InitXComponentController);
     BindNativeFunction(env, exportObj, "getCustomUIController", moduleName, JsPipManager::GetCustomUIController);
+    BindNativeFunction(env, exportObj, "getTypeNode", moduleName, JsPipManager::GetTypeNode());
+    BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback());
+    BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback());
     return NapiGetUndefined(env);
 }
 } // namespace Rosen

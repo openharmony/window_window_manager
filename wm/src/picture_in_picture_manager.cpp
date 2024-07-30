@@ -48,6 +48,7 @@ std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::win
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 std::shared_mutex PictureInPictureManager::controllerMapMutex_;
 std::mutex PictureInPictureManager::mutex_;
+std::shared_ptr<NativeReference> PictureInPictureManager::callbackRef_ = nullptr;
 
 PictureInPictureManager::PictureInPictureManager()
 {
