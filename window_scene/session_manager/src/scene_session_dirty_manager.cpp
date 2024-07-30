@@ -539,8 +539,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     WindowType windowType = windowSessionProperty->GetWindowType();
     bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindowindowType) &&
-        !Rosen::WindowHelper::IsDialogWindow(windowType);
+    bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
+        !（Rosen::WindowHelper::IsDialogWindow(windowType)）;
     if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
         (isMainWindow || isDecorDialog) && maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
         (sceneSession->GetSessionInfo().isSetPointerAreas_) || isNoDialogSystemWindow) {
