@@ -1813,11 +1813,10 @@ public:
     /**
      * @brief Enable drag window.
      *
-     * @param enableDrag The value true means to enable window dragging, false means the opposite.
+     * @param enableDrag The value true means to enable window dragging, and false means the opposite.
      * @return Errorcode of window.
      */
     virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
 
     /**
      * @brief Set whether to display the maximize, minimize, split buttons of main window.
