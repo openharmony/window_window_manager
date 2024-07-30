@@ -455,8 +455,8 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
             return;
         }
         auto limits = sessionProperty->GetWindowLimits();
-        TLOGD(WmsLogTag::WMS_EVENT, "%{public}s [minWidth_,maxWidth_,minHeight_,maxHeight_]: %{public}d"
-            ",%{public}d,%{public}d,%{public}d", scene_session->GetWindowName.c_str(), limits.minWidth_, 
+        TLOGD(WmsLogTag::WMS_EVENT, "%{public}s [minWidth,maxWidth,minHeight,maxHeight]: %{public}d,"
+            " %{public}d,%{public}d,%{public}d", sceneSession->GetWindowName().c_str(), limits.minWidth_, 
             limits.maxWidth_, limits.minHeight_, limits.maxHeight_);
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
@@ -539,10 +539,11 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     WindowType windowType = windowSessionProperty->GetWindowType();
     bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindowindowType) &&
+        !Rosen::WindowHelper::IsDialogWindow(windowType);
     if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
         (isMainWindow || isDecorDialog) && maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-        (sceneSession->GetSessionInfo().isSetPointerAreas_) ||
-        (WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable())) {
+        (sceneSession->GetSessionInfo().isSetPointerAreas_) || isNoDialogSystemWindow) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
     std::vector<MMI::Rect> touchHotAreas;
