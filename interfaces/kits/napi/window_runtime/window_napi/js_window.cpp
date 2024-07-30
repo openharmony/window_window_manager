@@ -5510,47 +5510,48 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc argv, nullptr， nullptr);
+    napi_get_cb_info(env, info, &argc argv, nullptr，nullptr);
     if (argc < 1) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Argc is invalid: %{public}zu", argc);
+        TLOGI(WmsLogTag::WMS_EVENT, "OnEnableDrag Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is nullptr!");
+        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag window is nullptr!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableDrag is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag is not allowed since window is not system window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "EnableDrag permission denied!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "OnEnableDrag permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     napi napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to enable drag, nativeVal is null");
+        WLOGFE("OnEnableDrag Failed, nativeVal is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     } 
     bool enbaleDrag = false;
     napi_get_value_bool(env, nativeVal, &enbaleDrag);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enable));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableDrag falied throw");
+        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag falied throw");
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = GetCompleteTask(enableDrag, weakToken);
-    napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr : (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnEnableDrag",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
-NapiAsyncTask::CompleteCallback JsWindow:: GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const
+NapiAsyncTask::CompleteCallback JsWindow::GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const
 {
-    NapiAsyncTask::CompleteCallback complete = [weakToken, enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    NapiAsyncTask::CompleteCallback complete = 
+        [weakToken, enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task.Reject(env,
