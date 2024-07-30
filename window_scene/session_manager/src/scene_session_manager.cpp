@@ -573,6 +573,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 WSError SceneSessionManager::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
 {   
     TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
+    const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "GetFreeMultiWindowEnableState permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
