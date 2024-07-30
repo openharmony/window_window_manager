@@ -17,7 +17,6 @@
 #include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
-#include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "screen_fold_data.h"
 #include "session_manager/include/scene_session_manager.h"
