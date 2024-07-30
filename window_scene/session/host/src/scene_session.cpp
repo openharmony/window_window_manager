@@ -1616,8 +1616,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled();
     TLOGI(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
         WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled());
-    if (isDragEnabledSystemWindow || (isMovableWindowType && (isMainWindow || isSubWindow || isDialog)) &&
-        !isMaxModeAvoidSysBar) {
+    if (isDragEnabledSystemWindow || (isMovableWindowType && (isMainWindow || isSubWindow || isDialog) &&
+        !isMaxModeAvoidSysBar)) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             pointerEvent->MarkProcessed();
@@ -1628,7 +1628,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
-        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()
+        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
             || isDragEnabledSystemWindow) {
             auto isPC = systemConfig_.uiType_ == "pc";
             if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
