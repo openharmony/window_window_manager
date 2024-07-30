@@ -410,8 +410,9 @@ void WindowSceneSessionImpl::UpdateWindowState()
     } else {
         bool isSubWindow = WindowHelper::IsSubWindow(windowType);
         bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+        bool isSysytemWindow = WindowHelper::IsSystemWindow(WindowType);
         UpdateWindowSizeLimits();
-        if ((isSubWindow || isDialogWindow) && property_->GetDragEnabled()) {
+        if ((isSubWindow || isDialogWindow || isSysytemWindow) && property_->GetDragEnabled()) {
             WLOGFD("sync window limits to server side in order to make size limits work while resizing");
             UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         }
@@ -467,6 +468,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
                 TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid SCB type: %{public}u", type);
                 return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             }
+            InitSystemSessionEnableDrag();
         } else if (!WindowHelper::IsSubWindow(type)) {
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
@@ -485,6 +487,13 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
+{
+    TLOGD(WmsLogTag::WmsLogTag::WMS_EVENT, "init systemsession enabledrag false");
+    property_->SetDragEnabled(false);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
@@ -541,15 +550,20 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
-    if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
+    WindowType windowType = property_->GetWindowType();
+    bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
+    if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
-    WindowType windowType = property_->GetWindowType();
+    TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d" dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
     bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
+    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !property_->GetDragEnabled();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
-    if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin) && !isDecorDialog) {
+    TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d", 
+        isFixedSystemWin, isFixedSubWin, isDecorDialog);
+    if (isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
         hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
@@ -2084,8 +2098,9 @@ void WindowSceneSessionImpl::StartMove()
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isPcAppInPad = property_->GetIsPcAppInPad();
+    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled());
     bool isValidWindow = isMainWindow ||
-            ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog));
+            ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog || isDragEnabledSystemWin));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -3242,9 +3257,11 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     }
 
     WindowType windowType = GetType();
+    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
     if (!WindowHelper::IsMainWindow(windowType)
         && !WindowHelper::IsSubWindow(windowType)
-        && windowType != WindowType::WINDOW_TYPE_DIALOG) {
+        && windowType != WindowType::WINDOW_TYPE_DIALOG
+        && !isDragEnabledSystemWin) {
         WLOGFE("windowType not support. WinId:%{public}u, WindowType:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
