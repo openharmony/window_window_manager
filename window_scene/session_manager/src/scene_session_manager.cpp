@@ -7006,7 +7006,8 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
             visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             i++;
-        } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
+        } else if (lastVisibleData_[i].first > currVisibleData[j].first &&
+                currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             j++;
         } else {
@@ -7021,7 +7022,9 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     }
     for (; j < currVisibleData.size(); ++j) {
-        visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+        if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+        }
     }
     lastVisibleData_ = currVisibleData;
     return visibilityChangeInfo;
