@@ -5548,6 +5548,27 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     return result;
 }
 
+NapiAsyncTask::CompleteCallback JsWindow:: GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const
+{
+    NapiAsyncTask::CompleteCallback complete = [weakToken, enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task.Reject(env,
+                JsErrUtils::CreateJsError(env,WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnEnableDrag failed."));
+                return;
+        }
+        WMError ret = weakWindow->EnableDrag(enableDrag);
+        TLOGI(WmsLogTag::WMS_EVENT, "call enabledrag ret: %{public}u", ret);
+        if (ret == WMError::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnEnableDrag failed."));
+        }
+    };
+    return complete;
+}
+
 napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6157,6 +6178,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
+    BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
 }
 }  // namespace Rosen
 }  // namespace OHOS
