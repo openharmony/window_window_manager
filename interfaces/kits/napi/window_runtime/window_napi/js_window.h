@@ -287,8 +287,6 @@ private:
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
 
     NapiAsyncTask::CompleteCallback GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const;
-
-    NapiAsyncTask
 };
 }  // namespace Rosen
 }  // namespace OHOS
