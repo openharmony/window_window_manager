@@ -1615,7 +1615,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     bool isDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled();
     TLOGI(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
-        WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled());
+        WindowHelper::IsSystemWindow(windowType), property->GetDragEnabled());
     if (isDragEnabledSystemWindow || (isMovableWindowType && (isMainWindow || isSubWindow || isDialog) &&
         !isMaxModeAvoidSysBar)) {
         if (CheckDialogOnForeground() && isPointDown) {
