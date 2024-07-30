@@ -571,17 +571,21 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 }
 
 WSError SceneSessionManager::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
-{
+{   
     TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "GetFreeMultiWindowEnableState permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [this, hostWindowId, &enable]() {
+    auto task = [this, hostWindowId, &enable, callingPid]() {
         auto sceneSession = GetSceneSession(hostWindowId);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
             return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            WLOGFE("Permission denied, not destroy by the same process");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
         }
         bool isEnable = sceneSession->IsFreeMultiWindowEnable();
         enable = isEnable;
