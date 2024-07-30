@@ -2069,6 +2069,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }  else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
+        TLOGD(WmsLogTag::WMS_DIALOG, "systemWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
