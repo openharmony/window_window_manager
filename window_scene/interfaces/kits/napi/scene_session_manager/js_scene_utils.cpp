@@ -822,6 +822,12 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         napi_set_named_property(env, objValue, "isStartupInstallFree",
             CreateJsValue(env, (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
                 AAFwk::Want::FLAG_INSTALL_ON_DEMAND));
+        auto params = sessionInfo.want->GetParams();
+        napi_set_named_property(env, objValue, "fileManagerMode",
+            CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
+        napi_set_named_property(env, objValue, "extraFormIdentity",
+            CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
     }
 }
 
