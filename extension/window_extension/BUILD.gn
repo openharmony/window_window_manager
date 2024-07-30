@@ -54,6 +54,7 @@ ohos_shared_library("libwindow_extension") {
   ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil",
     "../../interfaces/kits/napi/window_runtime:window_native_kit",
     "../../window_scene/interfaces/innerkits:libwsutils",
     "../../wm:libwm",

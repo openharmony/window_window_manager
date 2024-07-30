@@ -2113,6 +2113,14 @@ public:
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+    
+    /**
+     * @brief Get the window status of current window.
+     *
+     * @param windowStatus
+     * @return WMError.
+     */
+    virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

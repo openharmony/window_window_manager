@@ -915,9 +915,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& type = GetType();
-    TLOGI(WmsLogTag::WMS_LIFE, "Window show [name: %{public}s, id: %{public}d, type: %{public}u], reason: %{public}u,"
-        " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(),
-        property_->GetPersistentId(), type, reason, state_, requestState_);
     if (IsWindowSessionInvalid()) {
         TLOGI(WmsLogTag::WMS_LIFE, "Window show failed, session is invalid, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
@@ -926,6 +923,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
 
+    TLOGI(WmsLogTag::WMS_LIFE, "Window show [name: %{public}s, id: %{public}d, type: %{public}u], reason: %{public}u,"
+        " state:%{public}u, requestState:%{public}u", property_->GetWindowName().c_str(),
+        property_->GetPersistentId(), type, reason, state_, requestState_);
     auto isDecorEnable = IsDecorEnable();
     UpdateDecorEnableToAce(isDecorEnable);
     property_->SetDecorEnable(isDecorEnable);
@@ -969,6 +969,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         PreLayoutOnShow(type);
+        // Add maintenance logs before the IPC process.
+        TLOGI(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
+            property_->GetWindowName().c_str(), GetPersistentId());
         ret = static_cast<WMError>(hostSession->Show(property_));
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
@@ -3642,6 +3645,21 @@ uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
     TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     return height;
+}
+
+WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property_ is null, WinId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowStatus = GetWindowStatusInner(GetMode());
+    TLOGD(WmsLogTag::DEFAULT, "WinId:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

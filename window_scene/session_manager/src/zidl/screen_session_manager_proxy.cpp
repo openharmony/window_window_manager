@@ -2160,7 +2160,8 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
     return displayNode;
 }
 
-void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2179,6 +2180,10 @@ void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, 
     }
     if (!data.WriteFloat(rotation)) {
         WLOGFE("Write rotation failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
+        WLOGFE("Write screenPropertyChangeType failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY),

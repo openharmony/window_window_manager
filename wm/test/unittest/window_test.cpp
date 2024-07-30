@@ -2668,6 +2668,21 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
+
+/**
+ * @tc.name: GetWindowStatus
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(window, nullptr);
+    WindowStatus windowStatus;
+    auto ret = window->GetWindowStatus(windowStatus);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
