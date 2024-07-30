@@ -206,11 +206,11 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     scensession->SetAspectRatio(ratio);
+    
     limits.maxHeight_ = 0;
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
     scensession->SetAspectRatio(ratio);
-
     EXPECT_NE(scensession, nullptr);
 }
 
