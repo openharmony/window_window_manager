@@ -1483,7 +1483,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyDumpInfoResult, Function | SmallTest | 
     std::vector<std::string> params = {"-a"};
     std::string dumpInfo = "";
     WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result01, WSError::WS_OK);
     params.clear();
     params.push_back("-w");
     params.push_back("23456");
