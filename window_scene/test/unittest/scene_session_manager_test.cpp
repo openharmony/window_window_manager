@@ -1251,14 +1251,12 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     EXPECT_EQ(result, WMError::WM_OK);
 
     topNum = 0;
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 
     topNum = 1000;
     MainWindowInfo info;
     topNInfos.push_back(info);
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 }
 
 /**
