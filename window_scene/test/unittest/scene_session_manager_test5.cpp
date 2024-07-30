@@ -141,6 +141,7 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDisconnectSpecificSessionInner, Fun
     ssm_->DestroyAndDisconnectSpecificSessionInner(1);
 }
 
+
 /**
  * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
