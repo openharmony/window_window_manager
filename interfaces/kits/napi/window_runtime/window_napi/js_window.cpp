@@ -5527,7 +5527,7 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "OnEnableDrag permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
-    napi napi_value nativeVal = argv[0];
+    napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         WLOGFE("OnEnableDrag Failed, nativeVal is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -5541,7 +5541,8 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = GetCompleteTask(enableDrag, weakToken);
-    napi_value lastParam = (argc == 0) ? nullptr : (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr : 
+        (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnEnableDrag",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
