@@ -2728,7 +2728,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
             SessionState sessionState = session->GetSessionState();
-            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d", sessionState);
+            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, \
+                isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
+                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
             bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
                 sessionState == SessionState::STATE_ACTIVE;
             if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
@@ -2736,12 +2738,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                     session->GetForegroundInteractiveStatus());
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
-            TLOGI(WmsLogTag::WMS_LIFE, "isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
-                isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
             if (!isSessionForeground && !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state:%{public}d, \
-                    isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
-                    sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
+                TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
         }
