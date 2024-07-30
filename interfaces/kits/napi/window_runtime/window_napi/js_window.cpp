@@ -5532,12 +5532,12 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         WLOGFE("OnEnableDrag Failed, nativeVal is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     } 
-    bool enbaleDrag = false;
-    napi_get_value_bool(env, nativeVal, &enbaleDrag);
+    bool enableDrag = false;
+    napi_get_value_bool(env, nativeVal, &enableDrag);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enable));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag falied throw");
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag falied throw error");
+        return NapiThrowError(env, ret);
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = GetCompleteTask(enableDrag, weakToken);
