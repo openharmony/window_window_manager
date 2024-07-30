@@ -628,6 +628,89 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveTo02, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 5));
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
+
+/**
+ * @tc.name: GetWindowStatus01
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetWindowStatus01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    WindowStatus windowStatus;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_UNDEFINED, windowStatus);
+}
+
+/**
+ * @tc.name: GetWindowStatus02
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetWindowStatus02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    WindowStatus windowStatus;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, windowStatus);
+}
+
+/**
+ * @tc.name: GetWindowStatus03
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetWindowStatus03");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetDisplayId(0);
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    WindowStatus windowStatus;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_FLOATING, windowStatus);
+    window->property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_MAXIMIZE, windowStatus);
+    window->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_MINIMIZE, windowStatus);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, windowStatus);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

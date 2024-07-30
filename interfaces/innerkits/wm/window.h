@@ -2106,6 +2106,14 @@ public:
      * @return the height of status bar.
      */
     virtual uint32_t GetStatusBarHeight() { return 0; }
+    
+    /**
+     * @brief Get the window status of current window.
+     *
+     * @param windowStatus
+     * @return WMError.
+     */
+    virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
