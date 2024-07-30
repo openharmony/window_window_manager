@@ -1380,6 +1380,19 @@ ohos_unittest("ws_single_display_sensor_fold_state_manager_test") {
   ]
 }
 
+ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "single_display_sensor_pocket_fold_state_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_intention_event_manager_test") {
   module_out_path = module_out_path
 
