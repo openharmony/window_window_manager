@@ -740,8 +740,8 @@ ohos_static_library("wm_unittest_common") {
     "ability_runtime:ability_context_native",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_base",
-    "ipc:ipc_single",
     "image_framework:image_native",
+    "ipc:ipc_single",
     "power_manager:powermgr_client",
   ]
 
