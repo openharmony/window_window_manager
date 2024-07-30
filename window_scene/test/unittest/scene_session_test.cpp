@@ -1954,6 +1954,26 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 1);
 }
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetAppForceLandscapeConfig";
+    info.bundleName_ = "GetAppForceLandscapeConfig";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    AppForceLandscapeConfig config = {};
+    auto result = sceneSession->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 }
 }
