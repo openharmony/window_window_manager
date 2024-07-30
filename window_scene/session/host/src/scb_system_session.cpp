@@ -198,6 +198,7 @@ WSError SCBSystemSession::SetSystemSceneBlockingFocus(bool blocking)
 
 void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 {
+    // scb system session do nothing
     return;
 }
 
