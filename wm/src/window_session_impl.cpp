@@ -599,7 +599,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(ANIMATION_TIME);
@@ -612,7 +611,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             }
             window->rotationAnimationCount_--;
             if (window->rotationAnimationCount_ == 0) {
-                RSInterfaces::GetInstance().DisableCacheForRotation();
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -1895,6 +1893,17 @@ void WindowSessionImpl::RecoverSessionListener()
     if (touchOutsideListeners_.find(persistentId) != touchOutsideListeners_.end() &&
         !touchOutsideListeners_[persistentId].empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(persistentId, true);
+    }
+    if (windowVisibilityChangeListeners_.find(persistentId) != windowVisibilityChangeListeners_.end() &&
+        !windowVisibilityChangeListeners_[persistentId].empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, true);
+    }
+    if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
+        !windowRectChangeListeners_[persistentId].empty()) {
+        auto hostSession = GetHostSession();
+        if (hostSession != nullptr) {
+            hostSession->UpdateRectChangeListenerRegistered(true);
+        }
     }
 }
 
@@ -3339,30 +3348,35 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 {
-    WLOGFD("NotifyWindowStatusChange");
-    auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
+        windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            WindowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
+            windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
+        windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+        windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
     }
     if (state_ == WindowState::STATE_HIDDEN) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
+        windowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
+    return windowStatus;
+}
 
+void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);
+    auto windowStatus = GetWindowStatusInner(mode);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
     for (auto& listener : windowStatusChangeListeners) {
         if (listener != nullptr) {
-            listener->OnWindowStatusChange(WindowStatus);
+            listener->OnWindowStatusChange(windowStatus);
         }
     }
 }

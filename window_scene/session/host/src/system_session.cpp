@@ -262,7 +262,7 @@ WSError SystemSession::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (!dialogSessionBackGestureEnabled_) {
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && !dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }

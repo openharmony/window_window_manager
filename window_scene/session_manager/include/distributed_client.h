@@ -22,18 +22,26 @@
 #include "mission_info.h"
 #include "mission_snapshot.h"
 #include "iremote_broker.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
-class DistributedClient {
+class DmsDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    DistributedClient() = default;
-    virtual ~DistributedClient() = default;
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+};
+
+class DistributedClient {
+WM_DECLARE_SINGLE_INSTANCE(DistributedClient);
+
+public:
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
                             std::vector<AAFwk::MissionInfo>& missionInfos);
     int32_t GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
                                          std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot);
     int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state);
+    void ClearDmsProxy();
+    void ClearDeathRecipient();
     enum {
         START_REMOTE_ABILITY = 1,
         CONNECT_REMOTE_ABILITY = 6,
@@ -57,8 +65,14 @@ public:
         SET_MISSION_CONTINUE_STATE = 300
     };
 private:
+    void InitDistributedSchedProxy();
     sptr<IRemoteObject> GetDmsProxy();
     bool ReadMissionInfosFromParcel(Parcel& parcel, std::vector<AAFwk::MissionInfo>& missionInfos);
+
+    std::mutex mutex_;
+    bool destroyed_ = false;
+    sptr<DmsDeathRecipient> dmsDeath_ = nullptr;
+    sptr<IRemoteObject> dmsProxy_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

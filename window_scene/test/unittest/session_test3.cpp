@@ -134,59 +134,6 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: Foreground02
- * @tc.desc: Foreground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, Foreground02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    session_->SetSessionState(SessionState::STATE_BACKGROUND);
-    session_->isActive_ = true;
-    auto result = session_->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    session_->SetSessionState(SessionState::STATE_INACTIVE);
-    session_->isActive_ = false;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    session_->sessionStage_ = mockSessionStage;
-    result = session_->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: Foreground03
- * @tc.desc: Foreground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, Foreground03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    session_->SetSessionState(SessionState::STATE_BACKGROUND);
-    session_->isActive_ = true;
-
-    property->type_ = WindowType::WINDOW_TYPE_DIALOG;
-    auto result = session_->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    SessionInfo parentInfo;
-    parentInfo.abilityName_ = "testSession1";
-    parentInfo.moduleName_ = "testSession2";
-    parentInfo.bundleName_ = "testSession3";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
-    ASSERT_NE(parentSession, nullptr);
-    session_->SetParentSession(parentSession);
-    session_->SetSessionState(SessionState::STATE_INACTIVE);
-    result = session_->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: SetFocusable04
  * @tc.desc: SetFocusable Test
  * @tc.type: FUNC
@@ -350,35 +297,6 @@ HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Leve
     session_->HandleDialogForeground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
     EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
-}
-
-/**
- * @tc.name: Background
- * @tc.desc: Background Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, Background, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetSessionState(SessionState::STATE_ACTIVE);
-    auto result = session_->Background();
-    EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: Background02
- * @tc.desc: Background Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, Background02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetSessionState(SessionState::STATE_ACTIVE);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session_->property_, nullptr);
-    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    auto result = session_->Background();
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
