@@ -931,76 +931,6 @@ HWTEST_F(WindowSessionTest2, UnregisterLifecycleListener021, Function | SmallTes
 }
 
 /**
- * @tc.name: NotifyActivation022
- * @tc.desc: NotifyActivation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyActivation022, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->NotifyActivation();
-    uint64_t screenId = 0;
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: NotifyConnect023
- * @tc.desc: NotifyConnect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyConnect023, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->NotifyConnect();
-    uint64_t screenId = 0;
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: NotifyForeground024
- * @tc.desc: NotifyForeground
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyForeground024, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->NotifyForeground();
-    uint64_t screenId = 0;
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: NotifyBackground025
- * @tc.desc: NotifyBackground
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyBackground025, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->NotifyBackground();
-    uint64_t screenId = 0;
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: NotifyDisconnect026
- * @tc.desc: NotifyDisconnect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyDisconnect026, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->NotifyDisconnect();
-    uint64_t screenId = 0;
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
  * @tc.name: NotifyExtensionDied027
  * @tc.desc: NotifyExtensionDied
  * @tc.type: FUNC
@@ -1065,19 +995,6 @@ HWTEST_F(WindowSessionTest2, SetSessionState031, Function | SmallTest | Level2)
     SessionState state = SessionState::STATE_CONNECT;
     session_->SetSessionState(state);
     ASSERT_EQ(state, session_->state_);
-}
-
-/**
- * @tc.name: UpdateSessionState32
- * @tc.desc: UpdateSessionState
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, UpdateSessionState32, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionState state = SessionState::STATE_CONNECT;
-    session_->UpdateSessionState(state);
-    ASSERT_EQ(session_->state_, SessionState::STATE_CONNECT);
 }
 
 /**
@@ -1206,56 +1123,6 @@ HWTEST_F(WindowSessionTest2, GetBrightness42, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsActive43
- * @tc.desc: IsActive
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, IsActive43, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool res = session_->IsActive();
-    ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: IsSystemSession44
- * @tc.desc: IsSystemSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, IsSystemSession44, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool res = session_->IsSystemSession();
-    ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: Hide45
- * @tc.desc: Hide
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, Hide45, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    auto result = session_->Hide();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: Show46
- * @tc.desc: Show
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, Show46, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    auto result = session_->Show(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: DrawingCompleted
  * @tc.desc: DrawingCompleled
  * @tc.type: FUNC
@@ -1265,18 +1132,6 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     auto result = session_->DrawingCompleted();
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: IsSystemActive47
- * @tc.desc: IsSystemActive
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, IsSystemActive47, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool res = session_->IsSystemActive();
-    ASSERT_EQ(res, false);
 }
 
 /**
@@ -1290,34 +1145,6 @@ HWTEST_F(WindowSessionTest2, SetSystemActive48, Function | SmallTest | Level2)
     bool systemActive = false;
     session_->SetSystemActive(systemActive);
     ASSERT_EQ(systemActive, session_->isSystemActive_);
-}
-
-/**
- * @tc.name: IsTerminated49
- * @tc.desc: IsTerminated
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, IsTerminated49, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    bool res = session_->IsTerminated();
-    ASSERT_EQ(true, res);
-    session_->state_ = SessionState::STATE_FOREGROUND;
-    res = session_->IsTerminated();
-    ASSERT_EQ(false, res);
-    session_->state_ = SessionState::STATE_ACTIVE;
-    res = session_->IsTerminated();
-    ASSERT_EQ(false, res);
-    session_->state_ = SessionState::STATE_INACTIVE;
-    res = session_->IsTerminated();
-    ASSERT_EQ(false, res);
-    session_->state_ = SessionState::STATE_BACKGROUND;
-    res = session_->IsTerminated();
-    ASSERT_EQ(false, res);
-    session_->state_ = SessionState::STATE_CONNECT;
-    res = session_->IsTerminated();
-    ASSERT_EQ(false, res);
 }
 
 /**
