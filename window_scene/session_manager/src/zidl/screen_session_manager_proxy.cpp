@@ -2071,7 +2071,7 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
