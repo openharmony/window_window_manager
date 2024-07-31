@@ -5551,12 +5551,12 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 
 NapiAsyncTask::CompleteCallback JsWindow::GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const
 {
-    NapiAsyncTask::CompleteCallback complete = 
+    NapiAsyncTask::CompleteCallback complete =
         [weakToken, enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task.Reject(env,
-                JsErrUtils::CreateJsError(env,WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnEnableDrag failed."));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnEnableDrag failed."));
                 return;
         }
         WMError ret = weakWindow->EnableDrag(enableDrag);
