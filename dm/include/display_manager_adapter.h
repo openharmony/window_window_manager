@@ -91,8 +91,7 @@ public:
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
-    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
-
+    
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
@@ -150,6 +149,7 @@ public:
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

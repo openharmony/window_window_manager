@@ -127,9 +127,7 @@ ohos_shared_library("libdm") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  public_external_deps = [ 
-    "graphic_2d:color_manager",
-  ]
+  public_external_deps = [ "graphic_2d:color_manager" ]
 
   external_deps = [
     "ability_runtime:ability_manager",
