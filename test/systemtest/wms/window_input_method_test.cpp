@@ -79,6 +79,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
     window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
+    window->Destroy();
 }
 
 /**
@@ -110,6 +111,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
         ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
     }
     inputMethodWindow->Hide();
+    inputMethodWindow->Destroy();
 }
 } // namespace
 } // namespace Rosen
