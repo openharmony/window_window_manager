@@ -624,7 +624,7 @@ bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent&
 {
     napi_value jsDeviceId = nullptr;
     napi_get_named_property(env, jsObject, "deviceId", &jsDeviceId);
-    int32_t deviceId;
+    int32_t deviceId = 0;
     if (!ConvertFromJsValue(env, jsDeviceId, deviceId)) {
         WLOGFE("[NAPI]Failed to convert parameter to deviceId");
         return false;
