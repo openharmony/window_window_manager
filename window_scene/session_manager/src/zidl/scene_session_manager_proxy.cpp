@@ -1756,7 +1756,7 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
+WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "run SceneSessionManagerProxy::GetFreeMultiWindowEnableState");
     MessageParcel data;
@@ -1764,10 +1764,6 @@ WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(int32_t hostWind
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(hostWindowId)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write hostWindowId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(
