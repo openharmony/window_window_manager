@@ -437,7 +437,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         return;
     }
     bool dragEnabled = sessionProperty->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", scene_session->GetWindowName().c_str(),
+    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", sceneSession->GetWindowName().c_str(),
         dragEnabled);
     if (dragEnabled) {
         float vpr = 1.5f; // 1.5: default vp
