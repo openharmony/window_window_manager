@@ -200,5 +200,23 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | 
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState end.";
 }
+
+/**
+ * @tc.name: SetMissionContinueState02
+ * @tc.desc: SetMissionContinueState test
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(DistributedClientTest, SetMissionContinueState02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 start.";
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 end.";
+}
 }
 }

@@ -191,8 +191,7 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
 
 int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    TLOGI(WmsLogTag::DMS, "SetMissionContinueState called. Mission id: %{public}d, state: %{public}d",
-        missionId, state);
+    TLOGI(WmsLogTag::DMS, "Mission id: %{public}d, state: %{public}d", missionId, state);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         TLOGI(WmsLogTag::DMS, "remote system ablity is null");
@@ -200,12 +199,18 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
     }
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, SET_MISSION_CONTINUE_STATE, data, reply);
+    int32_t error = remote->SendRequest(SET_MISSION_CONTINUE_STATE, data, reply, option);
+    if (error != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "transact failed, error: %{public}d", error);
+        return error;
+    }
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS
