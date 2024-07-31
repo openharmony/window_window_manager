@@ -46,6 +46,7 @@
 #include "pattern_detach_callback.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
+#include "application_context.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -477,6 +478,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
+        InitStatusBarColor();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
@@ -485,6 +487,35 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+void WindowSceneSessionImpl::InitStatusBarColor()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    bool isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    uint32_t contentColor;
+    static const uint32_t BLACK = 0xE5000000;
+    static const uint32_t WHITE = 0xE5FFFFFF;
+    if (isColorModeSetByApp) {
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+    } else {
+        bool hasDarkRes = false;
+        appContext->AppHasDarkRes(hasDarkRes);
+        TLOGI(WmsLogTag::WMS_IMMS, "has dark res: %{public}u", hasDarkRes);
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+            (hasDarkRes ? WHITE : BLACK);
+    }
+
+    SystemBarProperty curSysBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(
+        static_cast<uint32_t>(curSysBarProp.settingFlag_) |
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)
+    );
+    SystemBarProperty sysBarProp(curSysBarProp.enable_, curSysBarProp.backgroundColor_, contentColor,
+        curSysBarProp.enableAnimation_, settingFlag);
+    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, sysBarProp);
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
