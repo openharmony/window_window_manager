@@ -5531,7 +5531,7 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     if (nativeVal == nullptr) {
         WLOGFE("OnEnableDrag Failed, nativeVal is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    } 
+    }
     bool enableDrag = false;
     napi_get_value_bool(env, nativeVal, &enableDrag);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enableDrag));
@@ -5541,7 +5541,7 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete = GetCompleteTask(enableDrag, weakToken);
-    napi_value lastParam = (argc == 0) ? nullptr : 
+    napi_value lastParam = (argc == 0) ? nullptr :
         (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnEnableDrag",
