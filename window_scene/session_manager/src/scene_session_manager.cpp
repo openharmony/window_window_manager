@@ -8353,15 +8353,17 @@ bool SceneSessionManager::UpdateImmersiveState()
             WLOGFE("Property is nullptr");
             continue;
         }
+        TLOGI(WmsLogTag::WMS_MAIN, "session id:%{public}d", sceneSession->GetPersistentId());
         auto sysBarProperty = property->GetSystemBarProperty();
         if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
-            WLOGFD("Current window is immersive");
+            TLOGI(WmsLogTag::WMS_MAIN, "window is immersive. id:%{public}d", sceneSession->GetPersistentId());
             return true;
         } else {
-            WLOGFD("Current window is not immersive");
+            TLOGI(WmsLogTag::WMS_MAIN, "statusBar is enabled. id:%{public}d", sceneSession->GetPersistentId());
             break;
         }
     }
+    TLOGI(WmsLogTag::WMS_MAIN, "not immersive");
     return false;
 }
 
