@@ -106,6 +106,18 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch, Function | SmallTes
 }
 
 /**
+ * @tc.name: PhysicalScreenUniqueSwitch
+ * @tc.desc: PhysicalScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch02, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenUniqueSwitch(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
  * @tc.name: VirtualScreenUniqueSwitch01
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
@@ -127,6 +139,110 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch02, Function | SmallTe
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {2, 3};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch03, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {1012, 1002};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch04, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {12, 1001};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch05, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {12, 1002};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch06, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {12, 1003};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch07, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {1003, 1003};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch08, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {1003, 1002};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch09, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {1003, 1001};
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch010, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> screenSession =nullptr;
+    std::vector<ScreenId> screenIds = {1004, 1001};
     DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
