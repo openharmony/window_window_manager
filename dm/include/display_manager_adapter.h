@@ -91,7 +91,7 @@ public:
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
-    
+
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
