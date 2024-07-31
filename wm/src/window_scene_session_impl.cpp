@@ -563,7 +563,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
         isFixedSystemWin, isFixedSubWin, isDecorDialog);
-    if (isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
+    if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
         hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     } else {
         if (dragType != AreaType::UNDEFINED) {
