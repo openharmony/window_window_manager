@@ -756,6 +756,13 @@ napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnKeepKeyboardOnFocus(env, info) : nullptr;
 }
 
+napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI] EnableDrag");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>>(env, info);
+    return (me != nullptr) ? me->OnEnableDrag(env, info) ：nullptr;
+}
+
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]GetWindowLimits");
@@ -838,13 +845,6 @@ napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]GetImmersiveModeEnabledState");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
-}
-
-napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI] EnableDrag");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>>(env, info);
-    return (me != nullptr) ? me->OnEnableDrag(env, info) ：nullptr;
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
