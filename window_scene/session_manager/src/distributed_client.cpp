@@ -16,11 +16,8 @@
 
 #include "ability_manager_errors.h"
 #include "distributed_parcel_helper.h"
-#include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "string_ex.h"
 #include "system_ability_definition.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
