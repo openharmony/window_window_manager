@@ -571,7 +571,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 }
 
 WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
-{   
+{
     enable = systemConfig_.freeMultiWindowEnable_;
     return WSError::WS_OK;
 }
