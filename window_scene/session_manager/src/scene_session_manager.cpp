@@ -585,8 +585,8 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(int32_t hostWindowId,
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
-            WLOGFE("Permission denied, not destroy by the same process");
-            return WMError::WS_ERROR_INVALID_SESSION;
+            TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied, not called by the same process");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         bool isEnable = sceneSession->IsFreeMultiWindowEnable();
         enable = isEnable;
