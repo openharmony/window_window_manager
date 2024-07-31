@@ -891,13 +891,13 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetHostWindowRect(hostWindowId, rect));
 }
 
-WMError WindowAdapter::GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
+WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetFreeMultiWindowEnableState(hostWindowId, enable));
+    return static_cast<WMError>(wmsProxy->GetFreeMultiWindowEnableState(enable));
 }
 
 WMError WindowAdapter::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)

@@ -221,7 +221,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable)
+    virtual WSError GetFreeMultiWindowEnableState(bool& enable)
     {
         return WSError::WS_OK;
     }

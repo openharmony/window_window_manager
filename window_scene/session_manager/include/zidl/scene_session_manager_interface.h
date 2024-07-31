@@ -244,7 +244,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    WSError GetFreeMultiWindowEnableState(int32_t hostWindowId, bool& enable) override
+    WSError GetFreeMultiWindowEnableState(bool& enable) override
     {
         return WSError::WS_OK;
     }
