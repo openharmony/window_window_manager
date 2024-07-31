@@ -456,7 +456,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         }
         auto limits = sessionProperty->GetWindowLimits();
         TLOGD(WmsLogTag::WMS_EVENT, "%{public}s [minWidth,maxWidth,minHeight,maxHeight]: %{public}d,"
-            " %{public}d,%{public}d,%{public}d", sceneSession->GetWindowName().c_str(), limits.minWidth_, 
+            " %{public}d, %{public}d, %{public}d", sceneSession->GetWindowName().c_str(), limits.minWidth_,
             limits.maxWidth_, limits.minHeight_, limits.maxHeight_);
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
@@ -472,7 +472,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "UpdatePointerAreas sceneSession is: %{public}d dragEnabled is false", 
+        TLOGD(WmsLogTag::WMS_EVENT, "UpdatePointerAreas sceneSession is: %{public}d dragEnabled is false",
             sceneSession->GetPersistentId());
     }
 }
