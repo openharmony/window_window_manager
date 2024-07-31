@@ -759,8 +759,8 @@ napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "[NAPI] EnableDrag");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>>(env, info);
-    return (me != nullptr) ? me->OnEnableDrag(env, info) ：nullptr;
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnEnableDrag(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
@@ -5510,7 +5510,7 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc argv, nullptr，nullptr);
+    napi_get_cb_info(env, info, &argc argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGI(WmsLogTag::WMS_EVENT, "OnEnableDrag Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -5534,7 +5534,7 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     } 
     bool enableDrag = false;
     napi_get_value_bool(env, nativeVal, &enableDrag);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enable));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enableDrag));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag falied throw error");
         return NapiThrowError(env, ret);
