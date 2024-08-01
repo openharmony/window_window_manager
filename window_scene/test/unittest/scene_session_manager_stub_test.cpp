@@ -959,22 +959,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function |
 }
 
 /**
- * @tc.name: HandleGetSessionInfoByContinueSessionId
- * @tc.desc: test HandleGetSessionInfoByContinueSessionId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteString("test_01");
-
-    int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleGetUIContentRemoteObj
  * @tc.desc: test HandleGetUIContentRemoteObj
  * @tc.type: FUNC
@@ -985,25 +969,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | Sm
     MessageParcel reply;
     data.WriteInt32(1);
     int res = stub_->HandleGetUIContentRemoteObj(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleUpdateExtWindowFlags
- * @tc.desc: test HandleUpdateExtWindowFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    sptr<IRemoteObject> token = nullptr;
-    data.WriteRemoteObject(token);
-    data.WriteInt32(7);
-    data.WriteInt32(7);
-
-    int res = stub_->HandleUpdateExtWindowFlags(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1068,6 +1033,41 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, Function | Sma
 
     int res = stub_->HandleGetCallingWindowRect(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfoByContinueSessionId
+ * @tc.desc: test HandleGetSessionInfoByContinueSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString("test_01");
+
+    int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateExtWindowFlags
+ * @tc.desc: test HandleUpdateExtWindowFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    data.WriteInt32(7);
+    data.WriteInt32(7);
+
+    int res = stub_->HandleUpdateExtWindowFlags(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**

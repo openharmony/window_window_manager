@@ -209,7 +209,7 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
  * @tc.name: SetUiDvsyncSwitch
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
 {
     RootScene rootScene;
@@ -222,7 +222,7 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
  * @tc.name: SetUiDvsyncSwitch
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
 {
     RootScene rootScene;
