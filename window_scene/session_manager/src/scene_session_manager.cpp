@@ -5819,10 +5819,10 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                                                std::vector<SessionInfoBean>& sessionInfos)
 {
-    TLOGI(WmsLogTag::DMS, "GetRemoteSessionInfos From Dms begin");
+    TLOGI(WmsLogTag::DEFAULT, "begin");
     int result = DistributedClient::GetInstance().GetMissionInfos(deviceId, numMax, sessionInfos);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "GetRemoteMissionInfos failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
@@ -6265,12 +6265,12 @@ WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IR
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
-    TLOGI(WmsLogTag::DMS, "GetRemoteSessionSnapshotInfo begin");
+    TLOGI(WmsLogTag::DEFAULT, "begin");
     std::unique_ptr<AAFwk::MissionSnapshot> sessionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
     int result = DistributedClient::GetInstance().GetRemoteMissionSnapshotInfo(deviceId,
         sessionId, sessionSnapshotPtr);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "GetRemoteMissionSnapshotInfo failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
         return result;
     }
     sessionSnapshot = *sessionSnapshotPtr;
