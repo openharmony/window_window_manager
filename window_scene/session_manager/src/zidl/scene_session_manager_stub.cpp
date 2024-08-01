@@ -949,7 +949,7 @@ int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, Messag
 
 int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "run HandleGetFreeMultiWindowEnableState!");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "run HandleGetFreeMultiWindowEnableState!");
     bool enable = false;
     WSError ret = GetFreeMultiWindowEnableState(enable);
     reply.WriteBool(enable);
