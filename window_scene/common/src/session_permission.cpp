@@ -323,12 +323,9 @@ bool SessionPermission::IsBetaVersion()
     return betaName.find("beta") != std::string::npos;
 }
 
-bool SessionPermission::IsFoundationCall(int32_t uid)
+bool SessionPermission::IsFoundationCall()
 {
-    if (uid == 0) {
-        uid = IPCSkeleton::GetCallingUid();
-    }
-    return uid == FOUNDATION_UID;
+    return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
 } // namespace Rosen
