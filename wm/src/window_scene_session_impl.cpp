@@ -489,18 +489,24 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::InitStatusBarColor()
+void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecFwk::Configuration> configuration)
 {
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_IMMS, "not main window");
+    }
     std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
     if (appContext == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "app context is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
         return;
     }
-    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    std::shared_ptr<AppExecFwk::Configuration> config = configuration;
     if (config == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "app config is nullptr");
-        return;
+        config = appContext->GetConfiguration();
+        if (config == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "app config is nullptr")
+        }
     }
+  
     bool isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     uint32_t contentColor;
@@ -2391,6 +2397,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
             uiContent->UpdateConfiguration(configuration);
         }
     }
+    UpdateStatusBarColor(configuration);
     if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
         return;
     }
