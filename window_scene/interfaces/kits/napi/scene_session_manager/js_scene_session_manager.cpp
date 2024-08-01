@@ -1220,7 +1220,6 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         return NapiGetUndefined(env);
     }
-
     if (rootScene_ == nullptr) {
         rootScene_ = new RootScene();
     }
@@ -1242,6 +1241,15 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
         });
     }
+    SceneSessionManager::GetInstance().SetRootSceneUIContentFunc([rootScene = rootScene_]() {
+        const auto& rootSceneUIContent = rootScene->GetUIContent();
+        if (rootSceneUIContent != nullptr) {
+            TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
+            rootSceneUIContent->ProcessBackPressed();
+        } else {
+            WLOGFE("rootScene UIContent is null");
+        }
+    });
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
     });

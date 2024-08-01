@@ -1265,6 +1265,31 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, Function |
     auto result = ssm_->TerminateSessionByPersistentId(INVALID_SESSION_ID);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: SetRootSceneUIContentFunc
+ * @tc.desc: test function : SetRootSceneUIContentFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetRootSceneUIContentFunc, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "SetRootSceneUIContentFunc";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->focusedSessionId_ = sceneSession->GetPersistentId();
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->ProcessBackEvent();
+
+    RootSceneUIContentFunc func = []() {};
+    ssm_->SetRootSceneUIContentFunc(func);
+    ssm_->ProcessBackEvent();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
