@@ -347,17 +347,20 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     if (isFocused_) {
         UpdateFocus(false);
     }
-    SessionInfo info;
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
-        info.bundleName_ = property_->GetSessionInfo().bundleName_;
+        property_->EditSessionInfo().abilityName_ = abilityContext->GetAbilityInfo()->name;
+        property_->EditSessionInfo().moduleName_ = context_->GetHapModuleInfo()->moduleName;
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "property_ or context_ or abilityContext is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    property_->SetSessionInfo(info);
+    auto& info = property_->EditSessionInfo();
+    if (auto want = abilityContext->GetWant()) {
+        info.want = want;
+    } else {
+        TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
+    }
     property_->SetWindowState(state_);
     TLOGI(WmsLogTag::WMS_RECOVER,
         "bundleName=%{public}s, moduleName=%{public}s, abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, "
