@@ -9952,7 +9952,7 @@ WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId
 
 void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc)
 {
-    rootSceneProcessBackEventFunc = processBackEventFunc;
+    rootSceneProcessBackEventFunc_ = processBackEventFunc;
     TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
 } // namespace OHOS::Rosen
