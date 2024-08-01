@@ -162,6 +162,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetCallingWindowRect(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
             return HandleGetWindowModeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE):
+            return HandleGetFreeMultiWindowEnableState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
         default:
@@ -936,6 +938,16 @@ int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, Messag
     reply.WriteInt32(rect.posY_);
     reply.WriteUint32(rect.width_);
     reply.WriteUint32(rect.height_);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "run HandleGetFreeMultiWindowEnableState!");
+    bool enable = false;
+    WSError ret = GetFreeMultiWindowEnableState(enable);
+    reply.WriteBool(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

@@ -526,6 +526,12 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
+{
+    enable = systemConfig_.freeMultiWindowEnable_;
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
