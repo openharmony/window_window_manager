@@ -159,9 +159,8 @@ HWTEST_F(SCBSystemSessionTest, RegisterBufferAvailableCallback, Function | Small
  */
 HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->BindKeyboardSession(nullptr);
-    int ret = 0;
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -171,16 +170,15 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Lev
  */
 HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, scbSystemSession_);
     SessionInfo info;
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
     sptr<SceneSession::SpecificSessionCallback> callback =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, callback);
+        new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> session = new SceneSession(info, callback);
     scbSystemSession_->BindKeyboardSession(session);
-    int ret = 0;
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -228,6 +226,6 @@ HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Leve
     scbSystemSession_->GetKeyboardSession();
 }
 
-}
-}
-}
+} //namespace
+} //namespace Rosen
+} //namespace OHOS
