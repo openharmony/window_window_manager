@@ -1245,7 +1245,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         if (rootScene == nullptr ||  rootScene->GetUIContent() == nullptr) {
             TLOGE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
             return;
-        }  
+        }
         TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
         rootScene->GetUIContent()->ProcessBackPressed();
     });
