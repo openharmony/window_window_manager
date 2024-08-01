@@ -489,7 +489,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecFwk::Configuration> configuration)
+void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
         TLOGD(WmsLogTag::WMS_IMMS, "not main window");
