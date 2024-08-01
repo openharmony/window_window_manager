@@ -2974,8 +2974,8 @@ WSError SceneSessionManager::ProcessBackEvent()
             session->RequestSessionBack(false);
             return WSError::WS_OK;
         }
-        if (session->GetSessionInfo().isSystem_ && rootSceneUIContentFunc_) {
-            rootSceneUIContentFunc_();
+        if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
+            rootSceneProcessBackEventFunc_();
         } else {
             session->ProcessBackEvent();
         }
@@ -9950,9 +9950,9 @@ WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::SetRootSceneUIContentFunc(const RootSceneUIContentFunc& rootSceneUIContentFunc)
+void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc)
 {
-    rootSceneUIContentFunc_ = rootSceneUIContentFunc;
-    WLOGFI("SetRootSceneUIContentFunc");
+    rootSceneProcessBackEventFunc = processBackEventFunc;
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
 } // namespace OHOS::Rosen

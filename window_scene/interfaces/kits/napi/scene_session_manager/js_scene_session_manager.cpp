@@ -1241,14 +1241,13 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
         });
     }
-    SceneSessionManager::GetInstance().SetRootSceneUIContentFunc([rootScene = rootScene_]() {
-        const auto& rootSceneUIContent = rootScene->GetUIContent();
-        if (rootSceneUIContent != nullptr) {
-            TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
-            rootSceneUIContent->ProcessBackPressed();
-        } else {
-            WLOGFE("rootScene UIContent is null");
-        }
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([rootScene = rootScene_]() {
+        if (rootScene == nullptr ||  rootScene->GetUIContent() == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
+            return;
+        }  
+        TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
+        rootScene->GetUIContent()->ProcessBackPressed();
     });
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
