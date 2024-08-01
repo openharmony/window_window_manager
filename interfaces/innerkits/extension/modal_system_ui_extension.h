@@ -41,12 +41,13 @@ private:
             }
             virtual ~DialogAbilityConnection() = default;
 
+            bool SendWant(const sptr<IRemoteObject>& remoteObject);
+
             void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
                 int resultCode) override;
             void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
         private:
-            std::mutex mutex_;
             AAFwk::Want want_;
     };
 
