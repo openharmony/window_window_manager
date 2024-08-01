@@ -213,7 +213,7 @@ private:
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange();
-    void InitStatusBarColor();
+    void UpdateStatusBarColor(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
