@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #ifndef WINDOW_MANAGER_MODAL_SYSTEM_UI_EXTENSION_H
 #define WINDOW_MANAGER_MODAL_SYSTEM_UI_EXTENSION_H
 
-#include <mutex>
 #include <string>
 #include <element_name.h>
 #include <ability_connect_callback_interface.h>
@@ -35,7 +34,7 @@ public:
 private:
     class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
     public:
-        explicit DialogAbilityConnection(const AAFwk::Want& want) : want_(want) {};
+        explicit DialogAbilityConnection(const AAFwk::Want& want) : want_(want) {}
         virtual ~DialogAbilityConnection() = default;
 
         void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
