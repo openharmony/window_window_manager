@@ -2840,8 +2840,6 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             TLOGI(WmsLogTag::WMS_EVENT, "Input id:%{public}d",
                 pointerEvent->GetId());
         }
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
-            pointerEvent->GetId(), pointerEvent->GetPointerAction());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
@@ -2917,7 +2915,6 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent) {
         if (FilterKeyEvent(keyEvent)) return;
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:keyEvent Send id:%d", keyEvent->GetId());
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
