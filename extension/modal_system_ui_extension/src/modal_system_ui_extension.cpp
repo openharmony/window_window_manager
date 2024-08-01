@@ -15,7 +15,6 @@
 
 #include "modal_system_ui_extension.h"
 
-#include <atomic>
 #include <memory>
 
 #include <ability_manager_client.h>
@@ -45,8 +44,6 @@ ModalSystemUiExtension::~ModalSystemUiExtension()
 
 bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
 {
-    dialogConnectionCallback_ = sptr<OHOS::AAFwk::IAbilityConnection>(new DialogAbilityConnection(want));
-
     auto abilityManagerClient = AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "AbilityManagerClient is nullptr");
@@ -55,6 +52,7 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
 
     AAFwk::Want systemUIWant;
     systemUIWant.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
+    dialogConnectionCallback_ = sptr<DialogAbilityConnection>::MakeSptr(want);
     auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result = %{public}d", result);
@@ -129,14 +127,12 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
     if (!SendWant(remoteObject)) {
         return;
     }
-
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)] {
         auto connection = weakThis.promote();
         if (!connection) {
             TLOGI(WmsLogTag::WMS_UIEXT, "session is null or already disconnected");
             return;
         }
-
         auto abilityManagerClient = AbilityManagerClient::GetInstance();
         if (abilityManagerClient == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "AbilityManagerClient is nullptr");
@@ -149,7 +145,6 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
             TLOGI(WmsLogTag::WMS_UIEXT, "DisconnectAbility success");
         }
     };
-
     ffrt::task_handle handle = ffrt::submit_h(std::move(task),
         ffrt::task_attr().delay(DISCONNECT_ABILITY_DELAY_TIME_MICROSECONDS));
     if (handle == nullptr) {

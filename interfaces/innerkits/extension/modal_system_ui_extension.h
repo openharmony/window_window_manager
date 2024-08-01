@@ -30,25 +30,21 @@ public:
     ~ModalSystemUiExtension();
 
     bool CreateModalUIExtension(const AAFwk::Want& want);
-    static std::string ToString(const AAFwk::WantParams& wantParams_);
+    static std::string ToString(const AAFwk::WantParams& wantParams);
 
 private:
     class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
-        public:
-            DialogAbilityConnection(const AAFwk::Want& want)
-            {
-                want_ = want;
-            }
-            virtual ~DialogAbilityConnection() = default;
+    public:
+        explicit DialogAbilityConnection(const AAFwk::Want& want) : want_(want) {};
+        virtual ~DialogAbilityConnection() = default;
 
-            bool SendWant(const sptr<IRemoteObject>& remoteObject);
+        void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
+            int resultCode) override;
+        void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
-            void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
-                int resultCode) override;
-            void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
-
-        private:
-            AAFwk::Want want_;
+    private:
+        AAFwk::Want want_;
+        bool SendWant(const sptr<IRemoteObject>& remoteObject);
     };
 
     sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_{ nullptr };
