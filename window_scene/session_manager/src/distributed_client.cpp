@@ -128,7 +128,7 @@ int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& devic
         TLOGE(WmsLogTag::DEFAULT, "missionSnapshotPtr is null");
         return ERR_UNKNOWN_OBJECT;
     }
-    missionSnapshot = *missionSnapshotPtr
+    missionSnapshot = *missionSnapshotPtr;
     return ERR_NONE;
 }
 
