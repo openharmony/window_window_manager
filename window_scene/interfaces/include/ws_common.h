@@ -553,6 +553,7 @@ struct WindowImmersive {
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
     std::string uiType_ = "phone";
+    std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
