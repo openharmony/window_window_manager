@@ -503,7 +503,7 @@ void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecF
     if (config == nullptr) {
         config = appContext->GetConfiguration();
         if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "app config is nullptr")
+            TLOGE(WmsLogTag::WMS_IMMS, "app config is nullptr");
         }
     }
   
