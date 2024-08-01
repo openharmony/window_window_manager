@@ -1267,15 +1267,15 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, Function |
 }
 
 /**
- * @tc.name: SetRootSceneUIContentFunc
- * @tc.desc: test function : SetRootSceneUIContentFunc
+ * @tc.name: SetRootSceneProcessBackEventFunc
+ * @tc.desc: test function : SetRootSceneProcessBackEventFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, SetRootSceneUIContentFunc, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
-    sessionInfo.abilityName_ = "SetRootSceneUIContentFunc";
+    sessionInfo.abilityName_ = "SetRootSceneProcessBackEventFunc";
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
     sessionInfo.isSystem_ = true;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -1286,8 +1286,8 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneUIContentFunc, Function | SmallTe
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->ProcessBackEvent();
 
-    RootSceneUIContentFunc func = []() {};
-    ssm_->SetRootSceneUIContentFunc(func);
+    RootSceneProcessBackEventFunc func = []() {};
+    ssm_->SetRootSceneProcessBackEventFunc(func);
     ssm_->ProcessBackEvent();
 }
 }
