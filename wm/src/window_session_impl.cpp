@@ -2390,7 +2390,6 @@ WSError WindowSessionImpl::NotifyDestroy()
             NotifyAfterDestroy();
         }
     }
-
     return WSError::WS_OK;
 }
 
