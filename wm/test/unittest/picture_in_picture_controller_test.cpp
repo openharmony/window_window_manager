@@ -47,6 +47,7 @@ public:
     ~MockWindow() {};
     MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
     MOCK_METHOD0(Destroy, WMError());
+    MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
 class MockXComponentController : public XComponentController {
@@ -138,8 +139,29 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     auto listener = sptr<IPiPLifeCycle>::MakeSptr();
     ASSERT_NE(nullptr, listener);
     pipControl->RegisterPiPLifecycle(listener);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    auto window = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(startType));
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    startType = StartPipType::AUTO_START;
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    startType = StartPipType::NULL_START;
+    pipControl->pipOption_->SetContentSize(10, 10);
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    pipControl->pipOption_->SetContentSize(0, 10);
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    pipControl->pipOption_->SetContentSize(10, 0);
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
+    pipControl->pipOption_->SetContentSize(0, 0);
+    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
 }
 
 /**
@@ -214,18 +236,30 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
+    void *contextPtr = static_cast<void*>(new AbilityRuntime::AbilityContextImpl());
+    option->SetContext(contextPtr);
 
-    EXPECT_EQ(nullptr, windowOption);
+    std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
+    ASSERT_NE(nullptr, xComponentController);
+    pipControl->mainWindowXComponentController_ = nullptr;
+    pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-
-    sptr<Window> window = nullptr;
+    pipControl->mainWindowXComponentController_ = xComponentController;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    WMError errorCode = WMError::WM_ERROR_PIP_CREATE_FAILED;
-    ASSERT_NE(WMError::WM_OK, errorCode);
+    pipControl->mainWindowXComponentController_ = nullptr;
+    pipControl->mainWindow_ = mw;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    option->SetNodeControllerRef(nullptr);
-    ASSERT_EQ(nullptr, option->GetNodeControllerRef());
-    ASSERT_EQ(nullptr, pipControl->GetCustomNodeController());
+    pipControl->mainWindowXComponentController_ = xComponentController;
+    startType = StartPipType::NULL_START;
+    auto window = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    pipControl->mainWindow_ = window;
+    XPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_CREATED));
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
+    startType = StartPipType::AUTO_START;
+    pipControl->CreatePictureInPictureWindow(startType);
+    XPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
+    pipControl->CreatePictureInPictureWindow(startType);
 }
 
 /**

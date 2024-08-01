@@ -101,13 +101,6 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "Create pip failed, invalid pipOption");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
-    const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
-    SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
-    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
-    if (windowOption == nullptr) {
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
     mainWindowXComponentController_ = pipOption_->GetXComponentController();
     if (mainWindowXComponentController_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
@@ -120,6 +113,10 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     UpdateXComponentPositionAndSize();
+    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
     windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -133,6 +130,9 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
     pipTemplateInfo.pipControlStatusInfoList = pipOption_->GetControlStatus();
     pipTemplateInfo.pipControlEnableInfoList = pipOption_->GetControlEnable();
+    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
+    const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
+    SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
     sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
@@ -888,7 +888,7 @@ void PictureInPictureController::PiPMainWindowListenerImpl::DelayReset()
         listener->isValid_ = true;
         TLOGI(WmsLogTag::WMS_PIP, "reset to valid");
     };
-    handler_->PostTask(delayTask, "wms:PiPMainWindowListenerImpl_DelayReset", DELAY_RESET);
+    handler_->PostTask(std::move(delayTask), "wms:PiPMainWindowListenerImpl_DelayReset", DELAY_RESET);
 }
 
 WindowMode PictureInPictureController::PiPMainWindowListenerImpl::GetMode()
