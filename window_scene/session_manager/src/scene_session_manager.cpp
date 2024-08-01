@@ -6266,14 +6266,12 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
     TLOGI(WmsLogTag::DEFAULT, "begin");
-    std::unique_ptr<AAFwk::MissionSnapshot> sessionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
     int result = DistributedClient::GetInstance().GetRemoteMissionSnapshotInfo(deviceId,
-        sessionId, sessionSnapshotPtr);
+        sessionId, sessionSnapshot);
     if (result != ERR_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
         return result;
     }
-    sessionSnapshot = *sessionSnapshotPtr;
     return ERR_OK;
 }
 
