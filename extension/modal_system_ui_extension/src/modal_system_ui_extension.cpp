@@ -18,9 +18,10 @@
 #include <atomic>
 #include <memory>
 
-#include <message_parcel.h>
 #include <ability_manager_client.h>
+#include <ffrt.h>
 #include <iremote_object.h>
+#include <message_parcel.h>
 
 #include "window_manager_hilog.h"
 
@@ -32,8 +33,7 @@ namespace {
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 constexpr int32_t VALUE_TYPE_STRING = 9;
-std::atomic_bool g_isDialogShow = false;
-sptr<IRemoteObject> g_remoteObject = nullptr;
+constexpr uint64_t DISCONNECT_ABILITY_DELAY_TIME_MICROSECONDS = 5000000;
 } // namespace
 
 ModalSystemUiExtension::ModalSystemUiExtension() {}
@@ -46,12 +46,6 @@ ModalSystemUiExtension::~ModalSystemUiExtension()
 bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
 {
     dialogConnectionCallback_ = sptr<OHOS::AAFwk::IAbilityConnection>(new DialogAbilityConnection(want));
-    if (g_isDialogShow) {
-        AppExecFwk::ElementName element;
-        dialogConnectionCallback_->OnAbilityConnectDone(element, g_remoteObject, INVALID_USERID);
-        TLOGI(WmsLogTag::WMS_UIEXT, "dialog has been shown");
-        return true;
-    }
 
     auto abilityManagerClient = AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
@@ -70,12 +64,12 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     return true;
 }
 
-std::string ModalSystemUiExtension::ToString(const AAFwk::WantParams& wantParams_)
+std::string ModalSystemUiExtension::ToString(const AAFwk::WantParams& wantParams)
 {
     std::string result;
-    if (wantParams_.Size() != 0) {
+    if (wantParams.Size() != 0) {
         result += "{";
-        for (auto it: wantParams_.GetParams()) {
+        for (auto it : wantParams.GetParams()) {
             int typeId = AAFwk::WantParams::GetDataType(it.second);
             result += "\"" + it.first + "\":";
             if (typeId == VALUE_TYPE_STRING && AAFwk::WantParams::GetStringByType(it.second, typeId)[0] != '{') {
@@ -83,7 +77,7 @@ std::string ModalSystemUiExtension::ToString(const AAFwk::WantParams& wantParams
             } else {
                 result += AAFwk::WantParams::GetStringByType(it.second, typeId);
             }
-            if (it != *wantParams_.GetParams().rbegin()) {
+            if (it != *wantParams.GetParams().rbegin()) {
                 result += ",";
             }
         }
@@ -94,53 +88,79 @@ std::string ModalSystemUiExtension::ToString(const AAFwk::WantParams& wantParams
     return result;
 }
 
-void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
-    const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
+bool ModalSystemUiExtension::DialogAbilityConnection::SendWant(const sptr<IRemoteObject>& remoteObject)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
-    std::lock_guard lock(mutex_);
-    if (remoteObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is nullptr");
-        return;
-    }
-    if (g_remoteObject == nullptr) {
-        g_remoteObject = remoteObject;
-    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write message parcel key size failed");
-        return;
+        return false;
     }
     if (!data.WriteString16(u"bundleName") || !data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write bundleName failed");
-        return;
+        return false;
     }
     if (!data.WriteString16(u"abilityName") || !data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write abilityName failed");
-        return;
+        return false;
     }
     if (!data.WriteString16(u"parameters") ||
         !data.WriteString16(Str8ToStr16(ModalSystemUiExtension::ToString(want_.GetParams())))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write parameters failed");
-        return;
+        return false;
     }
     int32_t ret = remoteObject->SendRequest(AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "show dialog failed");
+        return false;
+    }
+    return true;
+}
+
+void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
+    const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is nullptr");
         return;
     }
-    g_isDialogShow = true;
+    if (!SendWant(remoteObject)) {
+        return;
+    }
+
+    auto task = [weakThis = wptr(this)]() {
+        auto connection = weakThis.promote();
+        if (!connection) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "session is null or already disconnected");
+            return;
+        }
+
+        auto abilityManagerClient = AbilityManagerClient::GetInstance();
+        if (abilityManagerClient == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "AbilityManagerClient is nullptr");
+            return;
+        }
+        auto result = abilityManagerClient->DisconnectAbility(connection);
+        if (result != ERR_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "DisconnectAbility failed, result = %{public}d", result);
+        } else {
+            TLOGI(WmsLogTag::WMS_UIEXT, "DisconnectAbility success");
+        }
+    };
+
+    ffrt::task_handle handle = ffrt::submit_h(std::move(task),
+        ffrt::task_attr().delay(DISCONNECT_ABILITY_DELAY_TIME_MICROSECONDS));
+    if (handle == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to post task");
+    }
 }
 
 void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element,
     int resultCode)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "called");
-    std::lock_guard lock(mutex_);
-    g_isDialogShow = false;
-    g_remoteObject = nullptr;
 }
 } // namespace Rosen
 } // namespace OHOS
