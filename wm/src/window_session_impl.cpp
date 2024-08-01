@@ -2387,7 +2387,7 @@ WSError WindowSessionImpl::NotifyDestroy()
         }
     } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
         if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_ && needRemoveWindowInputChannel_) {
-            NotifyAfterDestroy();
+            Destroy();
         }
     }
     return WSError::WS_OK;
