@@ -1769,7 +1769,7 @@ WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+        return WSError::WM_ERROR_NULLPTR;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE),
