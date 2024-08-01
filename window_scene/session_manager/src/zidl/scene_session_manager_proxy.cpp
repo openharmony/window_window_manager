@@ -1766,7 +1766,12 @@ WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
         TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest GetFreeMultiWindowEnableState failed");
