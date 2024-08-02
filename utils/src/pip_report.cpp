@@ -64,7 +64,7 @@ std::string PiPReporter::GetPackageName() const
 
 void PiPReporter::LogWhenError(int32_t errCode)
 {
-    if (source == 0) {
+    if (errCode == 0) {
         return;
     }
     TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode);
