@@ -309,7 +309,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
-        session->isTerminating = false;
+        session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
@@ -3263,11 +3263,11 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSession: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3307,11 +3307,11 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
                 session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3563,7 +3563,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), rect, reason, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3597,7 +3597,7 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), controlType, status, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
