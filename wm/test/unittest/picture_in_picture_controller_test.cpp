@@ -254,11 +254,11 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     auto window = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, window);
     pipControl->mainWindow_ = window;
-    XPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_CREATED));
+    EXPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     startType = StartPipType::AUTO_START;
     pipControl->CreatePictureInPictureWindow(startType);
-    XPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
+    EXPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
     pipControl->CreatePictureInPictureWindow(startType);
 }
 
