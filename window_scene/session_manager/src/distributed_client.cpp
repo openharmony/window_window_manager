@@ -100,7 +100,6 @@ int32_t DistributedClient::GetMissionInfos(const std::string& deviceId, int32_t 
 int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
                                                         AAFwk::MissionSnapshot& missionSnapshot)
 {
-    TLOGI(WmsLogTag::DEFAULT, "SnapshotInfo");
     if (deviceId.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "deviceId is null");
         return ERR_NULL_OBJECT;

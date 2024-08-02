@@ -1564,6 +1564,7 @@ ohos_unittest("ws_distributed_client_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
   ]
