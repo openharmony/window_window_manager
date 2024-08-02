@@ -5529,31 +5529,31 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        TLOGI(WmsLogTag::WMS_EVENT, "OnEnableDrag Argc is invalid: %{public}zu", argc);
+        TLOGI(WmsLogTag::WMS_EVENT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag window is nullptr!");
+        TLOGE(WmsLogTag::WMS_EVENT, "window is nullptr!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_EVENT, "is not allowed since window is not system window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "OnEnableDrag permission denied!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("OnEnableDrag Failed, nativeVal is null");
+        WLOGFE("Failed, nativeVal is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool enableDrag = false;
     napi_get_value_bool(env, nativeVal, &enableDrag);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->EnableDrag(enableDrag));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnEnableDrag falied throw error");
+        TLOGE(WmsLogTag::WMS_EVENT, "falied throw error");
         return NapiThrowError(env, ret);
     }
     wptr<Window> weakToken(windowToken_);
