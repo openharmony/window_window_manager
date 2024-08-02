@@ -225,9 +225,9 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     const char* moduleName = "JsPipManager";
     BindNativeFunction(env, exportObj, "initXComponentController", moduleName, JsPipManager::InitXComponentController);
     BindNativeFunction(env, exportObj, "getCustomUIController", moduleName, JsPipManager::GetCustomUIController);
-    BindNativeFunction(env, exportObj, "getTypeNode", moduleName, JsPipManager::GetTypeNode());
-    BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback());
-    BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback());
+    BindNativeFunction(env, exportObj, "getTypeNode", moduleName, JsPipManager::GetTypeNode);
+    BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
+    BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen
