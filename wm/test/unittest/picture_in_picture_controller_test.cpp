@@ -236,7 +236,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    void *contextPtr = static_cast<void*>(new AbilityRuntime::AbilityContextImpl());
+    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
     option->SetContext(contextPtr);
 
     std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
@@ -284,7 +284,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     option->SetContext(nullptr);
     ASSERT_EQ(nullptr, option->GetContext());
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    void *contextPtr = static_cast<void*>(new AbilityRuntime::AbilityContextImpl());
+    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
     option->SetContext(contextPtr);
 
     pipControl->curState_ = PiPWindowState::STATE_STARTING;
@@ -302,7 +302,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
-    delete(contextPtr);
+    delete contextPtr;
 }
 
 /**
