@@ -50,8 +50,8 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: ReportPiPRatio
- * @tc.desc: ReportPiPRatio/ReportPiPRestore
+ * @tc.name: CheckValue
+ * @tc.desc: CheckValue
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, CheckValue, Function | SmallTest | Level2)
