@@ -535,17 +535,17 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
-    TLOGI(WmsLogTag::DMS, "Enter");
+    TLOGI(WmsLogTag::DEFAULT, "Enter");
     auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "fail to find session by token.");
+            TLOGE(WmsLogTag::DEFAULT, "fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState));
-        TLOGI(WmsLogTag::DMS, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
+        TLOGI(WmsLogTag::DEFAULT, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
