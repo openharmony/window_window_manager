@@ -139,7 +139,7 @@ HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, Function | SmallTest | Leve
  * @tc.name: SetUiDvsyncSwitch
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, Function | SmallTest | Level3)
 {
     NodeId nodeId = 0;

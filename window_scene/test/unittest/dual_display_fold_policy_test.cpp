@@ -86,6 +86,35 @@ namespace {
     }
 
     /**
+     * @tc.name: ChangeScreenDisplayMode
+     * @tc.desc: ChangeScreenDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> session = new ScreenSession();
+        ScreenId screenId = 1001;
+        ssm_.screenSessionMap_[screenId] = session;
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::UNKNOWN);
+        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
+        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::SUB);
+        mode = ssm_.GetFoldDisplayMode();
+        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
+        mode = ssm_.GetFoldDisplayMode();
+        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::COORDINATION);
+        mode = ssm_.GetFoldDisplayMode();
+        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+    }
+
+    /**
      * @tc.name: SendSensorResult
      * @tc.desc: SendSensorResult
      * @tc.type: FUNC
