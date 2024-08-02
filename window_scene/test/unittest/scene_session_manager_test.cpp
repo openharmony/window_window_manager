@@ -98,6 +98,7 @@ void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sce
     sceneSession->systemTouchable_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->foregroundInteractiveStatus_.store(true);
+    sceneSession->isVisible_ = true;
 }
 
 int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession>& session)
