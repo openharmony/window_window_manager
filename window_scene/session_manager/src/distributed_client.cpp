@@ -98,7 +98,7 @@ int32_t DistributedClient::GetMissionInfos(const std::string& deviceId, int32_t 
 }
 
 int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
-                                                        std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot)
+                                                        AAFwk::MissionSnapshot& missionSnapshot)
 {
     if (deviceId.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "deviceId is null");
@@ -123,7 +123,11 @@ int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& devic
         return error;
     }
     std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshotPtr(reply.ReadParcelable<AAFwk::MissionSnapshot>());
-    missionSnapshot = std::move(missionSnapshotPtr);
+    if (missionSnapshotPtr == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "missionSnapshotPtr is null");
+        return ERR_UNKNOWN_OBJECT;
+    }
+    missionSnapshot = *missionSnapshotPtr;
     return ERR_NONE;
 }
 
