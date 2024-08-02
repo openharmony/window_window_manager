@@ -36,7 +36,7 @@ private:
     napi_value OnGetCustomUIController(napi_env env, napi_callback_info info);
     napi_value OnGetTypeNode(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
-    void RegisterListener(napi_env env, napi_callback_info info);
+    void RegisterListener(napi_env env, const std::string type, napi_value value);
     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
 };
 } // namespace Rosen
