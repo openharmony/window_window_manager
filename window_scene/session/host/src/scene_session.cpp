@@ -399,16 +399,11 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 
 WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 1e44e04b4 (change interface name)
-    if (event != SessionEvent::EVENTT_START_MOVE) {
+    if (event != SessionEvent::EVENT_START_MOVE) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not start move event");
         return WSError::WS_ERROR_NULLPTR; 
     }
     if (!SessionPermission::IsSystemCalling()) {
-<<<<<<< HEAD
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
@@ -426,37 +421,6 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
         return WSError::WS_OK;
     };
     return PostSyncTask(task, "OnSystemSessionEvent");
-=======
-    auto weakThis = wptr(this);
-    auto session = weakThis.promote();
-    if (!session) {
-        TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    } else if (!SessionPermission::IsSystemCalling()) {
-=======
->>>>>>> 1e44e04b4 (change interface name)
-        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
-<<<<<<< HEAD
-    WSError errorCode = OnSessionEvent(event);
-    return errorCode;
->>>>>>> 24cedaa9c (add interface to move system window)
-=======
-    auto task = [weakThis = wptr(this), event, this]() {
-        auto session = weakThis.promote();
-        if (!session || !session->moveDragController_) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
-            return WSError::WS_ERROR_NULLPTR;
-        } 
-        if (session->moveDragController_->GetStartDragFlag()) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation, window is moving");
-            return WSError::WS_ERROR_REPEAT_OPERATION;
-        }
-        OnSessionEvent(event);
-        return WSError::WS_OK;
-    }
->>>>>>> 1e44e04b4 (change interface name)
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY)
@@ -1675,8 +1639,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialog = WindowHelper::IsDialogWindow(windowType);
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
-    bool isSystemWindow = WindowHelper::IsSystemWindow(windowType);
-    if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog || isSystemWindow) &&
+    if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog) &&
         !isMaxModeAvoidSysBar) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
@@ -1698,7 +1661,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
                 return WSError::WS_OK;
             }
         }
-        if ((IsDecorEnable() || isSystemWindow) && moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
+        if (IsDecorEnable() && moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
@@ -2086,10 +2049,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
-        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    }  else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "systemWindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
