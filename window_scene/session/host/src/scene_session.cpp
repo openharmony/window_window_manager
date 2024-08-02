@@ -2734,7 +2734,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
                 sessionState == SessionState::STATE_ACTIVE;
             if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, sceneSession in an interactive state");
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, sceneSession in a non interactive state");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
             if (!isSessionForeground && !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
