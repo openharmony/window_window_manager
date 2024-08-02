@@ -478,7 +478,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
-        UpdateStatusBarColor();
+        UpdateDefaultStatusBarColor();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
@@ -489,9 +489,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
 {
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (!shouldFollowAppColorMode_) {
+        TLOGD(WmsLogTag::WMS_IMMS, "user set");
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_IMMS, "not main window");
     }
     std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
@@ -499,37 +502,34 @@ void WindowSceneSessionImpl::UpdateStatusBarColor(const std::shared_ptr<AppExecF
         TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
         return;
     }
-    std::shared_ptr<AppExecFwk::Configuration> config = configuration;
-    if (config == nullptr) {
-        config = appContext->GetConfiguration();
-        if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "app config is nullptr");
-        }
-    }
-  
+
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
     bool isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     uint32_t contentColor;
-    static const uint32_t BLACK = 0xE5000000;
-    static const uint32_t WHITE = 0xE5FFFFFF;
+    static const uint32_t BLACK = 0xFF000000;
+    static const uint32_t WHITE = 0xFFFFFFFF;
     if (isColorModeSetByApp) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}u, type: %{public}u, colorMode: %{public}s",
+            GetPersistentId(), GetType(), colorMode.c_str());
         contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
     } else {
         bool hasDarkRes = false;
         appContext->AppHasDarkRes(hasDarkRes);
-        TLOGI(WmsLogTag::WMS_IMMS, "has dark res: %{public}u", hasDarkRes);
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}u, type: %{public}u, hasDarkRes: %{public}u, colorMode: %{public}s",
+            GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
         contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
             (hasDarkRes ? WHITE : BLACK);
     }
 
-    SystemBarProperty curSysBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(
-        static_cast<uint32_t>(curSysBarProp.settingFlag_) |
+    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusBarProp.contentColor_ = contentColor;
+    statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
+        static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)
     );
-    SystemBarProperty sysBarProp(curSysBarProp.enable_, curSysBarProp.backgroundColor_, contentColor,
-        curSysBarProp.enableAnimation_, settingFlag);
-    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, sysBarProp);
+    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    shouldFollowAppColorMode_ = true;
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
@@ -1830,6 +1830,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         return WMError::WM_ERROR_NULLPTR;
     }
     isSystembarPropertiesSet_ = true;
+    shouldFollowAppColorMode_ = false;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
@@ -2397,7 +2398,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
             uiContent->UpdateConfiguration(configuration);
         }
     }
-    UpdateStatusBarColor(configuration);
+    UpdateDefaultStatusBarColor();
     if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
         return;
     }
