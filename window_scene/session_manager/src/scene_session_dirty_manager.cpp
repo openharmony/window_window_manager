@@ -537,7 +537,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         !(Rosen::WindowHelper::IsDialogWindow(windowType));
     if (((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
         (isMainWindow || isDecorDialog || isDecorSubWindow) &&
-        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) || (sceneSession->GetSessionInfo().isSetPointerAreas_)) ||
+        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+        (sceneSession->GetSessionInfo().isSetPointerAreas_)) ||
         isNoDialogSystemWindow) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
