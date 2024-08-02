@@ -113,7 +113,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     UpdateXComponentPositionAndSize();
-    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    auto windowOption = sptr<WindowOption>::MakeSptr();
     if (windowOption == nullptr) {
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }

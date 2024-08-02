@@ -50,37 +50,21 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: CheckValue
- * @tc.desc: CheckValue
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, CheckValue, Function | SmallTest | Level2)
-{
-    int result = 0;
-    SingletonContainer::Get<PiPReporter>().CheckValue(result);
-    result = 10;
-    SingletonContainer::Get<PiPReporter>().CheckValue(result);
-}
-
-/**
  * @tc.name: ReportPiPStartWindow
- * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
+ * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow/LogWhenError
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
 {
-    int result = 0;
     int32_t source = 0;
     std::string errorReason = "";
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
     source = 1;
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
+    SingletonContainer::Get<PiPReporter>().LogWhenError(0);
+    SingletonContainer::Get<PiPReporter>().LogWhenError(10);
 }
 
 /**

@@ -260,6 +260,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     pipControl->CreatePictureInPictureWindow(startType);
     EXPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
     pipControl->CreatePictureInPictureWindow(startType);
+    delete(contextPtr);
 }
 
 /**
@@ -301,6 +302,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
+    delete(contextPtr);
 }
 
 /**
