@@ -102,7 +102,6 @@ namespace {
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
         ASSERT_TRUE(controller != nullptr);
         controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
-        delete controller;
     }
 
     /**
@@ -121,8 +120,6 @@ namespace {
         displayInfo->SetHeight(35);
         ASSERT_TRUE(controller != nullptr);
         controller->CheckBoundaryRects(boundaryRects, displayInfo);
-        delete displayInfo;
-        delete controller;
     }
 
     /**
@@ -136,7 +133,6 @@ namespace {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_TRUE(controller != nullptr);
         controller->CalcWaterfallRects(displayId);
-        delete controller;
     }
 
     /**
@@ -160,7 +156,6 @@ namespace {
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
         rotation = Rotation::ROTATION_270;
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-        delete controller;
     }
 
     /**
@@ -178,7 +173,6 @@ namespace {
         ASSERT_EQ(finalRect.top_, result.top_);
         ASSERT_EQ(finalRect.width_, result.width_);
         ASSERT_EQ(finalRect.height_, result.height_);
-        delete controller;
     }
 
     /**
