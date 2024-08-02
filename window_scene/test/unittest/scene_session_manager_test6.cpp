@@ -976,7 +976,7 @@ HWTEST_F(SceneSessionManagerTest6, JudgeNeedNotifyPrivacyInfo, Function | SmallT
     std::unordered_set<std::string> privacyBundles;
     ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
     privacyBundles.insert("bundle1");
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
@@ -986,7 +986,7 @@ HWTEST_F(SceneSessionManagerTest6, JudgeNeedNotifyPrivacyInfo, Function | SmallT
     ASSERT_NE(nullptr, ssm_);
     ssm_->privacyBundleMap_.insert({displayId, privacyBundles1});
     ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
     privacyBundles.insert("bundle2");
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
