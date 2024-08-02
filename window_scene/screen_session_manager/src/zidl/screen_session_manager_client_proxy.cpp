@@ -25,6 +25,12 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Scree
 void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
     ScreenId rsId, const std::string& name)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -48,7 +54,7 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
         WLOGFE("Write name failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -58,6 +64,12 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
 
 void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -73,7 +85,7 @@ void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> ol
         WLOGFE("Write currentScbPid failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SWITCH_USER_CMD),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -84,6 +96,12 @@ void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> ol
 void ScreenSessionManagerClientProxy::OnPropertyChanged(ScreenId screenId,
     const ScreenProperty& property, ScreenPropertyChangeReason reason)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -103,7 +121,7 @@ void ScreenSessionManagerClientProxy::OnPropertyChanged(ScreenId screenId,
         WLOGFE("Write reason failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -148,6 +166,12 @@ void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent eve
 
 void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -163,7 +187,7 @@ void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId,
         WLOGFE("Write sensorRotation failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -173,6 +197,12 @@ void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId,
 
 void ScreenSessionManagerClientProxy::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -188,7 +218,7 @@ void ScreenSessionManagerClientProxy::OnScreenOrientationChanged(ScreenId screen
         WLOGFE("Write screenOrientation failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -198,6 +228,12 @@ void ScreenSessionManagerClientProxy::OnScreenOrientationChanged(ScreenId screen
 
 void ScreenSessionManagerClientProxy::OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -213,7 +249,7 @@ void ScreenSessionManagerClientProxy::OnScreenRotationLockedChanged(ScreenId scr
         WLOGFE("Write isLocked failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ROTATION_LOCKED_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -224,6 +260,12 @@ void ScreenSessionManagerClientProxy::OnScreenRotationLockedChanged(ScreenId scr
 void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -258,7 +300,7 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
         WLOGFE("Write type failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -269,6 +311,12 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
 void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
     std::vector<uint64_t>& surfaceNodeIds)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -284,7 +332,7 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
         WLOGFE("Write surfaceNodeIds failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    if (remote->SendRequest(static_cast<uint32_t>(
         ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -295,6 +343,12 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
 
 void ScreenSessionManagerClientProxy::OnUpdateFoldDisplayMode(FoldDisplayMode displayMode)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -306,7 +360,7 @@ void ScreenSessionManagerClientProxy::OnUpdateFoldDisplayMode(FoldDisplayMode di
         WLOGFE("Write displayMode failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -342,6 +396,12 @@ void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)
 
 void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -349,7 +409,7 @@ void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -360,6 +420,12 @@ void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
 
 void ScreenSessionManagerClientProxy::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -375,7 +441,7 @@ void ScreenSessionManagerClientProxy::SetDisplayNodeScreenId(ScreenId screenId, 
         WLOGFE("Write displayNodeScreenId failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_DISPLAY_NODE_SCREEN_ID),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -385,6 +451,12 @@ void ScreenSessionManagerClientProxy::SetDisplayNodeScreenId(ScreenId screenId, 
 
 void ScreenSessionManagerClientProxy::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -396,7 +468,7 @@ void ScreenSessionManagerClientProxy::SetVirtualPixelRatioSystem(ScreenId screen
         WLOGFE("Write screenId/virtualPixelRatio failed");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -406,6 +478,12 @@ void ScreenSessionManagerClientProxy::SetVirtualPixelRatioSystem(ScreenId screen
 
 void ScreenSessionManagerClientProxy::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -417,7 +495,7 @@ void ScreenSessionManagerClientProxy::OnFoldStatusChangedReportUE(const std::vec
         WLOGFE("Write screenFoldInfo failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    if (remote->SendRequest(static_cast<uint32_t>(
         ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
