@@ -9650,6 +9650,11 @@ WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyleType
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    if (isPC) {
+        windowStyleType = WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW
+        return WMError::WM_OK;
+    }
     windowStyleType = systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_ ?
         WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
     return WMError::WM_OK;
