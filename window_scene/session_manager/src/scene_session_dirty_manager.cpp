@@ -15,17 +15,10 @@
 
 #include "scene_session_dirty_manager.h"
 
-#include <cinttypes>
-#include <memory>
-#include <sstream>
-#include <parameter.h>
 #include <parameters.h>
 #include "screen_session_manager/include/screen_session_manager_client.h"
-#include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
-#include "wm_common_inner.h"
-#include "transaction/rs_uiextension_data.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -539,12 +532,12 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     WindowType windowType = windowSessionProperty->GetWindowType();
     bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
     bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
         !(Rosen::WindowHelper::IsDialogWindow(windowType));
-    if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        (isMainWindow || isDecorDialog) && maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-        (sceneSession->GetSessionInfo().isSetPointerAreas_) ||
-        (WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable()) ||
+    if (((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
+        (isMainWindow || isDecorDialog || isDecorSubWindow) &&
+        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) || (sceneSession->GetSessionInfo().isSetPointerAreas_)) ||
         isNoDialogSystemWindow) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }

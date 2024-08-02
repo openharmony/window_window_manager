@@ -616,6 +616,22 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         return false;
     }
     pointerEvent.SetPointerId(pointerId);
+    if (!ConvertDeviceIdFromJs(env, jsObject, pointerEvent)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
+{
+    napi_value jsDeviceId = nullptr;
+    napi_get_named_property(env, jsObject, "deviceId", &jsDeviceId);
+    int32_t deviceId = 0;
+    if (!ConvertFromJsValue(env, jsDeviceId, deviceId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to deviceId");
+        return false;
+    }
+    pointerEvent.SetDeviceId(deviceId);
     return true;
 }
 
@@ -822,6 +838,12 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         napi_set_named_property(env, objValue, "isStartupInstallFree",
             CreateJsValue(env, (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
                 AAFwk::Want::FLAG_INSTALL_ON_DEMAND));
+        auto params = sessionInfo.want->GetParams();
+        napi_set_named_property(env, objValue, "fileManagerMode",
+            CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
+        napi_set_named_property(env, objValue, "extraFormIdentity",
+            CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
     }
 }
 

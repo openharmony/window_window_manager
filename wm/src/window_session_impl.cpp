@@ -599,7 +599,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSInterfaces::GetInstance().EnableCacheForRotation();
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(ANIMATION_TIME);
@@ -612,7 +611,6 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             }
             window->rotationAnimationCount_--;
             if (window->rotationAnimationCount_ == 0) {
-                RSInterfaces::GetInstance().DisableCacheForRotation();
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -2850,8 +2848,6 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             TLOGI(WmsLogTag::WMS_EVENT, "Input id:%{public}d",
                 pointerEvent->GetId());
         }
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:pointerEvent Send id:%d action:%d",
-            pointerEvent->GetId(), pointerEvent->GetPointerAction());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
@@ -2927,7 +2923,6 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent) {
         if (FilterKeyEvent(keyEvent)) return;
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl:keyEvent Send id:%d", keyEvent->GetId());
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
@@ -3358,30 +3353,35 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 {
-    WLOGFD("NotifyWindowStatusChange");
-    auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
+        windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            WindowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
+            windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
+        windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+        windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
     }
     if (state_ == WindowState::STATE_HIDDEN) {
-        WindowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
+        windowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
+    return windowStatus;
+}
 
+void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);
+    auto windowStatus = GetWindowStatusInner(mode);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
     for (auto& listener : windowStatusChangeListeners) {
         if (listener != nullptr) {
-            listener->OnWindowStatusChange(WindowStatus);
+            listener->OnWindowStatusChange(windowStatus);
         }
     }
 }
@@ -3506,6 +3506,20 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
         isForceSplit, homePage.c_str());
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+WMError WindowSessionImpl::SetContinueState(int32_t continueState)
+{
+    if (continueState > ContinueState::CONTINUESTATE_MAX || continueState < ContinueState::CONTINUESTATE_UNKNOWN) {
+        TLOGE(WmsLogTag::WMS_MAIN, "continueState is invalid: %{public}d", continueState);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "property_ is nullptr!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
