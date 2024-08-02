@@ -118,16 +118,9 @@ public:
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
-<<<<<<< HEAD
-<<<<<<< HEAD
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value IsFocused(napi_env env, napi_callback_info info);
-=======
-    static napi_value StartMove(napi_env env, napi_callback_info info);
->>>>>>> a99b13df7 (增加移动系统窗口的接口)
-=======
     static napi_value StartMoving(napi_env env, napi_callback_info info);
->>>>>>> 1e44e04b4 (change interface name)
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
