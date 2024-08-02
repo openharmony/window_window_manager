@@ -122,7 +122,7 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
 
 WMError EnableDrag(bool enableDrag)
 {
-    return WMError::OK;
+    return WMError::WM_OK;
 }
 
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
