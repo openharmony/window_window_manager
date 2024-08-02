@@ -2708,7 +2708,7 @@ bool ScreenSessionManagerProxy::SetVirtualScreenStatus(ScreenId screenId, Virtua
         return false;
     }
 
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
