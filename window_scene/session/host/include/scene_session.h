@@ -511,7 +511,7 @@ private:
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool isDeviceWakeupByApplication_ { false };
-    std::atomic_bool needStartingWindowExitAnimation_ { false };
+    std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };

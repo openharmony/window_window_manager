@@ -1132,6 +1132,113 @@ HWTEST_F(AbstractScreenControllerTest, StopScreens, Function | SmallTest | Level
     ret = absController_->StopScreens(screenIds, stopCombination);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: ChangeScreenGroup
+ * @tc.desc: ChangeScreenGroup test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup03, Function | SmallTest | Level3)
+{
+    sptr<AbstractScreenGroup> group = screenGroupVec[0];
+    Point point;
+    group->screenMap_.insert(std::make_pair(0, screenVec[0]));
+    group->screenMap_.insert(std::make_pair(1, screenVec[0]));
+    std::vector<Point> startPoints;
+    std::vector<ScreenId> screens;
+    for (ScreenId i = 0; i < 7; ++i) {
+        screens.emplace_back(i);
+        startPoints.emplace_back(point);
+        if (i < absController_->dmsScreenMap_.size() && absController_->dmsScreenMap_[i] != nullptr) {
+            absController_->dmsScreenMap_[i]->groupDmsId_ = 1;
+        }
+    }
+    absController_->abstractScreenCallback_ = nullptr;
+    absController_->ChangeScreenGroup(group, screens, startPoints, true, ScreenCombination::SCREEN_ALONE);
+    ASSERT_EQ(6, absController_->dmsScreenMap_.size());
+}
+
+/**
+ * @tc.name: UpdateRSTree
+ * @tc.desc: UpdateRSTree test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, UpdateRSTree06, Function | SmallTest | Level3)
+{
+    ScreenId id = 1;
+    ScreenId parentId = 2;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    RSDisplayNodeConfig config;
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
+    sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    absController_->UpdateRSTree(id, parentId, node, true, false);
+}
+
+/**
+ * @tc.name: SetScreenRotateAnimation
+ * @tc.desc: SetScreenRotateAnimation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation04, Function | SmallTest | Level3)
+{
+    RSDisplayNodeConfig config;
+    absController_->dmsScreenMap_[1]->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    sptr<AbstractScreen> screen = screenVec[0];
+    screen->rotation_ = Rotation::ROTATION_0;
+    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_270, false);
+    ASSERT_EQ(Rotation::ROTATION_0, screen->rotation_);
+}
+
+/**
+ * @tc.name: SetRotation
+ * @tc.desc: SetRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetRotation02, Function | SmallTest | Level3)
+{
+    absController_->dmsScreenMap_[1]->rotation_ = Rotation::ROTATION_180;
+    absController_->screenIdManager_.dms2RsScreenIdMap_.erase(1);
+    ASSERT_EQ(true, absController_->SetRotation(1, Rotation::ROTATION_0, true));
+    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
+    ASSERT_EQ(false, absController_->SetRotation(1, Rotation::ROTATION_0, false));
+    ASSERT_EQ(false, absController_->SetRotation(1, Rotation::ROTATION_0, true));
+}
+
+/**
+ * @tc.name: InitVirtualScreen
+ * @tc.desc: InitVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen03, Function | SmallTest | Level3)
+{
+    VirtualScreenOption option;
+    sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
+    sptr<SupportedScreenModes> modes;
+    if (defaultScreen != nullptr) {
+        defaultScreen->modes_.emplace_back(modes);
+        defaultScreen->activeIdx_ = 0;
+        ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
+        sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
+        ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
+    }
+}
+
+/**
+ * @tc.name: MakeMirror
+ * @tc.desc: MakeMirror test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, MakeMirror06, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> screens;
+    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
+    absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
+    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
+    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

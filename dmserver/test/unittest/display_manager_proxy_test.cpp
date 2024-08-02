@@ -1364,6 +1364,224 @@ HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level
     auto result = proxy.MakeUniqueScreen(screenIds);
     EXPECT_EQ(DMError::DM_OK, result);
 }
+
+/**
+ * @tc.name: RemoveVirtualScreenFromGroup02
+ * @tc.desc: test DisplayManagerProxy::RemoveVirtualScreenFromGroup02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup02, Function | SmallTest | Level1)
+{
+    ScreenId screenId_ = static_cast<ScreenId>(0);
+    std::vector<ScreenId> screenId;
+    screenId.push_back(screenId_);
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    proxy1.RemoveVirtualScreenFromGroup(screenId);
+    EXPECT_TRUE(true);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    proxy2.RemoveVirtualScreenFromGroup(screenId);
+    EXPECT_TRUE(true);
+
+    remoteMocker->sendRequestResult_ = 1;
+    proxy2.RemoveVirtualScreenFromGroup(screenId);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetScreenActiveMode02
+ * @tc.desc: test DisplayManagerProxy::SetScreenActiveMode02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode02, Function | SmallTest | Level1)
+{
+    ScreenId screenId = static_cast<ScreenId>(0);
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    auto result1 = proxy1.SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    auto result2 = proxy2.SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatio02
+ * @tc.desc: test DisplayManagerProxy::SetVirtualPixelRatio02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio02, Function | SmallTest | Level1)
+{
+    ScreenId screenId = static_cast<ScreenId>(0);
+    float virtualPixelRatio = 0;
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    auto result1 = proxy1.SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    auto result2 = proxy2.SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: SetResolution02
+ * @tc.desc: test DisplayManagerProxy::SetResolution02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetResolution02, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.SetResolution(screenId, 50, 100, 1.00);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: GetDensityInCurResolution02
+ * @tc.desc: test DisplayManagerProxy::GetDensityInCurResolution02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution02, Function | SmallTest | Level1)
+{
+    ScreenId screenId = static_cast<ScreenId>(0);
+    float virtualPixelRatio = 0;
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    auto result1 = proxy1.GetDensityInCurResolution(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    auto result2 = proxy2.GetDensityInCurResolution(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.GetDensityInCurResolution(screenId, virtualPixelRatio);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: IsScreenRotationLocked02
+ * @tc.desc: test DisplayManagerProxy::IsScreenRotationLocked02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked02, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    bool isLocked = true;
+    auto result = proxy.IsScreenRotationLocked(isLocked);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: SetScreenRotationLocked02
+ * @tc.desc: test DisplayManagerProxy::SetScreenRotationLocked02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked02, Function | SmallTest | Level1)
+{
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    auto result1 = proxy1.SetScreenRotationLocked(true);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    auto result2 = proxy2.SetScreenRotationLocked(true);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenRotationLocked(true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: SetScreenRotationLockedFromJs02
+ * @tc.desc: test DisplayManagerProxy::SetScreenRotationLockedFromJs02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs02, Function | SmallTest | Level1)
+{
+    DisplayManagerProxy proxy1(nullptr);
+    EXPECT_EQ(nullptr, proxy1.remoteObject_);
+
+    auto result1 = proxy1.SetScreenRotationLockedFromJs(true);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result1);
+    
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy2(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
+    
+    auto result2 = proxy2.SetScreenRotationLockedFromJs(true);
+    EXPECT_EQ(DMError::DM_OK, result2);
+
+    remoteMocker->sendRequestResult_ = 1;
+    auto result3 = proxy2.SetScreenRotationLockedFromJs(true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
+}
+
+/**
+ * @tc.name: ResizeVirtualScreen02
+ * @tc.desc: test DisplayManagerProxy::ResizeVirtualScreen02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen02, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    ScreenId screenId = 0;
+    auto result = proxy.ResizeVirtualScreen(screenId, 50, 100);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
+
+/**
+ * @tc.name: MakeUniqueScreen02
+ * @tc.desc: test DisplayManagerProxy::MakeUniqueScreen02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen02, Function | SmallTest | Level1)
+{
+    sptr<RemoteMocker> remoteMocker = new RemoteMocker();
+    DisplayManagerProxy proxy(remoteMocker);
+    EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
+    std::vector<ScreenId> screenIds;
+    auto result = proxy.MakeUniqueScreen(screenIds);
+    EXPECT_EQ(DMError::DM_OK, result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

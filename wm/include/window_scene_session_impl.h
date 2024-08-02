@@ -160,11 +160,13 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
+    virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
+    WMError GetWindowStatus(WindowStatus& windowStatus) override;
 
 protected:
     void DestroySubWindow();

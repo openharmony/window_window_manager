@@ -236,6 +236,7 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError EnableDrag(bool enableDrag) override;
+    WMError SetContinueState(int32_t continueState) override;
 
 protected:
     WMError Connect();
@@ -275,6 +276,7 @@ protected:
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
+    WindowStatus GetWindowStatusInner(WindowMode mode);
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;

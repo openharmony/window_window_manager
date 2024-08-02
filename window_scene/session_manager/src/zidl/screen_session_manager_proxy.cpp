@@ -15,10 +15,6 @@
 
 #include "zidl/screen_session_manager_proxy.h"
 
-#include "common/rs_rect.h"
-#include "dm_common.h"
-#include "transaction/rs_marshalling_helper.h"
-
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -2075,7 +2071,7 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;

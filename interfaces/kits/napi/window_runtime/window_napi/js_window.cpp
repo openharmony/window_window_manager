@@ -847,6 +847,20 @@ napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowStatus(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsFocused(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
 {
@@ -1847,7 +1861,10 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isEnabled = false;
-    napi_get_value_bool(env, nativeVal, &isEnabled);
+    napi_status retCode = napi_get_value_bool(env, nativeVal, &isEnabled);
+    if (retCode != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
 
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
@@ -6068,6 +6085,44 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     return CreateJsValue(env, isEnabled);
 }
 
+napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
+{
+    auto window = windowToken_;
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WindowStatus windowStatus;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowStatus(windowStatus));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get window status failed, ret = %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    auto objValue = CreateJsValue(env, windowStatus);
+    if (objValue != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "window [%{public}u, %{public}s] get window status end",
+            window->GetWindowId(), window->GetWindowName().c_str());
+        return objValue;
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "create js value windowStatus failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
+{
+    auto window = windowToken_;
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    
+    bool isFocused = window->IsFocused();
+    TLOGI(WmsLogTag::WMS_FOCUS, "window [%{public}u, %{public}s] get isFocused end, isFocused = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isFocused);
+    return CreateJsValue(env, isFocused);
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -6181,6 +6236,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
+    BindNativeFunction(env, object, "getWindowStatus", moduleName, JsWindow::GetWindowStatus);
+    BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
 }
 }  // namespace Rosen
 }  // namespace OHOS

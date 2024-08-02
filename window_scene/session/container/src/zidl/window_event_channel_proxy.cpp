@@ -317,7 +317,7 @@ WSError WindowEventChannelProxy::TransferAccessibilityDumpChildInfo(
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!reply.ReadStringVector(&info)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "%{public}s, Read reply info failed.", __func__);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read reply info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();

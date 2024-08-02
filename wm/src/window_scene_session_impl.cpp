@@ -347,17 +347,20 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     if (isFocused_) {
         UpdateFocus(false);
     }
-    SessionInfo info;
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (property_ && context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
-        info.bundleName_ = property_->GetSessionInfo().bundleName_;
+        property_->EditSessionInfo().abilityName_ = abilityContext->GetAbilityInfo()->name;
+        property_->EditSessionInfo().moduleName_ = context_->GetHapModuleInfo()->moduleName;
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "property_ or context_ or abilityContext is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    property_->SetSessionInfo(info);
+    auto& info = property_->EditSessionInfo();
+    if (auto want = abilityContext->GetWant()) {
+        info.want = want;
+    } else {
+        TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
+    }
     property_->SetWindowState(state_);
     TLOGI(WmsLogTag::WMS_RECOVER,
         "bundleName=%{public}s, moduleName=%{public}s, abilityName=%{public}s, appIndex=%{public}d, type=%{public}u, "
@@ -3115,6 +3118,12 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
+{
+    return windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
+}
+
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
     if (IsWindowSessionInvalid()) {
@@ -3656,6 +3665,21 @@ uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
     TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     return height;
+}
+
+WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "property_ is null, WinId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowStatus = GetWindowStatusInner(GetMode());
+    TLOGD(WmsLogTag::DEFAULT, "WinId:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

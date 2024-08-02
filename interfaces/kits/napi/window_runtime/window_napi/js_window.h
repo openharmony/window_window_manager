@@ -119,6 +119,8 @@ public:
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
+    static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
+    static napi_value IsFocused(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -223,6 +225,8 @@ private:
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
+    napi_value OnIsFocused(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
