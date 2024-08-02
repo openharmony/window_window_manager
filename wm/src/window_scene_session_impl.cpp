@@ -2103,10 +2103,10 @@ void WindowSceneSessionImpl::StartMove()
 WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
 {
     auto hostSession = GetHostSession();
-    if(hostSession) {
+    if (hostSession) {
         WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
         TLOGD(WmsLogTag::WMS_SYSTEM, "hostSession id: %{public}d , errorCode: %{public}d",
-          GetPersistentId(), static_cast<int>(errorCode));
+            GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
                 return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
@@ -2119,7 +2119,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
             }
             default: {
                 return WmErrorCode::WM_OK;
-            }                   
+            }
         }
     } else {
         TLOGE(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");

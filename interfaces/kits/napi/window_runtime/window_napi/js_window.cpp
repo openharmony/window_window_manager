@@ -6071,8 +6071,8 @@ napi_value JsWindow::OnStartMove(napi_env env, napi_callback_info info)
             TLOGE(WmsLogTag::WMS_SYSTEM, "wm error code is null.");
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "This window is nullptr.");
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
@@ -6087,7 +6087,8 @@ napi_value JsWindow::OnStartMove(napi_env env, napi_callback_info info)
 
     NapiAsyncTask::CompleteCallback complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (err == nullptr) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "System abnormal."));
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "System abnormal."));
             return;
         }
         if (*err == WmErrorCode::WM_OK) {
