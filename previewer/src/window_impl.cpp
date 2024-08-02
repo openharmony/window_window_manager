@@ -120,7 +120,7 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     }
 }
 
-WMError EnableDrag(bool enableDrag)
+WMError WindowImpl::EnableDrag(bool enableDrag)
 {
     return WMError::WM_OK;
 }
