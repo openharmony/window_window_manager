@@ -210,7 +210,7 @@ HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, Function | SmallTest | L
  * @tc.name: IsFoundationCall
  * @tc.desc: test function : IsFoundationCall
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsFoundationCall, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::IsFoundationCall();
