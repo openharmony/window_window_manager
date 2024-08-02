@@ -96,6 +96,7 @@ using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSes
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
+using RootSceneProcessBackEventFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -268,6 +269,7 @@ public:
     void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
+    void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
@@ -723,6 +725,7 @@ private:
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
+    RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
