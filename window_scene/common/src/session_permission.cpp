@@ -34,7 +34,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionPermission"};
-const int32_t FOUNDATION_UID = 5523;
+constexpr int32_t FOUNDATION_UID = 5523;
 
 sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
 {
