@@ -401,7 +401,7 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not start move event");
-        return WSError::WS_ERROR_NULLPTR; 
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (!SessionPermission::IsSystemCalling()) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
@@ -412,7 +412,7 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
         if (!session || !session->moveDragController_) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
             return WSError::WS_ERROR_NULLPTR;
-        } 
+        }
         if (session->moveDragController_->GetStartDragFlag()) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation, window is moving");
             return WSError::WS_ERROR_REPEAT_OPERATION;
