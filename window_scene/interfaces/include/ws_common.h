@@ -342,6 +342,7 @@ struct SessionInfo {
     uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
+    bool isBackTransition_ = false;
 };
 
 enum class SessionFlag : uint32_t {
