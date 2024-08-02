@@ -99,6 +99,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
@@ -159,6 +160,8 @@ public:
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingSessionInfo(Parcel& parcel) const;
+    static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
