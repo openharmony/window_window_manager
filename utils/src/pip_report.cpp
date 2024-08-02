@@ -62,12 +62,19 @@ std::string PiPReporter::GetPackageName() const
     return packageName_;
 }
 
+void PiPReporter::CheckValue(int32_t source)
+{
+    if (source != 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", source);
+    }
+}
+
 void PiPReporter::ReportPiPStartWindow(int32_t source, int32_t templateType,
                                        int32_t isSuccess, const std::string& errorReason)
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report start pip widow");
     if (source == 0) {
-        TLOGI(WmsLogTag::WMS_PIP, "need not report start pip widow");
+        TLOGE(WmsLogTag::WMS_PIP, "need not report start pip widow");
         return;
     }
     std::string eventName = "START_PIP";
@@ -81,9 +88,7 @@ void PiPReporter::ReportPiPStartWindow(int32_t source, int32_t templateType,
         EVENT_KEY_START_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 
 void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
@@ -91,7 +96,7 @@ void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report stop pip widow");
     if (source == 0) {
-        TLOGI(WmsLogTag::WMS_PIP, "need not report stop pip widow");
+        TLOGE(WmsLogTag::WMS_PIP, "need not report stop pip widow");
         return;
     }
     std::string eventName = "STOP_PIP";
@@ -105,9 +110,7 @@ void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
         EVENT_KEY_STOP_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 
 void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &actionEvent)
@@ -127,9 +130,7 @@ void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, currentAction,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 
 void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType controlType)
@@ -143,9 +144,7 @@ void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType con
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, static_cast<uint32_t>(controlType),
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 
 void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
@@ -160,9 +159,7 @@ void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
         EVENT_KEY_WINDOW_WIDTH, windowWidth,
         EVENT_KEY_WINDOW_HEIGHT, windowHeight,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 
 void PiPReporter::ReportPiPRestore()
@@ -175,9 +172,7 @@ void PiPReporter::ReportPiPRestore()
         EVENT_KEY_PNAMEID, PNAMEID,
         EVENT_KEY_PVERSION, PVERSION,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    CheckValue(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

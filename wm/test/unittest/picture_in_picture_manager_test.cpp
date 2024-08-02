@@ -50,6 +50,19 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
+ * @tc.name: ReportPiPRatio
+ * @tc.desc: ReportPiPRatio/ReportPiPRestore
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, CheckValue, Function | SmallTest | Level2)
+{
+    int result = 0;
+    SingletonContainer::Get<PiPReporter>().CheckValue(result);
+    result = 10;
+    SingletonContainer::Get<PiPReporter>().CheckValue(result);
+}
+
+/**
  * @tc.name: ReportPiPStartWindow
  * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
  * @tc.type: FUNC
@@ -77,10 +90,10 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
  */
 HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
 {
-    int result = 0;
     std::string actionEvent = "";
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
-    ASSERT_EQ(result, 0);
+    actionEvent = "nextVideo";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
 }
 
 /**
