@@ -31,7 +31,8 @@ MultiScreenManager::~MultiScreenManager()
 void MultiScreenManager::FilterPhysicalAndVirtualScreen(const std::vector<ScreenId>& allScreenIds,
     std::vector<ScreenId>& physicalScreenIds, std::vector<ScreenId>& virtualScreenIds)
 {
-    TLOGI(WmsLogTag::DMS, "filter physical and virtual screen enter");
+    TLOGI(WmsLogTag::DMS, "filter physical and virtual screen enter allScreen size: %{public}u",
+        static_cast<uint32_t>(allScreenIds.size()));
     sptr<ScreenSession> defaultSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (defaultSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail to get defaultSession");
@@ -60,7 +61,8 @@ void MultiScreenManager::FilterPhysicalAndVirtualScreen(const std::vector<Screen
 DMError MultiScreenManager::VirtualScreenMirrorSwitch(const ScreenId mainScreenId,
     const std::vector<ScreenId>& screenIds, ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS, "virtual screen mirror switch enter");
+    TLOGI(WmsLogTag::DMS, "virtual screen mirror switch enter size: %{public}u",
+        static_cast<uint32_t>(screenIds.size()));
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenMirrorSwitch start");
     auto mainScreen = ScreenSessionManager::GetInstance().GetScreenSession(mainScreenId);
     if (mainScreen == nullptr) {

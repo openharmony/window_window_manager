@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
+#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include <hisysevent.h>
 #include <chrono>
 
 #include "fold_screen_controller/fold_screen_policy.h"
-#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "fold_screen_state_internel.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorFoldStateManager"};
+} // namespace
+
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
 
@@ -35,26 +39,25 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (nextState == FoldStatus::UNKNOWN) {
-        if (mState_ == FoldStatus::UNKNOWN) {
-            mState_ = nextState;
-        }
+        WLOGFW("fold state is UNKNOWN");
         return;
     }
-    if (mState_ != nextState) {
-        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d, angle:%{public}f",
-            mState_, nextState, angle);
-        ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
+    if (mState_ == nextState) {
+        WLOGFI("fold state doesn't change, foldState = %{public}d.", mState_);
+        return;
+    }
+    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
 
-        NotifyReportFoldStatusToScb(mState_, nextState, angle);
-
-        mState_ = nextState;
-        if (foldScreenPolicy != nullptr) {
-            foldScreenPolicy->SetFoldStatus(mState_);
-        }
-        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
-        if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
-            foldScreenPolicy->SendSensorResult(mState_);
-        }
+    NotifyReportFoldStatusToScb(mState_, nextState, angle);
+    
+    mState_ = nextState;
+    if (foldScreenPolicy != nullptr) {
+        foldScreenPolicy->SetFoldStatus(mState_);
+    }
+    ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+    if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
+        foldScreenPolicy->SendSensorResult(mState_);
     }
 }
 
@@ -66,8 +69,7 @@ FoldStatus SensorFoldStateManager::GetCurrentState()
 void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
     float postureAngle)
 {
-    TLOGI(WmsLogTag::DMS,
-        "ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
+    WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
         currentStatus, nextStatus, postureAngle);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -77,7 +79,7 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", postureAngle);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
+        WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -88,6 +90,7 @@ void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
 }
 
 void SensorFoldStateManager::RegisterApplicationStateObserver() {}
+
 
 void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
     float postureAngle)
@@ -101,5 +104,4 @@ void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatu
         std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration), std::to_string(postureAngle)};
     ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
 }
-
 } // namespace OHOS::Rosen
