@@ -413,7 +413,7 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
             TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->moveDragController_->GetStartDragFlag()) {
+        if (session->moveDragController_->GetStartMoveFlag()) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation, window is moving");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
