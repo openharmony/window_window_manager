@@ -9652,7 +9652,7 @@ WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyleType
     }
     auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
     if (isPC) {
-        windowStyleType = WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW
+        windowStyleType = WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW;
         return WMError::WM_OK;
     }
     windowStyleType = systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_ ?
