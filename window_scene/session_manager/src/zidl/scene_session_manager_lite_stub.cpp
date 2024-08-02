@@ -15,7 +15,6 @@
 
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 
-#include <ipc_types.h>
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
@@ -111,6 +110,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleClearMainSessions(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
+            return HandleTerminateSessionByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

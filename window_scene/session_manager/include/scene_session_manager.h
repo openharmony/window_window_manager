@@ -342,6 +342,7 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WSError SwitchFreeMultiWindow(bool enable);
+    WSError GetFreeMultiWindowEnableState(bool& enable) override;
     const SystemSessionConfig& GetSystemSessionConfig() const;
     void ClearDisplayStatusBarTemporarilyFlags();
     WSError NotifyEnterRecentTask(bool enterRecent);

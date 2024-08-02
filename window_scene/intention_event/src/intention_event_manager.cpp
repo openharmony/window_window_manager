@@ -189,7 +189,7 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return false;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent receive id:%d action:%d",
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:PointerEvent id:%d action:%d",
         pointerEvent->GetId(), pointerEvent->GetPointerAction());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
@@ -241,8 +241,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent Send id:%d action:%d",
-            pointerEvent->GetId(), pointerEvent->GetPointerAction());
         sceneSession->SendPointerEventToUI(pointerEvent);
         // notify touchOutside and touchDown event
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
@@ -311,8 +309,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The key event is nullptr");
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent receive id:%d",
-        keyEvent->GetId());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:KeyEvent id:%d", keyEvent->GetId());
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "OnInputEvent is disabled temporarily");
         keyEvent->MarkProcessed();
@@ -371,8 +368,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent Send id:%d",
-        keyEvent->GetId());
     focusedSceneSession->SendKeyEventToUI(keyEvent);
 }
 

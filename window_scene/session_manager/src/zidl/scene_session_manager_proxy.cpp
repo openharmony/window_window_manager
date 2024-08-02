@@ -1756,6 +1756,32 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "run SceneSessionManagerProxy::GetFreeMultiWindowEnableState");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write interface token failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest GetFreeMultiWindowEnableState failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto isEnable = reply.ReadBool();
+    enable = isEnable;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WMError SceneSessionManagerProxy::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
 {
     MessageParcel data;

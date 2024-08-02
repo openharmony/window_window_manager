@@ -21,12 +21,6 @@
 
 namespace FRAME_TRACE {
 
-#if (defined(__aarch64__) || defined(__X86_64__))
-const char* g_frameTraceSoPath = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
-#else
-const char* g_frameTraceSoPath = "/system/lib/platformsdk/libframe_trace_intf.z.so";
-#endif
-
 WindowFrameTraceImpl* WindowFrameTraceImpl::GetInstance()
 {
     static WindowFrameTraceImpl ftWindow;
@@ -35,11 +29,7 @@ WindowFrameTraceImpl* WindowFrameTraceImpl::GetInstance()
 #ifdef FRAME_TRACE_ENABLE
 bool WindowFrameTraceImpl::AccessFrameTrace()
 {
-    if (!judgeFrameTrace_) {
-        judgeFrameTrace_ = true;
-        accessFrameTrace_ = access(g_frameTraceSoPath, F_OK) ? false : true;
-    }
-    return accessFrameTrace_;
+    return true;
 }
 
 void WindowFrameTraceImpl::VsyncStartFrameTrace()

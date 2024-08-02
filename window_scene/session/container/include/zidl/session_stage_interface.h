@@ -48,6 +48,15 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+
+    /**
+     * @brief Notify client to close the existing pip window.
+     *
+     * Called when starting pip but there is already a pip window foreground. The previous one will be destroyed if
+     * the new starting request has a higher priority.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError NotifyCloseExistPipWindow() = 0;
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) = 0;
     virtual WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
@@ -67,7 +76,27 @@ public:
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
+
+    /**
+     * @brief Set pip event to client.
+     *
+     * Set the pip event to client. Such as close, restore, destroy events.
+     *
+     * @param action Indicates the action name.
+     * @param status Indicates the status num.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
+
+    /**
+     * @brief Set the media control event to client.
+     *
+     * Set the media control event to client. The event is from pip control panel operation.
+     *
+     * @param controlType Indicates the {@link WsPiPControlType} component in pip control panel.
+     * @param status Indicates the {@link WsPiPControlStatus} required state of specified component.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) = 0;
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;

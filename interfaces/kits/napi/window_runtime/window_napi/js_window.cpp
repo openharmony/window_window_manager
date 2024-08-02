@@ -1854,7 +1854,10 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isEnabled = false;
-    napi_get_value_bool(env, nativeVal, &isEnabled);
+    napi_status retCode = napi_get_value_bool(env, nativeVal, &isEnabled);
+    if (retCode != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
 
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
