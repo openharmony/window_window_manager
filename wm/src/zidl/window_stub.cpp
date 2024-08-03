@@ -31,11 +31,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 {
     if (staticDestroyMonitor_.IsDestroyed()) {
         WLOGFE("Main thread finished, static data has been destroyed");
-        return -1;
+        return ERR_INVALID_STATE;
     }
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     WindowMessage msgId = static_cast<WindowMessage>(code);
     switch (msgId) {
@@ -75,11 +75,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         case WindowMessage::TRANS_ID_UPDATE_AVOID_AREA: {
             sptr<AvoidArea> avoidArea = data.ReadStrongParcelable<AvoidArea>();
             if (avoidArea == nullptr) {
-                return -1;
+                return ERR_INVALID_DATA;
             }
             uint32_t type;
             if (!data.ReadUint32(type)) {
-                return -1;
+                return ERR_INVALID_DATA;
             }
             UpdateAvoidArea(avoidArea, static_cast<AvoidAreaType>(type));
             break;
@@ -107,7 +107,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
                 if (!rsTransaction) {
                     WLOGFE("RSTransaction unMarsh failed");
-                    return -1;
+                    return ERR_INVALID_DATA;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
                 UpdateOccupiedAreaChangeInfo(info, transaction);
@@ -125,7 +125,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
                 if (!rsTransaction) {
                     WLOGFE("RSTransaction unMarsh failed");
-                    return -1;
+                    return ERR_INVALID_DATA;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
                 UpdateOccupiedAreaAndRect(info, rect, transaction);
@@ -169,7 +169,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             std::vector<std::string> params;
             if (!data.ReadStringVector(&params)) {
                 WLOGFE("Fail to read params");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             DumpInfo(params);
             break;
@@ -178,7 +178,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             auto pointerEvent = MMI::PointerEvent::Create();
             if (!pointerEvent->ReadFromParcel(data)) {
                 WLOGFE("Read Pointer Event failed");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             NotifyWindowClientPointUp(pointerEvent);
             break;
@@ -198,7 +198,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             auto event = MMI::KeyEvent::Create();
             if (!event->ReadFromParcel(data)) {
                 WLOGFE("Read Pointer Event failed");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             ConsumeKeyEvent(event);
             break;
@@ -212,7 +212,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS
