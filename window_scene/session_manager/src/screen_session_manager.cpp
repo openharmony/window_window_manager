@@ -631,8 +631,13 @@ sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
     return GetScreenSession(defaultScreenId_);
 }
 
-sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, int32_t uid)
+sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo)
 {
+    if (displayInfo == nullptr) {
+        TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
+        return nullptr;
+    }
+    auto uid = IPCSkeleton::GetCallingUid();
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
@@ -650,14 +655,13 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
     GetDefaultScreenId();
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-    auto uid = IPCSkeleton::GetCallingUid();
     if (screenSession) {
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayInfo == nullptr) {
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        displayInfo = HookDisplayInfoByUid(displayInfo, uid);
+        displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
         TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
@@ -669,7 +673,6 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DMS, "GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    auto uid = IPCSkeleton::GetCallingUid();
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -684,7 +687,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
         }
         if (displayId == displayInfo->GetDisplayId()) {
             TLOGD(WmsLogTag::DMS, "GetDisplayInfoById success");
-            displayInfo = HookDisplayInfoByUid(displayInfo, uid);
+            displayInfo = HookDisplayInfoByUid(displayInfo);
             return displayInfo;
         }
     }
