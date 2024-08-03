@@ -837,7 +837,7 @@ public:
 
     std::string ToString() const
     {
-        std:stringstream ss;
+        std::stringstream ss;
         if (isEmptyAvoidArea()) {
             ss << "empty";
             return ss.str();
