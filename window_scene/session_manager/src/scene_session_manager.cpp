@@ -9692,23 +9692,8 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "enterRecent: %{public}u", enterRecent);
     enterRecent_.store(enterRecent);
-    if (enterRecent) {
-        SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_ENTER_RECENTS);
-        return WSError::WS_OK;
-    }
-
-    SetSystemAnimatedScenes(SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
-    auto task = [this]() {
-        for (auto persistentId : avoidAreaListenerSessionSet_) {
-            auto sceneSession = GetSceneSession(persistentId);
-            if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-                continue;
-            }
-            bool needUpdate = false;
-            UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
-        }
-    };
-    taskScheduler_->PostAsyncTask(task, "Exit enterRecent");
+    SetSystemAnimatedScenes(enterRecent ?
+        SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
     return WSError::WS_OK;
 }
 
