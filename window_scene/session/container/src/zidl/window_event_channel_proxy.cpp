@@ -51,7 +51,12 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -76,7 +81,12 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_POINTER_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -95,7 +105,12 @@ WSError WindowEventChannelProxy::TransferBackpressedEventForConsumed(bool& isCon
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -124,7 +139,12 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
         WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -160,7 +180,12 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumedAsync(
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_KEY_EVENT_ASYNC),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -182,7 +207,12 @@ WSError WindowEventChannelProxy::TransferFocusActiveEvent(bool isFocusActive)
         WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -204,7 +234,12 @@ WSError WindowEventChannelProxy::TransferFocusState(bool focusState)
         WLOGFE("Write focusState failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -231,7 +266,12 @@ WSError WindowEventChannelProxy::TransferAccessibilityHoverEvent(float pointX, f
         TLOGE(WmsLogTag::WMS_UIEXT, "Write TransferAccessibilityHoverEvent data failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_HOVER_EVENT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
@@ -264,7 +304,12 @@ WSError WindowEventChannelProxy::TransferAccessibilityChildTreeRegister(
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    int error = Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int error = remote->SendRequest(
         static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_REGISTER),
         data, reply, option);
     if (error != ERR_OK) {
@@ -284,7 +329,12 @@ WSError WindowEventChannelProxy::TransferAccessibilityChildTreeUnregister()
         TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int error = Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int error = remote->SendRequest(
         static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_UNREGISTER),
         data, reply, option);
     if (error != ERR_OK) {
@@ -309,7 +359,12 @@ WSError WindowEventChannelProxy::TransferAccessibilityDumpChildInfo(
         TLOGE(WmsLogTag::WMS_UIEXT, "failed to write params");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int error = Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int error = remote->SendRequest(
         static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_DUMP_CHILD_INFO),
         data, reply, option);
     if (error != ERR_OK) {
