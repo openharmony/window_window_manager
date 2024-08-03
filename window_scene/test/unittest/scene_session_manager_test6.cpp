@@ -747,6 +747,7 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, Function |
     sessionInfo.abilityName_ = "DumpSessionWithId";
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
+    sessionInfo.isBackTransition_ = false;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
@@ -772,6 +773,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sessionInfo.abilityName_ = "DumpSessionWithId";
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
+    sessionInfo.isBackTransition_ = false;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
