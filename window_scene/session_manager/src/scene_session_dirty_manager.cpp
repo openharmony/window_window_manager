@@ -535,10 +535,10 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
     bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
         !(Rosen::WindowHelper::IsDialogWindow(windowType));
-    if (((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
+    if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
         (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogSystemWindow) &&
         maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-        (sceneSession->GetSessionInfo().isSetPointerAreas_))) {
+        (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
     std::vector<MMI::Rect> touchHotAreas;
