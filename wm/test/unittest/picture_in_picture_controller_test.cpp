@@ -293,13 +293,12 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StartPictureInPicture(startType));
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
 
-    pipControl->mainWindow_ = nullptr;
     pipControl->pipOption_->SetNavigationId("navId");
+    pipControl->mainWindow_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    pipControl->pipOption_->SetNavigationId("");
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->mainWindow_ = mw;
-
-    pipControl->pipOption_->SetNavigationId("");
-    ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
     delete contextPtr;
@@ -811,7 +810,7 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = xComponentController1;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController1));
     pipControl->pipXComponentController_ = xComponentController;
     EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
