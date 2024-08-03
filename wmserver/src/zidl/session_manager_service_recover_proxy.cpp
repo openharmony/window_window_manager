@@ -38,7 +38,12 @@ void SessionManagerServiceRecoverProxy::OnSessionManagerServiceRecover(
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
@@ -74,7 +79,12 @@ void SessionManagerServiceRecoverProxy::OnWMSConnectionChanged(
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED), data, reply,
         option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
