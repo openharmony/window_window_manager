@@ -214,7 +214,6 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange();
     void UpdateDefaultStatusBarColor();
-    bool shouldFollowAppColorMode_ = true;
     bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
