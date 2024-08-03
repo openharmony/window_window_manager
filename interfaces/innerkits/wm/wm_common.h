@@ -249,11 +249,13 @@ enum class WindowStatus : uint32_t {
 /**
  * @brief Enumerates setting flag of systemStatusBar
  */
-enum class SystemBarSettingFlag : uint32_t {
+enum class SystemBarSettingFlag : uint32_t
+{
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    FOLLOW_SETTING = 1 << 2,
+    ALL_SETTING = 0b011
 };
 
 /**
