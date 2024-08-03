@@ -629,7 +629,8 @@ HWTEST_F(PictureInPictureControllerTest, DoActionEvent, Function | SmallTest | L
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     sptr<IPiPActionObserver> listener = nullptr;
 
-    pipControl->RegisterPiPActionObserver(listener);
+    pipControl->DoActionEvent(actionName, status);
+    actionName = "nextVideo";
     pipControl->DoActionEvent(actionName, status);
 }
 
@@ -715,15 +716,16 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
     pipControl->UpdateXComponentPositionAndSize();
     pipControl->mainWindowXComponentController_ = xComponentController;
 
-    pipControl->windowRect_.width_ = 10;
-    pipControl->windowRect_.height_ = 10;
-    pipControl->UpdateXComponentPositionAndSize();
     pipControl->windowRect_.width_ = 0;
+    pipControl->windowRect_.height_ = 10;
     pipControl->UpdateXComponentPositionAndSize();
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 0;
     pipControl->UpdateXComponentPositionAndSize();
     pipControl->windowRect_.width_ = 0;
+    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->windowRect_.width_ = 10;
+    pipControl->windowRect_.height_ = 10;
     pipControl->UpdateXComponentPositionAndSize();
 }
 
@@ -763,13 +765,19 @@ HWTEST_F(PictureInPictureControllerTest, ResetExtController, Function | SmallTes
     ASSERT_NE(nullptr, xComponentController1);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     
+    pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->ResetExtController();
-    pipControl->pipXComponentController_ = nullptr;
-    pipControl->ResetExtController();
-    pipControl->mainWindowXComponentController_ = xComponentController1;
+    pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->pipXComponentController_ = xComponentController;
-
+    pipControl->ResetExtController();
+    pipControl->pipXComponentController_ = nullptr;
+    pipControl->mainWindowXComponentController_ = xComponentController1;
+    pipControl->ResetExtController();
+    pipControl->pipXComponentController_ = xComponentController;
+    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+            .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
+    pipControl->ResetExtController();
     EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     pipControl->ResetExtController();
@@ -795,12 +803,22 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->window_ = mw;
     
+    pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
-    pipControl->pipXComponentController_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
-    pipControl->mainWindowXComponentController_ = xComponentController1;
+    pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->pipXComponentController_ = xComponentController;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
+    pipControl->pipXComponentController_ = nullptr;
+    pipControl->mainWindowXComponentController_ = xComponentController1;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
+    pipControl->pipXComponentController_ = xComponentController;
+    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+        .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->SetXComponentController(xComponentController));
+    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+        .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
+    ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
 }
 
 /**
@@ -893,6 +911,9 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
+    pipControl->pipOption_ = nullptr;
+    pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true);
+    pipControl->pipOption_ = option;
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR,
         pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
