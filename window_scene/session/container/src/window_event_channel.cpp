@@ -63,8 +63,12 @@ void WindowEventChannelListenerProxy::OnTransferKeyEventForConsumed(int32_t keyE
         TLOGE(WmsLogTag::WMS_EVENT, "retCode write failed.");
         return;
     }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
