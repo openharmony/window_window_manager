@@ -568,8 +568,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     }
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
-        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), rsTransaction != nullptr,
-        wmReason, GetWindowName().c_str(), GetPersistentId());
+        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), wmReason, rsTransaction != nullptr,
+        GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
