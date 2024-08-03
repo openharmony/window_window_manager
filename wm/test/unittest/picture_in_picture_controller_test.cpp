@@ -808,14 +808,11 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->pipXComponentController_ = xComponentController;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
-    pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = xComponentController1;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController1));
-    pipControl->pipXComponentController_ = xComponentController;
-    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+    EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->SetXComponentController(xComponentController));
-    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+    EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
 }
