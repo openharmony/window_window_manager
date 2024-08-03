@@ -21,6 +21,7 @@
 #include <float.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace Rosen {
@@ -832,6 +833,29 @@ public:
         }
         delete avoidArea;
         return nullptr;
+    }
+
+    std::string ToString() const {
+        std:stringstream ss;
+        if (isEmptyAvoidArea()) {
+            ss << "empty";
+            return ss.str();
+        }
+
+        std::vector<std::pair<std::string, Rect>> rects = {
+            std::make_pair("top", topRect_),
+            std::make_pair("bottom", bottomRect_),
+            std::make_pair("left", leftRect_),
+            std::make_pair("right", rightRect_)
+        };
+        for (const auto& pair: rects) {
+            if (!pair.second.IsUninitializedRect()) {
+                auto rect = pair.second;
+                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
+                    << rect.width_ << " " << rect.height_ << "] ";
+            }
+        }
+        return ss.str();
     }
 };
 

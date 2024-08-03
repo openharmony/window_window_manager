@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -2587,11 +2578,8 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-          "id: %{public}d, type: %{public}d, "
-          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
-          GetPersistentId(), type,
-          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
-          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
+          "window [%{public}d, %{public}s] type %{public}d area %{public}s",
+          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
