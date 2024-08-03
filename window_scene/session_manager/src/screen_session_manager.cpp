@@ -661,6 +661,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
+        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
         displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
