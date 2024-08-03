@@ -31,7 +31,7 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
     switch (msgId) {
