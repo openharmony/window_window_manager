@@ -835,7 +835,8 @@ public:
         return nullptr;
     }
 
-    std::string ToString() const {
+    std::string ToString() const
+    {
         std:stringstream ss;
         if (isEmptyAvoidArea()) {
             ss << "empty";
