@@ -7252,7 +7252,8 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
         needUpdate = iter->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d type %{public}d empty avoid area",
+            TLOGI(WmsLogTag::WMS_IMMS,
+                "window %{public}d type %{public}d empty avoid area",
                 persistentId, avoidAreaType);
             needUpdate = false;
             return needUpdate;
