@@ -45,6 +45,20 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
     : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     TLOGI(WmsLogTag::DMS, "DualDisplayFoldPolicy created");
+
+    ScreenId screenIdMain = 0;
+    int32_t foldCreaseRegionPosX = 0;
+    int32_t foldCreaseRegionPosY = 1256;
+    int32_t foldCreaseRegionPosWidth = 1136;
+    int32_t foldCreaseRegionPosHeight = 184;
+
+    std::vector<DMRect> rect = {
+        {
+            foldCreaseRegionPosX, foldCreaseRegionPosY,
+            foldCreaseRegionPosWidth, foldCreaseRegionPosHeight
+        }
+    };
+    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
 }
 
 void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
