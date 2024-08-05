@@ -85,6 +85,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {BIND_DIALOG_TARGET_CB,                 ListenerFuncType::BIND_DIALOG_TARGET_CB},
     {RAISE_TO_TOP_CB,                       ListenerFuncType::RAISE_TO_TOP_CB},
     {RAISE_TO_TOP_POINT_DOWN_CB,            ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB},
+    {CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
+        ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB},
     {BACK_PRESSED_CB,                       ListenerFuncType::BACK_PRESSED_CB},
     {SESSION_FOCUSABLE_CHANGE_CB,           ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB},
     {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB},
@@ -99,8 +101,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SYSTEMBAR_PROPERTY_CHANGE_CB,          ListenerFuncType::SYSTEMBAR_PROPERTY_CHANGE_CB},
     {NEED_AVOID_CB,                         ListenerFuncType::NEED_AVOID_CB},
     {PENDING_SESSION_TO_FOREGROUND_CB,      ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB},
-    {CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
-        ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB},
     {PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
         ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB},
     {CUSTOM_ANIMATION_PLAYING_CB,           ListenerFuncType::CUSTOM_ANIMATION_PLAYING_CB},
@@ -704,6 +704,20 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
     }
     session->SetRaiseToAppTopForPointDownFunc(func);
     WLOGFD("ProcessRaiseToTopForPointDownRegister success");
+}
+
+void JsSceneSession::ProcessClickModalSpecificWindowOutsideRegister()
+{
+    NotifyClickModalSpecificWindowOutsideFunc func = [this] {
+        this->OnClickModalSpecificWindowOutside();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+        return;
+    }
+    session->SetClickModalSpecificWindowOutsideListener(func);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
 void JsSceneSession::ProcessRaiseAboveTargetRegister()
@@ -1844,6 +1858,20 @@ void JsSceneSession::OnRaiseToTopForPointDown()
     taskScheduler_->PostMainThreadTask(task, "OnRaiseToTopForPointDown");
 }
 
+void JsSceneSession::OnClickModalSpecificWindowOutside()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    auto task = [jsCallBack = GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB), env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnClickModalSpecificWindowOutside");
+}
+
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 {
     WLOGFI("[NAPI]OnRaiseAboveTarget");
@@ -2582,34 +2610,6 @@ napi_value JsSceneSession::OnSetExitSplitOnBackground(napi_env env, napi_callbac
     }
     session->SetExitSplitOnBackground(isExitSplitOnBackground);
     return NapiGetUndefined(env);
-}
-
-void JsSceneSession::ProcessClickModalSpecificWindowOutsideRegister()
-{
-    NotifyClickModalSpecificWindowOutsideFunc func = [this]() {
-        this->OnClickModalSpecificWindowOutside();
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
-        return;
-    }
-    session->SetClickModalSpecificWindowOutsideListener(func);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
-}
-
-void JsSceneSession::OnClickModalSpecificWindowOutside()
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
-    auto task = [jsCallBack = GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB), env = env_]() {
-        if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnClickModalSpecificWindowOutside");
 }
 
 napi_value JsSceneSession::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)

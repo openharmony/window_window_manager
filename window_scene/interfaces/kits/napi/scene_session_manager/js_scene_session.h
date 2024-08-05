@@ -159,6 +159,7 @@ private:
     void ProcessSessionPiPControlStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
+    void ProcessClickModalSpecificWindowOutsideRegister();
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
@@ -175,7 +176,6 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionDefaultAnimationFlagChangeRegister();
-    void ProcessClickModalSpecificWindowOutsideRegister();
     void ProcessIsCustomAnimationPlaying();
     void ProcessShowWhenLockedRegister();
     void ProcessRequestedOrientationChange();
@@ -206,6 +206,7 @@ private:
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
+    void OnClickModalSpecificWindowOutside();
     void OnRaiseAboveTarget(int32_t subWindowId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
@@ -231,7 +232,6 @@ private:
     void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
-    void OnClickModalSpecificWindowOutside();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
     void OnKeyboardGravityChange(SessionGravity gravity);
