@@ -26,7 +26,7 @@ class PiPReporter {
 WM_DECLARE_SINGLE_INSTANCE(PiPReporter);
 #define LOG_WHEN_ERROR(errCode) \
     if ((errCode) != 0) { \
-       TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
+        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
     }
 public:
     void SetCurrentPackageName(const std::string &packageName);
