@@ -100,7 +100,7 @@ export class PiPContent extends ViewPU {
         this.useNode = true;
         this.mXCNodeController = new XCNodeController(this.xComponent);
         console.info(TAG, 'use Node Controller');
-        pop.on('stateChange', (w1) => {
+        pip.on('stateChange', (w1) => {
             var x1;
             console.info(TAG, `stateChange state: ${w1}}`);
             if (w1 === 3 || w1 === 4) {
