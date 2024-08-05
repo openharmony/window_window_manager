@@ -758,8 +758,6 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
     }
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         vpr = hostDensityValue_->load();
-    } else if (useUniqueDensity_) {
-        vpr = virtualPixelRatio_;
     } else {
         vpr = displayInfo->GetVirtualPixelRatio();
     }
