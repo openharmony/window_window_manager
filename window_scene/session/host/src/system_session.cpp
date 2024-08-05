@@ -208,9 +208,9 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
             return WSError::WS_OK;
         }
     }
-    auto sessionProperty = GetSessionProperty();
     if (type == WindowType::WINDOW_TYPE_DIALOG) {
         Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        auto sessionProperty = GetSessionProperty();
         if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
             RaiseToAppTopForPointDown();
         }
