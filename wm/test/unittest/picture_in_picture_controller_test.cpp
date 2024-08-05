@@ -139,28 +139,25 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     auto listener = sptr<IPiPLifeCycle>::MakeSptr();
     ASSERT_NE(nullptr, listener);
     pipControl->RegisterPiPLifecycle(listener);
-    auto window = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, window);
-    pipControl->window_ = window;
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(startType));
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     startType = StartPipType::AUTO_START;
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     startType = StartPipType::NULL_START;
     pipControl->pipOption_->SetContentSize(10, 10);
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(0, 10);
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(10, 0);
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(0, 0);
-    EXPECT_CALL(*(window), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
 }
 
@@ -251,14 +248,11 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->mainWindowXComponentController_ = xComponentController;
     startType = StartPipType::NULL_START;
-    auto window = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, window);
-    pipControl->mainWindow_ = window;
-    EXPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_CREATED));
+    EXPECT_CALL(*(mw), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     startType = StartPipType::AUTO_START;
     pipControl->CreatePictureInPictureWindow(startType);
-    EXPECT_CALL(*(window), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
+    EXPECT_CALL(*(mw), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
     pipControl->CreatePictureInPictureWindow(startType);
     delete(contextPtr);
 }
@@ -867,6 +861,24 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    pipControl->pipOption_ = option;
+    pipControl->pipOption_->SetNavigationId("navId");
+    pipControl->mainWindow_ = mw;
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->pipOption_ = nullptr;
+    pipControl->mainWindow_ = nullptr;
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->mainWindow_ = mw;
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->pipOption_ = option;
+    pipControl->pipOption_->SetNavigationId("navId");
+    pipControl->mainWindow_ = nullptr;
+    pipControl->window_ = window;
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
