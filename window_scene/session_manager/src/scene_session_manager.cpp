@@ -8335,7 +8335,7 @@ bool SceneSessionManager::GetImmersiveState()
         }
         WLOGI("GetImmersiveState, not immersive");
         return false;
-    }
+    };
     return taskScheduler_->PostSyncTask(task, "GetImmersiveState");
 }
 
