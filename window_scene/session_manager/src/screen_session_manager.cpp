@@ -129,6 +129,9 @@ ScreenSessionManager::ScreenSessionManager()
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD,
         AppExecFwk::ThreadMode::FFRT);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
+    if (!screenCutoutController_) {
+        TLOGE(WmsLogTag::DMS, "screenCutoutController_ is nullptr");
+    }
     sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -142,6 +145,9 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
     TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
+    if (!foldScreenController_) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
+    }
     foldScreenController_->SetOnBootAnimation(true);
     auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
