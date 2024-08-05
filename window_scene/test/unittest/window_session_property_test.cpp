@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "future_callback.h"
 #include "window_session_property.h"
 
 using namespace testing;
@@ -1013,6 +1014,49 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
     delete property;
 }
 
+/**
+ * @tc.name: MarshallingFutureCallback
+ * @tc.desc: MarshallingFutureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    MessageParcel parcel;
+    property->SetLayoutCallback(nullptr);
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    property->SetLayoutCallback(layoutCallback);
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
+}
+
+/**
+ * @tc.name: UnmarshallingFutureCallback
+ * @tc.desc: UnmarshallingFutureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFutureCallback, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    MessageParcel parcelFalse;
+    parcelFalse.WriteBool(false);
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingFutureCallback(parcelFalse, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    ASSERT_NE(nullptr, layoutCallback);
+    MessageParcel parcelTrue;
+    parcelTrue.WriteBool(true);
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrue, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
+    MessageParcel parcelTrueWithObject;
+    parcelTrueWithObject.WriteBool(true);
+    parcelTrueWithObject.WriteObject(layoutCallback->AsObject());
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrueWithObject, property);
+    ASSERT_NE(nullptr, property->GetLayoutCallback());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
