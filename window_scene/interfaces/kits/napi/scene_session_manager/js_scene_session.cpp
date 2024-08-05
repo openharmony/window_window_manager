@@ -295,11 +295,8 @@ void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_valu
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
-    : env_(env), weakSession_(session)
+    : env_(env), weakSession_(session), persistentId_(session->GetPersistentId())
 {
-    if (session) {
-        persistentId_ = session->GetPersistentId();
-    }
     InitListenerFuncs();
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
         SceneSession::SessionChangeCallback();
