@@ -679,6 +679,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 {
+<<<<<<< HEAD
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
         WLOGFE("sessionchangeCallback is nullptr");
@@ -692,13 +693,16 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
         }
         jsSceneSession->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
     };
+=======
+>>>>>>> bcd0caf32 (solution to onWindowAnimationFlagChange_ data race)
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
-    WLOGFD("ProcessSessionDefaultAnimationFlagChangeRegister success");
+    session->RegisterDefaultAnimationFlagChangeCallback([this](bool isNeedDefaultAnimationFlag) {
+        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
+    });
 }
 
 void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag)
