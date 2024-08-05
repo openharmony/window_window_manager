@@ -62,14 +62,6 @@ std::string PiPReporter::GetPackageName() const
     return packageName_;
 }
 
-void PiPReporter::LogWhenError(int32_t errCode)
-{
-    if (errCode == 0) {
-        return;
-    }
-    TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode);
-}
-
 void PiPReporter::ReportPiPStartWindow(int32_t source, int32_t templateType,
                                        int32_t isSuccess, const std::string& errorReason)
 {
@@ -89,7 +81,7 @@ void PiPReporter::ReportPiPStartWindow(int32_t source, int32_t templateType,
         EVENT_KEY_START_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
@@ -111,7 +103,7 @@ void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
         EVENT_KEY_STOP_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &actionEvent)
@@ -131,7 +123,7 @@ void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, currentAction,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType controlType)
@@ -145,7 +137,7 @@ void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType con
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, static_cast<uint32_t>(controlType),
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
@@ -160,7 +152,7 @@ void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
         EVENT_KEY_WINDOW_WIDTH, windowWidth,
         EVENT_KEY_WINDOW_HEIGHT, windowHeight,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPRestore()
@@ -173,7 +165,7 @@ void PiPReporter::ReportPiPRestore()
         EVENT_KEY_PNAMEID, PNAMEID,
         EVENT_KEY_PVERSION, PVERSION,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    LogWhenError(ret);
+    LOG_WHEN_ERROR(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -51,7 +51,7 @@ namespace {
 
 /**
  * @tc.name: ReportPiPStartWindow
- * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow/LogWhenError
+ * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
@@ -63,8 +63,6 @@ HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest
     source = 1;
     SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    SingletonContainer::Get<PiPReporter>().LogWhenError(0);
-    SingletonContainer::Get<PiPReporter>().LogWhenError(10);
 }
 
 /**

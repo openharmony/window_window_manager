@@ -114,9 +114,6 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     }
     UpdateXComponentPositionAndSize();
     auto windowOption = sptr<WindowOption>::MakeSptr();
-    if (windowOption == nullptr) {
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
     windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -208,10 +205,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     }
     if (!IsPullPiPAndHandleNavigation()) {
         TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Init main window failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     curState_ = PiPWindowState::STATE_STARTING;
