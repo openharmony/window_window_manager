@@ -777,7 +777,7 @@ napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::ReportData(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnReportData(env, info) : nullptr;
 }
