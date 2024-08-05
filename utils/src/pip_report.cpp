@@ -22,7 +22,7 @@
         if ((errCode) != 0) {                                                                 \
             TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
         }                                                                                     \
-    } while(0)
+    } while(false)
     
 namespace OHOS {
 namespace Rosen {
