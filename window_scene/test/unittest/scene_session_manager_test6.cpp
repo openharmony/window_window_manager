@@ -1292,6 +1292,247 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     ssm_->SetRootSceneProcessBackEventFunc(func);
     ssm_->ProcessBackEvent();
 }
+
+/**
+ * @tc.name: SetAppForceLandscapeMode
+ * @tc.desc: test function : SetAppForceLandscapeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetAppForceLandscapeMode, Function | SmallTest | Level3)
+{
+    std::string bundleName = "";
+    int32_t mode = 1;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret1 = ssm_->SetAppForceLandscapeMode(bundleName, mode);
+    EXPECT_EQ(ret1, WSError::WS_ERROR_NULLPTR);
+    auto ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
+    EXPECT_EQ(ret2, 0);
+    bundleName = "test";
+    ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
+    EXPECT_EQ(ret2, 0);
+    ret1 = ssm_->SetAppForceLandscapeMode(bundleName, mode);
+    EXPECT_EQ(ret1, WSError::WS_OK);
+    ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
+    EXPECT_EQ(ret2, 1);
+    DisplayChangeListener listener;
+    DisplayId displayId = 0;
+    listener.OnScreenshot(displayId);
+    bool immersive = true;
+    listener.OnImmersiveStateChangae(immersive);
+}
+
+/**
+ * @tc.name: OnScreenFoldStatusChanged
+ * @tc.desc: test function : OnScreenFoldStatusChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, OnScreenFoldStatusChanged, Function | SmallTest | Level3)
+{
+    std::vector<std::string> screenFoldInfo;
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnScreenFoldStatusChanged(screenFoldInfo);
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->UpdateDisplayHookInfo(0, 50, 50, 0.0f, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ssm_->CheckSceneZOrder();
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: test function : NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "NotifySessionForeground";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    uint32_t reason = 0;
+    bool witenAnimation = false;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifySessionForeground(sceneSession, reason, witenAnimation);
+    WSRect area = { 0, 0, 0, 0 };
+    ssm_->AddWindowDragHotArea(type, area);
+    uint64_t displayId = 0;
+    ssm_->currAiNavigationBarAreaMap_.insert(std::make_pair(displayId, area));
+    auto ret = ssm_->GetAINavigationBarArea(1);
+    EXPECT_TRUE(ret.IsEmpty());
+    ret = ssm_->GetAINavigationBarArea(displayId);
+    EXPECT_EQ(ret, area);
+}
+
+/**
+ * @tc.name: OnDisplayStateChange
+ * @tc.desc: test function : OnDisplayStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | Level3)
+{
+    DisplayChangeListener listener;
+    DisplayId displayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    displayInfoMap.insert(std::make_pair(displayId, displayInfo));
+    DisplayStateChangeType type = DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE;
+    listener.OnDisplayStateChange(displayId, displayInfo, displayInfoMap, type);
+    type = DisplayStateChangeType::UNKNOWN;
+    listener.OnDisplayStateChange(displayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: UpdateSessionAvoidAreaIfNeed
+ * @tc.desc: test function : UpdateSessionAvoidAreaIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    sptr<SceneSession> sceneSession = nullptr;
+    AvoidArea avoidArea;
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->enterRecent_ = false;
+    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, false);
+    ssm_->enterRecent_ = true;
+    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, false);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, false);
+    ssm_->enterRecent_ = false;
+    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, true);
+    ssm_->lastUpdatedAvoidArea_.clear();
+    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UpdateSessionAvoidAreaIfNeed01
+ * @tc.desc: test function : UpdateSessionAvoidAreaIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed01, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    AvoidArea avoidArea;
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEY_BOARD;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->enterRecent_ = false;
+    std::map<AvoidAreaType, AvoidArea> mapAvoidAreaType;
+    mapAvoidAreaType.insert(std::make_pair(avoidAreaType, avoidArea));
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastUpdatedAvoidArea_.insert(std::make_pair(persistentId, mapAvoidAreaType));
+    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, false);
+    avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, false);
+    avoidArea.topRect_.posX_ = 1;
+    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckIfReuseSession
+ * @tc.desc: test function : CheckIfReuseSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession";
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->CheckIfReuseSession(sessionInfo);
+    EXPECT_EQ(ret, BrokerStates::BROKER_UNKNOWN);
+    ScreenId  screenId = 0;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: test function : UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateAvoidArea, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidArea(persistentId);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateAvoidArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    ssm_->UpdateAvoidArea(persistendId);
+    sceneSession->property_ = SetWindowType(WindowType:: APP_WINDOW_BASE);
+    ssm_->UpdateAvoidArea(persistendId);
+}
+
+/**
+ * @tc.name: UpdateMaximizeMode
+ * @tc.desc: test function : UpdateMaximizeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateMaximizeMode, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    bool isMaximize = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    auto ret = ssm_->UpdateMaximizeMode(persistentId, isMaximize);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateMaximizeMode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    EXPECT_EQ(ret, WSError::WS_OK);
+    sptr<DisplayInfo> displayInfo = nullptr;
+    ssm_->ProcessDisplayScale(displayInfo);
+    ProcessVirtualPixelRatioChangeFunc func = nullptr;
+    ssm_->SetVirtualPixeIRatioChangeListener(func);
+}
+
+/**
+ * @tc.name: WindowDestroyNotifyVisibility
+ * @tc.desc: test function : WindowDestroyNotifyVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "WindowDestroyNotifyVisibility";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(true);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    sceneSession->SetRSVisible(false);
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    sceneSession = nullptr;
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
