@@ -856,7 +856,7 @@ napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]StartMove");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]StartMoving");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnStartMoving(env, info) : nullptr;
 }
