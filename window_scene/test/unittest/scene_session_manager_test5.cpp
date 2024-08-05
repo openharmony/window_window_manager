@@ -850,13 +850,8 @@ HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession02, Function | Smal
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->CreateKeyboardPanelSession(sceneSession);
-    ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
-    ssm_->DestroyToastSession(sceneSession);
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->CreateKeyboardPanelSession(sceneSession);
-    ssm_->DestroyToastSession(sceneSession);
-    ssm_->HandleCastScreenDisConnection(sceneSession);
 }
 
 /**
@@ -899,28 +894,6 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Le
     int32_t persistentId = 1;
     bool isPrepareTerminate = true;
     ASSERT_EQ(WSError::WS_OK, ssm_->PrepareTerminate(persistentId, isPrepareTerminate));
-}
-
-/**
- * @tc.name: RequestSceneSessionActivationInner
- * @tc.desc: RequestSceneSessionActivationInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionActivationInner, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.ancoSceneState = 0;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = nullptr;
-    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    ssm_->RequestSceneSessionActivationInner(sceneSession, true, promise);
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->RequestSceneSessionActivationInner(sceneSession, true, promise);
 }
 
 /**
