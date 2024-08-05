@@ -1694,8 +1694,6 @@ napi_value JsSceneSession::OnUpdateSizeChangeReason(napi_env env, napi_callback_
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     session->UpdateSizeChangeReason(reason);
