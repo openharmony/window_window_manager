@@ -1546,8 +1546,11 @@ napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_
         WLOGFE("[NAPI]session is nullptr");
         return NapiGetUndefined(env);
     }
+    auto func = [session]() {
+        SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
+    }
+    session->SetUpdatePrivateStateAndNotifyFunc(func);
     session->UpdateNativeVisibility(visible);
-    SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
     WLOGFI("[NAPI]OnUpdateNativeVisibility end");
     return NapiGetUndefined(env);
 }
