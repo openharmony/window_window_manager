@@ -381,7 +381,23 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_EQ(nullptr, property);
+    EXPECT_NE(nullptr, property);
+    Rect rect { 4, 4, 4, 4 };
+    std::vector<Rect> vRect { rect };
+    property->SetPersistentId(0);
+    property->SetSessionPropertyChangeCallback(nullptr);
+    EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
+    property->SetTouchHotAreas(vRect);
+
+    auto func = [](){};
+    property->SetPersistentId(1);
+    property->SetSessionPropertyChangeCallback(func);
+    property->SetTouchHotAreas(vRect);
+    EXPECT_NE(nullptr, property->touchHotAreasChangeCallback_);
+
+    Rect rect1 { 5, 5, 5, 5 };
+    vRect.emplace_back(rect1);
+    property->SetTouchHotAreas(vRect);
 }
 
 /**
