@@ -24,9 +24,12 @@
 namespace OHOS::Rosen {
 class PiPReporter {
 WM_DECLARE_SINGLE_INSTANCE(PiPReporter);
-
+#define LOG_WHEN_ERROR(errCode) \
+    if (errCode == 0) { \
+        return; \
+    } \
+    TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode);
 public:
-    void LogWhenError(int32_t errCode);
     void SetCurrentPackageName(const std::string &packageName);
     void ReportPiPStartWindow(int32_t source, int32_t templateType, int32_t isSuccess, const std::string &errorReason);
     void ReportPiPStopWindow(int32_t source, int32_t templateType, int32_t isSuccess, const std::string &errorReason);

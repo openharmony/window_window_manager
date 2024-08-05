@@ -292,7 +292,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_->SetNavigationId("");
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    pipControl->mainWindow_ = mw;
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
     delete contextPtr;
