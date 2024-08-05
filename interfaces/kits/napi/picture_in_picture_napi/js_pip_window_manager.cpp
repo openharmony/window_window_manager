@@ -186,7 +186,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
     option.SetNodeControllerRef(nodeControllerRef);
-    option.SetNodeControllerRef(typeNodeRef);
+    option.SetTypeNodeRef(typeNodeRef);
     return checkOptionParams(option);
 }
 
