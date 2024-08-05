@@ -8301,7 +8301,7 @@ void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
 
 bool SceneSessionManager::GetImmersiveState()
 {
-    auto task = [this] () -> bool {
+    auto task = [this] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
             auto sceneSession = item->second;
@@ -8324,7 +8324,6 @@ bool SceneSessionManager::GetImmersiveState()
                 WLOGFE("Property is nullptr");
                 continue;
             }
-            WLOGI("GetImmersiveState, session id:%{public}d", sceneSession->GetPersistentId());
             auto sysBarProperty = property->GetSystemBarProperty();
             if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
                 WLOGI("GetImmersiveState, window is immersive. id:%{public}d", sceneSession->GetPersistentId());
