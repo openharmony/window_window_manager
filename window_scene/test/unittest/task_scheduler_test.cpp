@@ -44,6 +44,16 @@ HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level
     delete taskScheduler;
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSchedulerText, , Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
