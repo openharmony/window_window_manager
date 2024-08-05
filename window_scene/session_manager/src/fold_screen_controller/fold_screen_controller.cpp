@@ -169,4 +169,9 @@ void FoldScreenController::UpdateForPhyScreenPropertyChange()
     }
     foldScreenPolicy_->UpdateForPhyScreenPropertyChange();
 }
+
+void FoldScreenController::ExitCoordination()
+{
+    foldScreenPolicy_->ExitCoordination();
+}
 } // namespace OHOS::Rosen
