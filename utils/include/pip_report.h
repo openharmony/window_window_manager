@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 class PiPReporter {
 WM_DECLARE_SINGLE_INSTANCE(PiPReporter);
+
 public:
     void SetCurrentPackageName(const std::string &packageName);
     void ReportPiPStartWindow(int32_t source, int32_t templateType, int32_t isSuccess, const std::string &errorReason);

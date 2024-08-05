@@ -17,7 +17,7 @@
 #include <hisysevent.h>
 #include "pip_report.h"
 #include "window_manager_hilog.h"
-    
+ 
 namespace OHOS {
 namespace Rosen {
 namespace {
