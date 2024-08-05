@@ -799,6 +799,144 @@ HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, Function | SmallTes
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 }
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: SceneSesionManager config decor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
+    ASSERT_NE(item, nullptr);
+    ssm_->ConfigDecor(*item, false);
+    delete item;
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint64_t surfaceNodeId = 1234;
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, false);
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, true);
+}
+
+/**
+ * @tc.name: CreateKeyboardPanelSession
+ * @tc.desc: CreateKeyboardPanelSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->CreateKeyboardPanelSession(sceneSession);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->CreateKeyboardPanelSession(sceneSession);
+}
+
+/**
+ * @tc.name: InitSceneSession02
+ * @tc.desc: InitSceneSession02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "test1";
+    sessionInfo.abilityName_ = "test2";
+    sessionInfo.abilityInfo = nullptr;
+    sessionInfo.isAtomicService_ = true;
+    sessionInfo.screenId_ = SCREEN_ID_INVALID;
+    unsigned int flags = 1111;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ASSERT_NE(nullptr, sessionInfo.want);
+    sessionInfo.want->SetFlags(flags);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
+    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+}
+
+/**
+ * @tc.name: PrepareTerminate
+ * @tc.desc: SceneSesionManager prepare terminate
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "PrepareTerminate";
+    sessionInfo.abilityName_ = "PrepareTerminate";
+    sessionInfo.abilityInfo = nullptr;
+    int32_t persistentId = 1;
+    bool isPrepareTerminate = true;
+    ASSERT_EQ(WSError::WS_OK, ssm_->PrepareTerminate(persistentId, isPrepareTerminate));
+}
+
+/**
+ * @tc.name: RequestSceneSessionBackground
+ * @tc.desc: RequestSceneSessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.ancoSceneState = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = nullptr;
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
+    ssm_->RequestSceneSessionBackground(sceneSession, true, false, true);
+    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+}
+
+/**
+ * @tc.name: AddClientDeathRecipient
+ * @tc.desc: SceneSesionManager add client death recipient
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "AddClientDeathRecipient";
+    info.bundleName_ = "AddClientDeathRecipient";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->AddClientDeathRecipient(nullptr, sceneSession);
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
