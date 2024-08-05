@@ -31,7 +31,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(PiPReporter)
         if ((errCode) != 0) {                                                                 \
             TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
         }                                                                                     \
-    } while(false)
+    } while (false)
 
 static std::map<std::string, int32_t> CONTROL_ACTION_MAP = {
     {"playbackStateChanged", 0},
