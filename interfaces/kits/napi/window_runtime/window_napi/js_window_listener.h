@@ -105,8 +105,7 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
 
 private:
-    uint32_t currentWidth_ = 0;
-    uint32_t currentHeight_ = 0;
+    Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
