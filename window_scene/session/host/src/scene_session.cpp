@@ -400,7 +400,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
-        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not start move event");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!SessionPermission::IsSystemCalling()) {
@@ -414,7 +414,7 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation, window is moving");
+            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         OnSessionEvent(event);
