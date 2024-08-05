@@ -818,6 +818,14 @@ public:
      */
     virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
     /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
@@ -825,6 +833,14 @@ public:
      * @return WMError
      */
     virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    /**
+     * @brief resize the window instance (w,h)
+     *
+     * @param width
+     * @param height
+     * @return WMError
+     */
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief set the window gravity
      *
