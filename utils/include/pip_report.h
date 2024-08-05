@@ -26,7 +26,7 @@ namespace OHOS::Rosen {
     if (errCode == 0) { \
         return; \
     } \
-    TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
+    TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode);
 class PiPReporter {
 WM_DECLARE_SINGLE_INSTANCE(PiPReporter);
 
