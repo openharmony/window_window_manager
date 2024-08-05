@@ -290,7 +290,7 @@ public:
     void AddWindowDragHotArea(uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    bool UpdateImmersiveState();
+    bool GetImmersiveState();
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
