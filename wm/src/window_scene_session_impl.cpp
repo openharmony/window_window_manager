@@ -1727,8 +1727,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        ((windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad") ||
-         IsFreeMultiWindowMode())) {
+        windowSystemConfig_.uiType_ != "phone" &&
+        windowSystemConfig_.uiType_ != "pad") {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3120,7 +3120,7 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 void WindowSceneSessionImpl::NotifySessionFullScreen(bool fullScreen)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u", GetWindowId());
-    SetLayoutFullScreen(fullScreen);
+    Maximize(fullScreen ? MaximizePresentation::ENTER_IMMERSIVE : MaximizePresentation::EXIT_IMMERSIVE);
 }
 
 WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
