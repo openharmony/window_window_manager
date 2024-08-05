@@ -1946,7 +1946,7 @@ void JsSceneSession::OnRaiseToTopForPointDown()
 
     auto task = [this,  persistentId = persistentId_, env = env_]() {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destoryed",
+            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
