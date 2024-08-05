@@ -1141,6 +1141,18 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+void Session::ProcessClickModalSpecificWindowOutside(int32_t posX, int32_t posY)
+{
+    if (clickModalSpecificWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
+        clickModalSpecificWindowOutsideFunc_();
+    }
+}
+
+void Session::SetClickModalSpecificWindowOutsideListener(const NotifyClickModalSpecificWindowOutsideFunc& func)
+{
+    clickModalSpecificWindowOutsideFunc_ = func;
+}
+
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
 {
     SetForegroundInteractiveStatus(interactive);

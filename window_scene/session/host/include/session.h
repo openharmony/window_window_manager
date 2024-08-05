@@ -68,6 +68,7 @@ using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, b
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyClickModalSpecificWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
@@ -243,6 +244,7 @@ public:
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
+    void SetClickModalSpecificWindowOutsideListener(const NotifyClickModalSpecificWindowOutsideFunc& func);
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
@@ -418,6 +420,7 @@ public:
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
     void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
+    void ProcessClickModalSpecificWindowOutside(int32_t posX, int32_t posY);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
@@ -512,6 +515,7 @@ protected:
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
+    NotifyClickModalSpecificWindowOutsideFunc clickModalSpecificWindowOutsideFunc_;
     NotifyUIRequestFocusFunc requestFocusFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
     GetStateFromManagerFunc getStateFromManagerFunc_;
