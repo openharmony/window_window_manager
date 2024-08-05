@@ -7956,7 +7956,6 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
 {
     WLOGFI("type: %{public}d", type);
     auto isSaCall = SessionPermission::IsSACalling();
-    auto callingUid = IPCSkeleton::GetCallingUid();
     if (!isSaCall || !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::DEFAULT, "The caller has not permission granted or not SACalling");
         return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -7976,7 +7975,6 @@ WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
 {
     WLOGFI("type: %{public}d", type);
     auto isSaCall = SessionPermission::IsSACalling();
-    auto callingUid = IPCSkeleton::GetCallingUid();
     if (!isSaCall || !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::DEFAULT, "The caller has not permission granted or not SACalling");
         return WSError::WS_ERROR_INVALID_PERMISSION;
