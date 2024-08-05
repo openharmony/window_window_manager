@@ -254,7 +254,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     pipControl->CreatePictureInPictureWindow(startType);
     EXPECT_CALL(*(mw), GetWindowState()).Times(0).WillOnce(Return(WindowState::STATE_SHOWN));
     pipControl->CreatePictureInPictureWindow(startType);
-    delete(contextPtr);
+    delete contextPtr;
 }
 
 /**
