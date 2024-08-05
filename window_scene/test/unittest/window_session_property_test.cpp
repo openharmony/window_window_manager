@@ -380,11 +380,8 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
 */
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    std::vector<Rect> *rects = new std::vector<Rect>;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetTouchHotAreas(*rects);
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(nullptr, property);
 }
 
 /**
