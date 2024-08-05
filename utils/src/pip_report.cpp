@@ -17,7 +17,13 @@
 #include <hisysevent.h>
 #include "pip_report.h"
 #include "window_manager_hilog.h"
-
+#define LOG_WHEN_ERROR(errCode)                                                               \
+    do {                                                                                      \
+        if ((errCode) != 0) {                                                                 \
+            TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
+        }                                                                                     \
+    } while(0)
+    
 namespace OHOS {
 namespace Rosen {
 namespace {
