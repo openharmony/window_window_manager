@@ -546,11 +546,11 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
 }
 
 /**
- * @tc.name: UpdateImmersiveState02
- * @tc.desc: UpdateImmersiveState
+ * @tc.name: GetImmersiveState02
+ * @tc.desc: GetImmersiveState
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest4, UpdateImmersiveState02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
 
@@ -564,24 +564,24 @@ HWTEST_F(SceneSessionManagerTest4, UpdateImmersiveState02, Function | SmallTest 
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
 
     sceneSession02->property_ = nullptr;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(sceneSession02->property_, nullptr);
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->state_ = SessionState::STATE_ACTIVE;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->state_ = SessionState::STATE_FOREGROUND;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
-    EXPECT_EQ(true, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(true, ssm_->GetImmersiveState());
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
 }
 
 /**

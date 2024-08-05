@@ -467,14 +467,14 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdateImmersiveState
- * @tc.desc: test UpdateImmersiveState
+ * @tc.name: GetImmersiveState
+ * @tc.desc: test GetImmersiveState
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetImmersiveState, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->UpdateImmersiveState();
+    ssm_->GetImmersiveState();
     ASSERT_EQ(ret, 0);
 }
 
