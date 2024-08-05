@@ -2120,26 +2120,30 @@ napi_value JsSceneSessionManager::OnSendTouchEvent(napi_env env, napi_callback_i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value nativeObj = argv[0];
     if (nativeObj == nullptr) {
-        WLOGFE("[NAPI]Failed to convert object");
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Failed to convert object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto pointerEvent = MMI::PointerEvent::Create();
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Failed to create pointer event");
+        return NapiGetUndefined(env);
+    }
     if (!ConvertPointerEventFromJs(env, nativeObj, *pointerEvent)) {
-        WLOGFE("[NAPI]Failed to convert pointer event");
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Failed to convert pointer event");
         return NapiGetUndefined(env);
     }
     uint32_t zIndex;
     if (!ConvertFromJsValue(env, argv[1], zIndex)) {
-        WLOGFE("[NAPI]Failed to convert parameter to zIndex");
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Failed to convert parameter to zIndex");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
