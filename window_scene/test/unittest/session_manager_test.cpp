@@ -196,7 +196,8 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     sessionManager.OnUserSwitch(nullptr);
     ASSERT_EQ(funcInvoked, false);
     sessionManager.userSwitchCallbackFunc_ = []() {};
-    sessionManager.OnUserSwitch(nullptr);
+    sptr<ISessionManagerService> sessionManagerService;
+    sessionManager.OnUserSwitch(sessionManagerService);
     ASSERT_EQ(funcInvoked, false);
 }
 
@@ -218,6 +219,20 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterSMSRecoverListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.isRecoverListenerRegistered_ = false;
+    sessionManager.mockSessionManagerServiceProxy_ = nullptr;
+    sessionManager.RegisterSMSRecoverListener();
+    ASSERT_EQ(sessionManager.mockSessionManagerServiceProxy_, nullptr);
 }
 }
 }

@@ -226,6 +226,151 @@ HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Leve
     scbSystemSession_->GetKeyboardSession();
 }
 
+/**
+ * @tc.name: ProcessPointDownSession
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level3)
+{
+    int32_t posX = 0;
+    int32_t posY = 0;
+    WSError ret = scbSystemSession_->ProcessPointDownSession(posX, posY);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect02
+ * @tc.desc: check func NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
+{
+    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback = new (std::nothrow) SCBSystemSession::SpecificSessionCallback();
+    UpdateAvoidAreaCallback onUpdateAvoidArea;
+    ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
+    scbSystemSession_->specificCallback_ = specificCallback;
+    scbSystemSession_->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
+    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = onClearDisplayStatusBarTemporarilyFlags;
+    auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = nullptr;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = onClearDisplayStatusBarTemporarilyFlags;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    scbSystemSession_->specificCallback_ = nullptr;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect03
+ * @tc.desc: check func NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
+
+    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    session->property_ = property;
+    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
+    scbSystemSession_->isKeyboardPanelEnabled_ = true;
+    auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->isKeyboardPanelEnabled_ = false;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
+    scbSystemSession_->isKeyboardPanelEnabled_ = true;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->isKeyboardPanelEnabled_ = false;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->property_ = property;
+    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
+    scbSystemSession_->isKeyboardPanelEnabled_ = true;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->isKeyboardPanelEnabled_ = false;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
+    scbSystemSession_->isKeyboardPanelEnabled_ = true;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    
+    scbSystemSession_->isKeyboardPanelEnabled_ = false;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    scbSystemSession_->reason_ = SizeChangeReason::DRAG;
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: PresentFocusIfPointDown02
+ * @tc.desc: check func PresentFocusIfPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, scbSystemSession_);
+    SessionInfo info;
+    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+
+    session->isFocused_ = true;
+    windowSessionProperty->focusable_ = false;
+    scbSystemSession_->PresentFocusIfPointDown();
+    scbSystemSession_->PresentFoucusIfNeed(2);
+    ASSERT_EQ(session->isFocused_, true);
+
+    session->isFocused_ = false;
+    windowSessionProperty->focusable_ = false;
+    scbSystemSession_->PresentFocusIfPointDown();
+    scbSystemSession_->PresentFoucusIfNeed(2);
+    ASSERT_EQ(session->isFocused_, false);
+
+    session->isFocused_ = true;
+    windowSessionProperty->focusable_ = true;
+    scbSystemSession_->PresentFocusIfPointDown();
+    scbSystemSession_->PresentFoucusIfNeed(2);
+    ASSERT_EQ(session->isFocused_, true);
+}
+
+/**
+ * @tc.name: PresentFoucusIfNeed
+ * @tc.desc: check func PresentFoucusIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level3)
+{
+    int32_t pointerAction = 100;
+    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    ASSERT_EQ(pointerAction, 2);
+}
 } //namespace
 } //namespace Rosen
 } //namespace OHOS
