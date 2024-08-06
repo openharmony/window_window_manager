@@ -232,6 +232,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property2, nullptr);
     property2->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property2, false));
 
@@ -241,6 +242,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property2, false));
 
     sptr<WindowSessionProperty> property3 = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property3, nullptr);
     property3->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     session->SetSessionProperty(property3);
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
@@ -342,11 +344,13 @@ HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, sceneSession);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     sceneSession->SetSessionProperty(property);
     EXPECT_EQ(WSError::WS_OK, sceneSession->Background(true));
 
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property2, nullptr);
     property2->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     sceneSession->SetSessionProperty(property2);
     EXPECT_EQ(WSError::WS_OK, sceneSession->Background(false));
@@ -464,6 +468,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
 
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property2, nullptr);
     property2->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     session->SetSessionProperty(property2);
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
@@ -805,6 +810,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
     ASSERT_NE(mockSessionStage, nullptr);
     SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->clientIdentityToken_ = "session1";
 
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
@@ -837,14 +843,15 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     ASSERT_NE(mockSessionStage, nullptr);
     SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     sceneSession->Session::isTerminating_ = false;
-
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     sptr<IWindowEventChannel> eventChannel = new WindowEventChannel(mockSessionStage);
+    ASSERT_NE(eventChannel, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
     auto result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig,
         property, nullptr);
