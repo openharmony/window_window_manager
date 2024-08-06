@@ -185,6 +185,44 @@ HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange01, Function | 
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
     ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
+
+/**
+ * @tc.name: ProcessUpdateRotationChange
+ * @tc.desc: ProcessUpdateRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateAvoidArea";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    WSRectF bounds = { 0, 0, 0 ,0 };
+    sceneSession->SetBounds(bounds);
+    displayInfo->width_ = 0;
+    displayInfo->height_ = 0;
+    Rotation rotation = Rotation::ROTATION_0;
+    sceneSession->SetRotation(rotation);
+    displayInfo->SetRotation(rotation);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
