@@ -624,7 +624,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
         WLOGFE("Fail to read params");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     std::string dumpInfo;
     WSError errCode = GetSessionDumpInfo(params, dumpInfo);
@@ -635,7 +635,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
     if (infoSize != 0) {
         if (!reply.WriteRawData(info, infoSize)) {
             WLOGFE("Fail to write dumpInfo");
-            return -1;
+            return ERR_INVALID_DATA;
         }
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -703,7 +703,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     uint32_t vectorSize = data.ReadUint32();
     if (vectorSize > MAX_VECTOR_SIZE) {
         WLOGFI("Vector is too big!");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
@@ -857,7 +857,7 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
     WMError errCode = GetVisibilityWindowInfo(infos);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
         WLOGFE("Write visibility window infos failed");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
