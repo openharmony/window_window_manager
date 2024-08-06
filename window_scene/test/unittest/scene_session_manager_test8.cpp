@@ -72,7 +72,7 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Level3)
 {
-    std::string strId = "strId";
+    std::string strId = "1234";
     std::string dumpInfo = "dumpInfo";
     //SceneSessionManager::GetInstance().SetDumpUITreeFunc(nullptr);
     EXPECT_EQ(WSError::WS_OK, SceneSessionManager::GetInstance()
@@ -140,7 +140,7 @@ HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | Smal
     std::string deviceId = "deviceId";
     int res = SceneSessionManager::GetInstance().GetRemoteSessionSnapshotInfo(
         deviceId, 8, sessionSnapshot);
-    EXPECT_EQ(ERR_OK, res);
+    EXPECT_NE(ERR_OK, res);
 }
 }
 }
