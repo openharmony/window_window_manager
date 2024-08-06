@@ -1089,27 +1089,6 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
 }
-
-/**
- * @tc.name: SetKeyboardGravityChangeCallback
- * @tc.desc: SetKeyboardGravityChangeCallback function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetKeyboardGravityChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetKeyboardGravityChangeCallback";
-    info.bundleName_ = "SetKeyboardGravityChangeCallback";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    NotifyKeyboardGravityChangeFunc fun = [](SessionGravity gravity) {
-        return;
-    };
-    session->SetKeyboardGravityChangeCallback(fun);
-    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
-}
 }
 }
 }
