@@ -159,7 +159,7 @@ int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel
 {
     WLOGFD("HandleSetWindowAnimationFlag!");
     bool isNeedWindowAnimationFlag = data.ReadBool();
-    const WSError& errCode = UpdateWindowAnimationFlag(isNeedWindowAnimationFlag);
+    WSError errCode = UpdateWindowAnimationFlag(isNeedWindowAnimationFlag);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -196,7 +196,7 @@ int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
     bool isFromClient = data.ReadBool();
-    const WSError& errCode = Disconnect(isFromClient);
+    WSError errCode = Disconnect(isFromClient);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -214,7 +214,7 @@ int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
         WLOGFW("Property not exist!");
         property = sptr<WindowSessionProperty>::MakeSptr();
     }
-    const WSError& errCode = Show(property);
+    WSError errCode = Show(property);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -222,7 +222,7 @@ int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Hide!");
-    const WSError& errCode = Hide();
+    WSError errCode = Hide();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -329,7 +329,7 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     abilitySessionInfo->resultCode = data.ReadInt32();
-    const WSError& errCode = TerminateSession(abilitySessionInfo);
+    WSError errCode = TerminateSession(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -352,7 +352,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->errorCode = data.ReadInt32();
     abilitySessionInfo->errorReason = data.ReadString();
     abilitySessionInfo->identityToken = data.ReadString();
-    const WSError& errCode = NotifySessionException(abilitySessionInfo);
+    WSError errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -382,7 +382,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
         abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
     bool visible = data.ReadBool();
-    const WSError& errCode = ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+    WSError errCode = ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -413,7 +413,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (data.ReadBool()) {
         abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
-    const WSError& errCode = PendingSessionActivation(abilitySessionInfo);
+    WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -429,7 +429,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    const WSError& errCode = UpdateSessionRect(rect, reason);
+    WSError errCode = UpdateSessionRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -437,7 +437,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
 int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RaiseToAppTop!");
-    const WSError& errCode = RaiseToAppTop();
+    WSError errCode = RaiseToAppTop();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -446,7 +446,7 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
 {
     WLOGFD("RaiseAboveTarget!");
     auto subWindowId = data.ReadInt32();
-    const WSError& errCode = RaiseAboveTarget(subWindowId);
+    WSError errCode = RaiseAboveTarget(subWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -454,7 +454,7 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RaiseAppMainWindowToTop!");
-    const WSError& errCode = RaiseAppMainWindowToTop();
+    WSError errCode = RaiseAppMainWindowToTop();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -526,7 +526,7 @@ int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetAspectRatio!");
     float ratio = data.ReadFloat();
-    const WSError& errCode = SetAspectRatio(ratio);
+    WSError errCode = SetAspectRatio(ratio);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -535,7 +535,7 @@ int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data
 {
     WLOGD("HandleUpdateWindowSceneAfterCustomAnimation!");
     bool isAdd = data.ReadBool();
-    const WSError& errCode = UpdateWindowSceneAfterCustomAnimation(isAdd);
+    WSError errCode = UpdateWindowSceneAfterCustomAnimation(isAdd);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
