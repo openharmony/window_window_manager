@@ -215,8 +215,8 @@ private:
     void NotifyDisplayInfoChange();
 
     /**
-    * Window Immersive
-    */
+     * Window Immersive
+     */
     void UpdateDefaultStatusBarColor();
     
     bool userLimitsSet_ = false;
