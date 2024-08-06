@@ -246,12 +246,14 @@ HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | L
  */
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
 {
-    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback = new (std::nothrow) SCBSystemSession::SpecificSessionCallback();
+    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback = 
+        new (std::nothrow) SCBSystemSession::SpecificSessionCallback();
     UpdateAvoidAreaCallback onUpdateAvoidArea;
     ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
     scbSystemSession_->specificCallback_ = specificCallback;
     scbSystemSession_->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
-    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = onClearDisplayStatusBarTemporarilyFlags;
+    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
+        onClearDisplayStatusBarTemporarilyFlags;
     auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
@@ -263,7 +265,8 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest 
     ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
-    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = onClearDisplayStatusBarTemporarilyFlags;
+    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
+        onClearDisplayStatusBarTemporarilyFlags;
     ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
