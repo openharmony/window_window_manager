@@ -140,7 +140,7 @@ HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | Smal
     std::string deviceId = "deviceId";
     int res = SceneSessionManager::GetInstance().GetRemoteSessionSnapshotInfo(
         deviceId, 8, sessionSnapshot);
-    EXPECT_NE(ERR_OK, res);
+    EXPECT_EQ(ERR_NULL_OBJECT, res);
 }
 }
 }
