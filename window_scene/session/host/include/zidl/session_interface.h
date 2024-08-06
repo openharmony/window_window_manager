@@ -51,7 +51,7 @@ public:
      * @brief Receive session event from system application.
      *
      * This function provides the ability for system applications to move system window.\n
-     * When the system application listen for the touch down event, this interface will take effect.\n
+     * This interface will take effect after touch down event.\n
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      * @permission Make sure the caller has system permission.
