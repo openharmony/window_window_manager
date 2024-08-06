@@ -571,7 +571,10 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            auto task = [this]() { SendCastEvent(true); };
+            auto task = [this]() {
+                SendCastEvent(true);
+                ScreenSessionPublish::GetInstance.PublishCastPlugInEvent();
+            };
             taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
             TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventTrue");
             isPhyScreenConnected_ = true;
@@ -581,7 +584,10 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            auto task = [this]() { SendCastEvent(false); };
+            auto task = [this]() {
+                SendCastEvent(false);
+                ScreenSessionPublish::GetInstance.PublishCastPlugOutEvent();
+            };
             taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
             TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
         }
@@ -1926,14 +1932,12 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    // screenId要在rotation前进行设置
-    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
-    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
-    auto task = [settingScreenId, settingRotation]() {
-        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
-        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
-        ScreenSettingHelper::SetSettingRotation(settingRotation);
-    };
+    // 异步发送屏幕旋转公共事件
+    auto task = [=]() {
+        TLOGI(WmsLogTag::DMS, "publish dms rotation event");
+        ScreenSessionPublish::GetInstance.PublishDisplayRotationEvent(
+            displayInfo->GetScreenId(), displayInfo->GetRotation());
+    }
     taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
 
