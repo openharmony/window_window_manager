@@ -602,7 +602,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
 void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 {
     GetDefaultScreenId();
-    TLOGI(WmsLogTag::DMS, "Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
+    TLOGD(WmsLogTag::DMS, "Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
         refreshRate, defaultScreenId_);
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
@@ -1934,7 +1934,13 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
         return;
     }
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged, displayId:%{public}" PRIu64"", displayInfo->GetDisplayId());
+        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
+            TLOGD(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
+                event, displayInfo->GetDisplayId());
+        } else {
+            TLOGI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
+                event, displayInfo->GetDisplayId());
+        }
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
         if (agents.empty()) {
             TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged agents is empty");
