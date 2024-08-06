@@ -1357,8 +1357,8 @@ HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest
     uint32_t type = 0;
     ssm_->AddWindowDragHotArea(type, area);
     uint64_t displayId = 0;
-    ssm_->currAiNavigationBarAreaMap_.clear();
-    ssm_->currAiNavigationBarAreaMap_.insert(std::make_pair(displayId, area));
+    ssm_->currAINavigationBarAreaMap_.clear();
+    ssm_->currAINavigationBarAreaMap_.insert(std::make_pair(displayId, area));
     auto ret = ssm_->GetAINavigationBarArea(1);
     EXPECT_TRUE(ret.IsEmpty());
     ret = ssm_->GetAINavigationBarArea(displayId);
@@ -1379,6 +1379,7 @@ HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | 
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     displayInfoMap.insert(std::make_pair(displayId, displayInfo));
     DisplayStateChangeType type = DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE;
+    listener.OnDisplayStateChange(displayId, displayInfo, displayInfoMap, type);
     type = DisplayStateChangeType::UPDATE_ROTATION;
     listener.OnDisplayStateChange(displayId, displayInfo, displayInfoMap, type);
     type = DisplayStateChangeType::UPDATE_SCALE;
@@ -1435,10 +1436,10 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed01, Function | Sm
     sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
     ssm_->enterRecent_ = false;
     std::map<AvoidAreaType, AvoidArea> mapAvoidAreaType;
     mapAvoidAreaType.insert(std::make_pair(avoidAreaType, avoidArea));
-    ASSERT_NE(nullptr, ssm_);
     ssm_->lastUpdatedAvoidArea_.insert(std::make_pair(persistentId, mapAvoidAreaType));
     auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
     EXPECT_EQ(ret, false);
@@ -1488,7 +1489,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateAvoidArea, Function | SmallTest | Level
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     ssm_->UpdateAvoidArea(persistentId);
-    sceneSession->property->SetWindowType(WindowType:: APP_WINDOW_BASE);
+    sceneSession->property_->SetWindowType(WindowType:: APP_WINDOW_BASE);
     ssm_->UpdateAvoidArea(persistentId);
 }
 
@@ -1514,6 +1515,9 @@ HWTEST_F(SceneSessionManagerTest6, UpdateMaximizeMode, Function | SmallTest | Le
     EXPECT_EQ(ret, WSError::WS_OK);
     sptr<DisplayInfo> displayInfo = nullptr;
     ssm_->ProcessDisplayScale(displayInfo);
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    ssm_->ProcessDisplayScale(displayInfo);
     ProcessVirtualPixelRatioChangeFunc func = nullptr;
     ssm_->SetVirtualPixelRatioChangeListener(func);
 }
@@ -1526,7 +1530,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateMaximizeMode, Function | SmallTest | Le
 HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
-    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "WindowDestroyNotifyVisibility";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
