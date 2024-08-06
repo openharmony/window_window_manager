@@ -389,12 +389,12 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     }
 
     WSRect callingSessionRect = callingSession->GetSessionRect();
-    int32_t oriPosYBeforeRaisedBykeyboard = callingSession->GetOriPosYBeforeRaisedByKeyboard();
-    if (oriPosYBeforeRaisedBykeyboard != 0 && isCallingSessionFloating) {
-        callingSessionRect.posY_ = oriPosYBeforeRaisedBykeyboard;
+    int32_t oriPosYBeforeRaisedByKeyboard = callingSession->GetOriPosYBeforeRaisedByKeyboard();
+    if (oriPosYBeforeRaisedByKeyboard != 0 && isCallingSessionFloating) {
+        callingSessionRect.posY_ = oriPosYBeforeRaisedByKeyboard;
     }
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(keyboardPanelRect, callingSessionRect, 0, 0)) &&
-        oriPosYBeforeRaisedBykeyboard == 0) {
+        oriPosYBeforeRaisedByKeyboard == 0) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No overlap area, keyboardRect: %{public}s, callingRect: %{public}s",
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
         if (!IsCallingSessionSplitMode(callingSession)) {
@@ -405,23 +405,23 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     WSRect newRect = callingSessionRect;
     int32_t statusHeight = callingSession->GetStatusBarHeight();
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
-        if (oriPosYBeforeRaisedBykeyboard == 0) {
-            oriPosYBeforeRaisedBykeyboard = callingSessionRect.posY_;
+        if (oriPosYBeforeRaisedByKeyboard == 0) {
+            oriPosYBeforeRaisedByKeyboard = callingSessionRect.posY_;
             callingSession->SetOriPosYBeforeRaisedByKeyboard(callingSessionRect.posY_);
         }
         // calculate new rect of calling session
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - newRect.height_, statusHeight);
-        newRect.posY_ = std::min(oriPosYBeforeRaisedBykeyboard, newRect.posY_);
+        newRect.posY_ = std::min(oriPosYBeforeRaisedByKeyboard, newRect.posY_);
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
         callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
     } else {
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
     }
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardRect: %{public}s, CallSession OriRect: %{public}s, NewRect: %{public}s"
-        ", OriPosYBeforeRaisedBykeyboard: %{public}d, isCallingSessionFloating: %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardRect: %{public}s, callSession OriRect: %{public}s, newRect: %{public}s"
+        ", oriPosYBeforeRaisedByKeyboard: %{public}d, isCallingSessionFloating: %{public}d",
         keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str(), newRect.ToString().c_str(),
-        oriPosYBeforeRaisedBykeyboard, isCallingSessionFloating);
+        oriPosYBeforeRaisedByKeyboard, isCallingSessionFloating);
 }
 
 void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction)
@@ -432,16 +432,16 @@ void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>
         return;
     }
     const WSRect& emptyRect = { 0, 0, 0, 0 };
-    int32_t oriPosYBeforeRaisedBykeyboard = callingSession->GetOriPosYBeforeRaisedByKeyboard();
+    int32_t oriPosYBeforeRaisedByKeyboard = callingSession->GetOriPosYBeforeRaisedByKeyboard();
     NotifyOccupiedAreaChangeInfo(callingSession, emptyRect, emptyRect, rsTransaction);
-    if (oriPosYBeforeRaisedBykeyboard != 0 &&
+    if (oriPosYBeforeRaisedByKeyboard != 0 &&
         callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         WSRect callingSessionRestoringRect = callingSession->GetSessionRect();
-        if (oriPosYBeforeRaisedBykeyboard != 0) {
-            callingSessionRestoringRect.posY_ = oriPosYBeforeRaisedBykeyboard;
+        if (oriPosYBeforeRaisedByKeyboard != 0) {
+            callingSessionRestoringRect.posY_ = oriPosYBeforeRaisedByKeyboard;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedBykeyboard: %{public}d, sessionMode: %{public}d",
-            oriPosYBeforeRaisedBykeyboard, callingSession->GetWindowMode());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
+            oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
         callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
     }
     callingSession->SetOriPosYBeforeRaisedByKeyboard(0); // 0: default value
