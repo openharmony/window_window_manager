@@ -50,7 +50,8 @@ namespace {
     const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
     const std::string SETTING_COLUMN_VALUE = "VALUE";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
-    constexpr const char *SETTINGS_URL_PROXY_HEAD = "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_";
+    constexpr const char *SETTINGS_URL_PROXY_HEAD = "datashare:///com.ohos.settingsdata/"
+        "entry/settingsdata/USER_SETTINGSDATA_";
     constexpr const char *SETTINGS_URL_PROXY_TAIL = "?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
