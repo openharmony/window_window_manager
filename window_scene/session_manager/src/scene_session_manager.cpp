@@ -1418,8 +1418,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
-        sceneSession->SetUpdatePrivateStateAndNotifyFunc([sceneSession]() {
-            SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
+        sceneSession->SetUpdatePrivateStateAndNotifyFunc([weakSession = wptr(sceneSession)]() {
+            auto session = weakSession.promote();
+            SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
         });
     }
     return sceneSession;
