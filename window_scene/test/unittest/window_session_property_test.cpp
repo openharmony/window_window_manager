@@ -48,6 +48,7 @@ HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Le
     ASSERT_EQ(property->GetDragEnabled(), true);
     property->SetDragEnabled(false);
     ASSERT_EQ(property->GetDragEnabled(), false);
+    ASSERT_NE(property->GetDragEnabled(), false);
 }
 
 /**
