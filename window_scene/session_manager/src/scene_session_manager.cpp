@@ -5919,7 +5919,7 @@ WSError SceneSessionManager::TerminateSessionNew(
 }
 
 WSError SceneSessionManager::SetVmaCacheStatus(bool showRecent) {
-    WLOGFI("SceneSessionManager SetVmaCacheStatus: %{public}d", showRecent);
+    WLOGFI("showRecent: %{public}d", showRecent);
     RSInterfaces::GetInstance().SetVmaCacheStatus(showRecent);
     return WSError::WS_OK;
 }
