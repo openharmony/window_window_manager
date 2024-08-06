@@ -653,6 +653,12 @@ void PictureInPictureController::UpdateXComponentPositionAndSize()
 
 void PictureInPictureController::UpdatePiPSourceRect() const
 {
+    if (GetTypeNode() != nullptr) {
+        Rect rect = {0, 0, 0, 0};
+        TLOGI(WmsLogTag::WMS_PIP, "use typeNode, unable to locate source rect");
+        window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RESTORE);
+        return;
+    }
     if (mainWindowXComponentController_ == nullptr || window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "xcomponent controller not valid");
         return;
@@ -666,12 +672,16 @@ void PictureInPictureController::UpdatePiPSourceRect() const
     Rect rect = { posX, posY, width, height };
     TLOGI(WmsLogTag::WMS_PIP, "result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    window_->UpdatePiPRect(rect, WindowSizeChangeReason::RECOVER);
+    window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RESTORE);
 }
 
 void PictureInPictureController::ResetExtController()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (GetTypeNode() != nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "skip resetExtController as nodeController enabled");
+        return;
+    }
     if (mainWindowXComponentController_ == nullptr || pipXComponentController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "error when resetExtController, one of the xComponentController is null");
         return;
@@ -701,10 +711,15 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
         TLOGE(WmsLogTag::WMS_PIP, "swap xComponent failed, errorCode: %{public}u", errorCode);
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
+    OnPictureInPictureStart();
+    return WMError::WM_OK;
+}
+
+void PictureInPictureController::OnPictureInPictureStart()
+{
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStart();
     }
-    return WMError::WM_OK;
 }
 
 WMError PictureInPictureController::RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
@@ -852,7 +867,7 @@ napi_ref PictureInPictureController::GetCustomNodeController()
     return pipOption_ == nullptr ? nullptr : pipOption_->GetNodeControllerRef();
 }
 
-napi_ref PictureInPictureController::GetTypeNode()
+napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
 }

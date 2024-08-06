@@ -54,7 +54,7 @@ public:
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     static void AutoStartPipWindow(std::string navigationId);
     static void DoDestroy();
-    static std::shared_ptr<NativeReference> callbackRef_;
+    static std::shared_ptr<NativeReference> innerCallbackRef_;
 private:
     // controller in use
     static sptr<PictureInPictureController> activeController_;

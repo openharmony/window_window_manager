@@ -81,9 +81,9 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
 void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCode)
 {
     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
-    if (PictureInPictureManager::callbackRef_ != nullptr) {
+    if (PictureInPictureManager::innerCallbackRef_ != nullptr) {
         napi_value value[] = { CreateJsValue(env_, static_cast<uint32_t>(state))};
-        CallJsFunction(env_, PictureInPictureManager::callbackRef_->GetNapiValue(), value, ArraySize(value));
+        CallJsFunction(env_, PictureInPictureManager::innerCallbackRef_->GetNapiValue(), value, ArraySize(value));
     }
     auto napiTask = [jsCallback = jsCallBack_, state, errorCode, env = env_]() {
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
