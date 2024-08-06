@@ -1197,7 +1197,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function 
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
 
-    WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullpter);
+    WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
 }
 
 /**
@@ -1210,7 +1210,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Functio
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
 
-    WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullpter);
+    WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullptr);
 }
 
 }
