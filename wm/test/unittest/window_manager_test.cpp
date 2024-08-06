@@ -103,7 +103,7 @@ public:
     };
 };
 
-class TestDrawingContentChangedListener: public IDrawingContentChangedListener{
+class TestDrawingContentChangedListener : public IDrawingContentChangedListener {
 public:
     void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo)
     {
@@ -1228,7 +1228,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Functio
  */
 HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
 {
-    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
     WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
 
     WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
@@ -1241,7 +1241,7 @@ HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | 
  */
 HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function | SmallTest | Level2)
 {
-    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
     WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener);
 
     WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
