@@ -103,6 +103,14 @@ public:
     };
 };
 
+class TestDrawingContentChangedListener: public IDrawingContentChangedListener{
+public:
+    void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestDrawingContentChangedListener");
+    }
+};
+
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -1181,7 +1189,7 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
 {
-    for(int32_t i=-1000; i<1000; i++)
+    for (int32_t i=-1000; i<1000; i++)
     {
         WindowManager::GetInstance().ShiftAppWindowFocus(i, i + 1);
     }
@@ -1211,6 +1219,32 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Functio
     WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
 
     WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullptr);
+}
+
+/**
+ * @tc.name: RegisterDrawingContentChangedListener01
+ * @tc.desc: check RegisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
+
+    WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
+}
+
+/**
+ * @tc.name: UnregisterDrawingContentChangedListener01
+ * @tc.desc: check UnregisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener);
+
+    WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
 }
 
 }
