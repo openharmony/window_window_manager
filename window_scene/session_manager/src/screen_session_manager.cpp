@@ -1232,6 +1232,10 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
 {
     if (defaultScreenId_ == INVALID_SCREEN_ID) {
         defaultScreenId_ = rsInterface_.GetDefaultScreenId();
+        std::ostringstream oss;
+        oss << "Default screen id : " << defaultScreenId_;
+        TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+        screenEventTracker_.RecordEvent(oss.str());
     }
     return defaultScreenId_;
 }
