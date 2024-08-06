@@ -1489,7 +1489,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateAvoidArea, Function | SmallTest | Level
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     ssm_->UpdateAvoidArea(persistentId);
-    sceneSession->property_->SetWindowType(WindowType:: APP_WINDOW_BASE);
+    sceneSession->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     ssm_->UpdateAvoidArea(persistentId);
 }
 
