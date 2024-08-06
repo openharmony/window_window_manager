@@ -772,6 +772,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetAllDisplayPhysicalResolution(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_STATUS: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenStatus screenStatus = static_cast<VirtualScreenStatus>(data.ReadInt32());
+            bool res = SetVirtualScreenStatus(screenId, screenStatus);
+            reply.WriteBool(res);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
