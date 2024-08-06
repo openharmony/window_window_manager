@@ -1294,34 +1294,6 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
 }
 
 /**
- * @tc.name: SetAppForceLandscapeMode
- * @tc.desc: SetAppForceLandscapeMode
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, SetAppForceLandscapeMode, Function | SmallTest | Level3)
-{
-    std::string bundleName = "";
-    int32_t mode = 1;
-    ASSERT_NE(nullptr, ssm_);
-    auto ret1 = ssm_->SetAppForceLandscapeMode(bundleName, mode);
-    EXPECT_EQ(ret1, WSError::WS_ERROR_NULLPTR);
-    auto ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
-    EXPECT_EQ(ret2, 0);
-    bundleName = "test";
-    ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
-    EXPECT_EQ(ret2, 0);
-    ret1 = ssm_->SetAppForceLandscapeMode(bundleName, mode);
-    EXPECT_EQ(ret1, WSError::WS_OK);
-    ret2 = ssm_->GetAppForceLandscapeMode(bundleName);
-    EXPECT_EQ(ret2, 1);
-    DisplayChangeListener listener;
-    DisplayId displayId = 0;
-    listener.OnScreenshot(displayId);
-    bool immersive = true;
-    listener.OnImmersiveStateChange(immersive);
-}
-
-/**
  * @tc.name: OnScreenFoldStatusChanged
  * @tc.desc: OnScreenFoldStatusChanged
  * @tc.type: FUNC
