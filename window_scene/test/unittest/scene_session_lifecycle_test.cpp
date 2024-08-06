@@ -418,9 +418,11 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     auto result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
     sceneSession->isActive_ = true;
     result = sceneSession->DisconnectTask(false, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
     specificCallback->onCreate_ =
     [&resultValue, specificCallback](const SessionInfo& info,
@@ -435,10 +437,12 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->isActive_ = true;
     result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->isActive_ = true;
     result = sceneSession->DisconnectTask(false, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -463,6 +467,7 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Lev
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = true;
     auto result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
     sceneSession->isActive_ = true;
     result = sceneSession->DisconnectTask(false, true);
