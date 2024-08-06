@@ -1481,7 +1481,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateAvoidArea, Function | SmallTest | Level
     ssm_->sceneSessionMap_.clear();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
-    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "UpdateAvoidArea";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
@@ -1507,7 +1507,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateMaximizeMode, Function | SmallTest | Le
     auto ret = ssm_->UpdateMaximizeMode(persistentId, isMaximize);
     EXPECT_EQ(ret, WSError::WS_OK);
     SessionInfo sessionInfo;
-    sessionInfo.bundleName = "SceneSessionManagerTest6";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "UpdateMaximizeMode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
