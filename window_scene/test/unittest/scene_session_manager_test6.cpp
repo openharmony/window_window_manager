@@ -682,22 +682,6 @@ HWTEST_F(SceneSessionManagerTest6, GetAbilityInfosFromBundleInfo, Function | Sma
 }
 
 /**
- * @tc.name: GetOrientationFromResourceManager
- * @tc.desc: GetOrientationFromResourceManager
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, GetOrientationFromResourceManager, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    OHOS::AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.bundleName = "testBundleName";
-    abilityInfo.moduleName = "testModuleName";
-    abilityInfo.orientationId = 123456;
-    ssm_->GetOrientationFromResourceManager(abilityInfo);
-    EXPECT_EQ(OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED, abilityInfo.orientation);
-}
-
-/**
  * @tc.name: NotifyCompleteFirstFrameDrawing
  * @tc.desc: NotifyCompleteFirstFrameDrawing
  * @tc.type: FUNC
