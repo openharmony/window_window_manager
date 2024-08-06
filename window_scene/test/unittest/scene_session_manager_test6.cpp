@@ -1464,7 +1464,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession, Function | SmallTest | L
     ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->CheckIfReuseSession(sessionInfo);
     EXPECT_EQ(ret, BrokerStates::BROKER_UNKOWN);
-    ScreenId  screenId = 0;
+    ScreenId screenId = 0;
     std::unordered_map<int32_t, SessionUIParam> uiParams;
     ssm_->FlushUIParams(screenId, std::move(uiParams));
 }
