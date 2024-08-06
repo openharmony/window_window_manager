@@ -1481,6 +1481,9 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     WSRect newRequestRect;
     scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
     EXPECT_NE(scensession, nullptr);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
 }
 
 /**
