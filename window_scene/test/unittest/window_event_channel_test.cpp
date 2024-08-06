@@ -143,6 +143,23 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Le
     windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->SetIsUIExtension(false);
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->sessionStage_ = nullptr;
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -158,6 +175,11 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
     isConsumed = true;
     res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
     ASSERT_EQ(res, WSError::WS_OK);
+
+    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    windowEventChannel->sessionStage_ = nullptr;
+    res = windowEventChannel->TransferBackpressedEventForConsumed(isConsumed);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -220,6 +242,18 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     } else {
         ASSERT_EQ(res, WSError::WS_OK);
     }
+
+    res = windowEventChannel_->TransferKeyEventForConsumed(nullptr, isConsumed, false);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    windowEventChannel_->isUIExtension_ = false;
+    res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, true);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    windowEventChannel->sessionStage_ = nullptr;
+    res = windowEventChannel->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
 /**

@@ -40,6 +40,7 @@ group("unittest") {
     ":ws_multi_screen_manager_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
+    ":ws_scene_board_judgement_test"
     ":ws_scene_input_manager_test",
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
@@ -811,6 +812,19 @@ ohos_unittest("ws_fold_screen_controller_test") {
     "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_board_judgement_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/window_scene/interfaces/innerkits/include" ]
+
+  sources = [ "scene_board_judgement_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 }
 
