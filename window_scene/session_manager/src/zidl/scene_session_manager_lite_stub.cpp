@@ -133,6 +133,10 @@ int SceneSessionManagerLiteStub::HandleSetSessionIcon(MessageParcel &data, Messa
     WLOGFD("run HandleSetSessionIcon!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    if (icon == nullptr) {
+        WLOGFE("icon is null");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetSessionIcon(token, icon);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -256,6 +260,10 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, 
 {
     WLOGFD("run HandleTerminateSessionNew");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return ERR_INVALID_DATA;
+    }
     bool needStartCaller = data.ReadBool();
     bool isFromBroker = data.ReadBool();
     const WSError& errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
