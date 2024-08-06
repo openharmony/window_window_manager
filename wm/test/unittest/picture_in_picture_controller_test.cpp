@@ -307,7 +307,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     PictureInPictureManager::RemoveActiveController(pipControl1);
     PictureInPictureManager::IsActiveController(pipControl);
-    pipControl->StartPictureInPicture(startType)
+    pipControl->StartPictureInPicture(startType);
     delete contextPtr;
 }
 

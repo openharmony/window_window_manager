@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
-#Include "window_scene_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -212,8 +212,8 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     windowSceneSessionImpl->GetMainWindowWithId(1);
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    pipControl1->mainWindowId_ = 2;
-    windowSceneSessionImpl->windowSessionMap_.insert(std:make_pair("window1", std::make_pair(2, windowSession)));
+    pipController1->mainWindowId_ = 2;
+    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(2, windowSession)));
     windowSceneSessionImpl->GetMainWindowWithId(2);
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
 }
