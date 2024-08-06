@@ -2178,7 +2178,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             return;
         }
         if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
-            session->updatePrivateStateAndNotifyFunc_();
+            session->updatePrivateStateAndNotifyFunc_(persistentId);
         }
     };
     PostTask(task, "UpdateNativeVisibility");
