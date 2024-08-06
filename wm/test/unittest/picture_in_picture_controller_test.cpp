@@ -736,6 +736,31 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
 }
 
 /**
+ * @tc.name: RegisterListener
+ * @tc.desc: RegisterListener/UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, RegisterListener, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+
+    auto listener = sptr<IPiPLifeCycle>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    auto listener1 = sptr<IPiPLifeCycle>::MakeSptr();
+    ASSERT_NE(nullptr, listener1);
+    pipControl->pipLifeCycleListeners_.push_back(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->RegisterPiPLifecycle(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPLifecycle(listener));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPLifecycle(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->UnregisterPiPLifecycle(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->UnregisterPiPLifecycle(listener));
+}
+
+/**
  * @tc.name: IsPullPiPAndHandleNavigation
  * @tc.desc: IsPullPiPAndHandleNavigation
  * @tc.type: FUNC
