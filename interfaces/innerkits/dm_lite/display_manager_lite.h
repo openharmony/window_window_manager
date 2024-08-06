@@ -57,6 +57,16 @@ public:
         virtual void OnFoldStatusChanged([[maybe_unused]]FoldStatus foldStatus) {}
     };
 
+    class IDisplayModeListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when display mode changed.
+         *
+         * @param displayMode DisplayMode.
+         */
+        virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
+    };
+
     /**
      * @brief Register a display listener.
      *
@@ -90,6 +100,22 @@ public:
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
 
     /**
+     * @brief Register a listener for the event of display mode changed.
+     *
+     * @param listener IDisplayModeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of display mode changed.
+     *
+     * @param listener IDisplayModeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
      * @brief Get the default display object.
      *
      * @return Default display object.
@@ -116,6 +142,13 @@ public:
      * @return display mode of the foldable device.
      */
     FoldDisplayMode GetFoldDisplayMode();
+
+    /**
+     * @brief Change the display mode of the foldable device.
+     *
+     * @param mode target display mode to change.
+     */
+    void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
      * @brief Get the display object by id.
