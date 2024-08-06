@@ -38,12 +38,15 @@ public:
     sptr<DisplayLite> GetDefaultDisplay();
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
+    void SetFoldDisplayMode(const FoldDisplayMode);
     bool IsFoldable();
 
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+    DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+    DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     void OnRemoteDied();
     sptr<DisplayLite> GetDisplayById(DisplayId displayId);
 private:
@@ -52,16 +55,20 @@ private:
     void NotifyDisplayChange(sptr<DisplayInfo> displayInfo);
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void Clear();
 
     std::map<DisplayId, sptr<DisplayLite>> displayMap_;
     std::recursive_mutex& mutex_;
     std::set<sptr<IDisplayListener>> displayListeners_;
     std::set<sptr<IFoldStatusListener>> foldStatusListeners_;
+    std::set<sptr<IDisplayModeListener>> displayModeListeners_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
     class DisplayManagerFoldStatusAgent;
     sptr<DisplayManagerFoldStatusAgent> foldStatusListenerAgent_;
+    class DisplayManagerDisplayModeAgent;
+    sptr<DisplayManagerDisplayModeAgent> displayModeListenerAgent_;
 };
 
 class DisplayManagerLite::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -147,6 +154,21 @@ public:
     virtual void NotifyFoldStatusChanged(FoldStatus foldStatus) override
     {
         pImpl_->NotifyFoldStatusChanged(foldStatus);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManagerLite::Impl::DisplayManagerDisplayModeAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerDisplayModeAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerDisplayModeAgent() = default;
+
+    virtual void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override
+    {
+        pImpl_->NotifyDisplayModeChanged(displayMode);
     }
 private:
     sptr<Impl> pImpl_;
@@ -348,6 +370,75 @@ void DisplayManagerLite::Impl::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
 }
 
+DMError DisplayManagerLite::RegisterDisplayModeListener(sptr<IDisplayModeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IDisplayModeListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterDisplayModeListener(listener);
+}
+
+DMError DisplayManagerLite::Impl::RegisterDisplayModeListener(sptr<IDisplayModeListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (displayModeListenerAgent_ == nullptr) {
+        displayModeListenerAgent_ = new DisplayManagerDisplayModeAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapterLite>().RegisterDisplayManagerAgent(
+            displayModeListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterDisplayModeListener failed !");
+        displayModeListenerAgent_ = nullptr;
+    } else {
+        WLOGI("IDisplayModeListener register success");
+        displayModeListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManagerLite::UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterDisplayModeListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterDisplayModeListener(listener);
+}
+
+DMError DisplayManagerLite::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(displayModeListeners_.begin(), displayModeListeners_.end(), listener);
+    if (iter == displayModeListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    displayModeListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (displayModeListeners_.empty() && displayModeListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            displayModeListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+        displayModeListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+void DisplayManagerLite::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    std::set<sptr<IDisplayModeListener>> displayModeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayModeListeners = displayModeListeners_;
+    }
+    for (auto& listener : displayModeListeners) {
+        listener->OnDisplayModeChanged(displayMode);
+    }
+}
+
 FoldStatus DisplayManagerLite::GetFoldStatus()
 {
     return pImpl_->GetFoldStatus();
@@ -396,6 +487,16 @@ FoldDisplayMode DisplayManagerLite::GetFoldDisplayMode()
 FoldDisplayMode DisplayManagerLite::Impl::GetFoldDisplayMode()
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldDisplayMode();
+}
+
+void DisplayManagerLite::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    return pImpl_->SetFoldDisplayMode(mode);
+}
+
+void DisplayManagerLite::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetFoldDisplayMode(mode);
 }
 
 void DisplayManagerLite::Impl::OnRemoteDied()
