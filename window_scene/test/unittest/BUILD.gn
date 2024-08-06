@@ -40,7 +40,7 @@ group("unittest") {
     ":ws_multi_screen_manager_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
-    ":ws_scene_board_judgement_test"
+    ":ws_scene_board_judgement_test",
     ":ws_scene_input_manager_test",
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
