@@ -1174,6 +1174,45 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
 }
 
+/**
+ * @tc.name: ShiftAppWindowFocus01
+ * @tc.desc: check ShiftAppWindowFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
+{
+    for(int32_t i=-1000; i<1000; i++)
+    {
+        WindowManager::GetInstance().ShiftAppWindowFocus(i, i + 1);
+    }
+}
+
+/**
+ * @tc.name: RegisterVisibleWindowNumChangedListener01
+ * @tc.desc: check RegisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
+
+    WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullpter);
+}
+
+/**
+ * @tc.name: UnregisterVisibleWindowNumChangedListener01
+ * @tc.desc: check UnregisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
+
+    WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullpter);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
