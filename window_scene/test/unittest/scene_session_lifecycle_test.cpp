@@ -817,11 +817,11 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
         property, nullptr, -1, -1, "session2");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
+    result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session1");
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
+    result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
@@ -853,7 +853,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     sptr<IWindowEventChannel> eventChannel = new WindowEventChannel(mockSessionStage);
     ASSERT_NE(eventChannel, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    auto result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig,
+    result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig,
         property, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 }

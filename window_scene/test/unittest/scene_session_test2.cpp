@@ -85,7 +85,6 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifyRaiseAboveTargetFunc fun = [](int32_t subWindowId()){};
     sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
     WSError result = scensession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
