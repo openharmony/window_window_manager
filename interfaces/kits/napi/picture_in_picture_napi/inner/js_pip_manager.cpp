@@ -154,16 +154,6 @@ napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
     return typeNode;
 }
 
-void JsPipManager::RegisterListener(napi_env env, const std::string type, napi_value value)
-{
-    std::shared_ptr<NativeReference> callbackRef;
-    napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
-    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    PictureInPictureManager::innerCallbackRef_ = callbackRef;
-    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", type.c_str());
-}
-
 napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
@@ -197,7 +187,12 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
         TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
         return NapiThrowInvalidParam(env);
     }
-    RegisterListener(env, cbType, value);
+    std::shared_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    PictureInPictureManager::innerCallbackRef_ = callbackRef;
+    TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
