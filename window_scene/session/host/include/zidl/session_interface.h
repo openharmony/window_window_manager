@@ -46,7 +46,7 @@ public:
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
-    
+
      /**
      * @brief Receive session event from system application.
      *
@@ -54,7 +54,7 @@ public:
      * When the system application listen for the touch down event, this interface will take effect.\n
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller is system application.
+     * @permission Make sure the caller has system permission.
      */
     virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
