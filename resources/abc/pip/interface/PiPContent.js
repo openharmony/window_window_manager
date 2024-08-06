@@ -18,6 +18,7 @@ const NodeController = requireNapi('arkui.node').NodeController;
 const FrameNode = requireNapi('arkui.node').FrameNode;
 
 const TAG = 'PiPContent';
+const ABOUT_TO_STOP = 3;
 
 class XCNodeController extends NodeController {
     constructor(k2) {
@@ -102,8 +103,8 @@ export class PiPContent extends ViewPU {
         console.info(TAG, 'use Node Controller');
         pip.on('stateChange', (w1) => {
             var x1;
-            console.info(TAG, `stateChange state: ${w1}}`);
-            if (w1 === 3 || w1 === 4) {
+            console.info(TAG, `stateChange state: ${w1}`);
+            if (w1 === ABOUT_TO_STOP) {
                 (x1 = this.mXCNodeController) === null || x1 === void 0 ? void 0 : x1.removeNode();
             }
         })

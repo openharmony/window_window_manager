@@ -148,6 +148,7 @@ napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
         TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
         return NapiGetUndefined(env);
     }
+    pipController->OnPictureInPictureStart();
     napi_value typeNode = nullptr;
     napi_get_reference_value(env, ref, &typeNode);
     return typeNode;
@@ -159,7 +160,7 @@ void JsPipManager::RegisterListener(napi_env env, const std::string type, napi_v
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
-    PictureInPictureManager::callbackRef_ = callbackRef;
+    PictureInPictureManager::innerCallbackRef_ = callbackRef;
     TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", type.c_str());
 }
 
@@ -209,7 +210,7 @@ napi_value JsPipManager::UnregisterCallback(napi_env env, napi_callback_info inf
 napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
-    PictureInPictureManager::callbackRef_ = nullptr;
+    PictureInPictureManager::innerCallbackRef_ = nullptr;
     return NapiGetUndefined(env);
 }
 

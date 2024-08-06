@@ -96,7 +96,8 @@ public:
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
     napi_ref GetCustomNodeController();
-    napi_ref GetTypeNode();
+    napi_ref GetTypeNode() const;
+    void OnPictureInPictureStart();
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:

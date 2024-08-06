@@ -17,6 +17,7 @@ import pip from '@ohos.pip';
 import { NodeController, FrameNode, TypedFrameNode, UIContext } from '@kit.ArkUI';
 
 const TAG: string = 'PiPContent';
+const ABOUT_TO_STOP = 3;
 
 class XCNodeController extends NodeController {
   private mXComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>;
@@ -66,8 +67,8 @@ export struct PiPContent {
     console.info(TAG, 'use Node Controller');
 
     pip.on('stateChange', (state: number) => {
-      console.info(TAG, `stateChange state:${state}}`);
-      if (state === 3 || state === 4) {
+      console.info(TAG, `stateChange state:${state}`);
+      if (state === ABOUT_TO_STOP) {
         this.mXCNodeController?.removeNode();
       }
     })
