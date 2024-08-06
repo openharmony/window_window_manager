@@ -115,11 +115,6 @@ HWTEST_F(SceneSessionManagerTest7, UpdateSessionWindowVisibilityListener, Functi
     ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
     ret = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
-    // sceneSession->callingPid_ = IPCSkeleton::GetCallingRealPid();
-    // ret = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
-    // EXPECT_EQ(ret, WSError::WS_OK);
-    // haveListener = false;
-    // EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
