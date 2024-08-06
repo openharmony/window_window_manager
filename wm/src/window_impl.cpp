@@ -667,8 +667,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
         auto displayInfo = display->GetDisplayInfo();
-        if (displayInfo != nullptr)
-        {
+        if (displayInfo != nullptr) {
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
             TLOGI(WmsLogTag::WMS_LIFE, "notify window orientation change end.");
         }
