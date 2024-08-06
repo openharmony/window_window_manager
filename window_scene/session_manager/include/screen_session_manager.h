@@ -192,6 +192,7 @@ public:
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
     void DisablePowerOffRenderControl(ScreenId screenId) override;
+    bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;

@@ -139,6 +139,7 @@ public:
         TRANS_ID_RESET_ALL_FREEZE_STATUS,
         TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO,
         TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION,
+        TRANS_ID_SET_VIRTUAL_SCREEN_STATUS,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -301,6 +302,7 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) { return false; }
 };
 } // namespace OHOS::Rosen
 
