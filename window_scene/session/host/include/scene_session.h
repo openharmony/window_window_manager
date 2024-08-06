@@ -80,7 +80,7 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
-using UpdatePrivateStateAndNotifyFunc = std::function<void()>;
+using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
