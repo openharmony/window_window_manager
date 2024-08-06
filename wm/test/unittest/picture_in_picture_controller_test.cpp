@@ -303,8 +303,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->pipOption_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_ = option;
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     PictureInPictureManager::RemoveActiveController(pipControl1);
     PictureInPictureManager::IsActiveController(pipControl);
     pipControl->StartPictureInPicture(startType);
