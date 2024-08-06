@@ -1418,6 +1418,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
+        sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
+            this->UpdatePrivateStateAndNotify(persistentId);
+        });
     }
     return sceneSession;
 }
