@@ -93,6 +93,98 @@ void SceneSessionManagerTest7::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: UpdateSessionWindowVisibilityListener
+ * @tc.desc: UpdateSessionWindowVisibilityListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateSessionWindowVisibilityListener, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    bool haveListener = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    auto ret = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateSessionWindowVisibilityListener";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->callingPid_ = 65535;
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ret = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+    // sceneSession->callingPid_ = IPCSkeleton::GetCallingRealPid();
+    // ret = ssm_->UpdateSessionWindowVisibilityListener(persistentId, haveListener);
+    // EXPECT_EQ(ret, WSError::WS_OK);
+    // haveListener = false;
+    // EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessVirtualPixelRatioChange
+ * @tc.desc: ProcessVirtualPixelRatioChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "UpdateAvoidArea";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sessionInfo.isSystem_ = false;
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    sceneSession = nullptr;
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: ProcessVirtualPixelRatioChange01
+ * @tc.desc: ProcessVirtualPixelRatioChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange01, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_NE(nullptr, displayInfo);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
+    displayInfo->SetVirtualPixelRatio(0.1f);
+    displayInfo->SetDensityInCurResolution(0.1f);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    ProcessVirtualPixelRatioChangeFunc func =  [](float ratio, const OHOS::Rosen::Rect& rect) {};
+    ssm_->SetVirtualPixelRatioChangeListener(func);
+    ASSERT_NE(nullptr, ssm_->processVirtualPixelRatioChangeFunc_);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo->SetDensityInCurResolution(0.2f);
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
