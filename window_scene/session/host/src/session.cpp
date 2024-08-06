@@ -926,6 +926,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         if (sessionProperty->GetCompatibleModeInPc()) {
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
+        property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -2179,6 +2180,18 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     if (enable) {
         property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "Set is app support phone in pc isSupportPhone: %{public}d", isSupportPhone);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsAppSupportPhoneInPc(isSupportPhone);
     return WSError::WS_OK;
 }
 

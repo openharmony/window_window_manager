@@ -286,6 +286,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
 
 void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName)
 {
+    BindNativeFunction(env, objValue, "setAppSupportPhoneInPc", moduleName,
+        JsSceneSession::SetAppSupportPhoneInPc);
     BindNativeFunction(env, objValue, "compatibleFullScreenRecover", moduleName,
         JsSceneSession::CompatibleFullScreenRecover);
     BindNativeFunction(env, objValue, "compatibleFullScreenMinimize", moduleName,
@@ -1280,6 +1282,13 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI] called");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
@@ -3240,6 +3249,33 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     session->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isSupportPhone = false;
+    if (!ConvertFromJsValue(env, argv[0], isSupportPhone)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        return NapiGetUndefined(env);
+    }
+    session->SetAppSupportPhoneInPc(isSupportPhone);
     return NapiGetUndefined(env);
 }
 
