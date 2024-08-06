@@ -84,6 +84,7 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     NotifyRaiseAboveTargetFunc fun = [](int32_t subWindowId()){};
     sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
     WSError result = scensession->RaiseAboveTarget(0);
@@ -1346,6 +1347,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1786,6 +1788,7 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
     ASSERT_EQ(result, SubWindowModalType::TYPE_UNDEFINED);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     result = sceneSession->SetSessionProperty(property);
     ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);

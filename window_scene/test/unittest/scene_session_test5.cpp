@@ -527,6 +527,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     session->SetSessionRectChangeCallback(nullptr);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionProperty(property);
     session->SetSessionRectChangeCallback(func);

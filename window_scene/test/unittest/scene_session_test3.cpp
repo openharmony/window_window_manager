@@ -275,6 +275,7 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | Smal
     ASSERT_NE(scenceSession, nullptr);
 
     sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
     scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, keyboardSession);
 }
