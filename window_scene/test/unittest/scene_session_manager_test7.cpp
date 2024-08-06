@@ -209,7 +209,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange, Function | Small
     ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
     sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
     ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
-    WSRectF bounds = { 0, 0, 0 ,0 };
+    WSRectF bounds = { 0, 0, 0 , 0 };
     sceneSession->SetBounds(bounds);
     displayInfo->width_ = 0;
     displayInfo->height_ = 0;
