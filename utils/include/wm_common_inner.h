@@ -299,7 +299,8 @@ namespace {
     constexpr int32_t IVALID_DIALOG_WINDOW_ID = -1;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
-    constexpr uint32_t WINDOW_FRAME_WIDTH = 16;
+    constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
+    constexpr uint32_t WINDOW_FRAME_WIDTH_TOUCH = 16;
     constexpr uint32_t WINDOW_FRAME_CORNER_WIDTH = 16; // the frame width of corner
     constexpr uint32_t HOTZONE_TOUCH = 24;
     constexpr uint32_t HOTZONE_POINTER = 4;
