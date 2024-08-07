@@ -2904,6 +2904,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
+            sceneSession->NotifyDestroy();
+        }
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
