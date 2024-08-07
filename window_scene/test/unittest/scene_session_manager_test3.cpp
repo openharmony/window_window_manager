@@ -992,7 +992,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
     sceneSession->SetIsPcAppInPad(false);
 
     bool ret = ssm_->IsPcLifeCycle(sceneSession);
@@ -1015,7 +1015,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
     sceneSession->SetIsPcAppInPad(true);
 
     bool ret = ssm_->IsPcLifeCycle(sceneSession);
@@ -1038,7 +1038,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle3, Function | SmallTest | Level3
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
-    property->SetCompatibleModeInPc(true);
+    property->SetIsAppSupportPhoneInPc(true);
     sceneSession->SetIsPcAppInPad(false);
 
     bool ret = ssm_->IsPcLifeCycle(sceneSession);
@@ -1079,7 +1079,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function 
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
 
@@ -1105,7 +1105,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function 
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_END);
 
@@ -1131,7 +1131,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function 
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
 
