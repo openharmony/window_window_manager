@@ -177,6 +177,7 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
     ASSERT_EQ(res, WSError::WS_OK);
 
     sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    ASSERT_NE(nullptr, windowEventChannel);
     windowEventChannel->sessionStage_ = nullptr;
     res = windowEventChannel->TransferBackpressedEventForConsumed(isConsumed);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
@@ -251,6 +252,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     EXPECT_EQ(res, WSError::WS_OK);
 
     sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    ASSERT_NE(nullptr, windowEventChannel);
     windowEventChannel->sessionStage_ = nullptr;
     res = windowEventChannel->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);

@@ -39,7 +39,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldRemoveTrailingCR_WhenLineEnd
     configFile.basic_ios<char>::rdbuf(input.rdbuf());
 
     SceneBoardJudgement sceneBoardJudgement;
-    sceneBoardJudgement.SafeGetLine(configFile.line);
+    sceneBoardJudgement.SafeGetLine(configFile, line);
     EXPECT_EQ(line, "Test");
 }
 
@@ -51,7 +51,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldNotRemoveTrailingCR_WhenLine
     configFile.basic_ios<char>::rdbuf(input.rdbuf());
 
     SceneBoardJudgement sceneBoardJudgement;
-    sceneBoardJudgement.SafeGetLine(configFile.line);
+    sceneBoardJudgement.SafeGetLine(configFile, line);
     EXPECT_EQ(line, "Test");
 }
 
@@ -63,7 +63,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldNotRemoveTrailingCR_WhenLine
     configFile.basic_ios<char>::rdbuf(input.rdbuf());
 
     SceneBoardJudgement sceneBoardJudgement;
-    sceneBoardJudgement.SafeGetLine(configFile.line);
+    sceneBoardJudgement.SafeGetLine(configFile, line);
     EXPECT_EQ(line, "");
 }
 
