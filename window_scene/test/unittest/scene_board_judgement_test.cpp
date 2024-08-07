@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
- #include <gtest/gtest.h>
- #include <fstream>
- #include <string>
- #include "interfaces/innerkits/include/scene_board_judgement.h"
+#include <gtest/gtest.h>
+#include <fstream>
+#include <string>
+#include "interfaces/innerkits/include/scene_board_judgement.h"
 
- using namespace testing;
- using namespace testing::ext;
+using namespace testing;
+using namespace testing::ext;
 
- namespace OHOS {
+namespace OHOS {
     namespace Rosen {
 
 class SceneBoardJudgementTest : public testing::Test {
@@ -31,7 +31,7 @@ protected:
     std::string line;
 };
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldRemoveTrailingCR_WhenLineEndsWithCR, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineEndsWithCR, Function | SmallTest | Level1)
 {
     std::istringstream input("Test\r");
     std::string line;
@@ -43,7 +43,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldRemoveTrailingCR_WhenLineEnd
     EXPECT_EQ(line, "Test");
 }
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldNotRemoveTrailingCR_WhenLineDoesNotEndWithCR, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineDoesNotEndWithCR, Function | SmallTest | Level1)
 {
     std::istringstream input("Test");
     std::string line;
@@ -55,7 +55,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldNotRemoveTrailingCR_WhenLine
     EXPECT_EQ(line, "Test");
 }
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_ShouldNotRemoveTrailingCR_WhenLineIsEmpty, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineIsEmpty, Function | SmallTest | Level1)
 {
     std::istringstream input("");
     std::string line;
