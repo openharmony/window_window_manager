@@ -1637,7 +1637,7 @@ const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
     };
     auto iter = areaMap.find(area);
     if (iter == areaMap.end()) {
-        return "UNKNOW";
+        return "UNKNOWN";
     }
     return iter->second;
 }
