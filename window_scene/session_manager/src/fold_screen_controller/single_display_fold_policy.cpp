@@ -120,7 +120,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 globalDisplayMode_);    
             ChangeScreenDisplayMode(globalDisplayMode_);       
         }
-    }
+    };
     std::thread t(taskScreenChange);
     t.detach();
 }
