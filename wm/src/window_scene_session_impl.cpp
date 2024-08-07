@@ -2141,10 +2141,8 @@ void WindowSceneSessionImpl::StartMove()
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
     bool isValidWindow = isMainWindow ||
-            ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) &&
-            (isSubWindow || isDecorDialog || isDragEnabledSystemWin));
+            ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
