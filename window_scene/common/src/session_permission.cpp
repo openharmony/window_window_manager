@@ -252,7 +252,7 @@ bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
     bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
     IPCSkeleton::SetCallingIdentity(identity);
     if (callingBundleName == bundleName) {
-        WLOGFI("verify bundle name success");
+        WLOGFD("verify bundle name success");
         return true;
     } else {
         WLOGFE("verify bundle name failed, calling bundle name %{public}s, but window bundle name %{public}s.",
