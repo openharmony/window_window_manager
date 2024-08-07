@@ -13,21 +13,13 @@
  * limitations under the License.
  */
 
-#include <bundle_mgr_interface.h>
-#include <bundlemgr/launcher_service.h>
 #include <gtest/gtest.h>
-#include <regex>
-#include "context.h"
+
 #include "interfaces/include/ws_common.h"
-#include "mock/mock_session_stage.h"
-#include "mock/mock_window_event_channel.h"
-#include "session/host/include/scene_session.h"
-#include "session/host/include/main_session.h"
-#include "session_info.h"
-#include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "window_manager_agent.h"
-#include "zidl/window_manager_agent_interface.h"
+#include "session_info.h"
+#include "session/host/include/scene_session.h"
+#include "session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
