@@ -66,7 +66,7 @@ HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Le
 {
     std::string strId = "1234";
     std::string dumpInfo = "dumpInfo";
-    //SceneSessionManager::GetInstance().SetDumpUITreeFunc(nullptr);
+    SceneSessionManager::GetInstance().SetDumpUITreeFunc(nullptr);
     EXPECT_EQ(WSError::WS_OK, SceneSessionManager::GetInstance()
         .GetTotalUITreeInfo(strId, dumpInfo));
     DumpUITreeFunc func = [](uint64_t, std::string& dumpInfo) {
