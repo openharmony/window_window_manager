@@ -282,6 +282,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
     }
