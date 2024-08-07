@@ -552,7 +552,7 @@ void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
     ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
-void ScreenSessionManager::NotifyCastWhenScreenConnectChange(sptr<ScreenSession> screenSession, bool isConnected)
+void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
 {
     if (isConnected) {
         auto task = [this]() {
@@ -590,14 +590,14 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            NotifyCastWhenScreenConnectChange(screenSession, true);
+            NotifyCastWhenScreenConnectChange(true);
             isPhyScreenConnected_ = true;
         }
         return;
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            NotifyCastWhenScreenConnectChange(screenSession, false);
+            NotifyCastWhenScreenConnectChange(false);
             FreeDisplayMirrorNodeInner(screenSession);
             isPhyScreenConnected_ = false;
         }
