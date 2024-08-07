@@ -818,7 +818,8 @@ ohos_unittest("ws_fold_screen_controller_test") {
 ohos_unittest("ws_scene_board_judgement_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "${window_base_path}/window_scene/interfaces/innerkits/include" ]
+  include_dirs =
+      [ "${window_base_path}/window_scene/interfaces/innerkits/include" ]
 
   sources = [ "scene_board_judgement_test.cpp" ]
 
