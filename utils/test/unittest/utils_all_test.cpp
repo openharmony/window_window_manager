@@ -23,6 +23,7 @@
 #include "singleton_container.h"
 #include "perform_reporter.h"
 #include "surface_reader_handler_impl.h"
+#include "sys_cap_util.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -204,6 +205,15 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
     surfaceReaderHandlerImpl->flag_ = true;
     surfaceReaderHandlerImpl->GetPixelMap();
+}
+/**
+ * @tc.name: SysCapUtilGetClientName
+ * @tc.desc: test SysCapUtil::GetClientName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, Function | SmallTest | Level2)
+{
+    ASSERT_EQ("unknown", SysCapUtil::GetClientName());
 }
 }
 } // namespace Rosen
