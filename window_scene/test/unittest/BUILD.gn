@@ -20,6 +20,8 @@ group("unittest") {
 
   deps = [
     ":ws_anomaly_detection_test",
+    ":ws_anr_handler_test",
+    ":ws_anr_manager_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_dual_display_fold_policy_test",
@@ -1821,5 +1823,33 @@ ohos_static_library("ws_unittest_common") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_unittest("ws_anr_handler_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anr_handler_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+  ]
+}
+
+ohos_unittest("ws_anr_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anr_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+  ]
 }
 ## Build ws_unittest_common.a }}}
