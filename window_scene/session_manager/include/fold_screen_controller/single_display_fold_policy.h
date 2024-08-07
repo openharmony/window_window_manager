@@ -21,6 +21,9 @@
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_info.h"
 #include "session/screen/include/screen_session.h"
+#include <atomic>
+#include <thread>
+#include <chrono>
 
 namespace OHOS::Rosen {
 class SingleDisplayFoldPolicy : public FoldScreenPolicy {
@@ -50,6 +53,8 @@ private:
         ScreenPropertyChangeReason reason);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    std::atomic<bool> isFirstDisplayModeChangeTaskRunning;
+    std::atomic<bool> isSecondDisplayModeChangeTaskRunning;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_FOLD_POLICY_H
