@@ -450,7 +450,7 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
-    void NotifyCastWhenScreenConnectChange(sptr<ScreenSession> screenSession, bool isConnected);
+    void NotifyCastWhenScreenConnectChange(bool isConnected);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
