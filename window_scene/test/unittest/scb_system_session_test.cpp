@@ -274,7 +274,7 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest 
     ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
-    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
+    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ =
         onClearDisplayStatusBarTemporarilyFlags;
     ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
