@@ -408,6 +408,7 @@ private:
     void UpdateSubWindowVisibility(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
+
     void PostProcessFocus();
     void PostProcessProperty();
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);

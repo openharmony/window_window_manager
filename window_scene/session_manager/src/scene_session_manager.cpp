@@ -3036,7 +3036,7 @@ bool SceneSessionManager::IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSess
 }
 
 WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive)
-{ 
+{
     auto persistentId = sceneSession->GetPersistentId();
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
     if (!abilitySessionInfo) {
@@ -3089,7 +3089,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
         }
-        // Change pc life cycle when switch user, do app freeze
+        // Change app life cycle in pc when switch user, do app freeze
         int32_t pid = static_cast<int32_t>(getpid());
         std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
         {
