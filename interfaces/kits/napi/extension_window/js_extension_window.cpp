@@ -894,6 +894,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
                 return;
             }
+            window->SetParentExtensionWindow(extWindow);
             task.Resolve(env, CreateJsWindowObject(env, window));
             TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Create sub window %{public}s end", windowName.c_str());
         };

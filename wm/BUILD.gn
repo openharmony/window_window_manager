@@ -115,6 +115,7 @@ ohos_static_library("libwm_static") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
     "ability_runtime:app_manager",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",

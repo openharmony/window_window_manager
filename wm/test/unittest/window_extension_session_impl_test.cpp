@@ -1472,6 +1472,28 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
     ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: NotifySetUIContent
+ * @tc.desc: NotifySetUIContent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySetUIContent, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->NotifySetUIContent();
+}
+
+/**
+ * @tc.name: NotifySetUIContent
+ * @tc.desc: NotifySetUIContent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AddSetUIContentTimeoutListener, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->AddSetUIContentTimeoutListener();
+}
 }
 } // namespace Rosen
 } // namespace OHOS

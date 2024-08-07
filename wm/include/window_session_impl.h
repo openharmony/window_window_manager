@@ -236,6 +236,7 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+    void SetParentExtensionWindow(const sptr<Window>& parentExtensionWindow) override;
 
 protected:
     WMError Connect();
@@ -431,6 +432,7 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
+    sptr<Window> parentExtensionWindow_ = nullptr;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool hasFirstNotifyInteractive_ = false;
