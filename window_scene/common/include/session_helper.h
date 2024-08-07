@@ -16,12 +16,13 @@
 #ifndef OHOS_ROSEN_SESSION_HELPER_H
 #define OHOS_ROSEN_SESSION_HELPER_H
 
+#include <pointer_event.h>
+
 #include <string>
 #include "ws_common.h"
 #include "ws_common_inner.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include "pointer_event.h"
 
 namespace OHOS {
 namespace Rosen {
