@@ -26,6 +26,7 @@
 #include "native_engine.h"
 #include "window_extension_session_impl.h"
 #include "mock_uicontent.h"
+#include "context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -138,6 +139,20 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
+}
+
+/**
+ * @tc.name: Destroy02
+ * @tc.desc: Destroy Test, window session is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Destroy02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->hostSession_ = nullptr;
+    window_->property_->SetPersistentId(0);
+    window_->state_= WindowState::STATE_DESTROYED;
+    ASSERT_NE(WMError::WM_OK, window_->Destroy(false, false));
 }
 
 /**
@@ -609,6 +624,19 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, Function | Sm
 }
 
 /**
+ * @tc.name: NotifyBackpressedEvent03
+ * @tc.desc: NotifyFocusActiveEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->uiContent_ = nullptr;
+    bool isConsumed = true;
+    window_->NotifyBackpressedEvent(isConsumed);
+}
+
+/**
  * @tc.name: InputMethodKeyEventResultCallback01
  * @tc.desc: InputMethodKeyEventResultCallback01 Test
  * @tc.type: FUNC
@@ -761,6 +789,103 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest 
     bool notifyInputMethod = false;
     ASSERT_NE(nullptr, window_);
     window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport01
+ * @tc.desc: ArkUIFrameworkSupport01 Test, context_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport02
+ * @tc.desc: ArkUIFrameworkSupport02 Test, context_->GetApplicationInfo() == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    abilityContext->stageContext_ = nullptr;
+    window_->context_ = abilityContext;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport03
+ * @tc.desc: ArkUIFrameworkSupport03 Test, version < 10 and isSystembarPropertiesSet_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->isSystembarPropertiesSet_ = true;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport04
+ * @tc.desc: ArkUIFrameworkSupport04 Test, version < 10 and isSystembarPropertiesSet_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->isSystembarPropertiesSet_ = false;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport05
+ * @tc.desc: ArkUIFrameworkSupport05 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    auto stageContent =  std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(nullptr, stageContent);
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    ASSERT_NE(nullptr, applicationInfo);
+    applicationInfo->apiCompatibleVersion = 12;
+    stageContent->SetApplicationInfo(applicationInfo);
+    abilityContext->stageContext_ = stageContent;
+    window_->context_ = abilityContext;
+    window_->isIgnoreSafeAreaNeedNotify_ = false;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport06
+ * @tc.desc: ArkUIFrameworkSupport06 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    auto stageContent =  std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(nullptr, stageContent);
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    ASSERT_NE(nullptr, applicationInfo);
+    applicationInfo->apiCompatibleVersion = 12;
+    stageContent->SetApplicationInfo(applicationInfo);
+    abilityContext->stageContext_ = stageContent;
+    window_->context_ = abilityContext;
+    window_->isIgnoreSafeAreaNeedNotify_ = true;
+    window_->ArkUIFrameworkSupport();
 }
 
 /**
