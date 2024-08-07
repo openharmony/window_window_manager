@@ -568,7 +568,7 @@ void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
         };
         taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
         TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
-    } 
+    }
 }
 
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
@@ -1943,7 +1943,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         TLOGI(WmsLogTag::DMS, "publish dms rotation event");
         ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
             displayInfo->GetScreenId(), displayInfo->GetRotation());
-    }
+    };
     taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
 
