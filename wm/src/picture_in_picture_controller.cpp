@@ -653,7 +653,7 @@ void PictureInPictureController::UpdateXComponentPositionAndSize()
 
 void PictureInPictureController::UpdatePiPSourceRect() const
 {
-    if (GetTypeNode() != nullptr) {
+    if (useTypeNode_) {
         Rect rect = {0, 0, 0, 0};
         TLOGI(WmsLogTag::WMS_PIP, "use typeNode, unable to locate source rect");
         window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RESTORE);
@@ -678,7 +678,7 @@ void PictureInPictureController::UpdatePiPSourceRect() const
 void PictureInPictureController::ResetExtController()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (GetTypeNode() != nullptr) {
+    if (useTypeNode_) {
         TLOGI(WmsLogTag::WMS_PIP, "skip resetExtController as nodeController enabled");
         return;
     }
@@ -711,12 +711,15 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
         TLOGE(WmsLogTag::WMS_PIP, "swap xComponent failed, errorCode: %{public}u", errorCode);
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    OnPictureInPictureStart();
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPictureInPictureStart();
+    }
     return WMError::WM_OK;
 }
 
 void PictureInPictureController::OnPictureInPictureStart()
 {
+    useTypeNode_ = true;
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStart();
     }

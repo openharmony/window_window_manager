@@ -99,6 +99,7 @@ export class PiPContent extends ViewPU {
             return;
         }
         this.useNode = true;
+        pip.setTypeNodeEnabled();
         this.mXCNodeController = new XCNodeController(this.xComponent);
         console.info(TAG, 'use Node Controller');
         pip.on('stateChange', (w1) => {

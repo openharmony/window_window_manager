@@ -73,7 +73,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(env, xComponentController);
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
-    if (!pipWindow) {
+    if (pipWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
         return NapiGetUndefined(env);
     }
@@ -148,10 +148,34 @@ napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
         TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
         return NapiGetUndefined(env);
     }
-    pipController->OnPictureInPictureStart();
     napi_value typeNode = nullptr;
     napi_get_reference_value(env, ref, &typeNode);
     return typeNode;
+}
+
+napi_value JsPipManager::SetTypeNodeEnabled(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnSetTypeNodeEnabled(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        return NapiGetUndefined(env);
+    }
+    pipController->OnPictureInPictureStart();
+    return NapiGetUndefined(env);
 }
 
 napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -224,6 +248,7 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getTypeNode", moduleName, JsPipManager::GetTypeNode);
     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
+    BindNativeFunction(env, exportObj, "setTypeNodeEnabled", moduleName, JsPipManager::SetTypeNodeEnabled);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen
