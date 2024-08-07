@@ -210,6 +210,73 @@ HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange, Function | Small
     displayInfo->SetRotation(rotation);
     ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
+
+/**
+ * @tc.name: FlushUIParams
+ * @tc.desc: FlushUIParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FlushUIParams, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FlushUIParams";
+    sessionInfo.screenId_ = 1;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParams.clear();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+}
+
+/**
+ * @tc.name: FlushUIParams01
+ * @tc.desc: FlushUIParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FlushUIParams01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FlushUIParams01";
+    sessionInfo.screenId_ = 2;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParams.clear();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->persistentId_ = 1;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    SessionUIParam sessionUIParam;
+    uiParams.insert(std::make_pair(1, sessionUIParam));
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    sessionInfo.screenId_ = -1ULL;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+}
+
+/**
+ * @tc.name: RegisterIAbilityManagerCollaborator
+ * @tc.desc: RegisterIAbilityManagerCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator, Function | SmallTest | Level3)
+{
+    int32_t type = 0;
+    sptr<AAFwk::IAbilityManagerCollaborator> impl = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, impl);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
