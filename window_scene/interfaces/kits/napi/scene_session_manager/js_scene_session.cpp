@@ -1280,14 +1280,14 @@ napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
 napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
-    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI] called");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
 }
 
