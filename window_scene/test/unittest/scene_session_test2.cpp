@@ -570,6 +570,31 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetMinimizedFlagByUserSwitch/IsMinimizedByUserSwitch
+ * @tc.desc: SetMinimizedFlagByUserSwitch/IsMinimizedByUserSwitch Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetMinimizedFlagByUserSwitch, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMinimizedFlagByUserSwitch";
+    info.bundleName_ = "SetMinimizedFlagByUserSwitch";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    bool isMinimized = true;
+    session->SetMinimizedFlagByUserSwitch(isMinimized);
+    bool ret = session->IsMinimizedByUserSwitch();
+    ASSERT_EQ(ret, true);
+
+    isMinimized = false;
+    session->SetMinimizedFlagByUserSwitch(isMinimized);
+    ret = session->IsMinimizedByUserSwitch();
+    ASSERT_EQ(ret, false);
+}
+
+/**
  * @tc.name: UpdatePiPRect01
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC

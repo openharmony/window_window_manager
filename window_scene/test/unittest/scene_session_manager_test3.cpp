@@ -977,6 +977,75 @@ HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: IsPcLifeCycle1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3)
+{
+    ssm_->systemConfig_.backgroundswitch = true;
+    SessionInfo info;
+    info.abilityName_ = "IsPcLifeCycle1";
+    info.bundleName_ = "IsPcLifeCycle1";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    property->SetCompatibleModeInPc(false);
+    sceneSession->SetIsPcAppInPad(false);
+
+    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsPcLifeCycle2
+ * @tc.desc: pc app in pad
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3)
+{
+    ssm_->systemConfig_.backgroundswitch = false;
+    SessionInfo info;
+    info.abilityName_ = "IsPcLifeCycle2";
+    info.bundleName_ = "IsPcLifeCycle2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    property->SetCompatibleModeInPc(false);
+    sceneSession->SetIsPcAppInPad(true);
+
+    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsPcLifeCycle3
+ * @tc.desc: Compatible mode in pc
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle3, Function | SmallTest | Level3)
+{
+    ssm_->systemConfig_.backgroundswitch = true;
+    SessionInfo info;
+    info.abilityName_ = "IsPcLifeCycle3";
+    info.bundleName_ = "IsPcLifeCycle3";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    property->SetCompatibleModeInPc(true);
+    sceneSession->SetIsPcAppInPad(false);
+
+    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: InitUserInfo
  * @tc.desc: SceneSesionManager init user info
  * @tc.type: FUNC
@@ -990,6 +1059,103 @@ HWTEST_F(SceneSessionManagerTest3, InitUserInfo, Function | SmallTest | Level3)
     fileDir = "newFileDir";
     WSError result02 = ssm_->InitUserInfo(newUserId, fileDir);
     ASSERT_EQ(result02, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: IsInvalidMainSessionOnUserSwitch1
+ * @tc.desc: invalid window type
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function | SmallTest | Level3)
+{
+    ssm_->systemConfig_.backgroundswitch = true;
+    int32_t pid = 12345;
+    SessionInfo info;
+    info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch1";
+    info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch1";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetCallingPid(45678);
+    property->SetCompatibleModeInPc(false);
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+
+    bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsNeedChangeLifeCycleOnUserSwitch2
+ * @tc.desc: invalid window state
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function | SmallTest | Level3)
+{
+    int32_t pid = 12345;
+    ssm_->systemConfig_.backgroundswitch = true;
+    SessionInfo info;
+    info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch2";
+    info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetCallingPid(45678);
+    property->SetCompatibleModeInPc(false);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionState(SessionState::STATE_END);
+
+    bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsNeedChangeLifeCycleOnUserSwitch3
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function | SmallTest | Level3)
+{
+    int32_t pid = 12345;
+    ssm_->systemConfig_.backgroundswitch = true;
+    SessionInfo info;
+    info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch3";
+    info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch3";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetCallingPid(45678);
+    property->SetCompatibleModeInPc(false);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+
+    bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsNeedChangeLifeCycleOnUserSwitch4
+ * @tc.desc: Invalid pid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function | SmallTest | Level3)
+{
+    int32_t pid = 12345;
+    SessionInfo info;
+    info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch4";
+    info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch4";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetCallingPid(pid);
+
+    bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
+    EXPECT_EQ(ret, false);
 }
 
 /**

@@ -3546,6 +3546,17 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
+void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
+    isMinimizedByUserSwitch_ = isMinimized;
+}
+
+bool SceneSession::IsMinimizedByUserSwitch()
+{
+    return isMinimizedByUserSwitch_;
+}
+
 void SceneSession::NotifySessionFullScreen(bool fullScreen)
 {
     if (!sessionStage_) {
