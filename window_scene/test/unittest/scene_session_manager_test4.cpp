@@ -1391,6 +1391,16 @@ HWTEST_F(SceneSessionManagerTest4, GetAllClearableSessions, Function | SmallTest
     ssm_->GetAllClearableSessions(sessionVector);
     EXPECT_FALSE(sessionVector.empty());
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+{
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
