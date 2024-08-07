@@ -22,7 +22,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
-    namespace Rosen {
+namespace Rosen {
 
 class SceneBoardJudgementTest : public testing::Test {
 protected:
