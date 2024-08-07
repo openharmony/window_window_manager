@@ -2185,7 +2185,7 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
 
 WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "Set is app support phone in pc isSupportPhone: %{public}d", isSupportPhone);
+    TLOGI(WmsLogTag::WMS_SCB, "isSupportPhone: %{public}d", isSupportPhone);
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);

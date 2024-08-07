@@ -1280,7 +1280,7 @@ napi_value JsSceneSession::SetSkipDraw(napi_env env, napi_callback_info info)
 napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SCB, "[NAPI]SetCompatibleModeInPc");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
@@ -3265,7 +3265,7 @@ napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_
     }
     bool isSupportPhone = false;
     if (!ConvertFromJsValue(env, argv[0], isSupportPhone)) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to enable");
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to isSupportPhone");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
