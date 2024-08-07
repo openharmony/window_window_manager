@@ -1102,7 +1102,6 @@ HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | Small
 
     sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
 }
 
 /**
@@ -1123,8 +1122,6 @@ HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | Sma
     sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
     sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
-
-
 }
 
 /**
