@@ -3046,8 +3046,8 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
     int errCode = ERR_OK;
     if (!isUserActive) {
         TLOGI(WmsLogTag::WMS_MULTI_USER,
-            "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d",
-            persistentId, sceneSession->GetWindowType(), sceneSession->GetSessionState());
+            "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
+            sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
         errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
