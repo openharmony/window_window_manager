@@ -35,8 +35,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    using ConfigItem = WindowSceneConfig::ConfigItem;
+const std::string EMPTY_DEVICE_ID = "";
+using ConfigItem = WindowSceneConfig::ConfigItem;
 }
 class SceneSessionManagerTest7 : public testing::Test {
 public:
@@ -171,7 +171,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange01, Function | 
     displayInfo->SetVirtualPixelRatio(0.1f);
     displayInfo->SetDensityInCurResolution(0.1f);
     ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
-    ProcessVirtualPixelRatioChangeFunc func =  [](float ratio, const OHOS::Rosen::Rect& rect) {};
+    ProcessVirtualPixelRatioChangeFunc func = [](float ratio, const OHOS::Rosen::Rect& rect) {};
     ssm_->SetVirtualPixelRatioChangeListener(func);
     ASSERT_NE(nullptr, ssm_->processVirtualPixelRatioChangeFunc_);
     ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
