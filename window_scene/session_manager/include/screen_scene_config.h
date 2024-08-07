@@ -52,8 +52,8 @@ private:
     static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> intNumbersConfig_;
     static std::map<std::string, std::string> stringConfig_;
-    static std::map<std::string, std::vector<std::string>> stringListConfig_;
     static std::map<uint64_t, std::vector<DMRect>> cutoutBoundaryRectMap_;
+    static std::map<std::string, std::vector<std::string>> stringListConfig_;
     static std::vector<DMRect> subCutoutBoundaryRect_;
     static bool isWaterfallDisplay_;
     static bool isScreenCompressionEnableInLandscape_;

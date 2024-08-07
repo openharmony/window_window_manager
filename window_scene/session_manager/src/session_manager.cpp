@@ -38,7 +38,7 @@ public:
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
             WLOGFE("InterfaceToken check failed");
-            return -1;
+            return ERR_TRANSACTION_FAILED;
         }
         auto msgId = static_cast<SessionManagerServiceRecoverMessage>(code);
         switch (msgId) {
@@ -62,7 +62,7 @@ public:
                 WLOGFW("unknown transaction code %{public}d", code);
                 return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
-        return 0;
+        return ERR_NONE;
     }
 
     void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override

@@ -285,7 +285,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             info.callerPersistentId_ = GetRealCallerSessionId(sceneSession);
             VerifyCallerToken(info);
         } else {
-            info.callerPersistentId_ = 0;
+            info.callerPersistentId_ = INVALID_SESSION_ID;
         }
 
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
@@ -332,7 +332,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
-    if (info.persistentId_ == 0) {
+    if (info.persistentId_ == INVALID_SESSION_ID) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (result == BrokerStates::BROKER_NOT_START) {
             WLOGE("[NAPI] The BrokerStates is not opened");

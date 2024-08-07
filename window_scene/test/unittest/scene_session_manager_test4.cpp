@@ -546,11 +546,11 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
 }
 
 /**
- * @tc.name: UpdateImmersiveState02
- * @tc.desc: UpdateImmersiveState
+ * @tc.name: GetImmersiveState02
+ * @tc.desc: GetImmersiveState
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest4, UpdateImmersiveState02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
 
@@ -564,24 +564,24 @@ HWTEST_F(SceneSessionManagerTest4, UpdateImmersiveState02, Function | SmallTest 
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
 
     sceneSession02->property_ = nullptr;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(sceneSession02->property_, nullptr);
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->state_ = SessionState::STATE_ACTIVE;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->state_ = SessionState::STATE_FOREGROUND;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
-    EXPECT_EQ(true, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(true, ssm_->GetImmersiveState());
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
-    EXPECT_EQ(false, ssm_->UpdateImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
 }
 
 /**
@@ -1244,6 +1244,152 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallT
     sceneSession->bufferAvailable_ = true;
     result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetStartupPageFromResource
+ * @tc.desc: GetStartupPageFromResource
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetStartupPageFromResource, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+    EXPECT_EQ(ssm_->GetResourceManager(abilityInfo), nullptr);
+    std::string path = "testPath";
+    uint32_t bgColor = 0;
+    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetStartupPage
+ * @tc.desc: GetStartupPage
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, GetStartupPage, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.bundleName_ = "bundleName";
+    std::string path = "testPath";
+    uint32_t bgColor = 0;
+    bool result = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    EXPECT_EQ(result, false);
+
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap;
+    StartingWindowInfo startingWindowInfo;
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    startingWindowInfoMap.insert(std::make_pair(key, startingWindowInfo));
+    ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
+    result = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    ssm_->GetStartupPage(sessionInfo, path, bgColor);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: UpdatePropertyDragEnabled
+ * @tc.desc: UpdatePropertyDragEnabled
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, UpdatePropertyDragEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "abilityName";
+    info.bundleName_ = "bundleName";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetSystemCalling(true);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    auto result = ssm_->UpdatePropertyDragEnabled(property, sceneSession);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdatePropertyRaiseEnabled
+ * @tc.desc: UpdatePropertyRaiseEnabled
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, UpdatePropertyRaiseEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "abilityName";
+    info.bundleName_ = "bundleName";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    property->SetSystemCalling(true);
+    auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleHideNonSystemFloatingWindows
+ * @tc.desc: HandleHideNonSystemFloatingWindows
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "abilityName";
+    info.bundleName_ = "bundleName";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sceneSession->property_->hideNonSystemFloatingWindows_ = true;
+    property->SetHideNonSystemFloatingWindows(false);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
+
+    sceneSession->property_->hideNonSystemFloatingWindows_ = false;
+    property->SetHideNonSystemFloatingWindows(true);
+    ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
+
+    sceneSession->isVisible_ = false;
+    ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
+    EXPECT_EQ(Session::IsScbCoreEnabled(), true);
+}
+
+/**
+ * @tc.name: GetAllClearableSessions
+ * @tc.desc: GetAllClearableSessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetAllClearableSessions, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.abilityInfo = nullptr;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "bundleName";
+    sessionInfo1.abilityName_ = "abilityName";
+    sessionInfo1.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, sessionInfo1.abilityInfo);
+    sessionInfo1.abilityInfo->excludeFromMissions = false;
+    sessionInfo1.abilityInfo->unclearableMission = false;
+    sessionInfo1.isSystem_ = false;
+    sessionInfo1.lockedState = false;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession1));
+    std::vector<sptr<SceneSession>> sessionVector;
+    sessionVector.clear();
+    ssm_->GetAllClearableSessions(sessionVector);
+    EXPECT_FALSE(sessionVector.empty());
 }
 }
 } // namespace Rosen

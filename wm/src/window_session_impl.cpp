@@ -566,15 +566,39 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (reason == SizeChangeReason::DRAG_END) {
         property_->SetRequestRect(wmRect);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u"
-        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.ToString().c_str(),
-        wmReason, GetWindowName().c_str(), GetPersistentId());
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
+        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), wmReason, rsTransaction != nullptr,
+        GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
-        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
+        "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
+        wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else if (handler_ != nullptr && rsTransaction != nullptr) {
+        auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+            auto window = weak.promote();
+            if (!window) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+                return;
+            }
+            if (rsTransaction) {
+                RSTransaction::FlushImplicitTransaction();
+                rsTransaction->Begin();
+            }
+            if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
+                !window->postTaskDone_) {
+                window->NotifySizeChange(wmRect, wmReason);
+                window->lastSizeChangeReason_ = wmReason;
+            }
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
+            window->postTaskDone_ = true;
+        };
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForNoRotation");
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
             NotifySizeChange(wmRect, wmReason);
@@ -583,6 +607,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
+
     return WSError::WS_OK;
 }
 
@@ -2570,11 +2595,8 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-          "id: %{public}d, type: %{public}d, "
-          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
-          GetPersistentId(), type,
-          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
-          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
+          "window [%{public}d, %{public}s] type %{public}d area %{public}s",
+          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {

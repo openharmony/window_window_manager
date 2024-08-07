@@ -56,4 +56,6 @@ void FoldScreenPolicy::ClearState()
     currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     currentFoldStatus_ = FoldStatus::UNKNOWN;
 }
+
+void FoldScreenPolicy::ExitCoordination() {};
 } // namespace OHOS::Rosen

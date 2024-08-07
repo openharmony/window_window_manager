@@ -30,6 +30,7 @@
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
+#include "accessibility_event_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,6 +55,22 @@ private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+
+    class TLifecycleListener : public ILifecycleListener {
+    public:
+        virtual ~TLifecycleListener() {}
+        void OnActivation() override {}
+        void OnConnect() override {}
+        void OnForeground() override {}
+        void OnBackground() override {}
+        void OnDisconnect() override {}
+        void OnExtensionDied() override {}
+        void OnExtensionTimeout(int32_t errorCode) override {}
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+            int64_t uiExtensionIdLevel) override {}
+        void OnDrawingCompleted() override {}
+    };
+    std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
 
 void WindowSessionTest2::SetUpTestCase()
@@ -939,8 +956,32 @@ HWTEST_F(WindowSessionTest2, NotifyExtensionDied027, Function | SmallTest | Leve
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyExtensionDied();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyExtensionDied();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyTransferAccessibilityEvent
+ * @tc.desc: NotifyTransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, NotifyTransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    OHOS::Accessibility::AccessibilityEventInfo info1;
+    int64_t uiExtensionIdLevel = 6;
+    session_->NotifyTransferAccessibilityEvent(info1, uiExtensionIdLevel);
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyTransferAccessibilityEvent(info1, uiExtensionIdLevel);
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -1533,6 +1574,13 @@ HWTEST_F(WindowSessionTest2, PostExportTask02, Function | SmallTest | Level2)
     session_->PostExportTask(task, name, delayTime);
     auto result = session_->GetBufferAvailable();
     ASSERT_EQ(result, false);
+
+    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
+        sceneSessionManager->eventHandler_);
+    session_->PostExportTask(task, name, delayTime);
+    auto result2 = session_->GetBufferAvailable();
+    ASSERT_EQ(result2, false);
 }
 
 /**

@@ -130,7 +130,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos03, Function | SmallTest | Level2
 HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo start.";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     EXPECT_EQ(distributedClient_->GetRemoteMissionSnapshotInfo("", 0, missionSnapshot), ERR_NULL_OBJECT);
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo end.";
 }
@@ -145,7 +145,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo02, Function | Small
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo02 start.";
     std::string deviceID = "123456789";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     EXPECT_NE(distributedClient_->GetRemoteMissionSnapshotInfo(deviceID, 0, missionSnapshot), ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();
@@ -162,7 +162,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo03, Function | Small
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo03 start.";
     std::string deviceID = "123456789";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     EXPECT_NE(distributedClient_->GetRemoteMissionSnapshotInfo(deviceID, 0, missionSnapshot), ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();

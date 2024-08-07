@@ -41,6 +41,7 @@ enum class ListenerFuncType : uint32_t {
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
     RAISE_TO_TOP_POINT_DOWN_CB,
+    CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
     BACK_PRESSED_CB,
     SESSION_FOCUSABLE_CHANGE_CB,
     SESSION_TOUCHABLE_CHANGE_CB,
@@ -177,6 +178,7 @@ private:
     void ProcessSessionPiPControlStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
+    void ProcessClickModalSpecificWindowOutsideRegister();
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
@@ -223,6 +225,7 @@ private:
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
+    void OnClickModalSpecificWindowOutside();
     void OnRaiseAboveTarget(int32_t subWindowId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
@@ -258,6 +261,7 @@ private:
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
+    int32_t persistentId_ = -1;
     wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
