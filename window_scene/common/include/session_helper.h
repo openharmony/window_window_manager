@@ -21,6 +21,7 @@
 #include "ws_common_inner.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include "pointer_event.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -116,7 +117,8 @@ public:
         int32_t sourceType, int outside, float vpr, const WSRect& rect)
     {
         int32_t insideCorner = WINDOW_FRAME_CORNER_WIDTH * vpr;
-        int32_t insideEdge = WINDOW_FRAME_WIDTH * vpr;
+        int32_t insideEdge = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ?
+            static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr) : static_cast<int32_t>(WINDOW_FRAME_WIDTH_TOUCH * vpr);
         int32_t leftOut = -outside;
         int32_t leftIn = insideEdge;
         int32_t leftCorner = insideCorner;
