@@ -3272,7 +3272,7 @@ napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->SetAppSupportPhoneInPc(isSupportPhone);
