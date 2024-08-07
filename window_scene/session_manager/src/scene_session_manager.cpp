@@ -4526,6 +4526,12 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
                     persistentId);
                 return WSError::WS_DO_NOTHING;
         }
+        // desktop click temp check
+        if (focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
+            sceneSession->GetZOrder() < focusedSession->GetZOrder() && reason == FocusChangeReason::CLICK) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "desktop click cannot request focus from global search!";
+            return WSError::WS_DO_NOTHING;
+        }
     }
     return WSError::WS_OK;
 }
