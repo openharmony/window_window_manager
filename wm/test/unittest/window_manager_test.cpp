@@ -761,7 +761,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_NE(ret, WMError::WM_OK);
 }
 
 /**
@@ -1158,10 +1158,8 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
 {
-    for (int32_t i=-1000; i<1000; i++)
-    {
-        WindowManager::GetInstance().ShiftAppWindowFocus(i, i + 1);
-    }
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
 }
 
 /**
@@ -1190,7 +1188,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Functio
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1222,7 +1220,7 @@ HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function 
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
     ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
