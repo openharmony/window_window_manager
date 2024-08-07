@@ -2412,11 +2412,17 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
 
 WSError WindowSessionImpl::NotifyDestroy()
 {
-    std::lock_guard<std::recursive_mutex> lockListener(dialogDeathRecipientListenerMutex_);
-    auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
-    for (auto& listener : dialogDeathRecipientListener) {
-        if (listener != nullptr) {
-            listener->OnDialogDeathRecipient();
+    if (WindowHelper::IsDialogWindow(property_->GetWindowType())) {
+        std::lock_guard<std::recursive_mutex> lockListener(dialogDeathRecipientListenerMutex_);
+        auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
+        for (auto& listener : dialogDeathRecipientListener) {
+            if (listener != nullptr) {
+                listener->OnDialogDeathRecipient();
+            }
+        }
+    } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
+        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_ && needRemoveWindowInputChannel_) {
+            Destroy();
         }
     }
     return WSError::WS_OK;
