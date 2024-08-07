@@ -243,6 +243,33 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     } else {
         ASSERT_EQ(res, WSError::WS_OK);
     }
+}
+
+/**
+ * @tc.name: TransferKeyEventForConsumed02
+ * @tc.desc: normal function TransferKeyEventForConsumed02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, Function | SmallTest | Level2)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+
+    bool isConsumed = true;
+    windowEventChannel_->SetIsUIExtension(true);
+    windowEventChannel_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+
+    auto keyItemTab = MMI::KeyEvent::KeyItem();
+    keyItemTab.SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyItemTab.SetPressed(true);
+    auto keyItemTest = MMI::KeyEvent::KeyItem();
+    keyItemTest.SetKeyCode(MMI::KeyEvent::KEYCODE_ALT_LEFT);
+    keyItemTest.SetPressed(true);
+
+    keyEvent->Reset();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyEvent->AddPressedKeyItems(keyItemTest);
+    keyEvent->AddPressedKeyItems(keyItemTab);
 
     res = windowEventChannel_->TransferKeyEventForConsumed(nullptr, isConsumed, false);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
