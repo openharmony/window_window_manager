@@ -83,7 +83,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
             context == nullptr, iSession == nullptr);
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!(vsyncStation_->IsResourceEnough())) {
+    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
         return WMError::WM_ERROR_NULLPTR;
     }
     SetDefaultDisplayIdIfNeed();
