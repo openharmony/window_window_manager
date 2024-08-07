@@ -1514,6 +1514,56 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
     sceneSession = nullptr;
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
 }
+
+/**
+ * @tc.name: GetRootSessionAvoidSessionRect
+ * @tc.desc: GetRootSessionAvoidSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetRootSessionAvoidSessionRect, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    GTEST_LOG_(INFO) << "aa1";
+    ASSERT_EQ(ssm_->rootSceneSession_, nullptr);
+    GTEST_LOG_(INFO) << "aa2";
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    ssm_->GetRootSessionAvoidSessionRect(type);
+
+    ssm_->rootSceneSession_ = new (std::nothrow) RootSceneSession();
+    type = AvoidAreaType::TYPE_SYSTEM;
+    ssm_->GetRootSessionAvoidSessionRect(type);
+
+    type = AvoidAreaType::TYPE_KEYBOARD;
+    ssm_->GetRootSessionAvoidSessionRect(type);
+
+    type = AvoidAreaType::TYPE_CUTOUT;
+    ssm_->GetRootSessionAvoidSessionRect(type);
+}
+
+/**
+ * @tc.name: RequestInputMethodCloseKeyboard
+ * @tc.desc: RequestInputMethodCloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    int32_t persistentId = 10;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    persistentId = 0;
+    sptr<Session> session = new Session(info);
+    session->property_ = nullptr;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+    
+    bool enable = true;
+    auto result = ssm_->GetFreeMultiWindowEnableState(enable);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
