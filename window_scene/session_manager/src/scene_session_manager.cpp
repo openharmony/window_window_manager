@@ -1866,6 +1866,18 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
     }
 }
 
+bool SceneSessionManager::IsPcLifeCycle(const sptr<SceneSession>& sceneSession)
+{
+    bool isPcAppInPad = false;
+    bool isAppSupportPhoneInPc = false;
+    auto property = sceneSession->GetSessionProperty();
+    if (property) {
+        isPcAppInPad = property->GetIsPcAppInPad();
+        isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
+    }
+    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
+}
+
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
@@ -1903,14 +1915,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        bool isPcAppInpad = false;
-        bool isAppSupportPhoneInPc = false;
-        auto property = scnSession->GetSessionProperty();
-        if (property) {
-            isPcAppInpad = property->GetIsPcAppInPad();
-            isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
-        }
-        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
+        if (IsPcLifeCycle(scnSession)) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -3017,6 +3022,70 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string &fileDir)
     return taskScheduler_->PostSyncTask(task, "InitUserInfo");
 }
 
+bool SceneSessionManager::IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid)
+{
+    auto sessionState = sceneSession->GetSessionState();
+    auto isInvalidMainSession = !WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+                                sessionState == SessionState::STATE_DISCONNECT ||
+                                sessionState == SessionState::STATE_END;
+    if (isInvalidMainSession) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "persistentId: %{public}d, type: %{public}d, state: %{public}d",
+            sceneSession->GetPersistentId(), sceneSession->GetWindowType(), sceneSession->GetSessionState());
+    }
+    return sceneSession->GetCallingPid() != pid && IsPcLifeCycle(sceneSession) && !isInvalidMainSession;
+}
+
+WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const bool isUserActive)
+{
+    int32_t pid = static_cast<int32_t>(getpid());
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (const auto& iter : sceneSessionMapCopy) {
+        auto& scnSession = iter.second;
+        if (scnSession == nullptr || !IsNeedChangeLifeCycleOnUserSwitch(scnSession, pid)) {
+            continue;
+        }
+        auto persistentId = scnSession->GetPersistentId();
+        auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
+        if (!abilitySessionInfo) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Create Ability info failed, id %{public}d", persistentId);
+            continue;
+        }
+        int errCode = ERR_OK;
+        if (!isUserActive) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER,
+                "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d",
+                persistentId, scnSession->GetWindowType(), scnSession->GetSessionState());
+
+            errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
+                abilitySessionInfo, false, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
+            if (errCode == ERR_OK) {
+                scnSession->SetMinimizedFlagByUserSwitch(true);
+            }
+        } else if (scnSession->IsMinimizedByUserSwitch()) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER,
+                "StartUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
+                scnSession->GetWindowType(), scnSession->GetSessionState());
+            bool isColdStart = false;
+            scnSession->SetMinimizedFlagByUserSwitch(false);
+            AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(
+                abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
+            if (errCode != ERR_OK) {
+                TLOGI(WmsLogTag::WMS_MULTI_USER, "failed! errCode: %{public}d", errCode);
+                scnSession->NotifySessionExceptionInner(abilitySessionInfo, true);
+                if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
+                    startUIAbilityErrorFunc_(
+                        static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+                }
+            }
+        }
+    }
+    return WSError::WS_OK;
+}
+
 void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
     auto task = [this, isUserActive]() {
@@ -3029,8 +3098,10 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
+            StartOrMinimizeUIAbilityBySCB(true);
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
+            StartOrMinimizeUIAbilityBySCB(false);
         }
         return WSError::WS_OK;
     };

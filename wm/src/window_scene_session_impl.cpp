@@ -958,6 +958,11 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "Switch to current user, NotifyAfterForeground");
+        NotifyAfterForeground(true, false);
+        return WMError::WM_OK;
+    }
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -1050,6 +1055,11 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "Switch to another user, NotifyAfterBackground");
+        NotifyAfterBackground(true, false);
+        return WMError::WM_OK;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     if (property_ == nullptr) {

@@ -292,6 +292,8 @@ public:
     bool RemoveToastSession(int32_t persistentId);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
+    void SetMinimizedFlagByUserSwitch(bool isMinimized);
+    bool IsMinimizedByUserSwitch();
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
@@ -519,6 +521,7 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };
     std::atomic_bool isStartMoving_ { false };
+    std::atomic_bool isMinimizedByUserSwitch_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isSystemSpecificSession_ { false };
