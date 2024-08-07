@@ -271,7 +271,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, Function | Small
     keyEvent->AddPressedKeyItems(keyItemTest);
     keyEvent->AddPressedKeyItems(keyItemTab);
 
-    res = windowEventChannel_->TransferKeyEventForConsumed(nullptr, isConsumed, false);
+    auto res = windowEventChannel_->TransferKeyEventForConsumed(nullptr, isConsumed, false);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 
     windowEventChannel_->isUIExtension_ = false;
