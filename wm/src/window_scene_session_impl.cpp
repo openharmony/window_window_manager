@@ -21,6 +21,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 
+#include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
@@ -46,7 +47,6 @@
 #include "pattern_detach_callback.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
-#include "application_context.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -497,7 +497,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
-        TLOGD(WmsLogTag::WMS_IMMS, "user set");
+        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
         return;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
@@ -509,13 +509,12 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
         return;
     }
-
     std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
     bool isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     uint32_t contentColor;
-    static const uint32_t BLACK = 0xFF000000;
-    static const uint32_t WHITE = 0xFFFFFFFF;
+    constexpr uint32_t BLACK = 0xFF000000;
+    constexpr uint32_t WHITE = 0xFFFFFFFF;
     if (isColorModeSetByApp) {
         TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}u, type: %{public}u, colorMode: %{public}s",
             GetPersistentId(), GetType(), colorMode.c_str());
@@ -532,8 +531,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     statusBarProp.contentColor_ = contentColor;
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
-        static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING)
-    );
+        static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
     SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
 }
 

@@ -451,9 +451,11 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 {
     Parcel parcel = Parcel();
     WindowSessionProperty *property = new WindowSessionProperty();
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), false);
+    EXPECT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, property->GetWindowType());
+    property->UnmarshallingPiPTemplateInfo(parcel, property);
+    delete property;
 }
 
 /**

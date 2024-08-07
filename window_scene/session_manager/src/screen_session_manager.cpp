@@ -129,6 +129,9 @@ ScreenSessionManager::ScreenSessionManager()
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD,
         AppExecFwk::ThreadMode::FFRT);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
+    if (!screenCutoutController_) {
+        TLOGE(WmsLogTag::DMS, "screenCutoutController_ is nullptr");
+    }
     sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -142,6 +145,9 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
 {
     TLOGI(WmsLogTag::DMS, "Enter");
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
+    if (!foldScreenController_) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
+    }
     foldScreenController_->SetOnBootAnimation(true);
     auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
@@ -602,7 +608,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
 void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 {
     GetDefaultScreenId();
-    TLOGI(WmsLogTag::DMS, "Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
+    TLOGD(WmsLogTag::DMS, "Set refreshRate: %{public}u, defaultscreenid: %{public}" PRIu64"",
         refreshRate, defaultScreenId_);
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     if (screenSession) {
@@ -1068,7 +1074,16 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         .property = property,
     };
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
-    screenSession->SetName("CastEngine");
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return nullptr;
+    }
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        // pc is none, pad&&phone is mirror
+        screenSession->SetName("ExtendedDisplay");
+    } else {
+        screenSession->SetName("CastEngine");
+    }
     screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
@@ -1938,7 +1953,13 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
         return;
     }
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged, displayId:%{public}" PRIu64"", displayInfo->GetDisplayId());
+        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
+            TLOGD(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
+                event, displayInfo->GetDisplayId());
+        } else {
+            TLOGI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
+                event, displayInfo->GetDisplayId());
+        }
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
         if (agents.empty()) {
             TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged agents is empty");
@@ -3480,6 +3501,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for <= 2000ms
     if (screenshot == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get pixelmap from RS, return nullptr!");
+    } else {
+        TLOGI(WmsLogTag::DMS, "Sucess to get pixelmap from RS!");
     }
     // notify dm listener
     sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
