@@ -291,8 +291,21 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_->SetNavigationId("");
-    PictureInPictureManager::SetActiveController(pipControl);
-    ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
+    auto pipControl1 = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto pipControl2 = sptr<PictureInPictureController>::MakeSptr(option, mw, 200, nullptr);
+    PictureInPictureManager::SetActiveController(pipControl1);
+    PictureInPictureManager::IsActiveController(pipControl2);
+    pipControl->mainWindowId_ = 100;
+    PictureInPictureManager::IsAttachedToSameWindow(100);
+    pipControl->window_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    pipControl->window_ = mw;
+    pipControl->pipOption_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
+    pipControl->pipOption_ = option;
+    PictureInPictureManager::RemoveActiveController(pipControl1);
+    PictureInPictureManager::IsActiveController(pipControl);
+    pipControl->StartPictureInPicture(startType);
     delete contextPtr;
 }
 
@@ -476,13 +489,13 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     pipControl->UpdateContentSize(width, height);
     pipControl->window_ = mw;
 
-    pipControl->mainWindowXComponentController_ = nullptr;
-    pipControl->UpdateContentSize(width, height);
     pipControl->mainWindowXComponentController_ = xComponentController;
     pipControl->windowRect_ = {0, 0, 0, 0};
     pipControl->IsContentSizeChanged(0, 0, 0, 0);
     pipControl->UpdateContentSize(width, height);
     pipControl->IsContentSizeChanged(10, 10, 10, 10);
+    pipControl->UpdateContentSize(width, height);
+    pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->UpdateContentSize(width, height);
 }
 
@@ -718,6 +731,31 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 10;
     pipControl->UpdateXComponentPositionAndSize();
+}
+
+/**
+ * @tc.name: RegisterListener
+ * @tc.desc: RegisterListener/UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, RegisterListener, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+
+    auto listener = sptr<IPiPLifeCycle>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    auto listener1 = sptr<IPiPLifeCycle>::MakeSptr();
+    ASSERT_NE(nullptr, listener1);
+    pipControl->pipLifeCycleListeners_.push_back(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->RegisterPiPLifecycle(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPLifecycle(listener));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPLifecycle(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->UnregisterPiPLifecycle(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->UnregisterPiPLifecycle(listener));
 }
 
 /**

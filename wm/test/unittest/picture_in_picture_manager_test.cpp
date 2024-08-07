@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -183,16 +184,13 @@ HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest
  */
 HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | SmallTest | Level2)
 {
-    int result = 0;
     PictureInPictureManager::AttachAutoStartController(0, nullptr);
-
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::SetActiveController(pipController);
-    result++;
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
@@ -200,15 +198,24 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::mainWindowLifeCycleImpl_ = nullptr;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
     PictureInPictureManager::autoStartController_ = pipController1;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
     sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
     ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
     PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
+    auto option1 = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option1);
+    auto windowSession = sptr<WindowSessionImpl>::MakeSptr(option1);
+    ASSERT_NE(nullptr, windowSession);
+    auto windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+    windowSceneSessionImpl->GetMainWindowWithId(1);
+    PictureInPictureManager::AttachAutoStartController(0, pipController1);
+    pipController1->mainWindowId_ = 2;
+    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(2, windowSession)));
+    windowSceneSessionImpl->GetMainWindowWithId(2);
+    PictureInPictureManager::AttachAutoStartController(0, pipController1);
 }
 
 /**
