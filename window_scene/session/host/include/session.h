@@ -287,6 +287,7 @@ public:
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
+    WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
