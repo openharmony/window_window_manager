@@ -210,6 +210,20 @@ HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange, Function | Small
     displayInfo->SetRotation(rotation);
     ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
+
+/**
+ * @tc.name: RegisterIAbilityManagerCollaborator
+ * @tc.desc: RegisterIAbilityManagerCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator, Function | SmallTest | Level3)
+{
+    int32_t type = 0;
+    sptr<AAFwk::IAbilityManagerCollaborator> impl = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, impl);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
