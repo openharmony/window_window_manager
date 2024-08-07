@@ -120,7 +120,13 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
  */
 HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
 {
+    scbSystemSession_->isFocused_ = true;
     bool isFocused = scbSystemSession_->isFocused_;
+
+    ASSERT_EQ(WSError::WS_OK, scbSystemSession_->UpdateFocus(!isFocused));
+
+    scbSystemSession_->isFocused_ = false;
+    isFocused = scbSystemSession_->isFocused_;
 
     ASSERT_EQ(WSError::WS_OK, scbSystemSession_->UpdateFocus(!isFocused));
 }
@@ -246,32 +252,35 @@ HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | L
  */
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
 {
-    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback = 
+    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback1 =
         new (std::nothrow) SCBSystemSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback1, nullptr);
+    sptr<SCBSystemSession> scbSystemSession = new (std::nothrow) SCBSystemSession(info, specificCallback1);
+    ASSERT_NE(scbSystemSession, nullptr);
     UpdateAvoidAreaCallback onUpdateAvoidArea;
     ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
-    scbSystemSession_->specificCallback_ = specificCallback;
-    scbSystemSession_->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
-    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
+    scbSystemSession->specificCallback_ = specificCallback1;
+    scbSystemSession->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
+    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ =
         onClearDisplayStatusBarTemporarilyFlags;
-    auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    auto ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
-    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = nullptr;
-    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = nullptr;
+    ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
-    scbSystemSession_->specificCallback_->onUpdateAvoidArea_ = nullptr;
-    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    scbSystemSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
-    scbSystemSession_->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
+    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = 
         onClearDisplayStatusBarTemporarilyFlags;
-    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    scbSystemSession_->specificCallback_ = nullptr;
-    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    scbSystemSession->specificCallback_ = nullptr;
+    ret = scbSystemSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -282,16 +291,16 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest 
  */
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
 {
-    SessionInfo info;
-    sptr<Session> session = new (std::nothrow) Session(info);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
-
     property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    session->property_ = property;
+
+    auto ret = scbSystemSession_->SetSessionProperty(property);
+    ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
-    auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
     
     scbSystemSession_->isKeyboardPanelEnabled_ = false;
@@ -308,7 +317,8 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest 
     ASSERT_EQ(WSError::WS_OK, ret);
 
     property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    session->property_ = property;
+    ret = scbSystemSession_->SetSessionProperty(property);
+    ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
@@ -339,28 +349,26 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest 
  */
 HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(nullptr, scbSystemSession_);
-    SessionInfo info;
-    sptr<Session> session = new (std::nothrow) Session(info);
-    sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
-
-    session->isFocused_ = true;
-    windowSessionProperty->focusable_ = false;
+    scbSystemSession_->isFocused_ = true;
+    auto ret = scbSystemSession_->SetFocusable(false);
+    ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
     scbSystemSession_->PresentFoucusIfNeed(2);
-    ASSERT_EQ(session->isFocused_, true);
+    ASSERT_EQ(scbSystemSession_->isFocused_, true);
 
-    session->isFocused_ = false;
-    windowSessionProperty->focusable_ = false;
+    scbSystemSession_->isFocused_ = false;
+    ret = scbSystemSession_->SetFocusable(false);
+    ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
     scbSystemSession_->PresentFoucusIfNeed(2);
-    ASSERT_EQ(session->isFocused_, false);
+    ASSERT_EQ(scbSystemSession_->isFocused_, false);
 
-    session->isFocused_ = true;
-    windowSessionProperty->focusable_ = true;
+    scbSystemSession_->isFocused_ = true;
+    ret = scbSystemSession_->SetFocusable(true);
+    ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
     scbSystemSession_->PresentFoucusIfNeed(2);
-    ASSERT_EQ(session->isFocused_, true);
+    ASSERT_EQ(scbSystemSession_->isFocused_, true);
 }
 
 /**
@@ -370,7 +378,11 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest |
  */
 HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level3)
 {
-    int32_t pointerAction = 100;
+    int32_t pointerAction = 8;
+    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    ASSERT_EQ(pointerAction, 8);
+
+    pointerAction = 100;
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
     ASSERT_EQ(pointerAction, 2);
 }
