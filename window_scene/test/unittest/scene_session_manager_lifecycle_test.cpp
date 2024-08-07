@@ -751,12 +751,12 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB1, Funct
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
 
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession->SetMinimizedFlagByUserSwitch(true);
 
-    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(true);
+    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(sceneSession, true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 
@@ -777,10 +777,10 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB2, Funct
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetCompatibleModeInPc(false);
+    property->SetIsAppSupportPhoneInPc(false);
 
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
-    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(false);
+    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(sceneSession, false);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 
