@@ -60,6 +60,7 @@ group("unittest") {
     ":ws_scene_session_manager_test4",
     ":ws_scene_session_manager_test5",
     ":ws_scene_session_manager_test6",
+    ":ws_scene_session_manager_test8",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_property_test",
@@ -1058,6 +1059,26 @@ ohos_unittest("ws_scene_session_manager_test6") {
   ]
 }
 
+ohos_unittest("ws_scene_session_manager_test8") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test8.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
@@ -1564,6 +1585,7 @@ ohos_unittest("ws_distributed_client_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
   ]

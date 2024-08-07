@@ -34,6 +34,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionPermission"};
+constexpr int32_t FOUNDATION_UID = 5523;
 
 sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
 {
@@ -317,6 +318,11 @@ bool SessionPermission::IsBetaVersion()
 {
     std::string betaName = OHOS::system::GetParameter("const.logsystem.versiontype", "");
     return betaName.find("beta") != std::string::npos;
+}
+
+bool SessionPermission::IsFoundationCall()
+{
+    return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
 } // namespace Rosen

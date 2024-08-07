@@ -500,7 +500,6 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, Function | S
     ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
 
     // to check that the same listner can not be registered twice
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
 

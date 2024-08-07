@@ -776,4 +776,11 @@ std::vector<DisplayPhysicalResolution> DisplayManagerAdapter::GetAllDisplayPhysi
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayPhysicalResolution>{});
     return displayManagerServiceProxy_->GetAllDisplayPhysicalResolution();
 }
+
+bool ScreenManagerAdapter::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetVirtualScreenStatus(screenId, screenStatus);
+}
+
 } // namespace OHOS::Rosen

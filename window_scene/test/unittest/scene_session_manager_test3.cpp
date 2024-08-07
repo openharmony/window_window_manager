@@ -1409,7 +1409,7 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
     EXPECT_FALSE(result01);
     sceneSession->UpdateNativeVisibility(true);
     bool result02 = ssm_->IsSessionVisibleForeground(sceneSession);
-    ASSERT_TRUE(result02);
+    EXPECT_FALSE(result02);
 }
 
 /**

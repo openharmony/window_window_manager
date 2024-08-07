@@ -1694,7 +1694,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level
 HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
-    std::string name { "UNKNOW" };
+    std::string name { "UNKNOWN" };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_EQ(name, session->GetName());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";
@@ -1708,7 +1708,7 @@ HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
 HWTEST_F(ScreenSessionTest, SetName, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetName start";
-    std::string name { "UNKNOW" };
+    std::string name { "UNKNOWN" };
     int ret = 0;
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->SetName(name);

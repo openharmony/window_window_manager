@@ -380,11 +380,24 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
 */
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    std::vector<Rect> *rects = new std::vector<Rect>;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetTouchHotAreas(*rects);
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(nullptr, property);
+    Rect rect { 4, 4, 4, 4 };
+    std::vector<Rect> vRect { rect };
+    property->SetPersistentId(0);
+    property->SetSessionPropertyChangeCallback(nullptr);
+    EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
+    property->SetTouchHotAreas(vRect);
+
+    auto func = [](){};
+    property->SetPersistentId(1);
+    property->SetSessionPropertyChangeCallback(func);
+    property->SetTouchHotAreas(vRect);
+    EXPECT_NE(nullptr, property->touchHotAreasChangeCallback_);
+
+    Rect rect1 { 5, 5, 5, 5 };
+    vRect.emplace_back(rect1);
+    property->SetTouchHotAreas(vRect);
 }
 
 /**
@@ -438,9 +451,11 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
 {
     Parcel parcel = Parcel();
     WindowSessionProperty *property = new WindowSessionProperty();
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), false);
+    EXPECT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, property->GetWindowType());
+    property->UnmarshallingPiPTemplateInfo(parcel, property);
+    delete property;
 }
 
 /**

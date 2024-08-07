@@ -36,7 +36,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return ERR_INVALID_DATA;
+        return ERR_TRANSACTION_FAILED;
     }
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
@@ -772,11 +772,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetAllDisplayPhysicalResolution(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_STATUS: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenStatus screenStatus = static_cast<VirtualScreenStatus>(data.ReadInt32());
+            bool res = SetVirtualScreenStatus(screenId, screenStatus);
+            reply.WriteBool(res);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 
 void ScreenSessionManagerStub::ProcGetAvailableArea(MessageParcel& data, MessageParcel& reply)

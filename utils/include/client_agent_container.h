@@ -139,12 +139,18 @@ void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remote
         deathCallback_(remoteObject);
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    static bool isEntryAgain = false;
+    if (isEntryAgain) {
+        WLOGFW("UnregisterAgentLocked entry again");
+    }
+    isEntryAgain = true;
     for (auto& elem : agentMap_) {
         if (UnregisterAgentLocked(elem.second, remoteObject)) {
             break;
         }
     }
     remoteObject->RemoveDeathRecipient(deathRecipient_);
+    isEntryAgain = false;
 }
 
 template<typename T1, typename T2>

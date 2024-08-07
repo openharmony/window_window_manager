@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowExtensionClientStubImpl : public WindowExtensionClientStub {
 public:
-    explicit WindowExtensionClientStubImpl(sptr<IWindowExtensionCallback>& componentCallback)
+    explicit WindowExtensionClientStubImpl(const sptr<IWindowExtensionCallback>& componentCallback)
         : componentCallback_(componentCallback) {};
     ~WindowExtensionClientStubImpl() = default;
 

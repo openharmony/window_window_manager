@@ -179,7 +179,7 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
 
-    std::string name_ { "UNKNOW" };
+    std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;

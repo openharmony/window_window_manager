@@ -21,6 +21,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 
+#include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
@@ -482,6 +483,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
+        UpdateDefaultStatusBarColor();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
@@ -496,6 +498,49 @@ void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
 {
     TLOGD(WmsLogTag::WMS_EVENT, "init systemsession enabledrag false");
     property_->SetDragEnabled(false);
+}
+
+void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
+{
+    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
+        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
+        return;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGD(WmsLogTag::WMS_IMMS, "not main window");
+        return;
+    }
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    bool isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    uint32_t contentColor;
+    constexpr uint32_t BLACK = 0xFF000000;
+    constexpr uint32_t WHITE = 0xFFFFFFFF;
+    if (isColorModeSetByApp) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}u, type: %{public}u, colorMode: %{public}s",
+            GetPersistentId(), GetType(), colorMode.c_str());
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+    } else {
+        bool hasDarkRes = false;
+        appContext->AppHasDarkRes(hasDarkRes);
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}u, type: %{public}u, hasDarkRes: %{public}u, colorMode: %{public}s",
+            GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+            (hasDarkRes ? WHITE : BLACK);
+    }
+
+    statusBarProp.contentColor_ = contentColor;
+    statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
+        static_cast<uint32_t>(statusBarProp.settingFlag_) |
+        static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
+    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
@@ -1338,7 +1383,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr && (mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
                                       mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
-            if (requestRect.posX_ == x && requestRect.posX_ == y) {
+            if (requestRect.posX_ == x && requestRect.posY_ == y) {
                 TLOGW(WmsLogTag::WMS_LAYOUT, "Request same position in multiWindow will not update");
                 return WMError::WM_OK;
             }
@@ -1603,12 +1648,8 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     avoidArea = hostSession->GetAvoidAreaByType(type);
     getAvoidAreaCnt_++;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
-          "top{%{public}d,%{public}d,%{public}d,%{public}d}, down{%{public}d,%{public}d,%{public}d,%{public}d}",
-          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_,
-          avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
-          avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
-          avoidArea.bottomRect_.height_);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d times %{public}u area %{public}s",
+          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 
@@ -1697,8 +1738,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        ((windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad") ||
-         IsFreeMultiWindowMode())) {
+        windowSystemConfig_.uiType_ != "phone" &&
+        windowSystemConfig_.uiType_ != "pad") {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2370,6 +2411,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
             uiContent->UpdateConfiguration(configuration);
         }
     }
+    UpdateDefaultStatusBarColor();
     if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
         return;
     }
@@ -3091,7 +3133,7 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
 void WindowSceneSessionImpl::NotifySessionFullScreen(bool fullScreen)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u", GetWindowId());
-    SetLayoutFullScreen(fullScreen);
+    Maximize(fullScreen ? MaximizePresentation::ENTER_IMMERSIVE : MaximizePresentation::EXIT_IMMERSIVE);
 }
 
 WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)

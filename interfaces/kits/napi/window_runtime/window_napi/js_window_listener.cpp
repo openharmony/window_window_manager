@@ -67,7 +67,8 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
+    if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
+        reason != WindowSizeChangeReason::DRAG_END) {
         WLOGFD("[NAPI]no need to change size");
         return;
     }
@@ -103,8 +104,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnSizeChange", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
-    currentWidth_ = rect.width_;
-    currentHeight_ = rect.height_;
+    currRect_ = rect;
 }
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
@@ -508,7 +508,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
+    if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
         return;
     }
@@ -553,8 +553,7 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
     eventHandler_->PostTask(jsCallback, "wms:JsWindowRectListener::OnRectChange", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    currentWidth_ = rect.width_;
-    currentHeight_ = rect.height_;
+    currRect_ = rect;
     currentReason_ = rectChangReason;
 }
 

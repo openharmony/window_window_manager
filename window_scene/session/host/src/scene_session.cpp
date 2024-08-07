@@ -309,7 +309,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
-        session->isTerminating = false;
+        session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
@@ -1100,7 +1100,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, status bar rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -1140,12 +1140,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, keyboard rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, input method bar rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s input method %{public}s",
                   rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
@@ -1177,7 +1177,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, cutout area rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
@@ -1204,7 +1204,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, AI navigation bar rect %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
@@ -1358,10 +1358,6 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             return {};
         }
 
-        if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
-            return {};
-        }
-
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
         switch (type) {
@@ -1385,7 +1381,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
+                TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
                     type, session->GetPersistentId());
                 return avoidArea;
             }
@@ -1960,10 +1956,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
 
     if (reason == SizeChangeReason::DRAG_END) {
-        if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");
-            WSRect restoringRect = {0, 0, 0, 0};
-            SetRestoringRectForKeyboard(restoringRect);
+        if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
+            SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -2186,6 +2181,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         if (!session->GetSessionProperty()) {
             WLOGFE("UpdateNativeVisibility property is null");
             return;
+        }
+        if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
+            session->updatePrivateStateAndNotifyFunc_(persistentId);
         }
     };
     PostTask(task, "UpdateNativeVisibility");
@@ -2692,6 +2690,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.reuse = abilitySessionInfo->reuse;
     info.processOptions = abilitySessionInfo->processOptions;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
+    info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
         info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -2717,8 +2716,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto isSACalling = SessionPermission::IsSACalling();
-    auto task = [weakThis = wptr(this), abilitySessionInfo, isSACalling]() {
+    bool isFoundationCall = SessionPermission::IsFoundationCall();
+    auto task = [weakThis = wptr(this), abilitySessionInfo, isFoundationCall]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2728,25 +2727,19 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (!session->IsPcOrPadEnableActivation() && !isSACalling &&
-            WindowHelper::IsMainWindow(session->GetWindowType())) {
-            auto sessionState = session->GetSessionState();
-            if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
-                !(session->GetForegroundInteractiveStatus())) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
-                    session->GetForegroundInteractiveStatus());
+        if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            SessionState sessionState = session->GetSessionState();
+            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, "
+                "isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
+                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
+            bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
+                sessionState == SessionState::STATE_ACTIVE;
+            if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, sceneSession in a non interactive state");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
-            auto callingTokenId = abilitySessionInfo->callingTokenId;
-            auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
-                callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
-                SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
-                "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
-            if (sessionState != SessionState::STATE_FOREGROUND && sessionState != SessionState::STATE_ACTIVE &&
-                !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
-                    startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
-                    sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
+            if (!isSessionForeground && !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
+                TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
         }
@@ -3279,11 +3272,11 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSession: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3323,11 +3316,11 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
                 session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3378,14 +3371,14 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
-WSRect SceneSession::GetRestoringRectForKeyboard() const
+int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return restoringRectForKeyboard_;
+    return oriPosYBeforeRaisedByKeyboard_;
 }
 
-void SceneSession::SetRestoringRectForKeyboard(WSRect rect)
+void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    restoringRectForKeyboard_ = rect;
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
@@ -3579,7 +3572,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), rect, reason, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3613,7 +3606,7 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), controlType, status, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3957,6 +3950,11 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
+}
+
+void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
+{
+    updatePrivateStateAndNotifyFunc_ = func;
 }
 
 int32_t SceneSession::GetStatusBarHeight()

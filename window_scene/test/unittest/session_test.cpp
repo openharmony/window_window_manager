@@ -54,6 +54,22 @@ private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+
+    class TLifecycleListener : public ILifecycleListener {
+    public:
+        virtual ~TLifecycleListener() {}
+        void OnActivation() override {}
+        void OnConnect() override {}
+        void OnForeground() override {}
+        void OnBackground() override {}
+        void OnDisconnect() override {}
+        void OnExtensionDied() override {}
+        void OnExtensionTimeout(int32_t errorCode) override {}
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+            int64_t uiExtensionIdLevel) override {}
+        void OnDrawingCompleted() override {}
+    };
+    std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
 
 void WindowSessionTest::SetUpTestCase()
@@ -798,6 +814,10 @@ HWTEST_F(WindowSessionTest, NotifyExtensionTimeout, Function | SmallTest | Level
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
     session_->NotifyExtensionTimeout(3);
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyExtensionTimeout(3);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
