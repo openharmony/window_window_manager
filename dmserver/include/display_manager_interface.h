@@ -70,6 +70,8 @@ public:
         TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
+        TRANS_ID_MULTI_SCREEN_MODE_SWITCH,
+        TRANS_ID_SET_MULTI_SCREEN_POSITION,
         TRANS_ID_SCREEN_MAKE_EXPAND,
         TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP,
         TRANS_ID_SCREEN_GAMUT_BASE = 1200,
@@ -235,6 +237,16 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
+    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
+        ExtendOption secondaryScreenOption)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) = 0;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
