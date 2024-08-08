@@ -622,6 +622,17 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.maxHeight_ = 10000;
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
+
+    session->SetSessionProperty(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
+    property->SetWindowLimits(limits);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(10.0f));
 }
 
 /**
