@@ -15,11 +15,12 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "display_manager_proxy.h"
-#include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 #include "window_adapter.h"
+#include "window_scene_session_impl.h"
+#include "window_impl.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -647,8 +648,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -674,8 +679,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -701,8 +710,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -728,8 +741,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo04");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -755,8 +772,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo05");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -782,8 +803,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo06");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -809,8 +834,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
     option->SetWindowName("moveWindowTo07");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -836,8 +865,12 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     option->SetWindowName("resize01");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -873,8 +906,12 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     option->SetWindowName("resize02");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -910,8 +947,12 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     option->SetWindowName("resize03");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -947,8 +988,12 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     option->SetWindowName("resize04");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -984,8 +1029,12 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     option->SetWindowName("resize05");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+
+    WMError error = windowImpl->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
