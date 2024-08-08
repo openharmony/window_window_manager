@@ -854,7 +854,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, Function | Sma
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
-    auto stageContent =  std::make_shared<AbilityRuntime::ContextImpl>();
+    auto stageContent = std::make_shared<AbilityRuntime::ContextImpl>();
     ASSERT_NE(nullptr, stageContent);
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     ASSERT_NE(nullptr, applicationInfo);
@@ -876,7 +876,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, Function | Sma
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
-    auto stageContent =  std::make_shared<AbilityRuntime::ContextImpl>();
+    auto stageContent = std::make_shared<AbilityRuntime::ContextImpl>();
     ASSERT_NE(nullptr, stageContent);
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     ASSERT_NE(nullptr, applicationInfo);
