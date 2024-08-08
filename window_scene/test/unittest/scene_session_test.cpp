@@ -870,7 +870,7 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
 
     scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
-    scensession->sessionChangeCallback_->OnShowWhenLocked = [](bool showWhenLocked){};
+    scensession->sessionChangeCallback_->OnShowWhenLocked_ = [](bool showWhenLocked){};
     ASSERT_EQ(scensession->OnShowWhenLocked(false), WSError::WS_OK);
 }
 
