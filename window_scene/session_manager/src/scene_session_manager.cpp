@@ -5918,10 +5918,10 @@ WSError SceneSessionManager::TerminateSessionNew(
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
 }
 
-WSError SceneSessionManager::SetVmaCacheStatus(bool showRecent)
+WSError SceneSessionManager::SetVmaCacheStatus(bool flag)
 {
-    WLOGFI("showRecent: %{public}d", showRecent);
-    RSInterfaces::GetInstance().SetVmaCacheStatus(showRecent);
+    WLOGFI("flag: %{public}d", flag);
+    RSInterfaces::GetInstance().SetVmaCacheStatus(flag);
     return WSError::WS_OK;
 }
 

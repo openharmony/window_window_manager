@@ -1820,14 +1820,14 @@ napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callbac
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    bool showRecent = true;
+    bool flag = false;
     if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], showRecent)) {
+        if (!ConvertFromJsValue(env, argv[0], flag)) {
             WLOGFE("[NAPI]Failed SetVmaCacheStatus to convert parameter to bool");
             return NapiGetUndefined(env);
         }
     }
-    SceneSessionManager::GetInstance().SetVmaCacheStatus(showRecent);
+    SceneSessionManager::GetInstance().SetVmaCacheStatus(flag);
     return NapiGetUndefined(env);
 }
 
