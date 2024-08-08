@@ -361,6 +361,17 @@ HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
     windowEventChannel_->sessionStage_ = nullptr;
     windowEventChannel_->PrintKeyEvent(keyEvent);
     windowEventChannel_->PrintKeyEvent(nullptr);
+
+    auto keyItemTab = MMI::KeyEvent::KeyItem();
+    keyItemTab.SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyItemTab.SetPressed(true);
+    auto keyItemTest = MMI::KeyEvent::KeyItem();
+    keyItemTest.SetKeyCode(MMI::KetEvent::KEYCODE_ALT_LEFT);
+    keyItemTest.SetPressed(true);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyEvent->AddPressedKeyItems(keyItemTab);
+    keyEvent->AddPressedKeyItems(keyItemTest);
+    windowEventChannel_->PrintKeyEvent(keyEvent);
 }
 
 /**
@@ -374,6 +385,18 @@ HWTEST_F(WindowEventChannelTest, PrintPointerEvent, Function | SmallTest | Level
     ASSERT_TRUE((windowEventChannel_ != nullptr));
     windowEventChannel_->PrintPointerEvent(pointerEvent);
     windowEventChannel_->PrintPointerEvent(nullptr);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    windowEventChannel_->PrintPointerEvent(pointerEvent);
+
+    auto pointerItem0 = MMI::PointerEvent::PointerItem();
+    pointerItem0.SetPointerId(0);
+    auto pointerItem1 = MMI::PointerEvent::PointerItem();
+    pointerItem1.SetPointerId(1);
+
+    pointerEvent->AddPointerItem(pointerItem0);
+    pointerEvent->AddPointerItem(pointerItem1);
+    windowEventChannel_->PrintPointerEvent(pointerEvent)
 }
 
 /**
@@ -492,6 +515,27 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, Function 
     auto res = TransferAccessibilityDumpChildInfo(false);
     ASSERT_EQ(res, WSError::WS_OK);
     WLOGFI("TransferAccessibilityDumpChildInfo02 end");
+}
+
+/**
+ * @tc.name: PrintInfoPointerEvent
+ * @tc.desc: normal function PrintInfoPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelTest, PrintInfoPointerEvent, Function | SmallTest | Level2)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    windowEventChannel_->PrintInfoPointerEvent(nullptr);
+
+    auto pointerItem0 = MMI::PointerEvent::PointerItem();
+    pointerItem0.SetPointerId(0);
+    auto pointerItem1 = MMI::PointerEvent::PointerItem();
+    pointerItem1.SetPointerId(1);
+    pointerEvent->AddPointerItem(pointerItem0);
+    pointerEvent->AddPointerItem(pointerItem1);
+
+    windowEventChannel_->PrintPointerEvent(pointerEvent);
 }
 }
 }
