@@ -245,7 +245,6 @@ HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | Smal
     sessionManagerLite.currentWMSUserId_ = SYSTEM_USERID;
     sessionManagerLite.OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
 
-    sessionManagerLite.destroyed_ = true;
     sessionManagerLite.ClearSessionManagerProxy();
 
     sptr<ISessionManagerService> sessionManagerService;

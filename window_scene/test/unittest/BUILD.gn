@@ -20,6 +20,8 @@ group("unittest") {
 
   deps = [
     ":ws_anomaly_detection_test",
+    ":ws_anr_handler_test",
+    ":ws_anr_manager_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_dual_display_fold_policy_test",
@@ -42,6 +44,7 @@ group("unittest") {
     ":ws_multi_screen_manager_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
+    ":ws_scene_board_judgement_test",
     ":ws_scene_input_manager_test",
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
@@ -62,6 +65,8 @@ group("unittest") {
     ":ws_scene_session_manager_test4",
     ":ws_scene_session_manager_test5",
     ":ws_scene_session_manager_test6",
+    ":ws_scene_session_manager_test7",
+    ":ws_scene_session_manager_test8",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_property_test",
@@ -816,6 +821,20 @@ ohos_unittest("ws_fold_screen_controller_test") {
   ]
 }
 
+ohos_unittest("ws_scene_board_judgement_test") {
+  module_out_path = module_out_path
+
+  include_dirs =
+      [ "${window_base_path}/window_scene/interfaces/innerkits/include" ]
+
+  sources = [ "scene_board_judgement_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+}
+
 ohos_unittest("ws_window_scene_config_test") {
   module_out_path = module_out_path
 
@@ -1044,6 +1063,46 @@ ohos_unittest("ws_scene_session_manager_test6") {
   module_out_path = module_out_path
 
   sources = [ "scene_session_manager_test6.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_test7") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test7.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_test8") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test8.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1828,5 +1887,33 @@ ohos_static_library("ws_unittest_common") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_unittest("ws_anr_handler_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anr_handler_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+  ]
+}
+
+ohos_unittest("ws_anr_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anr_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+  ]
 }
 ## Build ws_unittest_common.a }}}

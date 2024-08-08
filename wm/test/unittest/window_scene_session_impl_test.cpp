@@ -655,6 +655,28 @@ HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: StartMoveSystemWindow01
+ * @tc.desc: StartMoveSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, StartMoveSystemWindow01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("StartMoveSystemWindow01");
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->property_->SetPersistentId(1);
+    // show with null session
+
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->StartMoveSystemWindow();
+    ASSERT_NE(nullptr, session);
+}
+
+/**
  * @tc.name: Close01
  * @tc.desc: Close
  * @tc.type: FUNC

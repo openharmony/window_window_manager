@@ -866,6 +866,54 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | 
     ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
     ASSERT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, windowStatus);
 }
+
+
+/**
+ * @tc.name: MoveTo03
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("MoveTo01SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1001);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(2, 2));
+
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("MoveTo02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(3, 3));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 3));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 4));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

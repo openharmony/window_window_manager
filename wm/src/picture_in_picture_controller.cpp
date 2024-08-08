@@ -37,6 +37,7 @@
 namespace OHOS {
 namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
+    std::string setting_url_proxy_;
 namespace {
     constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
@@ -49,8 +50,9 @@ namespace {
     const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
     const std::string SETTING_COLUMN_VALUE = "VALUE";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
-    const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
-        "settingsdata/SETTINGSDATA?Proxy=true";
+    constexpr const char *SETTINGS_URL_PROXY_HEAD = "datashare:///com.ohos.settingsdata/"
+        "entry/settingsdata/USER_SETTINGSDATA_";
+    constexpr const char *SETTINGS_URL_PROXY_TAIL = "?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
 
@@ -74,6 +76,10 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
+
+    int32_t clientUserId = GetUserIdByUid(getuid());
+    TLOGI(WmsLogTag::WMS_PIP, "clientUserId = %{public}d", clientUserId);
+    setting_url_proxy_ = SETTINGS_URL_PROXY_HEAD + std::to_string(clientUserId) + SETTINGS_URL_PROXY_TAIL;
 
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
@@ -101,13 +107,6 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         TLOGE(WmsLogTag::WMS_PIP, "Create pip failed, invalid pipOption");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
-    const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
-    SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
-    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
-    if (windowOption == nullptr) {
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
     mainWindowXComponentController_ = pipOption_->GetXComponentController();
     if (mainWindowXComponentController_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
@@ -120,6 +119,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     UpdateXComponentPositionAndSize();
+    auto windowOption = sptr<WindowOption>::MakeSptr();
     windowOption->SetWindowName(PIP_WINDOW_NAME);
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -133,6 +133,9 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
     pipTemplateInfo.pipControlStatusInfoList = pipOption_->GetControlStatus();
     pipTemplateInfo.pipControlEnableInfoList = pipOption_->GetControlEnable();
+    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
+    const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
+    SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
     sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
@@ -205,10 +208,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
-    }
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Init main window failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     if (!IsPullPiPAndHandleNavigation()) {
         TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
@@ -371,7 +370,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
             pipController->DestroyPictureInPictureWindow();
         };
-        handler_->PostTask(timeoutTask, DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
+        handler_->PostTask(std::move(timeoutTask), DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
     }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
@@ -809,7 +808,7 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
         }
         remoteObj_ = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, setting_url_proxy_, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "create helper is nullptr");
         return ERR_NO_INIT;
@@ -817,7 +816,7 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(SETTING_URI_PROXY + "&key=" + key);
+    Uri uri(setting_url_proxy_ + "&key=" + key);
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Query return nullptr");
@@ -888,7 +887,7 @@ void PictureInPictureController::PiPMainWindowListenerImpl::DelayReset()
         listener->isValid_ = true;
         TLOGI(WmsLogTag::WMS_PIP, "reset to valid");
     };
-    handler_->PostTask(delayTask, "wms:PiPMainWindowListenerImpl_DelayReset", DELAY_RESET);
+    handler_->PostTask(std::move(delayTask), "wms:PiPMainWindowListenerImpl_DelayReset", DELAY_RESET);
 }
 
 WindowMode PictureInPictureController::PiPMainWindowListenerImpl::GetMode()

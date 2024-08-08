@@ -144,17 +144,69 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation
 }
 
 /**
- * @tc.name: CheckBoundingRectsBoundary
+ * @tc.name: CheckBoundingRectsBoundary01
  * @tc.desc: CheckBoundingRectsBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary01, Function | SmallTest | Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     std::vector<DMRect> boundingRects;
     controller->CheckBoundingRectsBoundary(displayId, boundingRects);
     ASSERT_TRUE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: CheckBoundingRectsBoundary02
+ * @tc.desc: CheckBoundingRectsBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary02, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    std::vector<DMRect> boundingRects;
+    DMRect rect1 = {0, 0, 100, 100};
+    DMRect rect2 = {50, 50, 50, 50};
+    boundingRects.push_back(rect1);
+    boundingRects.push_back(rect2);
+    controller->CheckBoundingRectsBoundary(displayId, boundingRects);
+    ASSERT_FALSE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: CheckBoundingRectsBoundary03
+ * @tc.desc: CheckBoundingRectsBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary03, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId displayId = 0;
+    std::vector<DMRect> boundingRects;
+    DMRect rect = {-1, -1, 100, 100};
+    boundingRects.push_back(rect);
+    controller->CheckBoundingRectsBoundary(displayId, boundingRects);
+    ASSERT_FALSE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: CheckBoundingRectsBoundary04
+ * @tc.desc: CheckBoundingRectsBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary04, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    std::vector<DMRect> boundingRects;
+    DMRect rect1 = {-1, -1, 100, 100};
+    DMRect rect2 = {50, 50, 50, 50};
+    boundingRects.push_back(rect1);
+    boundingRects.push_back(rect2);
+    controller->CheckBoundingRectsBoundary(displayId, boundingRects);
+    ASSERT_FALSE(boundingRects.empty());
 }
 
 /**

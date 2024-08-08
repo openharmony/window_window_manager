@@ -397,6 +397,32 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
+{
+    if (event != SessionEvent::EVENT_START_MOVE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [weakThis = wptr(this), event, this]() {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->moveDragController_->GetStartMoveFlag()) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
+            return WSError::WS_ERROR_REPEAT_OPERATION;
+        }
+        OnSessionEvent(event);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "OnSystemSessionEvent");
+}
+
 uint32_t SceneSession::GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY)
 {
     std::shared_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
@@ -1100,7 +1126,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, status bar rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -1140,12 +1166,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, keyboard rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, input method bar rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s input method %{public}s",
                   rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
@@ -1177,7 +1203,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, cutout area rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
@@ -1204,7 +1230,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, AI navigation bar rect %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
@@ -1358,10 +1384,6 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             return {};
         }
 
-        if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
-            return {};
-        }
-
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
         switch (type) {
@@ -1385,7 +1407,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
+                TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
                     type, session->GetPersistentId());
                 return avoidArea;
             }
@@ -2177,6 +2199,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             WLOGFE("UpdateNativeVisibility property is null");
             return;
         }
+        if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
+            session->updatePrivateStateAndNotifyFunc_(persistentId);
+        }
     };
     PostTask(task, "UpdateNativeVisibility");
 }
@@ -2682,6 +2707,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.reuse = abilitySessionInfo->reuse;
     info.processOptions = abilitySessionInfo->processOptions;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
+    info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
         info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -3364,12 +3390,12 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return oriPosYBeforeRaisedBykeyboard_;
+    return oriPosYBeforeRaisedByKeyboard_;
 }
 
 void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    oriPosYBeforeRaisedBykeyboard_ = posY;
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
@@ -3941,6 +3967,11 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
+}
+
+void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
+{
+    updatePrivateStateAndNotifyFunc_ = func;
 }
 
 int32_t SceneSession::GetStatusBarHeight()

@@ -33,7 +33,7 @@ struct CAvoidArea {
 
 struct ResWindow {
     int32_t ret;
-    sptr<Window> weakWindow;
+    sptr<Window> nativeWindow;
 };
 
 struct CBarProperties {
