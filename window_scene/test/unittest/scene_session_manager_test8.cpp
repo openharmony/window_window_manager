@@ -352,7 +352,7 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     extensionWindowFlags.waterMarkFlag = false;
     extensionWindowFlags.privacyModeFlag = false;
     sceneSession->combinedExtWindowFlags_ = extensionWindowFlags;
-    EXPCET_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
+    EXPECT_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
     SceneSessionManager::GetInstance().DestroyExtensionSession(iRemoteObjectMocker);
 }
 
