@@ -112,6 +112,10 @@ private:
     void ArkUIFrameworkSupport();
     void AddSetUIContentTimeoutListener();
 
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000
+    };
+
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
