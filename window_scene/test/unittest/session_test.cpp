@@ -253,7 +253,7 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
     session_->isTerminating_ = true;
     auto res2 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res2, WSError::WS_OK);
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     property->SetIsNeedUpdateWindowMode(true);
@@ -261,7 +261,7 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
     session_->SetSessionProperty(property);
     auto res3 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res3, WSError::WS_OK);
 }
 
 /**
