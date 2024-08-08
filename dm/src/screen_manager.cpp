@@ -206,7 +206,7 @@ ScreenManager::ScreenManager()
 
 ScreenManager::~ScreenManager()
 {
-    WLOGFD("Destroy screenmanager instance");
+    WLOGFI("Destroy screenmanager instance");
 }
 
 ScreenManager::Impl::~Impl()
