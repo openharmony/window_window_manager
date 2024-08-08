@@ -643,17 +643,11 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "mainNegative2",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -676,17 +670,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo02",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -709,17 +697,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo03",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -742,17 +724,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo04",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo04");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -775,17 +751,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo05",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo05");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -808,17 +778,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo06",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo06");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -841,17 +805,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "moveWindowTo07",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("moveWindowTo07");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -874,17 +832,11 @@ HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "resize01",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize01");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->Resize(-500, -500);
@@ -917,17 +869,11 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "resize02",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize02");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->Resize(-500, -500);
@@ -960,17 +906,11 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "resize03",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize03");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->Resize(-500, -500);
@@ -1003,17 +943,11 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "resize04",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize04");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->Resize(-500, -500);
@@ -1046,17 +980,11 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-    Utils::TestWindowInfo info = {
-        .name = "resize05",
-        .rect = {100, 100, 1000, 1000},
-        .type = WindowType::APP_WINDOW_BASE,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize05");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
     WMError ret = window->Resize(-500, -500);
