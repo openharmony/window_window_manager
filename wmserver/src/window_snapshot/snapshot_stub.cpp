@@ -24,8 +24,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotStub"};
 }
 
-int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     WLOGI("SnapshotStub::OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {

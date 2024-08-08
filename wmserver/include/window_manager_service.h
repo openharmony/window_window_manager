@@ -85,7 +85,7 @@ public:
     using Task = std::function<void()>;
     void OnStart() override;
     void OnStop() override;
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,

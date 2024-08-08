@@ -678,7 +678,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     return screenShot;
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode)
 {
     std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
     if (!lock.try_lock()) {
@@ -712,8 +712,8 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
     return pixelMap;
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-    const Media::Size &size, int rotation, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect& rect,
+    const Media::Size& size, int rotation, DmErrorCode* errorCode)
 {
     std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(displayId, errorCode);
     if (screenShot == nullptr) {

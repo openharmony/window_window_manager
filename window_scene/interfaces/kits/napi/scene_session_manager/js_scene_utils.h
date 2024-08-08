@@ -154,7 +154,7 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property);
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);

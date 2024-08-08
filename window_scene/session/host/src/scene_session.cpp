@@ -467,7 +467,7 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
     return PostSyncTask(task, "SetGlobalMaximizeMode");
 }
 
-WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
+WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     auto task = [weakThis = wptr(this), &mode]() {
         auto session = weakThis.promote();

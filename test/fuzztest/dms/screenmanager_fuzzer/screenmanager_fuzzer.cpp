@@ -56,7 +56,7 @@ public:
 };
 
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -65,7 +65,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
-bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
+bool ScreenPowerFuzzTest(const uint8_t* data, size_t size)
 {
     uint32_t screenPowerState;
     uint32_t powerStateChangeReason;
@@ -94,7 +94,7 @@ bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
+bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
@@ -135,7 +135,7 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
+bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
@@ -176,7 +176,7 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
+bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
@@ -204,7 +204,7 @@ bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool SetVirtualScreenSurfaceFuzzTest(const uint8_t *data, size_t size)
+bool SetVirtualScreenSurfaceFuzzTest(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     if (data == nullptr || size < sizeof(screenId)) {
@@ -217,7 +217,7 @@ bool SetVirtualScreenSurfaceFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool SetScreenRotationLockedFuzzTest(const uint8_t *data, size_t size)
+bool SetScreenRotationLockedFuzzTest(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     if (data == nullptr || size < sizeof(screenId)) {
@@ -231,7 +231,7 @@ bool SetScreenRotationLockedFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool IsScreenRotationLocked(const uint8_t *data, size_t size)
+bool IsScreenRotationLocked(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     if (data == nullptr || size < sizeof(screenId)) {
@@ -245,7 +245,7 @@ bool IsScreenRotationLocked(const uint8_t *data, size_t size)
     return true;
 }
 
-bool RemoveVirtualScreenFromGroupFuzzTest(const uint8_t *data, size_t size)
+bool RemoveVirtualScreenFromGroupFuzzTest(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     if (data == nullptr || size < sizeof(screenId)) {
@@ -259,7 +259,7 @@ bool RemoveVirtualScreenFromGroupFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool MakeMirrorFuzzTest(const uint8_t *data, size_t size)
+bool MakeMirrorFuzzTest(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     // 10 screens.
@@ -287,7 +287,7 @@ bool MakeMirrorFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool MakeExpandFuzzTest(const uint8_t *data, size_t size)
+bool MakeExpandFuzzTest(const uint8_t* data, size_t size)
 {
     ScreenId screenId;
     // 10 screens.

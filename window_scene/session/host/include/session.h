@@ -62,8 +62,8 @@ using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
-using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
-using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
+using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
+using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
@@ -234,7 +234,7 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear(bool needStartCaller = false);
-    WSError SetSessionLabel(const std::string &label);
+    WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
@@ -358,8 +358,8 @@ public:
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
-    void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
-    void PostLifeCycleTask(Task &&task, const std::string &name, const LifeCycleTaskType &taskType);
+    void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
+    void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
@@ -441,7 +441,7 @@ public:
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
-        SessionLifeCycleTask(const Task &task, const std::string &name, const LifeCycleTaskType &type)
+        SessionLifeCycleTask(const Task& task, const std::string& name, const LifeCycleTaskType& type)
             : task(task), name(name), type(type) {}
         Task task;
         const std::string name;

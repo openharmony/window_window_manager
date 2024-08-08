@@ -26,7 +26,7 @@ namespace OHOS::Rosen {
 static const std::string TIME_OUT("timeout");
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 
-void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData &data)
+void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     std::ostringstream oss;
@@ -36,7 +36,7 @@ void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData &data)
     cv_.notify_all();
 }
 
-std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const &time)
+std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const& time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {

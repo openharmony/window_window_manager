@@ -431,7 +431,7 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBounds(const WSRect &rect);
+    void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();

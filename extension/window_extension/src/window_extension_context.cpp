@@ -29,7 +29,7 @@ namespace {
 const size_t WindowExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("WindowExtensionContext"));
 int WindowExtensionContext::ILLEGAL_REQUEST_CODE(-1);
 
-WMError WindowExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const
+WMError WindowExtensionContext::StartAbility(const AAFwk::Want& want, const AAFwk::StartOptions& startOptions) const
 {
     WLOGFD("Start ability begin, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,

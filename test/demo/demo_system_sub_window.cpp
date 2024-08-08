@@ -53,7 +53,7 @@ void OutputWindowInfos(const std::vector<sptr<AccessibilityWindowInfo>>& infos)
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::cout << "===========================Start===========================" << std::endl;
     std::cout << "Wait 20s, The Windows will close itself" << std::endl;

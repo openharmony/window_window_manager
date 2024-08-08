@@ -32,7 +32,7 @@ constexpr uint32_t TRANS_RELEASE_BLOCK = 0;
 constexpr uint32_t TRANS_FAILED_FOR_PRIVACY = 1;
 
 void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
-    const AppExecFwk::ElementName &element,
+    const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
     TLOGI(WmsLogTag::DMS, "OnAbilityConnectDone entry");
@@ -60,7 +60,7 @@ void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
 }
 
 void ScreenSessionAbilityConnectionStub::OnAbilityDisconnectDone(
-    const AppExecFwk::ElementName &element, int32_t resultCode)
+    const AppExecFwk::ElementName& element, int32_t resultCode)
 {
     TLOGI(WmsLogTag::DMS, "OnAbilityDisconnectDone entry");
     if (resultCode != ERR_OK) {
@@ -124,7 +124,7 @@ bool ScreenSessionAbilityConnectionStub::IsAbilityConnectedSync()
 }
 
 int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
-    MessageParcel &data, MessageParcel &reply)
+    MessageParcel& data, MessageParcel& reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
@@ -149,7 +149,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
 }
 
 int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCode,
-    MessageParcel &data, MessageParcel &reply)
+    MessageParcel& data, MessageParcel& reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
@@ -194,7 +194,7 @@ void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 }
 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
-    const std::string &bundleName, const std::string &abilityName)
+    const std::string& bundleName, const std::string& abilityName)
 {
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
@@ -241,7 +241,7 @@ void ScreenSessionAbilityConnection::ScreenSessionDisconnectExtension()
 }
 
 int32_t ScreenSessionAbilityConnection::SendMessage(
-    const int32_t &transCode, MessageParcel &data, MessageParcel &reply)
+    const int32_t& transCode, MessageParcel& data, MessageParcel& reply)
 {
     if (abilityConnectionStub_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
@@ -256,7 +256,7 @@ int32_t ScreenSessionAbilityConnection::SendMessage(
 }
 
 int32_t ScreenSessionAbilityConnection::SendMessageBlock(
-    const int32_t &transCode, MessageParcel &data, MessageParcel &reply)
+    const int32_t& transCode, MessageParcel& data, MessageParcel& reply)
 {
     if (abilityConnectionStub_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "ability connection is nullptr");

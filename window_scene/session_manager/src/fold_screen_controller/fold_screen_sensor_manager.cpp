@@ -27,12 +27,12 @@
 #include <power_mgr_client.h>
 #endif
 
-static void SensorPostureDataCallback(SensorEvent *event)
+static void SensorPostureDataCallback(SensorEvent* event)
 {
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(event);
 }
 
-static void SensorHallDataCallback(SensorEvent *event)
+static void SensorHallDataCallback(SensorEvent* event)
 {
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(event);
 }

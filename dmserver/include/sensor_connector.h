@@ -53,7 +53,7 @@ private:
     static void SubscribeGravitySensor();
     static void UnsubscribeGravitySensor();
 
-    static void HandleGravitySensorEventCallback(SensorEvent *event);
+    static void HandleGravitySensorEventCallback(SensorEvent* event);
     static bool CheckCallbackTimeInterval();
     static int CalcRotationDegree(GravityData* gravityData);
     static SensorRotation CalcSensorRotation(int sensorDegree);

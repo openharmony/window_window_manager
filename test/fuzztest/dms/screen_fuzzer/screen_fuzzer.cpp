@@ -32,7 +32,7 @@ namespace {
     constexpr size_t LEN = 10;
 }
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -41,7 +41,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
-sptr<ScreenInfo> CreateScreenInfo(const uint8_t *data, size_t size)
+sptr<ScreenInfo> CreateScreenInfo(const uint8_t* data, size_t size)
 {
     sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
     if (info == nullptr) {
@@ -68,7 +68,7 @@ sptr<ScreenInfo> CreateScreenInfo(const uint8_t *data, size_t size)
     GetObject<uint32_t>(info->modeId_, data + startPos, size - startPos);
     return info;
 }
-bool ScreenFuzzTest(sptr<Screen> screen, sptr<Display> display, const uint8_t *data, size_t size)
+bool ScreenFuzzTest(sptr<Screen> screen, sptr<Display> display, const uint8_t* data, size_t size)
 {
     if (screen == nullptr || display == nullptr) {
         return false;
@@ -94,7 +94,7 @@ bool ScreenFuzzTest(sptr<Screen> screen, sptr<Display> display, const uint8_t *d
     return true;
 }
 
-bool ScreenFuzzTestNoDisplay(sptr<Screen> screen, const uint8_t *data, size_t size)
+bool ScreenFuzzTestNoDisplay(sptr<Screen> screen, const uint8_t* data, size_t size)
 {
     if (screen == nullptr) {
         return false;
@@ -122,7 +122,7 @@ bool ScreenFuzzTestNoDisplay(sptr<Screen> screen, const uint8_t *data, size_t si
     return true;
 }
 
-bool ColorGamutsFuzzTest(sptr<Screen> screen, const uint8_t *data, size_t size)
+bool ColorGamutsFuzzTest(sptr<Screen> screen, const uint8_t* data, size_t size)
 {
     if (screen == nullptr) {
         return false;

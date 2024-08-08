@@ -531,7 +531,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
-void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
+void ScreenSessionManager::SendCastEvent(const bool& isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
     if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
@@ -1690,7 +1690,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
     }
 }
 
-void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
+void ScreenSessionManager::BootFinishedCallback(const char* key, const char* value, void* context)
 {
     if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
         TLOGI(WmsLogTag::DMS, "BootFinishedCallback boot animation finished");
@@ -3539,7 +3539,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     return nullptr;
 }
 
-std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode)
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");
     *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
@@ -3577,7 +3577,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media
     return pixelMap;
 }
 
-bool ScreenSessionManager::GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId)
+bool ScreenSessionManager::GetSnapshotArea(Media::Rect& rect, DmErrorCode* errorCode, ScreenId& screenId)
 {
     ConfigureScreenSnapshotParams();
     if (ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension()) {

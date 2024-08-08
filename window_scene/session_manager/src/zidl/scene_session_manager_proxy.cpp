@@ -641,7 +641,7 @@ void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     }
 }
 
-WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label)
 {
     WLOGFI("run SceneSessionManagerProxy::SetSessionLabel");
     MessageParcel data;
@@ -1207,7 +1207,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionElement(AppExecFwk::ElementName
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::CheckWindowId(int32_t windowId, int32_t &pid)
+WMError SceneSessionManagerProxy::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -29,7 +29,7 @@ constexpr int32_t DEBUG_ON_DEFAULT = 0;
 static const std::string ENG_PARAMETER = "const.debuggable";
 static const bool IS_ENG_MODE = static_cast<bool>(GetIntParameter(ENG_PARAMETER, DEBUG_ON_DEFAULT));
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     CmdArgments cmdArgments;
 
