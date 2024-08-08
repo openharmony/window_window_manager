@@ -18,7 +18,6 @@
 #include "window_test_utils.h"
 #include "wm_common.h"
 #include "window_adapter.h"
-#include "window_scene_session_impl.h"
 #include "window_impl.h"
 
 using namespace testing;
@@ -1075,7 +1074,7 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
+    WMError ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1103,7 +1102,7 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
+    WMError ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
