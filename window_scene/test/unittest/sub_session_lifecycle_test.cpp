@@ -126,6 +126,10 @@ HWTEST_F(SessionStubLifecycleTest, Reconnect01, Function | SmallTest | Level1)
     property->SetWindowState(WindowState::STATE_HIDDEN);
     result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->SetWindowState(WindowState::STATE_FROZEN);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
