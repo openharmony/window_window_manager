@@ -1445,6 +1445,34 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
     ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
 }
+
+/**
+ * @tc.name: UpdateMaximizeMode
+ * @tc.desc: UpdateMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    auto ret = session_->UpdateMaximizeMode(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session_->SetSessionProperty(property);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    session_->SetSessionProperty(nullptr);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
