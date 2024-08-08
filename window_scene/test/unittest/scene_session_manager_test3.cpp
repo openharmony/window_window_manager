@@ -983,6 +983,7 @@ HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, Function | SmallTest | Leve
 */
 HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
     info.abilityName_ = "IsPcLifeCycle1";
@@ -1006,6 +1007,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3
 */
 HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = false;
     SessionInfo info;
     info.abilityName_ = "IsPcLifeCycle2";
@@ -1029,6 +1031,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3
 */
 HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle3, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
     info.abilityName_ = "IsPcLifeCycle3";
@@ -1068,6 +1071,7 @@ HWTEST_F(SceneSessionManagerTest3, InitUserInfo, Function | SmallTest | Level3)
 */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
     int32_t pid = 12345;
     SessionInfo info;
@@ -1094,6 +1098,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function 
 */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     int32_t pid = 12345;
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
@@ -1120,6 +1125,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function 
 */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     int32_t pid = 12345;
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
@@ -1146,6 +1152,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function 
  */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     int32_t pid = 12345;
     SessionInfo info;
     info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch4";
