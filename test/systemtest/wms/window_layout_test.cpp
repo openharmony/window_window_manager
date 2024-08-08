@@ -684,6 +684,9 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
         pParentWindow = new(std::nothrow) WindowImpl(option);
         ASSERT_NE(pParentWindow, nullptr);
+
+        WMError error = pParentWindow->Create(0, nullptr);
+        ASSERT_EQ(WMError::WM_OK, error);
     }
 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -726,6 +729,9 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
         pParentWindow = new(std::nothrow) WindowImpl(option);
         ASSERT_NE(pParentWindow, nullptr);
+
+        WMError error = pParentWindow->Create(0, nullptr);
+        ASSERT_EQ(WMError::WM_OK, error);
     }
 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
