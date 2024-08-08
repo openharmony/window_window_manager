@@ -129,6 +129,11 @@ HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, Function | Sma
     sptr<ScenePersistence> scenePersistence2 = new ScenePersistence(bundleName, persistentId);
     scenePersistence2->RenameSnapshotFromOldPersistentId(persistentId);
     ASSERT_EQ(ret, 0);
+
+    sptr<ScenePersistence> scenePersistence3 = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence3);
+    scenePersistence3->snapshotPath_ = "/data/1.png";
+    scenePersistence3->RenameSnapshotFromOldPersistentId(persistentId);
 }
 
 /**
@@ -150,6 +155,24 @@ HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
     scenePersistence->SaveUpdatedIcon(mPixelMap);
     std::string result(scenePersistence->GetUpdatedIconPath());
     std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
+}
+
+/**
+ * @tc.name: SaveUpdatedIcon02
+ * @tc.desc: test function : SaveUpdatedIcon02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon02, Function | SmallTest | Level1)
+{
+    std::string directory = "0/Storage";
+    std::string bundleName = "testBundleName";
+    ASSERT_NE(nullptr, scenePersistence);
+    scenePersistence->snapshotPath_ = "/data/1.png";
+    ASSERT_NE(nullptr, mPixelMap);
+    scenePersistence->SaveUpdatedIcon(mPixelMap);
+    std::string result(scenePersistence->GetUpdatedIconPath());
+    std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
+    EXPECT_EQ(result.compare(test), 1);
 }
 
 /**
@@ -213,6 +236,9 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     }
     EXPECT_NE(result, nullptr);
     ASSERT_EQ(result2, true);
+
+    result = scenePersistence->GetLocalSnapshotPixelMap(0.0, 0.2);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
