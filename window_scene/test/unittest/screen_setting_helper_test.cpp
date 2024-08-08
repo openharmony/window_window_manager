@@ -71,13 +71,26 @@ namespace {
     }
 
     /**
-     * @tc.name: UnregisterSettingDpiObserver
+     * @tc.name: UnregisterSettingDpiObserver01
      * @tc.desc: UnregisterSettingDpiObserver
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver01, Function | SmallTest | Level3)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        screenSettingHelper.UnregisterSettingDpiObserver();
+        ASSERT_EQ(screenSettingHelper.dpiObserver_, nullptr);
+    }
+
+     /**
+     * @tc.name: UnregisterSettingDpiObserver02
+     * @tc.desc: UnregisterSettingDpiObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        screenSettingHelper.dpiObserver_ = nullptr;
         screenSettingHelper.UnregisterSettingDpiObserver();
         ASSERT_EQ(screenSettingHelper.dpiObserver_, nullptr);
     }
@@ -97,11 +110,11 @@ namespace {
     }
 
     /**
-     * @tc.name: RegisterSettingCastObserver
+     * @tc.name: RegisterSettingCastObserver01
      * @tc.desc: RegisterSettingCastObserver
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver01, Function | SmallTest | Level3)
     {
         auto func = [] (const std::string&) {
             TLOGI(WmsLogTag::DMS, "UT test");
@@ -109,6 +122,22 @@ namespace {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         screenSettingHelper.RegisterSettingCastObserver(func);
         screenSettingHelper.castObserver_ = nullptr;
+        ASSERT_EQ(screenSettingHelper.castObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: RegisterSettingCastObserver02
+     * @tc.desc: RegisterSettingCastObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver02, Function | SmallTest | Level3)
+    {
+        auto func = [] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+        };
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        screenSettingHelper.castObserver_ = nullptr;
+        screenSettingHelper.RegisterSettingCastObserver(func);
         ASSERT_EQ(screenSettingHelper.castObserver_, nullptr);
     }
 
@@ -124,6 +153,7 @@ namespace {
         ASSERT_EQ(screenSettingHelper.castObserver_, nullptr);
     }
 
+
     /**
      * @tc.name: GetSettingCast
      * @tc.desc: GetSettingCast
@@ -136,6 +166,72 @@ namespace {
         std::string key = "test";
         bool ret = screenSettingHelper.GetSettingCast(enable, key);
         ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingRotationObserver
+     * @tc.desc: UnregisterSettingRotationObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        screenSettingHelper.UnregisterSettingRotationObserver();
+        ASSERT_EQ(screenSettingHelper.rotationObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: SetSettingRotation
+     * @tc.desc: SetSettingRotation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SetSettingRotation, Function | SmallTest | Level3)
+    {
+        int32_t rotation = -1;
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        ASSERT_EQ(rotation, -1);
+        screenSettingHelper.SetSettingRotation(rotation);
+    }
+
+    /**
+     * @tc.name: GetSettingRotation
+     * @tc.desc: GetSettingRotation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotation, Function | SmallTest | Level3)
+    {
+        int32_t screenId = 1;
+        std::string key = "test";
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        auto result = screenSettingHelper.GetSettingRotation(screenId, key);
+        ASSERT_EQ(result, false);
+    }
+
+    /**
+     * @tc.name: SetSettingRotationScreenId
+     * @tc.desc: SetSettingRotationScreenId
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SetSettingRotationScreenId, Function | SmallTest | Level3)
+    {
+        int32_t screenId = 1;
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        ASSERT_EQ(screenId, 1);
+        screenSettingHelper.SetSettingRotationScreenId(screenId);
+    }
+
+    /**
+     * @tc.name: GetSettingRotationScreenID
+     * @tc.desc: GetSettingRotationScreenID
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID, Function | SmallTest | Level3)
+    {
+        int32_t screenId = 1;
+        std::string key = "test";
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        auto result = screenSettingHelper.GetSettingRotationScreenID(screenId, key);
+        ASSERT_EQ(result, false);
     }
 }
 } // namespace Rosen
