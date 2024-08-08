@@ -257,7 +257,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
     state.isFocused_ = true;
     state.reason_ = FocusChangeReason::SCB_START_APP;
     sceneSession->SetPostProcessFocusState(state);
-    SceneSessionManager::GetInstance().PostProcessFocus(); 
+    SceneSessionManager::GetInstance().PostProcessFocus();
 
     sceneSession->SetPostProcessFocusState(state);
     state.reason_ = FocusChangeReason::DEFAULT;
