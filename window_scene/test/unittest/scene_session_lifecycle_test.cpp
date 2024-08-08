@@ -87,7 +87,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
 
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo &info,
+    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
         sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback);
@@ -228,7 +228,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
     sceneSession->isActive_ = true;
     auto result = sceneSession->Background();
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo &info,
+    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
         sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback);

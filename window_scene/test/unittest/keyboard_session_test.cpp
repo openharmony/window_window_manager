@@ -41,7 +41,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 private:
-    sptr<KeyboardSession> GetKeyboardSession(std::string &abilityName, std::string &bundleName);
+    sptr<KeyboardSession> GetKeyboardSession(std::string& abilityName, std::string& bundleName);
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -60,7 +60,7 @@ void KeyboardSessionTest::TearDown()
 {
 }
 
-sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(std::string &abilityName, std::string &bundleName)
+sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(std::string& abilityName, std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;

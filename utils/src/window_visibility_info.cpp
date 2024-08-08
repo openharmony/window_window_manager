@@ -21,7 +21,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfo"};
 }
 
-bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
+bool WindowVisibilityInfo::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteUint32(windowId_) && parcel.WriteInt32(pid_) &&
            parcel.WriteInt32(uid_) && parcel.WriteUint32(static_cast<uint32_t>(visibilityState_)) &&
@@ -31,7 +31,7 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
            parcel.WriteString(bundleName_) && parcel.WriteString(abilityName_);
 }
 
-WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
+WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
 {
     auto windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
     if (windowVisibilityInfo == nullptr) {

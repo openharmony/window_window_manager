@@ -2658,7 +2658,7 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, err](napi_env env, NapiAsyncTask &task, int32_t status) mutable {
+        [weakToken, err](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
@@ -4095,7 +4095,7 @@ napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback
     return result;
 }
 
-void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode &errCode, int32_t &subWindowId)
+void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode& errCode, int32_t& subWindowId)
 {
     if (nativeVal == nullptr) {
         WLOGFE("Failed to get subWindowId");
@@ -6408,7 +6408,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
     return result;
 }
 
-void BindFunctions(napi_env env, napi_value object, const char *moduleName)
+void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
     BindNativeFunction(env, object, "showWindow", moduleName, JsWindow::ShowWindow);
