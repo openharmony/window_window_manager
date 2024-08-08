@@ -1735,7 +1735,7 @@ HWTEST_F(WindowSessionTest2, ShouldCreateDetectTask, Function | SmallTest | Leve
 {
     DetectTaskInfo detectTaskInfo;
     detectTaskInfo.taskState = DetectTaskState::ATTACH_TASK;
-    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MDDE_FULLSCREEN;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
     session_->SetDetectTaskInfo(detectTaskInfo);
     bool ret = session_->ShouldCreateDetectTask(true, WindowMode::WINDOW_MODE_UNDEFINED);
     ASSERT_EQ(ret, true);
