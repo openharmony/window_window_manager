@@ -759,6 +759,50 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveTo03, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
+
+/**
+ * @tc.name: UpdateNewSize01
+ * @tc.desc: UpdateNewSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("UpdateNewSize01SubWindow");
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1003);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    subWindow->UpdateNewSize();
+    Rect windowRect = { 0, 0, 0, 0 };
+    WindowLimits windowLimits = { 0, 0, 0, 0, 0.0, 0, 0 };
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->property_->SetWindowRect(windowRect);
+    subWindow->property_->SetWindowLimits(windowLimits);
+    subWindow->UpdateNewSize();
+    windowRect.width_ = 10;
+    windowRect.height_ = 10;
+    subWindow->UpdateNewSize();
+    windowRect.width_ = 0;
+    windowRect.height_ = 0;
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subWindow->UpdateNewSize();
+    Rect windowRect1 = { 10, 10, 10, 10 };
+    WindowLimits windowLimits1 = { 100, 100, 100, 100, 0.0, 0, 0 };
+    subWindow->property_->SetRequestRect(windowRect1);
+    subWindow->property_->SetWindowLimits(windowLimits1);
+    subWindow->UpdateNewSize();
+    Rect windowRect2 = { 200, 200, 200, 200 };
+    subWindow->property_->SetRequestRect(windowRect2);
+    subWindow->UpdateNewSize();
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
