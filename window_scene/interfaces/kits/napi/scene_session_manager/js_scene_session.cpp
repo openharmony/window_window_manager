@@ -480,14 +480,15 @@ void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
 
 void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onAdjustKeyboardLayout_ = [this](const KeyboardLayoutParams& params) {
+    NotifyKeyboardLayoutAdjustFunc func = [this](const KeyboardLayoutParams& params) {
         this->OnAdjustKeyboardLayout(params);
     };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        return;
+    }
+    session->SetAdjustKeyboardLayoutCallback(func);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
