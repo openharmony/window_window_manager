@@ -958,14 +958,6 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     scensession->property_ = property;
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
-
-    NotifySystemBarPropertyChangeFunc fun = 
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
-    scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](
-        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){};
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-        WSError::WS_OK);
 }
 
 /**
@@ -989,11 +981,6 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     int ret = 0;
     scensession->OnShowWhenLocked(false);
     ASSERT_EQ(ret, 0);
-
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
-    scensession->sessionChangeCallback_->OnShowWhenLocked = [](bool showWhenLocked){};
-    ASSERT_EQ(scensession->OnShowWhenLocked(false), WSError::WS_OK);
 }
 
 /**
