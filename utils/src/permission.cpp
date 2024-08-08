@@ -40,7 +40,7 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCallin
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId: %{private}}u, flag: %{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId: %{private}u, flag: %{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
