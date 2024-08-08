@@ -652,7 +652,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -683,7 +683,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -714,7 +714,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -745,7 +745,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -776,7 +776,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -807,7 +807,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -838,7 +838,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -869,7 +869,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
@@ -910,7 +910,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
@@ -951,7 +951,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
@@ -992,7 +992,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
@@ -1033,7 +1033,7 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = windowImpl->Create(0, nullptr);
+    WMError error = window->Create(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
