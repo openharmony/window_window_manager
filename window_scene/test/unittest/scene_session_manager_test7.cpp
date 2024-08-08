@@ -278,6 +278,237 @@ HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator, Function
     auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, impl);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: ProcessBackEvent
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FlushUIParams01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->focusedSessionId_ = 1;
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    sessionInfo.isSystem_ = true;
+    ssm_->rootSceneProcessBackEventFunc_ = nullptr;
+    ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+    RootSceneProcessBackEventFunc func = [](){};
+    ssm_->rootSceneProcessBackEventFunc_ = func;
+    ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
+    ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+    sessionInfo.isSystem_ = false;
+    ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->rootSceneProcessBackEventFunc_ = nullptr;
+    ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DestroySpecificSession
+ * @tc.desc: DestroySpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroySpecificSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->remoteObjectMap_.clear();
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(nullptr, remoteObject);
+    ssm_->DestroySpecificSession(remoteObject);
+    ssm_->remoteObjectMap_.insert(std::make_pair(remoteObject, 1));
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroySpecificSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->DestroySpecificSession(remoteObject);
+    sceneSession = nullptr;
+    ssm_->DestroySpecificSession(remoteObject);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.desc: DestroyAndDisconnectSpecificSessionWithDetachCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionWithDetachCallback,
+    Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(nullptr, callback);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionWithDetachCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetCallingUid(1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionInner
+ * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneSession->SetParentPersistentId(2);
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo1.abilityName_ = "ParentSceneSession";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    sceneSession1 = nullptr;
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionInner01
+ * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    sceneSession->SetParentPersistentId(2);
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo1.abilityName_ = "ParentSceneSession";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    sceneSession1 = nullptr;
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionInner02
+ * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->SetParentPersistentId(2);
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo1.abilityName_ = "ParentSceneSession";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    sceneSession1 = nullptr;
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: CheckPiPPriority
+ * @tc.desc: CheckPiPPriority
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, CheckPiPPriority, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "CheckPiPPriority";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    PiPTemplateInfo pipTemplateInfo;
+    pipTemplateInfo.priority = 0;
+    sceneSession->pipTemplateInfo_.priority = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->CheckPiPPriority(pipTemplateInfo);
+    EXPECT_EQ(ret, false);
+    sceneSession->isVisible_ = false;
+    ret = ssm_->CheckPiPPriority(pipTemplateInfo);
+    EXPECT_EQ(ret, true);
+    pipTemplateInfo.priority = 1;
+    ret = ssm_->CheckPiPPriority(pipTemplateInfo);
+    EXPECT_EQ(ret, true);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = ssm_->CheckPiPPriority(pipTemplateInfo);
+    EXPECT_EQ(ret, true);
+    sceneSession = nullptr;
+    ret = ssm_->CheckPiPPriority(pipTemplateInfo);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsSessionVisibleForeground
+ * @tc.desc: IsSessionVisibleForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, IsSessionVisibleForeground, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> session = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->IsSessionVisibleForeground(session);
+    EXPECT_EQ(ret, false);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "IsSessionVisibleForeground";
+    session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, session);
+    session->isVisible_ = false;
+    ret = ssm_->IsSessionVisibleForeground(session);
+    EXPECT_EQ(ret, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
