@@ -1481,7 +1481,12 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
 HWTEST_F(WindowExtensionSessionImplTest, NotifySetUIContent, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
+    EXPECT_FALSE(window_->setUIContentFlag_.load());
     window_->NotifySetUIContent();
+    EXPECT_TRUE(window_->setUIContentFlag_.load());
+    window_->handler_ = nullptr;
+    window_->NotifySetUIContent();
+    EXPECT_TRUE(window_->setUIContentFlag_.load());
 }
 
 /**
@@ -1492,6 +1497,8 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifySetUIContent, Function | SmallTes
 HWTEST_F(WindowExtensionSessionImplTest, AddSetUIContentTimeoutListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
+    window_->AddSetUIContentTimeoutListener();
+    window_->handler_ = nullptr;
     window_->AddSetUIContentTimeoutListener();
 }
 }

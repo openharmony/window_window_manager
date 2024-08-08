@@ -15,8 +15,6 @@
 
 #include "window_extension_session_impl.h"
 
-#include <application_context.h>
-#include <exit_reason.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #ifdef IMF_ENABLE
@@ -488,13 +486,8 @@ void WindowExtensionSessionImpl::AddSetUIContentTimeoutListener()
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
 
-        AAFwk::ExitReason exitReason = { AAFwk::Reason::REASON_TRANSPARENT_WINDOW, "Transparent UIExtension" };
-        auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
-        if (appContext == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "application context is nullptr");
-            return;
-        }
-        appContext->ProcessSecurityExit(exitReason);
+        CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession_);
+        hostSession_->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
     };
     handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
         SET_UICONTENT_TIMEOUT_TIME_MS);
