@@ -838,7 +838,6 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
 
-    NotifySystemBarPropertyChangeFunc fun = 
     scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
     scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](

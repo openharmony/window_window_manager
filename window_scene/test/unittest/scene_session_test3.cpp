@@ -316,7 +316,6 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
 
     std::shared_ptr<RSTransaction> rs;
     ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(rs));
-
 }
 
 /**
