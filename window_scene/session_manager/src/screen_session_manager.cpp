@@ -4445,18 +4445,18 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         return;
     }
     if (g_foldScreenFlag) {
-        auto displayMode = GetFoldDisplayMode();
+        auto foldStatus = GetFoldStatus();
         // fold device will be callback NotifyFoldToExpandCompletion to UpdateRotationAfterBoot
-        if (displayMode == FoldDisplayMode::FULL) {
+        if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_FULL));
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
-        } else if (displayMode == FoldDisplayMode::MAIN) {
+        } else if (foldStatus == FoldStatus::FOLDED) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_MAIN));
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
         } else {
-            TLOGE(WmsLogTag::DMS, "unsuport displaymode: %{public}u", displayMode);
+            TLOGE(WmsLogTag::DMS, "unsupport foldStatus: %{public}u", foldStatus);
         }
     } else {
         screenSession->UpdateRotationAfterBoot(true);
