@@ -356,7 +356,8 @@ HWTEST_F(WindowEventChannelTest, TransferFocusActiveEvent, Function | SmallTest 
 HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_NE(windowEventChannel_, nullptr);
     windowEventChannel_->PrintKeyEvent(keyEvent);
     windowEventChannel_->sessionStage_ = nullptr;
     windowEventChannel_->PrintKeyEvent(keyEvent);
@@ -525,7 +526,8 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, Function 
 HWTEST_F(WindowEventChannelTest, PrintInfoPointerEvent, Function | SmallTest | Level2)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_TRUE((windowEventChannel_ != nullptr));
+    ASSERT_NE(pointerEvent, nullptr);
+    ASSERT_NE(windowEventChannel_, nullptr);
     windowEventChannel_->PrintInfoPointerEvent(nullptr);
 
     auto pointerItem0 = MMI::PointerEvent::PointerItem();
