@@ -1513,7 +1513,7 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
     sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
         WSRect rect = {1, 1, 1, 1};
         return rect;
-    }
+    };
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
 }
 
