@@ -1227,6 +1227,9 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, Function | SmallTest | Level2)
     session_->sessionStage_ = nullptr;
     session_->NotifyScreenshot();
 
+    session_->sessionStage_ = mockSessionStage_;
+    session_->NotifyScreenshot();
+
     session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
