@@ -269,6 +269,11 @@ WSError SystemSession::ProcessBackEvent()
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage_ is nullptr, id = %{public}d.",
+            GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->HandleBackEvent();
 }
 
