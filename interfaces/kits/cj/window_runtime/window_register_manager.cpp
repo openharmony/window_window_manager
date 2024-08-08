@@ -104,7 +104,18 @@ WmErrorCode CjWindowRegisterManager::ProcessAvoidAreaChangeRegister(
 WmErrorCode CjWindowRegisterManager::ProcessLifeCycleEventRegister(
     sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
 {
-    return WmErrorCode::WM_OK;
+    if(window == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[WindowRegister] window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowLifeCycle> thisListener(listener);
+    WmErrorCode ret;
+    if(isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
+    }
+    return ret;
 }
 
 WmErrorCode CjWindowRegisterManager::ProcessOccupiedAreaChangeRegister(

@@ -87,6 +87,8 @@ extern "C" {
     FFI_EXPORT int32_t FFiOHOSSetWindowColorSpace(int64_t id, uint32_t colorSpace);
     FFI_EXPORT int32_t FfiOHOSOnKeyboardHeightChange(int64_t id, int64_t callbackId);
     FFI_EXPORT int32_t FfiOHOSOffKeyboardHeightChange(int64_t id);
+    FFI_EXPORT int32_t FfiOHOSOnWindowEvent(int64_t id, int64_t callbackId);
+    FFI_EXPORT int32_t FfiOHOSOffWindowEvent(int64_t id);
 
     // WindowStage
     FFI_EXPORT RetDataI64 FfiOHOSBindWindowStage(int64_t windowStageImplPtr);

@@ -788,6 +788,30 @@ int32_t FfiOHOSOffKeyboardHeightChange(int64_t id)
     return ret;
 }
 
+int32_t FfiOHOSOnWindowEvent(int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OnWindowEvent start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if(instance == nullptr){
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->OnRegisterWindowCallback("windowEvent", callbackId);
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OnWindowEvent success");
+    return ret;
+}
+
+int32_t FfiOHOSOffWindowEvent(int64_t id)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OffWindowEvent start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if(instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->UnregisterWindowCallback("windowEvent", (-1));
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OffWindowEvent success");
+    return ret;
+}
+
 // WindowStage
 RetDataI64 FfiOHOSBindWindowStage(int64_t windowStageImplPtr)
 {
