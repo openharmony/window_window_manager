@@ -161,6 +161,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;

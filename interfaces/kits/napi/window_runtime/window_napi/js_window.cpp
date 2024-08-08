@@ -854,6 +854,13 @@ napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsFocused(env, info) : nullptr;
 }
 
+napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]StartMoving");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnStartMoving(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
 {
@@ -6051,8 +6058,54 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isFocused);
 }
 
+napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken_ is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    wptr<Window> weakToken(windowToken_);
+    std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [this, weakToken, err] () {
+        if (err == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "wm error code is null.");
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "This window is nullptr.");
+            *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not system window.");
+            *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
+        *err = window->StartMoveSystemWindow();
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (err == nullptr) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "System abnormal."));
+            return;
+        }
+        if (*err == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err), "Move system window failed."));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnStartMoving",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
+    BindNativeFunction(env, object, "startMoving", moduleName, JsWindow::StartMoving);
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
     BindNativeFunction(env, object, "showWindow", moduleName, JsWindow::ShowWindow);
     BindNativeFunction(env, object, "showWithAnimation", moduleName, JsWindow::ShowWithAnimation);

@@ -319,7 +319,7 @@ HWTEST_F(TimerManagerTest, ANRManagerGetBundleName, Function | SmallTest | Level
     anrManager->GetBundleName(0, 1);
     anrManager->GetBundleName(1, 0);
     anrManager->GetBundleName(1, 1);
-    ASSERT_EQ(res, "unknow");
+    ASSERT_EQ(res, "unknown");
     delete anrManager;
     GTEST_LOG_(INFO) << "ANRManager::GetBundleName end";
 }

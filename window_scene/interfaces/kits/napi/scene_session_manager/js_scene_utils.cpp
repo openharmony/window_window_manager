@@ -791,6 +791,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
     }
+    napi_set_named_property(env, objValue, "errorReason",
+        CreateJsValue(env, sessionInfo.errorReason));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     return objValue;
 }

@@ -1229,6 +1229,30 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnSystemSessionEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSystemSessionEvent";
+    info.bundleName_ = "OnSystemSessionEvent";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_EQ(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    scensession->SetSessionProperty(property);
+    scensession->isActive_ = false;
+
+    SessionEvent event = SessionEvent::EVENT_START_MOVE;
+    auto result = scensession->OnSystemSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetTopmost
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1466,21 +1490,24 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     WSRect newWinRect;
     WSRect newRequestRect;
-    scensession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    EXPECT_NE(scensession, nullptr);
+    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
 }
 
 /**

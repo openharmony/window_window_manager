@@ -70,17 +70,23 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     uint32_t p = 10;
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
 
-    scensession->SetSessionProperty(property);
-    WSError result = scensession->RaiseAboveTarget(0);
+    sceneSession->SetSessionProperty(property);
+    WSError result = sceneSession->RaiseAboveTarget(0);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+    result = sceneSession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1338,6 +1344,11 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    auto result = sceneSession->OnSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1737,6 +1748,50 @@ HWTEST_F(SceneSessionTest2, SetSkipDraw, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetSkipDraw(true);
     sceneSession->SetSkipDraw(false);
+}
+
+/**
+ * @tc.name: GetWindowDragHotAreaType
+ * @tc.desc: GetWindowDragHotAreaType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HotAreaType";
+    info.bundleName_ = "HotAreaType";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect rect = {0, 0, 10, 10};
+    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
+    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
+    auto type = sceneSession->GetWindowDragHotAreaType(1, 2, 2);
+    ASSERT_EQ(type, 1);
+}
+
+/**
+ * @tc.name: GetSubWindowModalType
+ * @tc.desc: GetSubWindowModalType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalType";
+    info.bundleName_ = "ModalType";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetSessionProperty(nullptr);
+    auto result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_UNDEFINED);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);
 }
 }
 }

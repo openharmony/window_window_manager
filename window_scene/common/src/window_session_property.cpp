@@ -888,6 +888,16 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
+{
+    isAppSupportPhoneInPc_ = isSupportPhone;
+}
+
+bool WindowSessionProperty::GetIsAppSupportPhoneInPc() const
+{
+    return isAppSupportPhoneInPc_;
+}
+
 void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
 {
     isPcAppInPad_ = isPcAppInPad;
@@ -944,6 +954,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_);
 }
@@ -1011,6 +1022,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     return property;

@@ -287,6 +287,7 @@ public:
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
+    WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -618,7 +619,7 @@ private:
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
-    std::string callingBundleName_ { "unknow" };
+    std::string callingBundleName_ { "unknown" };
     bool isRSVisible_ {false};
     WindowVisibilityState visibilityState_ { WINDOW_LAYER_STATE_MAX};
     bool needNotify_ {true};
