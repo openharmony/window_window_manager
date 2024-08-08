@@ -586,14 +586,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
-    } else if (handler_ != nullptr && rsTransaction != nullptr && CheckIfNeedCommitRsTransaction(wmReason)) {
+    } else if (handler_ != nullptr) {
         auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
             auto window = weak.promote();
             if (!window) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
                 return;
             }
-            if (rsTransaction) {
+            if (rsTransaction && window->CheckIfNeedCommitRsTransaction(wmReason)) {
                 RSTransaction::FlushImplicitTransaction();
                 rsTransaction->Begin();
             }
@@ -603,7 +603,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
                 window->lastSizeChangeReason_ = wmReason;
             }
             window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-            if (rsTransaction) {
+            if (rsTransaction && window->CheckIfNeedCommitRsTransaction(wmReason)) {
                 rsTransaction->Commit();
             }
             window->postTaskDone_ = true;

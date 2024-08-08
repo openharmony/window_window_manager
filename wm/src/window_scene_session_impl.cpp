@@ -3661,6 +3661,27 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange()
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
+WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+{
+    Rect newRect = {0, 0, 0, 0};
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
+            property_->GetWindowName().c_str(), GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool isLandscape = display->GetWidth() > display->GetHeight() ? true : false;
+    newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    property_->SetRequestRect(newRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize success, Id: %{public}d, newRect: %{public}s, "
+        "isLandscape: %{public}d", GetPersistentId(), newRect.ToString().c_str(), isLandscape);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
@@ -3668,8 +3689,16 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
         static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
         params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
         params.PortraitPanelRect_.ToString().c_str());
-    if (property_ != nullptr) {
-        property_->SetKeyboardLayoutParams(params);
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetKeyboardLayoutParams(params);
+    property_->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+    auto ret = MoveAndResizeKeyboard(params);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize failed");
+        return ret;
     }
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
