@@ -366,7 +366,7 @@ HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
     keyItemTab.SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
     keyItemTab.SetPressed(true);
     auto keyItemTest = MMI::KeyEvent::KeyItem();
-    keyItemTest.SetKeyCode(MMI::KetEvent::KEYCODE_ALT_LEFT);
+    keyItemTest.SetKeyCode(MMI::KeyEvent::KEYCODE_ALT_LEFT);
     keyItemTest.SetPressed(true);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
     keyEvent->AddPressedKeyItems(keyItemTab);
@@ -396,7 +396,7 @@ HWTEST_F(WindowEventChannelTest, PrintPointerEvent, Function | SmallTest | Level
 
     pointerEvent->AddPointerItem(pointerItem0);
     pointerEvent->AddPointerItem(pointerItem1);
-    windowEventChannel_->PrintPointerEvent(pointerEvent)
+    windowEventChannel_->PrintPointerEvent(pointerEvent);
 }
 
 /**
