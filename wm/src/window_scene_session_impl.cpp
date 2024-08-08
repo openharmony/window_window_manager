@@ -611,12 +611,17 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
         isFixedSystemWin, isFixedSubWin, isDecorDialog);
     if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
-        hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (!isFixedSubWin && !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
+            hostSession->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     } else {
         if (dragType != AreaType::UNDEFINED) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
-        } else if (isMoveArea) {
+        } else if (isMoveArea || WindowHelper::IsSystemWindow(windowType) &&
+            !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -2150,6 +2155,33 @@ void WindowSceneSessionImpl::StartMove()
     return;
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
+{
+    auto hostSession = GetHostSession();
+    if (hostSession) {
+        WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
+        TLOGD(WmsLogTag::WMS_SYSTEM, "hostSession id: %{public}d , errorCode: %{public}d",
+            GetPersistentId(), static_cast<int>(errorCode));
+        switch (errorCode) {
+            case WSError::WS_ERROR_REPEAT_OPERATION: {
+                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+            }
+            case WSError::WS_ERROR_NOT_SYSTEM_APP: {
+                return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+            }
+            case WSError::WS_ERROR_NULLPTR: {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
+            default: {
+                return WmErrorCode::WM_OK;
+            }
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("WindowSceneSessionImpl::Close id: %{public}d", GetPersistentId());
@@ -2258,10 +2290,6 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        return mode;
-    }
     auto hostSession = GetHostSession();
     if (hostSession) {
         hostSession->GetGlobalMaximizeMode(mode);

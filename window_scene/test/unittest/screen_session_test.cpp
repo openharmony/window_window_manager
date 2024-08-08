@@ -21,6 +21,18 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+class MockScreenChangeListener : public IScreenChangeListener {
+public:
+    void OnConnect(ScreenId screenId) override {}
+    void OnDisconnect(ScreenId screenId) override {}
+    void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        ScreenId screenId) override {}
+    void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) override {}
+    void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
+    void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
+    void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
+};
 class ScreenSessionTest : public testing::Test {
   public:
     ScreenSessionTest() {}
@@ -1303,7 +1315,7 @@ HWTEST_F(ScreenSessionTest, ConvertToScreenGroupInfo, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
     int res = 0;
@@ -1312,6 +1324,52 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener, Function | SmallTest |
     session->RegisterScreenChangeListener(screenChangeListener);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener end";
+}
+
+/**
+ * @tc.name: RegisterScreenChangeListener
+ * @tc.desc: Repeat to register
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    IScreenChangeListener* screenChangeListener1 = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->RegisterScreenChangeListener(screenChangeListener);
+    session->RegisterScreenChangeListener(screenChangeListener1);
+    ASSERT_FALSE(session->isFold_);
+}
+
+/**
+ * @tc.name: RegisterScreenChangeListener
+ * @tc.desc: screenState_ == ScreenState::CONNECTION
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ASSERT_EQ(session->screenState_, ScreenState::INIT);
+    session->screenState_ = ScreenState::CONNECTION;
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    session->RegisterScreenChangeListener(screenChangeListener);
+    ASSERT_FALSE(session->isFold_);
+    session->screenState_ = ScreenState::INIT;
+}
+
+/**
+ * @tc.name: Connect
+ * @tc.desc: Connect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, Connect, Function | SmallTest | Level2)
+{
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->RegisterScreenChangeListener(screenChangeListener);
+    session->Connect();
+    ASSERT_FALSE(session->isFold_);
 }
 
 /**
@@ -1345,11 +1403,29 @@ HWTEST_F(ScreenSessionTest, Disconnect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Disconnect
+ * @tc.desc: !listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, Disconnect02, Function | SmallTest | Level2)
+{
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    IScreenChangeListener* screenChangeListener1 = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session1 = new(std::nothrow) ScreenSession();
+    session->RegisterScreenChangeListener(screenChangeListener);
+    session1->RegisterScreenChangeListener(screenChangeListener1);
+    session1->Connect();
+    session1->Disconnect();
+    ASSERT_FALSE(session->isFold_);
+}
+
+/**
  * @tc.name: SensorRotationChange
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SensorRotationChange, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SensorRotationChange01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SensorRotationChange start";
     int res = 0;
@@ -1358,6 +1434,21 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange, Function | SmallTest | Level2)
     session->SensorRotationChange(sensorRotation);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SensorRotationChange end";
+}
+
+/**
+ * @tc.name: SensorRotationChange
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SensorRotationChange02, Function | SmallTest | Level2)
+{
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->RegisterScreenChangeListener(screenChangeListener);
+    Rotation sensorRotation = Rotation::ROTATION_90;
+    session->SensorRotationChange(sensorRotation);
+    ASSERT_FALSE(session->isFold_);
 }
 
 /**
@@ -1694,7 +1785,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level
 HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
-    std::string name { "UNKNOWN" };
+    std::string name { "UNKNOW" };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_EQ(name, session->GetName());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";

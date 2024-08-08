@@ -1805,12 +1805,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetElement().GetURI().c_str());
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    bool isCompatibleModeInPc = false;
+    bool isAppSupportPhoneInPc = false;
     auto sessionProperty = scnSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
-        isCompatibleModeInPc = sessionProperty->GetCompatibleModeInPc();
+        isAppSupportPhoneInPc = sessionProperty->GetIsAppSupportPhoneInPc();
     }
-    if (systemConfig_.backgroundswitch == false || isCompatibleModeInPc) {
+    if (systemConfig_.backgroundswitch == false || isAppSupportPhoneInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
@@ -1904,13 +1904,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         bool isPcAppInpad = false;
-        bool isCompatibleModeInPc = false;
+        bool isAppSupportPhoneInPc = false;
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
-            isCompatibleModeInPc = property->GetCompatibleModeInPc();
+            isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
         }
-        if ((systemConfig_.backgroundswitch && !isCompatibleModeInPc) || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -2048,7 +2048,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         HandleCastScreenDisConnection(scnSession);
         auto persistentId = scnSession->GetPersistentId();
-        RequestSessionUnfocus(persistentId);
+        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
+        RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
@@ -2903,6 +2904,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
             parentSession->RemoveSubSession(persistentId);
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
+        }
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
+            sceneSession->NotifyDestroy();
         }
     }
     {
@@ -4383,7 +4388,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
-    return ShiftFocus(nextSession);
+    return ShiftFocus(nextSession, FocusChangeReason::WIND);
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)

@@ -45,9 +45,9 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
-constexpr int ARG_INDEX_1 = 1;
+constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
-constexpr int ARG_INDEX_3 = 3;
+constexpr int ARG_INDEX_THREE = 3;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -777,7 +777,7 @@ napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::ReportData(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnReportData(env, info) : nullptr;
 }
@@ -2197,7 +2197,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     bool isFocused = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isFocused)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isFocused)) {
         WLOGFE("[NAPI]Failed to convert parameter to isFocused");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2212,7 +2212,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     }
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     if (argc > MIN_ARG_COUNT) {
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], reason)) {
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], reason)) {
             TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]Failed to convert parameter to reason");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
@@ -2492,7 +2492,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_INDEX_3) { // ReportData args must be greater than three
+    if (argc < ARG_INDEX_THREE) { // ReportData args must be greater than three
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2506,7 +2506,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     int32_t value;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], value)) { // second args is int value
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], value)) { // second args is int value
         WLOGFE("[NAPI]Failed to convert parameter to value");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
