@@ -368,8 +368,13 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
                 session->IsFocused() && session->IsMovableWindowType() &&
-                session->moveDragController_->HasPointDown())) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
+                session->moveDragController_->HasPointDown() &&
+                session->moveDragController_->GetMovable())) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
+                    "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, "
+                    "movable: %{public}d", session->GetPersistentId(), session->moveDragController_->GetStartDragFlag(),
+                    session->IsFocused(), session->IsMovableWindowType(), session->moveDragController_->HasPointDown(),
+                    session->moveDragController_->GetMovable());
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
@@ -3386,6 +3391,14 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     lastSafeRect.width_ = rect.width_;
     lastSafeRect.height_ = rect.height_;
     return;
+}
+
+void SceneSession::SetMovable(bool movable)
+{
+    if (moveDragController_) {
+	    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoveEnable: %{public}d", persistentId_, moveEnable);
+        moveDragController_->SetMoveEnable(movable);
+    }
 }
 
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
