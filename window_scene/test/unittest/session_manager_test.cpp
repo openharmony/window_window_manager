@@ -102,7 +102,6 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sessionManager.currentWMSUserId_ = SYSTEM_USERID;
     sessionManager.OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
 
-    sessionManager.destroyed_ = true;
     sessionManager.ClearSessionManagerProxy();
 
     sptr<ISessionManagerService> sessionManagerService;
@@ -144,17 +143,14 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChanged, Function | SmallTest | Leve
 HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
-    
-    sessionManager.destroyed_ = true;
+
     sessionManager.ClearSessionManagerProxy();
     ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
 
-    sessionManager.destroyed_ = false;
     sessionManager.sessionManagerServiceProxy_ = nullptr;
     sessionManager.ClearSessionManagerProxy();
     ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
 
-    sessionManager.destroyed_ = false;
     sptr<ISessionManagerService> sessionManagerServiceProxy;
     sessionManager.sessionManagerServiceProxy_ = sessionManagerServiceProxy;
     sessionManager.ClearSessionManagerProxy();
