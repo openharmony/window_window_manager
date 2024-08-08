@@ -3396,7 +3396,7 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 void SceneSession::SetMovable(bool movable)
 {
     if (moveDragController_) {
-	    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoveEnable: %{public}d", persistentId_, moveEnable);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoveEnable: %{public}d", persistentId_, moveEnable);
         moveDragController_->SetMoveEnable(movable);
     }
 }
