@@ -134,6 +134,16 @@ HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | Smal
         deviceId, 8, sessionSnapshot);
     EXPECT_EQ(ERR_NULL_OBJECT, res);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc:  set gesture navigation enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, , Function | SmallTest | Level3)
+{
+    
+}
 }
 }
 }
