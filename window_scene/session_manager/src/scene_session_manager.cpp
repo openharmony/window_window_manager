@@ -4485,7 +4485,7 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(sptr<SceneSessi
         focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
         return false;
     }
-    if (reason != FocusChangeReason::CLICK) {
+    if (reason != FocusChangeReason::CLICK || !focusedSession->GetBlockingFocus()) {
         return false;
     }
     return sceneSession->GetZOrder() < focusedSession->GetZOrder();
