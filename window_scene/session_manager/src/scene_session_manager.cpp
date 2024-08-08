@@ -2048,7 +2048,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         HandleCastScreenDisConnection(scnSession);
         auto persistentId = scnSession->GetPersistentId();
-        RequestSessionUnfocus(persistentId);
+        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
+        RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
@@ -4387,7 +4388,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
-    return ShiftFocus(nextSession);
+    return ShiftFocus(nextSession, FocusChangeReason::WIND);
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
