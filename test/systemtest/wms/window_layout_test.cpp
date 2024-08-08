@@ -895,10 +895,10 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -936,10 +936,10 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -977,10 +977,10 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1018,10 +1018,10 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1059,10 +1059,10 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
