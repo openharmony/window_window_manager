@@ -83,6 +83,9 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
             context == nullptr, iSession == nullptr);
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     SetDefaultDisplayIdIfNeed();
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
@@ -758,8 +761,6 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
     }
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         vpr = hostDensityValue_->load();
-    } else if (useUniqueDensity_) {
-        vpr = virtualPixelRatio_;
     } else {
         vpr = displayInfo->GetVirtualPixelRatio();
     }

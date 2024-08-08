@@ -886,7 +886,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             auto extWindow = weak->GetWindow();
             if (extWindow == nullptr) {
                 task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
             }
             auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {

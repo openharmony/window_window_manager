@@ -212,9 +212,12 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
             return WSError::WS_OK;
         }
     }
-    auto sessionProperty = GetSessionProperty();
-    if (type == WindowType::WINDOW_TYPE_DIALOG && sessionProperty && sessionProperty->GetRaiseEnabled()) {
-        RaiseToAppTopForPointDown();
+    if (type == WindowType::WINDOW_TYPE_DIALOG) {
+        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        auto sessionProperty = GetSessionProperty();
+        if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
+            RaiseToAppTopForPointDown();
+        }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
@@ -265,6 +268,11 @@ WSError SystemSession::ProcessBackEvent()
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && !dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage_ is nullptr, id = %{public}d.",
+            GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
 }

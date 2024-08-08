@@ -29,21 +29,27 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
-constexpr int32_t NUMBER_2 = 2;
-constexpr int32_t NUMBER_3 = 3;
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+// Refer to OHOS::Ace::TouchType
+enum class AceTouchType : int32_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+};
 
 int32_t GetMMITouchType(int32_t aceType)
 {
     switch (aceType) {
-        case 0:
+        case static_cast<int32_t>(AceTouchType::DOWN):
             return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case 1:
+        case static_cast<int32_t>(AceTouchType::UP):
             return MMI::PointerEvent::POINTER_ACTION_UP;
-        case NUMBER_2:
+        case static_cast<int32_t>(AceTouchType::MOVE):
             return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case NUMBER_3:
+        case static_cast<int32_t>(AceTouchType::CANCEL):
             return MMI::PointerEvent::POINTER_ACTION_CANCEL;
         default:
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
@@ -779,10 +785,14 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     napi_set_named_property(env, objValue, "isAtomicService",
         CreateJsValue(env, sessionInfo.isAtomicService_));
+    napi_set_named_property(env, objValue, "isBackTransition",
+        CreateJsValue(env, sessionInfo.isBackTransition_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
     }
+    napi_set_named_property(env, objValue, "errorReason",
+        CreateJsValue(env, sessionInfo.errorReason));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     return objValue;
 }

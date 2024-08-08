@@ -192,6 +192,7 @@ public:
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
     void DisablePowerOffRenderControl(ScreenId screenId) override;
+    bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -211,6 +212,7 @@ public:
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
+    void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
@@ -447,6 +449,7 @@ private:
     bool IsDefaultMirrorMode(ScreenId screenId);
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
+    void ExitCoordination(const std::string& reason);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
