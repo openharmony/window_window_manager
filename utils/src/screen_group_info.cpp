@@ -16,7 +16,7 @@
 #include "screen_group_info.h"
 
 namespace OHOS::Rosen {
-bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
+bool ScreenGroupInfo::Marshalling(Parcel& parcel) const
 {
     bool res = ScreenInfo::Marshalling(parcel) && parcel.WriteUint32((uint32_t)combination_) &&
         parcel.WriteUInt64Vector(children_);
@@ -38,7 +38,7 @@ bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
     return true;
 }
 
-ScreenGroupInfo* ScreenGroupInfo::Unmarshalling(Parcel &parcel)
+ScreenGroupInfo* ScreenGroupInfo::Unmarshalling(Parcel& parcel)
 {
     ScreenGroupInfo* screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
     if (screenGroupInfo == nullptr) {

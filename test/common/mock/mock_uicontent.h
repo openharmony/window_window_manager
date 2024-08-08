@@ -88,10 +88,10 @@ public:
         int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
         FindFocusedElementInfo, void(int64_t elementId,
-        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo &output));
+        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD4(
         FocusMoveSearch, void(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo &output));
+        Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
     MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
     MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));

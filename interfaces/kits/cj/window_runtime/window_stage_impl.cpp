@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Rosen {
-void CreateCjSubWindowArrayObject(std::vector<sptr<Window>> &vec, RetStruct &ret)
+void CreateCjSubWindowArrayObject(std::vector<sptr<Window>> &vec, RetStruct& ret)
 {
     int64_t *windowList = static_cast<int64_t *>(malloc(sizeof(int64_t) * vec.size()));
     if (windowList == nullptr) {
@@ -45,7 +45,7 @@ void CreateCjSubWindowArrayObject(std::vector<sptr<Window>> &vec, RetStruct &ret
     return;
 }
 
-int32_t CJWindowStageImpl::GetMainWindow(int64_t &windowId)
+int32_t CJWindowStageImpl::GetMainWindow(int64_t& windowId)
 {
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
@@ -66,7 +66,7 @@ int32_t CJWindowStageImpl::GetMainWindow(int64_t &windowId)
     return static_cast<int32_t>(WmErrorCode::WM_OK);
 }
 
-int32_t CJWindowStageImpl::CreateSubWindow(std::string name, int64_t &windowId)
+int32_t CJWindowStageImpl::CreateSubWindow(std::string name, int64_t& windowId)
 {
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
@@ -109,8 +109,8 @@ RetStruct CJWindowStageImpl::GetSubWindow()
     return ret;
 }
 
-int32_t CJWindowStageImpl::OnLoadContent(const std::string &contexUrl,
-    const std::string &storageJson, bool isLoadedByName)
+int32_t CJWindowStageImpl::OnLoadContent(const std::string& contexUrl,
+    const std::string& storageJson, bool isLoadedByName)
 {
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {

@@ -44,9 +44,9 @@ const int PARAM_NUMBER = 2; // 2: callback func input number, also reused by Pro
     } while (0)
 
 namespace OHOS {
-napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value);
-napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value);
-napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
+napi_status SetMemberInt32(napi_env env, napi_value result, const char* key, int32_t value);
+napi_status SetMemberUint32(napi_env env, napi_value result, const char* key, uint32_t value);
+napi_status SetMemberUndefined(napi_env env, napi_value result, const char* key);
 
 bool CheckCallingPermission(const std::string& permission);
 void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string& errMessage,
@@ -67,7 +67,7 @@ struct AsyncCallbackInfo {
 };
 
 template<typename ParamT>
-void AsyncFunc(napi_env env, void *data)
+void AsyncFunc(napi_env env, void* data)
 {
     AsyncCallbackInfo<ParamT> *info = reinterpret_cast<AsyncCallbackInfo<ParamT> *>(data);
     if (info->async) {
@@ -76,7 +76,7 @@ void AsyncFunc(napi_env env, void *data)
 }
 
 template<typename ParamT>
-void CompleteFunc(napi_env env, napi_status status, void *data)
+void CompleteFunc(napi_env env, napi_status status, void* data)
 {
     AsyncCallbackInfo<ParamT> *info = reinterpret_cast<AsyncCallbackInfo<ParamT> *>(data);
     napi_value result[PARAM_NUMBER] = {nullptr};

@@ -796,7 +796,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 }
 
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property)
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);

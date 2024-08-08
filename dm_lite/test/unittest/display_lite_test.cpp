@@ -121,7 +121,7 @@ HWTEST_F(DisplayTestLite, GetId01, Function | SmallTest | Level1)
 HWTEST_F(DisplayTestLite, GetId02, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "DisplayLite::GetId start";
-    DisplayInfo *displayInfo = new DisplayInfo();
+    DisplayInfo* displayInfo = new DisplayInfo();
     sptr<DisplayLite> display = new DisplayLite("", displayInfo);
     uint64_t id;
     id = display->GetId();
@@ -154,7 +154,7 @@ HWTEST_F(DisplayTestLite, GetDisplayInfo01, Function | SmallTest | Level1)
 HWTEST_F(DisplayTestLite, GetDisplayInfo02, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "DisplayLite::GetId start";
-    DisplayInfo *displayInfo = new DisplayInfo();
+    DisplayInfo* displayInfo = new DisplayInfo();
     sptr<DisplayLite> display = new DisplayLite("", displayInfo);;
     displayInfo = display->GetDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);

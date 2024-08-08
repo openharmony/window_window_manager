@@ -23,7 +23,7 @@
 #include "ipc_skeleton.h"
 
 namespace OHOS {
-napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value)
+napi_status SetMemberInt32(napi_env env, napi_value result, const char* key, int32_t value)
 {
     napi_value num;
     napi_status ret = napi_ok;
@@ -40,7 +40,7 @@ napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int
     return ret;
 }
 
-napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value)
+napi_status SetMemberUint32(napi_env env, napi_value result, const char* key, uint32_t value)
 {
     napi_value num;
     napi_status ret = napi_ok;
@@ -57,7 +57,7 @@ napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, ui
     return ret;
 }
 
-napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
+napi_status SetMemberUndefined(napi_env env, napi_value result, const char* key)
 {
     napi_value undefined;
     napi_status ret = napi_ok;
@@ -74,7 +74,7 @@ napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
     return ret;
 }
 
-bool CheckCallingPermission(const std::string &permission)
+bool CheckCallingPermission(const std::string& permission)
 {
     WLOGI("CheckCallingPermission, permission:%{public}s", permission.c_str());
     if (!permission.empty() &&

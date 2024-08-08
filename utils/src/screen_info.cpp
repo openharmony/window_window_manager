@@ -16,7 +16,7 @@
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
-bool ScreenInfo::Marshalling(Parcel &parcel) const
+bool ScreenInfo::Marshalling(Parcel& parcel) const
 {
     bool res = parcel.WriteString(name_) && parcel.WriteUint64(id_) &&
         parcel.WriteUint32(virtualWidth_) && parcel.WriteUint32(virtualHeight_) &&
@@ -44,7 +44,7 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
     return true;
 }
 
-ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
+ScreenInfo* ScreenInfo::Unmarshalling(Parcel& parcel)
 {
     ScreenInfo* info = new(std::nothrow) ScreenInfo();
     if (info == nullptr) {

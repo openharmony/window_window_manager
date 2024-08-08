@@ -37,7 +37,7 @@ public:
 private:
     class BufferListener : public IBufferConsumerListener {
     public:
-        explicit BufferListener(SurfaceReader &surfaceReader): surfaceReader_(surfaceReader)
+        explicit BufferListener(SurfaceReader& surfaceReader): surfaceReader_(surfaceReader)
         {
         }
         ~BufferListener() noexcept override = default;

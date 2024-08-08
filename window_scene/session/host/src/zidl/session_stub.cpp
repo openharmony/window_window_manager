@@ -36,7 +36,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 } // namespace
 
-int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -485,7 +485,7 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     auto mode = data.ReadUint32();
@@ -494,7 +494,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel 
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleGetGlobalMaximizeMode!");
     MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
@@ -692,7 +692,7 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
     SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());

@@ -33,7 +33,7 @@ public:
     explicit SessionManagerServiceLiteRecoverListener() = default;
 
     virtual int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+        uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
             TLOGE(WmsLogTag::WMS_RECOVER, "InterfaceToken check failed");

@@ -69,7 +69,7 @@ static bool InitMirror(SurfaceReader& surfaceReader)
     return true;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     SurfaceReader surfaceReader;
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandler = new SurfaceReaderHandlerImpl();

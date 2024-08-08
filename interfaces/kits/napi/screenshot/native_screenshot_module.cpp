@@ -61,7 +61,7 @@ static napi_valuetype GetType(napi_env env, napi_value root)
     return res;
 }
 
-static void GetDisplayId(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetDisplayId(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     GNAPI_LOG("Get Screenshot Option: GetDisplayId");
     napi_value displayId;
@@ -76,7 +76,7 @@ static void GetDisplayId(napi_env env, std::unique_ptr<Param> &param, napi_value
     }
 }
 
-static void GetRotation(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetRotation(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     GNAPI_LOG("Get Screenshot Option: GetRotation");
     napi_value rotation;
@@ -89,7 +89,7 @@ static void GetRotation(napi_env env, std::unique_ptr<Param> &param, napi_value 
     }
 }
 
-static void GetScreenRect(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetScreenRect(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     GNAPI_LOG("Get Screenshot Option: GetScreenRect");
     napi_value screenRect;
@@ -137,7 +137,7 @@ static void GetScreenRect(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
-static void GetImageSize(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetImageSize(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     GNAPI_LOG("Get Screenshot Option: ImageSize");
     napi_value imageSize;
@@ -163,7 +163,7 @@ static void GetImageSize(napi_env env, std::unique_ptr<Param> &param, napi_value
     }
 }
 
-static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetScreenshotParam(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     if (param == nullptr) {
         GNAPI_LOG("param == nullptr, use default param");
@@ -333,7 +333,7 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
 }
 } // namespace save
 
-void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, const char *propName)
+void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, const char* propName)
 {
     napi_value prop = nullptr;
     napi_create_int32(env, objValue, &prop);

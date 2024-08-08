@@ -124,7 +124,7 @@ void GravitySensorSubscriber::UnsubscribeGravitySensor()
     isGravitySensorSubscribed_ = false;
 }
 
-void GravitySensorSubscriber::HandleGravitySensorEventCallback(SensorEvent *event)
+void GravitySensorSubscriber::HandleGravitySensorEventCallback(SensorEvent* event)
 {
     if (!CheckCallbackTimeInterval() || event == nullptr) {
         return;

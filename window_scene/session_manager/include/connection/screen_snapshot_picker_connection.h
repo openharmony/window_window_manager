@@ -27,13 +27,13 @@
 namespace OHOS::Rosen {
 class ScreenSnapshotPickerConnection {
 public:
-    static ScreenSnapshotPickerConnection &GetInstance();
+    static ScreenSnapshotPickerConnection& GetInstance();
 
     bool SnapshotPickerConnectExtension();
     void SnapshotPickerDisconnectExtension();
-    int32_t GetScreenSnapshotInfo(Media::Rect &rect, ScreenId &screenId);
-    void SetBundleName(const std::string &bundleName);
-    void SetAbilityName(const std::string &abilityName);
+    int32_t GetScreenSnapshotInfo(Media::Rect& rect, ScreenId& screenId);
+    void SetBundleName(const std::string& bundleName);
+    void SetAbilityName(const std::string& abilityName);
 
 private:
     explicit ScreenSnapshotPickerConnection() = default;

@@ -61,7 +61,7 @@ public:
         }
     }
 
-    static FocusChangeInfo* Unmarshalling(Parcel &parcel)
+    static FocusChangeInfo* Unmarshalling(Parcel& parcel)
     {
         auto focusChangeInfo = new FocusChangeInfo();
         bool res = parcel.ReadInt32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&

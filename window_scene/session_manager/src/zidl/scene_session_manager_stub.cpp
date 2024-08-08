@@ -25,7 +25,7 @@ constexpr uint32_t MAX_VECTOR_SIZE = 100;
 }
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
-    MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -172,7 +172,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
     }
 }
 
-int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleCreateAndConnectSpecificSession!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
@@ -214,7 +214,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "run!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
@@ -308,7 +308,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run");
     int32_t persistentId = data.ReadInt32();
@@ -318,7 +318,7 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel &data, Messa
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
@@ -330,7 +330,7 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel &dat
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
@@ -342,7 +342,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel &d
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleGetFocusSessionInfo!");
     FocusChangeInfo focusInfo;
@@ -351,7 +351,7 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel &data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleSetSessionLabel!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -361,7 +361,7 @@ int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel &data, MessageP
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleSetSessionIcon!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -371,7 +371,7 @@ int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel &data, MessagePa
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleIsValidSessionIds!");
     std::vector<int32_t> sessionIds;
@@ -381,7 +381,7 @@ int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, Messag
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandlePendingSessionToForeground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -390,7 +390,7 @@ int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel &dat
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandlePendingSessionToBackground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -529,7 +529,7 @@ int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleGetFocusSessionToken!");
     sptr<IRemoteObject> token = nullptr;
@@ -549,7 +549,7 @@ int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleCheckWindowId!");
     int32_t windowId = INVALID_WINDOW_ID;
@@ -570,7 +570,7 @@ int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel &data, MessagePar
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleSetGestureNavigationEnabled!");
     bool enable = data.ReadBool();
@@ -579,7 +579,7 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel &da
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WMError errCode = GetAccessibilityWindowInfo(infos);
@@ -609,7 +609,7 @@ int SceneSessionManagerStub::HandleGetUnreliableWindowInfo(MessageParcel& data, 
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("HandleSetSessionContinueState");
     sptr <IRemoteObject> token = data.ReadRemoteObject();
@@ -619,7 +619,7 @@ int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, 
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
@@ -651,7 +651,7 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
@@ -686,7 +686,7 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleBindDialogTarget!");
     uint64_t persistentId = data.ReadUint64();
@@ -696,7 +696,7 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("HandleNotifyDumpInfoResult");
     std::vector<std::string> info;
@@ -720,7 +720,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleClearSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleClearSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleClearSession!");
     int32_t persistentId = data.ReadInt32();
@@ -729,7 +729,7 @@ int SceneSessionManagerStub::HandleClearSession(MessageParcel &data, MessageParc
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleClearAllSessions!");
     WSError ret = ClearAllSessions();
@@ -737,7 +737,7 @@ int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, Message
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleLockSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleLockSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleLockSession!");
     int32_t sessionId = data.ReadInt32();
@@ -745,7 +745,7 @@ int SceneSessionManagerStub::HandleLockSession(MessageParcel &data, MessageParce
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
-int SceneSessionManagerStub::HandleUnlockSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleUnlockSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleUnlockSession!");
     int32_t sessionId = data.ReadInt32();
@@ -753,7 +753,7 @@ int SceneSessionManagerStub::HandleUnlockSession(MessageParcel &data, MessagePar
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
-int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleMoveSessionsToForeground!");
     std::vector<int32_t> sessionIds;
@@ -763,7 +763,7 @@ int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel &data,
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
-int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleMoveSessionsToBackground!");
     std::vector<int32_t> sessionIds;
@@ -776,7 +776,7 @@ int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel &data,
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleRegisterCollaborator!");
     int32_t type = data.ReadInt32();
@@ -787,7 +787,7 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleUnregisterCollaborator!");
     int32_t type = data.ReadInt32();

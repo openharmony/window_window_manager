@@ -229,7 +229,7 @@ public:
      * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr);
+    std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode = nullptr);
 
     /**
      * @brief Get screenshot of the target display.
@@ -241,8 +241,8 @@ public:
      * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-        const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect& rect,
+        const Media::Size& size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
      * @brief Begin to wake up screen.

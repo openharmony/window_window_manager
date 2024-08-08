@@ -446,7 +446,7 @@ struct PointInfo {
  * @brief topN main window info.
  */
 struct MainWindowInfo : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(pid_)) {
             return false;

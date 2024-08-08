@@ -112,7 +112,7 @@ public:
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
     };
 
-    virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
+    virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;

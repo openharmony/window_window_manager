@@ -58,7 +58,7 @@ sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
     return bundleManagerServiceProxy;
 }
 
-bool GetInputMethodBundleName(std::string &name)
+bool GetInputMethodBundleName(std::string& name)
 {
     auto imc = MiscServices::InputMethodController::GetInstance();
     if (!imc) {

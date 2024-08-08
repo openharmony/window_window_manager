@@ -797,7 +797,7 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
     }
 
     // update display node's start point from left to right.
-    std::sort(screens.begin(), screens.end(), [](const auto &a, const auto &b) {
+    std::sort(screens.begin(), screens.end(), [](const auto& a, const auto& b) {
         return a->startPoint_.posX_ < b->startPoint_.posX_;
     });
     

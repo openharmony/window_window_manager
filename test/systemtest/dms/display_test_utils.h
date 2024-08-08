@@ -44,7 +44,7 @@ public:
     void SetDefaultWH(const sptr<Display>& display);
     class BufferListener : public IBufferConsumerListener {
     public:
-        explicit BufferListener(DisplayTestUtils &displayTestUtils): utils_(displayTestUtils)
+        explicit BufferListener(DisplayTestUtils& displayTestUtils): utils_(displayTestUtils)
         {
         }
         ~BufferListener() noexcept override = default;
