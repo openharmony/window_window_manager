@@ -959,7 +959,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Switch to current user, NotifyAfterForeground");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
@@ -1056,7 +1056,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Switch to another user, NotifyAfterBackground");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
         NotifyAfterBackground(true, false);
         return WMError::WM_OK;
     }
