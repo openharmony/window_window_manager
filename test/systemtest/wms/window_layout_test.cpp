@@ -635,6 +635,453 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     expect2 = Utils::CalcLimitedRect(expect2, virtualPixelRatio_);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
+
+/**
+ * @tc.name: moveWindowTo01
+ * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "mainNegative2",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo02
+ * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo02",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo03
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo03",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo04
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo04",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo05
+ * @tc.desc: test moveWindowTo for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo05",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo06
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo06",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo07
+ * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "moveWindowTo07",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize01
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "resize01",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    res = window->GetWindowLimits(windowLimits)
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize02
+ * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "resize02",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    res = window->GetWindowLimits(windowLimits)
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize03
+ * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "resize03",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    res = window->GetWindowLimits(windowLimits)
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize04
+ * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "resize04",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    res = window->GetWindowLimits(windowLimits)
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize05
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    Utils::TestWindowInfo info = {
+        .name = "resize05",
+        .rect = {100, 100, 1000, 1000},
+        .type = WindowType::APP_WINDOW_BASE,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    res = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    res = window->GetWindowLimits(windowLimits)
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
