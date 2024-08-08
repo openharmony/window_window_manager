@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
@@ -260,7 +261,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
 
     sceneSession->SetPostProcessFocusState(state);
     state.reason_ = FocusChangeReason::DEFAULT;
-    SceneSessionManager::GetInstance().PostProcessFocus(); 
+    SceneSessionManager::GetInstance().PostProcessFocus();
 }
 
 /**
