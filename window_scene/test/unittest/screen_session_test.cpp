@@ -447,15 +447,17 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level
     screenSession->ReportNotifyModeChange(displayOrientation);
     displayOrientation = DisplayOrientation::PORTRAIT;
     screenSession->ReportNotifyModeChange(displayOrientation);
+    displayOrientation = DisplayOrientation::PORTRAIT_INVERTED;
+    screenSession->ReportNotifyModeChange(displayOrientation);
     GTEST_LOG_(INFO) << "ReportNotifyModeChange end";
 }
 
 /**
- * @tc.name: UpdateRotationAfterBoot
+ * @tc.name: UpdateRotationAfterBoot01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "UpdateRotationAfterBoot start";
     ScreenSessionConfig config = {
@@ -466,6 +468,26 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot, Function | SmallTest | Leve
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     bool foldToExpand = true;
+    screenSession->UpdateRotationAfterBoot(foldToExpand);
+    GTEST_LOG_(INFO) << "UpdateRotationAfterBoot end";
+}
+
+/**
+ * @tc.name: UpdateRotationAfterBoot02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "UpdateRotationAfterBoot start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    bool foldToExpand = false;
     screenSession->UpdateRotationAfterBoot(foldToExpand);
     GTEST_LOG_(INFO) << "UpdateRotationAfterBoot end";
 }
@@ -1123,11 +1145,11 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetScreenColorGamut
+ * @tc.name: SetScreenColorGamut01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenColorGamut, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1136,6 +1158,23 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut, Function | SmallTest | Level2)
     int32_t colorGamut = 1;
     DMError res = session->SetScreenColorGamut(colorGamut);
     ASSERT_EQ(res, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
+}
+
+/**
+ * @tc.name: SetScreenColorGamut02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ASSERT_NE(session, nullptr);
+
+    int32_t colorGamut = -1;
+    DMError res = session->SetScreenColorGamut(colorGamut);
+    ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
 }
 
@@ -1247,11 +1286,11 @@ HWTEST_F(ScreenSessionTest, AddChild, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: AddChildren
+ * @tc.name: AddChildren01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, AddChildren, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, AddChildren01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1259,6 +1298,22 @@ HWTEST_F(ScreenSessionTest, AddChildren, Function | SmallTest | Level2)
     std::vector<Point> startPoints;
     bool res = sessionGroup.AddChildren(smsScreens, startPoints);
     ASSERT_EQ(res, true);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren end";
+}
+
+/**
+ * @tc.name: AddChildren02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, AddChildren02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren start";
+    ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
+    std::vector<sptr<ScreenSession>> smsScreens(2);
+    std::vector<Point> startPoints(1);
+    bool res = sessionGroup.AddChildren(smsScreens, startPoints);
+    ASSERT_EQ(res, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren end";
 }
 
@@ -1852,11 +1907,11 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcRotation
+ * @tc.name: CalcRotation01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
@@ -1900,15 +1955,103 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcDisplayOrientation
+ * @tc.name: CalcRotation02
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDisplayOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcRotation02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
+    Orientation orientation { Orientation::BEGIN };
+    FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->activeIdx_ = -1;
+    auto res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
+    supportedScreenModes->width_ = 40;
+    supportedScreenModes->height_ = 20;
+    session->modes_ = { supportedScreenModes };
+    session->activeIdx_ = 0;
+
+    orientation = Orientation::UNSPECIFIED;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    orientation = Orientation::VERTICAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_90, res);
+    
+    orientation = Orientation::HORIZONTAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    orientation = Orientation::REVERSE_VERTICAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_270, res);
+
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_180, res);
+
+    orientation = Orientation::LOCKED;
+    res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation end";
+}
+
+/**
+ * @tc.name: CalcDisplayOrientation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
     Rotation rotation { Rotation::ROTATION_0 };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->activeIdx_ = -1;
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
+
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
+    supportedScreenModes->width_ = 40;
+    supportedScreenModes->height_ = 20;
+    session->modes_ = { supportedScreenModes };
+    session->activeIdx_ = 0;
+
+    rotation = Rotation::ROTATION_0;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
+
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
+
+    rotation = Rotation::ROTATION_180;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
+
+    rotation = Rotation::ROTATION_270;
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
+    EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
+
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
+}
+
+/**
+ * @tc.name: CalcDisplayOrientation02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
+    Rotation rotation { Rotation::ROTATION_0 };
+    FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
     auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
@@ -1961,6 +2104,41 @@ HWTEST_F(ScreenSessionTest, FillScreenInfo, Function | SmallTest | Level2)
     session->FillScreenInfo(info);
     EXPECT_NE(nullptr, info);
     GTEST_LOG_(INFO) << "ScreenSessionTest: FillScreenInfo end";
+}
+
+/**
+ * @tc.name: PropertyChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, PropertyChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: PropertyChange start";
+    int res = 0;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ScreenProperty newProperty;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
+    session->PropertyChange(newProperty, reason);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: PropertyChange end";
+}
+
+/**
+ * @tc.name: PowerStatusChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, PowerStatusChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: PowerStatusChange start";
+    int res = 0;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    DisplayPowerEvent event = DisplayPowerEvent::DISPLAY_ON;
+    EventStatus status = EventStatus::BEGIN;
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
+    session->PowerStatusChange(event, status, reason);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: PowerStatusChange end";
 }
 
 /**
