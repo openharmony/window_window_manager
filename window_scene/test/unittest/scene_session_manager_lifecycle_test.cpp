@@ -741,6 +741,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction02, Fun
  */
 HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB1, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
     info.abilityName_ = "StartOrMinimizeUIAbilityBySCB1";
     info.bundleName_ = "StartOrMinimizeUIAbilityBySCB1";
@@ -767,6 +768,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB1, Funct
  */
 HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB2, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
     info.abilityName_ = "StartOrMinimizeUIAbilityBySCB2";
     info.bundleName_ = "StartOrMinimizeUIAbilityBySCB2";
