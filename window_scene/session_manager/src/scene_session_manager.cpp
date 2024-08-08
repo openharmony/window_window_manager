@@ -4478,8 +4478,8 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& scen
     return false;
 }
 
-bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(sptr<SceneSession>& focusedSession,
-    sptr<SceneSession>& sceneSession, FocusChangeReason reason)
+bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& sceneSession, FocusChangeReason reason)
 {
     if (focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
         focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
