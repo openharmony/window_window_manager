@@ -186,6 +186,57 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect, Function | SmallTest | Level1)
     auto ret = systemSession_->Disconnect(isFromClient);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
+
+/**
+ * @tc.name: Disconnect02
+ * @tc.desc: test function : Disconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionLifecycleTest, Disconnect02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "Disconnect02";
+    info.bundleName_ = "Disconnect02Func";
+    info.windowType_ = 2122;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback, nullptr);
+    sptr<SystemSession> sysSession =
+        new (std::nothrow) SystemSession(info, specificCallback);
+    ASSERT_NE(sysSession, nullptr);
+
+    bool isFromClient = true;
+    auto ret = sysSession->Disconnect(isFromClient);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: Disconnect03
+ * @tc.desc: test function : Disconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionLifecycleTest, Disconnect03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "Disconnect03";
+    info.bundleName_ = "Disconnect03Func";
+    info.windowType_ = 2122;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback, nullptr);
+    sptr<SystemSession> sysSession =
+        new (std::nothrow) SystemSession(info, specificCallback);
+    ASSERT_NE(sysSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    WindowType type = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
+    property->SetWindowType(type);
+    sysSession->property_ = property;
+
+    bool isFromClient = true;
+    auto ret = sysSession->Disconnect(isFromClient);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
 }
 }
 }

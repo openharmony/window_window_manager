@@ -555,6 +555,16 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+        wmReason == WindowSizeChangeReason::MAXIMIZE) {
+        return false;
+    }
+    return true;
+}
+
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -576,7 +586,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
-    } else if (handler_ != nullptr && rsTransaction != nullptr) {
+    } else if (handler_ != nullptr && rsTransaction != nullptr && CheckIfNeedCommitRsTransaction(wmReason)) {
         auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
             auto window = weak.promote();
             if (!window) {
@@ -2406,11 +2416,17 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
 
 WSError WindowSessionImpl::NotifyDestroy()
 {
-    std::lock_guard<std::recursive_mutex> lockListener(dialogDeathRecipientListenerMutex_);
-    auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
-    for (auto& listener : dialogDeathRecipientListener) {
-        if (listener != nullptr) {
-            listener->OnDialogDeathRecipient();
+    if (WindowHelper::IsDialogWindow(property_->GetWindowType())) {
+        std::lock_guard<std::recursive_mutex> lockListener(dialogDeathRecipientListenerMutex_);
+        auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
+        for (auto& listener : dialogDeathRecipientListener) {
+            if (listener != nullptr) {
+                listener->OnDialogDeathRecipient();
+            }
+        }
+    } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
+        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_ && needRemoveWindowInputChannel_) {
+            Destroy();
         }
     }
     return WSError::WS_OK;
@@ -2970,6 +2986,10 @@ WSError WindowSessionImpl::HandleBackEvent()
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer back event to inputEventConsumer");
         std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
+        if (backKeyEvent == nullptr) {
+            WLOGFE("backKeyEvent is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
         backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
         backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
         isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);

@@ -43,6 +43,7 @@ private:
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);

@@ -71,6 +71,11 @@ HWTEST_F(PersistentStorageTest, StorageOperate, Function | SmallTest | Level3)
     const std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
     float ratio = 1;
     float ratioValue = 2;
+
+    PersistentStorage::Delete(keyName, PersistentStorageType::UKNOWN);
+    auto result0 = PersistentStorage::HasKey(keyName, PersistentStorageType::UKNOWN);
+    EXPECT_EQ(false, result0);
+
     PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::UKNOWN);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::UKNOWN);
     EXPECT_EQ(1, ratio);
