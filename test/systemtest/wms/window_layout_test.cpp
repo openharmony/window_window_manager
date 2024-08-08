@@ -951,15 +951,6 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
 
     ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -990,15 +981,6 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -1031,15 +1013,6 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
 
     ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1053,6 +1026,103 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     option->SetWindowName("resize05");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WMError error = window->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+
+/**
+ * @tc.name: resize06
+ * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize06");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WMError error = window->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize07
+ * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize07");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WMError error = window->Create(0, nullptr);
+    ASSERT_EQ(WMError::WM_OK, error);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize08
+ * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("resize08");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
