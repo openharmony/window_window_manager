@@ -111,6 +111,18 @@ public:
     }
 };
 
+class TestFocusChangedListener : public IFocusChangedListener {
+public:
+    void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestFocusChangedListener OnFocused()");
+    }
+    void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestFocusChangedListener OnUnfocused()");
+    }
+};
+
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -771,8 +783,13 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
  */
 HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 {
-    WindowLayoutMode mode = WindowLayoutMode::BASE;
-    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(mode);
+    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::BASE);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 
@@ -1220,6 +1237,38 @@ HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function 
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterFocusChangedListener01
+ * @tc.desc: check RegisterFocusChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
+    ret = WindowManager::GetInstance().RegisterFocusChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterFocusChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterFocusChangedListener01
+ * @tc.desc: check UnregisterFocusChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
+    ret = WindowManager::GetInstance().UnregisterFocusChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterFocusChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
