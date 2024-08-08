@@ -776,6 +776,10 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     int ret = 1;
     scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(nullptr, scensession->GetSessionProperty());
 }
 
 /**
@@ -833,6 +837,14 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     scensession->property_ = property;
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
+
+    NotifySystemBarPropertyChangeFunc fun = 
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
+    scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){};
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+        WSError::WS_OK);
 }
 
 /**
@@ -856,6 +868,11 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     int ret = 0;
     scensession->OnShowWhenLocked(false);
     ASSERT_EQ(ret, 0);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
+    scensession->sessionChangeCallback_->OnShowWhenLocked = [](bool showWhenLocked){};
+    ASSERT_EQ(scensession->OnShowWhenLocked(false), WSError::WS_OK);
 }
 
 /**
@@ -926,6 +943,14 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
     AvoidArea avoidArea;
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
+    EXPECT_NE(scensession, nullptr);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    scensession->property_ = property;
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
@@ -1039,6 +1064,11 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
+    scensession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
     ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
@@ -1181,6 +1211,10 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyPropertyWhenConnect();
+    ASSERT_EQ(scensession->GetSessionProperty(), nullptr);
 }
 
 /**
@@ -1483,7 +1517,13 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
+
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, p);
+    sceneSession->SetSessionProperty(property);
+    res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
 }
 
 /**
