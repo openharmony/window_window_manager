@@ -4462,6 +4462,19 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& scen
     return false;
 }
 
+bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& sceneSession, FocusChangeReason reason)
+{
+    if (focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
+        focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
+        return false;
+    }
+    if (reason != FocusChangeReason::CLICK || !focusedSession->GetBlockingFocus()) {
+        return false;
+    }
+    return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+}
+
 WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
     FocusChangeReason reason)
 {
@@ -4509,6 +4522,11 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
                 TLOGD(WmsLogTag::WMS_FOCUS, "Lower session %{public}d cannot request focus from keyguard!",
                     persistentId);
                 return WSError::WS_DO_NOTHING;
+        }
+        // desktop click temp check
+        if (CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason)) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "click cannot request focus from full screen window!");
+            return WSError::WS_DO_NOTHING;
         }
     }
     return WSError::WS_OK;
