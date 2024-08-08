@@ -30,8 +30,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStub"};
 }
 
-int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
-    MessageParcel &reply, MessageOption &option)
+int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
+    MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Window event channel on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -178,7 +178,7 @@ int WindowEventChannelStub::HandleTransferAccessibilityHoverEvent(MessageParcel&
     return ERR_NONE;
 }
 
-int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeRegister(MessageParcel &data, MessageParcel &reply)
+int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeRegister(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t windowId = 0;
     int32_t treeId = -1;
@@ -195,14 +195,14 @@ int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeRegister(Mes
 }
 
 int32_t WindowEventChannelStub::HandleTransferAccessibilityChildTreeUnregister(
-    MessageParcel &data, MessageParcel &reply)
+    MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = TransferAccessibilityChildTreeUnregister();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
-int32_t WindowEventChannelStub::HandleTransferAccessibilityDumpChildInfo(MessageParcel &data, MessageParcel &reply)
+int32_t WindowEventChannelStub::HandleTransferAccessibilityDumpChildInfo(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {

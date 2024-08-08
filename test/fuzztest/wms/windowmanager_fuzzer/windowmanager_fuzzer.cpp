@@ -28,7 +28,7 @@ namespace {
 }
 
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {

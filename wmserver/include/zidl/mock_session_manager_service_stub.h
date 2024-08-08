@@ -25,8 +25,8 @@ class MockSessionManagerServiceStub : public IRemoteStub<IMockSessionManagerInte
 public:
     MockSessionManagerServiceStub() = default;
     ~MockSessionManagerServiceStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override;
 };
 }
 }
