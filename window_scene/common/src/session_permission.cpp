@@ -81,11 +81,11 @@ bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("Not system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "Not system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     }
     return false;
 }
@@ -94,7 +94,7 @@ bool SessionPermission::IsSystemCalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    WLOGFD("tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+    TLOGD(WmsLogTag::DEFAULT, "tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         return true;
@@ -113,40 +113,42 @@ bool SessionPermission::IsSACalling()
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        WLOGFW("SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
-    WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+    TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     return false;
 }
 
 bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
+    TLOGD(WmsLogTag::DEFAULT, "permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
+        TLOGE(WmsLogTag::DEFAULT,
+            "permission %{public}s: PERMISSION_DENIED, callingTokenID:%{private}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
 
 bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName)
 {
-    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
+    TLOGD(WmsLogTag::DEFAULT, "permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
+        TLOGE(WmsLogTag::DEFAULT,
+            "permission %{public}s: PERMISSION_DENIED, callingTokenID:%{private}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -181,7 +183,7 @@ bool SessionPermission::IsShellCall()
         WLOGFI("TokenType is Shell, verify success");
         return true;
     }
-    WLOGFI("Not Shell called. tokenId:%{public}u, type:%{public}u", callerToken, tokenType);
+    TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
     return false;
 }
 
