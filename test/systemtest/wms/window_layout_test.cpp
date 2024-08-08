@@ -900,7 +900,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
@@ -943,7 +943,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
@@ -986,7 +986,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
@@ -1029,7 +1029,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
@@ -1072,7 +1072,7 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
