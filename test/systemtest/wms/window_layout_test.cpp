@@ -675,6 +675,17 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 {
+    sptr<WindowImpl> pParentWindow = nullptr;
+    {
+        sptr<WindowOption> option = new (std::nothrow) WindowOption();
+        option->SetWindowName("ParentWindow02");
+        option->SetWindowType(WindowType::APP_WINDOW_BASE);
+        option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+        pParentWindow = new(std::nothrow) WindowImpl(option);
+        ASSERT_NE(pParentWindow, nullptr);
+    }
+
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("moveWindowTo02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -683,7 +694,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = window->Create(0, nullptr);
+    WMError error = window->Create(pParentWindow->property_->GetWindowId(), nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
@@ -706,6 +717,17 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 {
+    sptr<WindowImpl> pParentWindow = nullptr;
+    {
+        sptr<WindowOption> option = new (std::nothrow) WindowOption();
+        option->SetWindowName("ParentWindow03");
+        option->SetWindowType(WindowType::APP_WINDOW_BASE);
+        option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+        pParentWindow = new(std::nothrow) WindowImpl(option);
+        ASSERT_NE(pParentWindow, nullptr);
+    }
+
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("moveWindowTo03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -714,7 +736,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
     sptr<WindowImpl> window = new(std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WMError error = window->Create(0, nullptr);
+    WMError error = window->Create(pParentWindow->property_->GetWindowId(), nullptr);
     ASSERT_EQ(WMError::WM_OK, error);
 
     WMError ret = window->MoveTo(-500, -500);
