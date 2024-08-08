@@ -60,7 +60,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
-    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode = nullptr);
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr);
     virtual DMError HasImmersiveWindow(bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);

@@ -25,7 +25,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotProxy"};
 }
 
-int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot)
+int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject>& token, AAFwk::Snapshot& snapshot)
 {
     MessageParcel data;
     MessageParcel reply;

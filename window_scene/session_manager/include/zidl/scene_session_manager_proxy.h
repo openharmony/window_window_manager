@@ -52,16 +52,16 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetGestureNavigaionEnabled(bool enable) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label) override;
-    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
-    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
+    WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override;
-    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
     WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
 
@@ -73,9 +73,9 @@ public:
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) override;
 
-    WSError DumpSessionAll(std::vector<std::string> &infos) override;
-    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
-    WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
+    WSError DumpSessionAll(std::vector<std::string>& infos) override;
+    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos) override;
+    WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) override;
     WSError TerminateSessionNew(
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
@@ -93,7 +93,7 @@ public:
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;

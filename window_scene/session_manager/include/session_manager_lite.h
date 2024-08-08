@@ -68,7 +68,7 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
-    void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
+    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
     void DeleteAllSessionListeners();
     void ReregisterSessionListener() const;
     void RegisterSMSRecoverListener();

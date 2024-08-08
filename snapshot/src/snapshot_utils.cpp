@@ -433,7 +433,7 @@ bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId& displayId, bool isDisplay
     return true;
 }
 
-bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArguments& cmdArguments)
+bool SnapShotUtils::ProcessArgs(int argc, char* const argv[], CmdArguments& cmdArguments)
 {
     int opt = 0;
     const struct option longOption[] = {

@@ -29,7 +29,7 @@ public:
     explicit ScreenSessionAbilityDeathRecipient(
         std::function<void(void)> deathHandler) : deathHandler_(deathHandler) {}
     ~ScreenSessionAbilityDeathRecipient() = default;
-    void OnRemoteDied(const wptr<IRemoteObject> &remoteObject) override;
+    void OnRemoteDied(const wptr<IRemoteObject>& remoteObject) override;
 
 private:
     std::function<void(void)> deathHandler_;
@@ -41,7 +41,7 @@ public:
     virtual ~ScreenSessionAbilityConnectionStub() = default;
 
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
-        const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
+        const sptr<IRemoteObject>& remoteObject, int32_t resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int32_t resultCode) override;
     int32_t SendMessageSync(int32_t transCode, MessageParcel& data, MessageParcel& reply);
     int32_t SendMessageSyncBlock(int32_t transCode, MessageParcel& data, MessageParcel& reply);

@@ -37,7 +37,7 @@ namespace {
 static thread_local std::map<uint64_t, sptr<DisplayImpl>> g_cjDisplayMap;
 std::recursive_mutex g_mutex;
 
-void SetCRect(const DMRect& row, CRect* ptr)
+void SetCRect(const DMRect &row, CRect *ptr)
 {
     ptr->left = row.posX_;
     ptr->top = row.posY_;
@@ -59,7 +59,7 @@ CRect* CreateCBoundingRects(std::vector<DMRect> &bound)
     return result;
 }
 
-void SetCWaterfallDisplayAreaRects(const WaterfallDisplayAreaRects& area, CCutoutInfo * info)
+void SetCWaterfallDisplayAreaRects(const WaterfallDisplayAreaRects &area, CCutoutInfo * info)
 {
     if (info == nullptr || info->boundingRects == nullptr) {
         return;

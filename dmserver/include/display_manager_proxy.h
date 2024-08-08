@@ -27,7 +27,7 @@
 namespace OHOS::Rosen {
 class DisplayManagerProxy : public IRemoteProxy<IDisplayManager> {
 public:
-    explicit DisplayManagerProxy(const sptr<IRemoteObject>& impl)
+    explicit DisplayManagerProxy(const sptr<IRemoteObject> &impl)
         : IRemoteProxy<IDisplayManager>(impl) {};
     ~DisplayManagerProxy() {};
 

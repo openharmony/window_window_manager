@@ -1397,7 +1397,7 @@ void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc&
     updateSessionLabelFunc_ = func;
 }
 
-WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFD("run Session::SetSessionIcon, id: %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {

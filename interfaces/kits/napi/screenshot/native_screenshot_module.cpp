@@ -175,7 +175,7 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param>& param, napi
     GetImageSize(env, param, argv);
 }
 
-static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
+static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param>& param)
 {
     if (!param->validInputParam) {
         WLOGFE("Invalid Input Param!");
@@ -221,7 +221,7 @@ napi_value CreateJsRectObject(napi_env env, Media::Rect imageRect)
     return objValue;
 }
 
-napi_value CreateJsPickerObject(napi_env env, std::unique_ptr<Param> &param)
+napi_value CreateJsPickerObject(napi_env env, std::unique_ptr<Param>& param)
 {
     napi_value objValue = nullptr;
     NAPI_CALL(env, napi_create_object(env, &objValue));
@@ -237,7 +237,7 @@ napi_value CreateJsPickerObject(napi_env env, std::unique_ptr<Param> &param)
     return objValue;
 }
 
-napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
+napi_value Resolve(napi_env env, std::unique_ptr<Param>& param)
 {
     napi_value result;
     napi_value error;

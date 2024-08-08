@@ -641,7 +641,7 @@ void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     }
 }
 
-WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label)
+WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
     WLOGFI("run SceneSessionManagerProxy::SetSessionLabel");
     MessageParcel data;
@@ -673,8 +673,8 @@ WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject> &tok
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::SetSessionIcon(const sptr<IRemoteObject> &token,
-    const std::shared_ptr<Media::PixelMap> &icon)
+WSError SceneSessionManagerProxy::SetSessionIcon(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SceneSessionManagerProxy::SetSessionIcon");
     MessageParcel data;
@@ -707,7 +707,7 @@ WSError SceneSessionManagerProxy::SetSessionIcon(const sptr<IRemoteObject> &toke
 }
 
 WSError SceneSessionManagerProxy::IsValidSessionIds(
-    const std::vector<int32_t> &sessionIds, std::vector<bool> &results)
+    const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {
     WLOGFI("run SceneSessionManagerProxy::IsValidSessionIds");
     MessageParcel data;
@@ -802,7 +802,7 @@ WMError SceneSessionManagerProxy::GetUnreliableWindowInfo(int32_t windowId,
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::PendingSessionToForeground(const sptr<IRemoteObject> &token)
+WSError SceneSessionManagerProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
     WLOGFI("run SceneSessionManagerProxy::PendingSessionToForeground");
     MessageParcel data;
@@ -831,7 +831,7 @@ WSError SceneSessionManagerProxy::PendingSessionToForeground(const sptr<IRemoteO
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token)
+WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
 {
     WLOGFI("run SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator");
     MessageParcel data;
@@ -1034,7 +1034,7 @@ WSError SceneSessionManagerProxy::GetSessionInfoByContinueSessionId(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::DumpSessionAll(std::vector<std::string> &infos)
+WSError SceneSessionManagerProxy::DumpSessionAll(std::vector<std::string>& infos)
 {
     WLOGFI("run SceneSessionManagerProxy::DumpSessionAll");
     MessageParcel data;
@@ -1061,7 +1061,7 @@ WSError SceneSessionManagerProxy::DumpSessionAll(std::vector<std::string> &infos
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+WSError SceneSessionManagerProxy::DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos)
 {
     WLOGFI("run SceneSessionManagerProxy::DumpSessionWithId");
     MessageParcel data;
@@ -1150,7 +1150,7 @@ WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionI
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
+WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     WLOGFD("run SceneSessionManagerProxy::GetFocusSessionToken");
     MessageParcel data;
@@ -1348,7 +1348,7 @@ WSError SceneSessionManagerProxy::GetUIContentRemoteObj(int32_t persistentId, sp
     return static_cast<WSError>(reply.ReadUint32());
 }
 
-WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject> &token,
+WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
     MessageParcel data;
@@ -1595,7 +1595,7 @@ WSError SceneSessionManagerProxy::ClearAllSessions()
 }
 
 WSError SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator(int32_t type,
-    const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+    const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
 {
     WLOGFI("run SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator");
     if (!impl) {

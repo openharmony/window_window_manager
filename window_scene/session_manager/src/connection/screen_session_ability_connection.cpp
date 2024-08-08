@@ -33,7 +33,7 @@ constexpr uint32_t TRANS_FAILED_FOR_PRIVACY = 1;
 
 void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element,
-    const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
+    const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
 {
     TLOGI(WmsLogTag::DMS, "OnAbilityConnectDone entry");
     if (resultCode != ERR_OK) {
@@ -183,7 +183,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
     return RES_SUCCESS;
 }
 
-void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)
+void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
 {
     TLOGI(WmsLogTag::DMS, "OnRemoteDied entry");
     if (deathHandler_ == nullptr) {
