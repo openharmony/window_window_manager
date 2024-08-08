@@ -213,7 +213,7 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
 
-    session_->sessionState_ = nullptr;
+    session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
 }
 
@@ -239,7 +239,7 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
 {
     SystemSessionConfig sessionConfig;
     session_->state_ = SessionState::STATE_CONNECT;
-    session_->isTerminating = false;
+    session_->isTerminating_ = false;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -250,7 +250,7 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
-    session_->isTerminating = true;
+    session_->isTerminating_ = true;
     auto res2 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res, WSError::WS_OK);
