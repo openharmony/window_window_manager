@@ -1017,12 +1017,16 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto promoteThis = weakThis.promote();
-        if (promoteThis != nullptr && promoteThis->surfaceNode_ != nullptr) {
+        auto window = weakThis.promote();
+        if (window != nullptr && window->surfaceNode_ != nullptr) {
             bool setCallBackEnable = true;
-            if (promoteThis->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
+            if (window->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
+                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                    "Notify buffer available after layout, windowId: %u", window->GetWindowId());
+                TLOGI(WmsLogTag::WMS_MAIN,
+                    "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
                 // false: Make the function callable
-                promoteThis->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+                window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
             }
         }
     });
