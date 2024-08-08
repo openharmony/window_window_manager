@@ -1229,6 +1229,30 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnSystemSessionEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSystemSessionEvent";
+    info.bundleName_ = "OnSystemSessionEvent";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_EQ(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    scensession->SetSessionProperty(property);
+    scensession->isActive_ = false;
+
+    SessionEvent event = SessionEvent::EVENT_START_MOVE;
+    auto result = scensession->OnSystemSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetTopmost
  * @tc.desc: normal function
  * @tc.type: FUNC
