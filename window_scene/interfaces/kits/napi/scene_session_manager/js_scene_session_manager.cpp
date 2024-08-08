@@ -1817,15 +1817,21 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
 
 napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     bool flag = false;
-    if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], flag)) {
-            WLOGFE("[NAPI]Failed SetVmaCacheStatus to convert parameter to bool");
-            return NapiGetUndefined(env);
-        }
+    if (!ConvertFromJsValue(env, argv[0], flag)) {
+        WLOGFE("[NAPI]Faile to convert parameter to flag.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SetVmaCacheStatus(flag);
     return NapiGetUndefined(env);
