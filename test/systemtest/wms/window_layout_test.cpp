@@ -656,16 +656,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -689,16 +689,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -722,16 +722,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -755,16 +755,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -788,16 +788,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -821,16 +821,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -854,16 +854,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->MoveTo(-500, -500);
+    WMError ret = window->MoveTo(-500, -500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(0, 0);
+    ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(500, 500);
+    ret = window->MoveTo(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->MoveTo(20000, 20000);
+    ret = window->MoveTo(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -887,26 +887,26 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->Resize(-500, -500);
+    WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(0, 0);
+    ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(500, 500);
+    ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(20000, 20000);
+    ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    res = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits)
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -930,26 +930,26 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->Resize(-500, -500);
+    WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(0, 0);
+    ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(500, 500);
+    ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(20000, 20000);
+    ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    res = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits)
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -973,26 +973,26 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->Resize(-500, -500);
+    WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(0, 0);
+    ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(500, 500);
+    ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(20000, 20000);
+    ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    res = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits)
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -1016,26 +1016,26 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->Resize(-500, -500);
+    WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(0, 0);
+    ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(500, 500);
+    ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(20000, 20000);
+    ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    res = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits)
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -1059,26 +1059,26 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
 
-    WMError res = window->Resize(-500, -500);
+    WMError ret = window->Resize(-500, -500);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(0, 0);
+    ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    res = window->Resize(500, 500);
+    ret = window->Resize(500, 500);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(20000, 20000);
+    ret = window->Resize(20000, 20000);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
-    res = window->GetWindowLimits(windowLimits)
+    ret = window->GetWindowLimits(windowLimits)
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 
-    res = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
