@@ -262,6 +262,7 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual void StartMove() = 0;
+    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_OK; };
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
     virtual bool IsSupportWideGamut() = 0;
