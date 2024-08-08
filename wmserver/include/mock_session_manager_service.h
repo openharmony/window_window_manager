@@ -41,7 +41,7 @@ public:
     void UnregisterSMSLiteRecoverListener() override;
     void UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid);
     void OnStart() override;
-    int Dump(int fd, const std::vector<std::u16string> &args) override;
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
 

@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Rosen {
-static void SetDisplayObject(sptr<Display> &obj, RetStruct& ret)
+static void SetDisplayObject(sptr<Display> &obj, RetStruct &ret)
 {
     auto result = DisplayImpl::CreateDisplayImpl(obj);
     if (result == nullptr || ret.data == nullptr) {
@@ -42,7 +42,7 @@ static void SetDisplayObject(sptr<Display> &obj, RetStruct& ret)
     ret.code = static_cast<int32_t>(DmErrorCode::DM_OK);
 }
 
-static void SetDisplaysArrayObject(std::vector<sptr<Display>> &list, RetStruct& ret)
+static void SetDisplaysArrayObject(std::vector<sptr<Display>> &list, RetStruct &ret)
 {
     int64_t *displayImplIdList = static_cast<int64_t*>(malloc(sizeof(int64_t) * list.size()));
     if (displayImplIdList == nullptr) {

@@ -398,7 +398,7 @@ int32_t FFiOHOSWindowSetPreferredOrientation(int64_t id, uint32_t orientation)
     return res;
 }
 
-int32_t FFiOHOSWindowGetWindowAvoidArea(int64_t id, uint32_t areaType,  OHOS::Rosen::CAvoidArea* retPtr)
+int32_t FFiOHOSWindowGetWindowAvoidArea(int64_t id, uint32_t areaType,  OHOS::Rosen::CAvoidArea *retPtr)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowGetWindowAvoidArea start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
@@ -817,7 +817,7 @@ RetDataI64 FfiOHOSGetMainWindow(int64_t id)
     return ret;
 }
 
-RetDataI64 FfiOHOSCreateSubWindow(int64_t id, char* name)
+RetDataI64 FfiOHOSCreateSubWindow(int64_t id, char *name)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] createSubWindow start");
     RetDataI64 ret;
@@ -842,7 +842,7 @@ RetStruct FfiOHOSGetSubWindow(int64_t id)
     return ret;
 }
 
-int32_t FfiOHOSLoadContent(int64_t id, char* path)
+int32_t FfiOHOSLoadContent(int64_t id, char *path)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] loadContent start");
     std::string url = path;
@@ -854,7 +854,7 @@ int32_t FfiOHOSLoadContent(int64_t id, char* path)
     return instance->OnLoadContent(url, storageJson, false);
 }
 
-int32_t FfiOHOSLoadContentByName(int64_t id, char* name)
+int32_t FfiOHOSLoadContentByName(int64_t id, char *name)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] loadContentByName start");
     return SUCCESS_CODE;

@@ -30,8 +30,8 @@ namespace {
     const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 
-int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
+int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
 {
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {

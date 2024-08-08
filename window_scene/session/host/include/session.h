@@ -236,7 +236,7 @@ public:
     WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
-    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);

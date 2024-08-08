@@ -158,7 +158,7 @@ static std::string Str16ToStr8(const std::u16string& str)
     return result == DEFAULT_STRING ? "" : result;
 }
 
-int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string> &args)
+int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGI("dump begin fd: %{public}d", fd);
     if (fd < 0) {

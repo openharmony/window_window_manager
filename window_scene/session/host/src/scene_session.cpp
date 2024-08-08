@@ -2153,7 +2153,7 @@ std::string SceneSession::GetSessionSnapshotFilePath() const
     return "";
 }
 
-void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon)
+void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
     if (scenePersistence_ != nullptr) {
@@ -2533,7 +2533,7 @@ void SceneSession::SetClientIdentityToken(const std::string& clientIdentityToken
     clientIdentityToken_ = clientIdentityToken;
 }
 
-void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const
+void SceneSession::DumpSessionInfo(std::vector<std::string>& info) const
 {
     std::string dumpInfo = "      Session ID #" + std::to_string(persistentId_);
     info.push_back(dumpInfo);

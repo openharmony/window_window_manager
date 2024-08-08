@@ -253,7 +253,7 @@ void SessionManagerLite::OnWMSConnectionChanged(
     OnWMSConnectionChangedCallback(userId, screenId, isConnected, isCallbackRegistered);
 }
 
-void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService)
+void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched Lite");
     {

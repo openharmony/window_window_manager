@@ -136,8 +136,8 @@ public:
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
-    virtual WSError DumpSessionAll(std::vector<std::string> &infos) { return WSError::WS_OK; }
-    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionAll(std::vector<std::string>& infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos) { return WSError::WS_OK; }
     virtual WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
     {
         return WSError::WS_OK;
