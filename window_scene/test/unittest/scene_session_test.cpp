@@ -445,6 +445,25 @@ HWTEST_F(SceneSessionTest, IsAppSession02, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     ASSERT_EQ(false, scensession->IsAppSession());
+
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "testSession1";
+    parentInfo.moduleName_ = "testSession2";
+    parentInfo.bundleName_ = "testSession3";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
+    ASSERT_NE(parentSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(false, scensession->IsAppSession());
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(true, scensession->IsAppSession());
 }
 
 /**
@@ -558,6 +577,11 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     scensession->UpdateNativeVisibility(false);
     ASSERT_EQ(false, scensession->IsVisible());
     scensession->NotifyWindowVisibility();
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->sessionStage_ = mockSessionStage;
+    scensession->NotifyWindowVisibility();
 }
 
 /**
@@ -601,6 +625,9 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
+
+    scensession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
 }
 
@@ -672,6 +699,10 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
+    scensession->NotifyIsCustomAnimationPlaying(false);
+
+    scensession->sessionChangeCallback_ = specificCallback_;
+    scensession->sessionChangeCallback_->onIsCustomAnimationPlaying_ = [](bool status){};
     scensession->NotifyIsCustomAnimationPlaying(false);
 }
 
