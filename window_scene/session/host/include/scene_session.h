@@ -49,7 +49,6 @@ using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentI
 using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId)>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
     WsPiPControlStatus status)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
@@ -104,7 +103,6 @@ public:
     // callback for notify SceneBoard
     struct SessionChangeCallback : public RefBase {
         NotifyBindDialogSessionFunc onBindDialogTarget_;
-        NotifySessionRectChangeFunc onRectChange_;
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
@@ -456,7 +454,6 @@ private:
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
 
-    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyForceSplitFunc forceSplitFunc_;
     static wptr<SceneSession> enterSession_;
