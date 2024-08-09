@@ -71,6 +71,9 @@ private:
         void OnDrawingCompleted() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
+
+    sptr<SessionStageMocker> mockSessionStage_ = nullptr;
+    sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
 void WindowSessionTest2::SetUpTestCase()
@@ -96,6 +99,12 @@ void WindowSessionTest2::SetUp()
         return ssm_->IsScreenLocked();
     };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+
+    mockSessionStage_ = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage_, nullptr);
+
+    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSessionStage_);
+    ASSERT_NE(mockEventChannel_, nullptr);
 }
 
 void WindowSessionTest2::TearDown()
@@ -163,6 +172,21 @@ HWTEST_F(WindowSessionTest2, BindDialogToParentSession, Function | SmallTest | L
     sptr<Session> session = new (std::nothrow) Session(info);
     session_->BindDialogToParentSession(session);
 
+    sptr<Session> session1 = new (std::nothrow) Session(info);
+    ASSERT_NE(session1, nullptr);
+    session1->persistentId_ = 33;
+    session1->SetParentSession(session_);
+    session1->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(session1);
+
+    sptr<Session> session2 = new (std::nothrow) Session(info);
+    ASSERT_NE(session2, nullptr);
+    session2->persistentId_ = 34;
+    session2->SetParentSession(session_);
+    session2->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(session2);
+    session_->BindDialogToParentSession(session1);
+
     session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -181,6 +205,21 @@ HWTEST_F(WindowSessionTest2, RemoveDialogToParentSession, Function | SmallTest |
     info.bundleName_ = "testSession3";
     sptr<Session> session = new (std::nothrow) Session(info);
     session_->RemoveDialogToParentSession(session);
+
+    sptr<Session> session1 = new (std::nothrow) Session(info);
+    ASSERT_NE(session1, nullptr);
+    session1->persistentId_ = 33;
+    session1->SetParentSession(session_);
+    session1->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(session1);
+
+    sptr<Session> session2 = new (std::nothrow) Session(info);
+    ASSERT_NE(session2, nullptr);
+    session2->persistentId_ = 34;
+    session2->SetParentSession(session_);
+    session2->state_ = SessionState::STATE_ACTIVE;
+    session_->dialogVec_.push_back(session2);
+    session_->RemoveDialogToParentSession(session1);
 
     session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
@@ -295,6 +334,47 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent05, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: TransferPointerEvent06
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = true;
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+
+    session_->property_ = new WindowSessionProperty();
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    session_->windowEventChannel_ = mockEventChannel_;
+
+    auto needNotifyClient = true;
+    session_->TransferPointerEvent(pointerEvent, needNotifyClient);
+
+    needNotifyClient = false;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
+}
+
+/**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: !IsSystemSession() && !IsSessionVaild() is true
  * @tc.type: FUNC
@@ -309,6 +389,9 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent01, Function | SmallTest | Level2)
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
+
+    session_->windowEventChannel_ = mockEventChannel_;
+    ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEvent(keyEvent));
 }
 
 /**
@@ -1460,7 +1543,36 @@ HWTEST_F(WindowSessionTest2, SetSessionIcon, Function | SmallTest | Level2)
     session_->SetSessionIcon(icon);
     ASSERT_EQ(session_->Clear(), WSError::WS_OK);
     session_->SetSessionSnapshotListener(nullptr);
+    NotifyPendingSessionActivationFunc func = [](const SessionInfo& info) {};
+    session_->pendingSessionActivationFunc_ = func;
     ASSERT_EQ(session_->PendingSessionToForeground(), WSError::WS_OK);
+
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("SetSessionIcon", 1);
+    session_->updateSessionIconFunc_ = nullptr;
+    ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
+
+    NofitySessionIconUpdatedFunc func2 = [](const std::string& iconPath) {};
+    session_->updateSessionIconFunc_ = func2;
+    ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
+
+    NotifyTerminateSessionFuncNew func3 = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
+    session_->terminateSessionFuncNew_ = func3;
+    ASSERT_EQ(WSError::WS_OK, session_->Clear());
+}
+
+/**
+ * @tc.name: SetSessionExceptionListener
+ * @tc.desc: SetSessionExceptionListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest | Level2)
+{
+    session_->SetSessionExceptionListener(nullptr, true);
+
+    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession) {};
+    session_->SetSessionExceptionListener(func, true);
+
+    ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }
 
 /**
@@ -1472,6 +1584,9 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
 {
     ASSERT_NE(session_, nullptr);
     session_->SetRaiseToAppTopForPointDownFunc(nullptr);
+
+    NotifyRaiseToTopForPointDownFunc func = []() {};
+    session_->raiseToTopForPointDownFunc_ = func;
     session_->RaiseToAppTopForPointDown();
     session_->HandlePointDownDialog();
     session_->ClearDialogVector();
@@ -1486,6 +1601,9 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
     session_->SetNotifyUIRequestFocusFunc(nullptr);
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
+
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info) {};
+    session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
 }
 
