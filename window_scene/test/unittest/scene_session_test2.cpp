@@ -26,6 +26,7 @@
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
 #include <pointer_event.h>
+#include "ui/rs_surface_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -240,6 +241,11 @@ HWTEST_F(SceneSessionTest2, HandleEnterWinwdowArea2, Function | SmallTest | Leve
     WSError result = scensession->HandleEnterWinwdowArea(1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 
+    scensession->sessionInfo_.isSystem_ = true;
+    result = scensession->HandleEnterWinwdowArea(1, 1);
+    result = scensession->HandleEnterWinwdowArea(1, 1);
+    ASSERT_EQ(result, WSError::WS_OK);
+
     property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -342,6 +348,24 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent01, Function | SmallTest | Level
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
     ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
         WSError::WS_ERROR_INVALID_SESSION);
+
+    scensession->sessionInfo_.isSystem_ = true;
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+    WSError::WS_ERROR_NULLPTR);
+
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+    WSError::WS_ERROR_NULLPTR);
+
+    scensession->sessionInfo_.isSystem_ = false;
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+    WSError::WS_ERROR_INVALID_SESSION);
+
+    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_),
+    WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -403,6 +427,13 @@ HWTEST_F(SceneSessionTest2, RequestSessionBack, Function | SmallTest | Level2)
 
     WSError result = scensession->RequestSessionBack(true);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    scensession->SetLeashWinSurfaceNode(surfaceNode);
+    result = scensession->RequestSessionBack(true);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -434,6 +465,10 @@ HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2
     scensession->SetParentPersistentId(0);
     result = scensession->GetParentPersistentId();
     ASSERT_EQ(result, 0);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->SetParentPersistentId(0);
+    ASSERT_EQ(0, scensession->GetParentPersistentId());
 }
 
 /**
@@ -918,6 +953,10 @@ HWTEST_F(SceneSessionTest2, SetFloatingScale, Function | SmallTest | Level2)
     scensession->specificCallback_->onUpdateAvoidArea_ = updateAvoidAreaFun;
     scensession->SetFloatingScale(3.14f);
     EXPECT_EQ(3.14f, scensession->floatingScale_);
+
+    scensession->floatingScale_ = 3.0f;
+    scensession->SetFloatingScale(3.0f);
+    EXPECT_EQ(3.0f, scensession->floatingScale_);
 }
 
 /**
@@ -943,6 +982,13 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, Function | SmallTest | Leve
     };
     scensession->specificCallback_->onSessionTouchOutside_ = sessionTouchOutsideFun;
     scensession->specificCallback_->onOutsideDownEvent_ = outsideDownEventFun;
+    EXPECT_EQ(WSError::WS_OK, scensession->ProcessPointDownSession(3, 4));
+
+    scensession->specificCallback_->onSessionTouchOutside_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, scensession->ProcessPointDownSession(3, 4));
+
+    scensession->sessionInfo_.bundleName_ = "SCBGestureBack";
+    scensession->specificCallback_->onOutsideDownEvent_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, scensession->ProcessPointDownSession(3, 4));
 }
 
@@ -1573,6 +1619,8 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
+
+    sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
 }
 
 /**
@@ -1599,6 +1647,10 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
 
     bool visible = true;
     sceneSession->UpdateNativeVisibility(visible);
+
+    sceneSession->scenePersistence_ = new (std::nothrow) ScenePersistence(info.bundleName_, 0);
+    EXPECT_NE(sceneSession->scenePersistence_, nullptr);
+    sceneSession->GetUpdatedIconPath();
 }
 
 /**
@@ -1864,6 +1916,24 @@ HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->SetSessionProperty(property);
     sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+}
+
+/**
+ * @tc.name: IsFullScreenMovable
+ * @tc.desc: IsFullScreenMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsFullScreenMovable";
+    info.bundleName_ = "IsFullScreenMovable";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetSessionProperty(nullptr);
+    auto result = sceneSession->IsFullScreenMovable();
+    ASSERT_EQ(false, result);
 }
 }
 }

@@ -375,6 +375,9 @@ HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | L
     session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
     session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
     EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
+
+    session->SetSessionState(SessionState::STATE_BACKGROUND);
+    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
 }
 
 /**
