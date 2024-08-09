@@ -262,8 +262,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
         JsSceneSession::SetTemporarilyShowWhenLocked);
-    BindNativeFunction(env, objValue, "setSkipDraw", moduleName,
-        JsSceneSession::SetSkipDraw);
+    BindNativeFunction(env, objValue, "setSkipDraw", moduleName, JsSceneSession::SetSkipDraw);
     BindNativeFunction(env, objValue, "openKeyboardSyncTransaction", moduleName,
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
