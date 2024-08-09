@@ -3546,17 +3546,6 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
     return sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
-void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
-{
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
-    isMinimizedByUserSwitch_ = isMinimized;
-}
-
-bool SceneSession::IsMinimizedByUserSwitch()
-{
-    return isMinimizedByUserSwitch_;
-}
-
 void SceneSession::NotifySessionFullScreen(bool fullScreen)
 {
     if (!sessionStage_) {
@@ -4171,5 +4160,16 @@ bool SceneSession::IsPcOrPadEnableActivation() const
         isPcAppInPad = property->GetIsPcAppInPad();
     }
     return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
+}
+
+void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
+    isMinimizedByUserSwitch_ = isMinimized;
+}
+
+bool SceneSession::IsMinimizedByUserSwitch() const
+{
+    return isMinimizedByUserSwitch_;
 }
 } // namespace OHOS::Rosen

@@ -977,17 +977,17 @@ HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: IsPcLifeCycle1
+ * @tc.name: IsPcSceneSessionLifecycle1
  * @tc.desc: Normal test
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle1, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
-    info.abilityName_ = "IsPcLifeCycle1";
-    info.bundleName_ = "IsPcLifeCycle1";
+    info.abilityName_ = "IsPcSceneSessionLifecycle1";
+    info.bundleName_ = "IsPcSceneSessionLifecycle1";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -996,22 +996,22 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle1, Function | SmallTest | Level3
     property->SetIsAppSupportPhoneInPc(false);
     sceneSession->SetIsPcAppInPad(false);
 
-    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: IsPcLifeCycle2
+ * @tc.name: IsPcSceneSessionLifecycle2
  * @tc.desc: pc app in pad
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle2, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = false;
     SessionInfo info;
-    info.abilityName_ = "IsPcLifeCycle2";
-    info.bundleName_ = "IsPcLifeCycle2";
+    info.abilityName_ = "IsPcSceneSessionLifecycle2";
+    info.bundleName_ = "IsPcSceneSessionLifecycle2";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -1020,22 +1020,22 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle2, Function | SmallTest | Level3
     property->SetIsAppSupportPhoneInPc(false);
     sceneSession->SetIsPcAppInPad(true);
 
-    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: IsPcLifeCycle3
+ * @tc.name: IsPcSceneSessionLifecycle3
  * @tc.desc: Compatible mode in pc
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle3, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle3, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
     SessionInfo info;
-    info.abilityName_ = "IsPcLifeCycle3";
-    info.bundleName_ = "IsPcLifeCycle3";
+    info.abilityName_ = "IsPcSceneSessionLifecycle3";
+    info.bundleName_ = "IsPcSceneSessionLifecycle3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -1044,7 +1044,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcLifeCycle3, Function | SmallTest | Level3
     property->SetIsAppSupportPhoneInPc(true);
     sceneSession->SetIsPcAppInPad(false);
 
-    bool ret = ssm_->IsPcLifeCycle(sceneSession);
+    bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, false);
 }
 
@@ -1068,7 +1068,7 @@ HWTEST_F(SceneSessionManagerTest3, InitUserInfo, Function | SmallTest | Level3)
  * @tc.name: IsInvalidMainSessionOnUserSwitch1
  * @tc.desc: invalid window type
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1095,7 +1095,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function 
  * @tc.name: IsNeedChangeLifeCycleOnUserSwitch2
  * @tc.desc: invalid window state
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1122,7 +1122,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function 
  * @tc.name: IsNeedChangeLifeCycleOnUserSwitch3
  * @tc.desc: Normal test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
