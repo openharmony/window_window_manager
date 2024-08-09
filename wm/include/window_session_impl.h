@@ -288,6 +288,7 @@ protected:
     sptr<WindowSessionProperty> property_;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
+    sptr<Window> parentExtensionWindow_ = nullptr;
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
@@ -432,7 +433,6 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
-    sptr<Window> parentExtensionWindow_ = nullptr;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool hasFirstNotifyInteractive_ = false;

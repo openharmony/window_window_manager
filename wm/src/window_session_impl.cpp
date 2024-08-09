@@ -535,6 +535,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     if (context_) {
         context_.reset();
     }
+    if (parentExtensionWindow_) {
+        parentExtensionWindow_ = nullptr;
+    }
     ClearVsyncStation();
     return WMError::WM_OK;
 }
