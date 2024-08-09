@@ -1531,7 +1531,7 @@ HWTEST_F(WindowSessionTest2, SetSessionIcon, Function | SmallTest | Level2)
     session_->updateSessionIconFunc_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
 
-    NotifySessionIconUpdatedFunc = func2 = [](const std::string& iconPath) {};
+    NofitySessionIconUpdatedFunc = func2 = [](const std::string& iconPath) {};
     session_->updateSessionIconFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
 
