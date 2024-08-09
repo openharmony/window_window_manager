@@ -41,9 +41,11 @@ public:
     {
         isRegisteredMMI_ = true;
     }
+
 protected:
     InputTransferStation() = default;
     ~InputTransferStation();
+    
 private:
     bool IsRegisterToMMI() const
     {
