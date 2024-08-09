@@ -2215,6 +2215,11 @@ WSError Session::CompatibleFullScreenRecover()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenRecover();
 }
 
@@ -2226,6 +2231,11 @@ WSError Session::CompatibleFullScreenMinimize()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenMinimize();
 }
 
@@ -2236,6 +2246,11 @@ WSError Session::CompatibleFullScreenClose()
         TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->CompatibleFullScreenClose();
 }

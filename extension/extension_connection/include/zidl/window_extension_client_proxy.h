@@ -24,8 +24,8 @@ namespace Rosen {
 class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
 public:
     explicit WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IWindowExtensionClient>(impl) {};
-    ~WindowExtensionClientProxy() {};
+        : IRemoteProxy<IWindowExtensionClient>(impl) {}
+    ~WindowExtensionClientProxy() {}
     void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
