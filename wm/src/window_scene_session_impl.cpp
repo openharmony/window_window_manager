@@ -621,7 +621,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
         } else if (isMoveArea || (WindowHelper::IsSystemWindow(windowType) &&
-            !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
+            !(windowType == WindowType::WINDOW_TYPE_DIALOG))) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
