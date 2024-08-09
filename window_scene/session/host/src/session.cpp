@@ -2283,9 +2283,6 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (!sessionStage_) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         return sessionStage_->UpdateWindowMode(mode);
     }
     return WSError::WS_OK;
