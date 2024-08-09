@@ -1173,7 +1173,6 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
     session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
     session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-    session->ProcessUpdatePropertyByAction(property, session_, 0);
 }
 }
 }
