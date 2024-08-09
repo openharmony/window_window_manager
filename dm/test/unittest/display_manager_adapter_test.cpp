@@ -814,6 +814,24 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | 
         ASSERT_TRUE(allSize.empty());
     }
 }
+
+/**
+ * @tc.name: SetDisplayScale
+ * @tc.desc: SetDisplayScale test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, Function | SmallTest | Level2)
+{
+    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
+    const float scaleX = 1.0f;
+    const float scaleY = 1.0f;
+    const float pivotX = 0.5f;
+    const float pivotY = 0.5f;
+    sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetDefaultDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    ScreenId screenId = displayInfo->GetScreenId();
+    displayManagerAdapter.SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+}
 }
 }
 }

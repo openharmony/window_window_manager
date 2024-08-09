@@ -65,9 +65,9 @@ JsPipController::JsPipController(const sptr<PictureInPictureController>& pipCont
     : pipController_(pipController)
 {
     listenerCodeMap_ = {
-        {STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB},
-        {CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB},
-        {CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB},
+        { STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB },
+        { CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB },
+        { CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB },
     };
 }
 
@@ -354,7 +354,7 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         TLOGE(WmsLogTag::WMS_PIP, "New JsPiPWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    jsCbMap_[type][callbackRef] = pipWindowListener;
+    jsCbMap_[type].insert(pipWindowListener);
 
     switch (listenerCodeMap_[type]) {
         case ListenerType::STATE_CHANGE_CB:
@@ -380,9 +380,9 @@ bool JsPipController::IfCallbackRegistered(napi_env env, const std::string& type
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return false;
     }
-    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); ++iter) {
+    for (auto& listener : jsCbMap_[type]) {
         bool isEquals = false;
-        napi_strict_equals(env, jsListenerObject, iter->first->GetNapiValue(), &isEquals);
+        napi_strict_equals(env, jsListenerObject, listener->GetCallbackRef()->GetNapiValue(), &isEquals);
         if (isEquals) {
             TLOGE(WmsLogTag::WMS_PIP, "Callback already registered!");
             return true;
@@ -488,43 +488,42 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         TLOGI(WmsLogTag::WMS_PIP, "methodName %{public}s not registered!", type.c_str());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
+
     if (value == nullptr) {
-        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = UnRegisterListener(type, it->second);
+        for (auto& listener : jsCbMap_[type]) {
+            WmErrorCode ret = UnRegisterListener(type, listener);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            jsCbMap_[type].erase(it++);
         }
+        jsCbMap_.erase(type);
     } else {
         bool foundCallbackValue = false;
-        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        for (auto& listener : jsCbMap_[type]) {
             bool isEquals = false;
-            napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+            napi_strict_equals(env, value, listener->GetCallbackRef()->GetNapiValue(), &isEquals);
             if (!isEquals) {
-                ++it;
                 continue;
             }
             foundCallbackValue = true;
-            WmErrorCode ret = UnRegisterListener(type, it->second);
+            WmErrorCode ret = UnRegisterListener(type, listener);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
-            it = jsCbMap_[type].erase(it);
+            jsCbMap_[type].erase(listener);
             break;
         }
         if (!foundCallbackValue) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
+        if (jsCbMap_[type].empty()) {
+            jsCbMap_.erase(type);
+        }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success! callback map size: %{public}zu",
-        type.c_str(), jsCbMap_[type].size());
-    if (jsCbMap_[type].empty()) {
-        jsCbMap_.erase(type);
-    }
+    TLOGI(WmsLogTag::WMS_PIP, "Unregister type %{public}s success!", type.c_str());
     return WmErrorCode::WM_OK;
 }
 
@@ -545,106 +544,6 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
     }
     return WmErrorCode::WM_OK;
-}
-
-void CallJsMethod(napi_env env, napi_value method, napi_value const* argv, size_t argc)
-{
-    if (method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "empty method, call method failed");
-        return;
-    }
-    if (env == nullptr) {
-        return;
-    }
-    napi_call_function(env, NapiGetUndefined(env), method, argc, argv, nullptr);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStart()
-{
-    OnPipListenerCallback(PiPState::ABOUT_TO_START, 0);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStart()
-{
-    OnPipListenerCallback(PiPState::STARTED, 0);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPreparePictureInPictureStop()
-{
-    OnPipListenerCallback(PiPState::ABOUT_TO_STOP, 0);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPictureInPictureStop()
-{
-    OnPipListenerCallback(PiPState::STOPPED, 0);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnRestoreUserInterface()
-{
-    OnPipListenerCallback(PiPState::ABOUT_TO_RESTORE, 0);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPictureInPictureOperationError(int32_t errorCode)
-{
-    OnPipListenerCallback(PiPState::ERROR, errorCode);
-}
-
-void JsPipController::PiPLifeCycleImpl::OnPipListenerCallback(PiPState state, int32_t errorCode)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "OnPipListenerCallback is called, state: %{public}d", static_cast<int32_t>(state));
-    auto jsCallback = jsCallBack_;
-    std::string error = std::to_string(errorCode);
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [jsCallback, state, error] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(state)), CreateJsValue(env, error)};
-            CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::PiPLifeCycleImpl::OnPipListenerCallback",
-        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-void JsPipController::PiPActionObserverImpl::OnActionEvent(const std::string& actionEvent, int32_t statusCode)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "OnActionEvent is called, actionEvent: %{public}s", actionEvent.c_str());
-    auto jsCallback = jsCallBack_;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [jsCallback, actionEvent, statusCode] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[2] = {CreateJsValue(env, actionEvent), CreateJsValue(env, statusCode)};
-            CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::PiPActionObserverImpl::OnActionEvent",
-        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-void JsPipController::PiPControlObserverImpl::OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
-    napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(engine_, nullptr, &result);
-    auto asyncTask = [jsCallback = jsCallBack_, controlType, statusCode, env = engine_, task = napiAsyncTask.get()]() {
-        napi_value propertyValue = nullptr;
-        napi_create_object(env, &propertyValue);
-        if (propertyValue == nullptr) {
-            TLOGI(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
-            return;
-        }
-        napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
-        napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
-        napi_value argv[] = {propertyValue};
-        CallJsMethod(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
-        delete task;
-    };
-    if (napi_send_event(engine_, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(engine_, CreateJsError(engine_, 1, "send event failed"));
-    } else {
-        napiAsyncTask.release();
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

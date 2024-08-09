@@ -73,7 +73,11 @@ int32_t CJWindowStageImpl::CreateSubWindow(std::string name, int64_t &windowId)
         TLOGE(WmsLogTag::WMS_DIALOG, "[createSubWindow] Window scene is nullptr");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
+    sptr<Rosen::WindowOption> windowOption = new(std::nothrow) Rosen::WindowOption();
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[createSubWindow] Create option failed");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto window = weakScene->CreateWindow(name, windowOption);
@@ -93,7 +97,7 @@ int32_t CJWindowStageImpl::CreateSubWindow(std::string name, int64_t &windowId)
 
 RetStruct CJWindowStageImpl::GetSubWindow()
 {
-    RetStruct ret;
+    RetStruct ret = {.code = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), .len = 0, .data = nullptr};
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[getSubWindow] Window scene is nullptr");
@@ -181,6 +185,9 @@ std::shared_ptr<CJWindowStageImpl> CJWindowStageImpl::CreateCJWindowStage(
     std::shared_ptr<WindowScene> windowScene)
 {
     auto ptr = FFIData::Create<CJWindowStageImpl>(windowScene);
+    if (ptr == nullptr) {
+        return nullptr;
+    }
     auto windowStagePtr = std::shared_ptr<CJWindowStageImpl>(ptr.GetRefPtr());
     return windowStagePtr;
 }
@@ -189,6 +196,9 @@ extern "C" {
 FFI_EXPORT int64_t OHOS_CreateCJWindowStage(const std::shared_ptr<WindowScene>& windowScene)
 {
     auto ptr = OHOS::FFI::FFIData::Create<OHOS::Rosen::CJWindowStageImpl>(windowScene);
+    if (ptr == nullptr) {
+        return 0;
+    }
     return ptr->GetID();
 }
 }

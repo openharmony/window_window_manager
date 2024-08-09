@@ -155,6 +155,11 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
     sessionInfo_ = info;
 }
 
+void WindowSessionProperty::SetLayoutCallback(const sptr<IFutureCallback>& callback)
+{
+    layoutCallback_ = callback;
+}
+
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
     windowRect_ = rect;
@@ -248,6 +253,16 @@ const std::string& WindowSessionProperty::GetWindowName() const
 const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 {
     return sessionInfo_;
+}
+
+SessionInfo& WindowSessionProperty::EditSessionInfo()
+{
+    return sessionInfo_;
+}
+
+sptr<IFutureCallback> WindowSessionProperty::GetLayoutCallback() const
+{
+    return layoutCallback_;
 }
 
 Rect WindowSessionProperty::GetWindowRect() const
@@ -542,15 +557,18 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
 
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
-    if (GetPersistentId() != 0 && rects != touchHotAreas_) {
-        std::string rectStr = "";
-        for (const auto& rect : rects) {
-            rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) +" , " + std::to_string(rect.posY_) +
-            " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+    {
+        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+        if (GetPersistentId() != 0 && rects != touchHotAreas_) {
+            std::string rectStr;
+            for (const auto& rect : rects) {
+                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) + " , " + std::to_string(rect.posY_) +
+                    " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+            }
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+        touchHotAreas_ = rects;
     }
-    touchHotAreas_ = rects;
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
     }
@@ -558,6 +576,7 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
+    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
     rects = touchHotAreas_;
 }
 
@@ -818,6 +837,57 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     }
 }
 
+bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
+{
+    if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
+        !parcel.WriteString(sessionInfo_.abilityName_) ||
+        !parcel.WriteInt32(static_cast<int32_t>(sessionInfo_.continueState))) {
+        return false;
+    }
+    const auto& want = sessionInfo_.want;
+    bool hasWant = want != nullptr;
+    if (!parcel.WriteBool(hasWant)) {
+        return false;
+    }
+    if (hasWant && !parcel.WriteParcelable(want.get())) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    if (!parcel.ReadString(bundleName) || !parcel.ReadString(moduleName) || !parcel.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read String!");
+        return false;
+    }
+    SessionInfo info = { bundleName, moduleName, abilityName };
+    int32_t continueState;
+    if (!parcel.ReadInt32(continueState)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read continueState!");
+        return false;
+    }
+    info.continueState = static_cast<ContinueState>(continueState);
+    bool hasWant;
+    if (!parcel.ReadBool(hasWant)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read hasWant!");
+        return false;
+    }
+    if (hasWant) {
+        std::shared_ptr<AAFwk::Want> want(parcel.ReadParcelable<AAFwk::Want>());
+        if (want == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to read want!");
+            return false;
+        }
+        info.want = want;
+    }
+    property->SetSessionInfo(info);
+    return true;
+}
+
 void WindowSessionProperty::SetCompatibleModeInPc(bool compatibleModeInPc)
 {
     compatibleModeInPc_ = compatibleModeInPc;
@@ -828,6 +898,26 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
+{
+    isAppSupportPhoneInPc_ = isSupportPhone;
+}
+
+bool WindowSessionProperty::GetIsAppSupportPhoneInPc() const
+{
+    return isAppSupportPhoneInPc_;
+}
+
+void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
+{
+    isPcAppInPad_ = isPcAppInPad;
+}
+
+bool WindowSessionProperty::GetIsPcAppInPad() const
+{
+    return isPcAppInPad_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -836,6 +926,29 @@ void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDra
 bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 {
     return isSupportDragInPcCompatibleMode_;
+}
+
+bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
+{
+    if (layoutCallback_ == nullptr) {
+        return false;
+    }
+    if (!parcel.WriteObject(layoutCallback_->AsObject())) {
+        return false;
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
+{
+    auto readObject = parcel.ReadObject<IRemoteObject>();
+    sptr<IFutureCallback> callback = nullptr;
+    if (readObject != nullptr) {
+        callback = iface_cast<IFutureCallback>(readObject);
+    }
+    if (callback != nullptr) {
+        property->SetLayoutCallback(callback);
+    }
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -851,8 +964,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
-        parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
-        parcel.WriteString(sessionInfo_.abilityName_) &&
+        MarshallingSessionInfo(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -875,7 +987,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_);
+        parcel.WriteBool(isAppSupportPhoneInPc_) &&
+        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isPcAppInPad_) &&
+        MarshallingFutureCallback(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -900,8 +1015,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSnapshotSkip(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
-    SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
-    property->SetSessionInfo(info);
+    if (!UnmarshallingSessionInfo(parcel, property)) {
+        delete property;
+        return nullptr;
+    }
     property->SetParentPersistentId(parcel.ReadInt32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
@@ -939,7 +1056,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
+    property->SetIsPcAppInPad(parcel.ReadBool());
+    UnmarshallingFutureCallback(parcel, property);
     return property;
 }
 
@@ -987,6 +1107,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
+    layoutCallback_ = property->layoutCallback_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)

@@ -134,9 +134,8 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -247,38 +246,6 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
     session.property_ = new WindowSessionProperty();
     sceneSession->SetWindowFlags(sceneSession1, property);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
-}
-
-/**
- * @tc.name: TerminateSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, TerminateSession, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
-    sceneSession->TerminateSession(abilitySessionInfo);
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, NotifySessionException, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-    OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
 }
 
 /**

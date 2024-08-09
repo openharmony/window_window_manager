@@ -14,10 +14,10 @@
  */
 
 #include "session/host/include/keyboard_session.h"
-
 #include <gtest/gtest.h>
 #include <parameters.h>
 
+#include "mock/mock_keyboard_session.h"
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
@@ -34,12 +34,18 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "KeyboardSessionTest"};
 }
+
+constexpr int WAIT_ASYNC_US = 1000000;
 class KeyboardSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    sptr<KeyboardSession> GetKeyboardSession(const std::string& abilityName, const std::string& bundleName);
+    sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
+    sptr<KSSceneSessionMocker> GetSceneSessionMocker(const std::string& abilityName, const std::string& bundleName);
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -56,6 +62,56 @@ void KeyboardSessionTest::SetUp()
 
 void KeyboardSessionTest::TearDown()
 {
+}
+
+sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(const std::string& abilityName,
+    const std::string& bundleName)
+{
+    SessionInfo info;
+    info.abilityName_ = abilityName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    sptr<WindowSessionProperty> keyboardProperty = new (std::nothrow) WindowSessionProperty();
+    keyboardProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    keyboardSession->SetSessionProperty(keyboardProperty);
+
+    return keyboardSession;
+}
+
+sptr<SceneSession> KeyboardSessionTest::GetSceneSession(const std::string& abilityName,
+    const std::string& bundleName)
+{
+    SessionInfo info;
+    info.abilityName_ = abilityName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+
+    return sceneSession;
+}
+
+sptr<KSSceneSessionMocker> KeyboardSessionTest::GetSceneSessionMocker(const std::string& abilityName,
+    const std::string& bundleName)
+{
+    SessionInfo info;
+    info.abilityName_ = abilityName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KSSceneSessionMocker> mockSession = sptr<KSSceneSessionMocker>::MakeSptr(info, nullptr);
+
+    return mockSession;
 }
 
 namespace {
@@ -174,7 +230,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect, Function | SmallTest | L
     EXPECT_NE(keyboardSession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    keyboardSession->isDirty_ = true;
+    keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->sessionStage_ = mockSessionStage;
     auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
@@ -238,15 +294,15 @@ HWTEST_F(KeyboardSessionTest, SetKeyboardSessionGravity, Function | SmallTest | 
 }
 
 /**
- * @tc.name: GetSceneSession
+ * @tc.name: GetSceneSession01
  * @tc.desc: GetSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetSceneSession, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetSceneSession01, Function | SmallTest | Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "GetSceneSession";
-    info.bundleName_ = "GetSceneSession";
+    info.abilityName_ = "GetSceneSession01";
+    info.bundleName_ = "GetSceneSession01";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCb, nullptr);
@@ -433,100 +489,6 @@ HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: GetStatusBarHeight
- * @tc.desc: GetStatusBarHeight
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    int32_t statusBarHeight = keyboardSession->GetStatusBarHeight();
-    ASSERT_EQ(statusBarHeight, 0);
-
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, nullptr);
-    EXPECT_NE(keyboardSession, nullptr);
-    statusBarHeight = keyboardSession->GetStatusBarHeight();
-    ASSERT_EQ(statusBarHeight, 0);
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
-    EXPECT_NE(sceneSession, nullptr);
-    WSRect rect({0, 0, 0, 0});
-    sceneSession->winRect_ = rect;
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
-        [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
-        {
-            std::vector<sptr<SceneSession>> vec;
-            vec.push_back(nullptr);
-            return vec;
-        };
-    EXPECT_NE(specificCb->onGetSceneSessionVectorByType_, nullptr);
-    statusBarHeight = keyboardSession->GetStatusBarHeight();
-    ASSERT_EQ(statusBarHeight, 0);
-
-    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(windowSessionProperty, nullptr);
-    sceneSession->property_ = windowSessionProperty;
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb=
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback;
-    EXPECT_NE(keyboardCb, nullptr);
-    keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
-        [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
-        {
-            std::vector<sptr<SceneSession>> vec;
-            vec.push_back(sceneSession);
-            return vec;
-        };
-    statusBarHeight = keyboardSession->GetStatusBarHeight();
-    ASSERT_EQ(statusBarHeight, 0);
-}
-
-/**
- * @tc.name: GetStatusBarHeight
- * @tc.desc: GetStatusBarHeight
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, GetStatusBarHeight02, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
-    EXPECT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(windowSessionProperty, nullptr);
-    sceneSession->property_ = windowSessionProperty;
-    WSRect rect3({0, 0, 0, 1});
-    sceneSession->winRect_ = rect3;
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
-        [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
-        {
-            std::vector<sptr<SceneSession>> vec;
-            vec.push_back(sceneSession);
-            return vec;
-        };
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback;
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-    int32_t statusBarHeight = keyboardSession->GetStatusBarHeight();
-    ASSERT_EQ(statusBarHeight, 1);
-}
-
-/**
  * @tc.name: OnKeyboardPanelUpdated
  * @tc.desc: OnKeyboardPanelUpdated
  * @tc.type: FUNC
@@ -652,11 +614,11 @@ HWTEST_F(KeyboardSessionTest, AdjustKeyboardLayout, Function | SmallTest | Level
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         new (std::nothrow) SceneSession::SessionChangeCallback();
     EXPECT_NE(sessionChangeCallback, nullptr);
-    sessionChangeCallback->onAdjustKeyboardLayout_ = nullptr;
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
     keyboardSession->RegisterSessionChangeCallback(sessionChangeCallback);
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
-    sessionChangeCallback->onAdjustKeyboardLayout_ = [](const KeyboardLayoutParams& params){};
+    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     WLOGFI("AdjustKeyboardLayout end!");
@@ -713,17 +675,9 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
  */
 HWTEST_F(KeyboardSessionTest, OpenKeyboardSyncTransaction, Function | SmallTest | Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "OpenKeyboardSyncTransaction";
-    info.bundleName_ = "OpenKeyboardSyncTransaction";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
+    std::string abilityName = "OpenKeyboardSyncTransaction";
+    std::string bundleName = "OpenKeyboardSyncTransaction";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
     // isKeyBoardSyncTransactionOpen_ is false
     keyboardSession->OpenKeyboardSyncTransaction();
@@ -739,21 +693,9 @@ HWTEST_F(KeyboardSessionTest, OpenKeyboardSyncTransaction, Function | SmallTest 
  */
 HWTEST_F(KeyboardSessionTest, CloseKeyboardSyncTransaction1, Function | SmallTest | Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "CloseKeyboardSyncTransaction1";
-    info.bundleName_ = "CloseKeyboardSyncTransaction1";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    sptr<WindowSessionProperty> keyboardProperty = new (std::nothrow) WindowSessionProperty();
-    keyboardProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    keyboardSession->SetSessionProperty(keyboardProperty);
+    std::string abilityName = "CloseKeyboardSyncTransaction1";
+    std::string bundleName = "CloseKeyboardSyncTransaction1";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
@@ -762,6 +704,357 @@ HWTEST_F(KeyboardSessionTest, CloseKeyboardSyncTransaction1, Function | SmallTes
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
 }
 
-} // namespace
-} // namespace Rosen
-} // namespace OHOS
+/**
+ * @tc.name: CloseKeyboardSyncTransaction2
+ * @tc.desc: CloseKeyboardSyncTransaction2
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, CloseKeyboardSyncTransaction2, Function | SmallTest | Level1)
+{
+    std::string abilityName = "CloseKeyboardSyncTransaction2";
+    std::string bundleName = "CloseKeyboardSyncTransaction2";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    bool isKeyboardShow = true;
+    bool isRotating = false;
+
+    // isKeyBoardSyncTransactionOpen_ is true
+    keyboardSession->OpenKeyboardSyncTransaction();
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+}
+
+/**
+ * @tc.name: BindKeyboardPanelSession
+ * @tc.desc: BindKeyboardPanelSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, BindKeyboardPanelSession, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "BindKeyboardPanelSession";
+    info.bundleName_ = "BindKeyboardPanelSession";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<SceneSession> panelSession = nullptr;
+    keyboardSession->BindKeyboardPanelSession(panelSession);
+    panelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(panelSession, nullptr);
+    keyboardSession->BindKeyboardPanelSession(panelSession);
+    EXPECT_EQ(keyboardSession->keyboardPanelSession_, panelSession);
+}
+
+/**
+ * @tc.name: GetKeyboardGravity01
+ * @tc.desc: GetKeyboardGravity01
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetKeyboardGravity01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardGravity";
+    info.bundleName_ = "GetKeyboardGravity";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->property_ = nullptr;
+    auto ret = keyboardSession->GetKeyboardGravity();
+    EXPECT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, ret);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    ASSERT_NE(keyboardSession, nullptr);
+    ret = keyboardSession->GetKeyboardGravity();
+    EXPECT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, ret);
+}
+
+/**
+ * @tc.name: GetCallingSessionId01
+ * @tc.desc: GetCallingSessionId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetCallingSessionId01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetCallingSessionId";
+    info.bundleName_ = "GetCallingSessionId";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->property_ = nullptr;
+    auto ret = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(ret, INVALID_SESSION_ID);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->SetCallingSessionId(1);
+    ret = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: NotifyKeyboardPanelInfoChange
+ * @tc.desc: NotifyKeyboardPanelInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, NotifyKeyboardPanelInfoChange, Function | SmallTest | Level1)
+{
+    WSRect rect = {800, 800, 1200, 1200};
+    SessionInfo info;
+    info.abilityName_ = "NotifyKeyboardPanelInfoChange";
+    info.bundleName_ = "NotifyKeyboardPanelInfoChange";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->isKeyboardPanelEnabled_ = false;
+    keyboardSession->NotifyKeyboardPanelInfoChange(rect, true);
+    keyboardSession->isKeyboardPanelEnabled_ = true;
+    keyboardSession->sessionStage_ = nullptr;
+    keyboardSession->NotifyKeyboardPanelInfoChange(rect, true);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    keyboardSession->sessionStage_ = mockSessionStage;
+    ASSERT_NE(keyboardSession->sessionStage_, nullptr);
+    keyboardSession->NotifyKeyboardPanelInfoChange(rect, true);
+}
+
+/**
+ * @tc.name: CheckIfNeedRaiseCallingSession01
+ * @tc.desc: CheckIfNeedRaiseCallingSession01
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckIfNeedRaiseCallingSession";
+    info.bundleName_ = "CheckIfNeedRaiseCallingSession";
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCb, nullptr);
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    ASSERT_NE(callingSession, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    keyboardSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    keyboardSession->systemConfig_.uiType_ = "phone";
+    callingSession->systemConfig_.freeMultiWindowSupport_ = true;
+    callingSession->systemConfig_.freeMultiWindowEnable_ = true;
+    auto ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
+    EXPECT_EQ(ret, false);
+    callingSession->systemConfig_.freeMultiWindowEnable_ = false;
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
+    EXPECT_EQ(ret, false);
+    callingSession->systemConfig_.freeMultiWindowEnable_ = true;
+    keyboardSession->systemConfig_.uiType_ = "pad";
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
+    EXPECT_EQ(ret, true);
+    keyboardSession->systemConfig_.uiType_ = "pc";
+    callingSession->systemConfig_.freeMultiWindowEnable_ = false;
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
+    EXPECT_EQ(ret, true);
+    keyboardSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
+    EXPECT_EQ(ret, true);
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, false);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UpdateCallingSessionIdAndPosition01
+ * @tc.desc: UpdateCallingSessionIdAndPosition01
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateCallingSessionIdAndPosition";
+    info.bundleName_ = "UpdateCallingSessionIdAndPosition";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->property_ = nullptr;
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->SetCallingSessionId(-1);
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+    keyboardSession->state_ = SessionState::STATE_CONNECT;
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+    keyboardSession->UpdateCallingSessionIdAndPosition(-1);
+    keyboardSession->property_->SetCallingSessionId(0);
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+}
+
+/**
+ * @tc.name: OpenKeyboardSyncTransaction01
+ * @tc.desc: OpenKeyboardSyncTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, OpenKeyboardSyncTransaction01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateCallingSessionIdAndPosition";
+    info.bundleName_ = "UpdateCallingSessionIdAndPosition";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->OpenKeyboardSyncTransaction();
+    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->OpenKeyboardSyncTransaction();
+    WSRect keyboardPanelRect = {0, 0, 0, 0};
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+}
+
+/**
+ * @tc.name: RelayoutKeyBoard01
+ * @tc.desc: RelayoutKeyBoard01
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, RelayoutKeyBoard01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RelayoutKeyBoard";
+    info.bundleName_ = "RelayoutKeyBoard";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->property_ = nullptr;
+    keyboardSession->RelayoutKeyBoard();
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    keyboardSession->property_->sessionGravitySizePercent_ = 0;
+    keyboardSession->RelayoutKeyBoard();
+    keyboardSession->property_->sessionGravitySizePercent_ = 100;
+    keyboardSession->RelayoutKeyBoard();
+}
+
+/**
+ * @tc.name: Hide01
+ * @tc.desc: test function : Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, Hide01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "Hide";
+    info.bundleName_ = "Hide";
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
+    keyboardSession->state_ = SessionState::STATE_CONNECT;
+    keyboardSession->isActive_ = true;
+    keyboardSession->systemConfig_.uiType_ = "phone";
+    EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
+    keyboardSession->systemConfig_.uiType_ = "pc";
+    keyboardSession->property_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
+}
+
+/**
+ * @tc.name: RaiseCallingSession01
+ * @tc.desc: test function : RaiseCallingSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("IsCallingSessionSplitMode03",
+        "IsCallingSessionSplitMode03");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    Rosen::WSRect resultRect{ 0, 0, 0, 0 };
+    sptr<KSSceneSessionMocker> callingSession = GetSceneSessionMocker("callingSession", "callingSession");
+    ASSERT_NE(callingSession, nullptr);
+
+    callingSession->updateRectCallback_ = [&resultRect](const WSRect& rect, const SizeChangeReason& reason) {
+        resultRect.posX_ = rect.posX_;
+        resultRect.posY_ = rect.posY_;
+        resultRect.width_ = rect.width_;
+        resultRect.height_ = rect.height_;
+    };
+    callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    Rosen::WSRect keyboardPanelRect{ 0, 0, 0, 0 };
+    Rosen::WSRect emptyRect{ 0, 0, 0, 0 };
+    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+    ASSERT_EQ(resultRect, emptyRect);
+
+    // for cover GetSceneSession
+    keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
+        return callingSession;
+    };
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+    // for cover CheckIfNeedRaiseCallingSession
+    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
+
+    // for empty rect check;
+    keyboardSession->winRect_.posX_ = 1;
+    keyboardSession->winRect_.posY_ = 1;
+    keyboardSession->winRect_.posX_ = 1;
+    keyboardSession->winRect_.posX_ = 1;
+
+    // for cover oriPosYBeforeRaisedBykeyboard == 0
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
+    ASSERT_EQ(resultRect, emptyRect);
+}
+
+/**
+ * @tc.name: CloseKeyBoardSyncTransaction3
+ * @tc.desc: test function : CloseKeyBoardSyncTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, CloseKeyBoardSyncTransaction3, Function | SmallTest | Level1)
+{
+    std::string abilityName = "CloseKeyBoardSyncTransaction3";
+    std::string bundleName = "CloseKeyBoardSyncTransaction3";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    bool isKeyboardShow = true;
+    bool isRotating = false;
+
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
+    // isKeyBoardSyncTransactionOpen_ is true
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA), keyboardSession->dirtyFlags_);
+}
+
+/**
+ * @tc.name: GetRSTransaction01
+ * @tc.desc: test function : GetRSTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, GetRSTransaction01, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("IsCallingSessionSplitMode03",
+        "IsCallingSessionSplitMode03");
+    auto rsTransaction = keyboardSession->GetRSTransaction();
+    ASSERT_EQ(rsTransaction, nullptr);
+}
+
+}  // namespace
+}  // namespace Rosen
+}  // namespace OHOS

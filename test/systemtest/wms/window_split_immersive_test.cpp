@@ -106,6 +106,7 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     // enter split mode
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
+    ASSERT_NE(nullptr, priWindow);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);

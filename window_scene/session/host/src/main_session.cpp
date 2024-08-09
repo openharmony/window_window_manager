@@ -22,7 +22,6 @@
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -204,5 +203,17 @@ void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
 bool MainSession::IsExitSplitOnBackground() const
 {
     return isExitSplitOnBackground_;
+}
+
+void MainSession::NotifyClientToUpdateInteractive(bool interactive)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    const auto state = GetSessionState();
+    if (IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
+        WLOGFI("%{public}d", interactive);
+        sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+    }
 }
 } // namespace OHOS::Rosen

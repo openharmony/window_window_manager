@@ -51,9 +51,16 @@ ohos_shared_library("screen_napi") {
     "c_utils:utils",
     "graphic_surface:surface",  # use for SurfaceUtils
     "hilog:libhilog",
-    "hiview:libxpower_event_js",
+    "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
+
+  defines = []
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.hiviewdfx_hiview)) {
+    external_deps += [ "hiview:libxpower_event_js" ]
+    defines += [ "XPOWER_EVENT_ENABLE" ]
+  }
 
   relative_install_dir = "module"
 

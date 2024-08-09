@@ -21,6 +21,7 @@
 #include <zidl/window_manager_agent_interface.h>
 
 #include "singleton_delegator.h"
+#include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_lite_interface.h"
 
@@ -49,6 +50,8 @@ public:
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
+    virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
+    virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
 
 private:

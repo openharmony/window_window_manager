@@ -147,12 +147,11 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension05, F
  */
 HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, Function | SmallTest | Level1)
 {
-    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ =
-        std::make_unique<ScreenSessionAbilityConnection>();
+    ScreenSnapshotPickerConnection::GetInstance().abilityConnection_ = nullptr;
     Media::Rect rect{};
     ScreenId screenId = SCREEN_ID_INVALID;
-    ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
-    EXPECT_EQ(rect.height, 0);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -162,11 +161,14 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, Function |
  */
 HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, Function | SmallTest | Level1)
 {
-    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ = nullptr;
+    ScreenSnapshotPickerConnection::GetInstance().abilityConnection_ =
+        std::make_unique<ScreenSessionAbilityConnection>();
+    ScreenSnapshotPickerConnection::GetInstance().abilityConnection_->
+        GetScreenSessionAbilityConnectionStub() = nullptr;
     Media::Rect rect{};
     ScreenId screenId;
-    ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
-    EXPECT_EQ(rect.height, 0);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+    EXPECT_EQ(ret, -1);
 }
 
 /**

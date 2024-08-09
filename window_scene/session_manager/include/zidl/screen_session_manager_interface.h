@@ -127,6 +127,8 @@ public:
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
 
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) override {}
+
     void SetFoldStatusLocked(bool locked) override {}
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
@@ -144,7 +146,8 @@ public:
     virtual void SwitchUser() {}
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
-    virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
+    virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
@@ -174,6 +177,7 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -25,13 +25,18 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
-                                          "ScreenSessionManagerLiteProxy" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteProxy" };
 }
 
 DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -56,7 +61,7 @@ DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+    if (remote->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -67,6 +72,12 @@ DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
 DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -91,7 +102,7 @@ DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+    if (remote->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -169,6 +180,12 @@ FoldStatus ScreenSessionManagerLiteProxy::GetFoldStatus()
 
 sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerLiteProxy::GetDefaultDisplayInfo()
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return nullptr;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -176,7 +193,7 @@ sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerLiteProxy::GetDefaultDisplayI
         WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
+    if (remote->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return nullptr;

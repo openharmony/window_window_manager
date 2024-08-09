@@ -35,7 +35,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     MemoryGuard cacheGuard;
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     auto msgId = static_cast<WindowManagerMessage>(code);
     switch (msgId) {
@@ -249,12 +249,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             if (finishedCallback == nullptr) {
                 if (!reply.WriteBool(false)) {
                     WLOGFE("finishedCallback is nullptr and failed to write!");
-                    return 0;
+                    return ERR_INVALID_DATA;
                 }
             } else {
                 if (!reply.WriteBool(true) || !reply.WriteRemoteObject(finishedCallback->AsObject())) {
                     WLOGFE("finishedCallback is not nullptr and failed to write!");
-                    return 0;
+                    return ERR_INVALID_DATA;
                 }
             }
             break;
@@ -326,6 +326,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         case WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT: {
             uint32_t windowId = data.ReadUint32();
             std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
+            if (event == nullptr) {
+                WLOGFE("event is null");
+                return ERR_INVALID_DATA;
+            }
             event->ReadFromParcel(data);
             DispatchKeyEvent(windowId, event);
             break;
@@ -343,7 +347,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             WMError errCode = GetWindowAnimationTargets(missionIds, targets);
             if (!MarshallingHelper::MarshallingVectorParcelableObj<RSWindowAnimationTarget>(reply, targets)) {
                 WLOGFE("Write window animation targets failed");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -368,7 +372,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

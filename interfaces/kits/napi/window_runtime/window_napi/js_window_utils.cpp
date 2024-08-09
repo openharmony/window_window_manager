@@ -540,7 +540,11 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     }
     uint32_t index = 0;
     for (size_t i = 0; i < infos.size(); i++) {
-        napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, infos[i]));
+        auto info = infos[i];
+        auto windowType = info->GetWindowType();
+        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
+        }
     }
     return arrayValue;
 }
@@ -555,13 +559,6 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
-    auto windowType = info->GetWindowType();
-    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowType) != 0) {
-        napi_set_named_property(env, objValue, "windowType",
-            CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowType)));
-    } else {
-        napi_set_named_property(env, objValue, "windowType", CreateJsValue(env, windowType));
-    }
     return objValue;
 }
 
@@ -949,6 +946,17 @@ bool CheckCallingPermission(std::string permission)
     return true;
 }
 
+bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType)
+{
+    if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(apiWindowType)) != 0) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowType));
+        if (WindowHelper::IsSystemWindow(windowType)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
 {
     napi_value global;
@@ -993,6 +1001,25 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
         windowMask.emplace_back(elementArray);
     }
     return true;
+}
+
+napi_value ExtensionWindowAttributeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SYSTEM_WINDOW)));
+    napi_set_named_property(env, objValue, "SUB_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SUB_WINDOW)));
+    return objValue;
 }
 } // namespace Rosen
 } // namespace OHOS

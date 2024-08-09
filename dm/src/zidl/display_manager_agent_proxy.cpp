@@ -24,11 +24,17 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "DisplayManagerAgentProxy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAgentProxy"};
 }
 
 void DisplayManagerAgentProxy::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyDisplayPowerEvent: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -47,13 +53,19 @@ void DisplayManagerAgentProxy::NotifyDisplayPowerEvent(DisplayPowerEvent event, 
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyDisplayStateChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -72,13 +84,19 @@ void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayId id, DisplaySt
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnScreenConnect(sptr<ScreenInfo> screenInfo)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnScreenConnect: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -92,13 +110,19 @@ void DisplayManagerAgentProxy::OnScreenConnect(sptr<ScreenInfo> screenInfo)
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_CONNECT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_CONNECT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnScreenDisconnect(ScreenId screenId)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnScreenDisconnect: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -112,13 +136,19 @@ void DisplayManagerAgentProxy::OnScreenDisconnect(ScreenId screenId)
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_DISCONNECT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_DISCONNECT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnScreenChange(const sptr<ScreenInfo>& screenInfo, ScreenChangeEvent event)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnScreenChange: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -137,7 +167,7 @@ void DisplayManagerAgentProxy::OnScreenChange(const sptr<ScreenInfo>& screenInfo
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -145,6 +175,12 @@ void DisplayManagerAgentProxy::OnScreenChange(const sptr<ScreenInfo>& screenInfo
 void DisplayManagerAgentProxy::OnScreenGroupChange(const std::string& trigger,
     const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent event)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnScreenGroupChange: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -168,13 +204,19 @@ void DisplayManagerAgentProxy::OnScreenGroupChange(const std::string& trigger,
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREENGROUP_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_SCREENGROUP_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnDisplayCreate(sptr<DisplayInfo> displayInfo)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnDisplayCreate: remote is nullptr");
+        return;
+    }
+    
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -188,13 +230,19 @@ void DisplayManagerAgentProxy::OnDisplayCreate(sptr<DisplayInfo> displayInfo)
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_CONNECT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_DISPLAY_CONNECT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnDisplayDestroy(DisplayId displayId)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnDisplayDestroy: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -208,13 +256,19 @@ void DisplayManagerAgentProxy::OnDisplayDestroy(DisplayId displayId)
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_DISCONNECT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_DISPLAY_DISCONNECT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnDisplayChange: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -233,13 +287,19 @@ void DisplayManagerAgentProxy::OnDisplayChange(sptr<DisplayInfo> displayInfo, Di
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_DISPLAY_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::OnScreenshot(sptr<ScreenshotInfo> snapshotInfo)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("OnScreenshot: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -251,13 +311,19 @@ void DisplayManagerAgentProxy::OnScreenshot(sptr<ScreenshotInfo> snapshotInfo)
         WLOGFE("Write ScreenshotInfo failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_SHOT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_SHOT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyPrivateWindowStateChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -269,7 +335,7 @@ void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
         WLOGFE("Write private info failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -277,6 +343,12 @@ void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
 void DisplayManagerAgentProxy::NotifyPrivateStateWindowListChanged(DisplayId id,
     std::vector<std::string> privacyWindowList)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyPrivateStateWindowListChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -292,13 +364,19 @@ void DisplayManagerAgentProxy::NotifyPrivateStateWindowListChanged(DisplayId id,
         WLOGFE("Write privacyWindowList failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW_LIST, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW_LIST, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyFoldStatusChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -310,13 +388,19 @@ void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
         WLOGFE("Write foldStatus failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_FOLD_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_FOLD_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyFoldAngleChanged(std::vector<float> foldAngles)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyFoldAngleChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -328,13 +412,19 @@ void DisplayManagerAgentProxy::NotifyFoldAngleChanged(std::vector<float> foldAng
         WLOGFE("Write foldAngles failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_FOLD_ANGLE_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_FOLD_ANGLE_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyCaptureStatusChanged(bool isCapture)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyCaptureStatusChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -346,13 +436,19 @@ void DisplayManagerAgentProxy::NotifyCaptureStatusChanged(bool isCapture)
         WLOGFE("Write isCapture failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_CAPTURE_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_CAPTURE_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyDisplayChangeInfoChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -364,13 +460,19 @@ void DisplayManagerAgentProxy::NotifyDisplayChangeInfoChanged(const sptr<Display
         WLOGFE("Write display change info failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyDisplayModeChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -382,13 +484,19 @@ void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayM
         WLOGFE("Write displayMode failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_MODE_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_DISPLAY_MODE_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
 void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyAvailableAreaChanged: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -401,7 +509,7 @@ void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
         WLOGFE("Write rect failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_AVAILABLE_AREA_CHANGED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_ON_AVAILABLE_AREA_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
