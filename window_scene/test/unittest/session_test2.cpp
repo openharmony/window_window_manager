@@ -1929,6 +1929,36 @@ HWTEST_F(WindowSessionTest2, ShouldCreateDetectTaskInRecent, Function | SmallTes
     ret = session_->ShouldCreateDetectTaskInRecent(false, false, false);
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: CreateWindowStateDetectTask
+ * @tc.desc: CreateWindowStateDetectTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, CreateWindowStateDetectTask, Function | SmallTest | Level2)
+{
+    ssm_ = sptr<SceneSessionManager>::MakeSptr();
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
+    session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+    session_->SetSessionState(SessionState::STATE_CONNECT);
+    bool isAttach = true;
+    session_->CreateWindowStateDetectTask(isAttach, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(isAttach, true);
+
+    session_->handler_ = nullptr;
+    session_->CreateWindowStateDetectTask(false, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(session_->handler_, nullptr);
+}
+
+/**
+ * @tc.name: SetOffset01
+ * @tc.desc: SetOffset Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetOffset01, Function | SmallTest | Level2)
+{
+    session_->SetOffset(0, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
