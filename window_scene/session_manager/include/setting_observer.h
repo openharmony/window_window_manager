@@ -31,6 +31,7 @@ public:
 
     using UpdateFunc = std::function<void(const std::string&)>;
     void SetUpdateFunc(UpdateFunc& func);
+    
 private:
     std::string key_ {};
     UpdateFunc update_ = nullptr;
