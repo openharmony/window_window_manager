@@ -33,7 +33,12 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManager()
         return nullptr;
     }
 
-    auto ret = Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return nullptr;
+    }
+    auto ret = remote->SendRequest(
         static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER),
         data, reply, option);
     if (ret != ERR_NONE) {
@@ -55,7 +60,12 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManagerLite()
         return nullptr;
     }
 
-    auto ret = Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return nullptr;
+    }
+    auto ret = remote->SendRequest(
         static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER_LITE),
         data, reply, option);
     if (ret != ERR_NONE) {

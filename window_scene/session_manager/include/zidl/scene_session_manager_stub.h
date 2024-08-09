@@ -86,14 +86,17 @@ private:
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply);
     int HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply);
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

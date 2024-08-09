@@ -103,6 +103,7 @@ public:
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
@@ -138,6 +139,7 @@ public:
         TRANS_ID_RESET_ALL_FREEZE_STATUS,
         TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO,
         TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION,
+        TRANS_ID_SET_VIRTUAL_SCREEN_STATUS,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -262,6 +264,8 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
+    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
+
     virtual void SetFoldStatusLocked(bool locked) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
@@ -298,6 +302,7 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) { return false; }
 };
 } // namespace OHOS::Rosen
 

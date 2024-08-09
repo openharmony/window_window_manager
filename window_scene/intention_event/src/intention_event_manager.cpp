@@ -22,6 +22,8 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 #include <hitrace_meter.h>
+#include "parameters.h"
+#include "xcollie/xcollie.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -31,6 +33,10 @@ constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
+constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
+constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
+static const bool IS_BETA = OHOS::system::GetParameter("const.logsystem.versiontype", "").find("beta") !=
+    std::string::npos;
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
@@ -48,9 +54,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{public}d,"
-            "displayy:%{public}d, windowx:%{public}d, windowy :%{public}d, action :%{public}d pressure: "
-            "%{public}f, tiltx :%{public}f, tiltY :%{public}f",
+        TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{private}d,"
+            "displayy:%{private}d,windowx:%{private}d,windowy:%{private}d,action:%{public}d pressure:"
+            "%{public}f,tiltx:%{public}f,tiltY:%{public}f",
             windowId, actionId, item.GetDisplayX(), item.GetDisplayY(), item.GetWindowX(), item.GetWindowY(),
             pointerEvent->GetPointerAction(), item.GetPressure(), item.GetTiltX(), item.GetTiltY());
     }
@@ -58,8 +64,8 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     for (auto&& id :ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            TLOGD(WmsLogTag::WMS_EVENT, "all point info: id: %{public}d, x:%{public}d, y:%{public}d, "
-                "isPressend:%{public}d, pressure:%{public}f, tiltX:%{public}f, tiltY:%{public}f",
+            TLOGD(WmsLogTag::WMS_EVENT, "all point info: id:%{public}d,x:%{private}d,y:%{private}d,"
+                "isPressend:%{public}d,pressure:%{public}f,tiltX:%{public}f,tiltY:%{public}f",
             actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
             item.GetTiltX(), item.GetTiltY());
         }
@@ -91,6 +97,11 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
+    if (IS_BETA) {
+        // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
+        int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
+            FREQUENT_CLICK_COUNT_LIMIT);
+    }
     return true;
 }
 
@@ -178,7 +189,7 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return false;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent receive id:%d action:%d",
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:PointerEvent id:%d action:%d",
         pointerEvent->GetId(), pointerEvent->GetPointerAction());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
@@ -225,13 +236,11 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     SetPointerId(pointerEvent);
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d,InputTracking id:%{public}d, wid:%{public}u "
-            "windowName:%{public}s action:%{public}d isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
+            ",windowName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:pointerEvent Send id:%d action:%d",
-            pointerEvent->GetId(), pointerEvent->GetPointerAction());
         sceneSession->SendPointerEventToUI(pointerEvent);
         // notify touchOutside and touchDown event
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
@@ -239,6 +248,14 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             MMI::PointerEvent::PointerItem pointerItem;
             if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
                 sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            }
+            if (IS_BETA) {
+                /*
+                * Triggers input down event recorded.
+                * If the special num of the events reached within the sepcial time interval,
+                * a panic behavior is reported.
+                */
+                HiviewDFX::XCollie::GetInstance().TriggerTimerCount("FREQUENT_CLICK_WARNING", true, "");
             }
         }
     } else {
@@ -292,8 +309,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The key event is nullptr");
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent receive id:%d",
-        keyEvent->GetId());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:KeyEvent id:%d", keyEvent->GetId());
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "OnInputEvent is disabled temporarily");
         keyEvent->MarkProcessed();
@@ -313,8 +329,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     }
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
     static uint32_t eventId = 0;
-    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eventId:%{public}d, InputTracking id:%{public}d, wid:%{public}u "
-        "focusedSessionId:%{public}d, isSystem:%{public}d",
+    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
+        ",focusId:%{public}d,isSystem:%{public}d",
         eventId++, keyEvent->GetId(), keyEvent->GetTargetWindowId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
@@ -352,8 +368,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IntentionEventManager:keyEvent Send id:%d",
-        keyEvent->GetId());
     focusedSceneSession->SendKeyEventToUI(keyEvent);
 }
 
@@ -364,8 +378,9 @@ bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
     TLOGI(WmsLogTag::WMS_EVENT, "isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard || isKeyBack);
+    return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(

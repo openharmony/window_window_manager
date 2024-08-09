@@ -79,13 +79,14 @@ private:
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
     napi_value OnSetWindowBrightness(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
-    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
+
+    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
-    int32_t hostWindowId_;
+    int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
     static void SetWindowOption(sptr<Rosen::WindowOption> windowOption);

@@ -102,7 +102,6 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sessionManager.currentWMSUserId_ = SYSTEM_USERID;
     sessionManager.OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
 
-    sessionManager.destroyed_ = true;
     sessionManager.ClearSessionManagerProxy();
 
     sptr<ISessionManagerService> sessionManagerService;
@@ -144,17 +143,14 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChanged, Function | SmallTest | Leve
 HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
-    
-    sessionManager.destroyed_ = true;
+
     sessionManager.ClearSessionManagerProxy();
     ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
 
-    sessionManager.destroyed_ = false;
     sessionManager.sessionManagerServiceProxy_ = nullptr;
     sessionManager.ClearSessionManagerProxy();
     ASSERT_EQ(sessionManager.sessionManagerServiceProxy_, nullptr);
 
-    sessionManager.destroyed_ = false;
     sptr<ISessionManagerService> sessionManagerServiceProxy;
     sessionManager.sessionManagerServiceProxy_ = sessionManagerServiceProxy;
     sessionManager.ClearSessionManagerProxy();
@@ -195,8 +191,11 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     sessionManager.userSwitchCallbackFunc_ = nullptr;
     sessionManager.OnUserSwitch(nullptr);
     ASSERT_EQ(funcInvoked, false);
-    sessionManager.userSwitchCallbackFunc_ = []() {};
-    sessionManager.OnUserSwitch(nullptr);
+
+    std::function<void()> userSwitchCallbackFunc;
+    sessionManager.userSwitchCallbackFunc_ = userSwitchCallbackFunc;
+    sptr<ISessionManagerService> sessionManagerService;
+    sessionManager.OnUserSwitch(sessionManagerService);
     ASSERT_EQ(funcInvoked, false);
 }
 
@@ -210,14 +209,45 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     SessionManager sessionManager;
     sessionManager.OnFoundationDied();
     FoundationDeathRecipient foundationDeathRecipient;
-    wptr<IRemoteObject> wptrDeath = nullptr;
+    wptr<IRemoteObject> wptrDeath;
     foundationDeathRecipient.OnRemoteDied(wptrDeath);
-
     SSMDeathRecipient sSMDeathRecipient;
     sSMDeathRecipient.OnRemoteDied(wptrDeath);
+
+    wptrDeath = nullptr;
+    foundationDeathRecipient.OnRemoteDied(wptrDeath);
+    sSMDeathRecipient.OnRemoteDied(wptrDeath);
+
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterSMSRecoverListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.isRecoverListenerRegistered_ = false;
+    sessionManager.mockSessionManagerServiceProxy_ = nullptr;
+    sessionManager.RegisterSMSRecoverListener();
+    ASSERT_EQ(sessionManager.mockSessionManagerServiceProxy_, nullptr);
+}
+
+/**
+ * @tc.name: InitMockSMSProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.InitMockSMSProxy();
+    sessionManager.InitMockSMSProxy();
+    ASSERT_NE(sessionManager.foundationDeath_, nullptr);
 }
 }
 }

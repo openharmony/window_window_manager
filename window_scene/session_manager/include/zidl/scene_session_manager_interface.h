@@ -97,6 +97,7 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
+        TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
         TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB,
         TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB,
         TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION,
@@ -107,6 +108,8 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
+        TRANS_ID_GET_WINDOW_STYLE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -224,6 +227,8 @@ public:
     }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override {}
+    void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
+        const sptr<IRemoteObject>& token) override {}
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
     void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override
@@ -239,6 +244,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    WSError GetFreeMultiWindowEnableState(bool& enable) override
+    {
+        return WSError::WS_OK;
+    }
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override
     {
         return WMError::WM_OK;
@@ -248,6 +257,8 @@ public:
         return WMError::WM_OK;
     }
     WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
+
+    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

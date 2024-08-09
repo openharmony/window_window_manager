@@ -55,7 +55,9 @@ group("unittest") {
     ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
-    ":wm_window_session_impl_two_test",
+    ":wm_window_session_impl_test2",
+    ":wm_window_session_impl_test3",
+    ":wm_window_session_impl_test4",
     ":wm_window_stub_test",
     ":wm_window_test",
   ]
@@ -80,11 +82,6 @@ ohos_unittest("wm_window_manager_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
   ]
-
-  if (efficiency_manager_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines = [ "EFFICIENCY_MANAGER_ENABLE" ]
-  }
 }
 
 ohos_unittest("wm_window_display_change_adapter_test") {
@@ -249,10 +246,38 @@ ohos_unittest("wm_window_session_impl_test") {
   ]
 }
 
-ohos_unittest("wm_window_session_impl_two_test") {
+ohos_unittest("wm_window_session_impl_test2") {
   module_out_path = module_out_path
 
-  sources = [ "window_session_impl_two_test.cpp" ]
+  sources = [ "window_session_impl_test2.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_session_impl_test3") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_impl_test3.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_session_impl_test4") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_impl_test4.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -502,6 +527,7 @@ ohos_unittest("wm_window_extension_session_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_context",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -661,7 +687,6 @@ config("wm_unittest_common_public_config") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
-    "${ability_runtime_path}/test/mock/frameworks_kits_ability_native_test/include",
 
     # for abilityContext
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
@@ -689,7 +714,6 @@ ohos_static_library("wm_unittest_common") {
   public_deps = [
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "${ability_runtime_native_path}/appkit:app_context",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",

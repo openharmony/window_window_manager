@@ -238,6 +238,30 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Func
     func();
     ASSERT_EQ(resultValue, 1);
 }
+
+/**
+ * @tc.name: NotifyWindowStyleChange
+ * @tc.desc: test NotifyWindowStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+
+    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new WindowManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        windowManagerAgentProxy->NotifyWindowStyleChange(type);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
 }
 }
 }

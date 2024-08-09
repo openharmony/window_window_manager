@@ -145,6 +145,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     sleep(SPLIT_TEST_SLEEP_S);
 
     const sptr<Window>& secWindow = Utils::CreateTestWindow(splitInfo_);
+    ASSERT_NE(nullptr, secWindow);
     activeWindows_.push_back(secWindow);
     secWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     sleep(SPLIT_TEST_SLEEP_S);
@@ -182,14 +183,15 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
     const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
+    ASSERT_NE(nullptr, priWindow);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
     Utils::UpdateSplitRects(fullWindow);
 
-    Utils::RectEqualTo(fullWindow, Utils::splitRects_.secondaryRect);
-    Utils::RectEqualTo(priWindow, Utils::splitRects_.primaryRect);
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.secondaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(priWindow, Utils::splitRects_.primaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -217,14 +219,15 @@ HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
     const sptr<Window>& secWindow = Utils::CreateTestWindow(splitInfo_);
+    ASSERT_NE(nullptr, secWindow);
     activeWindows_.push_back(secWindow);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
     Utils::UpdateSplitRects(fullWindow);
 
-    Utils::RectEqualTo(fullWindow, Utils::splitRects_.primaryRect);
-    Utils::RectEqualTo(secWindow, Utils::splitRects_.secondaryRect);
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.primaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(secWindow, Utils::splitRects_.secondaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);

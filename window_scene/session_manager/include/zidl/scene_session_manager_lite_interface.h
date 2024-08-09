@@ -17,27 +17,23 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
 
 #include <iremote_broker.h>
-#ifndef USE_ADAPTER_LITE
 #include "common/include/window_session_property.h"
+#include "iability_manager_collaborator.h"
+#include "interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common_inner.h"
 #include "mission_info.h"
 #include "mission_listener_interface.h"
 #include "mission_snapshot.h"
 #include "session_info.h"
-#include "iability_manager_collaborator.h"
-namespace OHOS::Rosen {
-using ISessionListener = AAFwk::IMissionListener;
-using SessionInfoBean = AAFwk::MissionInfo;
-using SessionSnapshot = AAFwk::MissionSnapshot;
-}
-#endif
-#include "interfaces/include/ws_common.h"
-#include "interfaces/include/ws_common_inner.h"
 #include "zidl/window_manager_lite_interface.h"
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
 
 namespace OHOS::Rosen {
+using ISessionListener = AAFwk::IMissionListener;
+using SessionInfoBean = AAFwk::MissionInfo;
+using SessionSnapshot = AAFwk::MissionSnapshot;
 class ISceneSessionManagerLite : public OHOS::Rosen::IWindowManagerLite {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManagerLite");
@@ -78,9 +74,10 @@ public:
         TRANS_ID_RAISE_WINDOW_TO_TOP,
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
+        TRANS_ID_GET_WINDOW_STYLE_TYPE,
+        TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID,
     };
 
-#ifndef USE_ADAPTER_LITE
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
@@ -107,11 +104,11 @@ public:
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
+    virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
-#endif
-    virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
+    virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

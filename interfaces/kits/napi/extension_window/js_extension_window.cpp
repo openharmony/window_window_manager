@@ -49,7 +49,7 @@ JsExtensionWindow::~JsExtensionWindow() {}
 
 napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::Window> window, int32_t hostWindowId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsExtensionWindow CreateJsExtensionWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -310,7 +310,6 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
-    return;
 }
 
 napi_value JsExtensionWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info)
@@ -887,7 +886,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             auto extWindow = weak->GetWindow();
             if (extWindow == nullptr) {
                 task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
             }
             auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {
@@ -924,7 +923,7 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to title");
         return false;
     }
-    bool decorEnabled;
+    bool decorEnabled = false;
     if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to decorEnabled");
         return false;

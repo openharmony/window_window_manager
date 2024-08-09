@@ -50,6 +50,7 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
@@ -89,21 +90,23 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    bool GetFreeMultiWindowModeEnabledState() override;
+    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;
 
 private:
-    void AddExtensionWindowStageToSCB();
-    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
+    void AddExtensionWindowStageToSCB();
+    void RemoveExtensionWindowStageFromSCB();
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
+    void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
 
@@ -115,8 +118,8 @@ private:
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
-    int16_t rotationAnimationCount_ { 0 };
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

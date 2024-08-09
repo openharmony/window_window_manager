@@ -16,7 +16,9 @@
 #include "session/host/include/sub_session.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 
+#include "common/include/session_permission.h"
 #include "key_event.h"
+#include "window_helper.h"
 #include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
@@ -31,7 +33,7 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+    if (moveDragController_ != nullptr && specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
@@ -41,11 +43,14 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, " ~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "~SubSession, id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -70,6 +75,9 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -150,10 +158,14 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    auto isModal = IsModal();
     auto parentSession = GetParentSession();
-    if (parentSession && parentSession->CheckDialogOnForeground()) {
+    if (!isModal && parentSession && parentSession->CheckDialogOnForeground()) {
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
+    }
+    if (isModal) {
+        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
@@ -161,6 +173,12 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
+}
+
+int32_t SubSession::GetMissionId() const
+{
+    auto parentSession = GetParentSession();
+    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -180,12 +198,6 @@ WSError SubSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 
     WSError ret = Session::TransferKeyEvent(keyEvent);
     return ret;
-}
-
-int32_t SubSession::GetMissionId() const
-{
-    auto parentSession = GetParentSession();
-    return parentSession != nullptr ? parentSession->GetPersistentId() : SceneSession::GetMissionId();
 }
 
 void SubSession::UpdatePointerArea(const WSRect& rect)
@@ -229,5 +241,23 @@ bool SubSession::IsTopmost() const
     }
     TLOGI(WmsLogTag::WMS_SUB, "isTopmost: %{public}d", isTopmost);
     return isTopmost;
+}
+
+bool SubSession::IsModal() const
+{
+    bool isModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isModal;
+}
+
+bool SubSession::IsVisibleForeground() const
+{
+    if (parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
 }
 } // namespace OHOS::Rosen

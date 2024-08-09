@@ -24,8 +24,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION_MANAGER,
-                                          "ScreenSessionManagerStub" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
@@ -37,7 +36,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return ERR_INVALID_DATA;
+        return ERR_TRANSACTION_FAILED;
     }
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
@@ -560,6 +559,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetFoldStatusLocked(lockDisplayStatus);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto scaleX = data.ReadFloat();
+            auto scaleY = data.ReadFloat();
+            auto pivotX = data.ReadFloat();
+            auto pivotY = data.ReadFloat();
+            SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
             FoldDisplayMode displayMode = GetFoldDisplayMode();
             reply.WriteUint32(static_cast<uint32_t>(displayMode));
@@ -625,7 +633,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             auto rotation = data.ReadFloat();
-            UpdateScreenRotationProperty(screenId, bounds, rotation);
+            auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
+            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {
@@ -763,11 +772,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetAllDisplayPhysicalResolution(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_STATUS: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            VirtualScreenStatus screenStatus = static_cast<VirtualScreenStatus>(data.ReadInt32());
+            bool res = SetVirtualScreenStatus(screenId, screenStatus);
+            reply.WriteBool(res);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 
 void ScreenSessionManagerStub::ProcGetAvailableArea(MessageParcel& data, MessageParcel& reply)

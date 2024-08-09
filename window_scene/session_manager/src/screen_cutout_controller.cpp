@@ -154,7 +154,6 @@ void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId)
 {
     WaterfallDisplayAreaRects emptyRects = {};
     if (!ScreenSceneConfig::IsWaterfallDisplay()) {
-        TLOGE(WmsLogTag::DMS, "not waterfall display");
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }

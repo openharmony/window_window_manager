@@ -43,7 +43,7 @@ std::string SysCapUtil::GetClientName()
         return pn;
     }
 
-    WLOGFD("unknow name");
+    WLOGFD("unknown name");
     return "unknown";
 }
 
