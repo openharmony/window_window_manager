@@ -65,8 +65,7 @@ void ScreenSessionDumper::OutputDumpInfo()
     }
 
     static_cast<void>(signal(SIGPIPE, SIG_IGN)); // ignore SIGPIPE crash
-    UniqueFd ufd = UniqueFd(fd_); // auto free
-    int ret = dprintf(ufd.Get(), "%s\n", dumpInfo_.c_str());
+    int ret = dprintf(fd_, "%s\n", dumpInfo_.c_str());
     if (ret < 0) {
         TLOGE(WmsLogTag::DMS, "dprintf error. ret: %{public}d", ret);
         return;
@@ -111,6 +110,20 @@ void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
         oss << std::left << "[" << tracker.formatTimestamp(info.timestamp).c_str()
             << "]: " << info.info.c_str() << std::endl;
     }
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpMultiUserInfo(std::vector<int32_t> oldScbPids, int32_t userId, int32_t ScbPid)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS Multi User Info --------------" << std::endl;
+    oss << std::left << "[oldScbPid:] ";
+    for (auto oldScbPid : oldScbPids) {
+        oss << oldScbPid  << " ";
+    }
+    oss << std::endl;
+    oss << std::left << "[userId:] " << userId << std::endl;
+    oss << std::left << "[ScbPid:] " << ScbPid << std::endl;
     dumpInfo_.append(oss.str());
 }
 

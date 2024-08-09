@@ -83,6 +83,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
+    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
@@ -148,6 +149,7 @@ public:
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     virtual DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag);
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

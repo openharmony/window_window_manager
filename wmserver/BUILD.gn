@@ -118,7 +118,7 @@ ohos_shared_library("sms") {
     "accessibility:accessibility_common",
     "graphic_2d:window_animation",
     "input:libmmi-client",
-    "input:libmmi-util",
+    "input:libmmi-napi",
   ]
   if (scene_board_enabled) {
     deps += [ "${window_base_path}/window_scene/session_manager_service:session_manager_service" ]
@@ -229,7 +229,7 @@ if (scene_board_enabled) {
 
     if (defined(global_parts_info) &&
         defined(global_parts_info.resourceschedule_memmgr_override)) {
-      external_deps += [ "memmgr_override:memmgrclient" ]
+      external_deps += [ "memmgr:memmgrclient" ]
       defines += [ "MEMMGR_WINDOW_ENABLE" ]
     }
 

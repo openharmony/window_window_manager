@@ -21,6 +21,7 @@
 #include <float.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace Rosen {
@@ -253,7 +254,8 @@ enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
+    FOLLOW_SETTING = 1 << 2
 };
 
 /**
@@ -418,6 +420,14 @@ enum class BackupAndRestoreType : int32_t {
     CONTINUATION = 1,               // distribute
     APP_RECOVERY = 2,               // app recovery
     RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
+};
+
+/**
+ * @brief Enumerates window Style type.
+ */
+enum class WindowStyleType : uint8_t {
+    WINDOW_STYLE_DEFAULT = 0,
+    WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
 };
 
 /**
@@ -825,6 +835,30 @@ public:
         delete avoidArea;
         return nullptr;
     }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        if (isEmptyAvoidArea()) {
+            ss << "empty";
+            return ss.str();
+        }
+
+        std::vector<std::pair<std::string, Rect>> rects = {
+            std::make_pair("top", topRect_),
+            std::make_pair("bottom", bottomRect_),
+            std::make_pair("left", leftRect_),
+            std::make_pair("right", rightRect_)
+        };
+        for (const auto& pair: rects) {
+            if (!pair.second.IsUninitializedRect()) {
+                auto rect = pair.second;
+                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
+                    << rect.width_ << " " << rect.height_ << "] ";
+            }
+        }
+        return ss.str();
+    }
 };
 
 /**
@@ -1088,6 +1122,31 @@ enum ForceHideState : uint32_t {
     NOT_HIDDEN = 0,
     HIDDEN_WHEN_FOCUSED,
     HIDDEN_WHEN_UNFOCUSED
+};
+
+enum class ExtensionWindowAttribute : int32_t {
+    SYSTEM_WINDOW = 0,
+    SUB_WINDOW = 1,
+    UNKNOWN = 2
+};
+
+struct SystemWindowOptions {
+    int32_t windowType = -1;
+};
+
+struct SubWindowOptions {
+    std::string title;
+    bool decorEnabled = false;
+    bool isModal = false;
+    bool isTopmost = false;
+};
+
+struct ExtensionWindowConfig {
+    std::string windowName;
+    ExtensionWindowAttribute windowAttribute = ExtensionWindowAttribute::UNKNOWN;
+    Rect windowRect;
+    SubWindowOptions subWindowOptions;
+    SystemWindowOptions systemWindowOptions;
 };
 
 /**

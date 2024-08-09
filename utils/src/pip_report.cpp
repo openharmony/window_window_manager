@@ -26,6 +26,13 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(PiPReporter)
 
+#define LOG_WHEN_ERROR(errCode)                                                               \
+    do {                                                                                      \
+        if ((errCode) != 0) {                                                                 \
+            TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, errCode:%{public}d", errCode); \
+        }                                                                                     \
+    } while (false)
+
 static std::map<std::string, int32_t> CONTROL_ACTION_MAP = {
     {"playbackStateChanged", 0},
     {"nextVideo", 1},
@@ -81,9 +88,7 @@ void PiPReporter::ReportPiPStartWindow(int32_t source, int32_t templateType,
         EVENT_KEY_START_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
@@ -105,15 +110,17 @@ void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
         EVENT_KEY_STOP_PACKAGE_NAME, GetPackageName(),
         EVENT_KEY_OPERATION_CODE, isSuccess,
         EVENT_KEY_OPERATION_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &actionEvent)
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report pip widow action event");
     std::string eventName = "CONTROL_PANNEL_ACTION_EVENT";
+    if (CONTROL_ACTION_MAP.find(actionEvent) == CONTROL_ACTION_MAP.end()) {
+        TLOGE(WmsLogTag::WMS_PIP, "actionEvent %{public}s not found", actionEvent.c_str());
+        return;
+    }
     int32_t currentAction = CONTROL_ACTION_MAP[actionEvent];
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
@@ -123,9 +130,7 @@ void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, currentAction,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType controlType)
@@ -139,9 +144,7 @@ void PiPReporter::ReportPiPControlEvent(int32_t templateType, PiPControlType con
         EVENT_KEY_TEMPLATE_TYPE, templateType,
         EVENT_KEY_ACTION_EVENT, static_cast<uint32_t>(controlType),
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
@@ -156,9 +159,7 @@ void PiPReporter::ReportPiPRatio(int32_t windowWidth, int32_t windowHeight)
         EVENT_KEY_WINDOW_WIDTH, windowWidth,
         EVENT_KEY_WINDOW_HEIGHT, windowHeight,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 
 void PiPReporter::ReportPiPRestore()
@@ -171,9 +172,7 @@ void PiPReporter::ReportPiPRestore()
         EVENT_KEY_PNAMEID, PNAMEID,
         EVENT_KEY_PVERSION, PVERSION,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write HiSysEvent error, ret:%{public}d", ret);
-    }
+    LOG_WHEN_ERROR(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -272,6 +272,7 @@ HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
     ASSERT_NE(screenManagerListener, nullptr);
     screenManagerListener->OnScreenDisconnect(SCREEN_ID_INVALID);
     ASSERT_NE(screenManagerListener->pImpl_, nullptr);
+    screenManagerListener->OnScreenDisconnect(0);
     screenManagerListener->pImpl_ = nullptr;
     screenManagerListener->OnScreenDisconnect(0);
     ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
@@ -293,6 +294,7 @@ HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
     screenManagerListener->OnScreenChange(nullptr, ScreenChangeEvent::UPDATE_ORIENTATION);
     ASSERT_NE(screenManagerListener->pImpl_, nullptr);
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    screenManagerListener->OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
     screenManagerListener->pImpl_ = nullptr;
     screenManagerListener->OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
     ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
@@ -481,8 +483,11 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
     ASSERT_TRUE(utils.CreateSurface());
     std::vector<ScreenId> screenIds;
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopMirror(screenIds));
-    std::vector<ScreenId> mirrorScreenIds {0, 1, 2, 3, 4, 5};
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+    std::vector<ScreenId> mirrorScreenIds1 {0, 1, 2, 3, 4, 5};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds1);
+    ASSERT_EQ(DMError::DM_OK, err);
+    std::vector<ScreenId> mirrorScreenIds2 {};
+    err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds2);
     ASSERT_EQ(DMError::DM_OK, err);
 }
 
@@ -642,6 +647,17 @@ HWTEST_F(ScreenManagerTest, IsCaptured03, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: UnregisterScreenListener
+ * @tc.desc: UnregisterScreenListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, UnregisterScreenListener, Function | SmallTest | Level1)
+{
+    auto ret = ScreenManager::GetInstance().UnregisterScreenListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+}
+
+/**
  * @tc.name: RegisterScreenListener
  * @tc.desc: RegisterScreenListener fun
  * @tc.type: FUNC
@@ -691,6 +707,21 @@ HWTEST_F(ScreenManagerTest, MakeUniqueScreen_002, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: MakeUniqueScreen_003
+ * @tc.desc: MakeUniqueScreen_003 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeUniqueScreen_003, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds;
+    for (uint32_t i = 0; i < 32; ++i){ // MAX_SCREEN_SIZE
+        screenIds.emplace_back(i);
+    }
+    DMError error = ScreenManager::GetInstance().MakeUniqueScreen(screenIds);
+    ASSERT_NE(error, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
  * @tc.name: MakeMirror_001
  * @tc.desc: MakeMirror_001 fun
  * @tc.type: FUNC
@@ -719,6 +750,18 @@ HWTEST_F(ScreenManagerTest, StopExpand, Function | SmallTest | Level1)
     }
     DMError error = ScreenManager::GetInstance().StopExpand(expandScreenIds);
     ASSERT_EQ(error, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetScreenInfoSrting
+ * @tc.desc: GetScreenInfoSrting fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, Function | SmallTest | Level1)
+{
+    sptr<ScreenInfo> screenInfo = nullptr;
+    auto result =ScreenManager::GetInstance().pImpl_->GetScreenInfoSrting(screenInfo);
+    EXPECT_EQ(result, "");
 }
 }
 } // namespace Rosen

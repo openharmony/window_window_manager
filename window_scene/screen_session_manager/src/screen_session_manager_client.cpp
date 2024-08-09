@@ -18,13 +18,14 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_transaction.h>
+#include <transaction/rs_interfaces.h>
 
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_CLIENT, "ScreenSessionManagerClient" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClient" };
 std::mutex g_instanceMutex;
 } // namespace
 
@@ -270,13 +271,14 @@ FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
     return displayMode_;
 }
 
-void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
 
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
@@ -392,17 +394,24 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         return;
     }
     if (oldScbPids.size() == 0) {
-        WLOGFI("oldScbPids size 0");
+        WLOGFE("oldScbPids size 0");
         return;
     }
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
-            WLOGFI("display node is null");
+            WLOGFE("display node is null");
             continue;
         }
-        displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+            transactionProxy->FlushImplicitTransaction();
+        } else {
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+            WLOGFW("transactionProxy is null");
+        }
     }
     WLOGFI("switch user callback end");
 }
@@ -503,5 +512,17 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     if (displayChangeListener_) {
         displayChangeListener_->OnScreenFoldStatusChanged(screenFoldInfo);
     }
+}
+
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
+    const float pivotX, const float pivotY)
+{
+    auto session = GetScreenSession(id);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
 }
 } // namespace OHOS::Rosen

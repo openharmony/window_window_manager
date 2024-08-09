@@ -818,6 +818,14 @@ public:
      */
     virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
     /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
@@ -825,6 +833,14 @@ public:
      * @return WMError
      */
     virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    /**
+     * @brief resize the window instance (w,h)
+     *
+     * @param width
+     * @param height
+     * @return WMError
+     */
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief set the window gravity
      *
@@ -925,6 +941,16 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) { return WMError::WM_OK; }
+    /**
+     * @brief Set whether the dialog window responds to back gesture.
+     *
+     * @param isEnabled Responds to back gesture if true, or ignore back gesture if false.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     /**
      * @brief Raise zorder of window to the top of APP Mainwindow.
      *
@@ -1427,7 +1453,7 @@ public:
      * @param presentation the value means use presentation enum to layout when maximize window
      * @return WM_OK means maximize window ok, others means failed.
      */
-    virtual WMError Maximize(std::optional<MaximizePresentation> presentation)
+    virtual WMError Maximize(MaximizePresentation presentation)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1461,6 +1487,11 @@ public:
      *
      */
     virtual void StartMove() {}
+    /**
+     * @brief start move system window. It is called by application.
+     *
+     */
+    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Set flag that need remove window input channel.
      *
@@ -1694,7 +1725,7 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
@@ -1702,7 +1733,7 @@ public:
      *
      * @param windowLimits.
      * @return WMError.
-    */
+     */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
@@ -2067,13 +2098,14 @@ public:
      * @return WM_OK means set success, others means set failed
      */
     virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+
     /*
      * @brief Set the Dvsync Switch
      *
      * @param dvsyncSwitch bool.
      * @return * void
      */
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {};
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     /**
      * @brief Set whether to enable immersive mode.
@@ -2088,6 +2120,36 @@ public:
      * @return true means the immersive mode is enabled, and false means the opposite.
      */
     virtual bool GetImmersiveModeEnabledState() const { return true; }
+
+    /**
+     * @brief Get the height of status bar.
+     *
+     * @return the height of status bar.
+     */
+    virtual uint32_t GetStatusBarHeight() { return 0; }
+
+    /**
+     * @brief Get whether the free multi-window mode is enabled or not.
+     *
+     * @return true means the free multi-window mode is enabled, and false means the opposite.
+     */
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+    
+    /**
+     * @brief Get the window status of current window.
+     *
+     * @param windowStatus
+     * @return WMError.
+     */
+    virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the ContinueState of window.
+     *
+     * @param continueState of the window.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 };
 }
 }

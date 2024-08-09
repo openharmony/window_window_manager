@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include <parameters.h>
 
 #include "fold_screen_controller/fold_screen_policy.h"
-#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
 
@@ -28,16 +28,16 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr float ANGLE_MIN_VAL = 0.0F;
-    constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
-    constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
-    constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
-    constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
-    constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
-    constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
-    constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
-    constexpr int32_t HALL_THRESHOLD = 1;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float ANGLE_MIN_VAL = 0.0F;
+constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
+constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
+constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
+constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
+constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
+constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
+constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
+constexpr int32_t HALL_THRESHOLD = 1;
+constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 } // namespace
 
 SingleDisplaySensorFoldStateManager::SingleDisplaySensorFoldStateManager() {}
@@ -46,7 +46,6 @@ SingleDisplaySensorFoldStateManager::~SingleDisplaySensorFoldStateManager() {}
 void SingleDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -54,7 +53,6 @@ void SingleDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hal
 void SingleDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }

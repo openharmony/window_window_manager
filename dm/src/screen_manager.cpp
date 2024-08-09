@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "ScreenManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
     const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
@@ -206,7 +206,7 @@ ScreenManager::ScreenManager()
 
 ScreenManager::~ScreenManager()
 {
-    WLOGFD("Destroy screenmanager instance");
+    WLOGFI("Destroy screenmanager instance");
 }
 
 ScreenManager::Impl::~Impl()
@@ -691,4 +691,10 @@ void ScreenManager::OnRemoteDied()
 {
     pImpl_->OnRemoteDied();
 }
+
+bool ScreenManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenStatus(screenId, screenStatus);
+}
+
 } // namespace OHOS::Rosen

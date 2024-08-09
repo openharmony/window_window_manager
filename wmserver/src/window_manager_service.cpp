@@ -1305,7 +1305,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE && 
+    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE &&
         !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
         WLOGFE("Set privacy mode permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;

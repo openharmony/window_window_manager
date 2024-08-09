@@ -36,28 +36,28 @@ namespace {
 }
 class WindowLifeCycle : public IWindowLifeCycle {
 public:
-    virtual void AfterForeground() override
+    void AfterForeground() override
     {
     }
-    virtual void AfterBackground() override
+    void AfterBackground() override
     {
     }
-    virtual void AfterFocused() override
+    void AfterFocused() override
     {
     }
-    virtual void AfterUnfocused() override
+    void AfterUnfocused() override
     {
     }
-    virtual void AfterActive() override
+    void AfterActive() override
     {
     }
-    virtual void AfterInactive() override
+    void AfterInactive() override
     {
     }
-    virtual void AfterResumed() override
+    void AfterResumed() override
     {
     }
-    virtual void AfterPaused() override
+    void AfterPaused() override
     {
     }
 };

@@ -14,8 +14,6 @@
  */
 
 #include "session_manager_agent_controller.h"
-#include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -208,5 +206,18 @@ void SessionManagerAgentController::NotifyGestureNavigationEnabledResult(bool en
         }
     }
 }
+
+void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "windowStyletype: %{public}d",
+          static_cast<uint8_t>(type));
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE)) {
+        if (agent != nullptr) {
+            agent->NotifyWindowStyleChange(type);
+        }
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
