@@ -85,7 +85,7 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-std::recursive_mutex g_instanceMutex;
+
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t DEFAULT_USERID = -1;
@@ -170,14 +170,16 @@ public:
 };
 } // namespace
 
+sptr<SceneSessionManager> SceneSessionManager::CreateInstance()
+{
+    sptr<SceneSessionManager> sessionManager = new SceneSessionManager();
+    sessionManager->Init();
+    return sessionManager;
+}
+
 SceneSessionManager& SceneSessionManager::GetInstance()
 {
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneSessionManager* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneSessionManager();
-        instance->Init();
-    }
+    static sptr<SceneSessionManager> instance = CreateInstance();
     return *instance;
 }
 
@@ -231,6 +233,7 @@ void SceneSessionManager::Init()
     RegisterAppListener();
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
+    SceneInputManager::GetInstance().Init();
 }
 
 void SceneSessionManager::InitScheduleUtils()
