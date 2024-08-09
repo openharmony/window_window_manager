@@ -249,7 +249,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->pipOption_->SetXComponentController(xComponentController);
     startType = StartPipType::NULL_START;
-    EXPECT_CALL(*(mw), GetWindowState()).Times(1).WillOnce(Return(WindowState::STATE_CREATED));
+    EXPECT_CALL(*(mw), GetWindowState()).Times(2).WillOnce(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     startType = StartPipType::AUTO_START;
     delete contextPtr;
