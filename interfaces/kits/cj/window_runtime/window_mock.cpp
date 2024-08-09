@@ -75,7 +75,6 @@ FFI_EXPORT int FFiOHOSSetWindowColorSpace = 0;
 FFI_EXPORT int FfiOHOSOnKeyboardHeightChange = 0;
 FFI_EXPORT int FfiOHOSOffKeyboardHeightChange = 0;
 FFI_EXPORT int FfiOHOSOnWindowEvent = 0;
-FFI_EXPORT int FfiOHOSOffWindowEvent = 0;
 FFI_EXPORT int FfiOHOSBindWindowStage = 0;
 FFI_EXPORT int FfiOHOSGetMainWindow = 0;
 FFI_EXPORT int FfiOHOSCreateSubWindow = 0;
