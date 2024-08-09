@@ -2969,16 +2969,16 @@ napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input Parameter is missing or invalid" ));
+            "Input Parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     bool movable = true;
     if (!ConvertFromJsValue(env, argv[0], movable)) {
-      TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to  convert parameter to movable");
-      napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid" ));
-      return NapiGetUndefined(env);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to  convert parameter to movable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
 
     auto session = weakSession_.promote();

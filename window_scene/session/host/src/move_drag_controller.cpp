@@ -97,7 +97,7 @@ bool MoveDragController::GetStartDragFlag() const
     return isStartDrag_;
 }
 
-void MoveDragController::GetMovable()
+bool MoveDragController::GetMovable()
 {
     return isMovable_;
 }
