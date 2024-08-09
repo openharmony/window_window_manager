@@ -1469,6 +1469,62 @@ HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
     ret = session_->UpdateMaximizeMode(false);
     ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: UpdateTitleInTargetPos
+ * @tc.desc: UpdateTitleInTargetPos test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateTitleInTargetPos, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->UpdateTitleInTargetPos(true, 20);
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SwitchFreeMultiWindow
+ * @tc.desc: SwitchFreeMultiWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->SwitchFreeMultiWindow(true);
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = true;
+    ret = session_->SwitchFreeMultiWindow(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SetTouchHotAreas
+ * @tc.desc: SetTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    std::vector<Rect> touchHotAreas;
+    session_->SetTouchHotAreas(touchHotAreas);
+    ASSERT_EQ(session_->property_, nullptr);
+
+    session_->property_ = new WindowSessionProperty();
+    touchHotAreas = session_->property_->touchHotAreas_;
+    session_->property_->SetTouchHotAreas(touchHotAreas);
+    ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
