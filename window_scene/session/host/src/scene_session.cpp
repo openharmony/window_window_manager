@@ -4219,6 +4219,43 @@ bool SceneSession::IsPcOrPadEnableActivation() const
     return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
 }
 
+void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
+    const sptr<WindowSessionProperty>& sessionProperty)
+{
+    SessionGravity gravity;
+    uint32_t percent = 0;
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    Rect rect = {0, 0, 0, 0};
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
+        return;
+    }
+    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
+        sessionProperty->GetDisplayId());
+    if (screenSession != nullptr) {
+        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
+    }
+    bool isLandscape = screenWidth > screenHeight ? true : false;
+    rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    gravity = static_cast<SessionGravity>(params.gravity_);
+    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
+        UpdateInputMethodSessionRect(SessionHelper::TransferToWSRect(rect), newWinRect, newRequestRect);
+    } else if (rect.width_ > 0 && rect.height_ > 0) {
+        newWinRect = SessionHelper::TransferToWSRect(rect);
+        newRequestRect = SessionHelper::TransferToWSRect(rect);
+    }
+    SetSessionRequestRect(newRequestRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, newRequestRect: %{public}s,"
+        "isLandscape: %{public}d", GetPersistentId(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
+        isLandscape);
+}
+
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
