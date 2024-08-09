@@ -9869,7 +9869,7 @@ WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& 
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::CheckAndReportScreenFoldStatus(const ScreenFoldData& data)
+WMError SceneSessionManager::CheckAndReportScreenFoldStatus(ScreenFoldData& data)
 {
     static ScreenFoldData lastScreenHalfFoldData;
     if (data.nextScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
@@ -9880,6 +9880,11 @@ WMError SceneSessionManager::CheckAndReportScreenFoldStatus(const ScreenFoldData
     if (data.currentScreenFoldStatus_ == static_cast<int32_t>(FoldStatus::HALF_FOLD)) {
         if (data.currentScreenFoldStatusDuration_ >= ScreenFoldData::HALF_FOLD_REPORT_TRIGGER_DURATION) {
             lastScreenHalfFoldReportRet = ReportScreenFoldStatus(lastScreenHalfFoldData);
+        } else if (lastScreenHalfFoldData.currentScreenFoldStatus_ != ScreenFoldData::INVALID_VALUE) {
+            // if stay at half-fold less than 15s, combine this change with last
+            data.currentScreenFoldStatus_ = lastScreenHalfFoldData.currentScreenFoldStatus_;
+            data.currentScreenFoldStatusDuration_ += lastScreenHalfFoldData.currentScreenFoldStatusDuration_;
+            data.postureAngle_ = lastScreenHalfFoldData.postureAngle_;
         }
         lastScreenHalfFoldData.SetInvalid();
     }
