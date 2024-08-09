@@ -112,6 +112,10 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+
+    /*
+     * Fold Screen Status Change Report
+     */
     virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
@@ -356,7 +360,11 @@ public:
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo> displayInfo);
 
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
@@ -722,9 +730,14 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
-    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
     std::condition_variable nextFlushCompletedCV_;
