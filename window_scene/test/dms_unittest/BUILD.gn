@@ -45,9 +45,40 @@ group("unittest") {
     ":ws_screen_snapshot_picker_connection_test",
     ":ws_sensor_fold_state_manager_test",
     ":ws_session_display_power_controller_test",
+    ":ws_setting_observer_test",
+    ":ws_setting_provider_test",
     ":ws_single_display_fold_policy_test",
     ":ws_single_display_pocket_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
+  ]
+}
+
+ohos_unittest("ws_setting_observer_test") {
+  module_out_path = module_out_path
+
+  sources = [ "setting_observer_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:dataobs_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_setting_provider_test") {
+  module_out_path = module_out_path
+
+  sources = [ "setting_provider_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "data_share:datashare_consumer",
+    "hilog:libhilog",
   ]
 }
 
