@@ -941,6 +941,10 @@ HWTEST_F(SceneSessionTest5, SetForegroundInteractiveStatus, Function | SmallTest
     session->toastSession_.push_back(session);
     session->SetForegroundInteractiveStatus(false);
     session->toastSession_.clear();
+    session->SetSessionState(SessionState::STATE_ACTIVE);
+    session->toastSession_.push_back(nullptr);
+    session->SetForegroundInteractiveStatus(false);
+    session->toastSession_.clear();
 }
 
 /**
@@ -1049,6 +1053,100 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 641));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
+}
+
+/**
+ * @tc.name: IsAnco
+ * @tc.desc: IsAnco function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsAnco, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAnco";
+    info.bundleName_ = "IsAnco";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    bool res = session->IsAnco();
+    EXPECT_EQ(res ,false);
+
+    session->collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    res = session->IsAnco();
+    EXPECT_EQ(res ,true);
+}
+
+/**
+ * @tc.name: MakeSessionInfoDuringPendingActivation
+ * @tc.desc: MakeSessionInfoDuringPendingActivation function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MakeSessionInfoDuringPendingActivation, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    SessionInfo info;
+    info.abilityName_ = "MakeSessionInfoDuringPendingActivation";
+    info.bundleName_ = "MakeSessionInfoDuringPendingActivation";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    abilitySessionInfo->want = nullptr;
+    auto info_ =  session->MakeSessionInfoDuringPendingActivation(abilitySessionInfo, 1);
+    EXPECT_NE(info_, nullptr);
+
+    abilitySessionInfo->want = new AAFwk::Want();
+    abilitySessionInfo->want->SetParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 1);
+    info_ =  session->MakeSessionInfoDuringPendingActivation(abilitySessionInfo, 1);
+    EXPECT_NE(info_, nullptr);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction";
+    info.bundleName_ = "ProcessUpdatePropertyByAction";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info_;
+    info_.abilityName_ = "ProcessUpdatePropertyByAction_";
+    info_.bundleName_ = "ProcessUpdatePropertyByAction_";
+    sptr<SceneSession> session_ = sptr<SceneSession>::MakeSptr(info_, nullptr);
+    EXPECT_NE(session_, nullptr);
+
+    WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    session->ProcessUpdatePropertyByAction(property, session_, 0);
 }
 
 }
