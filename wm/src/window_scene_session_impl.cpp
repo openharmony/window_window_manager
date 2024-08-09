@@ -309,6 +309,9 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
     sptr<ISessionStage> iSessionStage(this);
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    if (channel == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     sptr<IWindowEventChannel> eventChannel(channel);
     sptr<Rosen::ISession> session;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
