@@ -236,6 +236,10 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+
+    /*
+     * UIExtension
+     */
     void SetParentExtensionWindow(const sptr<Window>& parentExtensionWindow) override;
 
 protected:
@@ -288,7 +292,6 @@ protected:
     sptr<WindowSessionProperty> property_;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
-    sptr<Window> parentExtensionWindow_ = nullptr;
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
@@ -319,6 +322,11 @@ protected:
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
+
+    /*
+     * UIExtension
+     */
+    sptr<Window> parentExtensionWindow_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
