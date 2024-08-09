@@ -1272,6 +1272,18 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
+/**
+ * @tc.name: NotifyDisplayInfoChange01
+ * @tc.desc: check NotifyDisplayInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
