@@ -1935,6 +1935,7 @@ void Session::UnregisterSessionChangeListeners()
         session->raiseToTopForPointDownFunc_ = nullptr;
         session->sessionInfoLockedStateChangeFunc_ = nullptr;
         session->contextTransparentFunc_ = nullptr;
+        session->sessionRectChangeFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
     };
     PostTask(task, "UnregisterSessionChangeListeners");
@@ -2114,6 +2115,9 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
@@ -2162,6 +2166,9 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             }
         } else {
             surfaceNode_->MarkUifirstNode(true);
+        }
+        if (!sessionStage_) {
+            return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
