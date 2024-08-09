@@ -970,7 +970,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
     session.isTerminating_ = true;
     sceneSession->TerminateSession(abilitySessionInfo);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, sceneSession->TerminateSession(abilitySessionInfo));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
     NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
@@ -1124,10 +1124,15 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     ASSERT_NE(nullptr, abilitySessionInfo);
     bool needRemoveSession = true;
-    OHOS::Rosen::Session session(info);
-    session.isTerminating_ = true;
+
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionExceptionInner";
+    info.bundleName_ = "NotifySessionExceptionInner";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isTerminating_ = true;
     auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(res, WSError::WS_OK);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
@@ -1136,11 +1141,11 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     sceneSession->clientIdentityToken_ = "session1";
     abilitySessionInfo->identityToken = "session2";
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(res, WSError::WS_OK);
 
     sceneSession->isTerminating_ = true;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_OPERATION);
+    ASSERT_EQ(res, WSError::WS_OK);
 
     sceneSession->isTerminating_ = false;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);

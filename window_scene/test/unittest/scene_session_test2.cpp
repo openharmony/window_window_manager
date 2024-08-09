@@ -903,7 +903,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
 
     scensession->SetSessionProperty(nullptr);
     scensession->NotifyForceHideChange(true);
-    ASSERT_EQ(scensession->property_.forceHide_, false);
+    ASSERT_EQ(scensession->property_->forceHide_, false);
 }
 
 /**
