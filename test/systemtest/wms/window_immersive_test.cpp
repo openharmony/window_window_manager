@@ -283,6 +283,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     SetWindowSystemProps(window1, TEST_PROPS_1);
     fullScreenAppinfo_.name = "Immer02";
     const sptr<Window>& window2 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(nullptr, window2);
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
@@ -311,6 +312,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
     fullScreenAppinfo_.name = "Immer03";
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window2 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(nullptr, window2);
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
     ASSERT_EQ(WMError::WM_OK, window1->Show());

@@ -26,6 +26,7 @@
 #include "native_engine.h"
 #include "window_extension_session_impl.h"
 #include "mock_uicontent.h"
+#include "context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -138,6 +139,20 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
+}
+
+/**
+ * @tc.name: Destroy02
+ * @tc.desc: Destroy Test, window session is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Destroy02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->hostSession_ = nullptr;
+    window_->property_->SetPersistentId(0);
+    window_->state_= WindowState::STATE_DESTROYED;
+    ASSERT_NE(WMError::WM_OK, window_->Destroy(false, false));
 }
 
 /**
@@ -609,6 +624,19 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, Function | Sm
 }
 
 /**
+ * @tc.name: NotifyBackpressedEvent03
+ * @tc.desc: NotifyFocusActiveEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->uiContent_ = nullptr;
+    bool isConsumed = true;
+    window_->NotifyBackpressedEvent(isConsumed);
+}
+
+/**
  * @tc.name: InputMethodKeyEventResultCallback01
  * @tc.desc: InputMethodKeyEventResultCallback01 Test
  * @tc.type: FUNC
@@ -764,6 +792,132 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ArkUIFrameworkSupport01
+ * @tc.desc: ArkUIFrameworkSupport01 Test, context_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport02
+ * @tc.desc: ArkUIFrameworkSupport02 Test, context_->GetApplicationInfo() == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    abilityContext->stageContext_ = nullptr;
+    window_->context_ = abilityContext;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport03
+ * @tc.desc: ArkUIFrameworkSupport03 Test, version < 10 and isSystembarPropertiesSet_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->isSystembarPropertiesSet_ = true;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport04
+ * @tc.desc: ArkUIFrameworkSupport04 Test, version < 10 and isSystembarPropertiesSet_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    window_->isSystembarPropertiesSet_ = false;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport05
+ * @tc.desc: ArkUIFrameworkSupport05 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    auto stageContent = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(nullptr, stageContent);
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    ASSERT_NE(nullptr, applicationInfo);
+    applicationInfo->apiCompatibleVersion = 12;
+    stageContent->SetApplicationInfo(applicationInfo);
+    abilityContext->stageContext_ = stageContent;
+    window_->context_ = abilityContext;
+    window_->isIgnoreSafeAreaNeedNotify_ = false;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: ArkUIFrameworkSupport06
+ * @tc.desc: ArkUIFrameworkSupport06 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    auto stageContent = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(nullptr, stageContent);
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    ASSERT_NE(nullptr, applicationInfo);
+    applicationInfo->apiCompatibleVersion = 12;
+    stageContent->SetApplicationInfo(applicationInfo);
+    abilityContext->stageContext_ = stageContent;
+    window_->context_ = abilityContext;
+    window_->isIgnoreSafeAreaNeedNotify_ = true;
+    window_->ArkUIFrameworkSupport();
+}
+
+/**
+ * @tc.name: NapiSetUIContent
+ * @tc.desc: NapiSetUIContent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    std::string contentInfo = "NapiSetUIContent test";
+    napi_env env = napi_env();
+    napi_value storage = napi_value();
+    sptr<IRemoteObject> token;
+    window_->uiContent_ = nullptr;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    window_->focusState_ = std::nullopt;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+
+    auto uiContent = std::make_shared<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, uiContent);
+    window_->uiContent_ = uiContent;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    window_->focusState_ = true;
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect Test
  * @tc.type: FUNC
@@ -801,6 +955,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, Function | SmallTest | Le
     window_->property_->SetWindowRect(preRect);
     reason = SizeChangeReason::ROTATION;
     ASSERT_EQ(WSError::WS_OK, window_->UpdateRect(rect, reason));
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, window_->UpdateRect(rect, reason));
 }
 
 /**
@@ -814,6 +971,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
     std::shared_ptr<RSTransaction> rsTransaction;
     ASSERT_NE(nullptr, window_);
+    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+
+    window_->handler_ = nullptr;
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
 }
 
@@ -853,6 +1013,24 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Functi
 }
 
 /**
+ * @tc.name: TransferAccessibilityEvent
+ * @tc.desc: TransferAccessibilityEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    Accessibility::AccessibilityEventInfo info;
+    int64_t uiExtensionIdLevel = 1;
+    ASSERT_NE(WMError::WM_OK, window_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
+
+    window_->hostSession_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->TransferAccessibilityEvent(info, uiExtensionIdLevel));
+}
+
+/**
  * @tc.name: NotifyAccessibilityChildTreeRegister01
  * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
@@ -864,7 +1042,16 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01,
     int64_t accessibilityId = 0;
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
-    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId));
+    auto ret = window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    window_->uiContent_ = nullptr;
+    ret = window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    window_->handler_ = nullptr;
+    ret = window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -877,6 +1064,9 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister0
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeUnregister());
+
+    window_->handler_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, window_->NotifyAccessibilityChildTreeUnregister());
 }
 
 /**
@@ -891,6 +1081,9 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Fun
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityDumpChildInfo(params, info));
+
+    window_->handler_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, window_->NotifyAccessibilityDumpChildInfo(params, info));
 }
 
 /**
@@ -919,6 +1112,17 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, Functio
     ASSERT_NE(nullptr, info);
     window_->NotifyOccupiedAreaChangeInfo(info);
 }
+
+/**
+ * @tc.name: UnregisterOccupiedAreaChangeListener
+ * @tc.desc: UnregisterOccupiedAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(nullptr));
+}
+
 
 /**
  * @tc.name: GetAvoidAreaByType01
@@ -984,10 +1188,15 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     ASSERT_NE(mockHostSession, nullptr);
     window_->hostSession_ = mockHostSession;
 
-    window_->property_->displayId_ = DISPLAY_ID_INVALID;
+    window_->property_->SetDisplayId(DISPLAY_ID_INVALID);
     EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
-    auto res = window_->Show();
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Show());
+
+    window_->property_->SetDisplayId(0);
+    EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));
+    ASSERT_EQ(static_cast<WMError>(WSError::WS_DO_NOTHING), window_->Show());
+    EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, window_->Show());
 }
 
 /**

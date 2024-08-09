@@ -55,58 +55,47 @@ void CjWindowListener::CallCjMethod(const char* methodName, void* argv, size_t a
 void CjWindowListener::OnSystemBarPropertyChange(DisplayId displayId,
     const SystemBarRegionTints& tints)
 {
-    return;
 }
 
 void CjWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    return;
 }
 
 void CjWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    return;
 }
 
 void CjWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    return;
 }
 
 void CjWindowListener::AfterForeground()
 {
-    return;
 }
 
 void CjWindowListener::AfterBackground()
 {
-    return;
 }
 
 void CjWindowListener::AfterFocused()
 {
-    return;
 }
 
 void CjWindowListener::AfterUnfocused()
 {
-    return;
 }
 
 void CjWindowListener::AfterResumed()
 {
-    return;
 }
 
 void CjWindowListener::AfterPaused()
 {
-    return;
 }
 
 void CjWindowListener::AfterDestroyed()
 {
-    return;
 }
 
 void CjWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
@@ -128,52 +117,42 @@ void CjWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     void* argv = &(info->rect_.height_);
     size_t argc = 1;
     thisListener->CallCjMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, argc);
-    return;
 }
 
 void CjWindowListener::OnTouchOutside() const
 {
-    return;
 }
 
 void CjWindowListener::OnScreenshot()
 {
-    return;
 }
 
 void CjWindowListener::OnDialogTargetTouch() const
 {
-    return;
 }
 
 void CjWindowListener::OnDialogDeathRecipient() const
 {
-    return;
 }
 
 void CjWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
 {
-    return;
 }
 
 void CjWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 {
-    return;
 }
 
 void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
-    return;
 }
 
 void CjWindowListener::OnWindowStatusChange(WindowStatus status)
 {
-    return;
 }
 
 void CjWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
-    return;
 }
 }
 }

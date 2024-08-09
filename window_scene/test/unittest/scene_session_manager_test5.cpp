@@ -1039,6 +1039,32 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
     ssm_->StartUIAbilityBySCB(sceneSession);
     ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
 }
+
+/**
+ * @tc.name: RequestSceneSessionBackground
+ * @tc.desc: RequestSceneSessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.ancoSceneState = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<Session> session = new (std::nothrow) Session(info);
+    ASSERT_NE(session, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionInfoPersistentId(123);
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
+    session->SetSessionInfoPersistentId(0);
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

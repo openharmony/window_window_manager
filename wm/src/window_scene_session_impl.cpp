@@ -598,7 +598,11 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     if ((WindowHelper::IsSystemWindow(windowType) || isFixedSubWin) && !isDecorDialog) {
-        hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        if (!isFixedSubWin && !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
+            hostSession->SendPointEventForMoveDrag(pointerEvent);
+        } else {
+            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     } else {
         if (dragType != AreaType::UNDEFINED) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
@@ -2137,6 +2141,33 @@ void WindowSceneSessionImpl::StartMove()
     return;
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
+{
+    auto hostSession = GetHostSession();
+    if (hostSession) {
+        WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
+        TLOGD(WmsLogTag::WMS_SYSTEM, "hostSession id: %{public}d , errorCode: %{public}d",
+            GetPersistentId(), static_cast<int>(errorCode));
+        switch (errorCode) {
+            case WSError::WS_ERROR_REPEAT_OPERATION: {
+                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+            }
+            case WSError::WS_ERROR_NOT_SYSTEM_APP: {
+                return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+            }
+            case WSError::WS_ERROR_NULLPTR: {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
+            default: {
+                return WmErrorCode::WM_OK;
+            }
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("WindowSceneSessionImpl::Close id: %{public}d", GetPersistentId());
@@ -2245,10 +2276,6 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 {
     WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        return mode;
-    }
     auto hostSession = GetHostSession();
     if (hostSession) {
         hostSession->GetGlobalMaximizeMode(mode);
@@ -3634,6 +3661,27 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange()
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
+WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+{
+    Rect newRect = {0, 0, 0, 0};
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
+            property_->GetWindowName().c_str(), GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool isLandscape = display->GetWidth() > display->GetHeight() ? true : false;
+    newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    property_->SetRequestRect(newRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize success, Id: %{public}d, newRect: %{public}s, "
+        "isLandscape: %{public}d", GetPersistentId(), newRect.ToString().c_str(), isLandscape);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
@@ -3641,8 +3689,16 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
         static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
         params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
         params.PortraitPanelRect_.ToString().c_str());
-    if (property_ != nullptr) {
-        property_->SetKeyboardLayoutParams(params);
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetKeyboardLayoutParams(params);
+    property_->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+    auto ret = MoveAndResizeKeyboard(params);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize failed");
+        return ret;
     }
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
