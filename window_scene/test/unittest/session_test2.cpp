@@ -1565,7 +1565,7 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
     ASSERT_NE(session_, nullptr);
     session_->SetRaiseToAppTopForPointDownFunc(nullptr);
 
-    NotifyRaiseToTopPointDownFunc func = []() {};
+    NotifyRaiseToTopForPointDownFunc func = []() {};
     session_->raiseToTopForPointDownFunc_ = func;
     session_->RaiseToAppTopForPointDown();
     session_->HandlePointDownDialog();
