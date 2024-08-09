@@ -145,6 +145,12 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
     return false;
 }
 
+int32_t GetPid()
+{
+    static int32_t pid = static_cast<int32_t>(getpid());
+    return pid;
+}
+
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
     BundleStatusCallback() = default;
@@ -1866,7 +1872,7 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
     }
 }
 
-bool SceneSessionManager::IsPcLifeCycle(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession)
 {
     bool isPcAppInPad = false;
     bool isAppSupportPhoneInPc = false;
@@ -1915,7 +1921,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             TLOGE(WmsLogTag::WMS_MAIN, "Create Ability info failed, id %{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (IsPcLifeCycle(scnSession)) {
+        if (IsPcSceneSessionLifecycle(scnSession)) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -3032,7 +3038,7 @@ bool SceneSessionManager::IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSess
         TLOGD(WmsLogTag::WMS_MULTI_USER, "persistentId: %{public}d, type: %{public}d, state: %{public}d",
             sceneSession->GetPersistentId(), sceneSession->GetWindowType(), sceneSession->GetSessionState());
     }
-    return sceneSession->GetCallingPid() != pid && IsPcLifeCycle(sceneSession) && !isInvalidMainSession;
+    return sceneSession->GetCallingPid() != pid && IsPcSceneSessionLifecycle(sceneSession) && !isInvalidMainSession;
 }
 
 WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive)
@@ -3043,7 +3049,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Create Ability info failed, id %{public}d", persistentId);
         return WSError::WS_ERROR_NULLPTR;
     }
-    int errCode = ERR_OK;
+    int32_t errCode = ERR_OK;
     if (!isUserActive) {
         TLOGI(WmsLogTag::WMS_MULTI_USER,
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
@@ -3060,8 +3066,8 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         TLOGI(WmsLogTag::WMS_MULTI_USER,
             "StartUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
-        bool isColdStart = false;
         sceneSession->SetMinimizedFlagByUserSwitch(false);
+        bool isColdStart = false;
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
@@ -3091,21 +3097,17 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
         }
-        // Change app life cycle in pc when switch user, do app freeze
-        int32_t pid = static_cast<int32_t>(getpid());
-        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
-        {
-            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            sceneSessionMapCopy = sceneSessionMap_;
-        }
-        for (const auto& iter : sceneSessionMapCopy) {
-            auto& scnSession = iter.second;
-            if (scnSession == nullptr) {
+
+        // Change app life cycle in pc when user switch, do app freeze
+        int32_t pid = GetPid();
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
                 TLOGE(WmsLogTag::WMS_MULTI_USER, "session is null");
                 continue;
             }
-            if (IsNeedChangeLifeCycleOnUserSwitch(scnSession, pid)) {
-                StartOrMinimizeUIAbilityBySCB(scnSession, isUserActive);
+            if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
+                StartOrMinimizeUIAbilityBySCB(sceneSession, isUserActive);
             }
         }
         return WSError::WS_OK;

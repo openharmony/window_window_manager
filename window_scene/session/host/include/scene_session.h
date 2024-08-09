@@ -292,8 +292,6 @@ public:
     bool RemoveToastSession(int32_t persistentId);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
-    void SetMinimizedFlagByUserSwitch(bool isMinimized);
-    bool IsMinimizedByUserSwitch();
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
@@ -374,6 +372,12 @@ public:
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
+
+    /*
+     * User Switch
+     */
+    void SetMinimizedFlagByUserSwitch(bool isMinimized);
+    bool IsMinimizedByUserSwitch() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -521,7 +525,6 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };
     std::atomic_bool isStartMoving_ { false };
-    std::atomic_bool isMinimizedByUserSwitch_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isSystemSpecificSession_ { false };
@@ -551,6 +554,9 @@ private:
 
     // Session recover
     bool isRecovered_ = false;
+
+    // User switch
+    bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
