@@ -1245,7 +1245,7 @@ HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function 
  * @tc.desc: check RegisterFocusChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest | Level2)
 {
     WMError ret;
     sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
