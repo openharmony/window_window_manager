@@ -728,6 +728,10 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio01, Function | SmallTest | Level
 
     systemConfig.isSystemDecorEnable_ = false;
     EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+
+    systemConfig.isSystemDecorEnable_ = true;
+    session->SetSessionProperty(nullptr);
+    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
 }
 
 /**
@@ -756,6 +760,19 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_START;
+    session->OnMoveDragCallback(reason);
+    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    EXPECT_NE(session->moveDragController_, nullptr);
+    session->SetSessionProperty(nullptr);
+    session->OnMoveDragCallback(reason);
+    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    session->SetSessionProperty(property);
+    property->compatibleModeInPc_ = true;
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 }
