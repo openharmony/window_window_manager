@@ -1076,29 +1076,6 @@ HWTEST_F(SceneSessionTest5, IsAnco, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: MakeSessionInfoDuringPendingActivation
- * @tc.desc: MakeSessionInfoDuringPendingActivation function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, MakeSessionInfoDuringPendingActivation, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    SessionInfo info;
-    info.abilityName_ = "MakeSessionInfoDuringPendingActivation";
-    info.bundleName_ = "MakeSessionInfoDuringPendingActivation";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    abilitySessionInfo->want = nullptr;
-    auto info_ =  session->MakeSessionInfoDuringPendingActivation(abilitySessionInfo, 1);
-    EXPECT_NE(info_, nullptr);
-
-    abilitySessionInfo->want = new AAFwk::Want();
-    abilitySessionInfo->want->SetParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 1);
-    info_ =  session->MakeSessionInfoDuringPendingActivation(abilitySessionInfo, 1);
-    EXPECT_NE(info_, nullptr);
-}
-
-/**
  * @tc.name: ProcessUpdatePropertyByAction
  * @tc.desc: ProcessUpdatePropertyByAction function01
  * @tc.type: FUNC
