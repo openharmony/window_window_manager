@@ -180,7 +180,7 @@ HWTEST_F(WindowSessionTest2, BindDialogToParentSession, Function | SmallTest | L
     session_->dialogVec_.push_back(session1);
 
     sptr<Session> session2 = new (std::nothrow) Session(info);
-    ASSERT_NE(session1, nullptr);
+    ASSERT_NE(session2, nullptr);
     session2->persistentId_ = 34;
     session2->SetParentSession(session_);
     session2->state_ = SessionState::STATE_ACTIVE;
@@ -214,7 +214,7 @@ HWTEST_F(WindowSessionTest2, RemoveDialogToParentSession, Function | SmallTest |
     session_->dialogVec_.push_back(session1);
 
     sptr<Session> session2 = new (std::nothrow) Session(info);
-    ASSERT_NE(session1, nullptr);
+    ASSERT_NE(session2, nullptr);
     session2->persistentId_ = 34;
     session2->SetParentSession(session_);
     session2->state_ = SessionState::STATE_ACTIVE;
@@ -345,6 +345,7 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Leve
     session_->sessionInfo_.isSystem_ = true;
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
 
     session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
@@ -353,7 +354,7 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Leve
     auto needNotifyClient = true;
     session_->TransferPointerEvent(pointerEvent, needNotifyClient);
 
-    auto needNotifyClient = false;
+    needNotifyClient = false;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient));
 
@@ -389,7 +390,7 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent01, Function | SmallTest | Level2)
     ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
 
-    sessioin_->windowEventChannel_ = mockEventChannel_;
+    session_->windowEventChannel_ = mockEventChannel_;
     ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEvent(keyEvent));
 }
 
