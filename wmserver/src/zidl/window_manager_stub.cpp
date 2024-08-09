@@ -326,6 +326,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         case WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT: {
             uint32_t windowId = data.ReadUint32();
             std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
+            if (event == nullptr) {
+                WLOGFE("event is null");
+                return ERR_INVALID_DATA;
+            }
             event->ReadFromParcel(data);
             DispatchKeyEvent(windowId, event);
             break;

@@ -230,6 +230,43 @@ HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
     mainSession_->RectCheck(1000000000, 1000000000);
 }
 
+/**
+ * @tc.name: SetExitSplitOnBackground
+ * @tc.desc: check func SetExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetExitSplitOnBackground, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = true;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    ASSERT_EQ(true, isExitSplitOnBackground);
+}
+
+/**
+ * @tc.name: IsExitSplitOnBackground01
+ * @tc.desc: check func IsExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground01, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = true;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    bool ret = mainSession_->IsExitSplitOnBackground();
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: IsExitSplitOnBackground02
+ * @tc.desc: check func IsExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = false;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    bool ret = mainSession_->IsExitSplitOnBackground();
+    ASSERT_EQ(false, ret);
+}
 }
 }
 }
