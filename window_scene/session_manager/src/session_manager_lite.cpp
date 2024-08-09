@@ -104,6 +104,7 @@ public:
         SessionManagerLite::GetInstance().DeleteSessionListener(listener);
         return ret;
     }
+    
 private:
     static inline BrokerDelegator<SceneSessionManagerLiteProxyMock> delegator_;
 };
