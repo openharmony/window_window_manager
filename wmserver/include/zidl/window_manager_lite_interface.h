@@ -19,6 +19,7 @@
 #include <iremote_broker.h>
 
 #include "interfaces/include/ws_common.h"
+#include "window_property.h"
 #include "window_transition_info.h"
 #include "zidl/window_manager_agent_interface.h"
 
@@ -45,6 +46,8 @@ public:
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
+    virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError TerminateSessionByPersistentId(int32_t persistentId) = 0;
 };
 }
 }

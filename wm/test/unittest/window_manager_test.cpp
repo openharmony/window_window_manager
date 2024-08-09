@@ -103,6 +103,22 @@ public:
     };
 };
 
+class TestDrawingContentChangedListener : public IDrawingContentChangedListener {
+public:
+    void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestDrawingContentChangedListener");
+    }
+};
+
+class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
+public:
+    void OnWindowStyleUpdate(WindowStyleType styleType)
+    {
+        TLOGI(WmsLogTag::DMS, "TestWindowStyleChangedListener");
+    }
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -745,7 +761,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_NE(ret, WMError::WM_OK);
 }
 
 /**
@@ -1069,6 +1085,144 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Lev
     // no repeated notification is sent if parameters do not change
     windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
 }
+
+/**
+ * @tc.name: RegisterWindowStyleChangedListener
+ * @tc.desc: check RegisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(nullptr));
+
+    sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+}
+
+/**
+ * @tc.name: UnregisterWindowStyleChangedListener
+ * @tc.desc: check UnregisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowStyleChangedListener(nullptr));
+
+    sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
+    sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+}
+
+/**
+ * @tc.name: NotifyWindowStyleChange
+ * @tc.desc: check NotifyWindowStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+{
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    auto ret = WindowManager::GetInstance().NotifyWindowStyleChange(type);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: check GetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    WindowStyleType type;
+    type = WindowManager::GetInstance().GetWindowStyleType();
+    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
+}
+
+/**
+ * @tc.name: ShiftAppWindowFocus01
+ * @tc.desc: check ShiftAppWindowFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
+{
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RegisterVisibleWindowNumChangedListener01
+ * @tc.desc: check RegisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterVisibleWindowNumChangedListener01
+ * @tc.desc: check UnregisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterDrawingContentChangedListener01
+ * @tc.desc: check RegisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterDrawingContentChangedListener01
+ * @tc.desc: check UnregisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -268,51 +268,18 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: HandleNotifyForegroundInteractiveStatus
- * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
+ * @tc.name: NotifySessionFullScreen
+ * @tc.desc: test function : NotifySessionFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
 
     data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyForegroundInteractiveStatus(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: test function : NotifySessionForeground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionForeground(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionBackground
- * @tc.desc: test function : NotifySessionBackground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
 }
 
 /**
@@ -450,6 +417,21 @@ HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, Function | SmallTest | 
     data.WriteInt32(static_cast<int32_t>(status));
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleSetPiPControlEvent(data, reply));
+}
+
+/**
+ * @tc.name: HandleSetUniqueVirtualPixelRatio
+ * @tc.desc: test function : HandleSetUniqueVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    data.WriteFloat(3.25f);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetUniqueVirtualPixelRatio(data, reply));
 }
 }
 }

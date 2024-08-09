@@ -157,6 +157,23 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest |
 }
 
 /**
+ * @tc.name: TransferAccessibilityHoverEvent
+ * @tc.desc: test function : TransferAccessibilityHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityHoverEvent, Function | SmallTest | Level1)
+{
+    float pointX = 0.0f;
+    float pointY = 0.0f;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
+        pointX, pointY, sourceType, eventType, timeMs);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC

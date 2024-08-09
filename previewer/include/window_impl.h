@@ -119,6 +119,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     // window effect
@@ -225,9 +226,10 @@ public:
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual WMError UpdateSystemBarProperty(bool status);
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
-    virtual WMError UpdateSystemBarProperty(bool status);
 
 private:
     static sptr<Window> FindWindowById(uint32_t windowId);

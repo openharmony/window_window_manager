@@ -50,10 +50,8 @@ public:
 
     sptr<ISessionManagerService> GetSessionManagerServiceProxy();
 
-#ifndef USE_ADAPTER_LITE
     void SaveSessionListener(const sptr<ISessionListener>& listener);
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
-#endif
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
     void OnWMSConnectionChanged(
@@ -87,14 +85,11 @@ private:
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
-    bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
     // above guarded by mutex_
 
     std::recursive_mutex listenerLock_;
-#ifndef USE_ADAPTER_LITE
     std::vector<sptr<ISessionListener>> sessionListeners_;
-#endif
     // above guarded by listenerLock_
 
     std::mutex wmsConnectionMutex_;

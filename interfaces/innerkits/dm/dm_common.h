@@ -82,6 +82,7 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PROXIMITY = 32,
     STATE_CHANGE_REASON_AOD_SLIDING = 40,
     STATE_CHANGE_REASON_PEN = 41,
+    STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -96,6 +97,14 @@ enum class ScreenPowerState : uint32_t {
     POWER_OFF,
     POWER_BUTT,
     INVALID_STATE,
+};
+
+enum class ScreenPropertyChangeType : uint32_t {
+    UNSPECIFIED = 0,
+    /* Screen connection. */
+    ROTATION_BEGIN,
+    /* Screen disconnection. */
+    ROTATION_END,
 };
 
 /**
@@ -312,6 +321,7 @@ enum class DisplayStateChangeType : uint32_t {
     UNFREEZE,
     VIRTUAL_PIXEL_RATIO_CHANGE,
     DISPLAY_COMPRESS,
+    UPDATE_SCALE,
     UNKNOWN,
 };
 

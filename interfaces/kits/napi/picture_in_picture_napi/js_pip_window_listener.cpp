@@ -42,6 +42,11 @@ JsPiPWindowListener::~JsPiPWindowListener()
     TLOGI(WmsLogTag::WMS_PIP, "~JsWindowListener");
 }
 
+std::shared_ptr<NativeReference> JsPiPWindowListener::GetCallbackRef() const
+{
+    return jsCallBack_;
+}
+
 void JsPiPWindowListener::OnPreparePictureInPictureStart()
 {
     OnPipListenerCallback(PiPState::ABOUT_TO_START, 0);
@@ -110,7 +115,15 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, statusCode:%{public}d", controlType, statusCode);
     auto napiTask = [jsCallback = jsCallBack_, controlType, statusCode, env = env_]() {
-        napi_value argv[] = {CreateJsValue(env, controlType), CreateJsValue(env, statusCode)};
+        napi_value propertyValue = nullptr;
+        napi_create_object(env, &propertyValue);
+        if (propertyValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "propertyValue is nullptr");
+            return;
+        }
+        napi_set_named_property(env, propertyValue, "controlType", CreateJsValue(env, controlType));
+        napi_set_named_property(env, propertyValue, "status", CreateJsValue(env, statusCode));
+        napi_value argv[] = {propertyValue};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {

@@ -115,6 +115,23 @@ HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo02, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: TransformWindowRects
+ * @tc.desc: TransformWindowRects
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, TransformWindowRects, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    Rect areaRect;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
+    input_monitor_->TransformWindowRects(windowNode, areaRect, touchHotAreas, pointerHotAreas);
+    WindowProperty windowProperty;
+    auto result = windowProperty.isNeedComputerTransform();
+    ASSERT_EQ(result, false);
+}
+
+/**
  * @tc.name: GetDisplayDirectionForMmi02
  * @tc.desc: get display direction
  * @tc.type: FUNC

@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <hitrace_meter.h>
+
 #include "js_screen_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
@@ -20,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_RUNTIME, "JsScreenListener"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenListener"};
 }
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
@@ -100,17 +103,20 @@ void JsScreenListener::OnConnect(ScreenId id)
         return;
     }
     sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-            CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
-        }
-    );
+    auto napiTask = [this, id] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnConnect");
+        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
+        CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenListener::OnConnect", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnConnect: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnConnect: env is nullptr");
+    }
 }
 
 void JsScreenListener::OnDisconnect(ScreenId id)
@@ -126,17 +132,20 @@ void JsScreenListener::OnDisconnect(ScreenId id)
         return;
     }
     sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-            CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
-        }
-    );
+    auto napiTask = [this, id] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnDisconnect");
+        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
+        CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenListener::OnDisconnect", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnDisconnect: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnDisconnect: env is nullptr");
+    }
 }
 
 void JsScreenListener::OnChange(ScreenId id)
@@ -152,17 +161,20 @@ void JsScreenListener::OnChange(ScreenId id)
         return;
     }
     sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [this, listener, id] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-            CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
-        }
-    );
+    auto napiTask = [this, id] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnChange");
+        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
+        CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenListener::OnChange", env_, std::make_unique<NapiAsyncTask>(
-            callback, std::move(execute), std::move(complete)));
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnChange: env is nullptr");
+    }
 }
 
 napi_value JsScreenListener::CreateScreenIdArray(napi_env env, const std::vector<ScreenId>& data)

@@ -59,10 +59,10 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
-    void CalNotRotateTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform,
+    void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
-    void CalTramform(const sptr<SceneSession> sceneSession, Matrix3f& tranform, bool useUIExtension = false) const;
-    void UpdatePrivacyMode(const sptr<SceneSession> sceneSession,
+    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;
+    void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
@@ -71,21 +71,20 @@ private:
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
-    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession> sceneSession,
+    void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
-    void UpdateModalExtensionWindowInfo(const sptr<SceneSession> sceneSession, MMI::WindowInfo& windowInfo);
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
-        const sptr<SceneSession> sceneSession);
+        const sptr<SceneSession>& sceneSession);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
-        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTranform) const;
+        const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
         const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession,
-        const Matrix3f hostTranform) const;
+        const Matrix3f hostTransform) const;
     MMI::WindowInfo GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
-        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTranform) const;
+        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
     MMI::WindowInfo MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
         const MMI::WindowInfo& hostWindowinfo) const;
-
+    void ResetFlushWindowInfoTask();
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;

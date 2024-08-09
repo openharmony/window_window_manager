@@ -331,6 +331,14 @@ public:
      * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
+
+    /**
+     * @brief when casting the screen, Virtual screen playback and pause function.
+     *
+     * @param screenId screenId used in virtual screen.
+     * @return screenStatus VIRTUAL_SCREEN_PLAY or VIRTUAL_SCREEN_PAUSE.
+     */
+    bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
 private:
     ScreenManager();
     ~ScreenManager();

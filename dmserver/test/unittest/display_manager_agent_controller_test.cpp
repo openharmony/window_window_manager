@@ -151,7 +151,6 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 1);
-    delete screenInfo;
 }
 /**
  * @tc.name: OnDisplayCreate
@@ -176,7 +175,6 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
     int result = displayManagerAgentController.dmAgentContainer_.
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 0);
-    delete displayInfo;
 }
 /**
  * @tc.name: OnDisplayDestroy

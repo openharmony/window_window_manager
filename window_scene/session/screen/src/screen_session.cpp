@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DMS_SCREEN_SESSION, "ScreenSession" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSession" };
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
@@ -224,6 +224,10 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
     displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
+    displayInfo->SetScaleX(property_.GetScaleX());
+    displayInfo->SetScaleY(property_.GetScaleY());
+    displayInfo->SetPivotX(property_.GetPivotX());
+    displayInfo->SetPivotY(property_.GetPivotY());
     return displayInfo;
 }
 
@@ -274,6 +278,17 @@ ScreenId ScreenSession::GetRSScreenId()
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;
+}
+
+void ScreenSession::SetScreenScale(const float scaleX, const float scaleY, const float pivotX, const float pivotY)
+{
+    property_.SetScaleX(scaleX);
+    property_.SetScaleY(scaleY);
+    property_.SetPivotX(pivotX);
+    property_.SetPivotY(pivotY);
+    if (updateScreenPivotCallback_ != nullptr) {
+        updateScreenPivotCallback_(pivotX, pivotY);
+    }
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
@@ -453,6 +468,11 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
 void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
 {
     updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
+void ScreenSession::SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback)
+{
+    updateScreenPivotCallback_ = updateScreenPivotCallback;
 }
 
 VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()

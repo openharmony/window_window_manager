@@ -37,6 +37,7 @@ public:
     static napi_value CreateJsScreenConnectChangeType(napi_env env);
     static napi_value CreateJsScreenPropertyChangeReason(napi_env env);
     static napi_value CreateJsFoldStatus(napi_env env);
+    static napi_value CreateJsScreenPropertyChangeType(napi_env env);
 };
 
 

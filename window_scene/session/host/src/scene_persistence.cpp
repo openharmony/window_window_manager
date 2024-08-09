@@ -36,12 +36,11 @@ constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
 
 constexpr uint8_t SUCCESS = 0;
-const std::string SNAPSHOT_THREAD = "OS_SnapshotThread";
 } // namespace
 
 std::string ScenePersistence::snapshotDirectory_;
 std::string ScenePersistence::updatedIconDirectory_;
-std::shared_ptr<TaskScheduler> ScenePersistence::snapshotScheduler_;
+std::shared_ptr<WSFFRTHelper> ScenePersistence::snapshotFfrtHelper_;
 
 bool ScenePersistence::CreateSnapshotDir(const std::string& directory)
 {
@@ -74,8 +73,8 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
             std::to_string(persistentId) + IMAGE_SUFFIX;
     }
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    if (snapshotScheduler_ == nullptr) {
-        snapshotScheduler_ = std::make_shared<TaskScheduler>(SNAPSHOT_THREAD);
+    if (snapshotFfrtHelper_ == nullptr) {
+        snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
 }
 
@@ -84,9 +83,9 @@ ScenePersistence::~ScenePersistence()
     remove(snapshotPath_.c_str());
 }
 
-std::shared_ptr<TaskScheduler> ScenePersistence::GetSnapshotScheduler() const
+std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
 {
-    return snapshotScheduler_;
+    return snapshotFfrtHelper_;
 }
 
 bool ScenePersistence::IsAstcEnabled()
@@ -111,35 +110,40 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             return;
         }
 
-        WLOGFD("Save snapshot begin");
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ScenePersistence:SaveSnapshot %s",
-            scenePersistence->snapshotPath_.c_str());
+        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot begin");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
-        if (IsAstcEnabled()) {
-            option.format = ASTC_IMAGE_FORMAT;
-            option.quality = ASTC_IMAGE_QUALITY;
-        } else {
-            option.format = IMAGE_FORMAT;
-            option.quality = IMAGE_QUALITY;
-        }
+        option.format = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
+        option.quality = IsAstcEnabled() ? ASTC_IMAGE_QUALITY : IMAGE_QUALITY;
         option.numberHint = 1;
 
         remove(scenePersistence->snapshotPath_.c_str());
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
-        imagePacker.StartPacking(scenePersistence->snapshotPath_, option);
-        imagePacker.AddImage(*pixelMap);
+        if (imagePacker.StartPacking(scenePersistence->snapshotPath_, option)) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, starting packing error");
+            resetSnapshotCallback();
+            return;
+        }
+        if (imagePacker.AddImage(*pixelMap)) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, adding image error");
+            resetSnapshotCallback();
+            return;
+        }
         int64_t packedSize = 0;
-        imagePacker.FinalizePacking(packedSize);
+        if (imagePacker.FinalizePacking(packedSize)) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, finalizing packing error");
+            resetSnapshotCallback();
+            return;
+        }
         // If the current num is equals to the latest num, it is the last saveSnapshot task
         if (savingSnapshotSum == scenePersistence->savingSnapshotSum_.load()) {
             resetSnapshotCallback();
             scenePersistence->isSavingSnapshot_.store(false);
         }
-        WLOGFD("Save snapshot end, packed size %{public}" PRIu64, packedSize);
+        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotScheduler_->RemoveTask("SaveSnapshot" + snapshotPath_);
-    snapshotScheduler_->PostAsyncTask(task, "SaveSnapshot" + snapshotPath_);
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
 
 bool ScenePersistence::IsSavingSnapshot()
@@ -172,7 +176,8 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersi
                 oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         }
     };
-    snapshotScheduler_->PostAsyncTask(task, "RenameSnapshotFromOldPersistentId");
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "RenameSnapshotFromOldPersistentId"
+        + std::to_string(oldPersistentId));
 }
 
 std::string ScenePersistence::GetSnapshotFilePath()
@@ -195,10 +200,19 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     if (remove(updatedIconPath_.c_str())) {
         WLOGFD("Failed to delete old file");
     }
-    imagePacker.StartPacking(GetUpdatedIconPath(), option);
-    imagePacker.AddImage(*pixelMap);
+    if (imagePacker.StartPacking(GetUpdatedIconPath(), option)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, starting packing error");
+        return;
+    }
+    if (imagePacker.AddImage(*pixelMap)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, adding image error");
+        return;
+    }
     int64_t packedSize = 0;
-    imagePacker.FinalizePacking(packedSize);
+    if (imagePacker.FinalizePacking(packedSize)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, finalizing packing error");
+        return;
+    }
     WLOGFD("SaveUpdatedIcon finished");
 }
 

@@ -29,12 +29,13 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DMS_DM, "DisplayManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
     const static uint32_t MAX_RETRY_NUM = 6;
     const static uint32_t RETRY_WAIT_MS = 500;
     const static uint32_t MAX_DISPLAY_SIZE = 32;
     const static uint32_t MAX_INTERVAL_US = 25000;
     std::atomic<bool> g_dmIsDestroyed = false;
+    std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -57,6 +58,7 @@ public:
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -497,6 +499,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
+    WLOGFI("Clear displaymanager listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -536,7 +539,7 @@ DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFD("Destroy displaymanager instance");
+    WLOGFI("Destroy displaymanager instance");
     g_dmIsDestroyed = true;
 }
 
@@ -678,8 +681,14 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
+    std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
+    if (!lock.try_lock()) {
+        WLOGFE("DisplayManager::GetSnapshotByPicker try_lock failed!");
+        return nullptr;
+    }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetSnapshotByPicker(rect, errorCode);
+    lock.unlock();
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetSnapshotByPicker failed!");
         return nullptr;
@@ -687,6 +696,10 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
     WLOGFI("snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         rect.left, rect.top, rect.width, rect.height);
     // create crop pixel map
+    if (rect.width == 0 || rect.height == 0) {
+        WLOGFE("width or height is invalid!");
+        return nullptr;
+    }
     Media::InitializationOptions opt;
     opt.size.width = rect.width;
     opt.size.height = rect.height;
@@ -832,6 +845,17 @@ FoldDisplayMode DisplayManager::Impl::GetFoldDisplayMode()
 void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     pImpl_->SetFoldDisplayMode(mode);
+}
+
+void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+}
+
+void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
+    float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
@@ -1758,7 +1782,7 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFI("[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -1887,3 +1911,4 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
 }
 } // namespace OHOS::Rosen
+

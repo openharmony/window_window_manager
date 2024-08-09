@@ -839,6 +839,41 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetDialogBackGestureEnabled01
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetDialogBackGestureEnabled01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetDialogBackGestureEnabled02
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetDialogBackGestureEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: NotifySessionForeground
  * @tc.type: FUNC
@@ -873,6 +908,24 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
     bool withAnimation = true;
     bool isFromInnerkits = true;
     windowSceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
+
+/**
+ * @tc.name: NotifySessionFullScreen
+ * @tc.desc: NotifySessionFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifySessionFullScreen");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    bool fullScreen = true;
+    windowSceneSession->NotifySessionFullScreen(fullScreen);
 }
 
 /**
@@ -1368,7 +1421,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    std::optional<MaximizePresentation> presentation ;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     // not support subWinodw call
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
  
@@ -1403,25 +1456,25 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
 
     ASSERT_NE(nullptr, window);
     // case1: only set maximize()
-    std::optional<MaximizePresentation> presentation;
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
     // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
-    presentation.emplace(MaximizePresentation::EXIT_IMMERSIVE);
+    presentation = MaximizePresentation::EXIT_IMMERSIVE;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
     
     // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
-    presentation.emplace(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING);
+    presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
     // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
-    presentation.emplace(MaximizePresentation::ENTER_IMMERSIVE);
+    presentation = MaximizePresentation::ENTER_IMMERSIVE;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);

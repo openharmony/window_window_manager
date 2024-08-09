@@ -62,7 +62,7 @@ namespace {
  */
 HWTEST_F(ScreenSceneTest, LoadContent01, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     screenScene.LoadContent("a", nullptr, nullptr, nullptr);
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
@@ -74,7 +74,7 @@ HWTEST_F(ScreenSceneTest, LoadContent01, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     screenScene.LoadContent("a", nullptr, nullptr, nullptr);
     screenScene.Destroy();
     ASSERT_EQ(1, screenScene.GetWindowId());
@@ -88,7 +88,7 @@ HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     Rect rect;
     screenScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
     ASSERT_EQ(1, screenScene.GetWindowId());
@@ -101,7 +101,7 @@ HWTEST_F(ScreenSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     screenScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, screenScene.GetWindowId());
@@ -114,7 +114,7 @@ HWTEST_F(ScreenSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, RequestVsync, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
     screenScene.RequestVsync(vsyncCallback);
     ASSERT_EQ(1, screenScene.GetWindowId());
@@ -127,7 +127,7 @@ HWTEST_F(ScreenSceneTest, RequestVsync, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
     screenScene.vsyncStation_ = nullptr;
     screenScene.RequestVsync(vsyncCallback);
@@ -141,7 +141,7 @@ HWTEST_F(ScreenSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     screenScene.GetVSyncPeriod();
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
@@ -153,7 +153,7 @@ HWTEST_F(ScreenSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     uint32_t rate = 120;
     int32_t animatorExpectedFrameRate = -1;
     screenScene.FlushFrameRate(rate, animatorExpectedFrameRate);
@@ -167,7 +167,7 @@ HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");;
+    ScreenScene screenScene("UNKNOWN");;
     screenScene.SetFrameLayoutFinishCallback([](){});
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
@@ -179,7 +179,7 @@ HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | L
  */
 HWTEST_F(ScreenSceneTest, SetDisplayDensity, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOW");
+    ScreenScene screenScene("UNKNOWN");
     float density = 2.0f;
     screenScene.SetDisplayDensity(density);
     ASSERT_EQ(1, screenScene.GetWindowId());

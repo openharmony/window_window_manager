@@ -78,100 +78,6 @@ void SceneSessionTest5::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: Foreground01
- * @tc.desc: Foreground01 function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, Foreground01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Foreground01";
-    info.bundleName_ = "Foreground01";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-
-    info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
-    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_EQ(WSError::WS_OK, session1->Foreground(property, true));
-}
-
-/**
- * @tc.name: Foreground02
- * @tc.desc: Foreground02 function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, Foreground02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Foreground02";
-    info.bundleName_ = "Foreground02";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    session->Session::SetSessionState(SessionState::STATE_CONNECT);
-    session->Session::isActive_ = true;
-    session->SetLeashWinSurfaceNode(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    session->specificCallback_ = specificCallback;
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->SetLeashWinSurfaceNode(surfaceNode);
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-
-    session->SetSessionProperty(property);
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-}
-
-/**
- * @tc.name: BackgroundTask
- * @tc.desc: BackgroundTask function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, BackgroundTask, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Foreground02";
-    info.bundleName_ = "Foreground02";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    session->SetSessionState(SessionState::STATE_BACKGROUND);
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
-
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    session->Session::SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
-
-    session->Session::SetSessionState(SessionState::STATE_INACTIVE);
-    info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
-
-    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    session->specificCallback_ = specificCallback;
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
-
-    session->scenePersistence_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
-
-    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("Foreground02", 1);
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
-    EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
-}
 
 /**
  * @tc.name: FixKeyboardPositionByKeyboardPanel
@@ -603,6 +509,45 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSessionRectChangeCallback02
+ * @tc.desc: SetSessionRectChangeCallback02 function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionRectChangeCallback02";
+    info.bundleName_ = "SetSessionRectChangeCallback02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rec = { 1, 1, 1, 1 };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+        return;
+    };
+    session->SetSessionRectChangeCallback(nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->SetSessionProperty(property);
+    session->SetSessionRectChangeCallback(func);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session->SetSessionProperty(property);
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.width_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.height_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -677,6 +622,17 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.maxHeight_ = 10000;
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
+
+    session->SetSessionProperty(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
+    property->SetWindowLimits(limits);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(10.0f));
 }
 
 /**
@@ -1118,6 +1074,32 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateMaximizeState, Function | SmallTes
     EXPECT_EQ(WMError::WM_OK, res);
 }
 
+/**
+ * @tc.name: SetUniqueDensityDpi
+ * @tc.desc: SetUniqueDensityDpi function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetUniqueDensityDpi";
+    info.bundleName_ = "SetUniqueDensityDpi";
+    info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->sessionStage_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->SetUniqueDensityDpi(true, 520));
+    session->sessionInfo_.isSystem_ = false;
+    session->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->SetUniqueDensityDpi(true, 520));
+    session->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(true, 520));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 79));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 641));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
+}
 }
 }
 }

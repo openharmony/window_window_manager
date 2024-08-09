@@ -105,8 +105,8 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             WLOGI("VsyncStation::FlushFrameRateImme %{public}d, linkerID = %{public}" PRIu64,
                 range.preferred_, frameRateLinker_->GetId());
-            frameRateLinker_->UpdateFrameRateRange(range, true);
-            frameRateLinker_->UpdateFrameRateRangeImme(range, true);
+            frameRateLinker_->UpdateFrameRateRange(range);
+            frameRateLinker_->UpdateFrameRateRangeImme(range);
         }
         frameRateLinker_->SetEnable(enabled);
     }
@@ -118,9 +118,16 @@ void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
     soloistManager.SetMainFrameRateLinkerEnable(enabled);
 }
 
+bool VsyncStation::IsResourceEnough()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    Init();
+    return (receiver_ != nullptr);
+}
+
 void VsyncStation::Init()
 {
-    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
+    if (!vsyncHandler_) {
         auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
             WLOGI("MainEventRunner is available");
@@ -132,12 +139,17 @@ void VsyncStation::Init()
                     AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
             }
         }
+    }
+    if (!hasInitVsyncReceiver_  && (vsyncHandler_ != nullptr)) {
         auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-        frameRateLinker_ = OHOS::Rosen::RSFrameRateLinker::Create();
-        while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
-                vsyncHandler_, nodeId_);
-            TLOGI(WmsLogTag::WMS_MAIN, "Create vsync receiver for nodeId:%{public}" PRIu64"", nodeId_);
+        if (frameRateLinker_ == nullptr) {
+            frameRateLinker_ = OHOS::Rosen::RSFrameRateLinker::Create();
+        }
+        receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
+            vsyncHandler_, nodeId_);
+        if (receiver_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Fail to create vsync receiver for nodeId:%{public}" PRIu64"", nodeId_);
+            return;
         }
         receiver_->Init();
         hasInitVsyncReceiver_ = true;

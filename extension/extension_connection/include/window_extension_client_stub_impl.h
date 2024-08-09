@@ -23,8 +23,8 @@ namespace OHOS {
 namespace Rosen {
 class WindowExtensionClientStubImpl : public WindowExtensionClientStub {
 public:
-    explicit WindowExtensionClientStubImpl(sptr<IWindowExtensionCallback>& componentCallback)
-        : componentCallback_(componentCallback) {};
+    explicit WindowExtensionClientStubImpl(const sptr<IWindowExtensionCallback>& componentCallback)
+        : componentCallback_(componentCallback) {}
     ~WindowExtensionClientStubImpl() = default;
 
     void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
