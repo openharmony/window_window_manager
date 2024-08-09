@@ -239,7 +239,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             return err;
         }
         // otherwise, stop the previous one
-        PictureInPictureManager::DoClose(true, false);
+        PictureInPictureManager::DoClose(true, true);
     }
     return StartPictureInPictureInner(startType);
 }
