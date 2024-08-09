@@ -474,6 +474,45 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSessionRectChangeCallback02
+ * @tc.desc: SetSessionRectChangeCallback02 function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionRectChangeCallback02";
+    info.bundleName_ = "SetSessionRectChangeCallback02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rec = { 1, 1, 1, 1 };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+        return;
+    };
+    session->SetSessionRectChangeCallback(nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->SetSessionProperty(property);
+    session->SetSessionRectChangeCallback(func);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session->SetSessionProperty(property);
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.width_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.height_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -654,6 +693,10 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio01, Function | SmallTest | Level
 
     systemConfig.isSystemDecorEnable_ = false;
     EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+
+    systemConfig.isSystemDecorEnable_ = true;
+    session->SetSessionProperty(nullptr);
+    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
 }
 
 /**
@@ -682,6 +725,19 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_START;
+    session->OnMoveDragCallback(reason);
+    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    EXPECT_NE(session->moveDragController_, nullptr);
+    session->SetSessionProperty(nullptr);
+    session->OnMoveDragCallback(reason);
+    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    session->SetSessionProperty(property);
+    property->compatibleModeInPc_ = true;
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 }
