@@ -30,6 +30,7 @@
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
+#include "accessibility_event_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,6 +55,22 @@ private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+
+    class TLifecycleListener : public ILifecycleListener {
+    public:
+        virtual ~TLifecycleListener() {}
+        void OnActivation() override {}
+        void OnConnect() override {}
+        void OnForeground() override {}
+        void OnBackground() override {}
+        void OnDisconnect() override {}
+        void OnExtensionDied() override {}
+        void OnExtensionTimeout(int32_t errorCode) override {}
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+            int64_t uiExtensionIdLevel) override {}
+        void OnDrawingCompleted() override {}
+    };
+    std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
 
 void WindowSessionTest2::SetUpTestCase()
@@ -939,8 +956,32 @@ HWTEST_F(WindowSessionTest2, NotifyExtensionDied027, Function | SmallTest | Leve
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyExtensionDied();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyExtensionDied();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
+}
+
+/**
+ * @tc.name: NotifyTransferAccessibilityEvent
+ * @tc.desc: NotifyTransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, NotifyTransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    OHOS::Accessibility::AccessibilityEventInfo info1;
+    int64_t uiExtensionIdLevel = 6;
+    session_->NotifyTransferAccessibilityEvent(info1, uiExtensionIdLevel);
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyTransferAccessibilityEvent(info1, uiExtensionIdLevel);
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -1341,6 +1382,26 @@ HWTEST_F(WindowSessionTest2, SetShowRecent003, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetShowRecent004
+ * @tc.desc: SetShowRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
+{
+    session_->systemConfig_.uiType_ = "phone";
+    ssm_->SetScreenLocked(false);
+
+    session_->property_ = new WindowSessionProperty();
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    bool showRecent = false;
+    session_->showRecent_ = true;
+    session_->SetAttachState(true);
+    session_->SetShowRecent(showRecent);
+    ASSERT_EQ(session_->GetShowRecent(), showRecent);
+}
+
+/**
  * @tc.name: GetAttachState001
  * @tc.desc: GetAttachState001
  * @tc.type: FUNC
@@ -1533,6 +1594,13 @@ HWTEST_F(WindowSessionTest2, PostExportTask02, Function | SmallTest | Level2)
     session_->PostExportTask(task, name, delayTime);
     auto result = session_->GetBufferAvailable();
     ASSERT_EQ(result, false);
+
+    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
+        sceneSessionManager->eventHandler_);
+    session_->PostExportTask(task, name, delayTime);
+    auto result2 = session_->GetBufferAvailable();
+    ASSERT_EQ(result2, false);
 }
 
 /**
@@ -1679,6 +1747,69 @@ HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest
     auto keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
+}
+
+/**
+ * @tc.name: IsSupportDetectWindow
+ * @tc.desc: IsSupportDetectWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level2)
+{
+    session_->systemConfig_.uiType_ = "phone";
+    ssm_->SetScreenLocked(true);
+    bool ret = session_->IsSupportDetectWindow(true);
+    ASSERT_EQ(ret, false);
+
+    ssm_->SetScreenLocked(false);
+    session_->property_ = new WindowSessionProperty();
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = session_->IsSupportDetectWindow(true);
+    ASSERT_EQ(ret, false);
+
+    ssm_->SetScreenLocked(false);
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session_->systemConfig_.uiType_ = "pc";
+    ret = session_->IsSupportDetectWindow(false);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ShouldCreateDetectTask
+ * @tc.desc: ShouldCreateDetectTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ShouldCreateDetectTask, Function | SmallTest | Level2)
+{
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::ATTACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    bool ret = session_->ShouldCreateDetectTask(true, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, true);
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    ret = session_->ShouldCreateDetectTask(false, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, true);
+    ret = session_->ShouldCreateDetectTask(true, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ShouldCreateDetectTaskInRecent
+ * @tc.desc: ShouldCreateDetectTaskInRecent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ShouldCreateDetectTaskInRecent, Function | SmallTest | Level2)
+{
+    bool ret = session_->ShouldCreateDetectTaskInRecent(true, true, true);
+    ASSERT_EQ(ret, false);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, true, true);
+    ASSERT_EQ(ret, true);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, true, false);
+    ASSERT_EQ(ret, false);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, false, false);
+    ASSERT_EQ(ret, false);
 }
 }
 } // namespace Rosen

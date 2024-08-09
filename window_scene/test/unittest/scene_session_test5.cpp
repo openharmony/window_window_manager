@@ -509,6 +509,45 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSessionRectChangeCallback02
+ * @tc.desc: SetSessionRectChangeCallback02 function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionRectChangeCallback02";
+    info.bundleName_ = "SetSessionRectChangeCallback02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rec = { 1, 1, 1, 1 };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+        return;
+    };
+    session->SetSessionRectChangeCallback(nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->SetSessionProperty(property);
+    session->SetSessionRectChangeCallback(func);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session->SetSessionProperty(property);
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.width_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+
+    rec.height_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(func);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -583,6 +622,17 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.maxHeight_ = 10000;
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
+
+    session->SetSessionProperty(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
+    property->SetWindowLimits(limits);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(10.0f));
 }
 
 /**
@@ -1125,7 +1175,6 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
     session->ProcessUpdatePropertyByAction(property, session_, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     session->ProcessUpdatePropertyByAction(property, session_, 0);
 }
-
 }
 }
 }

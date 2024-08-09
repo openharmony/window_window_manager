@@ -122,7 +122,6 @@ public:
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
-        NotifyKeyboardLayoutAdjustFunc onAdjustKeyboardLayout_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
 
@@ -161,6 +160,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
@@ -225,6 +225,7 @@ public:
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
@@ -360,6 +361,7 @@ public:
     {
         return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
     }
+    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty);
 
     // WMSPipeline-related: only accessed on SSM thread
     uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
@@ -374,6 +376,7 @@ public:
     bool IsPcOrPadEnableActivation() const;
 
 protected:
+    void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -403,6 +406,7 @@ protected:
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
+    NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -422,7 +426,6 @@ private:
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnMoveDragCallback(const SizeChangeReason& reason);
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
         bool isSupportDragInPcCompatibleMode);

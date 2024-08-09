@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "interfaces/include/ws_common.h"
+#include "screen_scene_config.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -77,14 +78,29 @@ namespace {
     }
 
     /**
-     * @tc.name: GetScreenCutoutInfo
+     * @tc.name: GetScreenCutoutInfo01
      * @tc.desc: GetScreenCutoutInfo func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo01, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DisplayId displayId = 0;
+        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo(displayId));
+    }
+
+    /**
+     * @tc.name: GetScreenCutoutInfo02
+     * @tc.desc: GetScreenCutoutInfo func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo02, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DisplayId displayId = 1;
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
         ASSERT_NE(nullptr, controller->GetScreenCutoutInfo(displayId));
     }
 
@@ -104,12 +120,88 @@ namespace {
         controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
     }
 
+      /**
+     * @tc.name: CurrentRotation90
+     * @tc.desc: CurrentRotation90 func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation90, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        std::vector<DMRect> displayBoundaryRects;
+        DMRect emptyRect = {10, 10, 20, 20};
+        DMRect emptyRect_ = {30, 30, 40, 40};
+        displayBoundaryRects.push_back(emptyRect);
+        displayBoundaryRects.push_back(emptyRect_);
+
+        std::vector<DMRect> finalVector;
+        uint32_t displayWidth = 100;
+        controller->CurrentRotation90(displayBoundaryRects, finalVector, displayWidth);
+
+        ASSERT_EQ(finalVector.size(), 2);
+        ASSERT_EQ(finalVector[0].posX_, 70);
+        ASSERT_EQ(finalVector[0].posY_, 10);
+        ASSERT_EQ(finalVector[0].width_, 20);
+        ASSERT_EQ(finalVector[0].height_, 20);
+    }
+
+     /**
+     * @tc.name: CurrentRotation180
+     * @tc.desc: CurrentRotation180 func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation180, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        std::vector<DMRect> displayBoundaryRects;
+        DMRect emptyRect = {10, 10, 20, 20};
+        DMRect emptyRect_ = {30, 30, 40, 40};
+        displayBoundaryRects.push_back(emptyRect);
+        displayBoundaryRects.push_back(emptyRect_);
+
+        std::vector<DMRect> finalVector;
+        uint32_t displayWidth = 100;
+        uint32_t displayHeight = 200;
+        controller->CurrentRotation180(displayBoundaryRects, finalVector, displayWidth, displayHeight);
+
+        ASSERT_EQ(finalVector.size(), 2);
+        ASSERT_EQ(finalVector[0].posX_, 70);
+        ASSERT_EQ(finalVector[0].posY_, 170);
+        ASSERT_EQ(finalVector[0].width_, 20);
+        ASSERT_EQ(finalVector[0].height_, 20);
+    }
+
     /**
-     * @tc.name: CheckBoundaryRects
+     * @tc.name: CurrentRotation270
+     * @tc.desc: CurrentRotation270 func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation270, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        std::vector<DMRect> displayBoundaryRects;
+        DMRect emptyRect = {10, 10, 20, 20};
+        DMRect emptyRect_ = {30, 30, 40, 40};
+        displayBoundaryRects.push_back(emptyRect);
+        displayBoundaryRects.push_back(emptyRect_);
+
+        std::vector<DMRect> finalVector;
+        uint32_t displayHeight = 200;
+        controller->CurrentRotation270(displayBoundaryRects, finalVector, displayHeight);
+
+        ASSERT_EQ(finalVector.size(), 2);
+        ASSERT_EQ(finalVector[0].posX_, 10);
+        ASSERT_EQ(finalVector[0].posY_, 170);
+        ASSERT_EQ(finalVector[0].width_, 20);
+        ASSERT_EQ(finalVector[0].height_, 20);
+    }
+
+    /**
+     * @tc.name: CheckBoundaryRects01
      * @tc.desc: ScreenCutoutController check boundary rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects01, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {-15, -15, 8, 8};
@@ -123,13 +215,70 @@ namespace {
     }
 
     /**
-     * @tc.name: CalcWaterfallRects
+     * @tc.name: CheckBoundaryRects02
+     * @tc.desc: ScreenCutoutController check boundary rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects02, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {-15, -15, 8, 8};
+        DMRect emptyRect_ = {21, 21, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
+        sptr<DisplayInfo> displayInfo = nullptr;
+        ASSERT_TRUE(controller != nullptr);
+        controller->CheckBoundaryRects(boundaryRects, displayInfo);
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRects01
      * @tc.desc: ScreenCutoutController calc waterfall rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects01, Function | SmallTest | Level3)
     {
         DisplayId displayId = 0;
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_TRUE(controller != nullptr);
+        controller->CalcWaterfallRects(displayId);
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRects02
+     * @tc.desc: ScreenCutoutController calc waterfall rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects02, Function | SmallTest | Level3)
+    {
+        DisplayId displayId = 1;
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_TRUE(controller != nullptr);
+        controller->CalcWaterfallRects(displayId);
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRects03
+     * @tc.desc: ScreenCutoutController calc waterfall rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects03, Function | SmallTest | Level3)
+    {
+        DisplayId displayId = 1;
+        ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {0, 0, 0, 0};
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_TRUE(controller != nullptr);
+        controller->CalcWaterfallRects(displayId);
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRects04
+     * @tc.desc: ScreenCutoutController calc waterfall rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects04, Function | SmallTest | Level3)
+    {
+        DisplayId displayId = 1;
+        ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {};
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_TRUE(controller != nullptr);
         controller->CalcWaterfallRects(displayId);

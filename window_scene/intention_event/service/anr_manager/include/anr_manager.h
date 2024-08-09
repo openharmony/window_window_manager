@@ -48,7 +48,7 @@ public:
 private:
     struct AppInfo {
         int32_t pid { -1 };
-        std::string bundleName { "unknow" };
+        std::string bundleName { "unknown" };
     };
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
