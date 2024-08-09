@@ -375,6 +375,12 @@ public:
     bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
 
+    /*
+     * User Switch
+     */
+    void SetMinimizedFlagByUserSwitch(bool isMinimized);
+    bool IsMinimizedByUserSwitch() const;
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -551,6 +557,9 @@ private:
 
     // Session recover
     bool isRecovered_ = false;
+
+    // User switch
+    bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

@@ -36,6 +36,7 @@ enum class WindowStateChangeReason : uint32_t {
     NORMAL,
     KEYGUARD,
     TOGGLING,
+    USER_SWITCH,
 };
 
 enum class WindowUpdateReason : uint32_t {
