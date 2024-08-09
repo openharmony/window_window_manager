@@ -122,6 +122,10 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+
+    /*
+     * Fold Screen Status Change Report
+     */
     virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
@@ -376,7 +380,12 @@ public:
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
+
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
@@ -766,9 +775,13 @@ private:
      */
     bool NotifyVisibleChange(int32_t persistentId);
 
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
-    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+
     void ResetWant(sptr<SceneSession>& sceneSession);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
