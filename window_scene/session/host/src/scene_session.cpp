@@ -4255,4 +4255,15 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         "isLandscape: %{public}d", GetPersistentId(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
         isLandscape);
 }
+
+void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
+    isMinimizedByUserSwitch_ = isMinimized;
+}
+
+bool SceneSession::IsMinimizedByUserSwitch() const
+{
+    return isMinimizedByUserSwitch_;
+}
 } // namespace OHOS::Rosen
