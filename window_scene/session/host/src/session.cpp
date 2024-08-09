@@ -2917,6 +2917,10 @@ WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
         TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
 }
 
