@@ -22,8 +22,8 @@
 namespace OHOS::Rosen {
 const std::string CAST_PLUG_IN_FLAG_DATA = "1";
 const std::string CAST_PLUG_OUT_FLAG_DATA = "0";
-const std::string COMMON_EVENT_DISPLAY_ROTATION_CHANGED = "custom.event.display_rotation_changed";
-const std::string COMMON_EVENT_CAST_PLUGGED_CHANGED = "custom.event.cast_plugged_changed";
+const std::string COMMON_EVENT_DISPLAY_ROTATION_CHANGED = "usual.event.dms.rotation_changed";
+const std::string COMMON_EVENT_CAST_PLUGGED_CHANGED = "usual.event.dms.cast_plugged_changed";
 constexpr int32_t PUBLISH_SUCCESS = 0;
 constexpr int32_t PUBLISH_FAILURE = -1;
 constexpr int32_t TRANS_CODE_CAST_PLUGGED_CHANGED = 0;

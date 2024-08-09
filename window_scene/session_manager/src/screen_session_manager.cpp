@@ -552,6 +552,25 @@ void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
     ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
+void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
+{
+    if (isConnected) {
+        auto task = [this]() {
+            SendCastEvent(true);
+            ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+        };
+        taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
+        TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventTrue");
+    } else {
+        auto task = [this]() {
+            SendCastEvent(false);
+            ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
+        };
+        taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
+        TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
+    }
+}
+
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
@@ -571,21 +590,14 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            auto task = [this]() { SendCastEvent(true); };
-            taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
-            TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventTrue");
+            NotifyCastWhenScreenConnectChange(true);
             isPhyScreenConnected_ = true;
         }
         return;
-    }
-    if (screenEvent == ScreenEvent::DISCONNECTED) {
+    } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            auto task = [this]() { SendCastEvent(false); };
-            taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
-            TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
-        }
-        if (phyMirrorEnable) {
+            NotifyCastWhenScreenConnectChange(false);
             FreeDisplayMirrorNodeInner(screenSession);
             isPhyScreenConnected_ = false;
         }
@@ -1939,13 +1951,11 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    // screenId要在rotation前进行设置
-    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
-    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
-    auto task = [settingScreenId, settingRotation]() {
-        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
-        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
-        ScreenSettingHelper::SetSettingRotation(settingRotation);
+    // 异步发送屏幕旋转公共事件
+    auto task = [=]() {
+        TLOGI(WmsLogTag::DMS, "publish dms rotation event");
+        ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
+            displayInfo->GetScreenId(), displayInfo->GetRotation());
     };
     taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
