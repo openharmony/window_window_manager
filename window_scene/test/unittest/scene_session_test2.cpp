@@ -811,6 +811,10 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, &func);
     scensession->sessionStage_ = nullptr;
     scensession->NotifyTouchOutside();
+
+    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    scensession->sessionStage_ = nullptr;
+    scensession->NotifyTouchOutside();
 }
 
 /**
@@ -834,6 +838,10 @@ HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest |
     scensession->sessionChangeCallback_->OnTouchOutside_ = func;
     bool result = scensession->CheckOutTouchOutsideRegister();
     EXPECT_EQ(true, result);
+
+    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    result = scensession->CheckOutTouchOutsideRegister();
+    EXPECT_EQ(false, result);
 
     scensession->sessionChangeCallback_ = nullptr;
     result = scensession->CheckOutTouchOutsideRegister();
@@ -864,6 +872,9 @@ HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Leve
     int result = session->GetPersistentId();
     EXPECT_EQ(0, result);
     scensession->UpdateRotationAvoidArea();
+
+    scensession->specificCallback_ = nullptr;
+    scensession->UpdateRotationAvoidArea();
 }
 
 /**
@@ -889,6 +900,10 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     scensession->sessionChangeCallback_->OnForceHideChange_ = func;
     EXPECT_NE(nullptr, &func);
     scensession->NotifyForceHideChange(true);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyForceHideChange(true);
+    ASSERT_EQ(scensession->property_->forceHide_, false);
 }
 
 /**
@@ -1959,6 +1974,27 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(nullptr);
     auto result = sceneSession->IsFullScreenMovable();
     ASSERT_EQ(false, result);
+}
+
+/**
+ * @tc.name: SetWindowAnimationFlag
+ * @tc.desc: SetWindowAnimationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowAnimationFlag";
+    info.bundleName_ = "SetWindowAnimationFlag";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    sceneSession->sessionChangeCallback_->onWindowAnimationFlagChange_ = [](
+        bool isNeedDefaultAnimationFlag) {};
+    sceneSession->SetWindowAnimationFlag(true);
+    ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }
 }
 }
