@@ -246,6 +246,14 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
     session.property_ = new WindowSessionProperty();
     sceneSession->SetWindowFlags(sceneSession1, property);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
+
+    session.property_ = nullptr;
+    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
+        const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
+    ){};
+    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
 }
 
 /**
