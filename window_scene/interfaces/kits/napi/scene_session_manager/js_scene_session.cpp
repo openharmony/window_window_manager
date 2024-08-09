@@ -317,10 +317,10 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 
 JsSceneSession::~JsSceneSession()
 {
-    WLOGD("~JsSceneSession");
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed, id:%{public}d", persistentId_);
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFD("session is nullptr, id:%{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->UnregisterSessionChangeListeners();

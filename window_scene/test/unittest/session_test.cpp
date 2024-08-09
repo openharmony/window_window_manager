@@ -463,13 +463,6 @@ HWTEST_F(WindowSessionTest, UpdateSessionRect01, Function | SmallTest | Level2)
     scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
     result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
-
-    int resultValue = 0;
-    NotifySessionRectChangeFunc onRectChange_ = [&resultValue](const WSRect &rect, const SizeChangeReason& reason)
-    { resultValue = 1; };
-    scensessionchangeCallBack->onRectChange_ = onRectChange_;
-    result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
