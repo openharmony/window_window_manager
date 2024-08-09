@@ -1590,6 +1590,24 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionDumpInfo, Function | SmallTest | Le
     result = ssm_->GetSessionDumpInfo(params, dumpInfo);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, nullptr));
+    ssm_->RegisterSessionSnapshotFunc(sceneSession);
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    EXPECT_EQ(ssm_->CheckCollaboratorType(type), true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
