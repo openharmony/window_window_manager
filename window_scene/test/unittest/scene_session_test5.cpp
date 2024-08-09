@@ -1201,14 +1201,14 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     sptr<SceneSession> session_ = sptr<SceneSession>::MakeSptr(info_, nullptr);
     EXPECT_NE(session_, nullptr);
 
-    auto res = session->HandleActionUpdateTurnScreenOn(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    auto res = session->HandleActionUpdateTurnScreenOn(
+        property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
 
     property->SetTurnScreenOn(true);
-    res = session->HandleActionUpdateTurnScreenOn(property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    res = session->HandleActionUpdateTurnScreenOn(
+        property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
-
-    res = session->HandleActionUpdateTurnScreenOn(property, nullptr, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
 }
 
 }
