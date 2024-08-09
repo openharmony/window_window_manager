@@ -357,6 +357,20 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     SceneSessionManager::GetInstance().DestroyExtensionSession(iRemoteObjectMocker);
 }
 
+/**
+ * @tc.name: GetRemoteSessionSnapshotInfo
+ * @tc.desc: GetRemoteSessionSnapshotInfo set gesture navigation enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | SmallTest | Level3)
+{
+    AAFwk::MissionSnapshot sessionSnapshot;
+    std::string deviceId = "deviceId";
+    int res = SceneSessionManager::GetInstance().GetRemoteSessionSnapshotInfo(
+        deviceId, 8, sessionSnapshot);
+    EXPECT_EQ(ERR_NULL_OBJECT, res);
+}
+
 }
 }
 }
