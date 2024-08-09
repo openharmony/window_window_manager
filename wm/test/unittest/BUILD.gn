@@ -527,6 +527,7 @@ ohos_unittest("wm_window_extension_session_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_context",
     "c_utils:utils",
     "hilog:libhilog",
   ]

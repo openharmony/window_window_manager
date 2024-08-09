@@ -85,7 +85,7 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-std::recursive_mutex g_instanceMutex;
+
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t DEFAULT_USERID = -1;
@@ -176,14 +176,16 @@ public:
 };
 } // namespace
 
+sptr<SceneSessionManager> SceneSessionManager::CreateInstance()
+{
+    sptr<SceneSessionManager> sessionManager = new SceneSessionManager();
+    sessionManager->Init();
+    return sessionManager;
+}
+
 SceneSessionManager& SceneSessionManager::GetInstance()
 {
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneSessionManager* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneSessionManager();
-        instance->Init();
-    }
+    static sptr<SceneSessionManager> instance = CreateInstance();
     return *instance;
 }
 
@@ -237,6 +239,7 @@ void SceneSessionManager::Init()
     RegisterAppListener();
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
+    SceneInputManager::GetInstance().Init();
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -2059,7 +2062,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         HandleCastScreenDisConnection(scnSession);
         auto persistentId = scnSession->GetPersistentId();
-        RequestSessionUnfocus(persistentId);
+        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
+        RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
@@ -2915,6 +2919,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
+        auto sessionProperty = sceneSession->GetSessionProperty();
+        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
+            sceneSession->NotifyDestroy();
+        }
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -3328,6 +3336,10 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
     const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
 {
+    if (!bundleMgr_) {
+        TLOGE(WmsLogTag::DEFAULT, "bundleMgr_ is nullptr");
+        return nullptr;
+    }
     AAFwk::Want want;
     want.SetElementName("", bundleName, abilityName, moduleName);
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
@@ -4461,7 +4473,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
-    return ShiftFocus(nextSession);
+    return ShiftFocus(nextSession, FocusChangeReason::WIND);
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
@@ -4535,6 +4547,19 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& scen
     return false;
 }
 
+bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& sceneSession, FocusChangeReason reason)
+{
+    if (focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
+        focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
+        return false;
+    }
+    if (reason != FocusChangeReason::CLICK || !focusedSession->GetBlockingFocus()) {
+        return false;
+    }
+    return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+}
+
 WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
     FocusChangeReason reason)
 {
@@ -4582,6 +4607,11 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
                 TLOGD(WmsLogTag::WMS_FOCUS, "Lower session %{public}d cannot request focus from keyguard!",
                     persistentId);
                 return WSError::WS_DO_NOTHING;
+        }
+        // desktop click temp check
+        if (CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason)) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "click cannot request focus from full screen window!");
+            return WSError::WS_DO_NOTHING;
         }
     }
     return WSError::WS_OK;
@@ -6268,6 +6298,13 @@ WSError SceneSessionManager::TerminateSessionNew(
         return errCode;
     };
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
+}
+
+WSError SceneSessionManager::SetVmaCacheStatus(bool flag)
+{
+    WLOGFI("flag: %{public}d", flag);
+    RSInterfaces::GetInstance().SetVmaCacheStatus(flag);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,

@@ -884,6 +884,52 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
+/**
+ * @tc.name: Resize01
+ * @tc.desc: Resize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("Resize01SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1002);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, subWindow->Resize(100, 100));
+    subWindow->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("Resize01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1003);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    Rect request = {100, 100, 100, 100};
+    subWindow->property_->SetRequestRect(request);
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+    std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(200, 200));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 200));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(200, 200));
+}
 
 /**
  * @tc.name: ResetAspectRatio

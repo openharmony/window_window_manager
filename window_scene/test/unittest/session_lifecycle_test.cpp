@@ -570,6 +570,8 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTe
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     session_->isTerminating_ = false;
+    NotifyTerminateSessionFuncTotal func = nullptr;
+    session_->SetTerminateSessionListenerTotal(func);
     ASSERT_EQ(WSError::WS_OK,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
