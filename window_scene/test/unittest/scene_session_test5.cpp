@@ -876,6 +876,12 @@ HWTEST_F(SceneSessionTest5, SetPrivacyMode, Function | SmallTest | Level2)
     session->SetPrivacyMode(true);
     session->SetSessionProperty(nullptr);
     session->SetPrivacyMode(true);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetPrivacyMode(true);
+    session->SetSessionProperty(property);
+    session->SetPrivacyMode(true);
 }
 
 /**
