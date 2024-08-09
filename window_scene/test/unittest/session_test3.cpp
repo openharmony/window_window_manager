@@ -910,6 +910,37 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: SetBufferAvailable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetBufferAvailable, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
+        resultValue = 1;
+    };
+    session_->SetBufferAvailableChangeListener(func);
+    session_->SetBufferAvailable(true);
+    ASSERT_EQ(session_->bufferAvailable_, true);
+}
+
+/**
+ * @tc.name: NotifySessionInfoChange
+ * @tc.desc: NotifySessionInfoChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
+        resultValue = 1;
+    };
+    session_->SetSessionInfoChangeNotifyManagerListener(func);
+    session_->NotifySessionInfoChange();
+    ASSERT_EQ(resultValue, 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
