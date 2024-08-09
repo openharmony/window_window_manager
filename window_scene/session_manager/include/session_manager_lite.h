@@ -85,7 +85,6 @@ private:
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
-    bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
     // above guarded by mutex_
 

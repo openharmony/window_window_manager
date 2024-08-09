@@ -964,6 +964,48 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
 }
+
+/**
+ * @tc.name: OnModeChange
+ * @tc.desc: OnModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, OnModeChange, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+
+    auto pipMainWinListener = sptr<PictureInPictureController::PiPMainWindowListenerImpl>::MakeSptr(mw);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    pipMainWinListener->OnModeChange(mode, true);
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    pipMainWinListener->OnModeChange(mode, true);
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_FLOATING;
+    pipMainWinListener->OnModeChange(mode, true);
+    mode = WindowMode::WINDOW_MODE_UNDEFINED;
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    pipMainWinListener->OnModeChange(mode, true);
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    pipMainWinListener->OnModeChange(mode, true);
+    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    pipMainWinListener->OnModeChange(mode, true);
+}
+
+/**
+ * @tc.name: DelayReset
+ * @tc.desc: DelayReset
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, DelayReset, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+
+    auto pipMainWinListener = sptr<PictureInPictureController::PiPMainWindowListenerImpl>::MakeSptr(mw);
+    pipMainWinListener->handler_ = nullptr;
+    pipMainWinListener->DelayReset();
+}
 }
 }
 }

@@ -46,6 +46,17 @@ public:
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+
+     /**
+     * @brief Receive session event from system application.
+     *
+     * This function provides the ability for system applications to move system window.\n
+     * This interface will take effect after touch down event.\n
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
