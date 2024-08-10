@@ -322,7 +322,7 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
 {
     sessionDirty_.store(true);
     bool hasPostTask = false;
-    if (hasPostTask_.(hasPostTask, true)) {
+    if (hasPostTask_.compare_exchange_strong(hasPostTask, true)) {
         auto task = [this]() {
             hasPostTask_.store(false);
             if (!sessionDirty_.load() || flushWindowInfoCallback_ == nullptr) {

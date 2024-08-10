@@ -258,7 +258,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     TLOGI(WmsLogTag::WMS_LIFE, "CreateAndConnectSpecificSession [name:%{public}s,id:%{public}d,parentId:%{public}d,"
         "type:%{public}u touchable:%{public}d]", property_->GetWindowName().c_str(), property_->GetPersistentId(),
-        property_->GetParentPersistentId(), GetType(), static_cast<int>(property->GetTouchable()));
+        property_->GetParentPersistentId(), GetType(), static_cast<int>(property_->GetTouchable()));
     return WMError::WM_OK;
 }
 
