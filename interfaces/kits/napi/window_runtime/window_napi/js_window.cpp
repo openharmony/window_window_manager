@@ -5576,11 +5576,11 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 }
 
 NapiAsyncTask::ExecuteCallback JsWindow::GetExecuteCallback(bool enableDrag, const wptr<Window> &weakToken,
-    std::shared_ptr<WmErrorCode> &errCode) const
+    std::shared_ptr<WmErrorCode> &errCodePtr) const
 {
     NapiAsyncTask::ExecuteCallback execute =
-    [weakToken, enableDrag, errCode]() {
-        if (errCode == nullptr) {
+    [weakToken, enableDrag, errCodePtr]() {
+        if (errCodePtr == nullptr) {
             return;
         }
         auto window = weakToken.promote();
