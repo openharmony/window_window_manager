@@ -219,7 +219,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     data.WriteInterfaceToken(u"OpenHarmeny");
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ERR_INVALID_STATE, res);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
