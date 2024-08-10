@@ -1713,13 +1713,82 @@ HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, Function | SmallTest
 }
 
 /**
- * @tc.name: 
- * @tc.desc: 
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
 {
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(parentSceneSession, nullptr);
+    ASSERT_NE(parentSceneSession->property_, nullptr);
+    parentSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(8, parentSceneSession));
 
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_NE(sceneSession->property_, nullptr);
+    sceneSession->isVisible_ = true;
+    sceneSession->SetZOrder(6);
+    sceneSession->blockingFocus_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_->SetParentPersistentId(8);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<SceneSession> result = ssm_->GetTopNearestBlockingFocusSession(2, true);
+    EXPECT_EQ(result, sceneSession);
+
+    sceneSession->blockingFocus_ = false;
+    result = ssm_->GetTopNearestBlockingFocusSession(2, false);
+    EXPECT_EQ(result, nullptr);
+
+    sceneSession->isVisible_ = false;
+    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
+    EXPECT_EQ(result, nullptr);
+
+    sceneSession->SetZOrder(1);
+    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
+    EXPECT_EQ(result, nullptr);
+
+    parentSceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->SetZOrder(6);
+    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
+    EXPECT_EQ(result, nullptr);
+
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: RequestFocusSpecificCheck
+ * @tc.desc: RequestFocusSpecificCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    sceneSession->SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
+    WSError result = ssm_->RequestFocusSpecificCheck(sceneSession, byForeground, reason);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+
+    sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession01));
+    sceneSession01->parentSession_ = sceneSession;
+    result = ssm_->RequestFocusSpecificCheck(sceneSession, byForeground, reason);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 }
 } // namespace Rosen
