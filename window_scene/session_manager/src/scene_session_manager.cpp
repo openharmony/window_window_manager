@@ -10086,7 +10086,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DEFAULT, "The caller has no permission granted.");
-        return WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
     surfaceNodeIds.clear();
