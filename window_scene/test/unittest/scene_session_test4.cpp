@@ -246,6 +246,14 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
     session.property_ = new WindowSessionProperty();
     sceneSession->SetWindowFlags(sceneSession1, property);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
+
+    session.property_ = nullptr;
+    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
+        const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
+    ){};
+    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
 }
 
 /**
@@ -374,6 +382,9 @@ HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | L
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
     session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
+    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
+
+    session->SetSessionState(SessionState::STATE_BACKGROUND);
     EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
 }
 

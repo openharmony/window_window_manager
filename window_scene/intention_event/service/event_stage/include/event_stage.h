@@ -32,6 +32,7 @@ public:
     std::vector<int32_t> GetTimerIds(int32_t persistentId);
     std::vector<int32_t> DelEvents(int32_t persistentId, int32_t eventId);
     void OnSessionLost(int32_t persistentId);
+    
 private:
     struct EventTime {
         int32_t eventId { 0 };

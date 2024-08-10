@@ -112,6 +112,10 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+
+    /*
+     * Fold Screen Status Change Report
+     */
     virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
@@ -239,6 +243,7 @@ public:
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
+    WSError SetVmaCacheStatus(bool flag);
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
     WSError ClearSession(int32_t persistentId) override;
@@ -355,7 +360,11 @@ public:
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo> displayInfo);
 
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
@@ -369,6 +378,7 @@ protected:
 private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
+    static sptr<SceneSessionManager> CreateInstance();
     void Init();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
@@ -427,6 +437,8 @@ private:
     bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
         sptr<SceneSession>& focusedSession, bool includingAppSession);
+    bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
+        const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool CheckParentSessionVisible(const sptr<SceneSession>& session);
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property);
@@ -537,6 +549,14 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
+
+    /*
+     * User Switch
+     */
+    bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
+    bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
+    WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -718,9 +738,14 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
-    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
     std::condition_variable nextFlushCompletedCV_;
