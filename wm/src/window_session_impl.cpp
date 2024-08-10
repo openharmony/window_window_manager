@@ -1056,8 +1056,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
-    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow_ != nullptr) {
-        parentExtensionWindow_->NotifySetUIContent();
+    auto parentExtensionWindow = parentExtensionWindow_.promote();
+    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
+        parentExtensionWindow->NotifySetUIContent();
     }
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
@@ -3515,7 +3516,7 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-void WindowSessionImpl::SetParentExtensionWindow(const sptr<Window>& parentExtensionWindow)
+void WindowSessionImpl::SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow)
 {
     parentExtensionWindow_ = parentExtensionWindow;
 }
