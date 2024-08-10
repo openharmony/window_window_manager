@@ -2217,6 +2217,11 @@ WMError SceneSessionManagerProxy::GetProcessSurfaceNodeIdByPersistentId(const in
         TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID),
         data, reply, option) != ERR_NONE) {
