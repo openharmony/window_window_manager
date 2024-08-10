@@ -1166,9 +1166,10 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
     info.bundleName_ = "test2";
     info.persistentId_ = 123;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession->property_);
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_NE(nullptr, ssm_);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
