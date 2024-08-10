@@ -57,6 +57,39 @@ void SessionStageProxyTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: SetActive
+ * @tc.desc: test function : SetActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetActive, Function | SmallTest | Level1)
+{
+    bool active = false;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->SetActive(active);
+    ASSERT_EQ(WSError::WS_OK, res);
+    active = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    res = sessionStage_->SetActive(active);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: UpdateDisplayId
+ * @tc.desc: test function : UpdateDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateDisplayId, Function | SmallTest | Level1)
+{
+    uint64_t displayID = 0;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->UpdateDisplayId(displayID);
+    ASSERT_EQ(WSError::WS_OK, res);
+    displayID = 1;
+    res = sessionStage_->UpdateDisplayId(displayID);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: UpdateRect
  * @tc.desc: test function : UpdateRect
  * @tc.type: FUNC
@@ -122,6 +155,18 @@ HWTEST_F(SessionStageProxyTest, UpdateFocus, Function | SmallTest | Level1)
     focus = true;
     ASSERT_TRUE((sessionStage_ != nullptr));
     res = sessionStage_->UpdateFocus(focus);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyDestroy
+ * @tc.desc: test function : NotifyDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyDestroy, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyDestroy();
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -222,8 +267,62 @@ HWTEST_F(SessionStageProxyTest, UpdateWindowMode, Function | SmallTest | Level1)
 HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, Function | SmallTest | Level1)
 {
     bool fullScreen = true;
-    ASSERT_TRUE(sessionStage_ != nullptr);
+    ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifySessionFullScreen(fullScreen);
+    fullScreen = false;
+    sessionStage_->NotifySessionFullScreen(fullScreen);
+}
+
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus
+ * @tc.desc: test function : NotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+{
+    bool interactive = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+    interactive = false;
+    sessionStage_->NotifyForegroundInteractiveStatus(interactive);
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: test function : NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | Level1)
+{
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifySessionForeground(reason, withAnimation);
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: test function : NotifySessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | Level1)
+{
+    uint32_t reason = 1;
+    bool withAnimation = true;
+    bool isFromInnerkits = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+}
+
+/**
+ * @tc.name: NotifyWindowVisibility
+ * @tc.desc: test function : NotifyWindowVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifyWindowVisibility(true);
 }
 
 /**
