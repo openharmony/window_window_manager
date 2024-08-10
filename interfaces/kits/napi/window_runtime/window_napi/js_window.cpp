@@ -5564,32 +5564,52 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         return NapiThrowError(env, ret);
     }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = GetCompleteTask(enableDrag, weakToken);
-    napi_value lastParam = (argc == 0) ? nullptr :
-        (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+
+    NapiAsyncTask::ExecuteCallback execute = GetExecuteCallback(enableDrag, weakToken, errCodePtr);
+    NapiAsyncTask::CompleteCallback complete = GetCompleteCallback(enableDrag, weakToken);
+
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnEnableDrag",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
-NapiAsyncTask::CompleteCallback JsWindow::GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const
+NapiAsyncTask::ExecuteCallback JsWindow::GetExecuteCallback(bool enableDrag, const wptr<Window> &weakToken,
+    std::shared_ptr<WmErrorCode> &errCode) const
+{
+    NapiAsyncTask::ExecuteCallback execute =
+       [weakToken, enableDrag, errCode](){
+           if (errCode == nullptr) {
+               return;
+           }
+           auto window = weakToken.promote();
+           if (window == nullptr) {
+               *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+               return;
+           }
+           *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
+           TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set enable drag end",
+            window->GetWindowId(), window->GetWindowName().c_str);
+     };
+     return execute;
+}
+
+NapiAsyncTask::CompleteCallback JsWindow::GetCompleteCallback(const std::shared_ptr<WmErrorCode> &errCodePtr) const
 {
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        [enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnEnableDrag failed."));
                     return;
             }
-            WMError ret = weakWindow->EnableDrag(enableDrag);
             TLOGI(WmsLogTag::WMS_EVENT, "call enabledrag ret: %{public}u", ret);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnEnableDrag failed."));
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "OnEnableDrag failed."));
             }
         };
     return complete;
