@@ -1811,6 +1811,55 @@ HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Fun
 {
     ASSERT_EQ(false, window_->GetFreeMultiWindowModeEnabledState());
 }
+
+/**
+ * @tc.name: NotifySetUIContent
+ * @tc.desc: NotifySetUIContent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifySetUIContent, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    EXPECT_FALSE(window_->setUIContentFlag_.load());
+    window_->NotifySetUIContent();
+    EXPECT_TRUE(window_->setUIContentFlag_.load());
+    window_->handler_ = nullptr;
+    window_->NotifySetUIContent();
+    EXPECT_TRUE(window_->setUIContentFlag_.load());
+}
+
+/**
+ * @tc.name: AddSetUIContentTimeoutListener
+ * @tc.desc: AddSetUIContentTimeoutListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AddSetUIContentTimeoutListener, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->AddSetUIContentTimeoutListener();
+    window_->handler_ = nullptr;
+    window_->AddSetUIContentTimeoutListener();
+}
+
+/**
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window_->hostSession_ = session;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(1);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+
+    window_->hostSession_ = nullptr;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(0);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

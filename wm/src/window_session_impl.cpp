@@ -1071,6 +1071,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
+    auto parentExtensionWindow = parentExtensionWindow_.promote();
+    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
+        parentExtensionWindow->NotifySetUIContent();
+    }
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -3536,6 +3540,11 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+void WindowSessionImpl::SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow)
+{
+    parentExtensionWindow_ = parentExtensionWindow;
 }
 
 WMError WindowSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)

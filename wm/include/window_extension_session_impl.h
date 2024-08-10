@@ -92,6 +92,8 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void NotifySetUIContent() override;
+    void NotifyExtensionTimeout(int32_t errorCode) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -109,6 +111,11 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
+    void AddSetUIContentTimeoutListener();
+
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000
+    };
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -120,6 +127,7 @@ private:
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     int16_t rotationAnimationCount_ { 0 };
+    std::atomic_bool setUIContentFlag_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
