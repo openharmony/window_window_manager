@@ -166,7 +166,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetFreeMultiWindowEnableState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACE_NODEID_BY_PERSISTENTID):
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");

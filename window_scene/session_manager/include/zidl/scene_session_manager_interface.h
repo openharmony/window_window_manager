@@ -110,7 +110,7 @@ public:
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
-        TRANS_ID_GET_PROCESS_SURFACE_NODEID_BY_PERSISTENTID,
+        TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
