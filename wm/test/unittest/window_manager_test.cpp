@@ -1291,7 +1291,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
  */
 HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
 {
-    WindowManager::GetInstance().NotifyWMSDisconnected(1, 2);
+    WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
 }
 
 /**
@@ -1304,7 +1304,7 @@ HWTEST_F(WindowManagerTest, NotifyFocused01, Function | SmallTest | Level2)
     sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
     ASSERT_NE(focusChangeInfo, nullptr);
 
-    ret = WindowManager::GetInstance().NotifyFocused(focusChangeInfo);
+    WindowManager::GetInstance().pImpl_->NotifyFocused(focusChangeInfo);
 }
 
 /**
@@ -1317,7 +1317,7 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
     sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
     ASSERT_NE(focusChangeInfo, nullptr);
 
-    ret = WindowManager::GetInstance().NotifyUnfocused(focusChangeInfo);
+    WindowManager::GetInstance().pImpl_->NotifyUnfocused(focusChangeInfo);
 }
 
 /**
@@ -1327,11 +1327,11 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
 {
-    std::vector<sptr<AccessibilityWindowInfo>> infos,
-    WindowManager::GetInstance().pImpl->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
     infos.push_back(nullptr);
-    WindowManager::GetInstance().pImpl->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+    WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
 }
 
@@ -1343,15 +1343,15 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
 HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTest | Level2)
 {
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
-    WindowManager::GetInstance().pImpl->visibleWindowNumChangedListeners_.clear();
-    WindowManager::GetInstance().pImpl->visibleWindowNumChangedListeners_.push_back(nullptr);
-    WindowManager::GetInstance().pImpl->.NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(nullptr);
+    WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     ASSERT_NE(listener, nullptr);
-    WindowManager::GetInstance().pImpl->visibleWindowNumChangedListeners_.clear();
-    WindowManager::GetInstance().pImpl->visibleWindowNumChangedListeners_.push_back(listener);
-    WindowManager::GetInstance().pImpl->.NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
+    WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
 }
 } // namespace Rosen
