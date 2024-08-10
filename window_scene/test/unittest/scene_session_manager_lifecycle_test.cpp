@@ -735,6 +735,58 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction02, Fun
 }
 
 /**
+ * @tc.name: StartOrMinimizeUIAbilityBySCB1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB1, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "StartOrMinimizeUIAbilityBySCB1";
+    info.bundleName_ = "StartOrMinimizeUIAbilityBySCB1";
+    ssm_->systemConfig_.backgroundswitch = true;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsAppSupportPhoneInPc(false);
+
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->SetMinimizedFlagByUserSwitch(true);
+
+    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(sceneSession, true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: StartOrMinimizeUIAbilityBySCB2
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB2, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "StartOrMinimizeUIAbilityBySCB2";
+    info.bundleName_ = "StartOrMinimizeUIAbilityBySCB2";
+    ssm_->systemConfig_.backgroundswitch = true;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsAppSupportPhoneInPc(false);
+
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    WSError ret = ssm_->StartOrMinimizeUIAbilityBySCB(sceneSession, false);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: RequestSceneSessionByCall01
  * @tc.desc: SceneSesionManager test RequestSceneSessionByCall
  * @tc.type: FUNC

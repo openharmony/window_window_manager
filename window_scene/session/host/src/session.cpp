@@ -1981,6 +1981,7 @@ void Session::UnregisterSessionChangeListeners()
         session->raiseToTopForPointDownFunc_ = nullptr;
         session->sessionInfoLockedStateChangeFunc_ = nullptr;
         session->contextTransparentFunc_ = nullptr;
+        session->sessionRectChangeFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
     };
     PostTask(task, "UnregisterSessionChangeListeners");
@@ -2160,6 +2161,9 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
@@ -2215,6 +2219,11 @@ WSError Session::CompatibleFullScreenRecover()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenRecover();
 }
 
@@ -2226,6 +2235,11 @@ WSError Session::CompatibleFullScreenMinimize()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenMinimize();
 }
 
@@ -2236,6 +2250,11 @@ WSError Session::CompatibleFullScreenClose()
         TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->CompatibleFullScreenClose();
 }
@@ -2260,6 +2279,9 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        }
+        if (!sessionStage_) {
+            return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
@@ -2901,6 +2923,10 @@ WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
     if (!IsSessionValid()) {
         TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
 }

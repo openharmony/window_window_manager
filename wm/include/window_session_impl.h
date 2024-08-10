@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "common/include/future_callback.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -237,6 +238,11 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
 
+    /*
+     * UIExtension
+     */
+    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -318,6 +324,11 @@ protected:
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
 
+    /*
+     * UIExtension
+     */
+    wptr<Window> parentExtensionWindow_ = nullptr;
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -373,6 +384,8 @@ private:
 
     bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
