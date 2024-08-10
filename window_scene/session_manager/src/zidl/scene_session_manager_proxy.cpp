@@ -2202,25 +2202,25 @@ WMError SceneSessionManagerProxy::GetProcessSurfaceNodeIdByPersistentId(const in
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::DEFAULT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(pid)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write pid failed");
+        TLOGE(WmsLogTag::DEFAULT, "Write pid failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32Vector(persistentIds)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write persistentIds failed");
+        TLOGE(WmsLogTag::DEFAULT, "Write persistentIds failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUInt64Vector(surfaceNodeIds)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write surfaceNodeIds failed");
+        TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACE_NODEID_BY_PERSISTENTID),
+        SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     reply.ReadUInt64Vector(&surfaceNodeIds);
