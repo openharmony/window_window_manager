@@ -5590,7 +5590,7 @@ NapiAsyncTask::ExecuteCallback JsWindow::GetExecuteCallback(bool enableDrag, con
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
         TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set enable drag end",
-            window->GetWindowId(), window->GetWindowName().c_str);
+            window->GetWindowId(), window->GetWindowName().c_str());
     };
     return execute;
 }
