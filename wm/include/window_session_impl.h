@@ -238,6 +238,11 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
 
+    /*
+     * UIExtension
+     */
+    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -318,6 +323,11 @@ protected:
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
+
+    /*
+     * UIExtension
+     */
+    wptr<Window> parentExtensionWindow_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace

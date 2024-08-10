@@ -2150,6 +2150,25 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
+     * @brief Set the parent window of sub window created by UIExtension
+     *
+     * @param parent window
+     */
+    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
+
+    /**
+     * @brief Notify the window that set UI content complete
+     */
+    virtual void NotifySetUIContent() {}
+
+    /**
+     * @brief Notify host that UIExtension timeout
+     *
+     * @param errorCode error code when UIExtension timeout
+     */
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 };
 }
 }
