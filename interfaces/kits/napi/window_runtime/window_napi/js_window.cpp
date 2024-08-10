@@ -5579,19 +5579,19 @@ NapiAsyncTask::ExecuteCallback JsWindow::GetExecuteCallback(bool enableDrag, con
     std::shared_ptr<WmErrorCode> &errCodePtr) const
 {
     NapiAsyncTask::ExecuteCallback execute =
-    [weakToken, enableDrag, errCodePtr]() {
-        if (errCodePtr == nullptr) {
-            return;
-        }
-        auto window = weakToken.promote();
-        if (window == nullptr) {
-            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            return;
-        }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
-        TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set enable drag end",
-            window->GetWindowId(), window->GetWindowName().c_str());
-    };
+        [weakToken, enableDrag, errCodePtr]() {
+            if (errCodePtr == nullptr) {
+                return;
+            }
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+                return;
+            }
+            *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
+            TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set enable drag end",
+                window->GetWindowId(), window->GetWindowName().c_str());
+        };
     return execute;
 }
 
@@ -5605,7 +5605,7 @@ NapiAsyncTask::CompleteCallback JsWindow::GetCompleteCallback(const std::shared_
                     return;
             }
             TLOGI(WmsLogTag::WMS_EVENT, "call enabledrag ret: %{public}u", *errCodePtr);
-            if (*errCodePtr == WMErrorCode::WM_OK) {
+            if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set Enable Drag failed."));
