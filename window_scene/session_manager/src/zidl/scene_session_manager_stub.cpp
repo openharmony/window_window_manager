@@ -1021,7 +1021,7 @@ int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = data.ReadInt32();
     std::vector<int32_t> persistentIds;
