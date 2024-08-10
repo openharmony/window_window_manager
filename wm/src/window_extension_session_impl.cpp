@@ -485,9 +485,7 @@ void WindowExtensionSessionImpl::AddSetUIContentTimeoutListener()
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
-
-        CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession_);
-        hostSession_->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+        NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
     };
     handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
         SET_UICONTENT_TIMEOUT_TIME_MS);
@@ -1059,6 +1057,13 @@ void WindowExtensionSessionImpl::NotifySetUIContent()
     TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete");
     handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     setUIContentFlag_.store(true);
+}
+
+void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyExtensionTimeout(errorCode);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -240,7 +240,7 @@ public:
     /*
      * UIExtension
      */
-    void SetParentExtensionWindow(const sptr<Window>& parentExtensionWindow) override;
+    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
 
 protected:
     WMError Connect();
@@ -326,7 +326,7 @@ protected:
     /*
      * UIExtension
      */
-    sptr<Window> parentExtensionWindow_ = nullptr;
+    wptr<Window> parentExtensionWindow_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
