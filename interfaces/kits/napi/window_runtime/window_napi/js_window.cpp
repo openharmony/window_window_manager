@@ -5602,7 +5602,7 @@ NapiAsyncTask::CompleteCallback JsWindow::GetCompleteCallback(const std::shared_
             if (errCodePtr == nullptr) {
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set Enable Drag failed."));
-                    return;
+                return;
             }
             TLOGI(WmsLogTag::WMS_EVENT, "call enabledrag ret: %{public}u", *errCodePtr);
             if (*errCodePtr == WmErrorCode::WM_OK) {
