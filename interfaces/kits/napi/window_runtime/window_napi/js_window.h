@@ -292,7 +292,9 @@ private:
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
 
-    NapiAsyncTask::CompleteCallback GetCompleteTask(bool enableDrag, const wptr<Window> &weakToken) const;
+    NapiAsyncTask::ExecuteCallback GetExecuteCallback(bool enableDrag, const wptr<Window> &weakToken,
+        std::shared_ptr<WmErrorCode> &errCode) const;
+    NapiAsyncTask::CompleteCallback GetCompleteCallback(const std::shared_ptr<WmErrorCode> &errCodePtr) const;
 };
 }  // namespace Rosen
 }  // namespace OHOS
