@@ -1941,7 +1941,6 @@ HWTEST_F(WindowSessionTest2, ShouldCreateDetectTaskInRecent, Function | SmallTes
  */
 HWTEST_F(WindowSessionTest2, CreateWindowStateDetectTask, Function | SmallTest | Level2)
 {
-    ssm_ = sptr<SceneSessionManager>::MakeSptr();
     auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
     session_->SetSessionState(SessionState::STATE_CONNECT);
