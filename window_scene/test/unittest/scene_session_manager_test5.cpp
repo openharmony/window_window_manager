@@ -1110,10 +1110,11 @@ HWTEST_F(SceneSessionManagerTest5, HandleCastScreenDisConnection, Function | Sma
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<ScreenSessionManager> ssm = new ScreenSessionManager();
+    sptr<ScreenSessionManager> screenSessionManager = new ScreenSessionManager();
+    ASSERT_NE(screenSessionManager, nullptr);
     ScreenId screenId = SCREEN_ID_INVALID;
     VirtualScreenFlag screenFlag = VirtualScreenFlag{1};
-    ssm->SetVirtualScreenFlag(screenId, screenFlag);
+    screenSessionManager->SetVirtualScreenFlag(screenId, screenFlag);
     ssm_->HandleCastScreenDisConnection(sceneSession);
 }
 
