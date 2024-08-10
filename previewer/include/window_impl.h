@@ -228,7 +228,6 @@ public:
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError UpdateSystemBarProperty(bool status);
-    virtual WMError EnableDrag(bool enableDrag) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
 
