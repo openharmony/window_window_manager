@@ -46,6 +46,7 @@ class ChannelDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     explicit ChannelDeathRecipient(const sptr<WindowEventChannelListener>& listener): listener_(listener) {}
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+    
 private:
     sptr<WindowEventChannelListener> listener_ = nullptr;
 };

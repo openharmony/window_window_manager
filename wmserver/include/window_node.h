@@ -167,6 +167,7 @@ public:
     AbilityInfo abilityInfo_;
     WindowNodeStateMachine stateMachine_;
     bool isFocused_ { false };
+    
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;

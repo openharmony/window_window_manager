@@ -54,6 +54,7 @@ public:
     MOCK_METHOD1(NotifyExtensionTimeout, void(int32_t errorCode));
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
+    MOCK_METHOD1(SetActive, WSError(bool active));
 };
 } // namespace Rosen
 } // namespace OHOS
