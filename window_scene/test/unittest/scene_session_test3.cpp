@@ -211,7 +211,7 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->winRect_ = rect;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->reason_ = SizeChangeReason::DRAG_END;
@@ -304,6 +304,11 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     sceneSession->SetSessionProperty(property);
     auto result = sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr);
     ASSERT_NE(result, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isKeyboardPanelEnabled_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);

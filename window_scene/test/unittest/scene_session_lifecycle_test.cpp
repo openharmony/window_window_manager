@@ -565,12 +565,6 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
 
     result = sceneSession->Disconnect(false);
     ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(false, false);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(false, true);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -776,7 +770,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    sceneSession->Session::isTerminating_ = false;
+    sceneSession->Session::isTerminating = false;
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
@@ -946,7 +940,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
 
     NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
-    session.isTerminating_ = false;
+    session.isTerminating = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
@@ -1054,6 +1048,8 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTes
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionFullScreen(fullScreen);
     ASSERT_EQ(ret, 1);
+    sceneSession->sessionStage_ = nullptr;
+    sceneSession->NotifySessionFullScreen(fullScreen);
 }
 
 /**
@@ -1102,7 +1098,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     info.bundleName_ = "NotifySessionExceptionInner";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isTerminating_ = true;
+    sceneSession->isTerminating = true;
     auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession);
     ASSERT_EQ(res, WSError::WS_OK);
 
@@ -1115,11 +1111,11 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sceneSession->isTerminating_ = true;
+    sceneSession->isTerminating = true;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sceneSession->isTerminating_ = false;
+    sceneSession->isTerminating = false;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
 
