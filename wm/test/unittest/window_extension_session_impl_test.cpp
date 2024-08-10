@@ -1155,7 +1155,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Fun
  */
 HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, Function | SmallTest | Level3)
 {
-    std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo = 
+    std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo =
 		std::make_optional<AccessibilityChildTreeInfo>();
     ASSERT_NE(accessibilityChildTreeInfo, std::nullopt);
     window_->accessibilityChildTreeInfo_ = accessibilityChildTreeInfo;
