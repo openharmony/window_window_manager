@@ -293,7 +293,7 @@ private:
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
 
     NapiAsyncTask::ExecuteCallback GetExecuteCallback(bool enableDrag, const wptr<Window> &weakToken,
-        std::shared_ptr<WmErrorCode> &errCode) const;
+        std::shared_ptr<WmErrorCode> &errCodePtr) const;
     NapiAsyncTask::CompleteCallback GetCompleteCallback(const std::shared_ptr<WmErrorCode> &errCodePtr) const;
 };
 }  // namespace Rosen
