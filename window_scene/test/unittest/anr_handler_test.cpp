@@ -68,11 +68,14 @@ HWTEST_F(AnrHandlerTest, HandleEventConsumed, Function | SmallTest | Level1)
     anrHandler_.sessionStageMap_.emplace(1, sessionInfo);
     anrHandler_.anrHandlerState_.sendStatus.emplace(0, true);
     anrHandler_.HandleEventConsumed(0, 0);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(anrHandler_.sessionStageMap_.size(), 2);
 
     anrHandler_.anrHandlerState_.sendStatus[0] = false;
     anrHandler_.HandleEventConsumed(0, MAX_MARK_PROCESS_DELAY_TIME_US);
+    usleep(WAIT_SYNC_IN_NS);
     anrHandler_.HandleEventConsumed(0, 0);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
