@@ -27,6 +27,7 @@
 #include "window_extension_session_impl.h"
 #include "mock_uicontent.h"
 #include "context_impl.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,6 +43,8 @@ public:
     void TearDown() override;
 private:
     sptr<WindowExtensionSessionImpl> window_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void WindowExtensionSessionImplTest::SetUpTestCase()
@@ -59,6 +62,11 @@ void WindowExtensionSessionImplTest::SetUp()
     option->SetWindowName("WindowExtensionSessionImplTest");
     window_ = new(std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window_);
+    if (!handler_) {
+        auto runner = AppExecFwk::EventRunner::Create("WindowExtensionSessionImplTest");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    window_->handler_ = handler_;
 }
 
 void WindowExtensionSessionImplTest::TearDown()
@@ -67,6 +75,23 @@ void WindowExtensionSessionImplTest::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: WindowExtensionSessionImpl
+ * @tc.desc: WindowExtensionSessionImpl contructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::MODAL);
+    option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("WindowExtensionSessionImplTest");
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window = nullptr;
+}
+
 /**
  * @tc.name: Create01
  * @tc.desc: normal test
@@ -164,6 +189,14 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
 {
     ASSERT_NE(nullptr, window_);
     window_->AddExtensionWindowStageToSCB();
+
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
+    window_->AddExtensionWindowStageToSCB();
+
+    window_->surfaceNode_ = nullptr;
+    window_->AddExtensionWindowStageToSCB();
 }
 
 /**
@@ -174,6 +207,11 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
 HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
+    window_->RemoveExtensionWindowStageFromSCB();
+
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
     window_->RemoveExtensionWindowStageFromSCB();
 }
 
@@ -969,12 +1007,27 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
 {
     Rect rect;
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
-    std::shared_ptr<RSTransaction> rsTransaction;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    rsTransaction->syncId_ = 1;
+    rsTransaction->isOpenSyncTransaction_ = true;
     ASSERT_NE(nullptr, window_);
+    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+
+    Rect preRect;
+    window_->UpdateRectForRotation(rect, preRect, wmReason, rsTransaction);
+
+    rsTransaction->isOpenSyncTransaction_ = false;
+    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+
+    rsTransaction->syncId_ = -1;
+    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+
+    rsTransaction = nullptr;
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
 
     window_->handler_ = nullptr;
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1052,6 +1105,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01,
     window_->handler_ = nullptr;
     ret = window_->NotifyAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, ret);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1061,12 +1115,16 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01,
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister01, Function | SmallTest | Level3)
 {
+    window_->uiContent_ = nullptr;
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeUnregister());
+
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeUnregister());
 
     window_->handler_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, window_->NotifyAccessibilityChildTreeUnregister());
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1078,12 +1136,37 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Fun
 {
     std::vector<std::string> params;
     std::vector<std::string> info;
+    window_->uiContent_ = nullptr;
+    ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityDumpChildInfo(params, info));
+
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityDumpChildInfo(params, info));
 
     window_->handler_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_INTERNAL_ERROR, window_->NotifyAccessibilityDumpChildInfo(params, info));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateAccessibilityTreeInfo
+ * @tc.desc: UpdateAccessibilityTreeInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, Function | SmallTest | Level3)
+{
+    std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo = std::make_optional<AccessibilityChildTreeInfo>();
+    ASSERT_NE(accessibilityChildTreeInfo, std::nullopt);
+    window_->accessibilityChildTreeInfo_ = accessibilityChildTreeInfo;
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    window_->UpdateAccessibilityTreeInfo();
+
+    window_->uiContent_ = nullptr;
+    window_->UpdateAccessibilityTreeInfo();
+
+    window_->accessibilityChildTreeInfo_= std::nullopt;
+    window_->UpdateAccessibilityTreeInfo();
 }
 
 /**
@@ -1424,6 +1507,17 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
+
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetPersistentId(1);
+
+    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
  
 /**
@@ -1594,6 +1688,11 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+
+    sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
+    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
 
 /**
@@ -1650,7 +1749,15 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTe
     pointerEvent->AddPointerItem(item);
     window_->ConsumePointerEvent(pointerEvent);
 
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    window_->ConsumePointerEvent(pointerEvent);
+
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    pointerEvent->UpdatePointerItem(0, item);
+    window_->ConsumePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerEvent->UpdatePointerItem(0, item);
     window_->ConsumePointerEvent(pointerEvent);
 }
@@ -1662,12 +1769,23 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTe
  */
 HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level3)
 {
+    bool ret = window_->PreNotifyKeyEvent(nullptr);
+    ASSERT_EQ(ret, false);
+
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(nullptr, keyEvent);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
-    bool ret = window_->PreNotifyKeyEvent(keyEvent);
+    ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
+
+    std::shared_ptr<Ace::UIContent> uiContent = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, uiContent);
+    window_->uiContent_ = uiContent;
+    Ace::UIContentMocker* uiContentMocker = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
+    EXPECT_CALL(*uiContentMocker, ProcessKeyEvent).Times(2).WillOnce(Return(true));
+    ret = window_->PreNotifyKeyEvent(keyEvent);
+    ASSERT_EQ(ret, true);
 
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     ret = window_->PreNotifyKeyEvent(keyEvent);
@@ -1680,6 +1798,16 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
     window_->focusState_ = true;
     ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetFreeMultiWindowModeEnabledState
+ * @tc.desc: GetFreeMultiWindowModeEnabledState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(false, window_->GetFreeMultiWindowModeEnabledState());
 }
 }
 } // namespace Rosen
