@@ -42,7 +42,7 @@ ohos_systemtest("modal_system_ui_extension_test") {
 
   sources = [
     "../../../window_scene/test/mock/mock_message_parcel.cpp",
-    "modal_system_ui_extension_test.cpp"
+    "modal_system_ui_extension_test.cpp",
   ]
 
   include_dirs = [ "../../../window_scene/test/mock" ]
