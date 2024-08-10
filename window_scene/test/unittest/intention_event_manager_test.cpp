@@ -257,7 +257,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent3, Function | MediumTest | Level
 HWTEST_F(IntentionEventManagerTest, OnInputEvent4, Function | MediumTest | Level2)
 {
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);;
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
     EXPECT_EQ(nullptr, inputEventListener->uiContent_);
     std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
     inputEventListener->OnInputEvent(axisEvent);
