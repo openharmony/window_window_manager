@@ -299,7 +299,7 @@ public:
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_OK; };
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
