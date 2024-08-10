@@ -1054,7 +1054,7 @@ void WindowExtensionSessionImpl::NotifySetUIContent()
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete");
+    TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete persistentId=%{public}d", GetPersistentId());
     handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     setUIContentFlag_.store(true);
 }
