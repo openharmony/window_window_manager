@@ -1599,6 +1599,10 @@ HWTEST_F(WindowSessionTest2, NotifyCloseExistPipWindow, Function | SmallTest | L
     ManagerState key = ManagerState{0};
     session_->GetStateFromManager(key);
     session_->NotifyUILostFocus();
+
+    session_->lostFocusFunc_ = []() {};
+    session_->NotifyUILostFocus();
+
     session_->SetSystemSceneBlockingFocus(true);
     session_->GetBlockingFocus();
     session_->sessionStage_ = mockSessionStage;
