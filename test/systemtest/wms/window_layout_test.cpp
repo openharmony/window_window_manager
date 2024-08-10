@@ -990,16 +990,16 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     window->property_->SetPersistentId(10009);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1029,16 +1029,16 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     window->property_->SetPersistentId(10010);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1068,16 +1068,16 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     window->property_->SetPersistentId(10011);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1159,10 +1159,10 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
     WMError ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1195,10 +1195,10 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
     WMError ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1228,25 +1228,25 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     window->property_->SetPersistentId(10015);
 
     WMError ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 }
