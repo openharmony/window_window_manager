@@ -602,6 +602,7 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, Function | SmallTest | Lev
     scensession->sessionStage_ = mockSessionStage;
     scensession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
     ASSERT_EQ(scensession->reason_, SizeChangeReason::ROTATION);
+    ASSERT_EQ(WSError::WS_OK, scensession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED));
 }
 
 /**
@@ -656,6 +657,21 @@ HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
     SizeChangeReason reason = SizeChangeReason::PIP_START;
     WSError result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    scenesession->SetSessionProperty(property);
+    result = scenesession->UpdatePiPRect(rect, reason);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    scenesession->SetSessionProperty(property);
+    scenesession->isTerminating_ = true;
+    result = scenesession->UpdatePiPRect(rect, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    scenesession->isTerminating_ = false;
+    result = scenesession->UpdatePiPRect(rect, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -681,6 +697,11 @@ HWTEST_F(SceneSessionTest2, UpdatePiPControlStatus, Function | SmallTest | Level
     auto status = WsPiPControlStatus::PLAY;
     WSError result = sceneSession->UpdatePiPControlStatus(controlType, status);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->UpdatePiPControlStatus(controlType, status);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
 }
 
 /**
@@ -1122,6 +1143,10 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     };
     scensession->SetWindowDragHotAreaListener(dragHotAreaFunc);
     EXPECT_NE(nullptr,  scensession->moveDragController_);
+    scensession->moveDragController_ = nullptr;
+    rectResult = scensession->GetSessionTargetRect();
+    scensession->SetWindowDragHotAreaListener(dragHotAreaFunc);
+    ASSERT_EQ(0, rectResult.width_);
 }
 
 /*
@@ -1596,6 +1621,8 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
 
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->SetSessionProperty(property);
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    ASSERT_NE(nullptr, sceneSession->specificCallback_);
     sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
         WSRect rect = {1, 1, 1, 1};
         return rect;
@@ -1787,6 +1814,10 @@ HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
     sceneSession->ClearExtWindowFlags();
     bool isRegister = true;
     sceneSession->UpdateRectChangeListenerRegistered(isRegister);
+    
+    sceneSession->sessionStage_ = new SessionStageMocker();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    sceneSession->NotifyDisplayMove(from, to);
 }
 
 /**
@@ -1828,6 +1859,10 @@ HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, Function | SmallTest |
     sceneSession->SetTemporarilyShowWhenLocked(false);
     isTemporarilyShowWhenLocked = sceneSession->IsTemporarilyShowWhenLocked();
     ASSERT_EQ(isTemporarilyShowWhenLocked, false);
+
+    sceneSession->isTemporarilyShowWhenLocked_.store(true);
+    sceneSession->SetTemporarilyShowWhenLocked(true);
+    ASSERT_EQ(sceneSession->IsTemporarilyShowWhenLocked(), true);
 }
 
 /**

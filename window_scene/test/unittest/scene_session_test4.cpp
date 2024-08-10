@@ -308,6 +308,11 @@ HWTEST_F(SceneSessionTest4, SetScale, Function | SmallTest | Level2)
     EXPECT_EQ(5.0f, session->GetScaleY());
     EXPECT_EQ(5.0f, session->GetPivotX());
     EXPECT_EQ(5.0f, session->GetPivotY());
+
+    session->sessionStage_ = new SessionStageMocker();
+    EXPECT_NE(nullptr, session->sessionStage_);
+    session->SetScale(5.0f, 5.0f, 5.0f, 5.0f);
+    EXPECT_EQ(5.0f, session->GetPivotY());
 }
 
 /**
