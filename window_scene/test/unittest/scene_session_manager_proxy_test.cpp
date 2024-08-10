@@ -1012,7 +1012,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Fu
 
     int32_t pid = 123;
     std::vector<int32_t> persistentIds = {1, 2, 3};
-    std::vector<uint64_t> surfaceNodeIds
+    std::vector<uint64_t> surfaceNodeIds;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds));
     sceneSessionManagerProxy_ = nullptr;
