@@ -82,6 +82,7 @@ public:
         return animationFirst_;
     }
     static bool isRemoteAnimationEnable_;
+    
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
         const sptr<WindowNode>& windowNode);

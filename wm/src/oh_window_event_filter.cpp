@@ -23,12 +23,22 @@
 
 using namespace OHOS::Rosen;
 
+static const std::unordered_map<int32_t, Input_KeyEventAction> keyEventActionMap = {
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_CANCEL, Input_KeyEventAction::KEY_ACTION_CANCEL},
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_DOWN, Input_KeyEventAction::KEY_ACTION_DOWN},
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_UP, Input_KeyEventAction::KEY_ACTION_UP},
+};
+
 KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
 {
     std::function<bool(OHOS::MMI::KeyEvent&)> func = [filter](OHOS::MMI::KeyEvent& keyEvent) {
         Input_KeyEvent *input = OH_Input_CreateKeyEvent();
         OH_Input_SetKeyEventKeyCode(input, keyEvent.GetKeyCode());
-        OH_Input_SetKeyEventAction(input, keyEvent.GetKeyAction());
+        auto iter = keyEventActionMap.find(keyEvent.GetKeyAction());
+        if (iter == keyEventActionMap.end()) {
+            return false;
+        }
+        OH_Input_SetKeyEventAction(input, iter->second);
         OH_Input_SetKeyEventActionTime(input, keyEvent.GetActionTime());
         return filter(input);
     };

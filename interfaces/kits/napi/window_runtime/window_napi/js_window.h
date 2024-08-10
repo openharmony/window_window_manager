@@ -53,8 +53,10 @@ public:
     static napi_value Recover(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
+    static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
     static napi_value SetWindowType(napi_env env, napi_callback_info info);
     static napi_value SetWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetProperties(napi_env env, napi_callback_info info);
@@ -120,6 +122,7 @@ public:
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value IsFocused(napi_env env, napi_callback_info info);
+    static napi_value StartMoving(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -178,8 +181,10 @@ private:
     napi_value OnRecover(napi_env env, napi_callback_info info);
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
+    napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowType(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetProperties(napi_env env, napi_callback_info info);
@@ -282,6 +287,7 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
+    napi_value OnStartMoving(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
