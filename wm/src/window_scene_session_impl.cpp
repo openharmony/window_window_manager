@@ -1349,9 +1349,6 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     if (context_) {
         context_.reset();
     }
-    if (parentExtensionWindow_) {
-        parentExtensionWindow_ = nullptr;
-    }
     ClearVsyncStation();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
