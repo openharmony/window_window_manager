@@ -75,9 +75,9 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation01, Funct
                 ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession, nullptr));
 }
 
-void func(WSError we){
+void func(WSError we)
+{}
 
-}
 /**
  * @tc.name: RequestExtensionSessionActivation02
  * @tc.desc: RequestExtensionSessionActivation Test
