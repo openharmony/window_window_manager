@@ -38,19 +38,26 @@ public:
     sptr<SceneSession> callingSession_;
 };
 
+using UpdateSessionRectCallBack = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 class KSSceneSessionMocker : public SceneSession {
 public:
     KSSceneSessionMocker(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
         : SceneSession(info, specificCallback) {}
     ~KSSceneSessionMocker() {}
 
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override
     {
         updateRectCallback_(rect, reason);
         return WSError::WS_OK;
     };
 
-    std::function<void(const WSRect& rect, const SizeChangeReason& reason)> updateRectCallback_ = nullptr;
+    int32_t GetStatusBarHeight() override
+    {
+        const int32_t statusBarHeight = 128;
+        return statusBarHeight;
+    }
+
+    UpdateSessionRectCallBack updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason& reason) {};
 };
 } // namespace Rosen
 } // namespace OHOS
