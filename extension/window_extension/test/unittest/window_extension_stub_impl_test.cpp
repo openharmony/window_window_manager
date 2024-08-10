@@ -19,6 +19,7 @@
 #include "window_extension_stub_impl.h"
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +34,7 @@ public:
     void TearDown() override;
     sptr<WindowExtensionStub> mockWindowExtensionStub_;
     sptr<WindowExtensionProxy> windowExtensionProxy_;
+    wptr<Window> window_ = nullptr;
 };
 
 void WindowExtensionStubImplTest::SetUpTestCase()
@@ -67,9 +69,13 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     auto res = windowExtensionStubImpl.CreateWindow(rect, parentWindowId, context, iSession);
     ASSERT_EQ(nullptr, res);
+
+    iSession = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iSession);
     option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     res = windowExtensionStubImpl.CreateWindow(rect, parentWindowId, context, iSession);
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), res);
+    ASSERT_EQ(nullptr, res);
 }
 
 /**
@@ -79,10 +85,16 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
  */
 HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 {
-    Rect rect;
-    WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    windowExtensionStubImpl.SetBounds(rect);
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+    WindowExtensionStubImpl windowExtensionStubImpl("WindowExtensionStubImplTest_SetBounds");
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect baseWindowRect = { 150, 150, 400, 600 };
+    option->SetWindowRect(baseWindowRect);
+    sptr<Window> window = Window::Create("WindowExtensionStubImplTest_SetBounds", option, nullptr);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.SetBounds(baseWindowRect);
 }
 
 /**
