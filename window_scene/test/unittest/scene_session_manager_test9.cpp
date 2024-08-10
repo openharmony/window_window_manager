@@ -435,7 +435,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessModalTopmostRequestFocusImmdediately02
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->ProcessSubSessionForeground(sceneSession);
 
-    ssm_->persistentId = 0;
+    subSceneSession->persistentId_ = 0;
     ssm_->ProcessModalTopmostRequestFocusImmdediately(sceneSession);
 }
 
@@ -483,11 +483,11 @@ HWTEST_F(SceneSessionManagerTest9, ProcessDialogRequestFocusImmdediately02, Func
     dialogSceneSession2->SetSessionState(SessionState::STATE_CONNECT);
     sceneSession->GetDialogVector().push_back(dialogSceneSession2);
 
-    sceneSession->GetdialogSession().push_back(nullptr);
+    sceneSession->GetDialogVector().push_back(nullptr);
 
     ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
 
-    ssm_->persistentId = 0;
+    dialogSceneSession->persistentId_ = 0;
     ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
 }
 }
