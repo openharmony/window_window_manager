@@ -1026,7 +1026,7 @@ int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParc
     int32_t pid = data.ReadInt32();
     std::vector<int32_t> persistentIds;
     data.ReadInt32Vector(&persistentIds);
-    std::vector<uint64_t> surfaceNodeIds
+    std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
     WMError errCode = GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
