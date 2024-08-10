@@ -5598,18 +5598,17 @@ NapiAsyncTask::ExecuteCallback JsWindow::GetExecuteCallback(bool enableDrag, con
 NapiAsyncTask::CompleteCallback JsWindow::GetCompleteCallback(const std::shared_ptr<WmErrorCode> &errCodePtr) const
 {
     NapiAsyncTask::CompleteCallback complete =
-        [enableDrag](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
+        [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
                 task.Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnEnableDrag failed."));
+                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set Enable Drag failed."));
                     return;
             }
             TLOGI(WmsLogTag::WMS_EVENT, "call enabledrag ret: %{public}u", ret);
-            if (ret == WMError::WM_OK) {
+            if (*errCodePtr == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "OnEnableDrag failed."));
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set Enable Drag failed."));
             }
         };
     return complete;
