@@ -19,6 +19,8 @@
 #include "wm_common.h"
 #include "window_adapter.h"
 #include "window_scene_session_impl.h"
+#include "ability_context_impl.h"
+#include "mock_session.h"
 
 
 using namespace testing;
@@ -1222,7 +1224,7 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
-    
+
     window->property_->SetPersistentId(10015);
 
     WMError ret = window->Resize(-500, -500);
