@@ -137,7 +137,7 @@ HWTEST_F(AnrManagerTest, GetBundleName, Function | SmallTest | Level1)
 {
     Rosen::ANRManager anrMgr;
     auto ret = anrMgr.GetBundleName(0, 0);
-    ASSERT_EQ(ret, "unknow");
+    ASSERT_EQ(ret, "unknown");
 
     anrMgr.appInfoGetter_ = [](int32_t pid, std::string& bundleName, int32_t uid) {
         bundleName = std::to_string(pid) + std::to_string(uid);
