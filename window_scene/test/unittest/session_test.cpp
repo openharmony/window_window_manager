@@ -1525,6 +1525,77 @@ HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
 }
+
+/**
+ * @tc.name: NotifyOccupiedAreaChangeInfo
+ * @tc.desc: NotifyOccupiedAreaChangeInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+    session_->NotifyOccupiedAreaChangeInfo(nullptr, nullptr);
+    EXPECT_NE(session_->sessionStage_, nullptr);
+}
+
+/**
+ * @tc.name: ProcessBackEvent
+ * @tc.desc: ProcessBackEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->ProcessBackEvent();
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: ProcessBackGetAndSetSessionRequestRectEvent
+ * @tc.desc: GetSessionRequestRectEvent, SetSessionRequestRectEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    session_->GetSessionRequestRect();
+    ASSERT_EQ(session_->property_, nullptr);
+
+    WSRect rect = {0, 0, 0, 0};
+    session_->SetSessionRequestRect(rect);
+    ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: SetSessionLastRect01
+ * @tc.desc: SetSessionLastRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionLastRect01, Function | SmallTest | Level2)
+{
+    WSRect rect = session_->GetSessionLastRect();
+    session_->SetSessionLastRect(rect);
+    ASSERT_EQ(rect, session_->lastWinRect_);
+}
+
+/**
+ * @tc.name: SetSessionRect01
+ * @tc.desc: SetSessionRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
+{
+    WSRect rect = session_->GetSessionRect();
+    session_->SetSessionRect(rect);
+    ASSERT_EQ(rect, session_->winRect_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
