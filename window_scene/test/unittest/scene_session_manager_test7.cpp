@@ -590,5 +590,195 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea, Function | Smal
     sceneSession->isVisible_ = false;
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
 }
+
+/**
+ * @tc.name: UpdateNormalSessionAvoidArea01
+ * @tc.desc: UpdateNormalSessionAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateNormalSessionAvoidArea01";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    int32_t persistentId = 1;
+    bool needUpdate = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->avoidAreaListenerSessionSet_.clear();
+    ssm_->avoidAreaListenerSessionSet_.insert(persistentId);
+    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+    sceneSession = nullptr;
+    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+}
+
+/**
+ * @tc.name: UnregisterWindowManagerAgent
+ * @tc.desc: UnregisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UnregisterWindowManagerAgent, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
+    ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: FindSessionByAffinity
+ * @tc.desc: FindSessionByAffinity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FindSessionByAffinity, Function | SmallTest | Level3)
+{
+    std::string affinity = "";
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->FindSessionByAffinity(affinity);
+    EXPECT_EQ(ret, nullptr);
+    affinity = "Test";
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FindSessionByAffinity";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ret = ssm_->FindSessionByAffinity(affinity);
+    EXPECT_EQ(ret, nullptr);
+    sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
+    sceneSession->sessionInfo_.sessionAffinity = "Test";
+    ret = ssm_->FindSessionByAffinity(affinity);
+    EXPECT_EQ(ret, sceneSession);
+}
+
+/**
+ * @tc.name: FindSessionByAffinity01
+ * @tc.desc: FindSessionByAffinity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FindSessionByAffinity01, Function | SmallTest | Level3)
+{
+    std::string affinity = "Test";
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->FindSessionByAffinity(affinity);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: ProcessUpdateRotationChange01
+ * @tc.desc: ProcessUpdateRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange01, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: ProcessUpdateRotationChange02
+ * @tc.desc: ProcessUpdateRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessUpdateRotationChange02, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo);
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateAvoidArea";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    WSRectF bounds = { 0, 0, 0, 0 };
+    sceneSession->SetBounds(bounds);
+    displayInfo->width_ = 0;
+    displayInfo->height_ = 0;
+    sceneSession->SetRotation(Rotation::ROTATION_0);
+    displayInfo->SetRotation(Rotation::ROTATION_90);
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo->height_ = 1;
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo->width_ = 1;
+    ssm_->ProcessUpdateRotationChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level3)
+{
+    uint64_t surfaceNodeId = 0;
+    bool isSkip = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->skipSurfaceNodeIds_.clear();
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
+    ssm_->skipSurfaceNodeIds_.push_back(surfaceNodeId);
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen01
+ * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetSkipSelfWhenShowOnVirtualScreen01, Function | SmallTest | Level3)
+{
+    uint64_t surfaceNodeId = 0;
+    bool isSkip = false;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->skipSurfaceNodeIds_.clear();
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
+    ssm_->skipSurfaceNodeIds_.push_back(surfaceNodeId);
+    ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
+}
+}
 } // namespace Rosen
 } // namespace OHOS
