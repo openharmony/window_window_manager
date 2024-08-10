@@ -1126,6 +1126,112 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 641));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
+
+    session->sessionStage_ = new SessionStageMocker();
+    EXPECT_NE(nullptr, session->sessionStage_);
+    EXPECT_EQ(WMError::WM_OK, session->SetUniqueDensityDpi(false, 641));
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyByAction02
+ * @tc.desc: HandleUpdatePropertyByAction02 function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleUpdatePropertyByAction";
+    info.bundleName_ = "HandleUpdatePropertyByAction";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
+    auto res = session->HandleUpdatePropertyByAction(nullptr, nullptr, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    res = session->HandleUpdatePropertyByAction(nullptr, session, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    res = session->HandleUpdatePropertyByAction(property, session, action);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
+    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
+    res = session->HandleUpdatePropertyByAction(property, session, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: HandleActionUpdateModeSupportInfo
+ * @tc.desc: HandleActionUpdateModeSupportInfo function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdateModeSupportInfo, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateModeSupportInfo";
+    info.bundleName_ = "HandleActionUpdateModeSupportInfo";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session2, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    ASSERT_NE(session, nullptr);
+    session->SetSessionProperty(nullptr);
+    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateModeSupportInfo(property, session2,
+        WSPropertyChangeAction::ACTION_UPDATE_RECT));
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateModeSupportInfo(property, session2,
+        WSPropertyChangeAction::ACTION_UPDATE_RECT));
+}
+
+/**
+ * @tc.name: UpdateUIParam
+ * @tc.desc: UpdateUIParam function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateUIParam, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateUIParam";
+    info.bundleName_ = "UpdateUIParam";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->isFocused_ = true;
+    session->isVisible_ = true;
+    uint32_t res = session->UpdateUIParam();
+    ASSERT_EQ(1, res);
+}
+
+/**
+ * @tc.name: UpdateVisibilityInner
+ * @tc.desc: UpdateVisibilityInner function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateVisibilityInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateVisibilityInner";
+    info.bundleName_ = "UpdateVisibilityInner";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->isVisible_ = true;
+    ASSERT_EQ(false, session->UpdateVisibilityInner(true));
+}
+
+/**
+ * @tc.name: UpdateInteractiveInner
+ * @tc.desc: UpdateInteractiveInner function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateInteractiveInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateInteractiveInner";
+    info.bundleName_ = "UpdateInteractiveInner";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->foregroundInteractiveStatus_.store(true);
+    ASSERT_EQ(false, session->UpdateInteractiveInner(true));
+    ASSERT_EQ(true, session->UpdateInteractiveInner(false));
 }
 
 /**

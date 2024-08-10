@@ -1082,6 +1082,8 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTes
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionFullScreen(fullScreen);
     ASSERT_EQ(ret, 1);
+    sceneSession->sessionStage_ = nullptr;
+    sceneSession->NotifySessionFullScreen(fullScreen);
 }
 
 /**

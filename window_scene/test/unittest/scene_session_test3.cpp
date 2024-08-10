@@ -302,11 +302,13 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     sceneSession->SetSessionProperty(property);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     auto result = sceneSession->NotifyClientToUpdateRectTask(nullptr);
-    ASSERT_NE(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
+    sceneSession->isKeyboardPanelEnabled_ = true;
     ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
