@@ -579,6 +579,20 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
 
+/**
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: WindowAdapter/GetProcessSurfaceNodeIdByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+{
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> surfaceNodeIds;
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 }
 }

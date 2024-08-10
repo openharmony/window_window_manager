@@ -133,6 +133,8 @@ public:
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
+    virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds);
     
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
