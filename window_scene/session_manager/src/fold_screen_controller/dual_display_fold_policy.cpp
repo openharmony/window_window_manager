@@ -74,12 +74,6 @@ bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
         TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
         return false;
     }
-    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
-    if (currentDisplayMode_ == FoldDisplayMode::COORDINATION && isScreenOn &&
-        displayMode == FoldDisplayMode::MAIN) {
-        TLOGI(WmsLogTag::DMS, "CurrentDisplayMode is coordination, HalfFold no need to change displaympde");
-        return false;
-    }
     return true;
 }
 
@@ -138,6 +132,12 @@ void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "SendSensorResult FoldStatus: %{public}d", foldStatus);
     FoldDisplayMode displayMode = GetModeMatchStatus();
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
+    if (currentDisplayMode_ == FoldDisplayMode::COORDINATION && isScreenOn &&
+        displayMode == FoldDisplayMode::MAIN) {
+        TLOGI(WmsLogTag::DMS, "CurrentDisplayMode is coordination, HalfFold no need to change displaympde");
+        return;
+    }
     if (displayMode != currentDisplayMode_) {
         ChangeScreenDisplayMode(displayMode);
     }
@@ -414,6 +414,6 @@ void DualDisplayFoldPolicy::ExitCoordination()
     currentDisplayMode_ = displayMode;
     globalDisplayMode_ = displayMode;
     TLOGI(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d", displayMode);
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
-
 } // namespace OHOS::Rosen
