@@ -1608,7 +1608,7 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 
 /**
  * @tc.name: InitSystemSessionDragEnable
- * @tc.desc: InitSystemSessionDragEnable
+ * @tc.desc: InitSystemSessionDragEnable Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
@@ -1620,7 +1620,7 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | Sm
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
-    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
