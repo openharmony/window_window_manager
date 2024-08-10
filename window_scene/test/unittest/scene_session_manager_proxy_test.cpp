@@ -998,6 +998,26 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest 
     sceneSessionManagerProxy_ = nullptr;
 }
 
+/**
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
+            new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> surfaceNodeIds
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetProcessSurfaceNodeIdByPersistentId(
+        pid, persistentIds, surfaceNodeIds));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
 }  // namespace
 }
 }

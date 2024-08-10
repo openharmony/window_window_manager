@@ -1654,6 +1654,37 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
     ssm_->DestroyDialogWithMainWindow(scnSession);
 }
+
+/**
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession1->SetCallingPid(123);
+    sceneSession2->SetCallingPid(123);
+    sceneSession3->SetCallingPid(111);
+
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds;
+    std::vector<uint64_t> surfaceNodeIds;
+    persistentIds.push_back(sceneSession1->GetPersistentId());
+    persistentIds.push_back(sceneSession2->GetPersistentId());
+    persistentIds.push_back(sceneSession3->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    
+    ASSERT_EQ(WSError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
+    ASSERT_EQ(0, surfaceNodeIds.size());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -233,6 +233,11 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
+    {
+        return WMError::WM_OK;
+    }
     virtual WMError GetWindowModeType(WindowModeType& windowModeType)
     {
         return WMError::WM_OK;

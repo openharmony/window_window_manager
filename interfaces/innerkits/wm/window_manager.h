@@ -733,6 +733,15 @@ public:
      */
     WindowStyleType GetWindowStyleType();
 
+    /**
+     * @brief Get window style type.
+     *
+     * @param windowStyleType WindowType
+     * @return @return WM_OK means get window style success, others means failed.
+     */
+    WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds);
+
 private:
     WindowManager();
     ~WindowManager();
