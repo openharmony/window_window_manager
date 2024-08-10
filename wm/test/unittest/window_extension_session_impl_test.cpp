@@ -83,6 +83,7 @@ namespace {
 HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
+	ASSERT_NE(nullptr, option);
     option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::MODAL);
     option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     ASSERT_NE(nullptr, option);
