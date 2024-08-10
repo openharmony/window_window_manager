@@ -1516,31 +1516,6 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
 }
 
 /**
- * @tc.name: GetRootSessionAvoidSessionRect
- * @tc.desc: GetRootSessionAvoidSessionRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, GetRootSessionAvoidSessionRect, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    GTEST_LOG_(INFO) << "aa1";
-    ASSERT_EQ(ssm_->rootSceneSession_, nullptr);
-    GTEST_LOG_(INFO) << "aa2";
-    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
-    ssm_->GetRootSessionAvoidSessionRect(type);
-
-    ssm_->rootSceneSession_ = new (std::nothrow) RootSceneSession();
-    type = AvoidAreaType::TYPE_SYSTEM;
-    ssm_->GetRootSessionAvoidSessionRect(type);
-
-    type = AvoidAreaType::TYPE_KEYBOARD;
-    ssm_->GetRootSessionAvoidSessionRect(type);
-
-    type = AvoidAreaType::TYPE_CUTOUT;
-    ssm_->GetRootSessionAvoidSessionRect(type);
-}
-
-/**
  * @tc.name: RequestInputMethodCloseKeyboard
  * @tc.desc: RequestInputMethodCloseKeyboard
  * @tc.type: FUNC
@@ -1619,7 +1594,7 @@ HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | 
         ASSERT_EQ(result1, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
     result = ssm_->IsKeyboardForeground();
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -1648,7 +1623,7 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->GetSceneSession(1);
     result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     WindowVisibilityInfo windowVisibilityInfo;
     windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;

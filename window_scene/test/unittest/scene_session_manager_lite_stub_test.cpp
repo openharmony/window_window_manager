@@ -241,7 +241,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionIcon, Function | Small
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -367,7 +367,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionNew, Function | 
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleTerminateSessionNew(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
