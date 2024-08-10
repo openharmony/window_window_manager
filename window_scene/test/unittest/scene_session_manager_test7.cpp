@@ -566,6 +566,29 @@ HWTEST_F(SceneSessionManagerTest7, GetAllSessionDumpInfo01, Function | SmallTest
     ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: UpdateNormalSessionAvoidArea
+ * @tc.desc: UpdateNormalSessionAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateNormalSessionAvoidArea";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    int32_t persistentId = 1;
+    bool needUpdate = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->avoidAreaListenerSessionSet_.clear();
+    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+    sceneSession->isVisible_ = false;
+    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
 }
 } // namespace Rosen
 } // namespace OHOS
