@@ -847,7 +847,7 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
     sessionInfo.abilityName_ = "GetMainWindowInfos";
-    sessionInfo.isSystem_ = false; 
+    sessionInfo.isSystem_ = false;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
