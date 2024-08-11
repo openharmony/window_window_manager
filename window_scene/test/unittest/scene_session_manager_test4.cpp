@@ -1792,13 +1792,46 @@ HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, Function | SmallTe
 }
 
 /**
- * @tc.name: 
- * @tc.desc: 
+ * @tc.name: ProcessModalExtensionPointDown
+ * @tc.desc: ProcessModalExtensionPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, ProcessModalExtensionPointDown, Function | SmallTest | Level3)
 {
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    int32_t posX = 1;
+    int32_t posY = 1;
+    ExtensionWindowAbilityInfo extensionWindowAbilityInfo;
+    extensionWindowAbilityInfo.persistentId = 1;
+    extensionWindowAbilityInfo.parentId = 2;
+    ssm_->extSessionInfoMap_.insert(std::make_pair(token, extensionWindowAbilityInfo));
 
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->ProcessModalExtensionPointDown(token, posX, posY);
+
+    ExtensionWindowEventInfo eventInfo;
+    eventInfo.pid = 0;
+    eventInfo.persistentId = 1;
+    sceneSession->modalUIExtensionInfoList_.push_back(eventInfo);
+    ssm_->ProcessModalExtensionPointDown(token, posX, posY);
+
+    eventInfo.persistentId = 4;
+    ssm_->ProcessModalExtensionPointDown(token, posX, posY);
+
+    eventInfo.pid = 4;
+    ssm_->ProcessModalExtensionPointDown(token, posX, posY);
+
+    sceneSession->modalUIExtensionInfoList_.clear();
+    ssm_->ProcessModalExtensionPointDown(token, posX, posY);
+    bool result = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(result));
+    usleep(WAIT_SYNC_IN_NS);
 }
 }
 } // namespace Rosen
