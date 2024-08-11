@@ -788,6 +788,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetAllDisplayPhysicalResolution(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION: {
+            ProcSetVirtualScreenSecurityExemption(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -877,5 +881,15 @@ void ScreenSessionManagerStub::ProcGetAllDisplayPhysicalResolution(MessageParcel
             break;
         }
     }
+}
+
+void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+    uint32_t pid = data.ReadUint32();
+    std::vector<uint64_t> windowIdList;
+    data.ReadUInt64Vector(&windowIdList);
+    DMError ret = SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen
