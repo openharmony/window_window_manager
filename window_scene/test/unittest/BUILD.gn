@@ -1117,6 +1117,7 @@ ohos_unittest("ws_scene_session_manager_test8") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ability_base:
   ]
 }
 

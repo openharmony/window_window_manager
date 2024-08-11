@@ -308,6 +308,8 @@ HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | Small
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.emplace(0, sceneSession);
     ssm_->NotifyUpdateRectAfterLayout();
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
 }
 
 /**
