@@ -122,6 +122,21 @@ HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: TransferKeyEvent04
+ * @tc.desc: check func TransferKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+
+    subSession_->SetParentSession(subSession_);
+    subSession_->SetSessionState(SessionState::STATE_CONNECT);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: IsTopmost01
  * @tc.desc: check func IsTopmost
  * @tc.type: FUNC
@@ -130,6 +145,21 @@ HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
 {
     subSession_->GetSessionProperty()->SetTopmost(false);
     ASSERT_EQ(false, subSession_->IsTopmost());
+
+    subSession_->GetSessionProperty()->SetTopmost(true);
+    ASSERT_EQ(true, subSession_->IsTopmost());
+}
+
+/**
+ * @tc.name: IsTopmost02
+ * @tc.desc: check func IsTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsTopmost02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    subSession_->SetSessionProperty(property);
+    ASSERT_TRUE(subSession_->GetSessionProperty() != nullptr);
 
     subSession_->GetSessionProperty()->SetTopmost(true);
     ASSERT_EQ(true, subSession_->IsTopmost());
@@ -222,6 +252,40 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Lev
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
     auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
     ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsModal01
+ * @tc.desc: check func IsModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(subSession_->IsModal());
+
+    subSession_->SetSessionProperty(nullptr);
+    ASSERT_TRUE(subSession_->GetSessionProperty() == nullptr);
+
+    ASSERT_FALSE(subSession_->IsModal());
+}
+
+/**
+ * @tc.name: IsVisibleForeground01
+ * @tc.desc: check func IsVisibleForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(subSession_->IsVisibleForeground());
+
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testMainSession3";
+    auto parentSession = new SubSession(info, specificCallback);
+
+    subSession_->SetParentSession(parentSession);
+    ASSERT_FALSE(subSession_->IsVisibleForeground());
 }
 }
 }
