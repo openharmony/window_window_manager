@@ -1649,6 +1649,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_NE(property, nullptr);
     ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
 }
 
