@@ -46,6 +46,11 @@ void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const 
 {
 }
 
+bool TraverseFuncTest(const sptr<SceneSession>& session)
+{
+    return true;
+}
+
 void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
@@ -79,25 +84,15 @@ void SceneSessionManagerTest9::TearDown()
 
 namespace {
 /**
- * @tc.name: TraverseSessionTreeFromTopToBottom01
+ * @tc.name: TraverseSessionTreeFromTopToBottom
  * @tc.desc: TraverseSessionTreeFromTopToBottom
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    TraverseFunc func;
-    ssm_->TraverseSessionTreeFromTopToBottom(func);
-}
+    ssm_->TraverseSessionTreeFromTopToBottom(TraverseFuncTest);
 
-/**
- * @tc.name: TraverseSessionTreeFromTopToBottom02
- * @tc.desc: TraverseSessionTreeFromTopToBottom
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "TraverseSessionTreeFromTopToBottom";
@@ -105,6 +100,7 @@ HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom02, Functio
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, nullptr));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->TraverseSessionTreeFromTopToBottom(TraverseFuncTest);
 }
 
 /**
