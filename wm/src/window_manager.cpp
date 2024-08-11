@@ -1327,5 +1327,6 @@ WindowStyleType WindowManager::GetWindowStyleType()
     }
     return styleType;
 }
+
 } // namespace Rosen
 } // namespace OHOS
