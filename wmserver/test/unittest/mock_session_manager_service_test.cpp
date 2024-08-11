@@ -193,6 +193,20 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Functi
     ASSERT_EQ(nullptr, sessionManagerService);
     MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(100);
 }
+
+/**
+ * @tc.name: GetSessionManagerServiceByUserId
+ * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+{
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> surfaceNodeIds;
+    MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
+    ASSERT_EQ(0, surfaceNodeIds.size());
+}
 }
 }
 }
