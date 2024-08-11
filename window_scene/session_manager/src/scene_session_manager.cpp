@@ -10080,4 +10080,34 @@ void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProces
     rootSceneProcessBackEventFunc_ = processBackEventFunc;
     TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
+
+WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+    const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "The caller has no permission granted.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    surfaceNodeIds.clear();
+    TLOGI(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId, pid:%{public}d", pid);
+    for (auto persistentId : persistentIds) {
+        TLOGI(WmsLogTag::DEFAULT, "convert wid:%{public}d", persistentId);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        auto callingPid = sceneSession->GetCallingPid();
+        auto surfaceNode = sceneSession->GetSurfaceNode();
+        if (surfaceNode != nullptr && callingPid == pid) {
+            surfaceNodeIds.push_back(surfaceNode->GetId());
+            auto leashWinSurfaceNode = sceneSession->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode != nullptr) {
+                surfaceNodeIds.push_back(leashWinSurfaceNode->GetId());
+            }
+        }
+    }
+
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
