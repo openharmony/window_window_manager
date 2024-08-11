@@ -578,6 +578,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
     windowAdapter.GetWindowStyleType(windowStyleType);
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
+
 }
 }
 }
