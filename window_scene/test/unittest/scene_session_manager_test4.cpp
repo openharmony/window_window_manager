@@ -20,6 +20,7 @@
 
 #include "context.h"
 #include "interfaces/include/ws_common.h"
+#include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
