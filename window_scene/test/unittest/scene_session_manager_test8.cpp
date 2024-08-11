@@ -544,6 +544,98 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
         WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
+/**
+ * @tc.name: RegisterRequestFocusStatusNotifyManagerFunc
+ * @tc.desc: test function : RegisterRequestFocusStatusNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
+    EXPECT_EQ(nullptr, sceneSession);
+}
+
+/**
+ * @tc.name: CheckRequestFocusImmdediately
+ * @tc.desc: test function : CheckRequestFocusImmdediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CheckRequestFocusImmdediately";
+    sessionInfo.abilityName_ = "CheckRequestFocusImmdediately";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
+    ssm_->CheckRequestFocusImmdediately(sceneSession);
+}
+
+/**
+ * @tc.name: NotifyLoadAbility
+ * @tc.desc: test function : NotifyLoadAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyLoadAbility, Function | SmallTest | Level3)
+{
+    int32_t collaboratorType = 100;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
+    ssm_->collaboratorMap_.clear();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        sptr<AAFwk::AbilityManagerCollaboratorProxy>::MakeSptr(iRemoteObjectMocker);
+    ssm_->collaboratorMap_.emplace(100, collaborator);
+    auto iter = ssm_->collaboratorMap_.find(100);
+    EXPECT_EQ(collaborator, iter->second);
+    ssm_->NotifyLoadAbility(collaboratorType, nullptr, nullptr);
+}
+
+/**
+ * @tc.name: HandleTurnScreenOn
+ * @tc.desc: test function : HandleTurnScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, HandleTurnScreenOn, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->HandleTurnScreenOn(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "HandleTurnScreenOn";
+    sessionInfo.abilityName_ = "HandleTurnScreenOn";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->GetSessionProperty()->SetTurnScreenOn(false);
+    ssm_->HandleTurnScreenOn(sceneSession);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->IsTurnScreenOn());
+    sceneSession->GetSessionProperty()->SetTurnScreenOn(true);
+    ssm_->HandleTurnScreenOn(sceneSession);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+}
+/**
+ * @tc.name: HandleKeepScreenOn
+ * @tc.desc: test function : HandleKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "HandleTurnScreenOn";
+    sessionInfo.abilityName_ = "HandleTurnScreenOn";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    ssm_->HandleKeepScreenOn(sceneSession, false);
+    sceneSession->keepScreenLock_ = nullptr;
+    ssm_->HandleKeepScreenOn(sceneSession, true);
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(true));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
