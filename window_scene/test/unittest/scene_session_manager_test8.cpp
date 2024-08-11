@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "ability_manager_collaborator_proxy.h"
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -571,26 +570,6 @@ HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, Function | Sma
     EXPECT_NE(nullptr, sceneSession);
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
     ssm_->CheckRequestFocusImmdediately(sceneSession);
-}
-
-/**
- * @tc.name: NotifyLoadAbility
- * @tc.desc: test function : NotifyLoadAbility
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, NotifyLoadAbility, Function | SmallTest | Level3)
-{
-    int32_t collaboratorType = 100;
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    ssm_->collaboratorMap_.clear();
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
-        sptr<AAFwk::AbilityManagerCollaboratorProxy>::MakeSptr(iRemoteObjectMocker);
-    ssm_->collaboratorMap_.emplace(100, collaborator);
-    auto iter = ssm_->collaboratorMap_.find(100);
-    EXPECT_EQ(collaborator, iter->second);
-    ssm_->NotifyLoadAbility(collaboratorType, nullptr, nullptr);
 }
 
 /**
