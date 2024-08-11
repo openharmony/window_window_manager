@@ -1629,6 +1629,54 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
     ssm_->DestroyDialogWithMainWindow(scnSession);
 }
+
+/**
+ * @tc.name: RequestSceneSessionDestruction
+ * @tc.desc: RequestSceneSessionDestruction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession;
+    bool needRemoveSession = true;
+    bool isSaveSnapshot = true;
+    bool isForceClean = true;
+    auto result = ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, result);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+
+    info.isClearSession = true;
+    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+    info.resultCode = 0;
+    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+}
+
+/**
+ * @tc.name: NotifySessionAINavigationBarChange
+ * @tc.desc: NotifySessionAINavigationBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->NotifySessionAINavigationBarChange(persistentId);
+
+    persistentId = 0;
+    Session session(info);
+    session.isVisible_ = true;
+    session.state_ = SessionState::STATE_FOREGROUND;
+    ssm_->NotifySessionAINavigationBarChange(persistentId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
