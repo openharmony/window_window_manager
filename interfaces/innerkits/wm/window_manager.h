@@ -733,17 +733,6 @@ public:
      */
     WindowStyleType GetWindowStyleType();
 
-    /**
-     * @brief Get process surfaceNodeId by persistentId.
-     *
-     * @param pid pid
-     * @param persistentIds persistentIds
-     * @param surfaceNodeIds surfaceNodeIds
-     * @return @return WM_OK means get surfaceNodeId success, others means failed.
-     */
-    WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds);
-
 private:
     WindowManager();
     ~WindowManager();

@@ -743,5 +743,28 @@ void MockSessionManagerService::WriteStringToFile(int32_t pid, const char* str)
     }
     close(fd);
 }
+
+void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+    const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
+{
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        WLOGFE("sessionManagerService is nullptr");
+        return;
+    }
+    if (!sceneSessionManager_) {
+        WLOGFW("Get scene session manager ...");
+        GetSceneSessionManager();
+        if (!sceneSessionManager_) {
+            WLOGFW("Get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    WSError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
+    if (ret != WSError::WS_OK) {
+        WLOGFD("sessionManagerService set failed!");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
