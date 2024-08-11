@@ -761,7 +761,8 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
         }
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
-    WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
+    WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(
+        pid, persistentIds, surfaceNodeIds);
     if (ret != WMError::WM_OK) {
         TLOGI(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
     }
