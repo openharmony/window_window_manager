@@ -5077,4 +5077,38 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
     return rsInterface_.SetVirtualScreenStatus(screenId, screenStatus);
 }
 
+DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_CALLING;
+    }
+
+    // MockSessionManagerService提供的接口有误，临时规避
+    std::vector<int32_t> tmpWindowIdList;
+    for (uint64_t id : windowIdList) {
+        tmpWindowIdList.push_back(static_cast<int32_t>(id));
+    }
+    std::vector<uint64_t> surfaceNodeIds;
+    MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
+        pid, tmpWindowIdList, surfaceNodeIds);
+    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+    auto ret = rsInterface_.SetVirtualScreenSecurityExemptionList(rsId, surfaceNodeIds);
+
+    std::ostringstream oss;
+    oss << "screenId:" << screenId << ", rsID: " << rsId << ", pid: " << pid
+        << ", winListSize:[ ";
+    for (auto val : windowIdList) {
+        oss << val << " ";
+    }
+    oss << "]" << ", surfaceListSize:[ ";
+    for (auto val : surfaceNodeIds) {
+        oss << val << " ";
+    }
+    oss << "]" << ", ret: " << ret;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    return ret == 0 ? DMError::DM_OK : DMError::DM_ERROR_UNKNOWN;
+}
+
 } // namespace OHOS::Rosen
