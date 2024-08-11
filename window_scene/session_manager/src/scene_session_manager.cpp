@@ -10101,6 +10101,10 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
         auto surfaceNode = sceneSession->GetSurfaceNode();
         if (surfaceNode != nullptr && callingPid == pid) {
             surfaceNodeIds.push_back(surfaceNode->GetId());
+            auto leashWinSurfaceNode = sceneSession->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode != nullptr) {
+                surfaceNodeIds.push_back(leashWinSurfaceNode->GetId());
+            }
         }
     }
 
