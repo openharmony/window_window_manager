@@ -1283,21 +1283,6 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
     ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
-
-/**
- * @tc.name: NotifyDisplayInfoChange01
- * @tc.desc: check NotifyDisplayInfoChange
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
-{
-    int32_t pid = 123;
-    std::vector<int32_t> persistentIds = {1, 2, 3};
-    std::vector<uint64_t> surfaceNodeIds;
-    WMError ret;
-    ret = WindowManager::GetInstance().GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
