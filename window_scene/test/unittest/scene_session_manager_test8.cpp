@@ -633,7 +633,8 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
     ssm_->HandleKeepScreenOn(sceneSession, false);
     sceneSession->keepScreenLock_ = nullptr;
     ssm_->HandleKeepScreenOn(sceneSession, true);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(true));
+    bool enable = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
 }
 
 }
