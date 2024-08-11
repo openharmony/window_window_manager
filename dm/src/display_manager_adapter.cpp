@@ -777,6 +777,13 @@ std::vector<DisplayPhysicalResolution> DisplayManagerAdapter::GetAllDisplayPhysi
     return displayManagerServiceProxy_->GetAllDisplayPhysicalResolution();
 }
 
+DMError DisplayManagerAdapter::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
+}
+
 bool ScreenManagerAdapter::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
 {
     INIT_PROXY_CHECK_RETURN(false);

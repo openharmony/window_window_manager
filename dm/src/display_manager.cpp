@@ -1921,7 +1921,8 @@ DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uin
 DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
     std::vector<uint64_t>& windowIdList)
 {
-    return DMError::DM_OK;
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
+        screenId, pid, windowIdList);
 }
 } // namespace OHOS::Rosen
 
