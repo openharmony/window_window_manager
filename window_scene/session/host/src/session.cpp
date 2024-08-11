@@ -2558,6 +2558,10 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetMaximizeMode(mode);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
@@ -2868,6 +2872,10 @@ WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
 
@@ -2892,6 +2900,10 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SwitchFreeMultiWindow(enable);
 }
