@@ -262,7 +262,7 @@ public:
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
 
     virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
