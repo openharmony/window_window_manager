@@ -779,6 +779,27 @@ HWTEST_F(SceneSessionManagerTest7, SetSkipSelfWhenShowOnVirtualScreen01, Functio
     ssm_->skipSurfaceNodeIds_.push_back(surfaceNodeId);
     ssm_->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
 }
+
+/**
+ * @tc.name: WindowLayerInfoChangeCallback
+ * @tc.desc: WindowLayerInfoChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, WindowLayerInfoChangeCallback, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSOcclusionData> occlusiontionData = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->WindowLayerInfoChangeCallback(occlusiontionData);
+    VisibleData visibleData;
+    visibleData.push_back(std::make_pair(1, WINDOW_LAYER_INFO_TYPE::SEMI_VISIBLE));
+    visibleData.push_back(std::make_pair(2, WINDOW_LAYER_INFO_TYPE::INVISIBLE));
+    visibleData.push_back(std::make_pair(3, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_DYNAMIC_STATUS));
+    visibleData.push_back(std::make_pair(4, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_STATIC_STATUS));
+    visibleData.push_back(std::make_pair(5, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_UNKNOWN_TYPE));
+    occlusiontionData = std::make_shared(RSOcclusionData)(visibleData);
+    ASSERT_NE(occlusiontionData, nullptr);
+    ssm_->WindowLayerInfoChangeCallback(occlusiontionData);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
