@@ -1790,6 +1790,16 @@ HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, Function | SmallTe
     result = ssm_->RequestFocusSpecificCheck(sceneSession, byForeground, reason);
     EXPECT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+{
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
