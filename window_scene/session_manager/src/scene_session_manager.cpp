@@ -10092,7 +10092,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     surfaceNodeIds.clear();
     TLOGI(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId, pid:%{public}d", pid);
     for (auto persistentId : persistentIds) {
-        TLOGI(WmsLogTag::DEFAULT, "wid:%{public}d", persistentId);
+        TLOGI(WmsLogTag::DEFAULT, "convert wid:%{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             continue;

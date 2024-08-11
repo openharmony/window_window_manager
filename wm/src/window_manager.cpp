@@ -1327,17 +1327,5 @@ WindowStyleType WindowManager::GetWindowStyleType()
     }
     return styleType;
 }
-
-WMError WindowManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-    const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
-{
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetProcessSurfaceNodeIdByPersistentId(
-        pid, persistentIds, surfaceNodeIds);
-    if (ret != WMError::WM_OK) {
-        WLOGFE("Get process surfaceNodeId by persistentId failed");
-    }
-    return ret;
-}
-
 } // namespace Rosen
 } // namespace OHOS
