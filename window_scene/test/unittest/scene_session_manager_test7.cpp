@@ -781,6 +781,40 @@ HWTEST_F(SceneSessionManagerTest7, SetSkipSelfWhenShowOnVirtualScreen01, Functio
 }
 
 /**
+ * @tc.name: GetMainWindowInfos
+ * @tc.desc: GetMainWindowInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetMainWindowInfos, Function | SmallTest | Level3)
+{
+    int32_t topNum = 1;
+    std::vector<MainWindowInfo> topNInfo;
+    topNInfo.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "GetMainWindowInfos";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->GetMainWindowInfos(topNum, topNInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    sceneSession->isVisible_ = false;
+    ret = ssm_->GetMainWindowInfos(topNum, topNInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = ssm_->GetMainWindowInfos(topNum, topNInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    sceneSession->isVisible_ = true;
+    ret = ssm_->GetMainWindowInfos(topNum, topNInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: WindowLayerInfoChangeCallback
  * @tc.desc: WindowLayerInfoChangeCallback
  * @tc.type: FUNC
@@ -791,14 +825,104 @@ HWTEST_F(SceneSessionManagerTest7, WindowLayerInfoChangeCallback, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowLayerInfoChangeCallback(occlusiontionData);
     VisibleData visibleData;
+    visibleData.push_back(std::make_pair(0, WINDOW_LAYER_INFO_TYPE::ALL_VISIBLE));
     visibleData.push_back(std::make_pair(1, WINDOW_LAYER_INFO_TYPE::SEMI_VISIBLE));
     visibleData.push_back(std::make_pair(2, WINDOW_LAYER_INFO_TYPE::INVISIBLE));
     visibleData.push_back(std::make_pair(3, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_DYNAMIC_STATUS));
     visibleData.push_back(std::make_pair(4, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_STATIC_STATUS));
     visibleData.push_back(std::make_pair(5, WINDOW_LAYER_INFO_TYPE::WINDOW_LAYER_UNKNOWN_TYPE));
-    occlusiontionData = std::make_shared(RSOcclusionData)(visibleData);
-    ASSERT_NE(occlusiontionData, nullptr);
+    occlusiontionData = std::make_shared<RSOcclusionData>(visibleData);
+    ASSERT_NE(nullptr, occlusiontionData);
     ssm_->WindowLayerInfoChangeCallback(occlusiontionData);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "GetMainWindowInfos";
+    sessionInfo.isSystem_ = false; 
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
+    sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
+    sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ssm_->NotifySessionMovedToFront(persistentId);
+    sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = true;
+    ssm_->NotifySessionMovedToFront(persistentId);
+    sceneSession->sessionInfo_.abilityInfo = nullptr;
+    ssm_->NotifySessionMovedToFront(persistentId);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    ssm_->NotifySessionMovedToFront(persistentId);
+    ssm_->listenerController_ = nullptr;
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: ProcessVirtualPixelRatioChange02
+ * @tc.desc: ProcessVirtualPixelRatioChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange02, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_NE(nullptr, displayInfo);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessVirtualPixelRatioChange02";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<SceneSession> sceneSession1 = nullptr;
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: ProcessVirtualPixelRatioChange03
+ * @tc.desc: ProcessVirtualPixelRatioChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange03, Function | SmallTest | Level3)
+{
+    DisplayId defaultDisplayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_NE(nullptr, displayInfo);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessVirtualPixelRatioChange03";
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession2->SetSessionState(SessionState::STATE_INACTIVE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession2));
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 }
 } // namespace Rosen
