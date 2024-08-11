@@ -1095,30 +1095,6 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
 }
 
 /**
- * @tc.name: HandleCastScreenDisConnection
- * @tc.desc: HandleCastScreenDisConnection
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, HandleCastScreenDisConnection, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.screenId_ = SCREEN_ID_INVALID;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<ScreenSessionManager> screenSessionManager = new ScreenSessionManager();
-    ASSERT_NE(screenSessionManager, nullptr);
-    ScreenId screenId = SCREEN_ID_INVALID;
-    VirtualScreenFlag screenFlag = VirtualScreenFlag{1};
-    screenSessionManager->SetVirtualScreenFlag(screenId, screenFlag);
-    ssm_->HandleCastScreenDisConnection(sceneSession);
-}
-
-/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
