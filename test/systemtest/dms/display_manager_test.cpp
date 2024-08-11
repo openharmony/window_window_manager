@@ -373,5 +373,20 @@ HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, Function | SmallTest | Lev
     ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(id, surfaceNode));
 }
 
+/**
+ * @tc.name: AddSurfaceNodeToDisplay | RemoveSurfaceNodeFromDisplay
+ * @tc.desc: add/remove surfaceNode to/from display
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level2)
+{
+    ScreenId id = 0;
+    uint32_t pid = 0;
+    std::vector<uint64_t> windowList;
+    auto ret = DisplayManager::GetInstance().SetVirtualScreenSecurityExemption(id, pid, windowList);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    sleep(2);
+}
+
 }
 } // namespace OHOS::Rosen
