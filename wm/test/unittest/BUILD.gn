@@ -667,6 +667,19 @@ ohos_unittest("wm_window_adapter_lite_test") {
   ]
 }
 
+ohos_unittest("ws_window_prepare_terminate_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_prepare_terminate_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
