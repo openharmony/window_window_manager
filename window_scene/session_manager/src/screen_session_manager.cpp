@@ -1180,6 +1180,13 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return screenSession;
     }
 
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        // pc is none, pad&&phone is mirror
+        if (phyScreenPropMap_.size() > 1) {
+            TLOGI(WmsLogTag::DMS, "Only Support one External screen.");
+            return nullptr;
+        }
+    }
     ScreenId rsId = screenId;
     screenIdManager_.UpdateScreenId(rsId, screenId);
 
