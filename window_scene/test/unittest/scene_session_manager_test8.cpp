@@ -616,6 +616,22 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
 }
 
+HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "HandleTurnScreenOn";
+    sessionInfo.abilityName_ = "HandleTurnScreenOn";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    ssm_->HandleKeepScreenOn(sceneSession, false);
+    sceneSession->keepScreenLock_ = nullptr;
+    ssm_->HandleKeepScreenOn(sceneSession, true);
+    bool enable = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
