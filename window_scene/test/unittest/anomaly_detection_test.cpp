@@ -83,6 +83,7 @@ void SessionVisibleTest(sptr<SceneSessionManager> ssm_)
     auto sceneSession = GetSceneSession("SessionVisibleTest");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->isVisible_ = false;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     AnomalyDetection::SceneZOrderCheckProcess();
@@ -95,6 +96,7 @@ void ZeroOrderTest(sptr<SceneSessionManager> ssm_)
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->zOrder_ = 0;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     AnomalyDetection::SceneZOrderCheckProcess();
@@ -109,6 +111,7 @@ void EQOrderTest(sptr<SceneSessionManager> ssm_)
     auto sceneSession1 = GetSceneSession("EQOrderTest1");
     ASSERT_NE(sceneSession1, nullptr);
     sceneSession1->isVisible_ = true;
+    sceneSession1->state_ = SessionState::STATE_ACTIVE;
     sceneSession1->sessionInfo_.persistentId_ = persistentId1;
     sceneSession1->zOrder_ = sameOrder;
     sceneSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -118,6 +121,7 @@ void EQOrderTest(sptr<SceneSessionManager> ssm_)
     auto sceneSession2 = GetSceneSession("EQOrderTest2");
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->isVisible_ = true;
+    sceneSession2->state_ = SessionState::STATE_ACTIVE;
     sceneSession2->sessionInfo_.persistentId_ = persistentId2;
     sceneSession2->zOrder_ = sameOrder;
     sceneSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -135,6 +139,7 @@ void WindowTypeTest(sptr<SceneSessionManager> ssm_)
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->zOrder_ = order;
     sceneSession->GetSessionProperty()->SetCallingSessionId(callingId);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
@@ -145,6 +150,7 @@ void WindowTypeTest(sptr<SceneSessionManager> ssm_)
     callingSession->SetSessionInfoPersistentId(callingId);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     callingSession->isVisible_ = true;
+    callingSession->state_ = SessionState::STATE_ACTIVE;
     callingSession->zOrder_ = sceneSession->GetZOrder() + 1;
     ssm_->sceneSessionMap_.insert({callingSession->GetPersistentId(), callingSession});
     AnomalyDetection::SceneZOrderCheckProcess();
@@ -165,6 +171,7 @@ void SubWindowTest(sptr<SceneSessionManager> ssm_)
     sceneSession->zOrder_ = order;
     sceneSession->GetSessionProperty()->SetCallingSessionId(mainId);
     sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->property_->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     AnomalyDetection::SceneZOrderCheckProcess();
@@ -176,6 +183,7 @@ void SubWindowTest(sptr<SceneSessionManager> ssm_)
     ASSERT_NE(mainSession, nullptr);
     mainSession->SetSessionInfoPersistentId(mainId);
     mainSession->isVisible_ = true;
+    mainSession->state_ = SessionState::STATE_ACTIVE;
     mainSession->zOrder_ = sceneSession->GetZOrder() + 1;
     mainSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert({mainSession->GetPersistentId(), mainSession});
@@ -200,6 +208,7 @@ void KeyGUARDTest(sptr<SceneSessionManager> ssm_)
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->zOrder_ = order;
     sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     AnomalyDetection::SceneZOrderCheckProcess();
@@ -218,12 +227,14 @@ void IsShowWhenLockedTest(sptr<SceneSessionManager> ssm_)
     sceneSession1->zOrder_ = order--;
     sceneSession1->SetSessionInfoPersistentId(id++);
     sceneSession1->isVisible_ = true;
+    sceneSession1->state_ = SessionState::STATE_ACTIVE;
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
 
     auto sceneSession2 = GetSceneSession("IsShowWhenLockedTest2");
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession2->isVisible_ = true;
+    sceneSession2->state_ = SessionState::STATE_ACTIVE;
     sceneSession2->zOrder_ = order--;
     sceneSession2->SetSessionInfoPersistentId(id++);
     sceneSession2->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
@@ -304,9 +315,13 @@ void BlockingFocusTest(sptr<SceneSessionManager> ssm_)
     AnomalyDetection::FocusCheckProcess(0, 1);
 
     sceneSession2->isVisible_ = true;
+    sceneSession2->state_ = SessionState::STATE_ACTIVE;
     AnomalyDetection::FocusCheckProcess(0, 1);
 
     sceneSession2->SetSystemTouchable(false);
+    AnomalyDetection::FocusCheckProcess(0, 1);
+
+    sceneSession2->SetSystemTouchable(true);
     AnomalyDetection::FocusCheckProcess(0, 1);
     ssm_->sceneSessionMap_.clear();
 }
