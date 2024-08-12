@@ -116,7 +116,7 @@ void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent eve
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
