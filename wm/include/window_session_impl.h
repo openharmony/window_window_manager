@@ -236,6 +236,7 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
     /*

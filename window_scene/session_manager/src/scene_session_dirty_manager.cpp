@@ -430,6 +430,8 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         return;
     }
     bool dragEnabled = sessionProperty->GetDragEnabled();
+    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", sceneSession->GetWindowName().c_str(),
+        dragEnabled);
     if (dragEnabled) {
         float vpr = 1.5f; // 1.5: default vp
         auto displayId = sessionProperty->GetDisplayId();
@@ -446,6 +448,9 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
             return;
         }
         auto limits = sessionProperty->GetWindowLimits();
+        TLOGD(WmsLogTag::WMS_EVENT, "%{public}s [minWidth,maxWidth,minHeight,maxHeight]: %{public}d,"
+            " %{public}d, %{public}d, %{public}d", sceneSession->GetWindowName().c_str(), limits.minWidth_,
+            limits.maxWidth_, limits.minHeight_, limits.maxHeight_);
         if (limits.minWidth_ == limits.maxWidth_ && limits.minHeight_ != limits.maxHeight_) {
             pointerChangeAreas = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
                 POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
@@ -460,7 +465,8 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
-        WLOGFD("UpdatePointerAreas sceneSession is: %{public}d dragEnabled is false", sceneSession->GetPersistentId());
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragEnabled is false",
+            sceneSession->GetPersistentId());
     }
 }
 
@@ -527,9 +533,12 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
     bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
+        !(Rosen::WindowHelper::IsDialogWindow(windowType));
     if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        (isMainWindow || isDecorDialog || isDecorSubWindow) &&
-        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) || (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
+        (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogSystemWindow) &&
+        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+        (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
     std::vector<MMI::Rect> touchHotAreas;

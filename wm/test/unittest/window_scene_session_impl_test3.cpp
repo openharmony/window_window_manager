@@ -1605,6 +1605,30 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
 }
+
+/**
+ * @tc.name: InitSystemSessionEnableDrag
+ * @tc.desc: InitSystemSessionEnableDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("InitSystemSessionEnableDrag");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    window->hostSession_ = session;
+    window->InitSystemSessionEnableDrag();
+}
 }
 } // namespace Rosen
 } // namespace OHOS

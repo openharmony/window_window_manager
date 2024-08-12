@@ -440,6 +440,28 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
     window->GetCallingWindowRect(rect);
 }
 
+
+/**
+ * @tc.name: EnableDrag
+ * @tc.desc: EnableDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, EnableDrag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("EnableDrag");
+    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, windowSession);
+    windowSession->property_->SetPersistentId(1);
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    windowSession->hostSession_ = session;
+    windowSession->EnableDrag(true);
+}
+
 /**
  * @tc.name: GetCallingWindowWindowStatus
  * @tc.desc: GetCallingWindowWindowStatus Test

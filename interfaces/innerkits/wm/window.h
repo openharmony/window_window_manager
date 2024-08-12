@@ -1832,6 +1832,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable drag window.
+     *
+     * @param enableDrag The value true means to enable window dragging, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set whether to display the maximize, minimize, split buttons of main window.
      *
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
