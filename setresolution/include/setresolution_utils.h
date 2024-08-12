@@ -33,7 +33,7 @@ public:
     SetResolutionUtils() = default;
     ~SetResolutionUtils() = default;
 
-    static void PrintUsage(const std::string &cmdLine);
+    static void PrintUsage(const std::string& cmdLine);
     static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
 };
 }

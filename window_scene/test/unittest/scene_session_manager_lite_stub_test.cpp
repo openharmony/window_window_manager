@@ -126,7 +126,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
     {
     }
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override
+    WMError CheckWindowId(int32_t windowId, int32_t& pid) override
     {
         return WMError::WM_OK;
     }

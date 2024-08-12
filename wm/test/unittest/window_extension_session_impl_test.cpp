@@ -422,7 +422,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, Function
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    NotifyTransferComponentDataFunc func = [](const AAFwk::WantParams &wantParams) -> AAFwk::WantParams {
+    NotifyTransferComponentDataFunc func = [](const AAFwk::WantParams& wantParams) -> AAFwk::WantParams {
         AAFwk::WantParams retWantParams;
         return retWantParams;
     };
@@ -456,7 +456,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync02, Func
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    NotifyTransferComponentDataForResultFunc func = [](const AAFwk::WantParams &wantParams) -> AAFwk::WantParams {
+    NotifyTransferComponentDataForResultFunc func = [](const AAFwk::WantParams& wantParams) -> AAFwk::WantParams {
         AAFwk::WantParams retWantParams;
         return retWantParams;
     };

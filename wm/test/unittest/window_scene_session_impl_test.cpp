@@ -34,7 +34,7 @@ using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
     MOCK_METHOD3(OnSizeChange,
-        void(Rect rect, WindowSizeChangeReason reason, const std::shared_ptr<RSTransaction> &rsTransaction));
+        void(Rect rect, WindowSizeChangeReason reason, const std::shared_ptr<RSTransaction>& rsTransaction));
 };
 
 class MockWindowLifeCycleListener : public IWindowLifeCycle {

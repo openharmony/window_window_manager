@@ -150,7 +150,7 @@ bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const s
     return true;
 }
 
-std::string DumpTransformInDisplayInfo(const std::vector<float> &transform)
+std::string DumpTransformInDisplayInfo(const std::vector<float>& transform)
 {
     std::stringstream stream("[");
     for (float transformItem : transform) {

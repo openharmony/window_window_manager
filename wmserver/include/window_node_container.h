@@ -84,8 +84,8 @@ public:
     void SetBelowScreenlockVisible(sptr<WindowNode>& node, bool visible);
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
-    WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t> &exceptionalIds = {},
-                                         const std::vector<WindowMode> &exceptionalModes = {});
+    WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t>& exceptionalIds = {},
+                                         const std::vector<WindowMode>& exceptionalModes = {});
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, DisplayId displayId, bool reorder = false);
     void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);

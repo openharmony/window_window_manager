@@ -163,7 +163,7 @@ void InputWindowMonitor::TransformWindowRects(const sptr<WindowNode>& windowNode
     }
 }
 
-void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
+void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                                              std::vector<MMI::WindowInfo>& windowsInfo)
 {
     std::map<uint32_t, sptr<WindowNode>> dialogWindowMap;

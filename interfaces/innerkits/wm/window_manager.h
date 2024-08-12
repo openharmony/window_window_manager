@@ -639,7 +639,7 @@ public:
      * @param infos session infos
      * @return WM_OK means set success, others means set failed.
      */
-    WMError DumpSessionAll(std::vector<std::string> &infos);
+    WMError DumpSessionAll(std::vector<std::string>& infos);
 
     /**
      * @brief Dump session info with id
@@ -647,7 +647,7 @@ public:
      * @param infos session infos
      * @return WM_OK means set success, others means set failed.
      */
-    WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
+    WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos);
 
     /**
      * @brief Get uiContent remote object

@@ -31,7 +31,7 @@ extern "C" __attribute__((constructor)) void NAPI_application_WindowExtensionCon
 }
 
 extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowExtensionContext_GetJSCode(
-    const char **buf, int *bufLen)
+    const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_extension_context_js_start;
@@ -44,7 +44,7 @@ extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowEx
 
 // window extension context JS register
 extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowExtensionContext_GetABCCode(
-    const char **buf, int *buflen)
+    const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_extension_context_abc_start;

@@ -33,7 +33,7 @@ public:
     explicit SessionManagerServiceLiteRecoverListener() = default;
 
     virtual int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+        uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
             TLOGE(WmsLogTag::WMS_RECOVER, "InterfaceToken check failed");
@@ -246,7 +246,7 @@ void SessionManagerLite::OnWMSConnectionChanged(
     OnWMSConnectionChangedCallback(userId, screenId, isConnected, isCallbackRegistered);
 }
 
-void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService)
+void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched Lite");
     {

@@ -20,13 +20,13 @@
 #include <string>
 
 namespace OHOS {
-void SetResolutionUtils::PrintUsage(const std::string &cmdLine)
+void SetResolutionUtils::PrintUsage(const std::string& cmdLine)
 {
     std::cout << "usage: " << cmdLine.c_str() <<
         " [-w width] [-h height] [-d dpi] [-m]" << std::endl;
 }
 
-bool SetResolutionUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdArgments)
+bool SetResolutionUtils::ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments)
 {
     int opt = 0;
     const struct option longOption[] = {

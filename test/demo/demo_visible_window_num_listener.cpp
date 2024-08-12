@@ -42,7 +42,7 @@ public:
 using namespace OHOS;
 using namespace OHOS::Rosen;
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::cout << "===========================Start===========================" << std::endl;
 

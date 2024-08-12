@@ -26,7 +26,7 @@ public:
     SessionManagerServiceStub() = default;
     virtual ~SessionManagerServiceStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 };
 } // namespace OHOS::Rosen
 
