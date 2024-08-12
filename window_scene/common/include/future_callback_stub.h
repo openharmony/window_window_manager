@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_FUTURE_CALLBACK_STUB_H
 #define OHOS_ROSEN_FUTURE_CALLBACK_STUB_H
 
-#include <map>
-
 #include "future_callback_interface.h"
 #include "iremote_stub.h"
 
@@ -28,11 +26,12 @@ public:
     FutureCallbackStub() = default;
     ~FutureCallbackStub() = default;
 
-    virtual int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
 
 private:
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace Rosen

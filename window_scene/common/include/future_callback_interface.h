@@ -32,7 +32,7 @@ public:
     };
 
     virtual WSError OnUpdateSessionRect(const WSRect& rect) = 0;
-    virtual WSRect GetResult(long timeOut) { return WSRect({0, 0, 0, 0}); }
+    virtual WSRect GetResult(long timeOut) { return {0, 0, 0, 0}; }
     virtual void ResetLock() {}
 };
 } // namespace Rosen
