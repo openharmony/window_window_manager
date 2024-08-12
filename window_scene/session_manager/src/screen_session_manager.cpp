@@ -664,13 +664,10 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
         TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
-        "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
-        "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
-        info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_,
-        displayInfo->GetWidth(),
-        displayInfo->GetHeight(),
-        displayInfo->GetRotation(),
-        displayInfo->GetDisplayOrientation());
+            "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
+            "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
+            info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
+            displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
 
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
