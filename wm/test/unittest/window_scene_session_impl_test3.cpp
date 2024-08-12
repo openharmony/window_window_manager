@@ -660,6 +660,29 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SetWindowLimits01
+ * @tc.desc: SetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindow = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->SetWindowName("SetWindowLimits01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
+    windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    windowSceneSessionImpl->property_->SetPersistentId(1004);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    windowSceneSessionImpl->hostSession_ = subSession;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits));
+}
+
+/**
  * @tc.name: IsValidSystemWindowType
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC
@@ -920,6 +943,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     window->hostSession_ = session;
     Rect request = {100, 100, 100, 100};
     subWindow->property_->SetRequestRect(request);
+    subWindow->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
     std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
