@@ -624,8 +624,6 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
 HWTEST_F(SceneSessionManagerTest8, NotifyLoadAbility, Function | SmallTest | Level3)
 {
     int32_t collaboratorType = 100;
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     ssm_->collaboratorMap_.clear();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
