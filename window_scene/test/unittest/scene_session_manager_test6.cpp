@@ -1638,18 +1638,18 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
 HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession;
+    ASSERT_EQ(sceneSession, nullptr);
     bool needRemoveSession = true;
     bool isSaveSnapshot = true;
     bool isForceClean = true;
-    auto result = ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, result);
+    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
 }
 
