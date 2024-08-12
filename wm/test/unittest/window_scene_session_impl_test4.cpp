@@ -1003,6 +1003,30 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateSubWindowStateAndNotify01, Function 
     subWindow->state_ = WindowState::STATE_SHOWN;
     subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_SHOWN);
 }
+
+/**
+ * @tc.name: SetWindowMode01
+ * @tc.desc: SetWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("SetWindowMode01");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1007);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetModeSupportInfo(0);
+    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

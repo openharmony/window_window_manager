@@ -1371,6 +1371,32 @@ HWTEST_F(WindowSceneSessionImplTest3, Show, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Show
+ * @tc.desc: Show01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, Show01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("Show01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    auto ret = windowSceneSessionImpl->Show(2, true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: NotifySpecificWindowSessionProperty
  * @tc.desc: NotifySpecificWindowSessionProperty
  * @tc.type: FUNC
