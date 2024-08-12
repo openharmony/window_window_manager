@@ -443,17 +443,6 @@ bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, int32_t& objName)
     return true;
 }
 
-bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, uint32_t& objName)
-{
-    if (GetType(env, jsObjName) != napi_undefined) {
-        if (!ConvertFromJsValue(env, jsObjName, objName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to objName");
-            return false;
-        }
-    }
-    return true;
-}
-
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 {
     napi_value jsLeftName = nullptr;
