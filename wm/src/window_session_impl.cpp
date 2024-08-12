@@ -1556,7 +1556,7 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
 
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "enableDrag: %{public}d", enableDrag);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
     return WMError::WM_OK;
