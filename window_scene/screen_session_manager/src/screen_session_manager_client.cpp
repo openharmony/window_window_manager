@@ -504,11 +504,9 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
 
 void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
 {
-    if (!screenSessionManager_) {
-        WLOGFE("screenSessionManager_ is null");
-        return;
+    if (screenSessionManager_) {
+        screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
     }
-    screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
