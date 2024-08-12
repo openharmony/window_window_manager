@@ -83,7 +83,6 @@ void SessionVisibleTest(sptr<SceneSessionManager> ssm_)
     auto sceneSession = GetSceneSession("SessionVisibleTest");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->isVisible_ = false;
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     AnomalyDetection::SceneZOrderCheckProcess();
