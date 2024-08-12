@@ -2177,6 +2177,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             WLOGFE("UpdateNativeVisibility property is null");
             return;
         }
+        if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
+            session->updatePrivateStateAndNotifyFunc_(persistentId);
+        }
     };
     PostTask(task, "UpdateNativeVisibility");
 }
@@ -3941,6 +3944,11 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
+}
+
+void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
+{
+    updatePrivateStateAndNotifyFunc_ = func;
 }
 
 int32_t SceneSession::GetStatusBarHeight()
