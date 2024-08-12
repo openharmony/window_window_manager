@@ -5084,15 +5084,11 @@ DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenI
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return DMError::DM_ERROR_INVALID_CALLING;
     }
-
-    // MockSessionManagerService提供的接口有误，临时规避
-    std::vector<int32_t> tmpWindowIdList;
-    for (uint64_t id : windowIdList) {
-        tmpWindowIdList.push_back(static_cast<int32_t>(id));
-    }
     std::vector<uint64_t> surfaceNodeIds;
-    MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
-        pid, tmpWindowIdList, surfaceNodeIds);
+    if (windowIdList.size() > 0) {
+        MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
+            pid, windowIdList, surfaceNodeIds);
+    }
     auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
     auto ret = rsInterface_.SetVirtualScreenSecurityExemptionList(rsId, surfaceNodeIds);
 
