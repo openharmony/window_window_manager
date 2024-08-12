@@ -264,6 +264,11 @@ uint32_t WindowSessionImpl::GetWindowId() const
     return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff; // 0xffffffff: to get low 32 bits
 }
 
+uint64_t WindowSessionImpl::GetDisplayId() const
+{
+    return property_->GetDisplayId();
+}
+
 int32_t WindowSessionImpl::GetParentId() const
 {
     // 0xffffffff: to get low 32 bits

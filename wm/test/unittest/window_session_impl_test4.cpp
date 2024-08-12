@@ -976,9 +976,11 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetTitleButtonVisible03");
+    option->SetDisplayId(1);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
+    ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
     uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
     window->property_->SetModeSupportInfo(modeSupportInfo);
