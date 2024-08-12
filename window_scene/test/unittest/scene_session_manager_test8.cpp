@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_manager_collaborator_proxy.h"
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
