@@ -5590,7 +5590,8 @@ NapiAsyncTask::ExecuteCallback JsWindow::GetEnableDragExecuteCallback(bool enabl
     return execute;
 }
 
-NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(const std::shared_ptr<WmErrorCode>& errCodePtr) const
+NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
+    const std::shared_ptr<WmErrorCode>& errCodePtr) const
 {
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
