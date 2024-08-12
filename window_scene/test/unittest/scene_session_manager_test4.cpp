@@ -1448,17 +1448,17 @@ HWTEST_F(SceneSessionManagerTest4, NotifyStackEmpty, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: RegisterSessionExceptionFunc01
+ * @tc.name: RegisterSessionExceptionFunc
  * @tc.desc: RegisterSessionExceptionFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.persistentId_ = 1;
-    sessionInfo.isSystem_ = false;
+    sessionInfo.isSystem_ = true;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, sceneSession));
@@ -1468,38 +1468,39 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc01, Function | Sm
     ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
 
-    sessionInfo.isSystem_ = true;
-    ssm_->RegisterSessionExceptionFunc(sceneSession);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    ASSERT_NE(abilitySessionInfo, nullptr);
+    WSError result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    abilitySessionInfo->errorCode = 1;
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    abilitySessionInfo->errorCode = 0;
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    sessionInfo.isSystem_ = false;
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
     ssm_->listenerController_ = nullptr;
-    ssm_->RegisterSessionExceptionFunc(sceneSession);
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_EQ(ssm_->CheckCollaboratorType(type), true);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    sessionInfo.persistentId_ = 2;
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
- * @tc.name: RegisterSessionExceptionFunc02
- * @tc.desc: RegisterSessionExceptionFunc
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "bundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, nullptr));
-    ssm_->RegisterSessionExceptionFunc(sceneSession);
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_EQ(ssm_->CheckCollaboratorType(type), true);
-}
-
-/**
- * @tc.name: RegisterSessionSnapshotFunc01
+ * @tc.name: RegisterSessionSnapshotFunc
  * @tc.desc: RegisterSessionSnapshotFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -1511,41 +1512,33 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc01, Function | Sma
     sessionInfo.abilityInfo->excludeFromMissions = true;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, sceneSession));
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    sceneSession->surfaceNode_ = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
+    ASSERT_NE(sceneSession->surfaceNode_, nullptr);
+    sceneSession->surfaceNode_->bufferAvailable_ = true;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
     ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionSnapshotFunc(sceneSession);
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
     sessionInfo.abilityInfo->excludeFromMissions = false;
-    ssm_->RegisterSessionSnapshotFunc(sceneSession);
-    ssm_->listenerController_ = nullptr;
-    ssm_->RegisterSessionSnapshotFunc(sceneSession);
-    sessionInfo.abilityInfo = nullptr;
-    ssm_->RegisterSessionSnapshotFunc(sceneSession);
-    sessionInfo.isSystem_ = false;
-    ssm_->RegisterSessionSnapshotFunc(sceneSession);
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_EQ(ssm_->CheckCollaboratorType(type), true);
-}
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
-/**
- * @tc.name: RegisterSessionSnapshotFunc02
- * @tc.desc: RegisterSessionSnapshotFunc
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "bundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, nullptr));
-    ssm_->RegisterSessionSnapshotFunc(sceneSession);
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_EQ(ssm_->CheckCollaboratorType(type), true);
+    ssm_->listenerController_ = nullptr;
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+
+    sessionInfo.abilityInfo = nullptr;
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+
+    sessionInfo.isSystem_ = true;
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+
+    sessionInfo.persistentId_ = 2;
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
