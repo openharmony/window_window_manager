@@ -24,8 +24,8 @@ namespace OHOS {
 namespace Rosen {
 class FutureCallbackStubMocker : public FutureCallbackStub {
 public:
-    FutureCallbackStubMocker() {};
-    ~FutureCallbackStubMocker() {};
+    FutureCallbackStubMocker() {}
+    ~FutureCallbackStubMocker() {}
     WSError OnUpdateSessionRect(const WSRect& rect) override { return WSError::WS_OK; }
 
     MOCK_METHOD(int, OnRemoteRequest,
