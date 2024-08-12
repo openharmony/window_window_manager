@@ -1129,6 +1129,10 @@ WSError Session::SetActive(bool active)
         TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::DEFAULT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
@@ -2492,6 +2496,10 @@ WSError Session::ProcessBackEvent()
         TLOGW(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::DEFAULT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
 }
