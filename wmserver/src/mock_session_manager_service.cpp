@@ -760,7 +760,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
             return;
         }
     }
-    if (persistentIds.size() == 0) {
+    if (persistentIds.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "PersistentIds is null, no need to get surfaceNodeId");
         return;
     }
