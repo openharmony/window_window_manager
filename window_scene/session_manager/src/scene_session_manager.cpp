@@ -9901,6 +9901,24 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.width_ = width;
     dmHookInfo.height_ = height;
     dmHookInfo.density_ = density;
+    dmHookInfo.rotation_ = 0;
+    dmHookInfo.enableHookRotation_ = false;
+    ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, HookInfo hookInfo, bool enable)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
+        "density: %{public}f, rotation: %{public}u, enableHookRotation: %{public}d, bool: %{public}d",
+        hookInfo.width_, hookInfo.height_, hookInfo.density_, hookInfo.rotation_, hookInfo.enableHookRotation_, hookInfo.enable);
+
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = hookInfo.width_;
+    dmHookInfo.height_ = hookInfo.height_;
+    dmHookInfo.density_ = hookInfo.density_;
+    dmHookInfo.rotation_ = hookInfo.rotation_;
+    dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
