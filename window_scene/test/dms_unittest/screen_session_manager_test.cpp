@@ -18,6 +18,8 @@
 #include "session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
+#include "connection/screen_cast_connection.h"
+#include "screen_scene_config.h"
 #include <surface.h>
 
 using namespace testing;
@@ -29,6 +31,8 @@ namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
+constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -2038,6 +2042,37 @@ HWTEST_F(ScreenSessionManagerTest, SetDisplayScale, Function | SmallTest | Level
     float pivotY = 0.5f;
     ssm_->SetDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
     ssm_->SetDisplayScale(ssm_->GetDefaultScreenId(), scaleX, scaleY, pivotX, pivotY);
+}
+
+/**
+ * @tc.name: ScreenCastConnection
+ * @tc.desc: ScreenCastConnection test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ScreenCastConnection, Function | SmallTest | Level3)
+{
+    std::string castBundleName = "testCastBundleName";
+    std::string castAbilityName = "testCastAbilityName";
+
+    ScreenCastConnection::GetInstance().SetBundleName("");
+    ScreenCastConnection::GetInstance().SetAbilityName("");
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetBundleName(), "");
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetAbilityName(), "");
+
+    EXPECT_EQ(ScreenCastConnection::GetInstance().CastConnectExtension(), false);
+
+    ScreenCastConnection::GetInstance().SetBundleName(castBundleName);
+    ScreenCastConnection::GetInstance().SetAbilityName(castAbilityName);
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetBundleName(), "");
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetAbilityName(), "");
+
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(ScreenCastConnection::GetInstance().CastConnectExtension(), false);
+    ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_START, data, reply);
+    ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_STOP, data, reply);
+    ScreenCastConnection::GetInstance().CastDisconnectExtension();
+    EXPECT_EQ(ScreenCastConnection::GetInstance().IsConnectedSync(), false);
 }
 }
 } // namespace Rosen
