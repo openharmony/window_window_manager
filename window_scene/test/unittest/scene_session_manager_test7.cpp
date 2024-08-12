@@ -1036,6 +1036,27 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, Function | SmallTest | Le
     auto ret = ssm_->ProcessBackEvent();
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo
+ * @tc.desc: GetWindowVisibilityChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | SmallTest | Level3)
+{
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.emplace_back(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    currVisibleData.emplace_back(4, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    currVisibleData.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    currVisibleData.emplace_back(7, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    currVisibleData.emplace_back(9, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.emplace_back(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    ssm_->lastVisibleData_.emplace_back(4, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
+    ssm_->lastVisibleData_.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
