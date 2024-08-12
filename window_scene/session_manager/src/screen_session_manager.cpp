@@ -576,6 +576,9 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
 {
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (screenEvent == ScreenEvent::CONNECTED) {
+        if (phyMirrorEnable) {
+            NotifyCastWhenScreenConnectChange(true);
+        }
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
                 clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
@@ -590,7 +593,6 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-            NotifyCastWhenScreenConnectChange(true);
             isPhyScreenConnected_ = true;
         }
         return;
