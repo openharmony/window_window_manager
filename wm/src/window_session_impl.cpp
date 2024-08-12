@@ -688,8 +688,8 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     uiContent->NotifyRotationAnimationEnd();
 }
 
-void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton,
-    bool &hideSplitButton)
+void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
+    bool& hideSplitButton)
 {
     if (!isPC) {
         return;

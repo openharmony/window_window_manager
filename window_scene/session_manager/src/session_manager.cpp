@@ -75,7 +75,7 @@ public:
     }
 
     void OnWMSConnectionChanged(
-        int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject> &sessionManagerService) override
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject>& sessionManagerService) override
     {
         auto sms = iface_cast<ISessionManagerService>(sessionManagerService);
         SessionManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected, sms);
@@ -276,7 +276,7 @@ void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerServ
     }
 }
 
-void SessionManager::OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService)
+void SessionManager::OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched");
     Clear();

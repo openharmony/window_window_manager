@@ -728,7 +728,7 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
     std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene);
     napi_wrap(env, objValue, jsWindowStage.release(), JsWindowStage::Finalizer, nullptr, nullptr);
 
-    const char *moduleName = "JsWindowStage";
+    const char* moduleName = "JsWindowStage";
     BindNativeFunction(env,
         objValue, "setUIContent", moduleName, JsWindowStage::SetUIContent);
     BindNativeFunction(env,

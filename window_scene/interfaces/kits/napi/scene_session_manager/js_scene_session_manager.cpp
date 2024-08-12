@@ -1061,7 +1061,7 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
         *errCode = static_cast<int32_t>(code);
     };
     auto complete = [obj = this, errCode, infos = scbAbilityInfos]
-        (napi_env env, NapiAsyncTask &task, int32_t status) {
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCode != static_cast<int32_t>(WSErrorCode::WS_OK)) {
             std::string errMsg = "invalid params can not get All AbilityInfos!";
             task.RejectWithCustomize(env, CreateJsValue(env, *errCode), CreateJsValue(env, errMsg));

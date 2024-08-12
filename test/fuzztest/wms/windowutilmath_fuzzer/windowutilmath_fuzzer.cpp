@@ -32,7 +32,7 @@ namespace {
 }
 
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -42,7 +42,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
 }
 
 size_t InitMatrix3(OHOS::Rosen::TransformHelper::Matrix3& mat3,
-    const uint8_t *data, size_t size, size_t startPos)
+    const uint8_t* data, size_t size, size_t startPos)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return 0;
@@ -58,7 +58,7 @@ size_t InitMatrix3(OHOS::Rosen::TransformHelper::Matrix3& mat3,
 }
 
 void InitMatrix4(OHOS::Rosen::TransformHelper::Matrix4& mat4,
-    const uint8_t *data, size_t size, size_t& startPos)
+    const uint8_t* data, size_t size, size_t& startPos)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return;
@@ -73,7 +73,7 @@ void InitMatrix4(OHOS::Rosen::TransformHelper::Matrix4& mat4,
 }
 
 void InitVector2(OHOS::Rosen::TransformHelper::Vector2& vec2,
-    const uint8_t *data, size_t size, size_t& startPos)
+    const uint8_t* data, size_t size, size_t& startPos)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return;
@@ -83,7 +83,7 @@ void InitVector2(OHOS::Rosen::TransformHelper::Vector2& vec2,
 }
 
 void InitVector3(OHOS::Rosen::TransformHelper::Vector3& vec3,
-    const uint8_t *data, size_t size, size_t& startPos)
+    const uint8_t* data, size_t size, size_t& startPos)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return;
@@ -93,7 +93,7 @@ void InitVector3(OHOS::Rosen::TransformHelper::Vector3& vec3,
     startPos += GetObject<float>(vec3.y_, data + startPos, size - startPos);
 }
 
-void WindowUtilMathFuzzPart1(const uint8_t *data, size_t size)
+void WindowUtilMathFuzzPart1(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return;
@@ -137,7 +137,7 @@ void WindowUtilMathFuzzPart1(const uint8_t *data, size_t size)
     OHOS::Rosen::TransformHelper::CreateTranslation(vec3);
 }
 
-void WindowUtilMathFuzzPart2(const uint8_t *data, size_t size)
+void WindowUtilMathFuzzPart2(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return;

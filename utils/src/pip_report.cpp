@@ -57,7 +57,7 @@ constexpr char EVENT_KEY_ACTION_EVENT[] = "ACTION_EVENT";
 constexpr char EVENT_KEY_WINDOW_WIDTH[] = "WINDOW_WIDTH";
 constexpr char EVENT_KEY_WINDOW_HEIGHT[] = "WINDOW_HEIGHT";
 
-void PiPReporter::SetCurrentPackageName(const std::string &packageName)
+void PiPReporter::SetCurrentPackageName(const std::string& packageName)
 {
     std::lock_guard<std::mutex> lock(packageNameMutex_);
     packageName_ = packageName;
@@ -113,7 +113,7 @@ void PiPReporter::ReportPiPStopWindow(int32_t source, int32_t templateType,
     LOG_WHEN_ERROR(ret);
 }
 
-void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string &actionEvent)
+void PiPReporter::ReportPiPActionEvent(int32_t templateType, const std::string& actionEvent)
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report pip widow action event");
     std::string eventName = "CONTROL_PANNEL_ACTION_EVENT";

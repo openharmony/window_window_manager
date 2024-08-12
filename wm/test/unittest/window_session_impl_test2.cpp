@@ -1443,7 +1443,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, Function | S
     class MockISubWindowCloseListener : public ISubWindowCloseListener
     {
     public:
-        void OnSubWindowClose(bool &terminateCloseProcess) {}
+        void OnSubWindowClose(bool& terminateCloseProcess) {}
     };
     window_ = GetTestWindowImpl("RegisterSubWindowCloseListeners01");
     ASSERT_NE(window_, nullptr);

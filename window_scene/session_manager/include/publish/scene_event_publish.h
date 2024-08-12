@@ -30,16 +30,16 @@
 namespace OHOS::Rosen {
 class SceneEventPublish : public EventFwk::CommonEventSubscriber {
 public:
-    explicit SceneEventPublish(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
+    explicit SceneEventPublish(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
         : CommonEventSubscriber(subscribeInfo)
     {}
     ~SceneEventPublish() = default;
 
-    void OnReceiveEvent(const EventFwk::CommonEventData &data);
+    void OnReceiveEvent(const EventFwk::CommonEventData& data);
 
     WSError Publish(std::string cmd);
 
-    std::string GetDebugDumpInfo(std::chrono::milliseconds const &time);
+    std::string GetDebugDumpInfo(std::chrono::milliseconds const& time);
 
     static void Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
 

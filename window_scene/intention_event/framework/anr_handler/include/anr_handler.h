@@ -33,7 +33,7 @@ class ANRHandler {
 public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
 
-    void SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage);
+    void SetSessionStage(int32_t eventId, const wptr<ISessionStage>& sessionStage);
     void HandleEventConsumed(int32_t eventId, int64_t actionTime);
     void OnWindowDestroyed(int32_t persistentId);
 

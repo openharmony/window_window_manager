@@ -22,7 +22,7 @@ CutoutInfo::CutoutInfo(const std::vector<DMRect>& boundingRects,
 {
 }
 
-bool CutoutInfo::Marshalling(Parcel &parcel) const
+bool CutoutInfo::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteInt32(waterfallDisplayAreaRects_.left.posX_) &&
         parcel.WriteInt32(waterfallDisplayAreaRects_.left.posY_) &&
@@ -43,7 +43,7 @@ bool CutoutInfo::Marshalling(Parcel &parcel) const
         WriteBoundingRectsVector(boundingRects_, parcel);
 }
 
-CutoutInfo *CutoutInfo::Unmarshalling(Parcel &parcel)
+CutoutInfo *CutoutInfo::Unmarshalling(Parcel& parcel)
 {
     WaterfallDisplayAreaRects waterfallDisplayAreaRects;
     std::vector<DMRect> boundingRects;
@@ -53,7 +53,7 @@ CutoutInfo *CutoutInfo::Unmarshalling(Parcel &parcel)
     return cutoutInfo;
 }
 
-bool CutoutInfo::WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel &parcel) const
+bool CutoutInfo::WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel& parcel) const
 {
     uint32_t size = static_cast<uint32_t>(boundingRects.size());
     if (!parcel.WriteUint32(size)) {
@@ -71,7 +71,7 @@ bool CutoutInfo::WriteBoundingRectsVector(const std::vector<DMRect>& boundingRec
     return true;
 }
 
-bool CutoutInfo::ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects, Parcel &parcel)
+bool CutoutInfo::ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects, Parcel& parcel)
 {
     uint32_t size;
     if (!parcel.ReadUint32(size)) {
@@ -95,7 +95,7 @@ bool CutoutInfo::ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects
     return true;
 }
 
-bool CutoutInfo::ReadWaterfallDisplayAreaRects(WaterfallDisplayAreaRects& waterfallDisplayAreaRects, Parcel &parcel)
+bool CutoutInfo::ReadWaterfallDisplayAreaRects(WaterfallDisplayAreaRects& waterfallDisplayAreaRects, Parcel& parcel)
 {
     if (!(parcel.ReadInt32(waterfallDisplayAreaRects.left.posX_) &&
         parcel.ReadInt32(waterfallDisplayAreaRects.left.posY_) &&
