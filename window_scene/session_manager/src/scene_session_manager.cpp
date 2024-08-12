@@ -9911,7 +9911,7 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, HookInfo hook
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
         "density: %{public}f, rotation: %{public}u, enableHookRotation: %{public}d, bool: %{public}d",
-        hookInfo.width_, hookInfo.height_, hookInfo.density_, hookInfo.rotation_, hookInfo.enableHookRotation_, hookInfo.enable);
+        hookInfo.width_, hookInfo.height_, hookInfo.density_, hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
 
     DMHookInfo dmHookInfo;
     dmHookInfo.width_ = hookInfo.width_;
