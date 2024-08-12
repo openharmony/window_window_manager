@@ -1637,7 +1637,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     bool isDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled() &&
         !isDialog;
-    TLOGI(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
+    TLOGD(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
         WindowHelper::IsSystemWindow(windowType), property->GetDragEnabled());
     if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog || isDragEnabledSystemWindow) &&
         !isMaxModeAvoidSysBar) {
@@ -2052,7 +2052,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "systemwindow setSurfaceBounds");
+        TLOGD(WmsLogTag::WMS_SYSTEM, "systemwindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
