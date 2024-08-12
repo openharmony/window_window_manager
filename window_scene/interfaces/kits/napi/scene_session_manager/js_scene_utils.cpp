@@ -443,6 +443,17 @@ bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, int32_t& objName)
     return true;
 }
 
+bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, uint32_t& objName)
+{
+    if (GetType(env, jsObjName) != napi_undefined) {
+        if (!ConvertFromJsValue(env, jsObjName, objName)) {
+            WLOGFE("[NAPI]Failed to convert parameter to objName");
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 {
     napi_value jsLeftName = nullptr;
@@ -477,6 +488,56 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
         return false;
     }
     rect.height_ = bottomName - rect.posY_;
+    return true;
+}
+
+bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo hookInfo)
+{
+    napi_value jsWidthName = nullptr;
+    napi_get_named_property(env, jsObject, "width", &jsWidthName);
+    napi_value jsHeightName = nullptr;
+    napi_get_named_property(env, jsObject, "height", &jsHeightName);
+    napi_value jsDensityName = nullptr;
+    napi_get_named_property(env, jsObject, "density", &jsDensityName);
+    napi_value jsRotationName = nullptr;
+    napi_get_named_property(env, jsObject, "rotation", &jsRotationName);
+    napi_value jsenableHookRotationName = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookRotation", &jsenableHookRotationName);
+    
+    uint32_t widthName = 0;
+    if (!ConvertFromJsValue(env, jsWidthName, widthName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        return false;
+    }
+    hookInfo.width_ = widthName;
+
+    uint32_t heightName = 0;
+    if (!ConvertFromJsValue(env, jsHeightName, heightName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        return false;
+    }
+    hookInfo.height_ = heightName;
+
+    double_t densityName = 1.0;
+    if (!ConvertFromJsValue(env, jsDensityName, densityName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        return false;
+    }
+    hookInfo.density_ = static_cast<float_t>(densityName);
+
+    uint32_t rotationName = 0;
+    if (!ConvertFromJsValue(env, jsRotationName, rotationName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rotation");
+        return false;
+    }
+    hookInfo.rotation_ = rotationName;
+
+    bool enableHookRotationName = false;
+    if (!ConvertFromJsValue(env, jsenableHookRotationName, enableHookRotationName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
+        return false;
+    }
+    hookInfo.enableHookRotation_ = enableHookRotationName;
     return true;
 }
 
