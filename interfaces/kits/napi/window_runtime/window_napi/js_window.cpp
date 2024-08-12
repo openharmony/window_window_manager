@@ -5560,8 +5560,8 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, nativeVal, &enableDrag);
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = GetExecuteCallback(enableDrag, weakToken, errCodePtr);
-    NapiAsyncTask::CompleteCallback complete = GetCompleteCallback(errCodePtr);
+    NapiAsyncTask::ExecuteCallback execute = GetEnableDragExecuteCallback(enableDrag, weakToken, errCodePtr);
+    NapiAsyncTask::CompleteCallback complete = GetEnableDragCompleteCallback(errCodePtr);
 
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnEnableDrag",
