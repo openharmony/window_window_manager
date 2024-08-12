@@ -958,6 +958,51 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, Function | SmallTest | Le
     subWindow->UpdateNewSize();
 }
 
+/**
+ * @tc.name: UpdateSubWindowStateAndNotify01
+ * @tc.desc: UpdateSubWindowStateAndNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("UpdateSubWindowStateAndNotify01");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1005);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("UpdateSubWindowStateAndNotify02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1006);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSceneSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1006, vec));
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    WindowSceneSessionImpl::subWindowSessionMap_[1006].push_back(subWindow);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_SHOWN);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_SHOWN);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
