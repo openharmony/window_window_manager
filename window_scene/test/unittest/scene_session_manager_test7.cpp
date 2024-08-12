@@ -924,6 +924,139 @@ HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange03, Function | 
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession2));
     ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
+
+/**
+ * @tc.name: ProcessBackEvent01
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessBackEvent02
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->rootSceneProcessBackEventFunc_ = nullptr;
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessBackEvent03
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent03, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    RootSceneProcessBackEventFunc func = [](){};
+    ssm_->rootSceneProcessBackEventFunc_ = func;
+    ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessBackEvent02
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent04, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->sessionInfo_.isSystem_ = false;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->rootSceneProcessBackEventFunc_ = nullptr;
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessBackEvent05
+ * @tc.desc: ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->sessionInfo_.isSystem_ = false;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    RootSceneProcessBackEventFunc func = [](){};
+    ssm_->rootSceneProcessBackEventFunc_ = func;
+    ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo
+ * @tc.desc: GetWindowVisibilityChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | SmallTest | Level3)
+{
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.emplace_back(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    currVisibleData.emplace_back(4, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    currVisibleData.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    currVisibleData.emplace_back(7, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    currVisibleData.emplace_back(9, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.emplace_back(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    ssm_->lastVisibleData_.emplace_back(4, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
+    ssm_->lastVisibleData_.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
+    ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
