@@ -402,11 +402,11 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         windowEventID = 0;
     }
     focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
-    std::map<int32_t, MMI::Rect> tempWindowDefaultHotArea;
-    static std::map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
+    std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
+    static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(static_cast<int>(e.zOrder)) + "|" +
+            std::to_string(static_cast<int32_t>(e.zOrder)) + "|" +
             std::to_string(e.pid) + "|" +
             std::to_string(e.defaultHotAreas.size());
 
@@ -419,7 +419,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
                     std::to_string(e.defaultHotAreas[0].width) + "|" +
                     std::to_string(e.defaultHotAreas[0].height);
             }
-            tempWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
+            currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
         }
         idList += ",";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
@@ -429,7 +429,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             DumpUIExtentionWindowInfo(e);
         }
     }
-    lastWindowDefaultHotArea = tempWindowDefaultHotArea;
+    lastWindowDefaultHotArea = currWindowDefaultHotArea;
     idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;

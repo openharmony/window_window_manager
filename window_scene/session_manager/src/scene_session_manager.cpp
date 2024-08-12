@@ -2267,7 +2267,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
-        property->GetWindowName().c_str(), property->GetWindowType(), static_cast<int>(property->GetTouchable()));
+        property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
