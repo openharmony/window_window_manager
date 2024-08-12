@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
+#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
@@ -540,6 +541,148 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: MoveToAsync01
+ * @tc.desc: MoveToAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("MoveToAsync01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->MoveToAsync(10, 10));
+}
+
+/**
+ * @tc.name: MoveToAsync02
+ * @tc.desc: MoveToAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("MoveToAsync02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(998);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("subMoveToAsync02");
+    subOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetPersistentId(999);
+    SessionInfo subSessionInfo = { "subCreateTestBundle", "subCreateTestModule", "subCreateTestAbility" };
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(abilityContext_, subSession));
+    subWindow->windowSessionMap_.insert(std::make_pair("MoveToAsync02", std::make_pair(998, window)));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    Rect request = { 100, 100, 100, 100 };
+    subWindow->property_->SetRequestRect(request);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    subWindow->property_->SetLayoutCallback(layoutCallback);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+}
+
+/**
+ * @tc.name: ResizeAsync01
+ * @tc.desc: ResizeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("ResizeAsync01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->ResizeAsync(500, 500));
+}
+
+/**
+ * @tc.name: ResizeAsync02
+ * @tc.desc: ResizeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("ResizeAsync02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(991);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("subResizeAsync02");
+    subOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    subWindow->property_->SetPersistentId(992);
+    SessionInfo subSessionInfo = { "subCreateTestBundle", "subCreateTestModule", "subCreateTestAbility" };
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(abilityContext_, subSession));
+    subWindow->windowSessionMap_.insert(std::make_pair("ResizeAsync02", std::make_pair(998, window)));
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    Rect request = { 100, 100, 600, 600 };
+    subWindow->property_->SetRequestRect(request);
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    subWindow->property_->SetLayoutCallback(layoutCallback);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
 }
 
 /**

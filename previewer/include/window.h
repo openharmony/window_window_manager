@@ -166,7 +166,9 @@ public:
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;

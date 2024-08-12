@@ -23,6 +23,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "singleton_container.h"
 #include "display_manager.h"
@@ -87,6 +88,7 @@ union WSColorParam {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
+constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
@@ -1349,6 +1351,23 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     return static_cast<WMError>(ret);
 }
 
+WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
+{
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+    }
+    auto ret = MoveTo(x, y);
+    if (state_ == WindowState::STATE_SHOWN && property_) {
+        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
+        if (layoutCallback) {
+            layoutCallback->ResetLock();
+            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        }
+    }
+    return static_cast<WMError>(ret);
+}
+
 void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr)
 {
     // Float camera window has a special limit:
@@ -1496,6 +1515,23 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
+{
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+    }
+    auto ret = Resize(width, height);
+    if (state_ == WindowState::STATE_SHOWN && property_) {
+        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
+        if (layoutCallback) {
+            layoutCallback->ResetLock();
+            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        }
+    }
     return static_cast<WMError>(ret);
 }
 
