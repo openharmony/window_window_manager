@@ -230,6 +230,7 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
         return NapiGetUndefined(env);
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync end");
     return CreateJsDisplayObject(env, display);
 }
 
