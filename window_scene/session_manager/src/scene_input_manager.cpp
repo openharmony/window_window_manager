@@ -412,8 +412,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
-            if (iter == lastWindowDefaultHotArea.end() ||
-                (iter != lastWindowDefaultHotArea.end() && iter->second != e.defaultHotAreas[0])) {
+            if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
                 idList += "|" + std::to_string(e.defaultHotAreas[0].x) + "|" +
                     std::to_string(e.defaultHotAreas[0].y) + "|" +
                     std::to_string(e.defaultHotAreas[0].width) + "|" +
