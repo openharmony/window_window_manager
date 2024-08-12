@@ -45,7 +45,7 @@ public:
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
     void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-        const std::vector<uint64_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds);
+        const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
 
 protected:
     MockSessionManagerService();
