@@ -388,6 +388,12 @@ struct ExpandOption {
     uint32_t startY_;
 };
 
+struct ExtendOption {
+    ScreenId screenId_;
+    uint32_t startX_;
+    uint32_t startY_;
+};
+
 /**
  * @brief fold display physical resolution
  */
