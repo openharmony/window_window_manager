@@ -666,8 +666,12 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
         TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
         "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
         "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
-        info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
-        displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+        info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_,
+        displayInfo->GetWidth(),
+        displayInfo->GetHeight(),
+        displayInfo->GetRotation(),
+        displayInfo->GetDisplayOrientation());
+
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
         displayInfo->SetVirtualPixelRatio(info.density_);
@@ -695,7 +699,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        // 在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
         displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
