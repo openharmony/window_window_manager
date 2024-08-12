@@ -61,6 +61,12 @@ static napi_value GetDefaultDisplaySync(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetDefaultDisplaySync(env, info) : nullptr;
 }
 
+static napi_value GetDisplayByIdSync(napi_env env, napi_callback_info info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetDisplayByIdSync(env, info) : nullptr;
+}
+
 static napi_value GetAllDisplay(napi_env env, napi_callback_info info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -191,6 +197,40 @@ napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
         return NapiGetUndefined(env);
     }
+    return CreateJsDisplayObject(env, display);
+}
+
+napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "OnGetDisplayByIdSync called");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        std::string errMsg = "Invalid args count, need one arg";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to displayId");
+        std::string errMsg = "Failed to convert parameter to displayId";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    if (displayId < 0) {
+        std::string errMsg = "displayid is invalid, less than 0";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+        return NapiGetUndefined(env);
+    }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync end");
     return CreateJsDisplayObject(env, display);
 }
 
@@ -1068,6 +1108,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
     BindNativeFunction(env, exportObj, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
+    BindNativeFunction(env, exportObj, "getDisplayByIdSync", moduleName, JsDisplayManager::GetDisplayByIdSync);
     BindNativeFunction(env, exportObj, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
     BindNativeFunction(env, exportObj, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
     BindNativeFunction(env, exportObj, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
