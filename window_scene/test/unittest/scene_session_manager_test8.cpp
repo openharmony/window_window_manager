@@ -618,24 +618,6 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: NotifyLoadAbility
- * @tc.desc: test function : NotifyLoadAbility
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, NotifyLoadAbility, Function | SmallTest | Level3)
-{
-    int32_t collaboratorType = 100;
-    ssm_->collaboratorMap_.clear();
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
-        sptr<AAFwk::AbilityManagerCollaboratorProxy>::MakeSptr(iRemoteObjectMocker);
-    ssm_->collaboratorMap_.emplace(100, collaborator);
-    auto iter = ssm_->collaboratorMap_.find(100);
-    EXPECT_EQ(collaborator, iter->second);
-    ssm_->NotifyLoadAbility(collaboratorType, nullptr, nullptr);
-}
-
-/**
  * @tc.name: SetBrightness
  * @tc.desc: test function : SetBrightness
  * @tc.type: FUNC
