@@ -1332,7 +1332,6 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
 
     infos.push_back(nullptr);
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
-
 }
 
 /**
