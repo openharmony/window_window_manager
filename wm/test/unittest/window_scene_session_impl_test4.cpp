@@ -618,6 +618,8 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -695,6 +697,8 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**

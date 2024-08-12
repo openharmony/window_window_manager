@@ -1539,13 +1539,17 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, Function | SmallTest | Level2
     ASSERT_NE(nullptr, session);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
+    Rect rect;
     sptr<IWindowChangeListener> listener = new (std::nothrow) MockWindowChangeListener();
     ASSERT_NE(nullptr, listener);
     window->RegisterWindowChangeListener(listener);
+    window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
 
     sptr<IWindowRectChangeListener> listener1 = new (std::nothrow) MockWindowRectChangeListener();
     ASSERT_NE(nullptr, listener1);
     window->RegisterWindowRectChangeListener(listener1);
+    window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
+    window->Destroy(true);
 }
 
 /**
