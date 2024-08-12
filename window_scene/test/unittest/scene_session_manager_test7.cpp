@@ -924,6 +924,26 @@ HWTEST_F(SceneSessionManagerTest7, ProcessVirtualPixelRatioChange03, Function | 
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession2));
     ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
+
+/**
+ * @tc.name: ProcessBackEvent01
+ * @tc.desc: ProcessBackEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "ProcessBackEvent01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    auto ret = ssm_->ProcessBackEvent();
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
