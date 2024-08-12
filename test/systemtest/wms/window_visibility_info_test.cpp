@@ -202,7 +202,7 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     subAppInfo_.rect = {0, 600, 300, 100};
     subAppInfo_.parentId = window1->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
-
+    ASSERT_NE(nullptr, subWindow1);
     bool isWindowVisible = false;
     bool isSubWindowVisible = false;
 

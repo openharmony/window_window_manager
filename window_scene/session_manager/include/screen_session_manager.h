@@ -329,6 +329,8 @@ private:
     int SetFoldDisplayMode(const std::string& modeParam);
     int SetFoldStatusLocked(const std::string& lockParam);
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo);
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+        std::vector<uint64_t>& windowIdList) override;
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -450,6 +452,7 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
+    void NotifyCastWhenScreenConnectChange(bool isConnected);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

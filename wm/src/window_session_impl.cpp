@@ -191,6 +191,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    property_->SetLayoutCallback(layoutCallback);
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
@@ -354,7 +356,7 @@ ColorSpace WindowSessionImpl::GetColorSpace()
 
 WMError WindowSessionImpl::WindowSessionCreateCheck()
 {
-    if (!property_) {
+    if (!property_ || vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& name = property_->GetWindowName();
@@ -377,7 +379,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
         }
         uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
         property_->SetAccessTokenId(accessTokenId);
-        WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
+        TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
     }
     return WMError::WM_OK;
 }
@@ -587,28 +589,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else if (handler_ != nullptr && rsTransaction != nullptr && CheckIfNeedCommitRsTransaction(wmReason)) {
-        auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
-            auto window = weak.promote();
-            if (!window) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
-                return;
-            }
-            if (rsTransaction) {
-                RSTransaction::FlushImplicitTransaction();
-                rsTransaction->Begin();
-            }
-            if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
-                !window->postTaskDone_) {
-                window->NotifySizeChange(wmRect, wmReason);
-                window->lastSizeChangeReason_ = wmReason;
-            }
-            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-            if (rsTransaction) {
-                rsTransaction->Commit();
-            }
-            window->postTaskDone_ = true;
-        };
-        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForNoRotation");
+        UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
             NotifySizeChange(wmRect, wmReason);
@@ -616,6 +597,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             postTaskDone_ = true;
         }
         UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+    }
+    if (property_) {
+        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
+        if (layoutCallback) {
+            layoutCallback->OnUpdateSessionRect(rect);
+        }
     }
 
     return WSError::WS_OK;
@@ -662,6 +649,33 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         }
         window->postTaskDone_ = true;
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
+}
+
+void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+            return;
+        }
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
+            !window->postTaskDone_) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        }
+        window->postTaskDone_ = true;
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -1056,6 +1070,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
+    }
+    auto parentExtensionWindow = parentExtensionWindow_.promote();
+    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
+        parentExtensionWindow->NotifySetUIContent();
     }
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
@@ -3080,8 +3098,9 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
     WLOGD("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard || isKeyBack);
+    return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
@@ -3521,6 +3540,11 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+void WindowSessionImpl::SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow)
+{
+    parentExtensionWindow_ = parentExtensionWindow;
 }
 
 WMError WindowSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)

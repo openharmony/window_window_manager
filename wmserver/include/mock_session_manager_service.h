@@ -44,6 +44,8 @@ public:
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
+    void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds);
 
 protected:
     MockSessionManagerService();

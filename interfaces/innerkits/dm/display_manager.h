@@ -633,6 +633,13 @@ public:
      */
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
 
+    /**
+     * @brief set virtual screen security exemption
+     *
+     * @param DM_OK means set exemption is success.
+    */
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

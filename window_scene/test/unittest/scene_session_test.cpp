@@ -445,6 +445,25 @@ HWTEST_F(SceneSessionTest, IsAppSession02, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     ASSERT_EQ(false, scensession->IsAppSession());
+
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "testSession1";
+    parentInfo.moduleName_ = "testSession2";
+    parentInfo.bundleName_ = "testSession3";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
+    ASSERT_NE(parentSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(false, scensession->IsAppSession());
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(true, scensession->IsAppSession());
 }
 
 /**
@@ -532,6 +551,9 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetDecorEnable(false);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(true, scensession_->IsDecorEnable());
+
+    scensession_->SetSessionProperty(nullptr);
+    ASSERT_EQ(false, scensession_->IsDecorEnable());
 }
 
 /**
@@ -554,6 +576,11 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     EXPECT_NE(scensession, nullptr);
     scensession->UpdateNativeVisibility(false);
     ASSERT_EQ(false, scensession->IsVisible());
+    scensession->NotifyWindowVisibility();
+
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    scensession->sessionStage_ = mockSessionStage;
     scensession->NotifyWindowVisibility();
 }
 
@@ -598,6 +625,9 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
+
+    scensession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
 }
 
@@ -644,6 +674,11 @@ HWTEST_F(SceneSessionTest, SaveAspectRatio, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     ASSERT_EQ(true, scensession->SaveAspectRatio(0.1));
+
+    scensession->sessionInfo_.bundleName_ = "";
+    scensession->sessionInfo_.moduleName_ = "";
+    scensession->sessionInfo_.abilityName_ = "";
+    ASSERT_EQ(false, scensession->SaveAspectRatio(0.1));
 }
 
 /**
@@ -664,6 +699,10 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
+    scensession->NotifyIsCustomAnimationPlaying(false);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    scensession->sessionChangeCallback_->onIsCustomAnimationPlaying_ = [](bool status){};
     scensession->NotifyIsCustomAnimationPlaying(false);
 }
 
@@ -723,6 +762,11 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     EXPECT_NE(scensession, nullptr);
     WSRect overlapRect = { 0, 0, 0, 0 };
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION);
+
+    scensession->sessionRectChangeFunc_ = [](const WSRect& rect, const SizeChangeReason& reason) {
+        return;
+    };
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION);
 }
 
 /**
@@ -776,6 +820,10 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     int ret = 1;
     scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(nullptr, scensession->GetSessionProperty());
 }
 
 /**
@@ -833,6 +881,13 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     scensession->property_ = property;
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
+    scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){};
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+        WSError::WS_OK);
 }
 
 /**
@@ -856,6 +911,11 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     int ret = 0;
     scensession->OnShowWhenLocked(false);
     ASSERT_EQ(ret, 0);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
+    scensession->sessionChangeCallback_->OnShowWhenLocked_ = [](bool showWhenLocked){};
+    ASSERT_EQ(scensession->OnShowWhenLocked(false), WSError::WS_OK);
 }
 
 /**
@@ -926,6 +986,14 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
     AvoidArea avoidArea;
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
+    EXPECT_NE(scensession, nullptr);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    scensession->property_ = property;
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
@@ -1040,6 +1108,11 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
+    scensession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
+    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
 /**
@@ -1151,6 +1224,13 @@ HWTEST_F(SceneSessionTest, GetRatioPreferenceKey, Function | SmallTest | Level2)
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     ASSERT_EQ(key, scensession->GetRatioPreferenceKey());
+
+    std::string key2(30, 'a');
+    std::string key3(80, 'a');
+    scensession->sessionInfo_.bundleName_ = key2;
+    scensession->sessionInfo_.moduleName_ = key2;
+    scensession->sessionInfo_.abilityName_ = key2;
+    ASSERT_EQ(key3, scensession->GetRatioPreferenceKey());
 }
 
 /**
@@ -1181,6 +1261,10 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyPropertyWhenConnect();
+    ASSERT_EQ(scensession->GetSessionProperty(), nullptr);
 }
 
 /**
@@ -1507,7 +1591,13 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
+
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, p);
+    sceneSession->SetSessionProperty(property);
+    res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -1654,6 +1744,81 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     AppForceLandscapeConfig config = {};
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleCompatibleModeMoveDrag
+ * @tc.desc: HandleCompatibleModeMoveDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleCompatibleModeMoveDrag";
+    info.bundleName_ = "HandleCompatibleModeMoveDrag";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    
+    WSRect rect = {1, 1, 1, 1};
+    WSRect rect2 = {1, 1, 2, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    rect = {1, 1, 2000, 1};
+    rect2 = {1, 1, 2, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    rect = {1, 1, 2000, 1};
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    rect = {1, 1, 500, 1};
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    rect = {1, 1, 500, 1};
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
+}
+
+/**
+ * @tc.name: SetMoveDragCallback
+ * @tc.desc: SetMoveDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMoveDragCallback";
+    info.bundleName_ = "SetMoveDragCallback";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    
+    sceneSession->moveDragController_ = nullptr;
+    sceneSession->SetMoveDragCallback();
 }
 }
 }

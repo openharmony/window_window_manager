@@ -37,6 +37,7 @@ private:
     void ProcGetAvailableArea(MessageParcel& data, MessageParcel& reply);
     void ProcProxyForFreeze(MessageParcel& data, MessageParcel& reply);
     void ProcGetAllDisplayPhysicalResolution(MessageParcel& data, MessageParcel& reply);
+    void ProcSetVirtualScreenSecurityExemption(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace Rosen
 } // namespace OHOS

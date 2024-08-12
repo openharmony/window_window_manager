@@ -132,6 +132,30 @@ FoldDisplayMode ScreenSessionManagerLiteProxy::GetFoldDisplayMode()
     return static_cast<FoldDisplayMode>(reply.ReadUint32());
 }
 
+void ScreenSessionManagerLiteProxy::SetFoldDisplayMode(const FoldDisplayMode displayMode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        WLOGFE("Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+    }
+}
+
 bool ScreenSessionManagerLiteProxy::IsFoldable()
 {
     sptr<IRemoteObject> remote = Remote();

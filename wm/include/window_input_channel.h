@@ -31,6 +31,7 @@ public:
     void HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void Destroy();
     Rect GetWindowRect();
+    
 private:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed);

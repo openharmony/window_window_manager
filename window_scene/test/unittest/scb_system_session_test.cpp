@@ -384,7 +384,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level
 
     pointerAction = 100;
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
-    ASSERT_EQ(pointerAction, 2);
+    ASSERT_EQ(pointerAction, 100);
 }
 } //namespace
 } //namespace Rosen

@@ -191,6 +191,139 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest03
+ * @tc.desc: sessionStub ProcessRemoteRequestTest03
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    AAFwk::Want options;
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteParcelable(&options), false);
+    ASSERT_EQ(data.WriteUint64(2), true);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW), data, reply, option);
+    ASSERT_EQ(5, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
+        data,
+        reply,
+        option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW), data, reply, option);
+    ASSERT_EQ(0, res);
+    ASSERT_EQ(22, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION), data, reply, option);
+    ASSERT_EQ(22, res);
+}
+
+/**
+ * @tc.name: ProcessRemoteRequestTest04
+ * @tc.desc: sessionStub ProcessRemoteRequestTest04
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    AAFwk::Want options;
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteParcelable(&options), false);
+    ASSERT_EQ(data.WriteUint64(2), true);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
+    ASSERT_EQ(22, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_PROCESS_POINT_DOWN_SESSION), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG), data, reply, option);
+    ASSERT_EQ(-1, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT), data, reply, option);
+    ASSERT_EQ(5, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION), data, reply, option);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: ProcessRemoteRequestTest05
+ * @tc.desc: sessionStub ProcessRemoteRequestTest05
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    AAFwk::Want options;
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteParcelable(&options), false);
+    ASSERT_EQ(data.WriteUint64(2), true);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE), data, reply, option);
+    ASSERT_EQ(0, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE),
+        data,
+        reply,
+        option);
+    ASSERT_EQ(0, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC

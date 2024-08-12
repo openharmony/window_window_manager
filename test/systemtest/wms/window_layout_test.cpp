@@ -15,11 +15,14 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "display_manager_proxy.h"
-#include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 #include "window_adapter.h"
+#include "window_scene_session_impl.h"
+#include "ability_context_impl.h"
+#include "mock_session.h"
+
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -39,6 +42,7 @@ public:
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
     static void InitAvoidArea();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
 
 vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
@@ -112,10 +116,12 @@ void WindowLayoutTest::TearDownTestCase()
 void WindowLayoutTest::SetUp()
 {
     activeWindows_.clear();
+    abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
 }
 
 void WindowLayoutTest::TearDown()
 {
+    abilityContext_ = nullptr;
 }
 
 namespace {
@@ -485,6 +491,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
@@ -498,6 +505,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
     ASSERT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);
@@ -546,6 +554,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
@@ -559,6 +568,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
     ASSERT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);
@@ -635,6 +645,614 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     expect2 = Utils::CalcLimitedRect(expect2, virtualPixelRatio_);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
+
+/**
+ * @tc.name: moveWindowTo01
+ * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10001);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo02
+ * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10002);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo03
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10003);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo04
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo04");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10004);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo05
+ * @tc.desc: test moveWindowTo for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo05");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10005);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo06
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo06");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10006);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: moveWindowTo07
+ * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("moveWindowTo07");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10007);
+
+    WMError ret = window->MoveTo(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->MoveTo(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize01
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize01");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10008);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: resize02
+ * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize02");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10009);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: resize03
+ * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize03");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10010);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: resize04
+ * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize04");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10011);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: resize05
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize05");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10012);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+
+/**
+ * @tc.name: resize06
+ * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize06");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10013);
+
+    WindowLimits windowLimits;
+    WMError ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: resize07
+ * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize07");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10014);
+
+    WindowLimits windowLimits;
+    WMError ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: resize08
+ * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("resize08");
+    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10015);
+
+    WMError ret = window->Resize(-500, -500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(0, 0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(500, 500);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(20000, 20000);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

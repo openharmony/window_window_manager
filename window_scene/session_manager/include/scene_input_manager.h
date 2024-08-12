@@ -32,6 +32,7 @@ struct SecSurfaceInfo;
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
+    void Init();
     void FlushDisplayInfoToMMI(const bool forceFlush = false);
     void FlushEmptyInfoToMMI();
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
@@ -47,7 +48,6 @@ protected:
     virtual ~SceneInputManager() = default;
 
 private:
-    void Init();
     void UpdateFocusedSessionId(int32_t focusedSessionId);
     void FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
         const std::vector<MMI::WindowInfo>& windowInfoList);
