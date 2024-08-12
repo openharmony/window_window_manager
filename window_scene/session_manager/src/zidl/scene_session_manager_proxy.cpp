@@ -42,7 +42,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         WLOGFE("Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!sessionStage || !data.WriteRemoteObject(sessionStage->AsObject())) {
+    if (!data.WriteRemoteObject(sessionStage->AsObject())) {
         WLOGFE("Write ISessionStage failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
