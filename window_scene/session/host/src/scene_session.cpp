@@ -1306,6 +1306,10 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
     std::string uiType = systemConfig_.uiType_;
     if (WindowHelper::IsMainWindow(winType)) {
+        if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
+            return false;
+        }
+
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
             uiType == "phone" || uiType == "pad") {
             return true;
