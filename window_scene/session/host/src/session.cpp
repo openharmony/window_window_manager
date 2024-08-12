@@ -2498,7 +2498,7 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
