@@ -166,6 +166,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetFreeMultiWindowEnableState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
+            return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1013,6 +1015,22 @@ int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, Messa
     TLOGI(WmsLogTag::WMS_LIFE, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
     if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to WriteBool");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = data.ReadInt32();
+    std::vector<int32_t> persistentIds;
+    data.ReadInt32Vector(&persistentIds);
+    std::vector<uint64_t> surfaceNodeIds;
+    data.ReadUInt64Vector(&surfaceNodeIds);
+    WMError errCode = GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
+    if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds fail.");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));

@@ -818,6 +818,14 @@ public:
      */
     virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
     /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
@@ -825,6 +833,14 @@ public:
      * @return WMError
      */
     virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    /**
+     * @brief resize the window instance (w,h)
+     *
+     * @param width
+     * @param height
+     * @return WMError
+     */
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief set the window gravity
      *
@@ -2134,6 +2150,25 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
+     * @brief Set the parent window of sub window created by UIExtension
+     *
+     * @param parent window
+     */
+    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
+
+    /**
+     * @brief Notify the window that set UI content complete
+     */
+    virtual void NotifySetUIContent() {}
+
+    /**
+     * @brief Notify host that UIExtension timeout
+     *
+     * @param errorCode error code when UIExtension timeout
+     */
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 };
 }
 }

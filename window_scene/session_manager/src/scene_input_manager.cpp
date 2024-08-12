@@ -27,7 +27,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneInputManager" };
 const std::string SCENE_INPUT_MANAGER_THREAD = "SceneInputManager";
 const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
-std::recursive_mutex g_instanceMutex;
 
 constexpr float DIRECTION0 = 0;
 constexpr float DIRECTION90 = 90;
@@ -174,28 +173,18 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 }
 } //namespace
 
-SceneInputManager& SceneInputManager::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneInputManager *instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneInputManager();
-        instance->Init();
-    }
-    return *instance;
-}
+
+WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
 void SceneInputManager::Init()
 {
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    if (sceneSessionDirty_) {
-        auto callback = [this]() {
-            FlushDisplayInfoToMMI();
-        };
-        sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
-    }
+    auto callback = [this]() {
+        FlushDisplayInfoToMMI();
+    };
+    sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
 }
 
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)

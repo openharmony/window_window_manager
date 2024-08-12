@@ -71,6 +71,7 @@ public:
         DisplayManagerAgentType type) { return DMError::DM_OK; }
 
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+    virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
     virtual bool IsFoldable() { return false; };
     virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; };
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }

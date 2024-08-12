@@ -41,6 +41,7 @@ public:
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, value, payload);
 #endif
     }
+    
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}

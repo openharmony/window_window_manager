@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "future_callback.h"
 #include "window_session_property.h"
 
 using namespace testing;
@@ -1028,6 +1029,44 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
     delete property;
 }
 
+/**
+ * @tc.name: MarshallingFutureCallback
+ * @tc.desc: MarshallingFutureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    if (property == nullptr) {
+        return;
+    }
+    Parcel parcel = Parcel();
+    property->SetLayoutCallback(nullptr);
+    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+}
+
+/**
+ * @tc.name: UnmarshallingFutureCallback
+ * @tc.desc: UnmarshallingFutureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFutureCallback, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    if (property == nullptr) {
+        return;
+    }
+    Parcel parcel = Parcel();
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    ASSERT_NE(nullptr, layoutCallback);
+    parcel.WriteObject(layoutCallback->AsObject());
+    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    ASSERT_NE(nullptr, property->GetLayoutCallback());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

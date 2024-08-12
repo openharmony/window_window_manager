@@ -178,6 +178,11 @@ public:
         return std::vector<DisplayPhysicalResolution> {};
     }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override { return false; }
+    virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+        std::vector<uint64_t>& windowIdList) override
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

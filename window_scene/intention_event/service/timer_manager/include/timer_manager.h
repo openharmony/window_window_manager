@@ -42,6 +42,7 @@ public:
     void Init();
     int32_t AddTimer(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimer(int32_t timerId);
+
 private:
     struct TimerItem {
         int32_t id { 0 };
@@ -49,6 +50,7 @@ private:
         int64_t nextCallTime  { 0 };
         std::function<void()> callback;
     };
+    
 private:
     void OnThread();
     void OnStop();

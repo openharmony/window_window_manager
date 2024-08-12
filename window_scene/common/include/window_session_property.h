@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <parcel.h>
+#include "future_callback_interface.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "wm_common.h"
@@ -42,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetLayoutCallback(const sptr<IFutureCallback>& callback);
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
@@ -100,6 +102,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    sptr<IFutureCallback> GetLayoutCallback() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -164,6 +167,8 @@ public:
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFutureCallback(Parcel& parcel) const;
+    static void UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -235,6 +240,7 @@ private:
     void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
+    sptr<IFutureCallback> layoutCallback_ = nullptr;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
