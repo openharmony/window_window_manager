@@ -5085,7 +5085,7 @@ DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenI
         return DMError::DM_ERROR_INVALID_CALLING;
     }
     std::vector<uint64_t> surfaceNodeIds;
-    if (windowIdList.size() > 0) {
+    if (!windowIdList.empty()) {
         MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
             pid, windowIdList, surfaceNodeIds);
     }
