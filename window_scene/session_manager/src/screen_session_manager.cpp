@@ -663,11 +663,22 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
-        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f",
-            info.width_, info.height_, info.density_);
+        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
+        "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
+        "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
+        info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
+        displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
         displayInfo->SetVirtualPixelRatio(info.density_);
+        sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
+        if (info.enableHookRotation_ && screenSession) {
+            Rotation targetRotation = static_cast<Rotation>(info.rotation_);
+            displayInfo->SetRotation(targetRotation);
+            DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
+                FoldDisplayMode::UNKNOWN);
+            displayInfo->SetDisplayOrientation(displayOrientation);
+        }
     }
     return displayInfo;
 }
