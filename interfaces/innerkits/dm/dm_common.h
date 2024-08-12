@@ -44,6 +44,8 @@ struct DMHookInfo {
     uint32_t width_;
     uint32_t height_;
     float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
 };
 
 /**
