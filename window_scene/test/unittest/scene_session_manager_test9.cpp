@@ -42,6 +42,15 @@ private:
 
 sptr<SceneSessionManager> SceneSessionManagerTest9::ssm_ = nullptr;
 
+void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
+{
+}
+
+bool TraverseFuncTest(const sptr<SceneSession>& session)
+{
+    return true;
+}
+
 void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
@@ -75,25 +84,15 @@ void SceneSessionManagerTest9::TearDown()
 
 namespace {
 /**
- * @tc.name: TraverseSessionTreeFromTopToBottom01
+ * @tc.name: TraverseSessionTreeFromTopToBottom
  * @tc.desc: TraverseSessionTreeFromTopToBottom
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    TraverseFunc func;
-    ssm_->TraverseSessionTreeFromTopToBottom(func);
-}
+    ssm_->TraverseSessionTreeFromTopToBottom(TraverseFuncTest);
 
-/**
- * @tc.name: TraverseSessionTreeFromTopToBottom02
- * @tc.desc: TraverseSessionTreeFromTopToBottom
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "TraverseSessionTreeFromTopToBottom";
@@ -101,6 +100,7 @@ HWTEST_F(SceneSessionManagerTest9, TraverseSessionTreeFromTopToBottom02, Functio
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, nullptr));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->TraverseSessionTreeFromTopToBottom(TraverseFuncTest);
 }
 
 /**
@@ -489,6 +489,110 @@ HWTEST_F(SceneSessionManagerTest9, ProcessDialogRequestFocusImmdediately02, Func
 
     dialogSceneSession->persistentId_ = 0;
     ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+}
+
+/**
+ * @tc.name: NotifyCompleteFirstFrameDrawing03
+ * @tc.desc: NotifyCompleteFirstFrameDrawing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, NotifyCompleteFirstFrameDrawing03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "NotifyCompleteFirstFrameDrawing03";
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityInfo->excludeFromMissions = true;
+    sessionInfo.abilityInfo = abilityInfo;
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = nullptr;
+    ssm_->NotifyCompleteFirstFrameDrawing(1);
+
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    sessionInfo.isSystem_ = false;
+    ssm_->eventHandler_ = nullptr;
+    ssm_->NotifyCompleteFirstFrameDrawing(1);
+
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler = std::make_shared<AppExecFwk::EventHandler>();
+    ssm_->eventHandler_ = eventHandler;
+    abilityInfo->excludeFromMissions = false;
+    ssm_->NotifyCompleteFirstFrameDrawing(1);
+}
+
+/**
+ * @tc.name: SetSessionLabel02
+ * @tc.desc: SetSessionLabel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetSessionLabel02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "SetSessionLabel02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<IRemoteObject> token = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, token);
+    sceneSession->SetAbilityToken(token);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = nullptr;
+
+    std::string label = "testLabel";
+    ssm_->SetSessionLabel(token, label);
+
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    sessionInfo.isSystem_ = false;
+    ssm_->SetSessionLabel(token, label);
+
+    sessionInfo.isSystem_ = true;
+    ssm_->SetSessionLabel(token, label);
+}
+
+/**
+ * @tc.name: RecoverAndReconnectSceneSession02
+ * @tc.desc: RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "RecoverAndReconnectSceneSession02";
+    sessionInfo.moduleName_ = "moduleTest";
+    sessionInfo.appIndex_ = 10;
+    sessionInfo.persistentId_ = 1;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityInfo->excludeFromMissions = true;
+    sessionInfo.abilityInfo = abilityInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetPersistentId(1);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    property->SetRequestedOrientation(Orientation::UNSPECIFIED);
+    ssm_->alivePersistentIds_.push_back(1);
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverSceneSessionFunc_ = NotifyRecoverSceneSessionFuncTest;
+
+    sptr<ISession> session;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetPersistentId(0);
+    ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
 }
 }
 } // namespace Rosen
