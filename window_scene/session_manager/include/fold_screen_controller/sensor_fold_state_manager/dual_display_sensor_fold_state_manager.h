@@ -33,12 +33,12 @@ class ApplicationStateObserver : public IApplicationStateObserver {
 public:
     ApplicationStateObserver();
     virtual ~ApplicationStateObserver() = default;
-    void OnForegroundApplicationChanged(const AppStateData& appStateData) override;
-    void OnAbilityStateChanged(const AppExecFwk::AbilityStateData& abilityStateData) override {};
-    void OnExtensionStateChanged(const AppExecFwk::AbilityStateData& abilityStateData) override {};
-    void OnProcessCreated(const AppExecFwk::ProcessData& processData) override {};
-    void OnProcessDied(const AppExecFwk::ProcessData& processData) override {};
-    void OnApplicationStateChanged(const AppExecFwk::AppStateData& appStateData) override {};
+    void OnForegroundApplicationChanged(const AppStateData &appStateData) override;
+    void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
+    void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
+    void OnProcessCreated(const AppExecFwk::ProcessData &processData) override {};
+    void OnProcessDied(const AppExecFwk::ProcessData &processData) override {};
+    void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
 

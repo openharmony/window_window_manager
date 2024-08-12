@@ -47,7 +47,7 @@ public:
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
 
     void OnBundleUpdated(const std::string& bundleName);
-    void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
+    void SetFrameLayoutFinishCallback(std::function<void()> && callback);
 
     void SetDisplayDensity(float density);
 

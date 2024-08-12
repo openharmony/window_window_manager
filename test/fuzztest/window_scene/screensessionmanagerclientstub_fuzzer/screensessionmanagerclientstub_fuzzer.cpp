@@ -34,7 +34,7 @@ namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
 }
 template<class T>
-size_t GetObject(T& object, const uint8_t* data, size_t size)
+size_t GetObject(T &object, const uint8_t *data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -42,7 +42,7 @@ size_t GetObject(T& object, const uint8_t* data, size_t size)
     }
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
-void ScreenSessionMgrClientStubTest1(MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
+void ScreenSessionMgrClientStubTest1(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
 {
     parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(
@@ -74,7 +74,7 @@ void ScreenSessionMgrClientStubTest1(MessageParcel& parcel, MessageParcel& reply
         ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED), parcel, reply, option);
     return;
 }
-void ScreenSessionMgrClientStubTest2(MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
+void ScreenSessionMgrClientStubTest2(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
 {
     parcel.RewindRead(0);
     ScreenSessionManagerClient::GetInstance().OnRemoteRequest(

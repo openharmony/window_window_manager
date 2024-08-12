@@ -24,16 +24,16 @@
 namespace OHOS::Rosen {
 class ScreenCastConnection {
 public:
-    static ScreenCastConnection& GetInstance();
+    static ScreenCastConnection &GetInstance();
 
     bool CastConnectExtension();
     void CastDisconnectExtension();
-    void SetBundleName(const std::string& bundleName);
-    void SetAbilityName(const std::string& abilityName);
+    void SetBundleName(const std::string &bundleName);
+    void SetAbilityName(const std::string &abilityName);
     std::string GetBundleName() const;
     std::string GetAbilityName() const;
     bool IsConnectedSync();
-    int32_t SendMessageToCastService(const int32_t& transCode, MessageParcel& data, MessageParcel& reply);
+    int32_t SendMessageToCastService(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
 
 private:
     explicit ScreenCastConnection() = default;

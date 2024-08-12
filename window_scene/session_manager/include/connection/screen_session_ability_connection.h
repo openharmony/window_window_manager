@@ -29,7 +29,7 @@ public:
     explicit ScreenSessionAbilityDeathRecipient(
         std::function<void(void)> deathHandler) : deathHandler_(deathHandler) {}
     ~ScreenSessionAbilityDeathRecipient() = default;
-    void OnRemoteDied(const wptr<IRemoteObject>& remoteObject) override;
+    void OnRemoteDied(const wptr<IRemoteObject> &remoteObject) override;
 
 private:
     std::function<void(void)> deathHandler_;
@@ -40,11 +40,11 @@ public:
     explicit ScreenSessionAbilityConnectionStub() = default;
     virtual ~ScreenSessionAbilityConnectionStub() = default;
 
-    void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
-        const sptr<IRemoteObject>& remoteObject, int32_t resultCode) override;
-    void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int32_t resultCode) override;
-    int32_t SendMessageSync(int32_t transCode, MessageParcel& data, MessageParcel& reply);
-    int32_t SendMessageSyncBlock(int32_t transCode, MessageParcel& data, MessageParcel& reply);
+    void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
+    int32_t SendMessageSync(int32_t transCode, MessageParcel &data, MessageParcel &reply);
+    int32_t SendMessageSyncBlock(int32_t transCode, MessageParcel &data, MessageParcel &reply);
     bool IsAbilityConnected();
     bool IsAbilityConnectedSync();
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -82,10 +82,10 @@ public:
     explicit ScreenSessionAbilityConnection() = default;
     ~ScreenSessionAbilityConnection() = default;
 
-    bool ScreenSessionConnectExtension(const std::string& bundleName, const std::string& abilityName);
+    bool ScreenSessionConnectExtension(const std::string &bundleName, const std::string &abilityName);
     void ScreenSessionDisconnectExtension();
-    int32_t SendMessage(const int32_t& transCode, MessageParcel& data, MessageParcel& reply);
-    int32_t SendMessageBlock(const int32_t& transCode, MessageParcel& data, MessageParcel& reply);
+    int32_t SendMessage(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
+    int32_t SendMessageBlock(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
     bool IsConnected();
     bool IsConnectedSync();
     sptr<ScreenSessionAbilityConnectionStub> GetScreenSessionAbilityConnectionStub();

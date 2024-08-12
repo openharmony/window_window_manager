@@ -19,7 +19,7 @@
 using namespace OHOS;
 using namespace OHOS::Rosen;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     auto displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::vector<DisplayId> ids;

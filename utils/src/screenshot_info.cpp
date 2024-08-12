@@ -16,12 +16,12 @@
 #include "screenshot_info.h"
 
 namespace OHOS::Rosen {
-bool ScreenshotInfo::Marshalling(Parcel& parcel) const
+bool ScreenshotInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteString(trigger_) && parcel.WriteUint64(displayId_);
 }
 
-ScreenshotInfo *ScreenshotInfo::Unmarshalling(Parcel& parcel)
+ScreenshotInfo *ScreenshotInfo::Unmarshalling(Parcel &parcel)
 {
     ScreenshotInfo *info = new(std::nothrow) ScreenshotInfo();
     if (info == nullptr) {
