@@ -364,6 +364,11 @@ uint32_t WindowImpl::GetWindowId() const
     return property_->GetWindowId();
 }
 
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return property_->GetDisplayId();
+}
+
 uint32_t WindowImpl::GetWindowFlags() const
 {
     return property_->GetWindowFlags();
