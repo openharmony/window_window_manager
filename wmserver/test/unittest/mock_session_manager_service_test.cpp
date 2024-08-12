@@ -202,7 +202,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Functi
 HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
 {
     int32_t pid = 123;
-    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> persistentIds = {1, 2, 3};
     std::vector<uint64_t> surfaceNodeIds;
     MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds);
