@@ -63,7 +63,7 @@ void ScreenSessionPublish::InitPublishEvents()
 }
 
 int32_t ScreenSessionPublish::PublishEvents(
-    const EventFwk::CommonEventData& eventData, std::string bundleName)
+    const EventFwk::CommonEventData &eventData, std::string bundleName)
 {
     if (publishInfo_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "publishInfo is nullptr");
@@ -81,7 +81,7 @@ int32_t ScreenSessionPublish::PublishEvents(
     return PUBLISH_SUCCESS;
 }
 
-void ScreenSessionPublish::PublishCastPluggedEvent(const bool& isEnable)
+void ScreenSessionPublish::PublishCastPluggedEvent(const bool &isEnable)
 {
     TLOGI(WmsLogTag::DMS, "start to publish cast plugged event");
     EventFwk::CommonEventData eventData;
@@ -118,7 +118,7 @@ void ScreenSessionPublish::PublishCastPlugOutEvent()
 }
 
 void ScreenSessionPublish::PublishDisplayRotationEvent(
-    const ScreenId& screenId, const Rotation& displayRotation)
+    const ScreenId &screenId, const Rotation &displayRotation)
 {
     TLOGI(WmsLogTag::DMS,
         "start to publish display rotation event, screenId: %{public}d, displayRotation: %{public}d",

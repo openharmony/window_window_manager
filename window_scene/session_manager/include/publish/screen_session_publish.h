@@ -31,14 +31,14 @@ public:
     void InitPublishEvents();
     void PublishCastPlugInEvent();
     void PublishCastPlugOutEvent();
-    void PublishDisplayRotationEvent(const ScreenId& screenId, const Rotation& displayRotation);
+    void PublishDisplayRotationEvent(const ScreenId &screenId, const Rotation &displayRotation);
 
 private:
     explicit ScreenSessionPublish() = default;
     ~ScreenSessionPublish() = default;
 
-    int32_t PublishEvents(const EventFwk::CommonEventData& eventData, std::string bundleName = "");
-    void PublishCastPluggedEvent(const bool& isEnable);
+    int32_t PublishEvents(const EventFwk::CommonEventData &eventData, std::string bundleName = "");
+    void PublishCastPluggedEvent(const bool &isEnable);
 
 private:
     sptr<EventFwk::CommonEventPublishInfo> publishInfo_;

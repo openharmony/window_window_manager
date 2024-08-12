@@ -61,12 +61,12 @@ void ScreenCastConnection::CastDisconnectExtension()
     TLOGI(WmsLogTag::DMS, "CastDisconnectExtension exit");
 }
 
-void ScreenCastConnection::SetBundleName(const std::string& bundleName)
+void ScreenCastConnection::SetBundleName(const std::string &bundleName)
 {
     bundleName_ = bundleName;
 }
 
-void ScreenCastConnection::SetAbilityName(const std::string& abilityName)
+void ScreenCastConnection::SetAbilityName(const std::string &abilityName)
 {
     abilityName_ = abilityName;
 }
@@ -90,8 +90,8 @@ bool ScreenCastConnection::IsConnectedSync()
     return abilityConnection_->IsConnectedSync();
 }
 
-int32_t ScreenCastConnection::SendMessageToCastService(const int32_t& transCode, MessageParcel& data,
-    MessageParcel& reply)
+int32_t ScreenCastConnection::SendMessageToCastService(const int32_t &transCode, MessageParcel &data,
+    MessageParcel &reply)
 {
     if (abilityConnection_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "ability connection is nullptr");

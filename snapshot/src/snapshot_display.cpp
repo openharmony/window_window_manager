@@ -38,7 +38,7 @@ static const std::string IS_DEVELOPER_MODE = GetParameter(DEVELOPER_MODE_PARAMET
 static bool GetScreenshotByCmdArguments(CmdArguments& cmdArguments, sptr<Display> display,
     std::shared_ptr<OHOS::Media::PixelMap>& pixelMap);
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     CmdArguments cmdArguments;
     cmdArguments.fileName = "";

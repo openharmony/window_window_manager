@@ -56,7 +56,7 @@ bool ScreenSnapshotPickerConnection::SnapshotPickerConnectExtension()
     return true;
 }
 
-int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect& rect, ScreenId& screenId)
+int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect &rect, ScreenId &screenId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -122,12 +122,12 @@ sptr<ScreenSessionAbilityConnectionStub> ScreenSnapshotPickerConnection::GetScre
     return abilityConnection_->GetScreenSessionAbilityConnectionStub();
 }
 
-void ScreenSnapshotPickerConnection::SetBundleName(const std::string& bundleName)
+void ScreenSnapshotPickerConnection::SetBundleName(const std::string &bundleName)
 {
     bundleName_ = bundleName;
 }
 
-void ScreenSnapshotPickerConnection::SetAbilityName(const std::string& abilityName)
+void ScreenSnapshotPickerConnection::SetAbilityName(const std::string &abilityName)
 {
     abilityName_ = abilityName;
 }

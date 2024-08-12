@@ -20,7 +20,7 @@
 
 
 namespace OHOS::Rosen {
-bool DisplayInfo::Marshalling(Parcel& parcel) const
+bool DisplayInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteString(name_) && parcel.WriteUint64(id_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteInt32(width_) && parcel.WriteInt32(height_) &&
@@ -42,7 +42,7 @@ bool DisplayInfo::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(scaleY_) && parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_);
 }
 
-DisplayInfo *DisplayInfo::Unmarshalling(Parcel& parcel)
+DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
 {
     DisplayInfo *displayInfo = new(std::nothrow) DisplayInfo();
     if (displayInfo == nullptr) {

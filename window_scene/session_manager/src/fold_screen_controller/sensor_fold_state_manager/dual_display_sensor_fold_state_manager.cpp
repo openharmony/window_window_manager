@@ -154,7 +154,7 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
 
 ApplicationStateObserver::ApplicationStateObserver() {}
 
-void ApplicationStateObserver::OnForegroundApplicationChanged(const AppStateData& appStateData)
+void ApplicationStateObserver::OnForegroundApplicationChanged(const AppStateData &appStateData)
 {
     if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND)) {
         foregroundBundleName_ = appStateData.bundleName;
