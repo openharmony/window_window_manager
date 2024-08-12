@@ -101,7 +101,7 @@ WSError SceneSessionManagerProxy::RecoverAndConnectSpecificSession(const sptr<IS
         WLOGFE("Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteRemoteObject(sessionStage->AsObject())) {
+    if (!sessionStage || !data.WriteRemoteObject(sessionStage->AsObject())) {
         WLOGFE("Write ISessionStage failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -155,15 +155,15 @@ WSError SceneSessionManagerProxy::RecoverAndReconnectSceneSession(const sptr<ISe
         WLOGFE("Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteRemoteObject(sessionStage->AsObject())) {
+    if (!sessionStage || !data.WriteRemoteObject(sessionStage->AsObject())) {
         WLOGFE("Write ISessionStage failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteRemoteObject(eventChannel->AsObject())) {
+    if (!eventChannel || !data.WriteRemoteObject(eventChannel->AsObject())) {
         WLOGFE("Write IWindowEventChannel failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!surfaceNode->Marshalling(data)) {
+    if (!surfaceNode || !surfaceNode->Marshalling(data)) {
         WLOGFE("Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
