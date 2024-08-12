@@ -758,7 +758,7 @@ napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI] EnableDrag");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI] EnableDrag");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnEnableDrag(env, info) : nullptr;
 }
