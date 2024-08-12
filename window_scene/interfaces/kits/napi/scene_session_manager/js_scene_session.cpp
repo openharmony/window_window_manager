@@ -1547,7 +1547,6 @@ napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->UpdateNativeVisibility(visible);
-    SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
     WLOGFI("[NAPI]OnUpdateNativeVisibility end");
     return NapiGetUndefined(env);
 }
