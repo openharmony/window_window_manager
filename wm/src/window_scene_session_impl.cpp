@@ -318,7 +318,6 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     if (token) {
         property_->SetTokenState(true);
     }
-
     const WindowType type = GetType();
     if (WindowHelper::IsSubWindow(type)) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
@@ -370,6 +369,9 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         GetPersistentId(), state_);
     sptr<ISessionStage> iSessionStage(this);
     auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    if (windowEventChannel == nullptr) {
+        return WMError::WM_ERROR_NULLPTR; 
+    }
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     sptr<Rosen::ISession> session;
