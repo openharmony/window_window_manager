@@ -569,6 +569,8 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
+        } else {
+            WLOGFI("OnPowerStatusChange: Sucess to SendEvent.");
         }
     } else {
         WLOGFE("OnPowerStatusChange: env is nullptr");
