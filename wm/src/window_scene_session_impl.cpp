@@ -370,7 +370,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     sptr<ISessionStage> iSessionStage(this);
     auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
     if (windowEventChannel == nullptr) {
-        return WMError::WM_ERROR_NULLPTR; 
+        return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
