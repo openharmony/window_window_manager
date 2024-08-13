@@ -20,6 +20,7 @@
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
 #include "iremote_object_mocker.h"
+#include "window_extension_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -85,16 +86,28 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
  */
 HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 {
-    WindowExtensionStubImpl windowExtensionStubImpl("WindowExtensionStubImplTest_SetBounds");
-    sptr<WindowOption> option = new WindowOption();
+    
+    WindowExtensionStubImpl windowExtensionStubImpl("windowName");
+    Rect rect = { 150, 150, 400, 600 };
+    windowExtensionStubImpl.SetBounds(rect);
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    Rect baseWindowRect = { 150, 150, 400, 600 };
-    option->SetWindowRect(baseWindowRect);
-    sptr<Window> window = Window::Create("WindowExtensionStubImplTest_SetBounds", option, nullptr);
+    option->SetWindowRect(rect);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    windowExtensionStubImpl.SetBounds(baseWindowRect);
+    window->property_->SetWindowRect(rect);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.SetBounds(rect);
+
+    Rect rect2 = { 100, 100, 200, 300 };
+    windowExtensionStubImpl.SetBounds(rect2);
+
+    rect2 = { 100, 150, 200, 600 };
+    windowExtensionStubImpl.SetBounds(rect2);
+
+    rect2 = { 150, 100, 400, 300 };
+    windowExtensionStubImpl.SetBounds(rect2);
 }
 
 /**
@@ -105,9 +118,14 @@ HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.Hide();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.Hide();
 }
 
 /**
@@ -118,9 +136,14 @@ HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.Show();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.Show();
 }
 
 /**
@@ -131,9 +154,14 @@ HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, RequestFocus, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.RequestFocus();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.RequestFocus();
 }
 
 /**
