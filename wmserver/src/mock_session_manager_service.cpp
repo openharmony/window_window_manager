@@ -745,7 +745,7 @@ void MockSessionManagerService::WriteStringToFile(int32_t pid, const char* str)
 }
 
 void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-    const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
+    const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds)
 {
     auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
     if (sessionManagerService == nullptr) {
@@ -760,11 +760,19 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
             return;
         }
     }
+    if (windowIdList.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowIdList is null, no need to get surfaceNodeId");
+        return;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t id : windowIdList) {
+        persistentIds.push_back(static_cast<int32_t>(id));
+    }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
     WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds);
     if (ret != WMError::WM_OK) {
-        TLOGI(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
+        TLOGE(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
     }
 }
 } // namespace Rosen

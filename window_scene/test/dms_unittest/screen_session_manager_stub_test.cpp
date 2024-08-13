@@ -336,7 +336,10 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest |
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(1009);
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
