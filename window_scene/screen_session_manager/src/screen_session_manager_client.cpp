@@ -280,6 +280,10 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     }
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
 
+    // not need update property to input manager
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        return;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");

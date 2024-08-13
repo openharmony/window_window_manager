@@ -35,7 +35,7 @@ public:
         : windowRoot_(root), handler_(handler),
         performReport_(new PerformReporter("GET_SNAPSHOT_TIME", {25, 35, 50, 200})) {};
     ~SnapshotController() = default;
-    int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
+    int32_t GetSnapshot(const sptr<IRemoteObject>& token, AAFwk::Snapshot& snapshot) override;
 
 private:
     sptr<WindowRoot> windowRoot_;

@@ -527,7 +527,9 @@ ohos_unittest("wm_window_extension_session_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_context",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -657,6 +659,19 @@ ohos_unittest("wm_window_adapter_lite_test") {
   module_out_path = module_out_path
 
   sources = [ "window_adapter_lite_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_prepare_terminate_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_prepare_terminate_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

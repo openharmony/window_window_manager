@@ -27,6 +27,7 @@ public:
     virtual ~WindowPrepareTerminateHandler() override;
     virtual void DoPrepareTerminate() override;
     void SetPrepareTerminateFun(const PrepareTerminateFunc& func);
+    
 private:
     PrepareTerminateFunc func_;
 };

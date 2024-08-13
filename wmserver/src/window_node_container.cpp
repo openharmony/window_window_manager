@@ -2155,7 +2155,7 @@ bool WindowNodeContainer::IsAppWindowsEmpty() const
 }
 
 WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(MinimizeReason reason,
-    const std::vector<uint32_t> &exceptionalIds, const std::vector<WindowMode> &exceptionalModes)
+    const std::vector<uint32_t>& exceptionalIds, const std::vector<WindowMode>& exceptionalModes)
 {
     if (appWindowNode_->children_.empty()) {
         return WMError::WM_OK;

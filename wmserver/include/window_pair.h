@@ -217,6 +217,7 @@ public:
      * @return true means existing recent or status is not PARI_DONE.
      */
     bool IsDuringSplit();
+    
 private:
     /**
      * @brief Gets whether the window is related to split window.

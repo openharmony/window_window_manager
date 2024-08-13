@@ -364,6 +364,11 @@ uint32_t WindowImpl::GetWindowId() const
     return property_->GetWindowId();
 }
 
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return property_->GetDisplayId();
+}
+
 uint32_t WindowImpl::GetWindowFlags() const
 {
     return property_->GetWindowFlags();
@@ -666,7 +671,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
-        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr) {
+            config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
+            TLOGI(WmsLogTag::WMS_LIFE, "notify window orientation change end.");
+        }
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
@@ -1205,6 +1214,9 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
+    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
@@ -4031,7 +4043,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
+    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
     return false;
 }
 

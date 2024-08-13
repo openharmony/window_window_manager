@@ -50,6 +50,7 @@ public:
             }
         }
     }
+    
 private:
     HilogFunc logfn_ { nullptr };
     const char* tag_ { nullptr };

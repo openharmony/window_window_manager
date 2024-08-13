@@ -36,7 +36,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 } // namespace
 
-int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -69,6 +69,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT):
+            return HandleSystemSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP):
@@ -282,6 +284,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
     }
@@ -303,6 +306,15 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t eventId = data.ReadUint32();
+    WLOGFD("HandleSystemSessionEvent eventId: %{public}d", eventId);
+    WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -485,7 +497,7 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     auto mode = data.ReadUint32();
@@ -494,7 +506,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel 
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleGetGlobalMaximizeMode!");
     MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
@@ -692,7 +704,7 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
     SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());

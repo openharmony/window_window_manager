@@ -926,6 +926,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         if (sessionProperty->GetCompatibleModeInPc()) {
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
+        property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -1128,6 +1129,10 @@ WSError Session::SetActive(bool active)
         TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
@@ -1249,7 +1254,7 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
     terminateSessionFunc_ = func;
 }
 
-void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
+void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
     if (lifeCycleTaskQueue_.empty()) {
@@ -1382,7 +1387,7 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
     terminateSessionFuncTotal_ = func;
 }
 
-WSError Session::SetSessionLabel(const std::string &label)
+WSError Session::SetSessionLabel(const std::string& label)
 {
     WLOGFI("run Session::SetSessionLabel");
     if (updateSessionLabelFunc_) {
@@ -1391,12 +1396,12 @@ WSError Session::SetSessionLabel(const std::string &label)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func)
 {
     updateSessionLabelFunc_ = func;
 }
 
-WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFD("run Session::SetSessionIcon, id: %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
@@ -1411,7 +1416,7 @@ WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func)
 {
     updateSessionIconFunc_ = func;
 }
@@ -1637,7 +1642,7 @@ const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
     };
     auto iter = areaMap.find(area);
     if (iter == areaMap.end()) {
-        return "UNKNOW";
+        return "UNKNOWN";
     }
     return iter->second;
 }
@@ -1980,6 +1985,7 @@ void Session::UnregisterSessionChangeListeners()
         session->raiseToTopForPointDownFunc_ = nullptr;
         session->sessionInfoLockedStateChangeFunc_ = nullptr;
         session->contextTransparentFunc_ = nullptr;
+        session->sessionRectChangeFunc_ = nullptr;
         WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
     };
     PostTask(task, "UnregisterSessionChangeListeners");
@@ -2159,6 +2165,9 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
@@ -2182,6 +2191,18 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     return WSError::WS_OK;
 }
 
+WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "isSupportPhone: %{public}d", isSupportPhone);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsAppSupportPhoneInPc(isSupportPhone);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetIsPcAppInPad(bool enable)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
@@ -2202,6 +2223,11 @@ WSError Session::CompatibleFullScreenRecover()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenRecover();
 }
 
@@ -2213,6 +2239,11 @@ WSError Session::CompatibleFullScreenMinimize()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->CompatibleFullScreenMinimize();
 }
 
@@ -2223,6 +2254,11 @@ WSError Session::CompatibleFullScreenClose()
         TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->CompatibleFullScreenClose();
 }
@@ -2247,6 +2283,9 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        }
+        if (!sessionStage_) {
+            return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
@@ -2457,6 +2496,10 @@ WSError Session::ProcessBackEvent()
         TLOGW(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
 }
@@ -2888,6 +2931,10 @@ WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
     if (!IsSessionValid()) {
         TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
 }

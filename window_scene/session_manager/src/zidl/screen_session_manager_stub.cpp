@@ -243,6 +243,35 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId secondaryScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenSourceMode secondaryScreenMode = static_cast<ScreenSourceMode>(data.ReadUint32());
+            DMError ret = MultiScreenModeSwitch(mainScreenId, secondaryScreenId, secondaryScreenMode);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_MULTI_SCREEN_POSITION: {
+            uint64_t mainScreenId = data.ReadUint64();
+            uint32_t mainScreenX = data.ReadUint32();
+            uint32_t mainScreenY = data.ReadUint32();
+            uint64_t secondaryScreenId = data.ReadUint64();
+            uint32_t secondaryScreenX = data.ReadUint32();
+            uint32_t secondaryScreenY = data.ReadUint32();
+            ExtendOption mainScreenOption = {
+                .screenId_ = mainScreenId,
+                .startX_ = mainScreenX,
+                .startY_ = mainScreenY,
+            };
+            ExtendOption secondaryScreenOption = {
+                .screenId_ = secondaryScreenId,
+                .startX_ = secondaryScreenX,
+                .startY_ = secondaryScreenY,
+            };
+            DMError ret = MultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
             std::vector<ScreenId> mirrorScreenIds;
             if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
@@ -779,6 +808,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(res);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION: {
+            ProcSetVirtualScreenSecurityExemption(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -868,5 +901,15 @@ void ScreenSessionManagerStub::ProcGetAllDisplayPhysicalResolution(MessageParcel
             break;
         }
     }
+}
+
+void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+    uint32_t pid = data.ReadUint32();
+    std::vector<uint64_t> windowIdList;
+    data.ReadUInt64Vector(&windowIdList);
+    DMError ret = SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen
