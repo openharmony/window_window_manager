@@ -57,6 +57,12 @@ public:
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override {};
 };
 
+class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
+public:
+    void OnConnected(int32_t userId,int32_t screenId) override {};
+    void OnDisConnected(int32_t userId,int32_t screenId) override {};
+}
+
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -718,13 +724,6 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Lev
  */
 HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Level2)
 {
-    class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener{
-        private:
-        int32_t userId = 0;
-        int32_t screenId = 0;
-        void OnConnected(int32_t userId,int32_t screenId){};
-        void OnDisConnected(int32_t userId,int32_t screenId){};
-    }
     WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = new IWMSConnectionChangedListenerSon();
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
     EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullpter);
