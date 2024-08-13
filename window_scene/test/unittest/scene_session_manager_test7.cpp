@@ -1057,6 +1057,19 @@ HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | Sma
     ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
     ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
 }
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidArea(persistentId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
