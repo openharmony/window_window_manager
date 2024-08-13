@@ -59,8 +59,8 @@ public:
 
 class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
 public:
-    void OnConnected(int32_t userId,int32_t screenId) override {};
-    void OnDisConnected(int32_t userId,int32_t screenId) override {};
+    void OnConnected(int32_t userId, int32_t screenId) override {};
+    void OnDisConnected(int32_t userId, int32_t screenId) override {};
 }
 
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
