@@ -2798,18 +2798,6 @@ void SceneSessionManager::UnregisterCreateSubSessionListener(int32_t persistentI
     taskScheduler_->PostSyncTask(task);
 }
 
-void SceneSessionManager::NotifyStatusBarEnabledChange(bool enable)
-{
-    WLOGFI("NotifyStatusBarEnabledChange enable %{public}d", enable);
-    auto task = [this, enable]() {
-        if (statusBarEnabledChangeFunc_) {
-            statusBarEnabledChangeFunc_(enable);
-        }
-        return WMError::WM_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "NotifyStatusBarEnabledChange");
-}
-
 void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func)
 {
     WLOGFD("SetStatusBarEnabledChangeListener");
@@ -2817,7 +2805,6 @@ void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusB
         WLOGFD("set func is null");
     }
     statusBarEnabledChangeFunc_ = func;
-    NotifyStatusBarEnabledChange(gestureNavigationEnabled_);
 }
 
 void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
@@ -3697,7 +3684,6 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
     }
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
     TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d Name:%{public}s", enable, callerBundleName.c_str());
-    gestureNavigationEnabled_ = enable;
     auto task = [this, enable, callerBundleName]() {
         SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
