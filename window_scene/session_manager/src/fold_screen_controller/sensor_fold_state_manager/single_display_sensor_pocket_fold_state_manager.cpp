@@ -28,16 +28,16 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr float ANGLE_MIN_VAL = 0.0F;
-    constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
-    constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
-    constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
-    constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
-    constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
-    constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
-    constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
-    constexpr int32_t HALL_THRESHOLD = 1;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float ANGLE_MIN_VAL = 0.0F;
+constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
+constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
+constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
+constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
+constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
+constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
+constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
+constexpr int32_t HALL_THRESHOLD = 1;
+constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 } // namespace
 
 SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager() {}
