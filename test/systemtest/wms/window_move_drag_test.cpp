@@ -26,9 +26,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowMoveDragTest"};
-    constexpr float POINT_HOTZONE_RATIO = 0.5;
-    constexpr int WAIT_SYANC_MS = 100000;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowMoveDragTest"};
+constexpr float POINT_HOTZONE_RATIO = 0.5;
+constexpr int WAIT_SYANC_MS = 100000;
 }
 using Utils = WindowTestUtils;
 class WindowMoveDragTest : public testing::Test {

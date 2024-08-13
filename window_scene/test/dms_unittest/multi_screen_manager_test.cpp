@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class MultiScreenManagerTest : public testing::Test {
 public:
