@@ -129,7 +129,6 @@ HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | Sma
     ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
-
     ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
@@ -145,7 +144,6 @@ HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | Sma
     ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
-
     ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
