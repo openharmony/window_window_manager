@@ -96,10 +96,11 @@ namespace {
  */
 HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | Level2)
 {
-    sptr<PipOption> option = new (std::nothrow) PipOption();
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     uint32_t pipTypeTemplate = 5;
     uint32_t testValue = 0;
     ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
