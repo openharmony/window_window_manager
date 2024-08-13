@@ -21,18 +21,18 @@
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
-    class RunningLock;
+class RunningLock;
 }
 
 namespace OHOS::Rosen {
 namespace PARAM_KEY {
-    const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
-    const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
-    const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
+const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
+const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 namespace {
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =

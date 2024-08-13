@@ -29,13 +29,13 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
-    const static uint32_t MAX_RETRY_NUM = 6;
-    const static uint32_t RETRY_WAIT_MS = 500;
-    const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 25000;
-    std::atomic<bool> g_dmIsDestroyed = false;
-    std::mutex snapBypickerMutex;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
+const static uint32_t MAX_RETRY_NUM = 6;
+const static uint32_t RETRY_WAIT_MS = 500;
+const static uint32_t MAX_DISPLAY_SIZE = 32;
+const static uint32_t MAX_INTERVAL_US = 25000;
+std::atomic<bool> g_dmIsDestroyed = false;
+std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 

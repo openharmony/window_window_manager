@@ -35,8 +35,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    using ConfigItem = WindowSceneConfig::ConfigItem;
+const std::string EMPTY_DEVICE_ID = "";
+using ConfigItem = WindowSceneConfig::ConfigItem;
 }
 class SceneSessionManagerTest6 : public testing::Test {
 public:

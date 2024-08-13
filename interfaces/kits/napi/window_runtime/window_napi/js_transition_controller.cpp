@@ -21,11 +21,12 @@
 #include "window_option.h"
 #include "js_window.h"
 #include "permission.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsTransitionController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsTransitionController"};
 }
 
 static int g_jsTransCxtCtorCnt = 0;

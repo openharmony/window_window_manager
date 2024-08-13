@@ -35,11 +35,11 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-    const std::string SETTING_COLUMN_VALUE = "VALUE";
-    const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
-        "settingsdata/SETTINGSDATA?Proxy=true";
-    constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
+const std::string SETTING_COLUMN_VALUE = "VALUE";
+const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
+    "settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
 class MockWindow : public Window {
 public:
