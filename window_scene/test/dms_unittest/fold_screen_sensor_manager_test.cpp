@@ -28,9 +28,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-    constexpr float ANGLE_MIN_VAL = 0.0F;
+constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float ANGLE_MIN_VAL = 0.0F;
 }
 
 class FoldScreenSensorManagerTest : public testing::Test {
@@ -59,148 +59,148 @@ void FoldScreenSensorManagerTest::TearDown()
 }
 
 namespace {
-    /**
-     * @tc.name: RegisterPostureCallback
-     * @tc.desc: test function : RegisterPostureCallback
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.RegisterPostureCallback();
-        ASSERT_NE(mgr.postureUser.callback, nullptr);
-    }
+/**
+ * @tc.name: RegisterPostureCallback
+ * @tc.desc: test function : RegisterPostureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.RegisterPostureCallback();
+    ASSERT_NE(mgr.postureUser.callback, nullptr);
+}
 
-    /**
-     * @tc.name: UnRegisterPostureCallback
-     * @tc.desc: test function : UnRegisterPostureCallback
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.UnRegisterPostureCallback();
-        ASSERT_EQ(mgr.postureUser.callback, nullptr);
-    }
+/**
+ * @tc.name: UnRegisterPostureCallback
+ * @tc.desc: test function : UnRegisterPostureCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.UnRegisterPostureCallback();
+    ASSERT_EQ(mgr.postureUser.callback, nullptr);
+}
 
-    /**
-     * @tc.name: RegisterHallCallback
-     * @tc.desc: test function : RegisterHallCallback
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.RegisterHallCallback();
-        ASSERT_NE(mgr.hallUser.callback, nullptr);
-    }
+/**
+ * @tc.name: RegisterHallCallback
+ * @tc.desc: test function : RegisterHallCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.RegisterHallCallback();
+    ASSERT_NE(mgr.hallUser.callback, nullptr);
+}
 
-    /**
-     * @tc.name: UnRegisterHallCallback
-     * @tc.desc: test function : UnRegisterHallCallback
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.UnRegisterHallCallback();
-        ASSERT_EQ(mgr.hallUser.callback, nullptr);
-    }
+/**
+ * @tc.name: UnRegisterHallCallback
+ * @tc.desc: test function : UnRegisterHallCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.UnRegisterHallCallback();
+    ASSERT_EQ(mgr.hallUser.callback, nullptr);
+}
 
-    /**
-     * @tc.name: HandlePostureData
-     * @tc.desc: test function : HandlePostureData
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.HandlePostureData(nullptr);
-        EXPECT_EQ(mgr.globalAngle, -1.0F);
+/**
+ * @tc.name: HandlePostureData
+ * @tc.desc: test function : HandlePostureData
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.HandlePostureData(nullptr);
+    EXPECT_EQ(mgr.globalAngle, -1.0F);
 
-        SensorEvent event;
-        PostureData postureData;
-        postureData.angle = 45.0F;
-        mgr.HandlePostureData(&event);
-        EXPECT_EQ(mgr.globalAngle, -1.0F);
+    SensorEvent event;
+    PostureData postureData;
+    postureData.angle = 45.0F;
+    mgr.HandlePostureData(&event);
+    EXPECT_EQ(mgr.globalAngle, -1.0F);
 
-        event.data = reinterpret_cast<uint8_t*>(&postureData);
-        event.dataLen = 0;
-        mgr.HandlePostureData(&event);
-        EXPECT_EQ(mgr.globalAngle, -1.0F);
+    event.data = reinterpret_cast<uint8_t*>(&postureData);
+    event.dataLen = 0;
+    mgr.HandlePostureData(&event);
+    EXPECT_EQ(mgr.globalAngle, -1.0F);
 
-        event.dataLen = sizeof(PostureData);
-        mgr.HandlePostureData(&event);
-        EXPECT_EQ(mgr.globalAngle, 45.0F);
-    }
+    event.dataLen = sizeof(PostureData);
+    mgr.HandlePostureData(&event);
+    EXPECT_EQ(mgr.globalAngle, 45.0F);
+}
 
-    /**
-     * @tc.name: notifyFoldAngleChanged
-     * @tc.desc: test function : notifyFoldAngleChanged
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, notifyFoldAngleChanged, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        float foldAngle = 0.0F;
-        mgr.notifyFoldAngleChanged(foldAngle);
-        EXPECT_EQ(foldAngle, 0.0F);
+/**
+ * @tc.name: notifyFoldAngleChanged
+ * @tc.desc: test function : notifyFoldAngleChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, notifyFoldAngleChanged, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    float foldAngle = 0.0F;
+    mgr.notifyFoldAngleChanged(foldAngle);
+    EXPECT_EQ(foldAngle, 0.0F);
 
-        foldAngle = 30.0F;
-        mgr.notifyFoldAngleChanged(foldAngle);
-        EXPECT_EQ(foldAngle, 30.0F);
-    }
+    foldAngle = 30.0F;
+    mgr.notifyFoldAngleChanged(foldAngle);
+    EXPECT_EQ(foldAngle, 30.0F);
+}
 
-    /**
-     * @tc.name: HandleHallData
-     * @tc.desc: test function : HandleHallData
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.HandleHallData(nullptr);
-        EXPECT_EQ(mgr.globalHall, USHRT_MAX);
+/**
+ * @tc.name: HandleHallData
+ * @tc.desc: test function : HandleHallData
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.HandleHallData(nullptr);
+    EXPECT_EQ(mgr.globalHall, USHRT_MAX);
 
-        SensorEvent event;
-        mgr.HandleHallData(&event);
-        EXPECT_EQ(mgr.globalHall, USHRT_MAX);
+    SensorEvent event;
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.globalHall, USHRT_MAX);
 
-        FoldScreenSensorManager::ExtHallData hallData;
-        event.data = reinterpret_cast<uint8_t*>(&hallData);
-        mgr.HandleHallData(&event);
-        EXPECT_EQ(mgr.globalHall, USHRT_MAX);
-        
-        event.dataLen = 0;
-        mgr.HandleHallData(&event);
-        EXPECT_EQ(mgr.globalHall, USHRT_MAX);
+    FoldScreenSensorManager::ExtHallData hallData;
+    event.data = reinterpret_cast<uint8_t*>(&hallData);
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.globalHall, USHRT_MAX);
+    
+    event.dataLen = 0;
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.globalHall, USHRT_MAX);
 
-        event.dataLen = sizeof(FoldScreenSensorManager::ExtHallData);
-        mgr.HandleHallData(&event);
-        EXPECT_EQ(mgr.globalHall, USHRT_MAX);
+    event.dataLen = sizeof(FoldScreenSensorManager::ExtHallData);
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.globalHall, USHRT_MAX);
 
-        hallData.hall = 10;
-        mgr.HandleHallData(&event);
-        EXPECT_EQ(mgr.globalHall, 65535);
-    }
+    hallData.hall = 10;
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.globalHall, 65535);
+}
 
-    /**
-     * @tc.name: TriggerDisplaySwitch
-     * @tc.desc: test function : TriggerDisplaySwitch
-     * @tc.type: FUNC
-     */
-    HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest | Level3)
-    {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
-        mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
-        mgr.globalHall = HALL_FOLDED_THRESHOLD;
-        mgr.TriggerDisplaySwitch();
-        EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
+/**
+ * @tc.name: TriggerDisplaySwitch
+ * @tc.desc: test function : TriggerDisplaySwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest | Level3)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    mgr.globalHall = HALL_FOLDED_THRESHOLD;
+    mgr.TriggerDisplaySwitch();
+    EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
 
-        mgr.globalHall = 10;
-        mgr.TriggerDisplaySwitch();
-        EXPECT_EQ(mgr.globalAngle, 25);
-    }
+    mgr.globalHall = 10;
+    mgr.TriggerDisplaySwitch();
+    EXPECT_EQ(mgr.globalAngle, 25);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

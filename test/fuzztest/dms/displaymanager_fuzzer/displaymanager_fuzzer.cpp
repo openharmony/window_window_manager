@@ -21,7 +21,7 @@
 
 namespace OHOS ::Rosen {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 4;
+constexpr size_t DATA_MIN_SIZE = 4;
 }
 
 class DisplayListener : public DisplayManager::IDisplayListener {
