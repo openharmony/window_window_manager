@@ -1212,6 +1212,72 @@ HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTe
     sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->FindMainWindowWithToken(targetToken);
 }
+
+/**
+ * @tc.name: RequestSceneSessionBackground
+ * @tc.desc: RequestSceneSessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<Session> session = new (std::nothrow) Session(info);
+    ASSERT_NE(session, nullptr);
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionInfoPersistentId(0);
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+}
+
+/**
+ * @tc.name: DestroyToastSession
+ * @tc.desc: DestroyToastSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, DestroyToastSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->DestroyToastSession(sceneSession);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->DestroyToastSession(sceneSession);
+}
+
+/**
+ * @tc.name: CheckModalSubWindowPermission
+ * @tc.desc: CheckModalSubWindowPermission
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetWindowFlags(123);
+    property->SetTopmost(true);
+    ssm_->CheckModalSubWindowPermission(property);
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ssm_->CheckModalSubWindowPermission(property);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
