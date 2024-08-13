@@ -1084,11 +1084,13 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
+    
 
     Rect rect;
     WMError ret;
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
     ret = window->Create(abilityContext_, nullptr);
     EXPECT_EQ(WMError::WM_OK, ret);
     window->property_->SetPersistentId(10008);
@@ -1297,8 +1299,6 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1336,8 +1336,6 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
