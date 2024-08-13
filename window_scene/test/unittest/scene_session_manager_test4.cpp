@@ -1827,6 +1827,16 @@ HWTEST_F(SceneSessionManagerTest4, ProcessModalExtensionPointDown, Function | Sm
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(result));
     usleep(WAIT_SYNC_IN_NS);
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, , Function | SmallTest | Level3)
+{
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
