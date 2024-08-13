@@ -34,9 +34,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t COLOR_RED = 0xffff0000;
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
-    constexpr uint8_t ALPHA = 255;
+constexpr uint32_t COLOR_RED = 0xffff0000;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
+constexpr uint8_t ALPHA = 255;
 }
 
 using Utils = WindowTestUtils;

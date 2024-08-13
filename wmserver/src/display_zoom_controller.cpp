@@ -18,7 +18,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayZoomController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayZoomController"};
 }
 
 void DisplayZoomController::SetAnchorAndScale(int32_t x, int32_t y, float scale)

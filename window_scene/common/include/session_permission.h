@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace PermissionConstants {
-    constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
+constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
 }
 class SessionPermission {
 public:
