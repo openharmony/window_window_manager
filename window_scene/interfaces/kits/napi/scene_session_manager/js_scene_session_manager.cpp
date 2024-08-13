@@ -2820,7 +2820,7 @@ napi_value JsSceneSessionManager::OnUpdateAppHookDisplayInfo(napi_env env, napi_
         return NapiGetUndefined(env);
     }
 
-    bool enable;
+    bool enable = false;
     if (!ConvertFromJsValue(env, argv[ARGC_TWO], enable)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

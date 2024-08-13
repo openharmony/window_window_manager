@@ -672,13 +672,18 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
         displayInfo->SetVirtualPixelRatio(info.density_);
-        sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
-        if (info.enableHookRotation_ && screenSession) {
+        if (info.enableHookRotation_) {
             Rotation targetRotation = static_cast<Rotation>(info.rotation_);
             displayInfo->SetRotation(targetRotation);
-            DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
-                FoldDisplayMode::UNKNOWN);
-            displayInfo->SetDisplayOrientation(displayOrientation);
+            sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
+            if (screenSession) {
+                DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
+                    FoldDisplayMode::UNKNOWN);
+                displayInfo->SetDisplayOrientation(displayOrientation);
+            } else {
+                TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
+                return nullptr;
+            }
         }
     }
     return displayInfo;

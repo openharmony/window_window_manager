@@ -9894,7 +9894,7 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
 WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density,
     bool enable)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, "
         "density: %{public}f, bool: %{public}d", width, height, density, enable);
 
     DMHookInfo dmHookInfo;
@@ -9909,8 +9909,8 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
 
 WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, HookInfo hookInfo, bool enable)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
-        "density: %{public}f, rotation: %{public}u, enableHookRotation: %{public}d, bool: %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, "
+        "density: %{public}f, rotation: %{public}u, enableHookRotation: %{public}d, enable: %{public}d",
         hookInfo.width_, hookInfo.height_, hookInfo.density_, hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
 
     DMHookInfo dmHookInfo;
