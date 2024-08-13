@@ -2333,6 +2333,7 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+/** @note @window.layout */
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
@@ -2360,6 +2361,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     }
 }
 
+/** @note @window.layout */
 void Session::RectCheckProcess()
 {
     if (!(IsSessionForeground() || isVisible_)) {
@@ -2402,6 +2404,7 @@ void Session::RectCheckProcess()
     }
 }
 
+/** @note @window.layout */
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2413,11 +2416,13 @@ void Session::SetSessionRect(const WSRect& rect)
     RectCheckProcess();
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
 }
 
+/** @note @window.layout */
 void Session::SetSessionLastRect(const WSRect& rect)
 {
     if (lastWinRect_ == rect) {
@@ -2426,6 +2431,7 @@ void Session::SetSessionLastRect(const WSRect& rect)
     lastWinRect_ = rect;
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionLastRect() const
 {
     return lastWinRect_;

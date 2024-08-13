@@ -607,6 +607,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
@@ -879,6 +880,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::SetAspectRatio(float ratio)
 {
     MessageParcel data;

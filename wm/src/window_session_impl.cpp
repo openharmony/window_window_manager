@@ -567,6 +567,7 @@ bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wm
     return true;
 }
 
+/** @note @window.layout */
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -608,6 +609,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -845,6 +847,7 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
     return displayInfo->GetVirtualPixelRatio();
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -1217,6 +1220,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
     }
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
 {
     {
@@ -2517,6 +2521,7 @@ void WindowSessionImpl::NotifyScreenshot()
     }
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     {
@@ -3438,6 +3443,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
     return windowStatus;
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);

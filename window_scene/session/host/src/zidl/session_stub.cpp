@@ -430,6 +430,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdateSessionRect!");
@@ -534,6 +535,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetAspectRatio!");
