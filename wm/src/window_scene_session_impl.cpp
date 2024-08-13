@@ -393,6 +393,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     return static_cast<WMError>(ret);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateWindowState()
 {
     {
@@ -811,6 +812,7 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     return systemLimits;
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio)
 {
@@ -863,6 +865,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     }
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits)
 {
     newLimits.maxRatio_ = customizedLimits.maxRatio_;
@@ -910,6 +913,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, 
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateWindowSizeLimits()
 {
     WindowLimits customizedLimits;
@@ -1389,6 +1393,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     return WMError::WM_OK;
 }
 
+/** @note @window.layout */
 WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
@@ -1479,6 +1484,7 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
     return static_cast<WMError>(ret);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr)
 {
     // Float camera window has a special limit:
@@ -1524,6 +1530,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     height = static_cast<uint32_t>(width * hwRatio);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const
 {
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
@@ -1566,6 +1573,7 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     WLOGFD("After limit by customize config: %{public}u %{public}u", width, height);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
 {
     float vpr = 0.0f;
@@ -1579,6 +1587,7 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 }
 
+/** @note @window.layout */
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",

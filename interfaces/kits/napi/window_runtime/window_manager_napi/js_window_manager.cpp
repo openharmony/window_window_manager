@@ -119,6 +119,7 @@ napi_value JsWindowManager::GetSnapshot(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetSnapshot(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindowManager::SetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -985,6 +986,7 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
     return GetTopWindowTask(contextPtr, env, nativeCallback, true);
 }
 
+/** @note @window.layout */
 napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     WLOGFD("OnSetWindowLayoutMode");

@@ -1882,6 +1882,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
     taskScheduler_->PostMainThreadTask(task);
 }
 
+/** @note @window.layout */
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
     if (reason != SizeChangeReason::MOVE && rect.IsEmpty()) {
