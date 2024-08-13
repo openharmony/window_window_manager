@@ -7866,7 +7866,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
 }
 
-void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo> displayInfo)
+void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
 {
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
