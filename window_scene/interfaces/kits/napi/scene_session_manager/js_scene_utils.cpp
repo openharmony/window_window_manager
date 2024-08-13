@@ -490,8 +490,8 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo hookInfo)
     napi_get_named_property(env, jsObject, "density", &jsDensity);
     napi_value jsRotation = nullptr;
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
-    napi_value jsenableHookRotation = nullptr;
-    napi_get_named_property(env, jsObject, "enableHookRotation", &jsenableHookRotation);
+    napi_value jsEnableHookRotation = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
     
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, jsWidth, width)) {
@@ -522,7 +522,7 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo hookInfo)
     hookInfo.rotation_ = rotation;
 
     bool enableHookRotation = false;
-    if (!ConvertFromJsValue(env, jsenableHookRotation, enableHookRotation)) {
+    if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
         return false;
     }
