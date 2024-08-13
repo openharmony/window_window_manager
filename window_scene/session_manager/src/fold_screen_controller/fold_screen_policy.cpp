@@ -15,8 +15,10 @@
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "window_manager_hilog.h"
+#include <cinttypes>
 
 namespace OHOS::Rosen {
+const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
@@ -58,4 +60,30 @@ void FoldScreenPolicy::ClearState()
 }
 
 void FoldScreenPolicy::ExitCoordination() {};
+
+bool FoldScreenPolicy::GetModeChangeRunningStatus()
+{
+    auto currentTime = std::chrono::steady_clock::now();
+    auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTimePoint_).count();
+    if (intervalMs > MODE_CHANGE_TIMEOUT_MS) {
+        TLOGE(WmsLogTag::DMS, "mode change timeout.");
+        return false;
+    }
+    return GetdisplayModeRunningStatus();
+}
+
+bool FoldScreenPolicy::GetdisplayModeRunningStatus()
+{
+    return displayModeChangeRunning_.load();
+}
+
+FoldDisplayMode FoldScreenPolicy::GetLastCacheDisplayMode()
+{
+    return lastCachedisplayMode_.load();
+}
+
+void FoldScreenPolicy::SetLastCacheDisplayMode(FoldDisplayMode mode)
+{
+    lastCachedisplayMode_ = mode;
+}
 } // namespace OHOS::Rosen
