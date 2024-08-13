@@ -59,7 +59,7 @@ config("libmockwms_config") {
     "${window_base_path}/dm/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/dmserver/include",
-    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager_client/include",
 
     # for scene session manager
     "${window_base_path}/interfaces/innerkits/wm",
