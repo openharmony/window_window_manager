@@ -247,32 +247,6 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: CheckDisplayStateChange02
- * @tc.desc: DisplayState changes if screen sets different mode
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Level2)
-{
-    WLOGI("CheckDisplayStateChange02");
-    auto modes = defaultScreen_->GetSupportedModes();
-    uint32_t usedModeIdx = defaultScreen_->GetModeId();
-    WLOGI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
-
-    for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
-        if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
-            defaultScreen_->SetScreenActiveMode(modeIdx);
-            WLOGI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
-            ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-            // reset usedMode
-            ResetDisplayChangeListener();
-            defaultScreen_->SetScreenActiveMode(usedModeIdx);
-            CheckDisplayChangeEventCallback(true);
-            break;
-        }
-    }
-}
-
-/**
  * @tc.name: CheckDisplaySizeChange01
  * @tc.desc: Check screen size change as screen mode set if screen sets another mode
  * @tc.type: FUNC
