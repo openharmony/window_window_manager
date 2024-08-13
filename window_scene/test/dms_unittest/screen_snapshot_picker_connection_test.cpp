@@ -141,6 +141,23 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension05, F
 }
 
 /**
+ * @tc.name: SnapshotPickerConnectExtension06
+ * @tc.desc: SnapshotPickerConnectExtension func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension06, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testScreenSnapshotBundleName";
+    std::string abilityName = "testScreenSnapshotAbilityName";
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
+    EXPECT_EQ(ret, false);
+    ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: GetScreenSnapshotInfo01
  * @tc.desc: GetScreenSnapshotInfo func
  * @tc.type: FUNC
@@ -169,6 +186,25 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, Function |
     ScreenId screenId;
     auto ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: GetScreenSnapshotInfo03
+ * @tc.desc: GetScreenSnapshotInfo func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo03, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testScreenSnapshotBundleName";
+    std::string abilityName = "testScreenSnapshotAbilityName";
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
+    auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
+    EXPECT_EQ(ret, true);
+    Media::Rect rect{};
+    ScreenId screenId;
+    ret = ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -219,6 +255,23 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, Function | S
     EXPECT_EQ(rect.width, 0);
     EXPECT_EQ(rect.height, 0);
     ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
+}
+
+/**
+ * @tc.name: GetScreenSessionAbilityConnectionStub
+ * @tc.desc: GetScreenSessionAbilityConnectionStub func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSessionAbilityConnectionStub, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testScreenSnapshotBundleName";
+    std::string abilityName = "testScreenSnapshotAbilityName";
+    ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
+    ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
+    bool ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
+    EXPECT_EQ(ret, false);
+    ASSERT_NE(ScreenSnapshotPickerConnection::GetInstance().abilityConnection_, nullptr);
+    EXPECT_NE(ScreenSnapshotPickerConnection::GetInstance().GetScreenSessionAbilityConnectionStub(), nullptr);
 }
 
 }
