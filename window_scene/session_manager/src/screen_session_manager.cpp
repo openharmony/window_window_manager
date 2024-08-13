@@ -4962,13 +4962,16 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldToExpandCompletion ENTER");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "notify permission denied");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
+    }
+    /* Avoid fold to expand process queues */
+    if (foldScreenController_ != nullptr) {
+        foldScreenController_->SetdisplayModeChangeStatus(false);
     }
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {

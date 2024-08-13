@@ -21,9 +21,6 @@
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_info.h"
 #include "session/screen/include/screen_session.h"
-#include <atomic>
-#include <thread>
-#include <chrono>
 
 namespace OHOS::Rosen {
 class SingleDisplayFoldPolicy : public FoldScreenPolicy {
@@ -39,8 +36,8 @@ public:
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override {};
 private:
-    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession, bool boot);
+    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession, bool boot);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
@@ -51,10 +48,9 @@ private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
+    void SetdisplayModeChangeStatus(bool status);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
-    std::atomic<bool> isFirstDisplayModeChangeTaskRunning;
-    std::atomic<bool> isSecondDisplayModeChangeTaskRunning;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_FOLD_POLICY_H
