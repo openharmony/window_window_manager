@@ -3679,11 +3679,11 @@ float SceneSessionManager::GetDisplayBrightness() const
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("SetGestureNavigationEnabled permission denied!");
+        TLOGE(WmsLogTag::WMS_EVENT, "permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
-    TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d Name:%{public}s", enable, callerBundleName.c_str());
+    TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d name:%{public}s", enable, callerBundleName.c_str());
     auto task = [this, enable, callerBundleName]() {
         SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
