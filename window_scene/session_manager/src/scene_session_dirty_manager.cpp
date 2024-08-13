@@ -407,6 +407,8 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         }
 
         windowInfoList.emplace_back(windowInfo);
+        // set the number of hot areas to the maximum number of hot areas when it exceeds the maximum number
+        // to avoid exceeding socket buff limits
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
             maxHotAreasNum = windowInfo.defaultHotAreas.size();
         }
@@ -495,10 +497,9 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     windowInfo.flags = 0;
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled()) {
-            windowInfo.flags = MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
-        } else {
-            windowInfo.flags = (!sceneSession->GetSystemTouchable() || !sceneSession->GetForegroundInteractiveStatus());
+        if (!screenSession->IsTouchEnabled() || !sceneSession->GetSystemTouchable() ||
+            !sceneSession->GetForegroundInteractiveStatus()) {
+            windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         }
     }
 }
