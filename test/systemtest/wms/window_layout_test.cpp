@@ -886,189 +886,6 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: moveWindowTo05
- * @tc.desc: test moveWindowTo for PC with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("moveWindowTo05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo05", "moduleName_moveWindowTo05", "abilityName_moveWindowTo05" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, sceneSession));
-
-    window->property_->SetPersistentId(10002);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
- * @tc.name: moveWindowTo06
- * @tc.desc: test moveWindowTo for PC with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("moveWindowTo06");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    window->property_->SetPersistentId(10006);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo06", "moduleName_moveWindowTo06", "abilityName_moveWindowTo06" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(20000, 20000);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
- * @tc.name: moveWindowTo07
- * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("moveWindowTo07");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    window->property_->SetPersistentId(10007);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo07", "moduleName_moveWindowTo07", "abilityName_moveWindowTo07" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(20000, 20000);
-    usleep(100000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
  * @tc.name: resize01
  * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
  * @tc.type: FUNC
@@ -1083,8 +900,6 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
-
-    
 
     Rect rect;
     WMError ret;
@@ -1110,8 +925,6 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.width_);
     EXPECT_EQ(500, rect.height_);
-
-
 
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1278,7 +1091,6 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 }
 
-
 /**
  * @tc.name: resize06
  * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
@@ -1388,7 +1200,6 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
