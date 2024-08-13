@@ -122,6 +122,10 @@ int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, Mess
 {
     WLOGFD("run HandleSetSessionLabel!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     std::string label = data.ReadString();
     WSError errCode = SetSessionLabel(token, label);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -132,6 +136,10 @@ int SceneSessionManagerLiteStub::HandleSetSessionIcon(MessageParcel& data, Messa
 {
     WLOGFD("run HandleSetSessionIcon!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
         WLOGFE("icon is null");
@@ -158,6 +166,10 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
 {
     WLOGFD("run HandlePendingSessionToForeground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     WSError errCode = PendingSessionToForeground(token);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -167,6 +179,10 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
 {
     WLOGFD("run HandlePendingSessionToBackground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     WSError errCode = PendingSessionToBackgroundForDelegator(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -191,7 +207,7 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }
     WSError errCode = UnRegisterSessionListener(listener);
@@ -295,6 +311,10 @@ int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& da
 {
     WLOGFD("HandleSetSessionContinueState");
     sptr <IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     auto continueState = static_cast<ContinueState>(data.ReadInt32());
     const WSError &ret = SetSessionContinueState(token, continueState);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -409,6 +429,10 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    if (windowManagerAgentObject == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
@@ -421,6 +445,10 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
     auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
     WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    if (windowManagerAgentObject == nullptr) {
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        return ERR_NONE;
+    }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
