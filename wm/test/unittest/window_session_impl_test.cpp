@@ -1211,6 +1211,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSubWindowCloseListeners(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<ISwitchFreeMultiWindowListener> listener11 = nullptr;
+    res = window->RegisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
@@ -1719,6 +1725,9 @@ HWTEST_F(WindowSessionImplTest, Notify02, Function | SmallTest | Level2)
     bool terminateCloseProcess = false;
     window->NotifySubWindowClose(terminateCloseProcess);
     ASSERT_EQ(terminateCloseProcess, false);
+
+    bool enable = false;
+    window->NotifySwitchFreeMultiWindow(enable);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: Notify02 end";
