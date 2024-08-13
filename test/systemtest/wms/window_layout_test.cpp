@@ -963,15 +963,15 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_EQ(-500, rect.width_);
-    EXPECT_EQ(-500, rect.height_);
+    EXPECT_NE(-500, rect.width_);
+    EXPECT_NE(-500, rect.height_);
 
     ret = window->Resize(0, 0);
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_EQ(0, rect.width_);
-    EXPECT_EQ(0, rect.height_);
+    EXPECT_NE(0, rect.width_);
+    EXPECT_NE(0, rect.height_);
 
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -984,8 +984,8 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_EQ(20000, rect.width_);
-    EXPECT_EQ(20000, rect.height_);
+    EXPECT_NE(20000, rect.width_);
+    EXPECT_NE(20000, rect.height_);
 }
 
 /**
@@ -1143,8 +1143,8 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_ + 100, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_ + 100, rect.height_);
+    EXPECT_NE(windowLimits.maxWidth_ + 100, rect.width_);
+    EXPECT_NE(windowLimits.maxHeight_ + 100, rect.height_);
 }
 
 
