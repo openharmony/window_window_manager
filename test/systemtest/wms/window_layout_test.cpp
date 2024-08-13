@@ -666,7 +666,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 
     Rect rect;
     WMError ret;
-    ret = window->Create(abilityContext_, session);
+    ret = window->Create(abilityContext_, nullptr);
     ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = window->Show();
@@ -675,28 +675,28 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     ret = window->MoveTo(-500, -500);
     usleep(100000);
     ASSERT_EQ(WMError::WM_OK, ret);
-    rect =window->property_->GetWindowRect();
+    rect = window->property_->GetWindowRect();
     ASSERT_EQ(-500, rect.posX_);
     ASSERT_EQ(-500, rect.posY_);
 
     ret = window->MoveTo(0, 0);
     usleep(100000);
     ASSERT_EQ(WMError::WM_OK, ret);
-    rect =window->property_->GetWindowRect();
+    rect = window->property_->GetWindowRect();
     ASSERT_EQ(0, rect.posX_);
     ASSERT_EQ(0, rect.posY_);
 
     ret = window->MoveTo(500, 500);
     usleep(100000);
     ASSERT_EQ(WMError::WM_OK, ret);
-    rect =window->property_->GetWindowRect();
+    rect = window->property_->GetWindowRect();
     ASSERT_EQ(500, rect.posX_);
     ASSERT_EQ(500, rect.posY_);
 
     ret = window->MoveTo(20000, 20000);
     usleep(100000);
     ASSERT_EQ(WMError::WM_OK, ret);
-    rect =window->property_->GetWindowRect();
+    rect = window->property_->GetWindowRect();
     ASSERT_EQ(20000, rect.posX_);
     ASSERT_EQ(20000, rect.posY_);
 }
@@ -953,39 +953,39 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 
     Rect rect;
     WMError ret;
-    ret = window->Create(abilityContext_, session);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = window->Create(abilityContext_, nullptr);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     window->property_->SetPersistentId(10008);
     ret = window->Show();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(-500, rect.width_);
-    ASSERT_EQ(-500, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(-500, rect.width_);
+    EXCEPT_EQ(-500, rect.height_);
 
     ret = window->Resize(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(0, rect.width_);
-    ASSERT_EQ(0, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(0, rect.width_);
+    EXCEPT_EQ(0, rect.height_);
 
     ret = window->Resize(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(500, rect.width_);
-    ASSERT_EQ(500, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(500, rect.width_);
+    EXCEPT_EQ(500, rect.height_);
 
     ret = window->Resize(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(20000, rect.width_);
-    ASSERT_EQ(20000, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(20000, rect.width_);
+    EXCEPT_EQ(20000, rect.height_);
 }
 
 /**
@@ -1123,28 +1123,28 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 
     Rect rect;
     WMError ret;
-    ret = window->Create(abilityContext_, session);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = window->Create(abilityContext_, nullptr);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     window->property_->SetPersistentId(10012);
     ret = window->Show();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
 
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
-    ASSERT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
+    EXCEPT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXCEPT_EQ(WMError::WM_OK, ret);
     usleep(100000);
-    rect =window->property_->GetWindowRect();
-    ASSERT_EQ(windowLimits.maxWidth_ + 100, rect.width_);
-    ASSERT_EQ(windowLimits.maxHeight_ + 100, rect.height_);
+    rect = window->property_->GetWindowRect();
+    EXCEPT_EQ(windowLimits.maxWidth_ + 100, rect.width_);
+    EXCEPT_EQ(windowLimits.maxHeight_ + 100, rect.height_);
 }
 
 
