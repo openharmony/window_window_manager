@@ -934,8 +934,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);    
 }
 
 /**
