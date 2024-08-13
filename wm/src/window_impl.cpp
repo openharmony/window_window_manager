@@ -1205,6 +1205,9 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
+    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
