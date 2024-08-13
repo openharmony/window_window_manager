@@ -3684,17 +3684,17 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
     }
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
     TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d name:%{public}s", enable, callerBundleName.c_str());
-    auto task = [this, enable, callerBundleName]() {
+    auto task = [this, enable, bundleName = std::move(callerBundleName)]() {
         SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
             WLOGFE("callback func is null");
             return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
-            gestureNavigationEnabledChangeFunc_(enable, callerBundleName);
+            gestureNavigationEnabledChangeFunc_(enable, bundleName);
         }
         if (statusBarEnabledChangeFunc_) {
-            statusBarEnabledChangeFunc_(enable, callerBundleName);
+            statusBarEnabledChangeFunc_(enable, bundleName);
         }
         return WMError::WM_OK;
     };
