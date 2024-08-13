@@ -21,6 +21,7 @@
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
 #include "mock_message_parcel.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,6 +52,8 @@ void WindowExtensionProxyTest::SetUp()
 {
     mockWindowExtensionStub_ = new WindowExtensionStubImpl("name");
     windowExtensionProxy_ = new WindowExtensionProxy(mockWindowExtensionStub_);
+    impl = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, impl);
     impl = nullptr;
     windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl);
 }
@@ -90,6 +93,10 @@ HWTEST_F(WindowExtensionProxyTest, OnWindowReady, Function | SmallTest | Level2)
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     windowExtensionClientProxy_->OnWindowReady(nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    auto surfaceNode = RSSurfaceNode::Create(config);
+    windowExtensionClientProxy_->OnWindowReady(surfaceNode);
 }
 
 /**
@@ -101,6 +108,8 @@ HWTEST_F(WindowExtensionProxyTest, OnBackPress, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, windowExtensionClientProxy_);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnBackPress();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     windowExtensionClientProxy_->OnBackPress();
 }
 
@@ -116,6 +125,9 @@ HWTEST_F(WindowExtensionProxyTest, OnKeyEvent, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, keyEvent);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowExtensionClientProxy_->OnKeyEvent(keyEvent);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    windowExtensionClientProxy_->OnKeyEvent(keyEvent);
 }
 
 /**
@@ -129,6 +141,9 @@ HWTEST_F(WindowExtensionProxyTest, OnPointerEvent, Function | SmallTest | Level2
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnPointerEvent(pointerEvent);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     windowExtensionClientProxy_->OnPointerEvent(pointerEvent);
 }
 
