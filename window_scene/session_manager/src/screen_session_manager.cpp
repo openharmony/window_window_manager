@@ -101,6 +101,11 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 
+const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
+constexpr int32_t FOLDABLE_DEVICE { 2 };
+constexpr float DEFAULT_PIVOT = 0.5f;
+constexpr float DEFAULT_SCALE = 1.0f;
+
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -1974,7 +1979,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-
+    UpdateDisplayScaleState(screenId);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
@@ -4162,6 +4167,172 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
+void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
+{
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    const ScreenProperty& property = session->GetScreenProperty();
+    if (property.GetScaleX() - DEFAULT_SCALE < FLT_EPSILON && property.GetScaleY() - DEFAULT_SCALE < FLT_EPSILON &&
+        property.GetPivotX() - DEFAULT_PIVOT < FLT_EPSILON && property.GetPivotY() - DEFAULT_PIVOT < FLT_EPSILON) {
+        TLOGD(WmsLogTag::DMS, "The scale and pivot is default value now. There is no need to update");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+          screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(), property.GetPivotY());
+    SetDisplayScaleInner(screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(),
+                         property.GetPivotY());
+}
+
+void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY,
+                                                const float& pivotX, const float& pivotY)
+{
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+          screenId, scaleX, scaleY, pivotX, pivotY);
+    UpdateDisplayNodeScale(session, scaleX, scaleY, pivotX, pivotY);
+    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(), {},
+                             DisplayStateChangeType::UPDATE_SCALE);
+}
+
+void ScreenSessionManager::UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX,
+                                                  const float& scaleY, const float& pivotX, const float& pivotY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    auto displayNode = session->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+    if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
+        CalcDisplayNodeTranslateOnFoldableRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    } else {
+        CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    }
+    TLOGD(WmsLogTag::DMS, "translate [%{public}f, %{public}f] scale [%{public}f, %{public}f]", translateX, translateY,
+          scaleX, scaleY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetTranslateX(translateX);
+    displayNode->SetTranslateY(translateY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+}
+
+void ScreenSessionManager::CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                                      const float& scaleY, const float& pivotX,
+                                                                      const float& pivotY, float& translateX,
+                                                                      float& translateY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is nullptr");
+        return;
+    }
+    const ScreenProperty& screenProperty = session->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    Rotation rotation = session->GetRotation();
+    float rotatedPivotX = DEFAULT_PIVOT;
+    float rotatedPivotY = DEFAULT_PIVOT;
+    float width = 0.0f;
+    float height = 0.0f;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            rotatedPivotX = pivotY;
+            rotatedPivotY = 1.0f - pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_90:
+            rotatedPivotX = 1.0f - pivotX;
+            rotatedPivotY = 1.0f - pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_180:
+            rotatedPivotX = 1.0f - pivotY;
+            rotatedPivotY = pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_270:
+            rotatedPivotX = pivotX;
+            rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        default:
+            TLOGE(WmsLogTag::DMS, "Unknown Rotation %{public}d", rotation);
+            break;
+    }
+    translateX = (DEFAULT_PIVOT - rotatedPivotX) * (scaleX - DEFAULT_SCALE) * width;
+    translateY = (DEFAULT_PIVOT - rotatedPivotY) * (scaleY - DEFAULT_SCALE) * height;
+}
+
+void ScreenSessionManager::CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                              const float& scaleY, const float& pivotX,
+                                                              const float& pivotY, float& translateX, float& translateY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is nullptr");
+        return;
+    }
+    const ScreenProperty& screenProperty = session->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    Rotation rotation = session->GetRotation();
+    float rotatedPivotX = DEFAULT_PIVOT;
+    float rotatedPivotY = DEFAULT_PIVOT;
+    float width = 0.0f;
+    float height = 0.0f;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            rotatedPivotX = pivotX;
+            rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_90:
+            rotatedPivotX = pivotY;
+            rotatedPivotY = 1.0f - pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_180:
+            rotatedPivotX = 1.0f - pivotX;
+            rotatedPivotY = 1.0f - pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_270:
+            rotatedPivotX = 1.0f - pivotY;
+            rotatedPivotY = pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        default:
+            TLOGE(WmsLogTag::DMS, "Unknown Rotation %{public}d", rotation);
+            break;
+    }
+    translateX = (DEFAULT_PIVOT - rotatedPivotX) * (scaleX - DEFAULT_SCALE) * width;
+    translateY = (DEFAULT_PIVOT - rotatedPivotY) * (scaleY - DEFAULT_SCALE) * height;
+}
+
 void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
@@ -4170,34 +4341,7 @@ void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, floa
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    auto session = GetScreenSession(screenId);
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::DMS, "session is null");
-        return;
-    }
-    auto displayNode = GetDisplayNode(screenId);
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayNode is null");
-        return;
-    }
-    TLOGD(WmsLogTag::DMS,
-        "scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
-        scaleX,
-        scaleY,
-        pivotX,
-        pivotY);
-    displayNode->SetScale(scaleX, scaleY);
-    displayNode->SetPivot(pivotX, pivotY);
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
-
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
-    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(),
-        emptyMap, DisplayStateChangeType::UPDATE_SCALE);
+    SetDisplayScaleInner(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)

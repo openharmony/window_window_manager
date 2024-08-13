@@ -83,8 +83,7 @@ public:
 
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
 
-    void UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
-        const float pivotX, const float pivotY);
+    void UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY);
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
