@@ -3695,19 +3695,20 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
         WLOGFE("SetGestureNavigationEnabled permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d Name:%{public}s", enable, callerBundleName.c_str());
     gestureNavigationEnabled_ = enable;
-    auto task = [this, enable]() {
+    auto task = [this, enable, callerBundleName]() {
         SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
             WLOGFE("callback func is null");
             return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
-            gestureNavigationEnabledChangeFunc_(enable);
+            gestureNavigationEnabledChangeFunc_(enable, callerBundleName);
         }
         if (statusBarEnabledChangeFunc_) {
-            statusBarEnabledChangeFunc_(enable);
+            statusBarEnabledChangeFunc_(enable, callerBundleName);
         }
         return WMError::WM_OK;
     };

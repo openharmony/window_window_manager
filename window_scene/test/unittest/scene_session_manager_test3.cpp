@@ -76,7 +76,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest3::ssm_ = nullptr;
 
 bool SceneSessionManagerTest3::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable,
+    std::string bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -84,7 +85,7 @@ void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
+void ProcessStatusBarEnabledChangeFuncTest(bool enable, std::string bundleName)
 {
 }
 
