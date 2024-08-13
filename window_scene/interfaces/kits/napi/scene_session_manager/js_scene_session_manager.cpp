@@ -300,31 +300,34 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
     taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
-void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
+void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, std::string bundleName)
 {
-    WLOGFI("[NAPI]OnStatusBarEnabledUpdate");
+    TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", static_cast<std::int32_t>(enable),
+        bundleName.c_str());
 
-    auto task = [this, enable, jsCallBack = GetJSCallback(STATUS_BAR_ENABLED_CHANGE_CB), env = env_]() {
+    auto task = [this, enable, bundleName, jsCallBack = GetJSCallback(STATUS_BAR_ENABLED_CHANGE_CB), env = env_]() {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, enable)};
+        napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnStatusBarEnabledUpdate, Enable" + std::to_string(enable));
 }
 
-void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
+void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, std::string bundleName)
 {
-    WLOGFI("[NAPI]OnGestureNavigationEnabledUpdate");
+    TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", static_cast<std::int32_t>(enable),
+        bundleName.c_str());
 
-    auto task = [this, enable, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_]() {
+    auto task = [this, enable, bundleName, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB),
+        env = env_]() {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, enable)};
+        napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnGestureNavigationEnabledUpdate" + std::to_string(enable));
@@ -437,18 +440,18 @@ void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
 {
-    ProcessStatusBarEnabledChangeFunc func = [this](bool enable) {
+    ProcessStatusBarEnabledChangeFunc func = [this](bool enable, std::string bundleName) {
         WLOGFD("StatusBarEnabledUpdate");
-        this->OnStatusBarEnabledUpdate(enable);
+        this->OnStatusBarEnabledUpdate(enable, bundleName);
     };
     SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(func);
 }
 
 void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
 {
-    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable) {
+    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable, std::string bundleName) {
         WLOGFD("GestureNavigationEnabledUpdate");
-        this->OnGestureNavigationEnabledUpdate(enable);
+        this->OnGestureNavigationEnabledUpdate(enable, bundleName);
     };
     SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(func);
 }

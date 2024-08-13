@@ -42,6 +42,7 @@ public:
     static bool IsBetaVersion();
     static bool IsSystemAppCall();
     static bool IsFoundationCall();
+    static std::string GetCallingBundleName();
 };
 } // Rosen
 } // OHOS
