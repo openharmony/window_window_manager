@@ -493,40 +493,40 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo hookInfo)
     napi_value jsenableHookRotationName = nullptr;
     napi_get_named_property(env, jsObject, "enableHookRotation", &jsenableHookRotationName);
     
-    uint32_t widthName = 0;
-    if (!ConvertFromJsValue(env, jsWidthName, widthName)) {
+    uint32_t width = 0;
+    if (!ConvertFromJsValue(env, jsWidthName, width)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
         return false;
     }
-    hookInfo.width_ = widthName;
+    hookInfo.width_ = width;
 
-    uint32_t heightName = 0;
-    if (!ConvertFromJsValue(env, jsHeightName, heightName)) {
+    uint32_t height = 0;
+    if (!ConvertFromJsValue(env, jsHeightName, height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
         return false;
     }
-    hookInfo.height_ = heightName;
+    hookInfo.height_ = height;
 
-    double_t densityName = 1.0;
-    if (!ConvertFromJsValue(env, jsDensityName, densityName)) {
+    double_t density = 1.0;
+    if (!ConvertFromJsValue(env, jsDensityName, density)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
         return false;
     }
-    hookInfo.density_ = static_cast<float_t>(densityName);
+    hookInfo.density_ = static_cast<float_t>(density);
 
-    uint32_t rotationName = 0;
-    if (!ConvertFromJsValue(env, jsRotationName, rotationName)) {
+    uint32_t rotation = 0;
+    if (!ConvertFromJsValue(env, jsRotationName, rotation)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rotation");
         return false;
     }
-    hookInfo.rotation_ = rotationName;
+    hookInfo.rotation_ = rotation;
 
-    bool enableHookRotationName = false;
-    if (!ConvertFromJsValue(env, jsenableHookRotationName, enableHookRotationName)) {
+    bool enableHookRotation = false;
+    if (!ConvertFromJsValue(env, jsenableHookRotationName, enableHookRotation)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
         return false;
     }
-    hookInfo.enableHookRotation_ = enableHookRotationName;
+    hookInfo.enableHookRotation_ = enableHookRotation;
     return true;
 }
 
