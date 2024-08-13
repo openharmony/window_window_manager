@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 
-class SceneSessionManagerTest9 : public testing::Test {
+class SceneSessionManagerTest10 : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -40,7 +40,7 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-sptr<SceneSessionManager> SceneSessionManagerTest9::ssm_ = nullptr;
+sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
 void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
 {
@@ -63,21 +63,21 @@ void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, st
 {
 }
 
-void SceneSessionManagerTest9::SetUpTestCase()
+void SceneSessionManagerTest10::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
 }
 
-void SceneSessionManagerTest9::TearDownTestCase()
+void SceneSessionManagerTest10::TearDownTestCase()
 {
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerTest9::SetUp()
+void SceneSessionManagerTest10::SetUp()
 {
 }
 
-void SceneSessionManagerTest9::TearDown()
+void SceneSessionManagerTest10::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
 }
@@ -88,11 +88,14 @@ namespace {
  * @tc.desc: RequestSceneSessionDestructionInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestructionInner, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<SceneSession> scnSession;
-    sptr<AAFwk::SessionInfo> scnSessionInfo;
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<AAFwk::SessionInfo> scnSessionInfo = new AAFwk::SessionInfo();
     bool needRemoveSession = true;
     bool isForceClean = true;
 
@@ -107,6 +110,48 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestructionInner, Function
     ssm_->listenerController_ = std::make_shared<SessionListenerController>();
     ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
 }
+
+/**
+ * @tc.name: RegisterWindowManagerAgent
+ * @tc.desc: RegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
+
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
+    ASSERT_EQ(windowManagerAgent, nullptr);
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
+}  // namespace
 }
 }
