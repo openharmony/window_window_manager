@@ -329,16 +329,16 @@ bool SessionPermission::IsFoundationCall()
 
 std::string SessionPermission::GetCallingBundleName()
 {
-    std::string callingBundleName;
-    auto bundleManagerServiceProxy_ = GetBundleManagerProxy();
-    if (!bundleManagerServiceProxy_) {
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
         WLOGFE("failed to get BundleManagerServiceProxy");
         return "";
     }
     int uid = IPCSkeleton::GetCallingUid();
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
+    std::string callingBundleName;
+    bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
     IPCSkeleton::SetCallingIdentity(identity);
     return callingBundleName;
 }

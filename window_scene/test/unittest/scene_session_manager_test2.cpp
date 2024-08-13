@@ -88,11 +88,11 @@ sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
 bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
 bool SceneSessionManagerTest2::statusBarEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
-    std::string bundleName) {
+    const std::string bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 ProcessStatusBarEnabledChangeFunc SceneSessionManagerTest2::statusBarEnabledCallbackFunc_ = [](bool enable,
-    std::string bundleName) {
+    const std::string bundleName) {
     statusBarEnabled_ = enable;
 };
 
