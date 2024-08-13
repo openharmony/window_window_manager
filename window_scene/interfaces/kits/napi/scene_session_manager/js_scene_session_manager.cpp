@@ -300,10 +300,10 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
     taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
-void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::string bundleName)
+void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", enable, bundleName.c_str());
-    auto task = [enable, bundleName, jsCallBack = GetJSCallback(STATUS_BAR_ENABLED_CHANGE_CB), env = env_]() {
+    auto task = [enable, bundleName, jsCallBack = GetJSCallback(STATUS_BAR_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -314,10 +314,10 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::str
     taskScheduler_->PostMainThreadTask(task, "OnStatusBarEnabledUpdate, Enable" + std::to_string(enable));
 }
 
-void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const std::string bundleName)
+void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", enable, bundleName.c_str());
-    auto task = [enable, bundleName, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_]() {
+    auto task = [enable, bundleName, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
@@ -435,7 +435,7 @@ void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
 {
-    ProcessStatusBarEnabledChangeFunc func = [this](bool enable, const std::string bundleName) {
+    ProcessStatusBarEnabledChangeFunc func = [this](bool enable, const std::string& bundleName) {
         WLOGFD("StatusBarEnabledUpdate");
         this->OnStatusBarEnabledUpdate(enable, bundleName);
     };
@@ -444,7 +444,7 @@ void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
 
 void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
 {
-    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable, const std::string bundleName) {
+    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable, const std::string& bundleName) {
         WLOGFD("GestureNavigationEnabledUpdate");
         this->OnGestureNavigationEnabledUpdate(enable, bundleName);
     };
