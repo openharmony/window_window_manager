@@ -797,7 +797,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, Function | SmallTest | L
     ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
 }
 
-
 /**
  * @tc.name: NotifyScreenChanged
  * @tc.desc: NotifyScreenChanged virtual screen
@@ -814,6 +813,68 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | L
     screenInfo = new ScreenInfo();
     ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
     ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
+}
+
+/**
+ * @tc.name: NotifyDisplayEvent
+ * @tc.desc: NotifyDisplayEvent  virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayEvent, Function | SmallTest | Level3)
+{
+    sptr<ScreenSessionManager> ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+
+    DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
+    ssm->NotifyDisplayEvent(event);
+    ASSERT_EQ(ssm->keyguardDrawnDone_, true);
+    
+    event = DisplayEvent::SCREEN_LOCK_SUSPEND;
+    ssm->NotifyDisplayEvent(event);
+    ASSERT_EQ(ssm->gotScreenOffNotify_, true);
+
+    event = DisplayEvent::SCREEN_LOCK_OFF;
+    ssm->NotifyDisplayEvent(event);
+    ASSERT_EQ(ssm->gotScreenOffNotify_, true);
+
+    event = DisplayEvent::SCREEN_LOCK_FINGERPRINT;
+    ssm->NotifyDisplayEvent(event);
+    ASSERT_EQ(ssm->gotScreenlockFingerprint_, true);
+
+    ssm = nullptr;
+}
+
+
+/**
+ * @tc.name: GetScreenInfoByDisplayId
+ * @tc.desc: GetScreenInfoByDisplayId  virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenInfoByDisplayId, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetScreenInfoByDisplayId";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenInfo> screenInfo;
+    screenInfo = ssm_->GetScreenInfoByDisplayId(screenId);
+    ASSERT_NE(screenInfo, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenModesByDisplayId
+ * @tc.desc: GetScreenModesByDisplayId  virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenModesByDisplayId, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetScreenModesByDisplayId";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<SupportedScreenModes> screenModes;
+    screenModes = ssm_->GetScreenModesByDisplayId(screenId);
+    ASSERT_NE(screenModes, nullptr);
 }
 
 /**
