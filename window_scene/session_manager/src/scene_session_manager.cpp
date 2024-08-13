@@ -2266,8 +2266,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         WLOGFE("pip window is not enable to create.");
         return WSError::WS_DO_NOTHING;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name: %{public}s, type: %{public}d",
-        property->GetWindowName().c_str(), property->GetWindowType());
+    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
+        property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
