@@ -704,7 +704,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 
 /**
  * @tc.name: moveWindowTo02
- * @tc.desc: test moveWindowTo for PC with windowMode: 100, windowType: 1001
+ * @tc.desc: test moveWindowTo for ALN with windowMode: 102, windowType: 1001
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
@@ -713,32 +713,50 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
+    SessionInfo sessionInfo = { "bundleName_moveWindowTo02", "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
-    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, sceneSession));
 
     window->property_->SetPersistentId(10002);
 
-    WMError ret = window->MoveTo(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    Rect rectOld;
+    Rect rectNow;
+    WMError ret;
+    ret = window->Create(abilityContext_, sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->Show();
+    EXPECT_EQ(WMError::WM_OK, ret);
 
+    rectOld = window->property_->GetWindowRect();
+    ret = window->MoveTo(-500, -500);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
+
+    rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
 
+    rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    ret = window->MoveTo(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
 }
 
 /**
@@ -751,7 +769,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo03");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
@@ -814,7 +832,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo04");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
@@ -877,33 +895,51 @@ HWTEST_F(WindowLayoutTest, moveWindowTo05, Function | MediumTest | Level3)
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo05");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
+    SessionInfo sessionInfo = { "bundleName_moveWindowTo05", "moduleName_moveWindowTo05", "abilityName_moveWindowTo05" };
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
-    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, sceneSession));
 
-    window->property_->SetPersistentId(10005);
+    window->property_->SetPersistentId(10002);
 
-    WMError ret = window->MoveTo(-500, -500);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    Rect rectOld;
+    Rect rectNow;
+    WMError ret;
+    ret = window->Create(abilityContext_, sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->Show();
+    EXPECT_EQ(WMError::WM_OK, ret);
 
+    rectOld = window->property_->GetWindowRect();
+    ret = window->MoveTo(-500, -500);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
+
+    rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
 
+    rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    ASSERT_EQ(WMError::WM_OK, ret);
-
-    ret = window->MoveTo(20000, 20000);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    usleep(100000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rectNow = window->property_->GetWindowRect();
+    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
+    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
 }
 
 /**
@@ -916,7 +952,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo06, Function | MediumTest | Level3)
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo06");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
@@ -979,7 +1015,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo07, Function | MediumTest | Level3)
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("moveWindowTo07");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
@@ -1048,6 +1084,9 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
     Rect rect;
     WMError ret;
     ret = window->Create(abilityContext_, nullptr);
@@ -1060,15 +1099,8 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_NE(-500, rect.width_);
-    EXPECT_NE(-500, rect.height_);
-
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
-    rect = window->property_->GetWindowRect();
-    EXPECT_NE(0, rect.width_);
-    EXPECT_NE(0, rect.height_);
+    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
+    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1077,12 +1109,18 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(500, rect.width_);
     EXPECT_EQ(500, rect.height_);
 
+
+
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_NE(20000, rect.width_);
-    EXPECT_NE(20000, rect.height_);
+    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
+    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
+
+    ret = window->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    
 }
 
 /**
@@ -1105,8 +1143,6 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1114,29 +1150,14 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     ret = window->Show();
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    rectOld = window->property_->GetWindowRect();
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
-
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
+
+    ret = window->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -1159,8 +1180,6 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1168,29 +1187,14 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     ret = window->Show();
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    rectOld = window->property_->GetWindowRect();
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
-
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
+
+    ret = window->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -1213,8 +1217,6 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1222,29 +1224,14 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     ret = window->Show();
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    rectOld = window->property_->GetWindowRect();
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
-
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
+
+    ret = window->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -1285,8 +1272,8 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(100000);
     rect = window->property_->GetWindowRect();
-    EXPECT_NE(windowLimits.maxWidth_ + 100, rect.width_);
-    EXPECT_NE(windowLimits.maxHeight_ + 100, rect.height_);
+    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
+    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 }
 
 
@@ -1322,21 +1309,11 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 }
 
 /**
@@ -1371,21 +1348,11 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 }
 
 /**
@@ -1408,8 +1375,6 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    Rect rectOld;
-    Rect rectNow;
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1420,21 +1385,10 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
-
-    rectOld = window->property_->GetWindowRect();
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    usleep(100000);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.width_, rectNow.width_);
-    EXPECT_EQ(rectOld.height_, rectNow.height_);
 }
 
 }
