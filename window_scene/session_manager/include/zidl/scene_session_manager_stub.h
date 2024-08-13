@@ -29,29 +29,29 @@ public:
     SceneSessionManagerStub() = default;
     virtual ~SceneSessionManagerStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    int HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
+    int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleRequestFocusStatus(MessageParcel &data, MessageParcel &reply);
-    int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
-    int HandleRecoverAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
-    int HandleRecoverAndReconnectSceneSession(MessageParcel &data, MessageParcel &reply);
-    int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply);
+    int HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply);
     int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data, MessageParcel& reply);
-    int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
-    int HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
-    int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply);
+    int HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
-    int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
-    int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
+    int HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
@@ -61,23 +61,23 @@ private:
 
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
+    int HandleGetSessionDump(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
-    int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
+    int HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
-    int HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply);
-    int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
-    int HandleClearSession(MessageParcel &data, MessageParcel &reply);
-    int HandleClearAllSessions(MessageParcel &data, MessageParcel &reply);
-    int HandleLockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleUnlockSession(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply);
-    int HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply);
+    int HandleBindDialogTarget(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply);
+    int HandleClearSession(MessageParcel& data, MessageParcel& reply);
+    int HandleClearAllSessions(MessageParcel& data, MessageParcel& reply);
+    int HandleLockSession(MessageParcel& data, MessageParcel& reply);
+    int HandleUnlockSession(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
@@ -97,6 +97,7 @@ private:
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

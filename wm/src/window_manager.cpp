@@ -250,7 +250,8 @@ void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
 
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    WLOGFD("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    TLOGD(WmsLogTag::DEFAULT,
+        "Camera float window, accessTokenId = %{private}u, isShowing = %{public}u", accessTokenId, isShowing);
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -580,7 +581,7 @@ WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode)
     return ret;
 }
 
-WMError WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener> &listener)
+WMError WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener could not be null");
@@ -1052,7 +1053,7 @@ WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibility
     return ret;
 }
 
-WMError WindowManager::DumpSessionAll(std::vector<std::string> &infos)
+WMError WindowManager::DumpSessionAll(std::vector<std::string>& infos)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().DumpSessionAll(infos);
     if (ret != WMError::WM_OK) {
@@ -1061,7 +1062,7 @@ WMError WindowManager::DumpSessionAll(std::vector<std::string> &infos)
     return ret;
 }
 
-WMError WindowManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+WMError WindowManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().DumpSessionWithId(persistentId, infos);
     if (ret != WMError::WM_OK) {

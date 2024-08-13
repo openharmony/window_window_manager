@@ -164,6 +164,9 @@ bool DisplayChangeTest::DisplaySizeEqual(const sptr<Display> display, const sptr
 inline bool DisplayChangeTest::CheckModeSizeChange(const sptr<SupportedScreenModes> usedInfo,
     const sptr<SupportedScreenModes> curInfo) const
 {
+    if (usedInfo == nullptr || curInfo == nullptr) {
+        return false;
+    }
     return (usedInfo->width_ != curInfo->width_ || usedInfo->height_ != curInfo->height_);
 }
 

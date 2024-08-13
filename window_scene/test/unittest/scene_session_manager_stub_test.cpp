@@ -1083,6 +1083,26 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | Small
     int res = stub_->HandleGetWindowStyleType(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleGetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: test HandleGetProcessSurfaceNodeIdByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> surfaceNodeIds;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteInt32(pid);
+    data.WriteInt32Vector(persistentIds);
+    data.WriteUInt64Vector(surfaceNodeIds);
+    int res = stub_->HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

@@ -31,6 +31,7 @@ enum class WindowDFXHelperType : uint32_t {
     WINDOW_RECT_CHECK = 1,
     WINDOW_ZORDER_CHECK,
     WINDOW_FOCUS_CHECK,
+    WINDOW_TRANSPARENT_CHECK,
 };
 
 struct WindowProfileInfo {

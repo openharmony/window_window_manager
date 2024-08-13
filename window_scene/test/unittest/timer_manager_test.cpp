@@ -137,6 +137,13 @@ HWTEST_F(TimerManagerTest, RemoveTimerInternal, Function | SmallTest | Level2)
     ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->RemoveTimerInternal(0);
     ASSERT_EQ(res, -1);
+
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timermanager->timers_.push_back(std::move(timer));
+    res = timermanager->RemoveTimerInternal(0);
+    ASSERT_EQ(res, 0);
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::RemoveTimerInternal start";
 }
@@ -198,6 +205,16 @@ HWTEST_F(TimerManagerTest, ProcessTimersInternal, Function | SmallTest | Level2)
         ASSERT_EQ(firstTimer->callback, nullptr);
         timermanager->ProcessTimersInternal();
     }
+    timermanager->timers_.clear();
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timer2->callback = []() {
+        return;
+    };
+    ASSERT_NE(timer2->callback, nullptr);
+    timermanager->timers_.push_back(std::move(timer2));
+    timermanager->ProcessTimersInternal();
 
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
@@ -319,7 +336,7 @@ HWTEST_F(TimerManagerTest, ANRManagerGetBundleName, Function | SmallTest | Level
     anrManager->GetBundleName(0, 1);
     anrManager->GetBundleName(1, 0);
     anrManager->GetBundleName(1, 1);
-    ASSERT_EQ(res, "unknow");
+    ASSERT_EQ(res, "unknown");
     delete anrManager;
     GTEST_LOG_(INFO) << "ANRManager::GetBundleName end";
 }
@@ -541,6 +558,31 @@ HWTEST_F(TimerManagerTest, ProcessTimers, Function | SmallTest | Level2)
     ASSERT_NE(timermanager, nullptr);
     timermanager->state_ = TimerMgrState::STATE_NOT_START;
     timermanager->ProcessTimers();
+    timermanager->state_ = TimerMgrState::STATE_RUNNING;
+    timermanager->ProcessTimers();
+    ASSERT_EQ(res, 0);
+    delete timermanager;
+}
+
+/**
+ * @tc.name: InsertTimerInternal
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, InsertTimerInternal, Function | SmallTest | Level2)
+{
+    int res = 0;
+    TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timer->nextCallTime = 1;
+    timermanager->timers_.push_back(std::move(timer));
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timermanager->InsertTimerInternal(timer2);
     ASSERT_EQ(res, 0);
     delete timermanager;
 }

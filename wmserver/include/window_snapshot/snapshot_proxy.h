@@ -27,7 +27,7 @@ class SnapshotProxy : public IRemoteProxy<AAFwk::ISnapshotHandler> {
 public:
     explicit SnapshotProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<AAFwk::ISnapshotHandler>(impl) {};
     ~SnapshotProxy() = default;
-    int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
+    int32_t GetSnapshot(const sptr<IRemoteObject>& token, AAFwk::Snapshot& snapshot) override;
 
 private:
     static inline BrokerDelegator<SnapshotProxy> delegator_;

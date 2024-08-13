@@ -206,7 +206,7 @@ ScreenManager::ScreenManager()
 
 ScreenManager::~ScreenManager()
 {
-    WLOGFD("Destroy screenmanager instance");
+    WLOGFI("Destroy screenmanager instance");
 }
 
 ScreenManager::Impl::~Impl()
@@ -479,6 +479,27 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     if (screenGroupId == SCREEN_ID_INVALID) {
         WLOGFE("create mirror failed");
     }
+    return ret;
+}
+
+DMError ScreenManager::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    ScreenSourceMode secondaryScreenMode)
+{
+    WLOGFI("mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",secondaryScreenMode:%{public}u",
+        mainScreenId, secondaryScreenId, secondaryScreenMode);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenModeSwitch(mainScreenId,
+        secondaryScreenId, secondaryScreenMode);
+    return ret;
+}
+
+DMError ScreenManager::MultiScreenRelativePosition(ExtendOption mainScreenOption,
+    ExtendOption secondaryScreenOption)
+{
+    WLOGFI("mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
+        mainScreenOption.screenId_, mainScreenOption.startX_, mainScreenOption.startY_,
+        secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenRelativePosition(mainScreenOption,
+        secondaryScreenOption);
     return ret;
 }
 

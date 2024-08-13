@@ -87,6 +87,7 @@ public:
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
@@ -499,6 +500,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
+    WLOGFI("Clear displaymanager listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -538,7 +540,7 @@ DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFD("Destroy displaymanager instance");
+    WLOGFI("Destroy displaymanager instance");
     g_dmIsDestroyed = true;
 }
 
@@ -1908,6 +1910,19 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    return pImpl_->SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
+}
+
+DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
+        screenId, pid, windowIdList);
 }
 } // namespace OHOS::Rosen
 

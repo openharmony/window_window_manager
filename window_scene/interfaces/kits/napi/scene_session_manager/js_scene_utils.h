@@ -148,13 +148,13 @@ bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& se
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
-bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap);
-bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector);
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap);
+bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector);
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property);
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
 napi_value CreateJsProcessOption(napi_env env, std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionStartupVisibility(napi_env env);
@@ -191,6 +191,7 @@ public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
     void PostMainThreadTask(Task&& localTask, std::string traceInfo = "Unnamed", int64_t delayTime = 0);
+    
 private:
     void GetMainEventHandler();
     napi_env env_;

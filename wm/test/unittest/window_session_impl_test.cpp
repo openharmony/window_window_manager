@@ -1889,6 +1889,22 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
 }
+
+/**
+ * @tc.name: SetParentExtensionWindow
+ * @tc.desc: SetParentExtensionWindow Test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest, SetParentExtensionWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetParentExtensionWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> parentWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->SetParentExtensionWindow(parentWindow);
+    EXPECT_EQ(window->parentExtensionWindow_, sptr<Window>(parentWindow));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

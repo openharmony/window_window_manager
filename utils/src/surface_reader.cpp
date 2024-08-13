@@ -107,7 +107,7 @@ void SurfaceReader::SetHandler(sptr<SurfaceReaderHandler> handler)
     handler_ = handler;
 }
 
-bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
+bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer>& buf)
 {
     if (handler_ == nullptr) {
         WLOGFE("SurfaceReaderHandler not set");

@@ -25,6 +25,7 @@ class PatternDetachCallback : public PatternDetachCallbackStub {
 public:
     void OnPatternDetach(int32_t persisitentId) override;
     void GetResult(long timeOut);
+    
 private:
     RunnableFuture<int> future_{};
 };

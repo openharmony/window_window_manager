@@ -27,7 +27,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowStub"};
 }
 
-int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     if (staticDestroyMonitor_.IsDestroyed()) {
         WLOGFE("Main thread finished, static data has been destroyed");
@@ -184,7 +184,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP: {
             auto pointerEvent = MMI::PointerEvent::Create();
-            if (!pointerEvent->ReadFromParcel(data)) {
+            if (!pointerEvent || !pointerEvent->ReadFromParcel(data)) {
                 WLOGFE("Read Pointer Event failed");
                 return ERR_INVALID_DATA;
             }
@@ -204,7 +204,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_CONSUME_KEY_EVENT: {
             auto event = MMI::KeyEvent::Create();
-            if (!event->ReadFromParcel(data)) {
+            if (!event || !event->ReadFromParcel(data)) {
                 WLOGFE("Read Pointer Event failed");
                 return ERR_INVALID_DATA;
             }

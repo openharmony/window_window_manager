@@ -49,11 +49,11 @@ public:
         EventPriority priority = EventPriority::LOW);
 
     // asynchronously calls the functions of AbilityManager
-    void MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser);
-    void TerminateAbility(const wptr<WindowNode> &node);
-    void CloseAbility(const wptr<WindowNode> &node);
-    void CompleteFirstFrameDrawing(const wptr<WindowNode> &node);
-    void UpdateMissionSnapShot(const wptr<WindowNode> &node, std::shared_ptr<Media::PixelMap> pixelMap);
+    void MinimizeAbility(const wptr<WindowNode>& node, bool isFromUser);
+    void TerminateAbility(const wptr<WindowNode>& node);
+    void CloseAbility(const wptr<WindowNode>& node);
+    void CompleteFirstFrameDrawing(const wptr<WindowNode>& node);
+    void UpdateMissionSnapShot(const wptr<WindowNode>& node, std::shared_ptr<Media::PixelMap> pixelMap);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);

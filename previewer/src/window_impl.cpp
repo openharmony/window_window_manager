@@ -15,6 +15,7 @@
 
 #include "window_impl.h"
 
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "window_option.h"
@@ -183,6 +184,11 @@ const std::string& WindowImpl::GetWindowName() const
 uint32_t WindowImpl::GetWindowId() const
 {
     return windowId_;
+}
+
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return DISPLAY_ID_INVALID;
 }
 
 uint32_t WindowImpl::GetWindowFlags() const

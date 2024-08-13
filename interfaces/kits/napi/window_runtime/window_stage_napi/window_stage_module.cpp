@@ -31,7 +31,7 @@ extern "C" __attribute__((constructor)) void NAPI_application_WindowStage_AutoRe
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_WindowStage_GetJSCode(const char **buf, int *bufLen)
+void NAPI_application_WindowStage_GetJSCode(const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_stage_js_start;
@@ -44,7 +44,7 @@ void NAPI_application_WindowStage_GetJSCode(const char **buf, int *bufLen)
 
 // window_stage JS register
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_WindowStage_GetABCCode(const char **buf, int *buflen)
+void NAPI_application_WindowStage_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_stage_abc_start;

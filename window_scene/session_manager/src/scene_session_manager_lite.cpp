@@ -19,18 +19,9 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLite" };
-std::recursive_mutex g_instanceMutex;
 } // namespace
 
-SceneSessionManagerLite& SceneSessionManagerLite::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneSessionManagerLite* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneSessionManagerLite();
-    }
-    return *instance;
-}
+WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManagerLite)
 
 WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)

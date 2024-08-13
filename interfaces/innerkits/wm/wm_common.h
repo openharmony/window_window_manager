@@ -446,7 +446,7 @@ struct PointInfo {
  * @brief topN main window info.
  */
 struct MainWindowInfo : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(pid_)) {
             return false;
@@ -997,10 +997,10 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
-    uint32_t minWidth_ = 0;
-    uint32_t minHeight_ = 0;
+    uint32_t maxWidth_ = INT32_MAX;
+    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t minWidth_ = 1;
+    uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;
