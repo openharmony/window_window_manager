@@ -72,6 +72,7 @@ public:
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
+    static napi_value GetBatchAbilityInfos(napi_env env, napi_callback_info info);
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
@@ -126,11 +127,7 @@ private:
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
-    napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos);
-    napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo);
-    napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo);
-    napi_value CreateWindowModes(napi_env env, const std::vector<AppExecFwk::SupportWindowMode>& windowModes);
-    napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo);
+    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
