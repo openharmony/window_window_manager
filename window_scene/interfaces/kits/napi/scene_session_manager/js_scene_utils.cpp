@@ -480,7 +480,7 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
     return true;
 }
 
-bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo hookInfo)
+bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo)
 {
     napi_value jsWidth = nullptr;
     napi_get_named_property(env, jsObject, "width", &jsWidth);
