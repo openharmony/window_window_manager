@@ -23,12 +23,12 @@
 #include "interfaces/include/ws_common.h"
 
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 } // namespace OHOS::MMI
 namespace OHOS::Accessibility {
-    class AccessibilityElementInfo;
+class AccessibilityElementInfo;
 }
 namespace OHOS::Rosen {
 class IWindowEventChannelListener : public IRemoteBroker {

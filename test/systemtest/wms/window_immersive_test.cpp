@@ -24,29 +24,29 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImmersiveTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImmersiveTest"};
 
-    const Rect SYS_BAR_REGION_NULL = { 0, 0, 0, 0 };
-    const SystemBarProperty SYS_BAR_PROP_DEFAULT;
-    const SystemBarProperty SYS_BAR_PROP_1(true, 0xE5111111, 0xE5222222);
-    const SystemBarProperty SYS_BAR_PROP_2(false, 0xE5222222, 0xE5333333);
-    const SystemBarProperty SYS_BAR_PROP_3(false, 0xE5333333, 0xE5444444);
-    const SystemBarProperty SYS_BAR_PROP_4(true, 0xE5444444, 0x66555555);
-    const SystemBarRegionTints TEST_PROPS_DEFAULT = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
-    };
-    const SystemBarRegionTints TEST_PROPS_1 = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
-    };
-    const SystemBarRegionTints TEST_PROPS_2 = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
-    };
+const Rect SYS_BAR_REGION_NULL = { 0, 0, 0, 0 };
+const SystemBarProperty SYS_BAR_PROP_DEFAULT;
+const SystemBarProperty SYS_BAR_PROP_1(true, 0xE5111111, 0xE5222222);
+const SystemBarProperty SYS_BAR_PROP_2(false, 0xE5222222, 0xE5333333);
+const SystemBarProperty SYS_BAR_PROP_3(false, 0xE5333333, 0xE5444444);
+const SystemBarProperty SYS_BAR_PROP_4(true, 0xE5444444, 0x66555555);
+const SystemBarRegionTints TEST_PROPS_DEFAULT = {
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
+};
+const SystemBarRegionTints TEST_PROPS_1 = {
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
+};
+const SystemBarRegionTints TEST_PROPS_2 = {
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
+};
 
-    const Rect EMPTY_RECT = {0, 0, 0, 0};
-    const float RATIO = 0.3;
+const Rect EMPTY_RECT = {0, 0, 0, 0};
+const float RATIO = 0.3;
 }
 
 using Utils = WindowTestUtils;

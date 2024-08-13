@@ -27,31 +27,31 @@
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
-    class Configuration;
-    class Ability;
+class Configuration;
+class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
-    class AbilityContext;
-    class Context;
+class AbilityContext;
+class Context;
 }
 
 namespace OHOS::AAFwk {
-    class Want;
-    class WantParams;
+class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
-    class UIContent;
+class UIContent;
 }
 
 namespace OHOS::Media {
-    class PixelMap;
+class PixelMap;
 }
 
 namespace OHOS::Accessibility {

@@ -24,15 +24,15 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_CJ_DISPLAY_STATE_MAP {
-        { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
-        { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
-        { DisplayState::ON,           DisplayStateMode::STATE_ON           },
-        { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
-        { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
-        { DisplayState::VR,           DisplayStateMode::STATE_VR           },
-        { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
-    };
+const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_CJ_DISPLAY_STATE_MAP {
+    { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
+    { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
+    { DisplayState::ON,           DisplayStateMode::STATE_ON           },
+    { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
+    { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
+    { DisplayState::VR,           DisplayStateMode::STATE_VR           },
+    { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
+};
 }
 static thread_local std::map<uint64_t, sptr<DisplayImpl>> g_cjDisplayMap;
 std::recursive_mutex g_mutex;
