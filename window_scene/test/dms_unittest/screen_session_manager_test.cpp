@@ -2063,8 +2063,8 @@ HWTEST_F(ScreenSessionManagerTest, ScreenCastConnection, Function | SmallTest | 
 
     ScreenCastConnection::GetInstance().SetBundleName(castBundleName);
     ScreenCastConnection::GetInstance().SetAbilityName(castAbilityName);
-    EXPECT_EQ(ScreenCastConnection::GetInstance().GetBundleName(), "");
-    EXPECT_EQ(ScreenCastConnection::GetInstance().GetAbilityName(), "");
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetBundleName(), castBundleName);
+    EXPECT_EQ(ScreenCastConnection::GetInstance().GetAbilityName(), castAbilityName);
 
     MessageParcel data;
     MessageParcel reply;
