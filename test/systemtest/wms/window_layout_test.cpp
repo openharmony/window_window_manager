@@ -722,10 +722,6 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, sceneSession));
-
-    window->property_->SetPersistentId(10002);
-
     Rect rectOld;
     Rect rectNow;
     WMError ret;
@@ -733,6 +729,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = window->Show();
     EXPECT_EQ(WMError::WM_OK, ret);
+    window->property_->SetPersistentId(10002);
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
@@ -934,7 +931,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);    
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
 }
 
 /**
@@ -971,7 +968,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
 }
 
 /**
@@ -1008,7 +1005,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
 }
 
 /**
@@ -1045,7 +1042,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
 }
 
 /**
