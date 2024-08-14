@@ -252,9 +252,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
         case WindowType::WINDOW_TYPE_UI_EXTENSION:
             TLOGI(WmsLogTag::WMS_LIFE, "uiExtensionUsage = %{public}u", property_->GetUIExtensionUsage());
             if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
-                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_NODE;
+                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_SECURE_NODE;
             } else {
-                rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
             break;
         default:
