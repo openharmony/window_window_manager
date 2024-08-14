@@ -61,7 +61,7 @@ class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
 public:
     void OnConnected(int32_t userId, int32_t screenId) override {};
     void OnDisconnected(int32_t userId, int32_t screenId) override {};
-}
+};
 
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
@@ -898,9 +898,9 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
  */
 HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
 {
-    WindowManagerLite::GetInstance.destroyed_ = true;
-    WindowManagerLite::GetInstance.OnRemoteDied();
-    ASSERT_EQ(WindowManagerLite::GetInstance.destroyed_, true);
+    WindowManagerLite::GetInstance().destroyed_ = true;
+    WindowManagerLite::GetInstance().OnRemoteDied();
+    ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
 }
 }
 }
