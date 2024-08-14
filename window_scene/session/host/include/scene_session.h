@@ -379,6 +379,7 @@ public:
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
+    void UnregisterSessionChangeListeners() override;
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
