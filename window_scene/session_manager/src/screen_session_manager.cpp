@@ -100,6 +100,7 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
+constexpr int32_t REMOVE_DISPLAY_MODE = 0;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -184,6 +185,9 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
             #endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (foldScreenController_ != nullptr) {
+                foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
+            }
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
@@ -198,6 +202,9 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
             #endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (foldScreenController_ != nullptr) {
+                foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
+            }
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         } else {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Init, invalid active screen id");
@@ -1714,6 +1721,10 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
 void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
 {
+    if (foldScreenController_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenController_ is null");
+        return;
+    }
     SetScreenPowerForFold(foldScreenController_->GetCurrentScreenId(), status);
 }
 
