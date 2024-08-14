@@ -900,13 +900,14 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 
     Rect rect;
     WMError ret;
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
     ret = window->Create(abilityContext_, nullptr);
     EXPECT_EQ(WMError::WM_OK, ret);
     window->property_->SetPersistentId(10008);
     ret = window->Show();
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = window->Resize(-500, -500);
