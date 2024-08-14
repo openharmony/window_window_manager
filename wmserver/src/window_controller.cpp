@@ -1267,7 +1267,7 @@ WMError WindowController::RaiseToAppTop(uint32_t windowId)
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFW("could not find window");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_NULLPTR;
     }
 
     auto parentNode = node->parent_;
