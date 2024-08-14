@@ -58,11 +58,15 @@ ohos_systemtest("wms_window_layout_test") {
 
   sources = [ "window_layout_test.cpp" ]
 
-  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/interfaces/include",
+  ]
 
   deps = [
     ":wms_systemtest_common",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
