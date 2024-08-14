@@ -1214,7 +1214,7 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
-    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+    if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden
