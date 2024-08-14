@@ -241,7 +241,7 @@ public:
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
-    void UnregisterSessionChangeListeners();
+    virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
