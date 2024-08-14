@@ -3401,7 +3401,7 @@ void SceneSession::SetMovable(bool movable)
             TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMovable: %{public}d", session->GetPersistentId(), movable);
             session->moveDragController_->SetMovable(movable);
         }
-    }
+    };
     PostTask(task, "SetMovable");
 }
 
