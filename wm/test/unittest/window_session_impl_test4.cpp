@@ -384,8 +384,7 @@ HWTEST_F(WindowSessionImplTest4, SetUIContentInner, Function | SmallTest | Level
     window->property_->SetPersistentId(1);
     std::string url = "";
     EXPECT_TRUE(window->IsWindowSessionInvalid());
-    WMError res1 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT,
-        BackupAndRestoreType::NONE, nullptr);
+    WMError res1 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
     ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetUIContentInner end";
 }
@@ -556,8 +555,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd, Function | SmallTes
     window->NotifyRotationAnimationEnd();
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("", nullptr, nullptr, WindowSetUIContentType::BY_ABC, BackupAndRestoreType::NONE,
-                          nullptr, aceRet);
+    window->InitUIContent("", nullptr, nullptr, WindowSetUIContentType::BY_ABC, nullptr, aceRet);
     window->NotifyRotationAnimationEnd();
     ASSERT_NE(nullptr, window->uiContent_);
 }
@@ -642,8 +640,7 @@ HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, Function | SmallTest | Level2
 
     window->SetUIContentByName(url, nullptr, nullptr, nullptr);
     window->SetUIContentByAbc(url, nullptr, nullptr, nullptr);
-    WMError res1 = window->NapiSetUIContent(url, nullptr, nullptr, BackupAndRestoreType::CONTINUATION,
-        nullptr, ability);
+    WMError res1 = window->NapiSetUIContent(url, nullptr, nullptr, false, nullptr, ability);
     ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
