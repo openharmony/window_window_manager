@@ -74,8 +74,8 @@ class WindowImmersiveTest1 : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
     void SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& props);
     bool SystemBarPropsEqualsTo(const SystemBarRegionTints& expect);
     void DumpFailedInfo(const SystemBarRegionTints& expect);
@@ -211,11 +211,6 @@ void WindowImmersiveTest1::SetUpTestCase()
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowImmersiveTest1::TearDownTestCase()
-{
-
-}
-
 void WindowImmersiveTest1::SetUp()
 {
     fullScreenAppinfo_ = {
@@ -227,6 +222,7 @@ void WindowImmersiveTest1::SetUp()
         .parentLimit = false,
         .parentId = INVALID_WINDOW_ID,
     };
+
     avoidBarInfo_ = {
         .name = "LeftAvoidTest",
         .rect = EMPTY_RECT,
@@ -343,8 +339,10 @@ void GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     }
 }
 
-void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties, 
-                        std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, WindowType type)
+void GetSpecificBarStatus(
+    std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
+    WindowType type)
 {
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
@@ -534,17 +532,14 @@ HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest |
     const vector<WindowMode>windowMode{WindowMode::WINDOW_MODE_FULLSCREEN, WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
          WindowMode::WINDOW_MODE_SPLIT_SECONDARY, WindowMode::WINDOW_MODE_FLOATING};
     const vector<WindowType>windowType{WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR};
-
     for (auto type : windowType) {
         for (auto mode : windowMode) {
             sptr<WindowOption> option = new (std::nothrow) WindowOption();
             ASSERT_NE(nullptr, option);
             option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
             option->SetWindowMode(mode);
-
             sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
             EXPECT_FALSE(window == nullptr);
-
             SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
             sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
             ASSERT_NE(nullptr, session);
@@ -552,16 +547,13 @@ HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest |
             window->hostSession_ = session;
             window->state_ = WindowState::STATE_SHOWN;
             activeWindows_.push_back(window);
-
             std::map<WindowType, SystemBarProperty> systemBarProperties;
             std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-
             GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, type);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
             WMError ret = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
             EXPECT_EQ(WMError::WM_OK, ret);
             sleep(1);
-            
             if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
                 auto sta = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
                 auto nav = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
@@ -571,7 +563,6 @@ HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest |
                 auto nav = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
                 EXPECT_EQ(true, nav.enable_);
             }
-
             GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, WindowType::APP_WINDOW_BASE);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
             ret = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
@@ -581,9 +572,7 @@ HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest |
             auto nav = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
             EXPECT_EQ(false, sta.enable_);
             EXPECT_EQ(false, nav.enable_);
-
             window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-
             GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, type);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
             ret = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
@@ -653,7 +642,7 @@ HWTEST_F(WindowImmersiveTest1, setSpecificBarProperty, Function | MediumTest | L
 
 /**
  * @tc.name: SetWindowSystemBarProperties
- * @tc.desc: SetWindowSystemBarProperties 
+ * @tc.desc: SetWindowSystemBarProperties
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImmersiveTest1, setWindowSystemBarProperties, Function | MediumTest | Level3)
