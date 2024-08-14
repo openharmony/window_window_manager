@@ -268,8 +268,8 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     return;
 }
 
-WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
+    napi_env env, napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("NapiSetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
@@ -285,9 +285,8 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env en
         WLOGFE("fail to NapiSetUIContent");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (type != BackupAndRestoreType::NONE) {
-        uiContent->Restore(this, contentInfo, storage, type == BackupAndRestoreType::CONTINUATION ?
-            Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
+    if (isdistributed) {
+        uiContent->Restore(this, contentInfo, storage);
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
@@ -311,7 +310,7 @@ Ace::UIContent* WindowImpl::GetUIContent() const
     return uiContent_.get();
 }
 
-std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
+std::string WindowImpl::GetContentInfo()
 {
     return "";
 }

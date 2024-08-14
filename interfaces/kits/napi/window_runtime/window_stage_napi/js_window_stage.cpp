@@ -326,7 +326,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     if (isLoadedByName) {
         ret = weakWindow->SetUIContentByName(contextUrl, env, nativeStorage);
     } else {
-        ret = weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage);
+        ret = weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage, false);
     }
     if (ret == WMError::WM_OK) {
         task.Resolve(env, NapiGetUndefined(env));

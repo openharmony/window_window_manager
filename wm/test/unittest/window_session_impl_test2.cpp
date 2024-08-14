@@ -761,7 +761,7 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
     int32_t nullPropertyId = 1002;
     int32_t displayId = 1003;
     int32_t cameraId = 1004;
-    
+
     window->windowSessionMap_.clear();
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     window->windowSessionMap_.insert(
@@ -903,10 +903,10 @@ HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest |
     ASSERT_NE(window, nullptr);
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     window->SetRequestedOrientation(Orientation::END);
-    
+
     window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
     window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    
+
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     window->SetRequestedOrientation(Orientation::BEGIN);
     window->Destroy();
@@ -927,24 +927,6 @@ HWTEST_F(WindowSessionImplTest2, GetRequestedOrientation, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetContentInfo
- * @tc.desc: GetContentInfo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
-{
-    auto window = GetTestWindowImpl("GetContentInfo");
-    ASSERT_NE(window, nullptr);
-    
-    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::CONTINUATION), "");
-    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::APP_RECOVERY), "");
-    ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::NONE), "");
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->GetContentInfo(BackupAndRestoreType::NONE);
-    window->Destroy();
-}
-
-/**
  * @tc.name: GetDecorHeight
  * @tc.desc: GetDecorHeight
  * @tc.type: FUNC
@@ -955,7 +937,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     int32_t height = -1;
     ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
-    
+
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(-1));
     window->uiContent_ = std::move(uiContent);
@@ -1116,22 +1098,21 @@ HWTEST_F(WindowSessionImplTest2, InitUIContent, Function | SmallTest | Level2)
     WindowSetUIContentType type = WindowSetUIContentType::DEFAULT;
     AppExecFwk::Ability* ability = nullptr;
     OHOS::Ace::UIContentErrorCode aceRet;
-    BackupAndRestoreType restoreType = BackupAndRestoreType::NONE;
 
     window->uiContent_ = nullptr;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
 
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
 
-    type = WindowSetUIContentType::RESTORE;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
+    type = WindowSetUIContentType::DISTRIBUTE;
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
 
     type = WindowSetUIContentType::BY_NAME;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
 
     type = WindowSetUIContentType::BY_ABC;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent end";
 }
 
@@ -1755,25 +1736,6 @@ HWTEST_F(WindowSessionImplTest2, GetSubWindow, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetRestoredRouterStack_0200
- * @tc.desc: basic function test of set or get restored router stack.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    std::string routerStack = "stackInfo:{}";
-    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    std::string gettedStack = window->GetRestoredRouterStack();
-    EXPECT_EQ(gettedStack, routerStack);
-    EXPECT_TRUE(window->GetRestoredRouterStack().empty());
-}
-
-/**
  * @tc.name: SetUiDvsyncSwitch
  * @tc.desc: SetUiDvsyncSwitch
  * @tc.type: FUNC
@@ -1818,24 +1780,6 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Le
     window->vsyncStation_ = nullptr;
     window->SetUiDvsyncSwitch(true);
     window->SetUiDvsyncSwitch(false);
-}
-
-/*
- * @tc.name: SetRestoredRouterStack_0100
- * @tc.desc: basic function test of set or get restored router stack.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    std::string routerStack = "stackInfo:{}";
-    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
-        WMError::WM_ERROR_INVALID_WINDOW);
 }
 }
 } // namespace Rosen

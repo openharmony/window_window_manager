@@ -23,7 +23,6 @@
 
 #include "window.h"
 #include "window_option.h"
-#include "wm_common.h"
 
 namespace OHOS::AppExecFwk {
     class Configuration;
@@ -154,7 +153,7 @@ public:
      *
      * @return content info of main window
      */
-    std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) const;
+    std::string GetContentInfo() const;
 
     /**
      * @brief Handle and notify memory.
