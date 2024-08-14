@@ -184,7 +184,7 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        TLOGI("token is nullptr");
+        WLOGFD("token is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToBackgroundForDelegator(token);
