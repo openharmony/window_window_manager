@@ -456,6 +456,17 @@ private:
     void SetDpiFromSettingData();
     void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
+    void UpdateDisplayScaleState(ScreenId screenId);
+    void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
+                                  const float& pivotY);
+    void UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
+                                const float& pivotX, const float& pivotY);
+    void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                   const float& scaleY, const float& pivotX, const float& pivotY,
+                                                   float& translateX, float& translateY);
+    void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
+                                            const float& pivotX, const float& pivotY, float& translateX,
+                                            float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);
