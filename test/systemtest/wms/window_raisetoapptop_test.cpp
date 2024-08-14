@@ -103,9 +103,9 @@ HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, Function | MediumTest | Level3)
     sleep(TEST_SLEEP_S);
 
     auto result1 = mainWindow->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, result1);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, result1);
     auto result2 = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_OK, result2);
+    ASSERT_EQ(WMError::WM_OK, result2);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, Function | MediumTest | Leve
     sleep(TEST_SLEEP_S);
 
     auto result = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_OK, result);
+    ASSERT_EQ(WMError::WM_OK, result);
 }
 
 /**
@@ -198,13 +198,13 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
     sleep(TEST_SLEEP_S);
 
     auto result = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_OK, result);
+    ASSERT_EQ(WMError::WM_OK, result);
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
     sleep(TEST_SLEEP_S);
 
     result = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, result);
+    ASSERT_EQ(WMError::WM_ERROR_STATE_ABNORMALLY, result);
 }
 
 /**
@@ -238,7 +238,7 @@ HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, Function | MediumTest | Level
     sleep(TEST_SLEEP_S);
 
     auto result = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, result);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, result);
 }
 }
 } // namespace Rosen
