@@ -198,7 +198,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
         if (token == nullptr) {
-            WLOGFI("Failed to read token object!");
+            WLOGI("Failed to read token object!");
             return ERR_INVALID_DATA;
         }
     } else {
@@ -244,7 +244,7 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
         if (token == nullptr) {
-            TLOGI("token is nullptr");
+            TLOGI(WmsLogTag::WMS_RECOVER, "token is nullptr");
             return ERR_INVALID_DATA;
         }
     } else {
@@ -285,7 +285,7 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
         if (token == nullptr) {
-            TLOGI("token is nullptr");
+            TLOGI(WmsLogTag::WMS_RECOVER, "token is nullptr");
             return ERR_INVALID_DATA;
         }
     } else {
@@ -319,7 +319,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     if (callback == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        TLOGI("callback is nullptr");
+        TLOGI(WmsLogTag::WMS_RECOVER, "callback is nullptr");
         return ERR_INVALID_DATA;
     }
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
@@ -472,7 +472,7 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
-        TLOGI("listener is nullptr");
+        WLOGFI("listener is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UnRegisterSessionListener(listener);
@@ -942,12 +942,12 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     if (sessionStage == nullptr) {
-        TLOGI("sessionStage is nullptr");
+        WLOGFE("sessionStage is nullptr");
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        TLOGI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     uint64_t surfaceNodeId = data.ReadUint64();
@@ -960,12 +960,12 @@ int SceneSessionManagerStub::HandleRemoveExtensionWindowStageFromSCB(MessageParc
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     if (sessionStage == nullptr) {
-        TLOGI("sessionStage is nullptr");
+        WLOGFE("sessionStage is nullptr");
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        TLOGI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     RemoveExtensionWindowStageFromSCB(sessionStage, token);
@@ -976,7 +976,7 @@ int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data,
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        TLOGI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     int32_t rectX = data.ReadInt32();
@@ -992,7 +992,7 @@ int SceneSessionManagerStub::HandleProcessModalExtensionPointDown(MessageParcel&
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        TLOGI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     int32_t posX = data.ReadInt32();
@@ -1015,7 +1015,7 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, Mes
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        TLOGI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     uint32_t extWindowFlags = data.ReadUint32();
