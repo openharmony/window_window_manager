@@ -26,7 +26,7 @@
 #include "window_property.h"
 
 namespace OHOS::AbilityRuntime {
-    class Context;
+class Context;
 }
 
 namespace OHOS {

@@ -31,7 +31,7 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowGroupMgr"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowGroupMgr"};
 }
 
 WMError WindowGroupMgr::MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId)

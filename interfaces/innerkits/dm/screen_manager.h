@@ -112,6 +112,27 @@ public:
      */
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
+     /**
+     * @brief Make screens as mirror-screen
+     *
+     * @param mainScreenId Main screen id.
+     * @param secondaryScreenId secondary screen id.
+     * @param secondaryScreenMode Screen Combination Mode.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode);
+
+     /**
+     * @brief Set Screen Relative Position
+     *
+     * @param mainScreenOption Main screen id and position.
+     * @param secondaryScreenOption secondary screen id and position.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
+        ExtendOption secondaryScreenOption);
+
     /**
     * @brief Make screens as unique-screen.
     *

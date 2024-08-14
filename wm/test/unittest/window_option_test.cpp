@@ -22,17 +22,17 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const SystemBarProperty SYS_BAR_PROP_DEFAULT;
-    const SystemBarProperty SYS_BAR_PROP_1(true, 0xE5111111, 0xE5222222);
-    const SystemBarProperty SYS_BAR_PROP_2(false, 0xE5222222, 0xE5333333);
-    const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_TEST = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1 },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
-    };
-    const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_DEFAULT = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR,     SYS_BAR_PROP_DEFAULT },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
-    };
+const SystemBarProperty SYS_BAR_PROP_DEFAULT;
+const SystemBarProperty SYS_BAR_PROP_1(true, 0xE5111111, 0xE5222222);
+const SystemBarProperty SYS_BAR_PROP_2(false, 0xE5222222, 0xE5333333);
+const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_TEST = {
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1 },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
+};
+const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_DEFAULT = {
+    { WindowType::WINDOW_TYPE_STATUS_BAR,     SYS_BAR_PROP_DEFAULT },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
+};
 }
 class WindowOptionTest : public testing::Test {
 public:

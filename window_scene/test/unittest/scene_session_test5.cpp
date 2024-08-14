@@ -1063,11 +1063,21 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     EXPECT_EQ(WMError::WM_OK, res);
 
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    info.isSystem_ = false;
     sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session1->SetSessionState(SessionState::STATE_CONNECT);
     res = session1->HandleActionUpdateSetBrightness(property, session1, action);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, res);
+
+    info.isSystem_ = false;
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session2->SetSessionState(SessionState::STATE_CONNECT);
+    res = session2->HandleActionUpdateSetBrightness(property, session2, action);
     EXPECT_EQ(WMError::WM_OK, res);
+
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session3->SetSessionState(SessionState::STATE_CONNECT);
+    property->SetBrightness(1.0);
+    res = session3->HandleActionUpdateSetBrightness(property, session3, action);
+    EXPECT_EQ(session3->GetBrightness(), 1.0);
 }
 
 /**
