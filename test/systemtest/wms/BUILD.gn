@@ -165,7 +165,7 @@ ohos_systemtest("wms_window_immersive_test2") {
 
   sources = [ "window_immersive_test2.cpp" ]
 
-  include_dirs = [ 
+  include_dirs = [
     "${window_base_path}/window_scene/test/mock",
     "${window_base_path}/interfaces/kits/napi/window_runtime/window_napi",
   ]
