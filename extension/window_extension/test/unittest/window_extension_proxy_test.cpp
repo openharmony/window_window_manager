@@ -36,7 +36,7 @@ public:
     void TearDown() override;
     sptr<WindowExtensionStub> mockWindowExtensionStub_;
     sptr<WindowExtensionProxy> windowExtensionProxy_;
-    sptr<IRemoteObject> impl;
+    sptr<IRemoteObject> impl_;
     sptr<WindowExtensionClientProxy> windowExtensionClientProxy_;
 };
 
@@ -52,10 +52,9 @@ void WindowExtensionProxyTest::SetUp()
 {
     mockWindowExtensionStub_ = new WindowExtensionStubImpl("name");
     windowExtensionProxy_ = new WindowExtensionProxy(mockWindowExtensionStub_);
-    impl = new IRemoteObjectMocker();
-    ASSERT_NE(nullptr, impl);
-    impl = nullptr;
-    windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl);
+    impl_ = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, impl_);
+    windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl_);
 }
 
 void WindowExtensionProxyTest::TearDown()
