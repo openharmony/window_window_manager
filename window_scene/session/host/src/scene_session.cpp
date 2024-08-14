@@ -2920,9 +2920,9 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u test", sceneSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
-        return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
+        return sceneSession->HandleUpdatePropertyByAction(property, action);
     };
     if (AppExecFwk::EventRunner::IsAppMainThread()) {
         PostTask(task, "UpdateProperty");
@@ -2938,12 +2938,8 @@ void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionCh
 }
 
 WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if (property == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -2953,63 +2949,63 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
 }
 
 WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
     switch (static_cast<uint32_t>(action)) {
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
-            return HandleActionUpdateTurnScreenOn(property, sceneSession, action);
+            return HandleActionUpdateTurnScreenOn(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
-            return HandleActionUpdateKeepScreenOn(property, sceneSession, action);
+            return HandleActionUpdateKeepScreenOn(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
-            return HandleActionUpdateFocusable(property, sceneSession, action);
+            return HandleActionUpdateFocusable(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
-            return HandleActionUpdateTouchable(property, sceneSession, action);
+            return HandleActionUpdateTouchable(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
-            return HandleActionUpdateSetBrightness(property, sceneSession, action);
+            return HandleActionUpdateSetBrightness(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
-            return HandleActionUpdateOrientation(property, sceneSession, action);
+            return HandleActionUpdateOrientation(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
-            return HandleActionUpdatePrivacyMode(property, sceneSession, action);
+            return HandleActionUpdatePrivacyMode(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
-            return HandleActionUpdatePrivacyMode(property, sceneSession, action);
+            return HandleActionUpdatePrivacyMode(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
-            return HandleActionUpdateSnapshotSkip(property, sceneSession, action);
+            return HandleActionUpdateSnapshotSkip(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
-            return HandleActionUpdateMaximizeState(property, sceneSession, action);
+            return HandleActionUpdateMaximizeState(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
-            return HandleActionUpdateOtherProps(property, sceneSession, action);
+            return HandleActionUpdateOtherProps(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
-            return HandleActionUpdateStatusProps(property, sceneSession, action);
+            return HandleActionUpdateStatusProps(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
-            return HandleActionUpdateNavigationProps(property, sceneSession, action);
+            return HandleActionUpdateNavigationProps(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
-            return HandleActionUpdateNavigationIndicatorProps(property, sceneSession, action);
+            return HandleActionUpdateNavigationIndicatorProps(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
-            return HandleActionUpdateFlags(property, sceneSession, action);
+            return HandleActionUpdateFlags(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
-            return HandleActionUpdateMode(property, sceneSession, action);
+            return HandleActionUpdateMode(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
-            return HandleActionUpdateAnimationFlag(property, sceneSession, action);
+            return HandleActionUpdateAnimationFlag(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
-            return HandleActionUpdateTouchHotArea(property, sceneSession, action);
+            return HandleActionUpdateTouchHotArea(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
-            return HandleActionUpdateDecorEnable(property, sceneSession, action);
+            return HandleActionUpdateDecorEnable(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
-            return HandleActionUpdateWindowLimits(property, sceneSession, action);
+            return HandleActionUpdateWindowLimits(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
-            return HandleActionUpdateDragenabled(property, sceneSession, action);
+            return HandleActionUpdateDragenabled(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
-            return HandleActionUpdateRaiseenabled(property, sceneSession, action);
+            return HandleActionUpdateRaiseenabled(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
-            return HandleActionUpdateHideNonSystemFloatingWindows(property, sceneSession, action);
+            return HandleActionUpdateHideNonSystemFloatingWindows(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
-            return HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
+            return HandleActionUpdateTextfieldAvoidInfo(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
-            return HandleActionUpdateWindowMask(property, sceneSession, action);
+            return HandleActionUpdateWindowMask(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
-            return HandleActionUpdateTopmost(property, sceneSession, action);
+            return HandleActionUpdateTopmost(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
-            return HandleActionUpdateModeSupportInfo(property, sceneSession, action);
+            return HandleActionUpdateModeSupportInfo(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -3017,11 +3013,12 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
 }
 
 WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
+    SetTurnScreenOn(property->IsTurnScreenOn());
 #ifdef POWER_MANAGER_ENABLE
-    auto task = [this, sceneSession]() {
+    auto task = [weakThis = wptr(this)]() {
+        auto sceneSession = weakThis.promote();
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "session is invalid");
             return;
@@ -3047,78 +3044,78 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
 }
 
 WMError SceneSession::HandleActionUpdateKeepScreenOn(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetKeepScreenOn(property->IsKeepScreenOn());
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetFocusable(property->GetFocusable());
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetFocusable(property->GetFocusable());
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateTouchable(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetTouchable(property->GetTouchable());
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetTouchable(property->GetTouchable());
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if (GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         TLOGW(WmsLogTag::DEFAULT, "only app main window can set brightness");
         return WMError::WM_OK;
     }
-    if (!sceneSession->IsSessionValid()) {
+    if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            sceneSession->GetPersistentId(), sceneSession->GetSessionState());
+            GetPersistentId(), GetSessionState());
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     float brightness = property->GetBrightness();
-    if (std::abs(brightness - sceneSession->GetBrightness()) < std::numeric_limits<float>::epsilon()) {
+    if (std::abs(brightness - GetBrightness()) < std::numeric_limits<float>::epsilon()) {
         TLOGD(WmsLogTag::DEFAULT, "Session brightness do not change: [%{public}f]", brightness);
         return WMError::WM_OK;
     }
-    sceneSession->SetBrightness(brightness);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetBrightness(brightness);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetRequestedOrientation(property->GetRequestedOrientation());
+    SetRequestedOrientation(property->GetRequestedOrientation());
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
     bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-    sceneSession->SetPrivacyMode(isPrivacyMode);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetPrivacyMode(isPrivacyMode);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetSnapshotSkip(property->GetSnapshotSkip());
+    SetSnapshotSkip(property->GetSnapshotSkip());
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetMaximizeMode(property->GetMaximizeMode());
         sessionProperty->SetIsLayoutFullScreen(property->IsLayoutFullScreen());
@@ -3127,63 +3124,63 @@ WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionPr
 }
 
 WMError SceneSession::HandleActionUpdateOtherProps(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
     for (auto iter : systemBarProperties) {
-        sceneSession->SetSystemBarProperty(iter.first, iter.second);
+        SetSystemBarProperty(iter.first, iter.second);
     }
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateStatusProps(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property, sceneSession);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateNavigationProps(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property, sceneSession);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateNavigationIndicatorProps(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property, sceneSession);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    HandleSpecificSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateFlags(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    SetWindowFlags(sceneSession, property);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    SetWindowFlags(property);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateMode(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetWindowMode(property->GetWindowMode());
     }
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateAnimationFlag(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetAnimationFlag(property->GetAnimationFlag());
     }
@@ -3191,9 +3188,9 @@ WMError SceneSession::HandleActionUpdateAnimationFlag(const sptr<WindowSessionPr
 }
 
 WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         std::vector<Rect> touchHotAreas;
         property->GetTouchHotAreas(touchHotAreas);
@@ -3203,9 +3200,9 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
 }
 
 WMError SceneSession::HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDecorEnable(property->IsDecorEnable());
     }
@@ -3213,9 +3210,9 @@ WMError SceneSession::HandleActionUpdateDecorEnable(const sptr<WindowSessionProp
 }
 
 WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetWindowLimits(property->GetWindowLimits());
         WindowLimits windowLimits = sessionProperty->GetWindowLimits();
@@ -3227,9 +3224,9 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 }
 
 WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDragEnabled(property->GetDragEnabled());
     }
@@ -3237,9 +3234,9 @@ WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProp
 }
 
 WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
     }
@@ -3247,20 +3244,20 @@ WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionPro
 }
 
 WMError SceneSession::HandleActionUpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto currentProperty = sceneSession->GetSessionProperty();
+    auto currentProperty = GetSessionProperty();
     if (currentProperty != nullptr) {
-        sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+        NotifySessionChangeByActionNotifyManager(property, action);
         currentProperty->SetHideNonSystemFloatingWindows(property->GetHideNonSystemFloatingWindows());
     }
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateTextfieldAvoidInfo(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetTextFieldPositionY(property->GetTextFieldPositionY());
         sessionProperty->SetTextFieldHeight(property->GetTextFieldHeight());
@@ -3269,45 +3266,44 @@ WMError SceneSession::HandleActionUpdateTextfieldAvoidInfo(const sptr<WindowSess
 }
 
 WMError SceneSession::HandleActionUpdateWindowMask(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetWindowMask(property->GetWindowMask());
         sessionProperty->SetIsShaped(property->GetIsShaped());
-        sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+        NotifySessionChangeByActionNotifyManager(property, action);
     }
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    sceneSession->SetTopmost(property->IsTopmost());
+    SetTopmost(property->IsTopmost());
     return WMError::WM_OK;
 }
 
 void SceneSession::HandleSpecificSystemBarProperty(WindowType type,
-    const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession)
+    const sptr<WindowSessionProperty>& property)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
     for (auto iter : systemBarProperties) {
         if (iter.first == type) {
-            sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            SetSystemBarProperty(iter.first, iter.second);
             TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperty: %{public}d, enable: %{public}d",
                 static_cast<int32_t>(iter.first), iter.second.enable_);
         }
     }
 }
 
-void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
-    const sptr<WindowSessionProperty>& property)
+void SceneSession::SetWindowFlags(const sptr<WindowSessionProperty>& property)
 {
     if (sceneSession == nullptr) {
         TLOGD(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "get session property failed");
         return;
@@ -3322,13 +3318,13 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
     }
     sessionProperty->SetWindowFlags(flags);
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
-        sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+        OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
     TLOGI(WmsLogTag::DEFAULT, "flags: %{public}u", flags);
 }
 
-void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
-    const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
 {
     TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
         GetPersistentId(), action);
@@ -3336,7 +3332,7 @@ void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSess
         TLOGW(WmsLogTag::DEFAULT, "func is null");
         return;
     }
-    sessionChangeByActionNotifyManagerFunc_(sceneSession, property, action);
+    sessionChangeByActionNotifyManagerFunc_(this, property, action);
 }
 
 WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
@@ -4008,9 +4004,9 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 }
 
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+    WSPropertyChangeAction action)
 {
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
     }
