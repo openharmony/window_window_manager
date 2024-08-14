@@ -478,18 +478,18 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
     sptr<SceneSession> sceneSession1 = nullptr;
     sptr<WindowSessionProperty> property = nullptr;
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     
     sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession1);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 
     property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 }
 
@@ -515,31 +515,31 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
     
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
     
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
     
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_MODE);
     
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
     
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property,
+    sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
