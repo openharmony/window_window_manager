@@ -3397,6 +3397,10 @@ void SceneSession::SetMovable(bool movable)
 {
     auto task = [weakThis = wptr(this), movable]() {
         auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
         if (session->moveDragController_) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMovable: %{public}d", session->GetPersistentId(), movable);
             session->moveDragController_->SetMovable(movable);
