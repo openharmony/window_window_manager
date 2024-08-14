@@ -76,7 +76,7 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
         displayModeChangeRunning_ = status;
         endTimePoint_ = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTimePoint_ - startTimePoint_).count();
-        TLOGD(WmsLogTag::DMS, "SetFoldStatus spends: %{public}" PRId64 "ms", elapsed);
+        TLOGD(WmsLogTag::DMS, "SetFoldStatus spends: %{public}" PRId64 "ms", static_cast<int64_t>(elapsed));
         if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
             ChangeScreenDisplayMode(lastCachedisplayMode_.load());
         }
