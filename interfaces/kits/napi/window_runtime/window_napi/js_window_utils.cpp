@@ -26,8 +26,8 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
-    constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
 napi_value WindowTypeInit(napi_env env)

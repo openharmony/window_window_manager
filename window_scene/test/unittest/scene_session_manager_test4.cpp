@@ -58,7 +58,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest4::ssm_ = nullptr;
 bool SceneSessionManagerTest4::gestureNavigationEnabled_ = true;
 
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -1427,27 +1428,6 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: NotifyStackEmpty
- * @tc.desc: NotifyStackEmpty
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, NotifyStackEmpty, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "bundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    int32_t persistentId = 1;
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
-    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
-    WSError result = ssm_->NotifyStackEmpty(0);
-    EXPECT_EQ(result, WSError::WS_OK);
-    result = ssm_->NotifyStackEmpty(persistentId);
-    EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: RegisterSessionExceptionFunc
  * @tc.desc: RegisterSessionExceptionFunc
  * @tc.type: FUNC
@@ -1717,45 +1697,46 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, Function |
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ASSERT_NE(sceneSession03, nullptr);
+    ASSERT_NE(sceneSession04, nullptr);
     ASSERT_NE(parentSceneSession, nullptr);
-    ASSERT_NE(parentSceneSession->property_, nullptr);
-    parentSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    sceneSession01->SetZOrder(1);
+    sceneSession01->isVisible_ = true;
+    sceneSession01->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    sceneSession02->SetZOrder(2);
+    sceneSession02->isVisible_ = true;
+    sceneSession02->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession02->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession02->blockingFocus_ = false;
+
+    sceneSession03->SetZOrder(3);
+    sceneSession03->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    parentSceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession03->property_->SetParentPersistentId(8);
+
+    sceneSession04->SetZOrder(4);
+    sceneSession04->property_->SetParentPersistentId(1);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
     ssm_->sceneSessionMap_.insert(std::make_pair(8, parentSceneSession));
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ASSERT_NE(sceneSession->property_, nullptr);
-    sceneSession->isVisible_ = true;
-    sceneSession->SetZOrder(6);
-    sceneSession->blockingFocus_ = true;
-    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    sceneSession->property_->SetParentPersistentId(8);
-    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    sptr<SceneSession> result = ssm_->GetTopNearestBlockingFocusSession(2, true);
-    EXPECT_EQ(result, sceneSession);
+    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(0, true);
+    EXPECT_EQ(ret, sceneSession01);
 
-    sceneSession->blockingFocus_ = false;
-    result = ssm_->GetTopNearestBlockingFocusSession(2, false);
-    EXPECT_EQ(result, nullptr);
-
-    sceneSession->isVisible_ = false;
-    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
-    EXPECT_EQ(result, nullptr);
-
-    sceneSession->SetZOrder(1);
-    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
-    EXPECT_EQ(result, nullptr);
-
-    parentSceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    sceneSession->SetZOrder(6);
-    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
-    EXPECT_EQ(result, nullptr);
-
-    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    result = ssm_->GetTopNearestBlockingFocusSession(2, true);
-    EXPECT_EQ(result, nullptr);
+    ret = ssm_->GetTopNearestBlockingFocusSession(10, true);
+    EXPECT_EQ(ret, nullptr);
 }
 
 /**

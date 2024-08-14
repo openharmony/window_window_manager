@@ -476,6 +476,23 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
+void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = std::move(callback);
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -665,7 +682,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
             return;
         }
-        static bool isPhone = systemConfig_.uiType_ == "phone";
+        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
         if (IsKeyboardNeedLeftOffset(isPhone, sessionProperty)) {
             keyboardSession->winRect_.posX_ += panelSession->winRect_.posX_;
         } else {
@@ -1122,7 +1139,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
+        (systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1170,7 +1187,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
+         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1280,7 +1298,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
         }
 
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            uiType == "phone" || uiType == "pad") {
+            uiType == UI_TYPE_PHONE || uiType == UI_TYPE_PAD) {
             return true;
         }
     }
@@ -1688,7 +1706,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
             || isDragEnabledSystemWindow) {
-            auto isPC = systemConfig_.uiType_ == "pc";
+            auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
             if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
@@ -4223,7 +4241,7 @@ bool SceneSession::IsImmersiveType() const
 
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     auto property = GetSessionProperty();
     bool isPcAppInPad = false;
     if (property != nullptr) {

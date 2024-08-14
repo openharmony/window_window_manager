@@ -79,8 +79,8 @@ using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
-using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable)>;
-using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
+using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -612,7 +612,6 @@ private:
     bool openDebugTrace {false};
     int32_t currentUserId_;
     std::atomic<bool> enableInputEvent_ = true;
-    bool gestureNavigationEnabled_ {true};
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
@@ -704,7 +703,6 @@ private:
     bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
-    void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);

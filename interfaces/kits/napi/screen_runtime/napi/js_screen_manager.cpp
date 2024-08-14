@@ -41,7 +41,7 @@ constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
 }
 
 class JsScreenManager {

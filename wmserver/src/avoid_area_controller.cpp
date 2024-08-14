@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaController"};
 }
 
 void AvoidAreaController::UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool isRegisterListener)

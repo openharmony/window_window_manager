@@ -25,9 +25,9 @@ using namespace FRAME_TRACE;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
-    const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task_";
-    constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
+const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task_";
+constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 }
 
 VsyncStation::VsyncStation(NodeId nodeId) : nodeId_(nodeId)

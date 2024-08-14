@@ -27,8 +27,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr int WAIT_FUTURE_RESULT = 20000; // 20s
-    constexpr int WAIT_SLEEP_TIME = 1; // 1s
+constexpr int WAIT_FUTURE_RESULT = 20000; // 20s
+constexpr int WAIT_SLEEP_TIME = 1; // 1s
 }
 
 class TestGestureNavigationEnabledChangedListener : public IGestureNavigationEnabledChangedListener {
