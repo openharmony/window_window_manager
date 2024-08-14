@@ -109,7 +109,7 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
-    void SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback);
+    void SetUpdateScreenPivotCallback(std::function<void(float, float)>&& updateScreenPivotCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
@@ -120,7 +120,7 @@ public:
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
 
-    void SetScreenScale(const float scaleX, const float scaleY, const float pivotX, const float pivotY);
+    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY);
 
     std::string GetName();
     ScreenId GetScreenId();
