@@ -56,6 +56,7 @@ public:
         Avoid fold to expand process queues public interface
     */
     bool GetModeChangeRunningStatus();
+    virtual void SetdisplayModeChangeStatus(bool status){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     
@@ -69,6 +70,7 @@ protected:
     std::chrono::steady_clock::time_point startTimePoint_ = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point endTimePoint_ = std::chrono::steady_clock::now();
     void SetLastCacheDisplayMode(FoldDisplayMode mode);
+    int64_t getFoldtoExpandElapsedMs();
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
