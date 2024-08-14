@@ -73,7 +73,6 @@ public:
 class WindowImmersiveTest1 : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     void SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& props);
@@ -188,7 +187,7 @@ void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId
     WLOGI("TestSystemBarChangedListener tints size: %{public}zu", tints.size());
     for (auto tint : tints) {
         auto type = tint.type_;
-        for (uint32_t i = 0; i < tints_.size(); i) {
+        for (uint32_t i = 0; i < tints_.size(); i++) {
             if (tints_[i].type_ == type) {
                 tints_[i] = tint;
             }
@@ -306,7 +305,7 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
     return ret;
 }
 
-void GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties, 
+void GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
                         std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, WindowType type)
 {
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
@@ -412,7 +411,7 @@ HWTEST_F(WindowImmersiveTest1, setFullScreen, Function | MediumTest | Level3)
 
 /**
  * @tc.name: SetLayoutFullScreen
- * @tc.desc: SetLayoutFullScreen 
+ * @tc.desc: SetLayoutFullScreen
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImmersiveTest1, setLayoutFullScreen, Function | MediumTest | Level3)
@@ -523,11 +522,11 @@ HWTEST_F(WindowImmersiveTest1, setImmersiveModeEnabledState, Function | MediumTe
 }
 
 /**
- * @tc.name: SetWindowSystemBarEnable
- * @tc.desc: SetWindowSystemBarEnable WINDOW_TYPE_APP_MAIN_WINDOW
+ * @tc.name: SetWindowSystemBarEnable_1
+ * @tc.desc: SetWindowSystemBarEnable_1 WINDOW_TYPE_APP_MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable_1, Function | MediumTest | Level3)
 {
     const vector<WindowMode>windowMode{WindowMode::WINDOW_MODE_FULLSCREEN, WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
          WindowMode::WINDOW_MODE_SPLIT_SECONDARY, WindowMode::WINDOW_MODE_FLOATING};
@@ -563,6 +562,42 @@ HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable, Function | MediumTest |
                 auto nav = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
                 EXPECT_EQ(true, nav.enable_);
             }
+        }
+    }
+}
+
+/**
+ * @tc.name: SetWindowSystemBarEnable_2
+ * @tc.desc: SetWindowSystemBarEnable_2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveTest1, setWindowSystemBarEnable_2, Function | MediumTest | Level3)
+{
+    const vector<WindowMode>windowMode{WindowMode::WINDOW_MODE_FULLSCREEN, WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
+         WindowMode::WINDOW_MODE_SPLIT_SECONDARY, WindowMode::WINDOW_MODE_FLOATING};
+    const vector<WindowType>windowType{WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR};
+    for (auto type : windowType) {
+        for (auto mode : windowMode) {
+            sptr<WindowOption> option = new (std::nothrow) WindowOption();
+            ASSERT_NE(nullptr, option);
+            option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+            option->SetWindowMode(mode);
+            sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+            EXPECT_FALSE(window == nullptr);
+            SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+            sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+            ASSERT_NE(nullptr, session);
+            window->property_->SetPersistentId(1);
+            window->hostSession_ = session;
+            window->state_ = WindowState::STATE_SHOWN;
+            activeWindows_.push_back(window);
+            std::map<WindowType, SystemBarProperty> systemBarProperties;
+            std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+            GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, type);
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
+            WMError ret = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
+            EXPECT_EQ(WMError::WM_OK, ret);
+            
             GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, WindowType::APP_WINDOW_BASE);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
             ret = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
