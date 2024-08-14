@@ -718,7 +718,8 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo02", "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
+    SessionInfo sessionInfo = { "bundleName_moveWindowTo02", 
+        "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
@@ -774,7 +775,8 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     window->property_->SetPersistentId(10003);
 
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo03", "moduleName_moveWindowTo03", "abilityName_moveWindowTo03" };
+    SessionInfo sessionInfo = { "bundleName_moveWindowTo03", 
+        "moduleName_moveWindowTo03", "abilityName_moveWindowTo03" };
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
@@ -837,7 +839,8 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     window->property_->SetPersistentId(10004);
 
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo04", "moduleName_moveWindowTo04", "abilityName_moveWindowTo04" };
+    SessionInfo sessionInfo = { "bundleName_moveWindowTo04", 
+        "moduleName_moveWindowTo04", "abilityName_moveWindowTo04" };
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
