@@ -243,8 +243,8 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption)
+    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+        ExtendOption secondScreenOption)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }

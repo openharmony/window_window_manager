@@ -1192,7 +1192,7 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MultiScreenModeSwitch: remote is null");
+        WLOGFW("remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1200,31 +1200,31 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MultiScreenModeSwitch: WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUint64(static_cast<uint64_t>(secondaryScreenId)) &&
         data.WriteUint32(static_cast<uint32_t>(secondaryScreenMode));
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MultiScreenModeSwitch: data write failed");
+        WLOGFE("data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MultiScreenModeSwitch: SendRequest failed");
+        WLOGFW("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MultiScreenRelativePosition(ExtendOption mainScreenOption,
-    ExtendOption secondaryScreenOption)
+DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+    ExtendOption secondScreenOption)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MultiScreenRelativePosition: remote is null");
+        WLOGFW("remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1232,20 +1232,20 @@ DMError ScreenSessionManagerProxy::MultiScreenRelativePosition(ExtendOption main
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MultiScreenRelativePosition: WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    bool res = data.WriteUint64(mainScreenOption.screenId_) &&
-        data.WriteUint32(mainScreenOption.startX_) && data.WriteUint32(mainScreenOption.startY_) &&
-        data.WriteUint64(secondaryScreenOption.screenId_) &&
-        data.WriteUint32(secondaryScreenOption.startX_) && data.WriteUint32(secondaryScreenOption.startY_);
+    bool res = data.WriteUint64(firstScreenOption.screenId_) &&
+        data.WriteUint32(firstScreenOption.startX_) && data.WriteUint32(firstScreenOption.startY_) &&
+        data.WriteUint64(secondScreenOption.screenId_) &&
+        data.WriteUint32(secondScreenOption.startX_) && data.WriteUint32(secondScreenOption.startY_);
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MultiScreenRelativePosition: data write failed");
+        WLOGFE("data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_MULTI_SCREEN_POSITION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MultiScreenRelativePosition: SendRequest failed");
+        WLOGFW("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());

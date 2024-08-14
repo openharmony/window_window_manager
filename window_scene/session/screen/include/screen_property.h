@@ -109,6 +109,14 @@ public:
 
     void SetOffset(int32_t offsetX, int32_t offsetY);
 
+    void SetStartX(uint32_t startX);
+    uint32_t GetStartX() const;
+
+    void SetStartY(uint32_t startY);
+    uint32_t GetStartY() const;
+
+    void SetStartPosition(uint32_t startX, uint32_t startY);
+
     void SetScreenType(ScreenType type);
     ScreenType GetScreenType() const;
 
@@ -162,6 +170,9 @@ private:
 
     int32_t offsetX_ { 0 };
     int32_t offsetY_ { 0 };
+
+    uint32_t startX_ { 0 };
+    uint32_t startY_ { 0 };
 
     ScreenType type_ { ScreenType::REAL };
 
