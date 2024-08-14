@@ -123,7 +123,8 @@ int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, Mess
     WLOGFD("run HandleSetSessionLabel!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+        WLOGFE("token is null");
         return ERR_NONE;
     }
     std::string label = data.ReadString();
@@ -194,7 +195,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "listener is nullptr!");
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
         return ERR_NONE;
     }
     WSError errCode = RegisterSessionListener(listener);
@@ -430,7 +431,7 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
     WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     if (windowManagerAgentObject == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        reply.WriteInt32(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
         return ERR_NONE;
     }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
@@ -446,7 +447,7 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
     WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     if (windowManagerAgentObject == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        reply.WriteInt32(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
         return ERR_NONE;
     }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
