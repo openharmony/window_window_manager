@@ -148,7 +148,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
-    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) {};
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;

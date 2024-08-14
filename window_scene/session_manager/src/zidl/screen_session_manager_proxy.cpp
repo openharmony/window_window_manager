@@ -2795,7 +2795,7 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2831,7 +2831,7 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
