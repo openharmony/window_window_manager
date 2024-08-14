@@ -1851,7 +1851,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float scaleParam) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
     if (scenePersistence_ == nullptr) {
@@ -1876,7 +1876,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
-    auto pixelMap = callback->GetResult(FFRT_SNAPSHOT_TIMEOUT_MS);
+    auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
@@ -1894,13 +1894,13 @@ void Session::SaveSnapshot(bool useFfrt)
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->snapshot_ = session->Snapshot();
+        session->snapshot_ = session->Snapshot(runInFfrt);
         if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
         }
@@ -1914,11 +1914,11 @@ void Session::SaveSnapshot(bool useFfrt)
         };
         session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
-    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
-    if (!useFfrt || snapshotFfrtHelper == nullptr) {
+    if (!useFfrt) {
         task();
         return;
     }
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
