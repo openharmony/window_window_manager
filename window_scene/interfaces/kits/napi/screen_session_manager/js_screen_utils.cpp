@@ -142,6 +142,24 @@ napi_value JsScreenUtils::CreateJsFoldStatus(napi_env env)
     return objValue;
 }
 
+napi_value JsScreenUtils::CreateJsScreenPropertyChangeType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeType::UNSPECIFIED)));
+    napi_set_named_property(env, objValue, "ROTATION_BEGIN", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_BEGIN)));
+    napi_set_named_property(env, objValue, "ROTATION_END", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_END)));
+    return objValue;
+}
+
 bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 {
     napi_value jsLeft = nullptr, jsTop = nullptr, jsWidth = nullptr, jsHeight = nullptr, jsRadius = nullptr;

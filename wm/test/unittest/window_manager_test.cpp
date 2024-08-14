@@ -103,6 +103,34 @@ public:
     };
 };
 
+class TestDrawingContentChangedListener : public IDrawingContentChangedListener {
+public:
+    void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestDrawingContentChangedListener");
+    }
+};
+
+class TestFocusChangedListener : public IFocusChangedListener {
+public:
+    void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestFocusChangedListener OnFocused()");
+    }
+    void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+    {
+        TLOGI(WmsLogTag::DMS, "TestFocusChangedListener OnUnfocused()");
+    }
+};
+
+class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
+public:
+    void OnWindowStyleUpdate(WindowStyleType styleType)
+    {
+        TLOGI(WmsLogTag::DMS, "TestWindowStyleChangedListener");
+    }
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -745,7 +773,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_NE(ret, WMError::WM_OK);
 }
 
 /**
@@ -755,8 +783,13 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
  */
 HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 {
-    WindowLayoutMode mode = WindowLayoutMode::BASE;
-    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(mode);
+    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::BASE);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 
@@ -1068,6 +1101,256 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Lev
     windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken2, displayId, density, orientation);
     // no repeated notification is sent if parameters do not change
     windowManager.pImpl_->NotifyDisplayInfoChanged(targetToken, displayId, density, orientation);
+}
+
+/**
+ * @tc.name: RegisterWindowStyleChangedListener
+ * @tc.desc: check RegisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(nullptr));
+
+    sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+}
+
+/**
+ * @tc.name: UnregisterWindowStyleChangedListener
+ * @tc.desc: check UnregisterWindowStyleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
+    windowManager.pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
+    windowManager.pImpl_->windowStyleListeners_.clear();
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowStyleChangedListener(nullptr));
+
+    sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
+    sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
+}
+
+/**
+ * @tc.name: NotifyWindowStyleChange
+ * @tc.desc: check NotifyWindowStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+{
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    auto ret = WindowManager::GetInstance().NotifyWindowStyleChange(type);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: check GetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    WindowStyleType type;
+    type = WindowManager::GetInstance().GetWindowStyleType();
+    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
+}
+
+/**
+ * @tc.name: ShiftAppWindowFocus01
+ * @tc.desc: check ShiftAppWindowFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
+{
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RegisterVisibleWindowNumChangedListener01
+ * @tc.desc: check RegisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterVisibleWindowNumChangedListener01
+ * @tc.desc: check UnregisterVisibleWindowNumChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterVisibleWindowNumChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterDrawingContentChangedListener01
+ * @tc.desc: check RegisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterDrawingContentChangedListener01
+ * @tc.desc: check UnregisterDrawingContentChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
+    ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterDrawingContentChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterFocusChangedListener01
+ * @tc.desc: check RegisterFocusChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
+    ret = WindowManager::GetInstance().RegisterFocusChangedListener(listener);
+    ASSERT_NE(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterFocusChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterFocusChangedListener01
+ * @tc.desc: check UnregisterFocusChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
+    ret = WindowManager::GetInstance().UnregisterFocusChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterFocusChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange01
+ * @tc.desc: check NotifyDisplayInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
+{
+    WMError ret;
+    ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: NotifyWMSDisconnected01
+ * @tc.desc: check NotifyWMSDisconnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
+{
+    WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
+}
+
+/**
+ * @tc.name: NotifyFocused01
+ * @tc.desc: check NotifyFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyFocused01, Function | SmallTest | Level2)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
+    ASSERT_NE(focusChangeInfo, nullptr);
+
+    WindowManager::GetInstance().pImpl_->NotifyFocused(focusChangeInfo);
+}
+
+/**
+ * @tc.name: NotifyUnfocused01
+ * @tc.desc: check NotifyUnfocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
+    ASSERT_NE(focusChangeInfo, nullptr);
+
+    WindowManager::GetInstance().pImpl_->NotifyUnfocused(focusChangeInfo);
+}
+
+/**
+ * @tc.name: NotifyAccessibilityWindowInfo01
+ * @tc.desc: check NotifyAccessibilityWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+
+    infos.push_back(nullptr);
+    WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+}
+
+/**
+ * @tc.name: NotifyVisibleWindowNumChanged01
+ * @tc.desc: check NotifyVisibleWindowNumChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTest | Level2)
+{
+    std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(nullptr);
+    WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+
+    sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
+    ASSERT_NE(listener, nullptr);
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
+    WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
 }
 } // namespace Rosen

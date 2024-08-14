@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_TEST_COMMON_MOCK_IREMOTE_OBJECT_MOCKER
-#define OHOS_ROSEN_TEST_COMMON_MOCK_IREMOTE_OBJECT_MOCKER
+#ifndef OHOS_ROSEN_TEST_COMMON_MOCK_UICONTENT_MOCKER
+#define OHOS_ROSEN_TEST_COMMON_MOCK_UICONTENT_MOCKER
 
 #include "ui_content.h"
 #include "native_engine/native_value.h"
@@ -88,10 +88,10 @@ public:
         int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
         FindFocusedElementInfo, void(int64_t elementId,
-        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo &output));
+        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD4(
         FocusMoveSearch, void(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo &output));
+        Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect& drawableRect));
     MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
     MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
@@ -106,7 +106,7 @@ public:
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
     MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent));
-    MOCK_METHOD1(SetForceSplitEnable, void(bool isForceSplit));
+    MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
 };
 } // namespace Ace
 } // namespace OHOS

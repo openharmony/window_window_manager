@@ -217,7 +217,8 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
 
     dragWindow->MoveTo(600, 600);
     sleep(WAIT_CALLBACK_US);
-
+    ASSERT_EQ(100, secondWindowDragListener_->point_.x);
+    ASSERT_EQ(100, secondWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_IN, secondWindowDragListener_->event_);
     ASSERT_EQ(DragEvent::DRAG_EVENT_OUT, firstWindowDragListener_->event_);
 

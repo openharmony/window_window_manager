@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
 }
 
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -31,12 +31,16 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     WLOGFD("code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     WindowManagerAgentMsg msgId = static_cast<WindowManagerAgentMsg>(code);
     switch (msgId) {
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
+            if (info == nullptr) {
+                WLOGFE("FocusChangeInfo is null");
+                return ERR_INVALID_DATA;
+            }
             bool focused = data.ReadBool();
             UpdateFocusChangeInfo(info, focused);
             break;
@@ -75,7 +79,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             std::vector<sptr<AccessibilityWindowInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(data, infos)) {
                 WLOGFE("read accessibility window infos failed");
-                return -1;
+                return ERR_INVALID_DATA;
             }
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
             NotifyAccessibilityWindowInfo(infos, type);
@@ -140,11 +144,16 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateCameraWindowStatus(accessTokenId, isShowing);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE: {
+            WindowStyleType type = static_cast<WindowStyleType>(data.ReadUint8());
+            NotifyWindowStyleChange(type);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -17,14 +17,16 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
 } // namespace
 bool SurfaceReaderHandlerImpl::OnImageAvailable(sptr<Media::PixelMap> pixelMap)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    flag_ = true;
-    pixelMap_ = pixelMap;
-    WLOGI("Get an Image!");
+    if (!flag_) {
+        flag_ = true;
+        pixelMap_ = pixelMap;
+        WLOGI("Get an Image!");
+    }
     return true;
 }
 
@@ -34,10 +36,17 @@ bool SurfaceReaderHandlerImpl::IsImageOk()
     return flag_;
 }
 
+void SurfaceReaderHandlerImpl::ResetFlag()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (flag_) {
+        flag_ = false;
+    }
+}
+
 sptr<Media::PixelMap> SurfaceReaderHandlerImpl::GetPixelMap()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    flag_ = false;
     return pixelMap_;
 }
 } // namespace OHOS::Rosen

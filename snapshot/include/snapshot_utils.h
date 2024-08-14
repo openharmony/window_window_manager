@@ -49,23 +49,23 @@ public:
     SnapShotUtils() = default;
     ~SnapShotUtils() = default;
 
-    static void PrintUsage(const std::string &cmdLine);
-    static bool CheckFileNameValid(const std::string &fileName, std::string fileType = "jpeg");
+    static void PrintUsage(const std::string& cmdLine);
+    static bool CheckFileNameValid(const std::string& fileName, std::string fileType = "jpeg");
     static std::string GenerateFileName(std::string fileType, int offset = 0);
     static bool CheckWidthAndHeightValid(int32_t w, int32_t h);
-    static bool RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t *rgb888Buf, int32_t size);
-    static bool RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t *rgb888Buf, int32_t size);
+    static bool RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t* rgb888Buf, int32_t size);
+    static bool RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t* rgb888Buf, int32_t size);
     static bool WriteRgb888ToJpeg(FILE* file, uint32_t width, uint32_t height, const uint8_t* data);
-    static bool WriteToJpeg(const std::string &fileName, const WriteToJpegParam &param);
-    static bool WriteToJpeg(int fd, const WriteToJpegParam &param);
-    static bool WriteToJpegWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
-    static bool WriteToJpegWithPixelMap(int fd, Media::PixelMap &pixelMap);
+    static bool WriteToJpeg(const std::string& fileName, const WriteToJpegParam& param);
+    static bool WriteToJpeg(int fd, const WriteToJpegParam& param);
+    static bool WriteToJpegWithPixelMap(const std::string& fileName, Media::PixelMap& pixelMap);
+    static bool WriteToJpegWithPixelMap(int fd, Media::PixelMap& pixelMap);
     static bool ProcessArgs(int argc, char * const argv[], CmdArguments& cmdArgments);
     static bool CheckWHValid(int32_t param);
-    static bool CheckParamValid(const WriteToJpegParam &param);
-    static bool SaveSnapShot(const std::string &filename, Media::PixelMap &pixelMap, std::string fileType = "jpeg");
+    static bool CheckParamValid(const WriteToJpegParam& param);
+    static bool SaveSnapShot(const std::string& filename, Media::PixelMap& pixelMap, std::string fileType = "jpeg");
 private:
-    static bool ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplayIdSet);
+    static bool ProcessDisplayId(Rosen::DisplayId& displayId, bool isDisplayIdSet);
 };
 }
 

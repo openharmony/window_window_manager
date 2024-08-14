@@ -26,7 +26,7 @@
 #include "window_property.h"
 
 namespace OHOS::AbilityRuntime {
-    class Context;
+class Context;
 }
 
 namespace OHOS {
@@ -72,6 +72,7 @@ public:
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     virtual uint32_t GetWindowFlags() const override;
     uint32_t GetRequestModeSupportInfo() const override;
     bool IsMainHandlerAvailable() const override;
@@ -119,6 +120,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    virtual WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     // window effect

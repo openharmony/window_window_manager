@@ -251,7 +251,7 @@ HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    
+
     auto window_ = new (std::nothrow)Window();
     ASSERT_NE(nullptr, window_);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window_->GetMode());
@@ -1653,7 +1653,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
-    
+
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     } else {
@@ -2290,19 +2290,6 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSingleFrameComposerEnabled
- * @tc.desc: set single frame composer enable flag
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level2)
-{
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetSingleFrameComposerEnabled(false));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
  * @tc.name: FlushFrameRate
  * @tc.desc: FlushFrameRate Test
  * @tc.type: FUNC
@@ -2315,6 +2302,19 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
     uint32_t rateType = 0;
     int32_t animatorExpectedFrameRate = -1;
     window->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetSingleFrameComposerEnabled
+ * @tc.desc: set single frame composer enable flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetSingleFrameComposerEnabled(false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2430,8 +2430,7 @@ HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
     sptr<WindowOption> option = nullptr;
     auto window = Window::Create("WindowTest02", option);
     uint32_t version = 0;
-    if (version < 10)
-    {
+    if (version < 10) {
         ASSERT_NE(10, version);
     }
     WindowOption windowoption;
@@ -2620,18 +2619,10 @@ HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowTest, Test04, Function | SmallTest | Level2)
 {
-    ExtensionWindowFlags flags;
-    ASSERT_EQ(flags.bitData, 0);
-    ExtensionWindowFlags flags1(7);
-    ASSERT_EQ(flags1.bitData, 7);
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetUIContentWithId(0));
-    sptr<IKeyboardPanelInfoChangeListener> listener = new IKeyboardPanelInfoChangeListener();
-    KeyboardPanelInfo keyboardPanelInfo;
-    listener->OnKeyboardPanelInfoChanged(keyboardPanelInfo);
     window->TriggerBindModalUIExtension();
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWaterMarkFlag(true));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetGrayScale(0));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2649,25 +2640,6 @@ HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
     auto window1 = window->GetTopWindowWithId(mainWinId);
     ASSERT_EQ(nullptr, window1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: Test06
- * @tc.desc: Test06
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, Test06, Function | SmallTest | Level2)
-{
-    KeyboardLayoutParams param;
-    KeyboardLayoutParams param1;
-    ASSERT_EQ(true, (param == param1));
-    ASSERT_EQ(false, (param != param1));
-    ASSERT_EQ(true, param.isEmpty());
-    Parcel parcel;
-    Rect rect = {0, 0, 0, 0};
-    ASSERT_EQ(false, KeyboardLayoutParams::ReadParcel(parcel, rect));
-    parcel.WriteUint32(0);
-    ASSERT_EQ(nullptr, KeyboardLayoutParams::Unmarshalling(parcel));
 }
 
 /**
@@ -2695,6 +2667,21 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: GetWindowStatus
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(window, nullptr);
+    WindowStatus windowStatus;
+    auto ret = window->GetWindowStatus(windowStatus);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen

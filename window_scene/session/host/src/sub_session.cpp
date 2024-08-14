@@ -16,6 +16,7 @@
 #include "session/host/include/sub_session.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 
+#include "common/include/session_permission.h"
 #include "key_event.h"
 #include "window_helper.h"
 #include "parameters.h"
@@ -47,6 +48,9 @@ SubSession::~SubSession()
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -71,6 +75,9 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -151,10 +158,14 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    auto isModal = IsModal();
     auto parentSession = GetParentSession();
-    if (parentSession && parentSession->CheckDialogOnForeground()) {
+    if (!isModal && parentSession && parentSession->CheckDialogOnForeground()) {
         WLOGFI("Has dialog foreground, id: %{public}d, type: %{public}d", id, GetWindowType());
         return WSError::WS_OK;
+    }
+    if (isModal) {
+        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
@@ -202,7 +213,7 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = systemConfig_.uiType_ == "pc";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     if (isPC && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
@@ -240,5 +251,13 @@ bool SubSession::IsModal() const
         isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     }
     return isModal;
+}
+
+bool SubSession::IsVisibleForeground() const
+{
+    if (parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
 }
 } // namespace OHOS::Rosen

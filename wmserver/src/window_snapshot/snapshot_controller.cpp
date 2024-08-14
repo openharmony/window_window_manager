@@ -25,10 +25,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotController"};
 }
 
-int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapshot& snapshot)
+int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject>& token, Snapshot& snapshot)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:GetSnapshot");
     if (token == nullptr) {

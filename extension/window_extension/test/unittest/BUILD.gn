@@ -28,7 +28,12 @@ group("unittest") {
 ohos_unittest("extension_window_extension_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_extension_proxy_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "window_extension_proxy_test.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   deps = [ ":window_extension_unittest_common" ]
 }
@@ -37,6 +42,8 @@ ohos_unittest("extension_window_extension_stub_impl_test") {
   module_out_path = module_out_path
 
   sources = [ "window_extension_stub_impl_test.cpp" ]
+
+  include_dirs = [ "${window_base_path}/test/common/mock" ]
 
   deps = [ ":window_extension_unittest_common" ]
 }
@@ -72,15 +79,36 @@ ohos_unittest("extension_window_extension_context_test") {
 ## Build window_extension_unittest_common.a {{{
 config("window_extension_unittest_common_public_config") {
   include_dirs = [
-    "../../../../interfaces/innerkits/wm",
-    "../../../../window_scene/session/host/include",
-    "../../../../wm/include",
     "../../include",
     "../../include/zidl",
     "../../../extension_connection/include",
     "../../../extension_connection/include/zidl",
     "../../../../interfaces/innerkits/extension",
+
+    "${window_base_path}/test/common/mock",
+    "${window_base_path}/dm/include",
+    "${window_base_path}/dmserver/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
+    "${window_base_path}/wm/test/mock",
+    "${window_base_path}/wmserver/include",
+    "${window_base_path}/wmserver/include/window_snapshot",
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/utils/include",
+    "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/session/host/include/zidl",
     "//third_party/googletest/googlemock/include",
+
+    # for abilityContext
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "//third_party/node/deps/icu-small/source/common",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
+
+    # abilityContext end
+    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -95,10 +123,22 @@ ohos_static_library("window_extension_unittest_common") {
   ]
 
   public_deps = [
+    # need delete it for abilitycontext
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "${arkui_path}/ace_engine/interfaces/inner_api/ace:ace_uicontent",
+    "${arkui_path}/napi:ace_napi",
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/dmserver:libdms",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/wm:libwm",
+    "${window_base_path}/wm:libwm_lite",
+    "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
@@ -113,11 +153,17 @@ ohos_static_library("window_extension_unittest_common") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
   ]
+
+  public_external_deps = [ "ability_base:want" ]
   subsystem_name = "window"
   part_name = "window_manager"
 }

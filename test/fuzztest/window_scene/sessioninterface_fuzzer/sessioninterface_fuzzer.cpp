@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionInterfaceFuzzTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionInterfaceFuzzTest"};
 }
 
 static std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext =
@@ -110,9 +110,9 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
-        sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         sendData, reply, option);
@@ -194,9 +194,6 @@ void ProxyInterfaceFuzzTestPart1(const uint8_t* data, size_t size)
     proxy->Foreground(property);
     proxy->Background();
     proxy->RaiseToAppTop();
-
-    bool active = source.GetObject<bool>();
-    proxy->UpdateActiveStatus(active);
 
     SessionEvent event = source.GetObject<SessionEvent>();
     proxy->OnSessionEvent(event);

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
-#define OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
+#ifndef OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H
+#define OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H
 
 #include <mutex>
 #include <refbase.h>
@@ -47,4 +47,4 @@ private:
     void NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus, float postureAngle);
 };
 } // namespace OHOS::Rosen
-#endif //OHOS_ROSEN_SENSOR_FOLD_STATR_MANAGER_H
+#endif //OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H

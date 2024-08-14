@@ -126,7 +126,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
     {
     }
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override
+    WMError CheckWindowId(int32_t windowId, int32_t& pid) override
     {
         return WMError::WM_OK;
     }
@@ -160,6 +160,14 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
     {
         return WSError::WS_OK;
+    }
+    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override
+    {
+        return WMError::WM_OK;
     }
     sptr<IRemoteObject> AsObject() override
     {
@@ -211,7 +219,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     data.WriteInterfaceToken(u"OpenHarmeny");
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ERR_INVALID_STATE, res);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
@@ -233,7 +241,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionIcon, Function | Small
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -359,7 +367,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionNew, Function | 
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleTerminateSessionNew(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -636,6 +644,35 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | Sma
     EXPECT_EQ(ERR_NONE, res);
 }
 
+/**
+ * @tc.name: HandleTerminateSessionByPersistentId
+ * @tc.desc: test function : HandleTerminateSessionByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetWindowStyleType
+ * @tc.desc: test function : HandleGetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowStyleType, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
 }
 }
 }

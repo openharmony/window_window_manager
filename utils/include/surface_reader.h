@@ -37,7 +37,7 @@ public:
 private:
     class BufferListener : public IBufferConsumerListener {
     public:
-        explicit BufferListener(SurfaceReader &surfaceReader): surfaceReader_(surfaceReader)
+        explicit BufferListener(SurfaceReader& surfaceReader): surfaceReader_(surfaceReader)
         {
         }
         ~BufferListener() noexcept override = default;
@@ -52,7 +52,7 @@ private:
     friend class BufferListener;
 
     void OnVsync();
-    bool ProcessBuffer(const sptr<SurfaceBuffer> &buf);
+    bool ProcessBuffer(const sptr<SurfaceBuffer>& buf);
 
     sptr<IBufferConsumerListener> listener_ = nullptr;
     sptr<IConsumerSurface> csurface_ = nullptr; // cosumer surface

@@ -49,6 +49,46 @@ RRect ScreenProperty::GetBounds() const
     return bounds_;
 }
 
+void ScreenProperty::SetScaleX(float scaleX)
+{
+    scaleX_ = scaleX;
+}
+
+float ScreenProperty::GetScaleX() const
+{
+    return scaleX_;
+}
+
+void ScreenProperty::SetScaleY(float scaleY)
+{
+    scaleY_ = scaleY;
+}
+
+float ScreenProperty::GetScaleY() const
+{
+    return scaleY_;
+}
+
+void ScreenProperty::SetPivotX(float pivotX)
+{
+    pivotX_ = pivotX;
+}
+
+float ScreenProperty::GetPivotX() const
+{
+    return pivotX_;
+}
+
+void ScreenProperty::SetPivotY(float pivotY)
+{
+    pivotY_ = pivotY;
+}
+
+float ScreenProperty::GetPivotY() const
+{
+    return pivotY_;
+}
+
 void ScreenProperty::SetPhyBounds(const RRect& phyBounds)
 {
     phyBounds_ = phyBounds;

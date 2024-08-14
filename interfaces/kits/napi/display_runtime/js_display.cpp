@@ -24,22 +24,27 @@
 #include "display.h"
 #include "display_info.h"
 #include "window_manager_hilog.h"
+#include "display_manager.h"
+#include "singleton_container.h"
+#include "js_display_listener.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
+constexpr int32_t INDEX_ONE = 1;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
-    const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
-        { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
-        { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
-        { DisplayState::ON,           DisplayStateMode::STATE_ON           },
-        { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
-        { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
-        { DisplayState::VR,           DisplayStateMode::STATE_VR           },
-        { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
-    };
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
+const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
+    { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
+    { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
+    { DisplayState::ON,           DisplayStateMode::STATE_ON           },
+    { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
+    { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
+    { DisplayState::VR,           DisplayStateMode::STATE_VR           },
+    { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
+};
 
 using GraphicCM_ColorSpaceType = enum {
     GRAPHIC_CM_COLORSPACE_NONE,
@@ -140,6 +145,8 @@ const std::map<ScreenHDRFormat, HDRFormat> NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP {
 }
 
 static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
+std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
+std::mutex mtx_;
 std::recursive_mutex g_mutex;
 
 JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
@@ -185,6 +192,211 @@ napi_value JsDisplay::GetAvailableArea(napi_env env, napi_callback_info info)
     WLOGI("GetAvailableArea is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsDisplay::RegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
+{
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnRegisterDisplayManagerCallback(env, info) : nullptr;
+}
+
+napi_value JsDisplay::UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
+{
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(env, info) : nullptr;
+}
+
+bool NapiIsCallable(napi_env env, napi_value value)
+{
+    bool result = false;
+    napi_is_callable(env, value, &result);
+    return result;
+}
+
+bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGI("IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        return false;
+    }
+
+    for (auto& iter : jsCbMap_[type]) {
+        bool isEquals = false;
+        napi_strict_equals(env, jsListenerObject, iter.first->GetNapiValue(), &isEquals);
+        if (isEquals) {
+            WLOGFE("IfCallbackRegistered callback already registered!");
+            return true;
+        }
+    }
+    return false;
+}
+
+napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("OnRegisterDisplayManagerCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("JsDisplayManager Params not match: %{public}zu", argc);
+        std::string errMsg = "Invalid args count, need 2 args";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        std::string errMsg = "Failed to convert parameter to callbackType";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        WLOGFE("Failed to convert parameter to callbackType");
+        return NapiGetUndefined(env);
+    }
+    napi_value value = argv[INDEX_ONE];
+    if (value == nullptr) {
+        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
+        std::string errMsg = "OnRegisterDisplayManagerCallback is nullptr";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    if (!NapiIsCallable(env, value)) {
+        WLOGI("OnRegisterDisplayManagerCallback info->argv[1] is not callable");
+        std::string errMsg = "OnRegisterDisplayManagerCallback is not callable";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(env, cbType, value));
+    if (ret != DmErrorCode::DM_OK) {
+        WLOGFE("Failed to register display listener with type");
+        std::string errMsg = "Failed to register display listener with type";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
+DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
+{
+    if (IfCallbackRegistered(env, type, value)) {
+        WLOGFE("RegisterDisplayListenerWithType callback already registered!");
+        return DMError::DM_OK;
+    }
+    std::unique_ptr<NativeReference> callbackRef;
+    napi_ref result = nullptr;
+    napi_create_reference(env, value, 1, &result);
+    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+    sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(env);
+    DMError ret = DMError::DM_OK;
+    if (displayListener == nullptr) {
+        WLOGFE("displayListener is nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
+    } else {
+        WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFE("RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
+        return ret;
+    }
+    displayListener->AddCallback(type, value);
+    jsCbMap_[type][std::move(callbackRef)] = displayListener;
+    return DMError::DM_OK;
+}
+
+napi_value JsDisplay::OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnUnregisterDisplayCallback is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("JsDisplayManager Params not match %{public}zu", argc);
+        std::string errMsg = "Invalid args count, need one arg at least!";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    std::string cbType;
+    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+        WLOGFE("Failed to convert parameter to callbackType");
+        std::string errMsg = "Failed to convert parameter to string";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    DmErrorCode ret;
+    if (argc == ARGC_ONE) {
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
+    } else {
+        napi_value value = argv[INDEX_ONE];
+        if ((value == nullptr) || (!NapiIsCallable(env, value))) {
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
+        } else {
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(env, cbType, value));
+        }
+    }
+    if (ret != DmErrorCode::DM_OK) {
+        WLOGFW("failed to unregister display listener with type");
+        std::string errMsg = "failed to unregister display listener with type";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
+DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGI("UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
+            type.c_str());
+        return DMError::DM_OK;
+    }
+    DMError ret = DMError::DM_OK;
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        it->second->RemoveAllCallback();
+        if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+        } else {
+            ret = DMError::DM_ERROR_INVALID_PARAM;
+        }
+        jsCbMap_[type].erase(it++);
+        WLOGFI("unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
+    }
+    jsCbMap_.erase(type);
+    return ret;
+}
+
+DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
+        return DMError::DM_OK;
+    }
+    DMError ret = DMError::DM_OK;
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        bool isEquals = false;
+        napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+        if (isEquals) {
+            it->second->RemoveCallback(env, type, value);
+            if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+                sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+            } else {
+                ret = DMError::DM_ERROR_INVALID_PARAM;
+            }
+            jsCbMap_[type].erase(it++);
+            WLOGFI("unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
+            break;
+        } else {
+            it++;
+        }
+    }
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
+    }
+    return ret;
 }
 
 napi_value JsDisplay::HasImmersiveWindow(napi_env env, napi_callback_info info)
@@ -603,6 +815,8 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "getSupportedColorSpaces", "JsDisplay", JsDisplay::GetSupportedColorSpaces);
         BindNativeFunction(env, objValue, "getSupportedHDRFormats", "JsDisplay", JsDisplay::GetSupportedHDRFormats);
         BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
+        BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
+        BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);

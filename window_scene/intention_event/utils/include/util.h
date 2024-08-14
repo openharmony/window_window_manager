@@ -26,7 +26,7 @@ int64_t GetSysClockTime();
 int64_t GetMillisTime();
 
 template<typename T>
-bool AddInt(T op1, T op2, T minVal, T maxVal, T &res)
+bool AddInt(T op1, T op2, T minVal, T maxVal, T& res)
 {
     if (op1 >= 0) {
         if (op2 > maxVal - op1) {
@@ -41,12 +41,12 @@ bool AddInt(T op1, T op2, T minVal, T maxVal, T &res)
     return true;
 }
 
-inline bool AddInt32(int32_t op1, int32_t op2, int32_t &res)
+inline bool AddInt32(int32_t op1, int32_t op2, int32_t& res)
 {
     return AddInt(op1, op2, INT32_MIN, INT32_MAX, res);
 }
 
-inline bool AddInt64(int64_t op1, int64_t op2, int64_t &res)
+inline bool AddInt64(int64_t op1, int64_t op2, int64_t& res)
 {
     return AddInt(op1, op2, INT64_MIN, INT64_MAX, res);
 }

@@ -539,6 +539,130 @@ HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, Function | SmallTest | Level3)
     ret = absScreen_->RemoveSurfaceNode(surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: GetScreenMode
+ * @tc.desc: Get screen mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, GetScreenMode01, Function | SmallTest | Level3)
+{
+    sptr<SupportedScreenModes> mode0 = new SupportedScreenModes();
+    sptr<SupportedScreenModes> mode1 = new SupportedScreenModes();
+    absScreen_->modes_ = {mode0, mode1};
+
+    absScreen_->activeIdx_ = -1;
+    ASSERT_EQ(nullptr, absScreen_->GetActiveScreenMode());
+    absScreen_->activeIdx_ = static_cast<int32_t>(absScreen_->modes_.size());
+    ASSERT_EQ(nullptr, absScreen_->GetActiveScreenMode());
+    absScreen_->activeIdx_ = 0;
+    ASSERT_EQ(mode0, absScreen_->GetActiveScreenMode());
+    absScreen_->activeIdx_ = 1;
+    ASSERT_EQ(mode1, absScreen_->GetActiveScreenMode());
+
+    ASSERT_EQ(mode0, (absScreen_->GetAbstractScreenModes())[0]);
+    ASSERT_EQ(mode1, (absScreen_->GetAbstractScreenModes())[1]);
+}
+
+/**
+ * @tc.name: AddChild
+ * @tc.desc: Add child
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, AddChild03, Function | SmallTest | Level3)
+{
+    absScreenGroup_->screenMap_.clear();
+    Point point_(159, 357);
+    absScreenGroup_->mirrorScreenId_ = 10086;
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({0, absScreen_});
+    absScreen_->rsDisplayNode_ = nullptr;
+    bool result = absScreenGroup_->AddChild(absScreen_, point_);
+    EXPECT_FALSE(result);
+
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->type_ = ScreenType::REAL;
+    absScreenGroup_->defaultScreenId_ = 0;
+    result = absScreenGroup_->AddChild(absScreen_, point_);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetSourceMode
+ * @tc.desc: get source mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, GetSourceMode01, Function | SmallTest | Level3)
+{
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
+    absScreen_->screenController_->dmsScreenGroupMap_.insert({10086, absScreenGroup_});
+    absScreen_->groupDmsId_ = 10086;
+    ScreenSourceMode result = absScreen_->GetSourceMode();
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MAIN);
+
+    absScreen_->screenController_->defaultRsScreenId_ = 144;
+    result = absScreen_->GetSourceMode();
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MIRROR);
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
+    result = absScreen_->GetSourceMode();
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_EXTEND);
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
+    result = absScreen_->GetSourceMode();
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
+
+    sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
+    sptr<AbstractScreen> absScreenTest = new AbstractScreen(absScreenController, name_, 0, 0);
+    result = absScreenTest->GetSourceMode();
+    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
+}
+
+/**
+ * @tc.name: CalcRotation
+ * @tc.desc: Calc rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, CalcRotation01, Function | SmallTest | Level3)
+{
+    absScreen_->modes_.clear();
+    absScreen_->activeIdx_ = 0;
+
+    ASSERT_EQ(Rotation::ROTATION_0, absScreen_->CalcRotation(Orientation::UNSPECIFIED));
+
+    sptr<SupportedScreenModes> mode = new SupportedScreenModes();
+    mode->width_ = 1;
+    mode->height_ = 1;
+    absScreen_->modes_ = {mode};
+
+    ASSERT_EQ(Rotation::ROTATION_0, absScreen_->CalcRotation(Orientation::UNSPECIFIED));
+    ASSERT_EQ(Rotation::ROTATION_90, absScreen_->CalcRotation(Orientation::VERTICAL));
+    ASSERT_EQ(Rotation::ROTATION_0, absScreen_->CalcRotation(Orientation::HORIZONTAL));
+    ASSERT_EQ(Rotation::ROTATION_270, absScreen_->CalcRotation(Orientation::REVERSE_VERTICAL));
+    ASSERT_EQ(Rotation::ROTATION_180, absScreen_->CalcRotation(Orientation::REVERSE_HORIZONTAL));
+    ASSERT_EQ(Rotation::ROTATION_0, absScreen_->CalcRotation(Orientation::LOCKED));
+}
+
+/**
+ * @tc.name: RemoveDefaultScreen
+ * @tc.desc: Remove default screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, Function | SmallTest | Level3)
+{
+    sptr<AbstractScreen> absTest = nullptr;
+    bool result = absScreenGroup_->RemoveDefaultScreen(absTest);
+    EXPECT_FALSE(result);
+
+    absScreen_->rsDisplayNode_ = nullptr;
+    result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
+    EXPECT_TRUE(result);
+
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
+    ASSERT_TRUE(result);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

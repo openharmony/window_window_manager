@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -135,8 +136,8 @@ public:
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
-    virtual WSError DumpSessionAll(std::vector<std::string> &infos) { return WSError::WS_OK; }
-    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionAll(std::vector<std::string>& infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos) { return WSError::WS_OK; }
     virtual WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
     {
         return WSError::WS_OK;
@@ -146,11 +147,24 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
     virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
     {
         return WSError::WS_OK;
+    }
+    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
+    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -184,22 +198,9 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
-    virtual WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible)
-    {
-        return WSError::WS_OK;
-    }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
-    }
-    virtual WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
-    {
-        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
@@ -220,6 +221,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetFreeMultiWindowEnableState(bool& enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {
         return WMError::WM_OK;
@@ -229,6 +234,10 @@ public:
         return WMError::WM_OK;
     }
     virtual WMError GetWindowModeType(WindowModeType& windowModeType)
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType)
     {
         return WMError::WM_OK;
     };

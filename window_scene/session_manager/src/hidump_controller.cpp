@@ -222,7 +222,7 @@ void HidumpController::DumpLayoutParam(
         << session->GetZOrder() << "|"
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
-        << session->isDirty_ << "|"
+        << session->IsDirtyWindow() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl
@@ -289,7 +289,7 @@ void HidumpController::DumpKeyboardParamList(std::ostringstream& oss)
         << std::endl
         << "keyboardLayoutParams"
         << std::endl
-        << "lastSafeRect restoringRectForKeyboard"
+        << "lastSafeRect oriPosYBeforeRaisedByKeyboard_"
         << std::endl;
 }
 
@@ -298,7 +298,7 @@ void HidumpController::DumpKeyboardParam(
 {
     constexpr int precision = 1;
     WSRect lastSafeRect = session->GetLastSafeRect();
-    WSRect restoringRectForKeyboard = session->GetRestoringRectForKeyboard();
+    int32_t oriPosYBeforeRaisedByKeyboard = session->GetOriPosYBeforeRaisedByKeyboard();
     KeyboardLayoutParams keyboardLayoutParams = property->GetKeyboardLayoutParams();
     Rect LandscapeKeyboardRect = keyboardLayoutParams.LandscapeKeyboardRect_;
     Rect PortraitKeyboardRect = keyboardLayoutParams.PortraitKeyboardRect_;
@@ -307,7 +307,7 @@ void HidumpController::DumpKeyboardParam(
     oss << "Keyboard:"
         << std::endl
         << session->GetSCBKeepKeyboardFlag() << "|"
-        << session->sessionInfo_.isSystemInput_ << "|"
+        << session->IsSystemInput() << "|"
         << static_cast<uint32_t>(property->sessionGravity_) << "|"
         << property->sessionGravitySizePercent_ << "|"
         << property->GetKeepKeyboardFlag() << "|"
@@ -336,10 +336,7 @@ void HidumpController::DumpKeyboardParam(
         << lastSafeRect.posY_ << " "
         << lastSafeRect.width_ << " "
         << lastSafeRect.height_ << "]|"
-        << "[" << restoringRectForKeyboard.posX_ << " "
-        << restoringRectForKeyboard.posY_ << " "
-        << restoringRectForKeyboard.width_ << " "
-        << restoringRectForKeyboard.height_ << "]|"
+        << "[" << oriPosYBeforeRaisedByKeyboard << "]|"
         << std::endl;
 }
 
@@ -505,7 +502,7 @@ void HidumpController::DumpVisibleParamList(std::ostringstream& oss)
 void HidumpController::DumpVisibleParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "Visible: "
-        << session->GetVisible() << "|"
+        << session->GetRSVisible() << "|"
         << static_cast<uint32_t>(session->GetVisibilityState()) << "|"
         << std::endl;
 }

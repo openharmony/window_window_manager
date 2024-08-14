@@ -47,6 +47,18 @@ public:
     void SetPhyBounds(const RRect& phyBounds);
     RRect GetPhyBounds() const;
 
+    void SetScaleX(float scaleX);
+    float GetScaleX() const;
+
+    void SetScaleY(float scaleY);
+    float GetScaleY() const;
+
+    void SetPivotX(float pivotX);
+    float GetPivotX() const;
+
+    void SetPivotY(float pivotY);
+    float GetPivotY() const;
+
     float GetDensity();
     float GetDefaultDensity();
     void SetDefaultDensity(float defaultDensity);
@@ -120,6 +132,11 @@ private:
     float rotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
+
+    float scaleX_ { 1.0f };
+    float scaleY_ { 1.0f };
+    float pivotX_ { 0.5f };
+    float pivotY_ { 0.5f };
 
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };

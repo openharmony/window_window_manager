@@ -31,12 +31,13 @@
 #include "pixel_map_napi.h"
 #include "permission.h"
 #include "singleton_container.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
-    const std::string PIP_WINDOW = "pip_window";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
+const std::string PIP_WINDOW = "pip_window";
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -1230,6 +1231,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowStatusType", WindowStatusTypeInit(env));
     napi_set_named_property(env, exportObj, "RectChangeReason", RectChangeReasonInit(env));
     napi_set_named_property(env, exportObj, "ExtensionWindowAttribute", ExtensionWindowAttributeInit(env));
+    napi_set_named_property(env, exportObj, "MaximizePresentation", MaximizePresentationInit(env));
     const char *moduleName = "JsWindowManager";
     BindNativeFunction(env, exportObj, "create", moduleName, JsWindowManager::Create);
     BindNativeFunction(env, exportObj, "createWindow", moduleName, JsWindowManager::CreateWindow);

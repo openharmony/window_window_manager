@@ -53,7 +53,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMS"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMS"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -142,7 +142,7 @@ void WindowManagerService::PostVoidSyncTask(Task task, const std::string& taskNa
     }
 }
 
-void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     WLOGI("systemAbilityId: %{public}d, start", systemAbilityId);
     switch (systemAbilityId) {
@@ -1305,7 +1305,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE && 
+    if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE &&
         !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
         WLOGFE("Set privacy mode permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;

@@ -29,21 +29,27 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
-constexpr int32_t NUMBER_2 = 2;
-constexpr int32_t NUMBER_3 = 3;
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+// Refer to OHOS::Ace::TouchType
+enum class AceTouchType : int32_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+};
 
 int32_t GetMMITouchType(int32_t aceType)
 {
     switch (aceType) {
-        case 0:
+        case static_cast<int32_t>(AceTouchType::DOWN):
             return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case 1:
+        case static_cast<int32_t>(AceTouchType::UP):
             return MMI::PointerEvent::POINTER_ACTION_UP;
-        case NUMBER_2:
+        case static_cast<int32_t>(AceTouchType::MOVE):
             return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case NUMBER_3:
+        case static_cast<int32_t>(AceTouchType::CANCEL):
             return MMI::PointerEvent::POINTER_ACTION_CANCEL;
         default:
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
@@ -126,6 +132,21 @@ bool IsJsIsSystemUndefind(napi_env env, napi_value jsIsSystem, SessionInfo& sess
             return false;
         }
         sessionInfo.isSystem_ = isSystem;
+    }
+    return true;
+}
+
+bool IsJsSceneTypeUndefined(napi_env env, napi_value jsSceneType, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsSceneType) != napi_undefined) {
+        uint32_t sceneType;
+        if (!ConvertFromJsValue(env, jsSceneType, sceneType)) {
+            WLOGFE("[NAPI]Failed to convert parameter to sceneType");
+            return false;
+        }
+        sessionInfo.sceneType_ = static_cast<SceneType>(sceneType);
+    } else if (sessionInfo.isSystem_) {
+        sessionInfo.sceneType_ = SceneType::SYSTEM_WINDOW_SCENE;
     }
     return true;
 }
@@ -227,23 +248,10 @@ bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInf
     return true;
 }
 
-bool IsJsIsSystemInputUndefined(napi_env env, napi_value jsIsSystemInput, SessionInfo& sessionInfo)
-{
-    if (GetType(env, jsIsSystemInput) != napi_undefined) {
-        bool isSystemInput = false;
-        if (!ConvertFromJsValue(env, jsIsSystemInput, isSystemInput)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isSystemInput");
-            return false;
-        }
-        sessionInfo.isSystemInput_ = isSystemInput;
-    }
-    return true;
-}
-
 bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsProcessOption) != napi_undefined) {
-        std::shared_ptr<AAFwk::ProcessOptions> processOptions;
+        std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
         if (!ConvertProcessOptionFromJs(env, jsProcessOption, processOptions)) {
             WLOGFE("[NAPI]Failed to convert parameter to processOptions");
             return false;
@@ -291,6 +299,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "appIndex", &jsAppIndex);
     napi_value jsIsSystem = nullptr;
     napi_get_named_property(env, jsObject, "isSystem", &jsIsSystem);
+    napi_value jsSceneType = nullptr;
+    napi_get_named_property(env, jsObject, "sceneType", &jsSceneType);
     napi_value jsWindowInputType = nullptr;
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
@@ -308,6 +318,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
         return false;
     }
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
@@ -358,8 +371,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "screenId", &jsScreenId);
     napi_value jsIsRotable = nullptr;
     napi_get_named_property(env, jsObject, "isRotatable", &jsIsRotable);
-    napi_value jsIsSystemInput = nullptr;
-    napi_get_named_property(env, jsObject, "isSystemInput", &jsIsSystemInput);
     napi_value jsIsSetPointerAreas = nullptr;
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
@@ -381,9 +392,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsRotatableUndefined(env, jsIsRotable, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsIsSystemInputUndefined(env, jsIsSystemInput, sessionInfo)) {
         return false;
     }
     if (!IsJsIsSetPointerAreasUndefined(env, jsIsSetPointerAreas, sessionInfo)) {
@@ -614,10 +622,26 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         return false;
     }
     pointerEvent.SetPointerId(pointerId);
+    if (!ConvertDeviceIdFromJs(env, jsObject, pointerEvent)) {
+        return false;
+    }
     return true;
 }
 
-bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
+{
+    napi_value jsDeviceId = nullptr;
+    napi_get_named_property(env, jsObject, "deviceId", &jsDeviceId);
+    int32_t deviceId = 0;
+    if (!ConvertFromJsValue(env, jsDeviceId, deviceId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to deviceId");
+        return false;
+    }
+    pointerEvent.SetDeviceId(deviceId);
+    return true;
+}
+
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList)
 {
     bool isArray = false;
     napi_is_array(env, jsObject, &isArray);
@@ -642,7 +666,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     return true;
 }
 
-bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap)
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap)
 {
     if (value == nullptr) {
         WLOGFE("value is nullptr");
@@ -683,7 +707,7 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
     return true;
 }
 
-bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
+bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
         WLOGFE("array is nullptr!");
@@ -761,16 +785,20 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     napi_set_named_property(env, objValue, "isAtomicService",
         CreateJsValue(env, sessionInfo.isAtomicService_));
+    napi_set_named_property(env, objValue, "isBackTransition",
+        CreateJsValue(env, sessionInfo.isBackTransition_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
     }
+    napi_set_named_property(env, objValue, "errorReason",
+        CreateJsValue(env, sessionInfo.errorReason));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     return objValue;
 }
 
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property)
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -820,6 +848,12 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         napi_set_named_property(env, objValue, "isStartupInstallFree",
             CreateJsValue(env, (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) ==
                 AAFwk::Want::FLAG_INSTALL_ON_DEMAND));
+        auto params = sessionInfo.want->GetParams();
+        napi_set_named_property(env, objValue, "fileManagerMode",
+            CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
+        napi_set_named_property(env, objValue, "extraFormIdentity",
+            CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
     }
 }
 
@@ -1218,7 +1252,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value SessionTypeInit(napi_env env)
 {
-    WLOGFD("SessionTypeInit");
+    WLOGFD("in");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -1269,6 +1303,35 @@ napi_value SessionTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value SceneTypeInit(napi_env env)
+{
+    WLOGFD("in");
+
+    if (env == nullptr) {
+        WLOGFE("Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "DEFAULT",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::DEFAULT)));
+    napi_set_named_property(env, objValue, "WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::SYSTEM_WINDOW_SCENE)));
+    napi_set_named_property(env, objValue, "TRANSFORM_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::TRANSFORM_SCENE)));
+    napi_set_named_property(env, objValue, "PANEL_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::PANEL_SCENE)));
+    napi_set_named_property(env, objValue, "INPUT_SCENE",
+        CreateJsValue(env, static_cast<int32_t>(SceneType::INPUT_SCENE)));
+    return objValue;
+}
 
 struct AsyncInfo {
     napi_env env;

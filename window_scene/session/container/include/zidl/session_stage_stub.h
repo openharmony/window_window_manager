@@ -30,8 +30,8 @@ public:
     SessionStageStub() = default;
     ~SessionStageStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override;
 
 private:
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);
@@ -66,6 +66,11 @@ private:
     int HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, MessageParcel& reply);
+    int HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply);
+    int HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply);
+    int HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply);
+    int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

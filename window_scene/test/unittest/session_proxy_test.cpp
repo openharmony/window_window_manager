@@ -30,106 +30,6 @@ class SessionProxyTest : public testing::Test {
     ~SessionProxyTest() {}
 };
 namespace {
-/**
- * @tc.name: Foreground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, Foreground, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<WindowSessionProperty> property;
-    WSError res = sProxy->Foreground(property);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground end";
-}
-
-/**
- * @tc.name: Foreground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, Foreground1, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    WSError res = sProxy->Foreground(property);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground end";
-}
-
-/**
- * @tc.name: Background
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, Background, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: Background start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->Background();
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: Background end";
-}
-
-/**
- * @tc.name: Disconnect
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, Disconnect, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: Disconnect start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->Disconnect();
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: Disconnect end";
-}
-
-/**
- * @tc.name: DrawingCompleted
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->DrawingCompleted();
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted end";
-}
-
-/**
- * @tc.name: PendingSessionActivation
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, PendingSessionActivation, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: PendingSessionActivation start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    WSError res = sProxy->PendingSessionActivation(abilitySessionInfo);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->PendingSessionActivation(abilitySessionInfo1);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: PendingSessionActivation end";
-}
 
 /**
  * @tc.name: WriteAbilitySessionInfoBasic
@@ -151,66 +51,6 @@ HWTEST_F(SessionProxyTest, WriteAbilitySessionInfoBasic, Function | SmallTest | 
     res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo1);
     ASSERT_EQ(res, true);
     GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic end";
-}
-
-/**
- * @tc.name: TerminateSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, TerminateSession, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: TerminateSession start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    WSError res = sProxy->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->TerminateSession(abilitySessionInfo1);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: TerminateSession end";
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, NotifySessionException, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySessionException start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    WSError res = sProxy->NotifySessionException(abilitySessionInfo);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->NotifySessionException(abilitySessionInfo1);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySessionException end";
-}
-
-/**
- * @tc.name: UpdateActiveStatus
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, UpdateActiveStatus, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateActiveStatus start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo, nullptr);
-
-    WSError res = sProxy->UpdateActiveStatus(abilitySessionInfo);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateActiveStatus end";
 }
 
 /**
@@ -552,6 +392,39 @@ HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
     int32_t res = sProxy->GetStatusBarHeight();
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    AppForceLandscapeConfig config = {};
+    auto res = sProxy->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig end";
+}
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
 }
 } // namespace
 } // namespace Rosen

@@ -34,9 +34,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t COLOR_RED = 0xffff0000;
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
-    constexpr uint8_t ALPHA = 255;
+constexpr uint32_t COLOR_RED = 0xffff0000;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
+constexpr uint8_t ALPHA = 255;
 }
 
 using Utils = WindowTestUtils;
@@ -202,7 +202,7 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     subAppInfo_.rect = {0, 600, 300, 100};
     subAppInfo_.parentId = window1->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
-
+    ASSERT_NE(nullptr, subWindow1);
     bool isWindowVisible = false;
     bool isSubWindowVisible = false;
 

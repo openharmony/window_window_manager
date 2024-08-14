@@ -112,6 +112,23 @@ HWTEST_F(WindowSessionImplTest3, SetInputEventConsumer01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetContinueState
+ * @tc.desc: SetContinueState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetContinueState, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState start";
+    window_ = GetTestWindowImpl("SetContinueState");
+    ASSERT_NE(window_, nullptr);
+    WMError ret = window_->SetContinueState(static_cast<int32_t>(ContinueState::CONTINUESTATE_INACTIVE));
+    ASSERT_EQ(ret, WMError::WM_OK);
+    ret = window_->SetContinueState(-100);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState end";
+}
+
+/**
  * @tc.name: GetListeners
  * @tc.desc: GetListeners01 IDisplayMoveListener
  * @tc.type: FUNC
@@ -150,6 +167,48 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, Function
     ASSERT_EQ(window_->RegisterWindowNoInteractionListener(windowNoInteractionListenerSptr), WMError::WM_OK);
     ASSERT_EQ(window_->UnregisterWindowNoInteractionListener(windowNoInteractionListenerSptr), WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: RegisterWindowNoInteractionListener01 end";
+}
+
+/**
+ * @tc.name: SetForceSplitEnable
+ * @tc.desc: SetForceSplitEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
+    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    ASSERT_NE(window_, nullptr);
+
+    bool isForceSplit = false;
+    std::string homePage = "MainPage";
+    int32_t res = 0;
+    window_->SetForceSplitEnable(isForceSplit, homePage);
+    ASSERT_EQ(res, 0);
+
+    isForceSplit = true;
+    window_->SetForceSplitEnable(isForceSplit, homePage);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable end";
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
+    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
+    ASSERT_NE(window_, nullptr);
+
+    AppForceLandscapeConfig config = {};
+    auto res = window_->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(config.mode_, 0);
+    ASSERT_EQ(config.homePage_, "");
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
 }
 } // namespace Rosen

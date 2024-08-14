@@ -24,15 +24,15 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_CJ_DISPLAY_STATE_MAP {
-        { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
-        { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
-        { DisplayState::ON,           DisplayStateMode::STATE_ON           },
-        { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
-        { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
-        { DisplayState::VR,           DisplayStateMode::STATE_VR           },
-        { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
-    };
+const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_CJ_DISPLAY_STATE_MAP {
+    { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
+    { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
+    { DisplayState::ON,           DisplayStateMode::STATE_ON           },
+    { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
+    { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
+    { DisplayState::VR,           DisplayStateMode::STATE_VR           },
+    { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
+};
 }
 static thread_local std::map<uint64_t, sptr<DisplayImpl>> g_cjDisplayMap;
 std::recursive_mutex g_mutex;
@@ -59,7 +59,7 @@ CRect* CreateCBoundingRects(std::vector<DMRect> &bound)
     return result;
 }
 
-void SetCWaterfallDisplayAreaRects(WaterfallDisplayAreaRects &area, CCutoutInfo * info)
+void SetCWaterfallDisplayAreaRects(const WaterfallDisplayAreaRects &area, CCutoutInfo * info)
 {
     if (info == nullptr || info->boundingRects == nullptr) {
         return;
@@ -126,6 +126,10 @@ sptr<DisplayImpl> DisplayImpl::CreateDisplayImpl(sptr<Display> &display)
     }
     if (cjDisplayPtr == nullptr) {
         cjDisplayPtr = FFIData::Create<DisplayImpl>(display);
+        if (cjDisplayPtr == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[CreateDisplayImpl] Failed to create display");
+            return nullptr;
+        }
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
         g_cjDisplayMap[displayId] = cjDisplayPtr;
     }
@@ -281,7 +285,7 @@ float DisplayImpl::GetYDPI()
 
 RetStruct DisplayImpl::GetCutoutInfo()
 {
-    RetStruct result;
+    RetStruct result = {.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr};
     sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);

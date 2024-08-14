@@ -35,7 +35,7 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrLsTest(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
+void SceneSessionMgrLsTest(MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
 {
     parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::

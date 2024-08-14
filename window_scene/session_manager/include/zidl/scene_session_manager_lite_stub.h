@@ -55,9 +55,9 @@ private:
     int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
     //for window manager service
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
-    int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
@@ -66,6 +66,8 @@ private:
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
+    int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

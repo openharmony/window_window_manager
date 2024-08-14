@@ -49,6 +49,10 @@ private:
 
         bool operator()(sptr<T1> agent)
         {
+            if (agent == nullptr) {
+                WLOGFE("agent is invalid");
+                return false;
+            }
             return agent->AsObject() == remoteObject_;
         }
 
@@ -115,6 +119,10 @@ template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& agents,
     const sptr<IRemoteObject>& agent)
 {
+    if (agent == nullptr) {
+        WLOGFE("agent is invalid");
+        return false;
+    }
     auto iter = std::find_if(agents.begin(), agents.end(), finder_t(agent));
     if (iter == agents.end()) {
         WLOGFD("could not find this agent");
@@ -135,16 +143,26 @@ template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remoteObject)
 {
     WLOGFI("RemoveAgent");
+    if (remoteObject == nullptr) {
+        WLOGFE("remoteObject is invalid");
+        return;
+    }
     if (deathCallback_ != nullptr) {
         deathCallback_(remoteObject);
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    static bool isEntryAgain = false;
+    if (isEntryAgain) {
+        WLOGFW("UnregisterAgentLocked entry again");
+    }
+    isEntryAgain = true;
     for (auto& elem : agentMap_) {
         if (UnregisterAgentLocked(elem.second, remoteObject)) {
             break;
         }
     }
     remoteObject->RemoveDeathRecipient(deathRecipient_);
+    isEntryAgain = false;
 }
 
 template<typename T1, typename T2>
