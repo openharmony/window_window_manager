@@ -21,11 +21,12 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "js_display.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
 }
 
 JsDisplayListener::JsDisplayListener(napi_env env) : env_(env)

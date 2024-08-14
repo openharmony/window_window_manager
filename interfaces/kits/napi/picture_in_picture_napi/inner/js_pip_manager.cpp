@@ -23,7 +23,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
-    constexpr int32_t NUMBER_ONE = 1;
+constexpr int32_t NUMBER_ONE = 1;
 }
 
 napi_value NapiGetUndefined(napi_env env)

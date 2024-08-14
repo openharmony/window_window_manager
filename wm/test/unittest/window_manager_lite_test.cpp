@@ -57,6 +57,12 @@ public:
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override {};
 };
 
+class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
+public:
+    void OnConnected(int32_t userId, int32_t screenId) override {};
+    void OnDisConnected(int32_t userId, int32_t screenId) override {};
+}
+
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -712,6 +718,19 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: NotifyWMSConnected03
+ * @tc.desc: NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = new IWMSConnectionChangedListenerSon();
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullpter);
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullpter);
+}
+/**
  * @tc.name: RegisterWindowStyleChangedListener
  * @tc.desc: check RegisterWindowStyleChangedListener
  * @tc.type: FUNC
@@ -849,6 +868,18 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
     int32_t persistentId = 0;
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
+}
+
+/**
+ * @tc.name: OnRemoteDied01
+ * @tc.desc: OnRemoteDied01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance.destroyed_ = true;
+    WindowManagerLite::GetInstance.OnRemoteDied();
+    ASSERT_EQ(WindowManagerLite::GetInstance.destroyed_, true);
 }
 }
 }
