@@ -104,6 +104,7 @@ public:
         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
         TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
@@ -111,6 +112,7 @@ public:
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
         TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
+        TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS,
         TRANS_ID_SET_CLIENT = 2500,
         TRANS_ID_GET_SCREEN_PROPERTY,
         TRANS_ID_GET_DISPLAY_NODE,
@@ -277,9 +279,13 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
+
+    virtual DMError SetFoldStatusLockedFromJs(bool locked) { return DMError::DM_OK; }
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 

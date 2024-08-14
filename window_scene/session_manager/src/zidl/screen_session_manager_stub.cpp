@@ -333,8 +333,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
+            DmErrorCode errCode = DmErrorCode::DM_OK;
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER: {
@@ -583,9 +585,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetFoldDisplayMode(displayMode);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
+            FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS: {
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
             SetFoldStatusLocked(lockDisplayStatus);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS: {
+            bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
+            DMError ret = SetFoldStatusLockedFromJs(lockDisplayStatus);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
