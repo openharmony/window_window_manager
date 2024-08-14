@@ -8808,7 +8808,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
 
         if (scnSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             scnSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
-            pixelMap = scnSession->Snapshot(scaleParam);
+            pixelMap = scnSession->Snapshot(false, scaleParam);
         }
         if (!pixelMap) {
             WLOGFI("get local snapshot pixelmap start");

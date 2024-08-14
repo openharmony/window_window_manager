@@ -680,16 +680,16 @@ HWTEST_F(WindowSessionTest3, Snapshot, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     session_->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(session_->surfaceNode_, nullptr);
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_ = nullptr;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 }
 
 /**
