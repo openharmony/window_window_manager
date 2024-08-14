@@ -1068,5 +1068,13 @@ void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->NotifyExtensionTimeout(errorCode);
 }
+
+int32_t WindowExtensionSessionImpl::GetRealParentId() const
+{
+    if (property_ == nullptr) {
+        return INVALID_WINDOW_ID;
+    }
+    return property_->GetRealParentId();
+}
 } // namespace Rosen
 } // namespace OHOS
