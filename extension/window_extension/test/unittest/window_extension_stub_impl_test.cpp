@@ -86,7 +86,6 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
  */
 HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 {
-    
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     Rect rect = { 150, 150, 400, 600 };
     windowExtensionStubImpl.SetBounds(rect);
