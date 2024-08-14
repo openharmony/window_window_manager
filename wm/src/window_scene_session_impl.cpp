@@ -1581,8 +1581,11 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
 
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Resize Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
+    if(0 == width || 0 == height){
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1612,7 +1615,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     }
 
     Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Resize Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
@@ -1631,8 +1634,11 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
+    if(0 == width || 0 == height){
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1658,7 +1664,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
         }
     }
     Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
         "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
