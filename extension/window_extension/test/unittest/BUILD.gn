@@ -126,7 +126,7 @@ ohos_static_library("window_extension_unittest_common") {
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
     "${arkui_path}/ace_engine/interfaces/inner_api/ace:ace_uicontent",
-    "${arkui_path}/arkui/napi:ace_napi",
+    "${arkui_path}/napi:ace_napi",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
