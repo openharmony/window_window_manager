@@ -2957,7 +2957,7 @@ napi_value JsSceneSession::OnSetWindowLastSafeRect(napi_env env, napi_callback_i
 napi_value JsSceneSession::SetMovable(napi_env env, napi_callback_info info)
 {
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetMovable(env, info): nullptr;
+    return (me != nullptr) ? me->OnSetMovable(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
@@ -2974,7 +2974,7 @@ napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
 
     bool movable = true;
     if (!ConvertFromJsValue(env, argv[0], movable)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to  convert parameter to movable");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to convert parameter to movable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -2982,6 +2982,7 @@ napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->SetMovable(movable);

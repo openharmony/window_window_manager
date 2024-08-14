@@ -3395,7 +3395,7 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 
 void SceneSession::SetMovable(bool movable)
 {
-    auto task = [weakThis = wptr(this), movable]() {
+    auto task = [weakThis = wptr(this), movable] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
