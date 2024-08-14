@@ -4297,4 +4297,18 @@ bool SceneSession::IsMinimizedByUserSwitch() const
 {
     return isMinimizedByUserSwitch_;
 }
+
+void SceneSession::UnregisterSessionChangeListeners()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("UnregisterSessionChangeListeners session is null");
+            return;
+        }
+        session->sessionChangeCallback_ = nullptr;
+        session->Session::UnregisterSessionChangeListeners();
+    };
+    PostTask(task, "UnregisterSessionChangeListeners");
+}
 } // namespace OHOS::Rosen
