@@ -124,8 +124,8 @@ int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, Mess
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        WLOGFE("token is null");
-        return ERR_NONE;
+        WLOGFD("token is null");
+        return ERR_INVALID_DATA;
     }
     std::string label = data.ReadString();
     WSError errCode = SetSessionLabel(token, label);
@@ -138,8 +138,9 @@ int SceneSessionManagerLiteStub::HandleSetSessionIcon(MessageParcel& data, Messa
     WLOGFD("run HandleSetSessionIcon!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
-        return ERR_NONE;
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+        WLOGFD("token is nullptr");
+        return ERR_INVALID_DATA;
     }
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
@@ -168,8 +169,9 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
     WLOGFD("run HandlePendingSessionToForeground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
-        return ERR_NONE;
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+        WLOGFD("token is nullptr");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToForeground(token);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -181,8 +183,9 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
     WLOGFD("run HandlePendingSessionToBackground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
-        return ERR_NONE;
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+        TLOGI("token is nullptr");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToBackgroundForDelegator(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -195,7 +198,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "listener is nullptr!");
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }
     WSError errCode = RegisterSessionListener(listener);
@@ -208,7 +211,7 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
         return ERR_NONE;
     }
     WSError errCode = UnRegisterSessionListener(listener);
@@ -313,8 +316,9 @@ int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& da
     WLOGFD("HandleSetSessionContinueState");
     sptr <IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
-        return ERR_NONE;
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+        WLOGFD("token is nullptr");
+        return ERR_INVALID_DATA;
     }
     auto continueState = static_cast<ContinueState>(data.ReadInt32());
     const WSError &ret = SetSessionContinueState(token, continueState);
@@ -432,7 +436,8 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     if (windowManagerAgentObject == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
-        return ERR_NONE;
+        WLOGFI("windowManagerAgentObject is nullptr");
+        return ERR_INVALID_DATA;
     }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -448,7 +453,8 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     if (windowManagerAgentObject == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
-        return ERR_NONE;
+        WLOGFI("windowManagerAgentObject is nullptr");
+        return ERR_INVALID_DATA;
     }
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
