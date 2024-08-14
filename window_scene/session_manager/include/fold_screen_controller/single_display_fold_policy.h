@@ -35,6 +35,7 @@ public:
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override {};
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
