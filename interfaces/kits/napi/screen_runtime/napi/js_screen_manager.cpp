@@ -87,10 +87,10 @@ static napi_value MultiScreenModeSwitch(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMultiScreenModeSwitch(env, info) : nullptr;
 }
 
-static napi_value MultiScreenRelativePosition(napi_env env, napi_callback_info info)
+static napi_value SetMultiScreenRelativePosition(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
-    return (me != nullptr) ? me->OnMultiScreenRelativePosition(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetMultiScreenRelativePosition(env, info) : nullptr;
 }
 
 static napi_value MakeExpand(napi_env env, napi_callback_info info)
@@ -485,7 +485,7 @@ napi_value OnMultiScreenModeSwitch(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value OnMultiScreenRelativePosition(napi_env env, napi_callback_info info)
+napi_value OnSetMultiScreenRelativePosition(napi_env env, napi_callback_info info)
 {
     WLOGI("OnMakeMirror is called");
     size_t argc = ARGC_FOUR;
@@ -494,28 +494,28 @@ napi_value OnMultiScreenRelativePosition(napi_env env, napi_callback_info info)
     if (argc < ARGC_TWO) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need two args");
     }
-    ExtendOption mainScreenOption;
-    if (GetExtendOptionFromJs(env, argv[INDEX_ZERO], mainScreenOption) == -1) {
+    ExtendOption firstScreenOption;
+    if (GetExtendOptionFromJs(env, argv[INDEX_ZERO], firstScreenOption) == -1) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
     }
-    ExtendOption secondaryScreenOption;
-    if (GetExtendOptionFromJs(env, argv[INDEX_ONE], secondaryScreenOption) == -1) {
+    ExtendOption secondScreenOption;
+    if (GetExtendOptionFromJs(env, argv[INDEX_ONE], secondScreenOption) == -1) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
     }
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [mainScreenOption, secondaryScreenOption, env,
+    auto asyncTask = [firstScreenOption, secondScreenOption, env,
         task = napiAsyncTask.get()]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMultiScreenRelativePosition");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetMultiScreenRelativePosition");
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().MultiScreenRelativePosition(mainScreenOption,
-                secondaryScreenOption));
+            SingletonContainer::Get<ScreenManager>().SetMultiScreenRelativePosition(firstScreenOption,
+                secondScreenOption));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(ret), "OnMultiScreenRelativePosition failed."));
+                CreateJsError(env, static_cast<int32_t>(ret), "OnSetMultiScreenRelativePosition failed."));
         }
         delete task;
     };
@@ -1037,6 +1037,10 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
     std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask)
 {
+    if (!env) {
+        WLOGFE("env is null");
+        return;
+    }
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
@@ -1203,8 +1207,8 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(env, exportObj, "makeMirror", moduleName, JsScreenManager::MakeMirror);
     BindNativeFunction(env, exportObj, "MultiScreenModeSwitch", moduleName, JsScreenManager::MultiScreenModeSwitch);
-    BindNativeFunction(env, exportObj, "MultiScreenRelativePosition", moduleName,
-        JsScreenManager::MultiScreenRelativePosition);
+    BindNativeFunction(env, exportObj, "SetMultiScreenRelativePosition", moduleName,
+        JsScreenManager::SetMultiScreenRelativePosition);
     BindNativeFunction(env, exportObj, "makeExpand", moduleName, JsScreenManager::MakeExpand);
     BindNativeFunction(env, exportObj, "stopMirror", moduleName, JsScreenManager::StopMirror);
     BindNativeFunction(env, exportObj, "stopExpand", moduleName, JsScreenManager::StopExpand);
