@@ -557,9 +557,13 @@ napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info inf
     std::lock_guard<std::mutex> lock(mtx_);
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(env, cbType, value));
     if (ret != DmErrorCode::DM_OK) {
+        DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
+            errCode = ret;
+        }
         WLOGFE("Failed to register display listener with type");
         std::string errMsg = "Failed to register display listener with type";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
@@ -597,9 +601,13 @@ napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info i
         }
     }
     if (ret != DmErrorCode::DM_OK) {
+        DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
+            errCode = ret;
+        }
         WLOGFW("failed to unregister display listener with type");
         std::string errMsg = "failed to unregister display listener with type";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
@@ -737,7 +745,12 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
-    SingletonContainer::Get<DisplayManager>().SetFoldDisplayMode(mode);
+    DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode));
+    if (errCode != DmErrorCode::DM_OK) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        return NapiGetUndefined(env);
+    }
     WLOGI("[NAPI]" PRIu64", setFoldDisplayMode");
     return NapiGetUndefined(env);
 }
@@ -759,7 +772,12 @@ napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
-    SingletonContainer::Get<DisplayManager>().SetFoldStatusLocked(locked);
+    DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<DisplayManager>().SetFoldStatusLockedFromJs(locked));
+    if (errCode != DmErrorCode::DM_OK) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        return NapiGetUndefined(env);
+    }
     WLOGI("[NAPI]" PRIu64", SetFoldStatusLocked");
     return NapiGetUndefined(env);
 }

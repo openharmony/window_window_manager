@@ -236,7 +236,7 @@ DmErrorCode UnregisterAllScreenListenerWithType(const std::string& type)
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFE("JsScreenManager::UnregisterAllScreenListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return DmErrorCode::DM_ERROR_INVALID_CALLING;
+        return DmErrorCode::DM_OK;
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
@@ -256,7 +256,7 @@ DmErrorCode UnRegisterScreenListenerWithType(napi_env env, const std::string& ty
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("JsScreenManager::UnRegisterScreenListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return DmErrorCode::DM_ERROR_INVALID_CALLING;
+        return DmErrorCode::DM_OK;
     }
     if (value == nullptr) {
         WLOGFE("JsScreenManager::UnRegisterScreenListenerWithType value is nullptr");
@@ -355,7 +355,11 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
     }
     std::lock_guard<std::mutex> lock(mtx_);
     if (argc == ARGC_ONE) {
-        UnregisterAllScreenListenerWithType(cbType);
+        DmErrorCode ret = UnregisterAllScreenListenerWithType(cbType);
+        if (ret != DmErrorCode::DM_OK) {
+            WLOGFE("unregister all callback failed");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        }
     } else {
         napi_value value = argv[INDEX_ONE];
         if ((value == nullptr) || (!NapiIsCallable(env, value))) {
@@ -626,13 +630,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
         napi_value object = argv[0];
         if (object == nullptr) {
-            WLOGFE("Failed to convert parameter to VirtualScreenOption.");
             errMsg = "Failed to get options, options is nullptr";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         } else {
@@ -654,9 +656,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
         auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
         auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
         if (screen == nullptr) {
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                "ScreenManager::CreateVirtualScreen failed."));
+            DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+            if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
+                ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+            }
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             WLOGFE("ScreenManager::CreateVirtualScreen failed.");
             return;
         }
