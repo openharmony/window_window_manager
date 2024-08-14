@@ -2671,8 +2671,8 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = systemConfig_.uiType_ == "pc";
-    bool isPhone = systemConfig_.uiType_ == "phone";
+    bool isPc = systemConfig_.uiType_ == UI_TYPE_PC;
+    bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
     if (!isPc && !isPhone) {
         TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
@@ -3070,7 +3070,7 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("const.product.devicetype", "unknown") == "phone" &&
+    return system::GetParameter("const.product.devicetype", "unknown") == UI_TYPE_PHONE &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
 } // namespace OHOS::Rosen

@@ -314,7 +314,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 
 bool StartingWindow::IsWindowFollowParent(WindowType type)
 {
-    auto isPhone = uiType_ == "phone";
+    auto isPhone = uiType_ == UI_TYPE_PHONE;
     if (!isPhone) {
         return false;
     }
