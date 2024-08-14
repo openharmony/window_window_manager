@@ -78,20 +78,20 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateFlags, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateStatusProps(property, sceneSession, action);
-    sceneSession->HandleActionUpdateNavigationProps(property, sceneSession, action);
-    sceneSession->HandleActionUpdateNavigationIndicatorProps(property, sceneSession, action);
-    sceneSession->HandleActionUpdateFlags(property, sceneSession, action);
+    sceneSession->HandleActionUpdateStatusProps(property, action);
+    sceneSession->HandleActionUpdateNavigationProps(property, action);
+    sceneSession->HandleActionUpdateNavigationIndicatorProps(propertyn, action);
+    sceneSession->HandleActionUpdateFlags(property, action);
 
-    auto ret = sceneSession->HandleActionUpdateFlags(property, sceneSession, action);
+    auto ret = sceneSession->HandleActionUpdateFlags(property, action);
     ASSERT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateFlags(property, sceneSession, action);
+    sceneSession->HandleActionUpdateFlags(property, action);
     windowSessionProperty.isSystemCalling_ = {true};
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateFlags(property, sceneSession, action);
+    sceneSession->HandleActionUpdateFlags(property, action);
 }
 
 /**
@@ -107,13 +107,13 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
+    sceneSession->HandleActionUpdateTouchHotArea(property, action);
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
+    sceneSession->HandleActionUpdateTouchHotArea(property, action);
 
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
+    sceneSession->HandleActionUpdateTouchHotArea(property, action);
 }
 
 /**
@@ -132,12 +132,12 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     ASSERT_NE(nullptr, property);
     OHOS::Rosen::Session session(info);
     session.property_ = nullptr;
-    sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
+    sceneSession->HandleActionUpdateDecorEnable(property, action);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
+    sceneSession->HandleActionUpdateDecorEnable(property, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    auto ret = sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
+    auto ret = sceneSession->HandleActionUpdateDecorEnable(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
@@ -157,9 +157,9 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateWindowLimits, Function | SmallTest
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     OHOS::Rosen::Session session(info);
     session.property_ = nullptr;
-    sceneSession->HandleActionUpdateWindowLimits(property, sceneSession, action);
+    sceneSession->HandleActionUpdateWindowLimits(property, action);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateWindowLimits(property, sceneSession, action);
+    sceneSession->HandleActionUpdateWindowLimits(property, action);
 }
 
 /**
@@ -177,14 +177,14 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateDragenabled(property, action);
 
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateDragenabled(property, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateDragenabled(property, action);
 }
 
 /**
@@ -197,18 +197,18 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateRaiseenabled, Function | SmallTest
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
-    sceneSession->HandleActionUpdateRaiseenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateRaiseenabled(property, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateRaiseenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateRaiseenabled(property, action);
 
     windowSessionProperty.isSystemCalling_ = {true};
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateRaiseenabled(property, sceneSession, action);
+    sceneSession->HandleActionUpdateRaiseenabled(property, action);
 
-    sceneSession->HandleActionUpdateHideNonSystemFloatingWindows(property, sceneSession, action);
+    sceneSession->HandleActionUpdateHideNonSystemFloatingWindows(property, action);
 }
 
 /**
@@ -220,21 +220,21 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
 {
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, property);
-    sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
-    sceneSession->HandleActionUpdateWindowMask(property, sceneSession, action);
+    sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action);
+    sceneSession->HandleActionUpdateWindowMask(property, action);
 
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
-    sceneSession->HandleActionUpdateWindowMask(property, sceneSession, action);
-    sceneSession->HandleActionUpdateTopmost(property, sceneSession, action);
+    sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action);
+    sceneSession->HandleActionUpdateWindowMask(property, action);
+    sceneSession->HandleActionUpdateTopmost(property, action);
 
     SessionInfo info;
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
     sceneSession1->SetSessionProperty(nullptr);
-    sceneSession1->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession1, action);
-    sceneSession1->HandleActionUpdateWindowMask(property, sceneSession1, action);
+    sceneSession1->HandleActionUpdateTextfieldAvoidInfo(property, action);
+    sceneSession1->HandleActionUpdateWindowMask(property, action);
 }
 
 /**
@@ -247,23 +247,23 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, property);
     sptr<SceneSession> sceneSession1 = nullptr;
-    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->SetWindowFlags(property);
     sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
-    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->SetWindowFlags(property);
 
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
-    sceneSession->SetWindowFlags(sceneSession1, property);
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
+    sceneSession->SetWindowFlags(property);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, action);
 
     session.property_ = nullptr;
-    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->SetWindowFlags(property);
     sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
         const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
     ){};
-    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, action);
 }
 
 /**

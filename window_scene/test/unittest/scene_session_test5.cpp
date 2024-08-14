@@ -1032,15 +1032,13 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
     info.bundleName_ = "HandleUpdatePropertyByAction";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    auto res = session->HandleUpdatePropertyByAction(nullptr, nullptr, action);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
-    res = session->HandleUpdatePropertyByAction(nullptr, session, action);
+    auto res = session->HandleUpdatePropertyByAction(nullptr, action);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    res = session->HandleUpdatePropertyByAction(property, session, action);
+    res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_DO_NOTHING, res);
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    res = session->HandleUpdatePropertyByAction(property, session, action);
+    res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
 
@@ -1059,24 +1057,24 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    auto res = session->HandleActionUpdateSetBrightness(property, session, action);
+    auto res = session->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    res = session1->HandleActionUpdateSetBrightness(property, session1, action);
+    res = session1->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, res);
 
     info.isSystem_ = false;
     sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     session2->SetSessionState(SessionState::STATE_CONNECT);
-    res = session2->HandleActionUpdateSetBrightness(property, session2, action);
+    res = session2->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 
     sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
     session3->SetSessionState(SessionState::STATE_CONNECT);
     property->SetBrightness(1.0);
-    res = session3->HandleActionUpdateSetBrightness(property, session3, action);
+    res = session3->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(session3->GetBrightness(), 1.0);
 }
 
@@ -1095,19 +1093,19 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateMaximizeState, Function | SmallTes
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
 
-    auto res = session->HandleActionUpdateMaximizeState(property, session, action);
+    auto res = session->HandleActionUpdateMaximizeState(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateMode(property, session, action);
+    res = session->HandleActionUpdateMode(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateAnimationFlag(property, session, action);
+    res = session->HandleActionUpdateAnimationFlag(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 
     session->SetSessionProperty(nullptr);
-    res = session->HandleActionUpdateMaximizeState(property, session, action);
+    res = session->HandleActionUpdateMaximizeState(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateMode(property, session, action);
+    res = session->HandleActionUpdateMode(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateAnimationFlag(property, session, action);
+    res = session->HandleActionUpdateAnimationFlag(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
 
@@ -1154,15 +1152,13 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction02, Function | SmallTest
     info.bundleName_ = "HandleUpdatePropertyByAction";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    auto res = session->HandleUpdatePropertyByAction(nullptr, nullptr, action);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
-    res = session->HandleUpdatePropertyByAction(nullptr, session, action);
+    auto res = session->HandleUpdatePropertyByAction(nullptr, action);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    res = session->HandleUpdatePropertyByAction(property, session, action);
+    res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_DO_NOTHING, res);
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    res = session->HandleUpdatePropertyByAction(property, session, action);
+    res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
 
@@ -1184,12 +1180,12 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateModeSupportInfo, Function | SmallT
     property->isSystemCalling_ = true;
     ASSERT_NE(session, nullptr);
     session->SetSessionProperty(nullptr);
-    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateModeSupportInfo(property, session2,
+    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateModeSupportInfo(property,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
 
     property->isSystemCalling_ = false;
     session->SetSessionProperty(property);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateModeSupportInfo(property, session2,
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateModeSupportInfo(property,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
 }
 
@@ -1341,12 +1337,12 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     EXPECT_NE(session_, nullptr);
 
     auto res = session->HandleActionUpdateTurnScreenOn(
-        property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+        property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
 
     property->SetTurnScreenOn(true);
     res = session->HandleActionUpdateTurnScreenOn(
-        property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+        property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
