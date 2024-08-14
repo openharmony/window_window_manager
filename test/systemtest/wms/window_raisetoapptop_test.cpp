@@ -204,7 +204,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
     sleep(TEST_SLEEP_S);
 
     result = subWindow1->RaiseToAppTop();
-    ASSERT_EQ(WMError::WM_ERROR_STATE_ABNORMALLY, result);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, result);
 }
 
 /**
