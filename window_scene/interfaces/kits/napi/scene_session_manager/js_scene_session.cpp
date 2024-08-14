@@ -2982,12 +2982,8 @@ napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] session is nullptr, id:%{public}d", persistentId_);
-        napi_throw(env, CreateJsError(env,
-            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "session is null"));
         return NapiGetUndefined(env);
     }
-
     session->SetMovable(movable);
     return NapiGetUndefined(env);
 }

@@ -45,11 +45,11 @@ public:
 
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
-    void SetMovable(bool movable);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
-    bool GetMovable() const;
     bool HasPointDown();
+    void SetMovable(bool movable);
+    bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
