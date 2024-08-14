@@ -3393,6 +3393,7 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
+
 void SceneSession::SetMovable(bool movable)
 {
     auto task = [weakThis = wptr(this), movable]() {
