@@ -168,7 +168,7 @@ void SingleDisplayFoldPolicy::RecoverWhenBootAnimationExit()
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (currentDisplayMode_ != displayMode) {
         ChangeScreenDisplayMode(displayMode);
-    } 
+    }
 }
 
 void SingleDisplayFoldPolicy::TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode)
