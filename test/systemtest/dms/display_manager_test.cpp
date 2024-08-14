@@ -32,8 +32,8 @@ using namespace testing::ext;
 
 namespace OHOS::Rosen {
 namespace  {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
-    const int WAIT_FOR_SYNC_US = 1;  // 1s
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
+const int WAIT_FOR_SYNC_US = 1;  // 1s
 }
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
@@ -371,6 +371,21 @@ HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, Function | SmallTest | Lev
     ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().AddSurfaceNodeToDisplay(id, surfaceNode));
     sleep(2);
     ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(id, surfaceNode));
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay | RemoveSurfaceNodeFromDisplay
+ * @tc.desc: add/remove surfaceNode to/from display
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level2)
+{
+    ScreenId id = 0;
+    uint32_t pid = 0;
+    std::vector<uint64_t> windowList;
+    auto ret = DisplayManager::GetInstance().SetVirtualScreenSecurityExemption(id, pid, windowList);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    sleep(2);
 }
 
 }

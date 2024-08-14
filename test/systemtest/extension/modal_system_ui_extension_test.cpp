@@ -15,8 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#include "iremote_object_mocker.h"
 #include "modal_system_ui_extension.h"
-#include "scene_board_judgement.h"
+#include "mock_message_parcel.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -61,11 +62,7 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
         return;
     }
     OHOS::AAFwk::Want want;
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_FALSE(connection->CreateModalUIExtension(want));
-    } else {
-        ASSERT_TRUE(connection->CreateModalUIExtension(want));
-    }
+    ASSERT_FALSE(connection->CreateModalUIExtension(want));
     delete connection;
 }
 
@@ -79,6 +76,68 @@ HWTEST_F(ModalSystemUiExtensionTest, ToString, Function | SmallTest | Level2)
     AAFwk::WantParams wantParams;
     std::string ret = ModalSystemUiExtension::ToString(wantParams);
     ASSERT_EQ("{}", ret);
+}
+
+/**
+ * @tc.name: DialogAbilityConnectionOnAbilityConnectDone
+ * @tc.desc: DialogAbilityConnectionOnAbilityConnectDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityConnectDone, Function | SmallTest | Level2)
+{
+    AAFwk::Want want;
+    auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
+    ASSERT_NE(connection, nullptr);
+    AppExecFwk::ElementName element;
+
+    connection->OnAbilityConnectDone(element, nullptr, 0);
+
+    auto remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    connection->OnAbilityConnectDone(element, remoteObject, 0);
+
+    remoteObject->sendRequestResult_ = 1;
+    connection->OnAbilityConnectDone(element, remoteObject, 0);
+    static constexpr uint32_t WAIT_TIME_MICROSECONDS = 5200000;
+    usleep(WAIT_TIME_MICROSECONDS);
+}
+
+/**
+ * @tc.name: DialogAbilityConnectionOnAbilityDisconnectDone
+ * @tc.desc: DialogAbilityConnectionOnAbilityDisconnectDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityDisconnectDone, Function | SmallTest | Level2)
+{
+    AAFwk::Want want;
+    auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
+    ASSERT_NE(connection, nullptr);
+    AppExecFwk::ElementName element;
+    connection->OnAbilityDisconnectDone(element, 0);
+}
+
+/**
+ * @tc.name: DialogAbilityConnectionSendWant
+ * @tc.desc: DialogAbilityConnectionSendWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionSendWant, Function | SmallTest | Level2)
+{
+    AAFwk::Want want;
+    auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
+    auto remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_FALSE(connection->SendWant(remoteObject));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteString16ErrorFlag(true);
+    EXPECT_FALSE(connection->SendWant(remoteObject));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    EXPECT_TRUE(connection->SendWant(remoteObject));
+
+    remoteObject->sendRequestResult_ = 1;
+    EXPECT_FALSE(connection->SendWant(remoteObject));
 }
 }
 } // Rosen

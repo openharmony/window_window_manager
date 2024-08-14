@@ -21,7 +21,9 @@
 #include "screen.h"
 #include "screen_info.h"
 #include "window_manager_hilog.h"
+#ifdef XPOWER_EVENT_ENABLE
 #include "xpower_event_js.h"
+#endif // XPOWER_EVENT_ENABLE
 
 namespace OHOS {
 namespace Rosen {
@@ -29,7 +31,7 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreen"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreen"};
 }
 
 static thread_local std::map<ScreenId, std::shared_ptr<NativeReference>> g_JsScreenMap;
@@ -142,9 +144,11 @@ napi_value JsScreen::SetScreenActiveMode(napi_env env, napi_callback_info info)
 {
     WLOGI("SetScreenActiveMode is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
+#ifdef XPOWER_EVENT_ENABLE
     if (me != nullptr) {
         HiviewDFX::ReportXPowerJsStackSysEvent(env, "EPS_LCD_FREQ");
     }
+#endif // XPOWER_EVENT_ENABLE
     return (me != nullptr) ? me->OnSetScreenActiveMode(env, info) : nullptr;
 }
 

@@ -24,7 +24,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 32;
+constexpr size_t DATA_MIN_SIZE = 32;
 }
 class ScreenListener : public ScreenManager::IScreenListener {
 public:

@@ -73,5 +73,10 @@ void WindowManagerAgent::NotifyGestureNavigationEnabledResult(bool enable)
     SingletonContainer::Get<WindowManager>().NotifyGestureNavigationEnabledResult(enable);
 }
 
+void WindowManagerAgent::NotifyWindowStyleChange(WindowStyleType type)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowStyleChange(type);
+}
+
 } // namespace Rosen
 } // namespace OHOS

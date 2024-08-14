@@ -255,6 +255,17 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
 
+static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
+{
+    int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
+    if (realCallerSessionId == sceneSession->GetPersistentId()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
+        realCallerSessionId = sceneSession->GetSessionInfo().callerPersistentId_;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
+    return realCallerSessionId;
+}
+
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
@@ -271,19 +282,10 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]session: %{public}d isNeedBackToOther: %{public}d",
             sceneSession->GetPersistentId(), isNeedBackToOther);
         if (isNeedBackToOther) {
-            int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
-            if (realCallerSessionId == sceneSession->GetPersistentId()) {
-                TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
-                auto scnSession = SceneSessionManager::GetInstance().GetSceneSession(realCallerSessionId);
-                if (scnSession != nullptr) {
-                    realCallerSessionId = scnSession->GetSessionInfo().callerPersistentId_;
-                }
-            }
-            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
-            info.callerPersistentId_ = realCallerSessionId;
+            info.callerPersistentId_ = GetRealCallerSessionId(sceneSession);
             VerifyCallerToken(info);
         } else {
-            info.callerPersistentId_ = 0;
+            info.callerPersistentId_ = INVALID_SESSION_ID;
         }
 
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
@@ -311,6 +313,9 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
+    if (info.fullScreenStart_) {
+        sceneSession->NotifySessionFullScreen(true);
+    }
 }
 
 void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
@@ -327,7 +332,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
-    if (info.persistentId_ == 0) {
+    if (info.persistentId_ == INVALID_SESSION_ID) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (result == BrokerStates::BROKER_NOT_START) {
             WLOGE("[NAPI] The BrokerStates is not opened");

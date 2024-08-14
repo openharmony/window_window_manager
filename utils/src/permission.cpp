@@ -29,32 +29,43 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
 }
 
-bool Permission::IsSystemServiceCalling(bool needPrintLog)
+bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCalling)
 {
-    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    uint32_t tokenId = isLocalSysCalling ?
+        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
+        IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId: %{private}u, flag: %{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("not system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "not system service calling, tokenId: %{private}u, flag: %{public}u", tokenId, flag);
     }
     return false;
 }
 
-bool Permission::IsSystemCalling()
+bool Permission::IsSystemCallingOrStartByHdcd(bool isLocalSysCalling)
 {
-    if (IsSystemServiceCalling(false)) {
+    if (!IsSystemCalling(isLocalSysCalling) && !IsStartByHdcd(isLocalSysCalling)) {
+        TLOGE(WmsLogTag::DEFAULT, "not system calling, not start by hdcd");
+        return false;
+    }
+    return true;
+}
+
+bool Permission::IsSystemCalling(bool isLocalSysCalling)
+{
+    if (IsSystemServiceCalling(false, isLocalSysCalling)) {
         return true;
     }
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
-    return isSystemApp;
+    uint64_t tokenId = isLocalSysCalling ?
+        IPCSkeleton::GetSelfTokenID() : IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
 bool Permission::CheckCallingPermission(const std::string& permission)
@@ -70,10 +81,13 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsStartByHdcd()
+bool Permission::IsStartByHdcd(bool isLocalSysCalling)
 {
+    uint32_t tokenId = isLocalSysCalling ?
+        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
+        IPCSkeleton::GetCallingTokenID();
     OHOS::Security::AccessToken::NativeTokenInfo info;
-    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
         return false;
     }
     if (info.processName.compare("hdcd") == 0) {
@@ -152,6 +166,7 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
     int uid = IPCSkeleton::GetCallingUid();
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
+    WLOGFI("resetCallingIdentity:%{public}s", identity.c_str());
     std::string callingBundleName;
     bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
     WLOGFI("get the bundle name:%{public}s", callingBundleName.c_str());

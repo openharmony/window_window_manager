@@ -55,6 +55,10 @@ sptr<CJWindowImpl> CreateCjWindowObject(sptr<Window>& window)
     }
 
     windowImpl = FFI::FFIData::Create<CJWindowImpl>(window);
+    if (windowImpl == nullptr) {
+        TLOGI(WmsLogTag::WMS_DIALOG, "Failed to create window %{public}s", windowName.c_str());
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_cjWindowMap[windowName] = windowImpl;
     return windowImpl;
@@ -89,13 +93,13 @@ ResWindow CJWindowImpl::CheckWindow()
 {
     ResWindow result;
     result.ret = static_cast<int32_t>(WmErrorCode::WM_OK);
-    result.weakWindow = nullptr;
+    result.nativeWindow = nullptr;
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
         result.ret = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return result;
     }
-    result.weakWindow = windowToken_;
+    result.nativeWindow = windowToken_;
     return result;
 }
 
@@ -105,9 +109,9 @@ int32_t CJWindowImpl::Hide()
     if (result.ret != 0) {
         return result.ret;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(result.weakWindow->Hide(0, false, false));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(result.nativeWindow->Hide(0, false, false));
     TLOGI(WmsLogTag::WMS_DIALOG,
-        "Window [%{public}u] hide end, ret = %{public}d", result.weakWindow->GetWindowId(), ret);
+        "Window [%{public}u] hide end, ret = %{public}d", result.nativeWindow->GetWindowId(), ret);
     return static_cast<int32_t>(ret);
 }
 
@@ -138,7 +142,7 @@ int32_t CJWindowImpl::ShowWindow()
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     if (weakWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "window is nullptr");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -176,7 +180,7 @@ int32_t CJWindowImpl::DestroyWindow()
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WMError ret = weakWindow->Destroy();
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -190,7 +194,7 @@ int32_t CJWindowImpl::MoveWindowTo(int32_t x, int32_t y)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveTo(x, y));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] move end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -207,7 +211,7 @@ int32_t CJWindowImpl::Resize(uint32_t width, uint32_t height)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Resize(width, height));
     TLOGD(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] resize end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -281,7 +285,7 @@ int32_t CJWindowImpl::SetWindowLayoutFullScreen(bool isLayoutFullScreen)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetLayoutFullScreen(isLayoutFullScreen));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -308,7 +312,7 @@ int32_t CJWindowImpl::SetWindowBrightness(float brightness)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetBrightness(brightness));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set brightness end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -367,7 +371,7 @@ int32_t CJWindowImpl::SetWindowFocusable(bool focusable)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetFocusable(focusable));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set focusable end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -380,7 +384,7 @@ int32_t CJWindowImpl::SetWindowKeepScreenOn(bool keepScreenOn)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set keep screen on end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -424,7 +428,7 @@ int32_t CJWindowImpl::SetWindowPrivacyMode(bool isPrivacyMode)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetPrivacyMode(isPrivacyMode));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
@@ -437,7 +441,7 @@ int32_t CJWindowImpl::SetWindowTouchable(bool touchable)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set touchable end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -450,7 +454,7 @@ int32_t CJWindowImpl::SetForbidSplitMove(bool isForbidSplitMove)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret;
     if (isForbidSplitMove) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
@@ -676,7 +680,7 @@ int32_t CJWindowImpl::SetWindowColorSpace(uint32_t colorSpace)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     weakWindow->SetColorSpace(ColorSpace(colorSpace));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] OnSetWindowColorSpace end, colorSpace = %{public}u",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
@@ -729,7 +733,7 @@ int32_t CJWindowImpl::SetResizeByDragEnabled(bool enable)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetResizeByDragEnabled(enable));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set dragEnabled end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -742,7 +746,7 @@ int32_t CJWindowImpl::RaiseToAppTop()
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = weakWindow->RaiseToAppTop();
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] zorder raise success",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -755,7 +759,7 @@ int32_t CJWindowImpl::SetSnapshotSkip(bool isSkip)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSnapshotSkip(isSkip));
     TLOGI(WmsLogTag::WMS_DIALOG, "[%{public}u, %{public}s] set snapshotSkip end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -798,7 +802,7 @@ int32_t CJWindowImpl::SetRaiseByClickEnabled(bool enable)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetRaiseByClickEnabled(enable));
     TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set raiseEnabled end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -811,7 +815,7 @@ int32_t CJWindowImpl::RaiseAboveTarget(int32_t windowId)
     if (result.ret != 0) {
         return result.ret;
     }
-    sptr<Window> weakWindow = result.weakWindow;
+    sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = weakWindow->RaiseAboveTarget(windowId);
     return static_cast<int32_t>(ret);
 }
@@ -983,14 +987,12 @@ static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& s
             systemBarProperties[type].contentColor_ = property.contentColor_;
         }
     }
-
-    return;
 }
 
 void SetBarPropertyMap(
     std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
-    CBarProperties cProperties,
+    const CBarProperties& cProperties,
     sptr<Window> nativeWindow)
 {
     auto statusProperty = nativeWindow->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -1030,7 +1032,7 @@ void SetBarPropertyMap(
     }
 }
 
-int32_t CJWindowImpl::SetWindowSystemBarProperties(CBarProperties cProperties)
+int32_t CJWindowImpl::SetWindowSystemBarProperties(const CBarProperties& cProperties)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
@@ -1088,7 +1090,7 @@ int32_t CJWindowImpl::SetWindowSystemBarEnable(char** arr, uint32_t size)
     return static_cast<int32_t>(ret);
 }
 
-int32_t CJWindowImpl::OnRegisterWindowCallback(std::string type, int64_t funcId)
+int32_t CJWindowImpl::OnRegisterWindowCallback(const std::string& type, int64_t funcId)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");
@@ -1102,7 +1104,7 @@ int32_t CJWindowImpl::OnRegisterWindowCallback(std::string type, int64_t funcId)
     return static_cast<int32_t>(ret);
 }
 
-int32_t CJWindowImpl::UnregisterWindowCallback(std::string type, int64_t funcId)
+int32_t CJWindowImpl::UnregisterWindowCallback(const std::string& type, int64_t funcId)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "WindowToken_ is nullptr");

@@ -56,8 +56,8 @@ inline void CalcFloatWindowRectLimits(const WindowLimits& limits, uint32_t maxFl
     maxHeight = std::min(maxHeight, static_cast<int32_t>(maxFloatingWindowSize * vpr));
 }
 
-inline std::string ConvertSessionName(const std::string &bundleName, const std::string &name,
-    const std::string &moduleName, const int32_t appIndex = 0)
+inline std::string ConvertSessionName(const std::string& bundleName, const std::string& name,
+    const std::string& moduleName, const int32_t appIndex = 0)
 {
     std::string strName;
     if (appIndex == 0) {

@@ -561,11 +561,38 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
+     * @brief Change the display mode of the foldable device from js.
+     *
+     * @param mode target display mode to change.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+
+    /**
+     * @brief Set display scale.
+     *
+     * @param screenId screenId used in DisplayManager.
+     * @param scaleX screen scale in x axis.
+     * @param scaleY screen scale in y axis.
+     * @param pivotX screen scale pivot in x axis.
+     * @param pivotY screen scale pivot in y axis.
+     */
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
+
+    /**
      * @brief Locked fold status.
      *
      * @param mode locked fold status is locked.
      */
     void SetFoldStatusLocked(bool locked);
+
+    /**
+     * @brief Locked fold status from js.
+     *
+     * @param locked locked fold status is locked.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetFoldStatusLockedFromJs(bool locked);
 
     /**
      * @brief Get the fold crease region in the current display mode.
@@ -621,6 +648,13 @@ public:
      * @return all physical resolution
      */
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
+
+    /**
+     * @brief set virtual screen security exemption
+     *
+     * @param DM_OK means set exemption is success.
+    */
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 

@@ -23,7 +23,7 @@ class MarshallingHelper : public Parcelable {
 public:
     MarshallingHelper() = delete;
     template<class T>
-    static bool MarshallingVectorParcelableObj(Parcel &parcel, const std::vector<sptr<T>>& data)
+    static bool MarshallingVectorParcelableObj(Parcel& parcel, const std::vector<sptr<T>>& data)
     {
         if (data.size() > INT_MAX) {
             return false;
@@ -40,7 +40,7 @@ public:
     }
 
     template<class T>
-    static bool UnmarshallingVectorParcelableObj(Parcel &parcel, std::vector<sptr<T>>& data)
+    static bool UnmarshallingVectorParcelableObj(Parcel& parcel, std::vector<sptr<T>>& data)
     {
         int32_t len = parcel.ReadInt32();
         if (len < 0) {
@@ -71,7 +71,7 @@ public:
     }
 
     template<class T>
-    static bool MarshallingVectorObj(Parcel &parcel, const std::vector<T>& data,
+    static bool MarshallingVectorObj(Parcel& parcel, const std::vector<T>& data,
         std::function<bool(Parcel&, const T&)> func)
     {
         if (data.size() > INT_MAX) {
@@ -92,7 +92,7 @@ public:
     }
 
     template<class T>
-    static bool UnmarshallingVectorObj(Parcel &parcel, std::vector<T>& data, std::function<bool(Parcel&, T&)> func)
+    static bool UnmarshallingVectorObj(Parcel& parcel, std::vector<T>& data, std::function<bool(Parcel&, T&)> func)
     {
         if (func == nullptr) {
             return false;

@@ -31,7 +31,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DragController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DragController"};
 }
 
 void DragController::UpdateDragInfo(uint32_t windowId)
@@ -472,11 +472,11 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
                 moveDragProperty_->startMoveFlag_ = false;
                 moveDragProperty_->startDragFlag_ = false;
             }
-            WLOGFD("[Server Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
-                   "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
-                   "%{public}d, pointPos: [%{public}d, %{public}d]", activeWindowId_, pointId, sourceType,
-                   moveDragProperty_->pointEventStarted_, moveDragProperty_->startMoveFlag_,
-                   moveDragProperty_->startDragFlag_, targetDisplayId, pointPosX, pointPosY);
+            TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u, pointId:%{public}d, sourceType:%{public}d, "
+                "hasPointStarted:%{public}d, startMove:%{public}d, startDrag:%{public}d, targetDisplayId:"
+                "%{public}d, pointPos:[%{private}d, %{private}d]", activeWindowId_, pointId, sourceType,
+                moveDragProperty_->pointEventStarted_, moveDragProperty_->startMoveFlag_,
+                moveDragProperty_->startDragFlag_, targetDisplayId, pointPosX, pointPosY);
             break;
         }
         // ready to move or drag
@@ -557,15 +557,12 @@ std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint
         return nullptr;
     }
 
-    auto vsyncStation = std::make_shared<VsyncStation>(node->surfaceNode_->GetId());
+    auto vsyncStation = std::make_shared<VsyncStation>(node->surfaceNode_->GetId(), inputEventHandler_);
     if (vsyncStation == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Get vsync station failed, create vsyncStation is nullptr");
         return nullptr;
     }
 
-    vsyncStation->SetIsMainHandlerAvailable(false);
-    vsyncStation->SetVsyncEventHandler(inputEventHandler_);
-    
     {
         std::lock_guard<std::mutex> lock(mtx_);
         vsyncStationMap_.emplace(windowId, vsyncStation);

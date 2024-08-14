@@ -271,14 +271,19 @@ FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
     return displayMode_;
 }
 
-void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation)
+void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
 
+    // not need update property to input manager
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        return;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");
@@ -511,5 +516,16 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     if (displayChangeListener_) {
         displayChangeListener_->OnScreenFoldStatusChanged(screenFoldInfo);
     }
+}
+
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    auto session = GetScreenSession(id);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
 }
 } // namespace OHOS::Rosen

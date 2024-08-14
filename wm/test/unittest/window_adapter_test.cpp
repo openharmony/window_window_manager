@@ -565,6 +565,20 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, Function | SmallTest | Level2)
     auto ret = windowAdapter.GetHostWindowRect(hostWindowId, rect);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: GetWindowStyleType
+ * @tc.desc: WindowAdapter/GetWindowStyleType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    windowAdapter.GetWindowStyleType(windowStyleType);
+    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+}
+
 }
 }
 }

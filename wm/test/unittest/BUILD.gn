@@ -55,8 +55,9 @@ group("unittest") {
     ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
+    ":wm_window_session_impl_test2",
     ":wm_window_session_impl_test3",
-    ":wm_window_session_impl_two_test",
+    ":wm_window_session_impl_test4",
     ":wm_window_stub_test",
     ":wm_window_test",
   ]
@@ -245,10 +246,10 @@ ohos_unittest("wm_window_session_impl_test") {
   ]
 }
 
-ohos_unittest("wm_window_session_impl_two_test") {
+ohos_unittest("wm_window_session_impl_test2") {
   module_out_path = module_out_path
 
-  sources = [ "window_session_impl_two_test.cpp" ]
+  sources = [ "window_session_impl_test2.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -263,6 +264,20 @@ ohos_unittest("wm_window_session_impl_test3") {
   module_out_path = module_out_path
 
   sources = [ "window_session_impl_test3.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_session_impl_test4") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_impl_test4.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -512,7 +527,9 @@ ohos_unittest("wm_window_extension_session_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_context",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -642,6 +659,19 @@ ohos_unittest("wm_window_adapter_lite_test") {
   module_out_path = module_out_path
 
   sources = [ "window_adapter_lite_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_prepare_terminate_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_prepare_terminate_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

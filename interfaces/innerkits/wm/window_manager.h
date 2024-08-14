@@ -177,6 +177,21 @@ public:
 };
 
 /**
+ * @class IWindowStyleChangedListener
+ *
+ * @brief Listener to observe windowStyle changed.
+ */
+class IWindowStyleChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window style changed.
+     *
+     * @param styleType
+     */
+    virtual void OnWindowStyleUpdate(WindowStyleType styleType) = 0;
+};
+
+/**
  * @class AccessibilityWindowInfo
  *
  * @brief Window info used for Accessibility.
@@ -624,7 +639,7 @@ public:
      * @param infos session infos
      * @return WM_OK means set success, others means set failed.
      */
-    WMError DumpSessionAll(std::vector<std::string> &infos);
+    WMError DumpSessionAll(std::vector<std::string>& infos);
 
     /**
      * @brief Dump session info with id
@@ -632,7 +647,7 @@ public:
      * @param infos session infos
      * @return WM_OK means set success, others means set failed.
      */
-    WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
+    WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos);
 
     /**
      * @brief Get uiContent remote object
@@ -693,7 +708,31 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener);
-    
+
+    /**
+     * @brief Register WindowStyle changed listener.
+     *
+     * @param listener IWindowStyleChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
+    /**
+    * @brief Unregister WindowStyle changed listener.
+    *
+    * @param listener IWindowStyleChangedListener
+    * @return WM_OK means unregister success, others means unregister failed.
+    */
+    WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
+    /**
+     * @brief Get window style type.
+     *
+     * @param windowStyleType WindowType
+     * @return @return WM_OK means get window style success, others means failed.
+     */
+    WindowStyleType GetWindowStyleType();
+
 private:
     WindowManager();
     ~WindowManager();
@@ -718,6 +757,7 @@ private:
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
+    WMError NotifyWindowStyleChange(WindowStyleType type);
 };
 } // namespace Rosen
 } // namespace OHOS

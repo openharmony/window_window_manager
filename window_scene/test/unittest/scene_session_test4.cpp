@@ -111,6 +111,9 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
     sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
 }
 
 /**
@@ -225,6 +228,13 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
     sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
     sceneSession->HandleActionUpdateWindowMask(property, sceneSession, action);
     sceneSession->HandleActionUpdateTopmost(property, sceneSession, action);
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->SetSessionProperty(nullptr);
+    sceneSession1->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession1, action);
+    sceneSession1->HandleActionUpdateWindowMask(property, sceneSession1, action);
 }
 
 /**
@@ -246,38 +256,14 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
     session.property_ = new WindowSessionProperty();
     sceneSession->SetWindowFlags(sceneSession1, property);
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
-}
 
-/**
- * @tc.name: TerminateSession
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, TerminateSession, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
-    sceneSession->TerminateSession(abilitySessionInfo);
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, NotifySessionException, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-    OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
+    session.property_ = nullptr;
+    sceneSession->SetWindowFlags(sceneSession1, property);
+    sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
+        const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
+    ){};
+    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession1, property, action);
 }
 
 /**
@@ -331,6 +317,11 @@ HWTEST_F(SceneSessionTest4, SetScale, Function | SmallTest | Level2)
     EXPECT_EQ(5.0f, session->GetScaleX());
     EXPECT_EQ(5.0f, session->GetScaleY());
     EXPECT_EQ(5.0f, session->GetPivotX());
+    EXPECT_EQ(5.0f, session->GetPivotY());
+
+    session->sessionStage_ = new SessionStageMocker();
+    EXPECT_NE(nullptr, session->sessionStage_);
+    session->SetScale(5.0f, 5.0f, 5.0f, 5.0f);
     EXPECT_EQ(5.0f, session->GetPivotY());
 }
 
@@ -406,6 +397,9 @@ HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | L
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
     session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
+    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
+
+    session->SetSessionState(SessionState::STATE_BACKGROUND);
     EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
 }
 

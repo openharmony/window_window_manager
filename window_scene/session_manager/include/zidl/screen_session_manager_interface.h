@@ -101,6 +101,10 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
+    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode) override { return DMError::DM_OK; }
+    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
+        ExtendOption secondaryScreenOption) override { return DMError::DM_OK; }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override { return DMError::DM_OK; }
@@ -126,8 +130,12 @@ public:
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override { return DMError::DM_OK; }
+
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) override {}
 
     void SetFoldStatusLocked(bool locked) override {}
+    DMError SetFoldStatusLockedFromJs(bool locked) override { return DMError::DM_OK; }
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
@@ -144,7 +152,8 @@ public:
     virtual void SwitchUser() {}
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
-    virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation) {}
+    virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
@@ -173,6 +182,12 @@ public:
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
     {
         return std::vector<DisplayPhysicalResolution> {};
+    }
+    virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override { return false; }
+    virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+        std::vector<uint64_t>& windowIdList) override
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
 };
 } // namespace Rosen

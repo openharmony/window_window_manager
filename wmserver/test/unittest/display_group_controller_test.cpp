@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const Rect DEFAULT_RECT = {0, 0, 200, 200};
+const Rect DEFAULT_RECT = {0, 0, 200, 200};
 }
 class DisplayGroupControllerTest : public testing::Test {
 public:

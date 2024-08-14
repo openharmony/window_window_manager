@@ -38,7 +38,6 @@
 #include "window_option.h"
 #include "wm_common.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -97,6 +96,7 @@ public:
     void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
@@ -115,6 +115,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
+    void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WSError UpdateFocus(bool focus) override;
@@ -235,6 +236,13 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual WMError EnableDrag(bool enableDrag) override;
+    WMError SetContinueState(int32_t continueState) override;
+
+    /*
+     * UIExtension
+     */
+    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
 
 protected:
     WMError Connect();
@@ -260,18 +268,21 @@ protected:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
-    void NotifyWindowStatusChange(WindowMode mode);
     static sptr<Window> FindWindowById(uint32_t winId);
+    void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void RegisterFrameLayoutCallback();
+    bool IsVerticalOrientation(Orientation orientation) const;
+    void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
+    WindowStatus GetWindowStatusInner(WindowMode mode);
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
@@ -298,6 +309,7 @@ protected:
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool needRemoveWindowInputChannel_ = false;
+    bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
@@ -308,6 +320,15 @@ protected:
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
     std::atomic_bool enableSetBufferAvailableCallback_ = false;
+    bool IsFreeMultiWindowMode() const
+    {
+        return windowSystemConfig_.IsFreeMultiWindowMode();
+    }
+
+    /*
+     * UIExtension
+     */
+    wptr<Window> parentExtensionWindow_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -347,10 +368,9 @@ private:
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
-
+    void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-    void NotifyAfterFocused();
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
@@ -365,16 +385,16 @@ private:
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
-    void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
     bool IsUserOrientation(Orientation orientation) const;
-    bool IsFreeMultiWindowMode() const
-    {
-        return windowSystemConfig_.freeMultiWindowSupport_ && windowSystemConfig_.freeMultiWindowEnable_;
-    }
-    bool IsAppSupportForceSplit(const std::string& bundleName);
-    void SetForceSplitEnable(bool isForceSplit);
+    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    bool IsNotifyInteractiveDuplicative(bool interactive);
+    void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
@@ -420,12 +440,14 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
-    WindowTitleVisibleFlags windowTitleVisibleFlags_;
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
+    WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+    bool hasFirstNotifyInteractive_ = false;
+    bool interactive_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

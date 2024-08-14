@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <parcel.h>
+#include "future_callback_interface.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "wm_common.h"
@@ -42,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetLayoutCallback(const sptr<IFutureCallback>& callback);
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
@@ -93,11 +95,15 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
+    void SetIsPcAppInPad(bool isPcAppInPad);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    sptr<IFutureCallback> GetLayoutCallback() const;
+    SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
@@ -145,6 +151,8 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    bool GetIsAppSupportPhoneInPc() const;
+    bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -157,6 +165,10 @@ public:
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingSessionInfo(Parcel& parcel) const;
+    static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFutureCallback(Parcel& parcel) const;
+    static void UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -228,6 +240,7 @@ private:
     void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
+    sptr<IFutureCallback> layoutCallback_ = nullptr;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
@@ -273,6 +286,7 @@ private:
     // Transform info
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
+    mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
@@ -294,7 +308,9 @@ private:
     static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
+    bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
+    bool isPcAppInPad_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -327,6 +343,34 @@ struct FreeMultiWindowConfig : public Parcelable {
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
+        return config;
+    }
+};
+
+struct AppForceLandscapeConfig : public Parcelable {
+    int32_t mode_ = 0;
+    std::string homePage_;
+
+    AppForceLandscapeConfig() {}
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage) : mode_(mode), homePage_(homePage) {}
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(mode_) ||
+            !parcel.WriteString(homePage_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static AppForceLandscapeConfig* Unmarshalling(Parcel& parcel)
+    {
+        AppForceLandscapeConfig* config = new (std::nothrow) AppForceLandscapeConfig();
+        if (config == nullptr) {
+            return nullptr;
+        }
+        config->mode_ = parcel.ReadInt32();
+        config->homePage_ = parcel.ReadString();
         return config;
     }
 };
@@ -428,6 +472,11 @@ struct SystemSessionConfig : public Parcelable {
         config->uiType_ = parcel.ReadString();
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
+    }
+
+    bool IsFreeMultiWindowMode() const
+    {
+        return freeMultiWindowEnable_ && freeMultiWindowSupport_;
     }
 };
 } // namespace Rosen

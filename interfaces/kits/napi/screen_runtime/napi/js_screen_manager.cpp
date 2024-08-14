@@ -35,10 +35,13 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
+constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
 constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
 }
 
 class JsScreenManager {
@@ -76,6 +79,18 @@ static napi_value MakeMirror(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
     return (me != nullptr) ? me->OnMakeMirror(env, info) : nullptr;
+}
+
+static napi_value MultiScreenModeSwitch(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMultiScreenModeSwitch(env, info) : nullptr;
+}
+
+static napi_value MultiScreenRelativePosition(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMultiScreenRelativePosition(env, info) : nullptr;
 }
 
 static napi_value MakeExpand(napi_env env, napi_callback_info info)
@@ -236,7 +251,7 @@ DmErrorCode UnregisterAllScreenListenerWithType(const std::string& type)
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFE("JsScreenManager::UnregisterAllScreenListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return DmErrorCode::DM_ERROR_INVALID_CALLING;
+        return DmErrorCode::DM_OK;
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
@@ -256,7 +271,7 @@ DmErrorCode UnRegisterScreenListenerWithType(napi_env env, const std::string& ty
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("JsScreenManager::UnRegisterScreenListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return DmErrorCode::DM_ERROR_INVALID_CALLING;
+        return DmErrorCode::DM_OK;
     }
     if (value == nullptr) {
         WLOGFE("JsScreenManager::UnRegisterScreenListenerWithType value is nullptr");
@@ -355,7 +370,11 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
     }
     std::lock_guard<std::mutex> lock(mtx_);
     if (argc == ARGC_ONE) {
-        UnregisterAllScreenListenerWithType(cbType);
+        DmErrorCode ret = UnregisterAllScreenListenerWithType(cbType);
+        if (ret != DmErrorCode::DM_OK) {
+            WLOGFE("unregister all callback failed");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        }
     } else {
         napi_value value = argv[INDEX_ONE];
         if ((value == nullptr) || (!NapiIsCallable(env, value))) {
@@ -423,6 +442,86 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
             task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirror failed."));
         }
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
+napi_value OnMultiScreenModeSwitch(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeMirror is called");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_THREE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need three args");
+    }
+    int64_t mainScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], mainScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
+    }
+    int64_t secondaryScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], secondaryScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
+    }
+    ScreenSourceMode secondaryScreenMode;
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], secondaryScreenMode)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter");
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [mainScreenId, secondaryScreenId, env, secondaryScreenMode,
+        task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMultiScreenModeSwitch");
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MultiScreenModeSwitch(mainScreenId, secondaryScreenId,
+                secondaryScreenMode));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMultiScreenModeSwitch failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
+napi_value OnMultiScreenRelativePosition(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeMirror is called");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need two args");
+    }
+    ExtendOption mainScreenOption;
+    if (GetExtendOptionFromJs(env, argv[INDEX_ZERO], mainScreenOption) == -1) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
+    }
+    ExtendOption secondaryScreenOption;
+    if (GetExtendOptionFromJs(env, argv[INDEX_ONE], secondaryScreenOption) == -1) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [mainScreenOption, secondaryScreenOption, env,
+        task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMultiScreenRelativePosition");
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MultiScreenRelativePosition(mainScreenOption,
+                secondaryScreenOption));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "OnMultiScreenRelativePosition failed."));
+        }
+        delete task;
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
@@ -616,6 +715,33 @@ static int32_t GetExpandOptionFromJs(napi_env env, napi_value optionObject, Expa
     return 0;
 }
 
+static int32_t GetExtendOptionFromJs(napi_env env, napi_value optionObject, ExtendOption& option)
+{
+    napi_value screedIdValue = nullptr;
+    napi_value startXValue = nullptr;
+    napi_value startYValue = nullptr;
+    uint32_t screenId;
+    uint32_t startX;
+    uint32_t startY;
+    napi_get_named_property(env, optionObject, "screenId", &screedIdValue);
+    napi_get_named_property(env, optionObject, "startX", &startXValue);
+    napi_get_named_property(env, optionObject, "startY", &startYValue);
+    if (!ConvertFromJsValue(env, screedIdValue, screenId)) {
+        WLOGFE("Failed to convert screedIdValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, startXValue, startX)) {
+        WLOGFE("Failed to convert startXValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, startYValue, startY)) {
+        WLOGFE("Failed to convert startYValue to callbackType");
+        return -1;
+    }
+    option = {screenId, startX, startY};
+    return 0;
+}
+
 napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
     WLOGI("JsScreenManager::OnCreateVirtualScreen is called");
@@ -626,13 +752,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
         napi_value object = argv[0];
         if (object == nullptr) {
-            WLOGFE("Failed to convert parameter to VirtualScreenOption.");
             errMsg = "Failed to get options, options is nullptr";
             errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
         } else {
@@ -654,9 +778,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
         auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
         auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
         if (screen == nullptr) {
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                "ScreenManager::CreateVirtualScreen failed."));
+            DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+            if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
+                ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+            }
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             WLOGFE("ScreenManager::CreateVirtualScreen failed.");
             return;
         }
@@ -1080,6 +1206,9 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenManager::RegisterScreenManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(env, exportObj, "makeMirror", moduleName, JsScreenManager::MakeMirror);
+    BindNativeFunction(env, exportObj, "MultiScreenModeSwitch", moduleName, JsScreenManager::MultiScreenModeSwitch);
+    BindNativeFunction(env, exportObj, "MultiScreenRelativePosition", moduleName,
+        JsScreenManager::MultiScreenRelativePosition);
     BindNativeFunction(env, exportObj, "makeExpand", moduleName, JsScreenManager::MakeExpand);
     BindNativeFunction(env, exportObj, "stopMirror", moduleName, JsScreenManager::StopMirror);
     BindNativeFunction(env, exportObj, "stopExpand", moduleName, JsScreenManager::StopExpand);

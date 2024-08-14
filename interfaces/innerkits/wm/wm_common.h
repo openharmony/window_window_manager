@@ -21,6 +21,7 @@
 #include <float.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace Rosen {
@@ -253,7 +254,8 @@ enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
+    FOLLOW_SETTING = 1 << 2
 };
 
 /**
@@ -421,6 +423,14 @@ enum class BackupAndRestoreType : int32_t {
 };
 
 /**
+ * @brief Enumerates window Style type.
+ */
+enum class WindowStyleType : uint8_t {
+    WINDOW_STYLE_DEFAULT = 0,
+    WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.
@@ -436,7 +446,7 @@ struct PointInfo {
  * @brief topN main window info.
  */
 struct MainWindowInfo : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(pid_)) {
             return false;
@@ -825,6 +835,30 @@ public:
         delete avoidArea;
         return nullptr;
     }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        if (isEmptyAvoidArea()) {
+            ss << "empty";
+            return ss.str();
+        }
+
+        std::vector<std::pair<std::string, Rect>> rects = {
+            std::make_pair("top", topRect_),
+            std::make_pair("bottom", bottomRect_),
+            std::make_pair("left", leftRect_),
+            std::make_pair("right", rightRect_)
+        };
+        for (const auto& pair: rects) {
+            if (!pair.second.IsUninitializedRect()) {
+                auto rect = pair.second;
+                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
+                    << rect.width_ << " " << rect.height_ << "] ";
+            }
+        }
+        return ss.str();
+    }
 };
 
 /**
@@ -963,10 +997,10 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
-    uint32_t minWidth_ = 0;
-    uint32_t minHeight_ = 0;
+    uint32_t maxWidth_ = INT32_MAX;
+    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t minWidth_ = 1;
+    uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;
