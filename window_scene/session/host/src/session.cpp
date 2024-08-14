@@ -2283,6 +2283,11 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+                surfaceNode_->MarkUifirstNode(false);
+            }
+        } else {
+            surfaceNode_->MarkUifirstNode(true);
         }
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
