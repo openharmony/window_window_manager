@@ -951,7 +951,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton);
     if (property_->GetCompatibleModeInPc()) {
-        uiContent->HideWindowTitleButton(hideSplitButton, false, hideMinimizeButton);
+        uiContent->HideWindowTitleButton(true, false, hideMinimizeButton);
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
     }
