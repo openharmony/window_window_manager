@@ -36,7 +36,7 @@ public:
     void TearDown();
 private:
     sptr<SceneSessionManager> ssm_;
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void SceneSessionManagerTest8::SetUpTestCase()
@@ -352,6 +352,8 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     sceneSession->combinedExtWindowFlags_ = extensionWindowFlags;
     EXPECT_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
     ssm_->DestroyExtensionSession(iRemoteObjectMocker);
+    constexpr uint32_t DES_WAIT_SYNC_IN_NS = 500000;
+    usleep(DES_WAIT_SYNC_IN_NS);
 }
 
 /**
