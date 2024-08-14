@@ -378,9 +378,11 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     windowInfoList.emplace_back(windowInfo);
 }
 
-std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
+auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
+std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     const auto sceneSessionMap = Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
@@ -394,7 +396,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
             " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
-        auto windowInfo = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
+        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
         auto iter = (sceneSessionValue->GetParentPersistentId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetParentPersistentId());
@@ -407,6 +409,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
         }
 
         windowInfoList.emplace_back(windowInfo);
+        pixelMapList.emplace_back(pixelMap);
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
             maxHotAreasNum = windowInfo.defaultHotAreas.size();
         }
@@ -414,7 +417,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetFullWindowInfoList()
     if (maxHotAreasNum > MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
         std::sort(windowInfoList.begin(), windowInfoList.end(), CmpMMIWindowInfo);
     }
-    return windowInfoList;
+    return {windowInfoList, pixelMapList};
 }
 
 void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSession,
@@ -497,8 +500,8 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     }
 }
 
-MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>& sceneSession,
-    const SceneSessionDirtyManager::WindowAction& action) const
+std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
+    const sptr<SceneSession>& sceneSession, const SceneSessionDirtyManager::WindowAction& action) const
 {
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
@@ -535,7 +538,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    auto pixelMap = windowSessionProperty->GetWindowMask().get();
+    auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -549,7 +552,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
         .zOrder = zOrder,
         .pointerChangeAreas = pointerChangeAreas,
         .transform = transformData,
-        .pixelMap = pixelMap,
+        .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
     };
@@ -559,7 +562,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetWindowInfo(const sptr<SceneSession>
     }
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
-    return windowInfo;
+    return {windowInfo, pixelMap};
 }
 
 void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback)
