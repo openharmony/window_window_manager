@@ -167,7 +167,7 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
         "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string(static_cast<int>(info.direction)) +
+        " direction: " + std::to_string(static_cast<int>(info.direction)) +
         " transform: " + DumpTransformInDisplayInfo(info.transform);
     return infoStr;
 }
