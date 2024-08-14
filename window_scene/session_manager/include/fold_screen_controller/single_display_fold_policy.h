@@ -36,8 +36,8 @@ public:
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override {};
 private:
-    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession, bool boot);
-    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession, bool boot);
+    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
@@ -48,7 +48,7 @@ private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
-    void SetdisplayModeChangeStatus(bool status);
+    void SetdisplayModeChangeStatus(bool status) override;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
