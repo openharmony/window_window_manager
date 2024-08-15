@@ -9597,7 +9597,7 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     if (isUserBackground_.load()) {
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to notify accessibility info");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to notify accessibilityInfo");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::NotifyAllAccessibilityInfo");
