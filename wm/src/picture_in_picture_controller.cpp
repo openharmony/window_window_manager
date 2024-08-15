@@ -54,7 +54,7 @@ namespace {
         "entry/settingsdata/USER_SETTINGSDATA_";
     constexpr const char *SETTINGS_URL_PROXY_TAIL = "?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-    const int defaultAspectRatio[] = {16, 9};
+    const int DEFAULT_ASPECT_RATIO[] = {16, 9};
 }
 
 uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
@@ -217,7 +217,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
     StartPipType type = startType;
     if (IsTypeNodeEnabled() && startType != StartPipType::AUTO_START) {
         type = StartPipType::AUTO_START;
-        TLOGI(WmsLogTag::WMS_PIP, "change startType when typeNode enabled");
     }
     curState_ = PiPWindowState::STATE_STARTING;
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
@@ -640,8 +639,8 @@ void PictureInPictureController::UpdateWinRectByComponent()
         uint32_t contentHeight = 0;
         pipOption_->GetContentSize(contentWidth, contentHeight);
         if (contentWidth == 0 || contentHeight == 0) {
-            contentWidth = defaultAspectRatio[0];
-            contentHeight = defaultAspectRatio[1];
+            contentWidth = DEFAULT_ASPECT_RATIO[0];
+            contentHeight = DEFAULT_ASPECT_RATIO[1];
         }
         windowRect_.posX_ = 0;
         windowRect_.posY_ = 0;
