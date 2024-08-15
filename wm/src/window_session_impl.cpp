@@ -196,6 +196,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetRealParentId(option->GetRealParentId());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
     property_->SetLayoutCallback(layoutCallback);
