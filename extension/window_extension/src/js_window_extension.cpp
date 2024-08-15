@@ -35,7 +35,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
 }
 int JsWindowExtension::extensionCnt_ = 0;
 

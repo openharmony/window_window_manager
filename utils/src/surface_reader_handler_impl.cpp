@@ -17,7 +17,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
 } // namespace
 bool SurfaceReaderHandlerImpl::OnImageAvailable(sptr<Media::PixelMap> pixelMap)
 {

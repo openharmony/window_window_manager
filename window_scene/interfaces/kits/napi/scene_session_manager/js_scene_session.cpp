@@ -249,6 +249,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
     BindNativeFunction(env, objValue, "setWindowLastSafeRect", moduleName, JsSceneSession::SetWindowLastSafeRect);
+    BindNativeFunction(env, objValue, "setMovable", moduleName, JsSceneSession::SetMovable);
     BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
     BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
@@ -261,8 +262,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
         JsSceneSession::SetTemporarilyShowWhenLocked);
-    BindNativeFunction(env, objValue, "setSkipDraw", moduleName,
-        JsSceneSession::SetSkipDraw);
+    BindNativeFunction(env, objValue, "setSkipDraw", moduleName, JsSceneSession::SetSkipDraw);
     BindNativeFunction(env, objValue, "openKeyboardSyncTransaction", moduleName,
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
@@ -577,21 +577,14 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onWindowAnimationFlagChange_ = [this](bool isNeedDefaultAnimationFlag) {
-        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
-    WLOGFD("ProcessSessionDefaultAnimationFlagChangeRegister success");
+    session->RegisterDefaultAnimationFlagChangeCallback([this](bool isNeedDefaultAnimationFlag) {
+        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
+    });
 }
 
 void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag)
@@ -2952,6 +2945,41 @@ napi_value JsSceneSession::OnSetWindowLastSafeRect(napi_env env, napi_callback_i
     }
     WSRect lastRect = { left, top, width, height };
     session->SetLastSafeRect(lastRect);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::SetMovable(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetMovable(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool movable = true;
+    if (!ConvertFromJsValue(env, argv[0], movable)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to convert parameter to movable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetMovable(movable);
     return NapiGetUndefined(env);
 }
 

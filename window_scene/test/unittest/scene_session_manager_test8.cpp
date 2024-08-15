@@ -36,7 +36,7 @@ public:
     void TearDown();
 private:
     sptr<SceneSessionManager> ssm_;
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
 void SceneSessionManagerTest8::SetUpTestCase()
@@ -352,6 +352,8 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     sceneSession->combinedExtWindowFlags_ = extensionWindowFlags;
     EXPECT_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
     ssm_->DestroyExtensionSession(iRemoteObjectMocker);
+    constexpr uint32_t DES_WAIT_SYNC_IN_NS = 500000;
+    usleep(DES_WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -614,6 +616,57 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
     ssm_->HandleKeepScreenOn(sceneSession, true);
     bool enable = true;
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
+}
+
+/**
+ * @tc.name: SetBrightness
+ * @tc.desc: test function : SetBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetBrightness";
+    sessionInfo.abilityName_ = "SetBrightness";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 2024;
+
+    ssm_->SetDisplayBrightness(3.14f);
+    std::shared_ptr<AppExecFwk::EventHandler> pipeEventHandler = nullptr;
+    ssm_->eventHandler_ = pipeEventHandler;
+    EXPECT_EQ(nullptr, ssm_->eventHandler_);
+    ssm_->SetBrightness(sceneSession, 3.15f);
+
+    ssm_->Init();
+    EXPECT_NE(nullptr, ssm_->eventHandler_);
+
+    ssm_->SetFocusedSessionId(2024);
+    EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
+    ssm_->SetBrightness(sceneSession, 3.15f);
+}
+
+/**
+ * @tc.name: TerminateSessionNew
+ * @tc.desc: test function : TerminateSessionNew
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | Level3)
+{
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    EXPECT_NE(nullptr, sessionInfo);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    EXPECT_NE(nullptr, iRemoteObjectMocker);
+    sessionInfo->sessionToken = iRemoteObjectMocker;
+
+    SessionInfo info;
+    info.bundleName_ = "TerminateSessionNew";
+    info.abilityName_ = "TerminateSessionNew";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->SetAbilityToken(iRemoteObjectMocker);
+    ssm_->sceneSessionMap_.emplace(0, sceneSession);
+    ssm_->TerminateSessionNew(sessionInfo, true, true);
 }
 
 }

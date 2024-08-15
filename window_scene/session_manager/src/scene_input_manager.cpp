@@ -28,10 +28,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneI
 const std::string SCENE_INPUT_MANAGER_THREAD = "SceneInputManager";
 const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
 
-constexpr float DIRECTION0 = 0;
-constexpr float DIRECTION90 = 90;
-constexpr float DIRECTION180 = 180;
-constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
@@ -167,7 +163,7 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
         "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string(static_cast<int>(info.direction)) +
+        " direction: " + std::to_string(static_cast<int>(info.direction)) +
         " transform: " + DumpTransformInDisplayInfo(info.transform);
     return infoStr;
 }
@@ -402,12 +398,25 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         windowEventID = 0;
     }
     focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
+    static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(e.zOrder) + "|" +
+            std::to_string(static_cast<int32_t>(e.zOrder)) + "|" +
             std::to_string(e.pid) + "|" +
-            std::to_string(e.defaultHotAreas.size()) + ",";
+            std::to_string(e.defaultHotAreas.size());
 
+        if (e.defaultHotAreas.size() > 0) {
+            auto iter = lastWindowDefaultHotArea.find(e.id);
+            if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
+                idList += "|" + std::to_string(e.defaultHotAreas[0].x) + "|" +
+                    std::to_string(e.defaultHotAreas[0].y) + "|" +
+                    std::to_string(e.defaultHotAreas[0].width) + "|" +
+                    std::to_string(e.defaultHotAreas[0].height);
+            }
+            currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
+        }
+        idList += ",";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
         }
@@ -415,6 +424,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             DumpUIExtentionWindowInfo(e);
         }
     }
+    lastWindowDefaultHotArea = currWindowDefaultHotArea;
     idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;

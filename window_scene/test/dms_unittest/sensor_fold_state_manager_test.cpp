@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
 class SensorFoldStateManagerTest : public testing::Test {
@@ -57,71 +57,71 @@ void SensorFoldStateManagerTest::TearDown()
 
 namespace {
 
-    /**
-     * @tc.name: HandleSensorChange
-     * @tc.desc: HandleSensorChange
-     * @tc.type: FUNC
-     */
-    HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, Function | SmallTest | Level3)
-    {
-        SensorFoldStateManager mgr = SensorFoldStateManager();
-        FoldStatus nextState = FoldStatus::UNKNOWN;
-        float angle = 0.0f;
-        sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
-        mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-        ASSERT_EQ(mgr.mState_, FoldStatus::UNKNOWN);
+/**
+ * @tc.name: HandleSensorChange
+ * @tc.desc: HandleSensorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, Function | SmallTest | Level3)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    FoldStatus nextState = FoldStatus::UNKNOWN;
+    float angle = 0.0f;
+    sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
+    mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
+    ASSERT_EQ(mgr.mState_, FoldStatus::UNKNOWN);
 
-        mgr.mState_ = FoldStatus::EXPAND;
-        mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-        ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
+    mgr.mState_ = FoldStatus::EXPAND;
+    mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
+    ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
 
-        nextState = FoldStatus::EXPAND;
-        mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-        ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
-    }
+    nextState = FoldStatus::EXPAND;
+    mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
+    ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
+}
 
-    /**
-     * @tc.name: ReportNotifyFoldStatusChange
-     * @tc.desc: ReportNotifyFoldStatusChange
-     * @tc.type: FUNC
-     */
-    HWTEST_F(SensorFoldStateManagerTest, ReportNotifyFoldStatusChange, Function | SmallTest | Level3)
-    {
-        SensorFoldStateManager mgr = SensorFoldStateManager();
-        int32_t currentStatus = 0;
-        int32_t nextStatus = 1;
-        float postureAngle = 0.0f;
-        mgr.ReportNotifyFoldStatusChange(currentStatus, nextStatus, postureAngle);
-        ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
-    }
+/**
+ * @tc.name: ReportNotifyFoldStatusChange
+ * @tc.desc: ReportNotifyFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, ReportNotifyFoldStatusChange, Function | SmallTest | Level3)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    int32_t currentStatus = 0;
+    int32_t nextStatus = 1;
+    float postureAngle = 0.0f;
+    mgr.ReportNotifyFoldStatusChange(currentStatus, nextStatus, postureAngle);
+    ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
+}
 
-    /**
-     * @tc.name: ClearState
-     * @tc.desc: ClearState
-     * @tc.type: FUNC
-     */
-    HWTEST_F(SensorFoldStateManagerTest, ClearState, Function | SmallTest | Level3)
-    {
-        SensorFoldStateManager mgr = SensorFoldStateManager();
-        sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
-        mgr.ClearState(foldScreenPolicy);
-        ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
-    }
+/**
+ * @tc.name: ClearState
+ * @tc.desc: ClearState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, ClearState, Function | SmallTest | Level3)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
+    mgr.ClearState(foldScreenPolicy);
+    ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
+}
 
-    /**
-     * @tc.name: NotifyReportFoldStatusToScb
-     * @tc.desc: NotifyReportFoldStatusToScb
-     * @tc.type: FUNC
-     */
-    HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, Function | SmallTest | Level3)
-    {
-        SensorFoldStateManager mgr = SensorFoldStateManager();
-        FoldStatus currentStatus = FoldStatus::UNKNOWN;
-        FoldStatus nextStatus = FoldStatus::EXPAND;
-        float postureAngle = 0.0f;
-        mgr.NotifyReportFoldStatusToScb(currentStatus, nextStatus, postureAngle);
-        ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
-    }
+/**
+ * @tc.name: NotifyReportFoldStatusToScb
+ * @tc.desc: NotifyReportFoldStatusToScb
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, Function | SmallTest | Level3)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    FoldStatus currentStatus = FoldStatus::UNKNOWN;
+    FoldStatus nextStatus = FoldStatus::EXPAND;
+    float postureAngle = 0.0f;
+    mgr.NotifyReportFoldStatusToScb(currentStatus, nextStatus, postureAngle);
+    ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

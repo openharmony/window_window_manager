@@ -70,6 +70,8 @@ public:
         TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
+        TRANS_ID_MULTI_SCREEN_MODE_SWITCH,
+        TRANS_ID_SET_MULTI_SCREEN_POSITION,
         TRANS_ID_SCREEN_MAKE_EXPAND,
         TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP,
         TRANS_ID_SCREEN_GAMUT_BASE = 1200,
@@ -102,6 +104,7 @@ public:
         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
         TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
@@ -109,6 +112,7 @@ public:
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
         TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
+        TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS,
         TRANS_ID_SET_CLIENT = 2500,
         TRANS_ID_GET_SCREEN_PROPERTY,
         TRANS_ID_GET_DISPLAY_NODE,
@@ -148,7 +152,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
-    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) {};
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
@@ -236,6 +240,16 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
+    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
+        ExtendOption secondaryScreenOption)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) = 0;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
@@ -265,9 +279,13 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
+
+    virtual DMError SetFoldStatusLockedFromJs(bool locked) { return DMError::DM_OK; }
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 

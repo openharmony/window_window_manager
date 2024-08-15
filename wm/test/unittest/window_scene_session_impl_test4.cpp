@@ -557,13 +557,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveToAsync(10, 10));
-    window->property_->SetPersistentId(997);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->MoveToAsync(10, 10));
+    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->MoveToAsync(10, 10));
 }
 
 /**
@@ -618,6 +612,8 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -634,13 +630,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->ResizeAsync(500, 500));
-    window->property_->SetPersistentId(990);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->ResizeAsync(500, 500));
+    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->ResizeAsync(500, 500));
 }
 
 /**
@@ -695,6 +685,8 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**

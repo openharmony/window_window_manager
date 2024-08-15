@@ -21,18 +21,18 @@
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
-    class RunningLock;
+class RunningLock;
 }
 
 namespace OHOS::Rosen {
 namespace PARAM_KEY {
-    const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
-    const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
-    const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
+const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
+const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 namespace {
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =
@@ -214,6 +214,7 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
+    void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
@@ -292,6 +293,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
     void ClearSpecificSessionCbMap();
@@ -378,6 +380,7 @@ public:
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
+    void UnregisterSessionChangeListeners() override;
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);

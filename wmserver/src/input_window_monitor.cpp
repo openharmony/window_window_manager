@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputMonitor"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputMonitor"};
 }
 static inline void convertRectsToMmiRects(const std::vector<Rect>& rects, std::vector<MMI::Rect>& mmiRects)
 {

@@ -26,17 +26,17 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "CommonEvent"};
-    constexpr int RETRY_MAX_COUNT = 3;
-    const std::string THREAD_ID = "WindowCommonEventHandler";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "CommonEvent"};
+constexpr int RETRY_MAX_COUNT = 3;
+const std::string THREAD_ID = "WindowCommonEventHandler";
 
-    enum class CommonEventCode : uint32_t {
-        COMMON_EVENT_USER_SWITCHED,
-    };
+enum class CommonEventCode : uint32_t {
+    COMMON_EVENT_USER_SWITCHED,
+};
 
-    const std::map<std::string, CommonEventCode> COMMON_EVENT_CODE_MAP {
-        {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, CommonEventCode::COMMON_EVENT_USER_SWITCHED},
-    };
+const std::map<std::string, CommonEventCode> COMMON_EVENT_CODE_MAP {
+    {EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED, CommonEventCode::COMMON_EVENT_USER_SWITCHED},
+};
 }
 
 WindowCommonEvent::WindowCommonEvent()
