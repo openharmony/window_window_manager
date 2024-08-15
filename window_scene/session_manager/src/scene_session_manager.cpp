@@ -3086,7 +3086,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
             isUserActive, currentUserId_);
         isUserBackground_.store(!isUserActive);
-        SceneInputManager::GetInstance().SetUserBackground(isUserBackground_);
+        SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
             // notify screenSessionManager to recover current user
