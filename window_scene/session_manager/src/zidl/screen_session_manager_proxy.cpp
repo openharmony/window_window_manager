@@ -1465,6 +1465,10 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
     }
 
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErrorCode;
+    }
     if (pixelMap == nullptr) {
         WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: SendRequest nullptr.");
         return nullptr;
@@ -1992,6 +1996,35 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
     }
 }
 
+//SetFoldDisplayModeFromJs add DMError to return DMErrorCode for js
+DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        WLOGFE("Write displayMode failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send request failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
+}
+
 void ScreenSessionManagerProxy::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
@@ -2041,6 +2074,36 @@ void ScreenSessionManagerProxy::SetFoldStatusLocked(bool locked)
                             data, reply, option) != ERR_NONE) {
         WLOGFE("Send TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS request failed");
     }
+}
+
+// SetFoldStatusLockedFromJs add DMError to return DMErrorCode for js
+DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
+        WLOGFE("Write lock fold display status failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send request failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
 }
 
 FoldDisplayMode ScreenSessionManagerProxy::GetFoldDisplayMode()

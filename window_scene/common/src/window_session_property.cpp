@@ -930,22 +930,26 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 
 bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
 {
-    if (layoutCallback_ == nullptr) {
-        return false;
-    }
-    if (!parcel.WriteObject(layoutCallback_->AsObject())) {
-        return false;
+    if (!layoutCallback_) {
+        if (!parcel.WriteBool(false)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteBool(true) ||
+            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(layoutCallback_->AsObject())) {
+            return false;
+        }
     }
     return true;
 }
 
 void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
 {
-    auto readObject = parcel.ReadObject<IRemoteObject>();
-    sptr<IFutureCallback> callback = nullptr;
-    if (readObject != nullptr) {
-        callback = iface_cast<IFutureCallback>(readObject);
+    if (!parcel.ReadBool()) {
+        return;
     }
+    sptr<IFutureCallback> callback =
+        iface_cast<IFutureCallback>((static_cast<MessageParcel*>(&parcel))->ReadRemoteObject());
     if (callback != nullptr) {
         property->SetLayoutCallback(callback);
     }
