@@ -138,7 +138,8 @@ std::shared_ptr<XComponentController> PipOption::GetXComponentController()
     return xComponentController_;
 }
 
-void PipOption::SetTypeNodeEnabled(bool enable) {
+void PipOption::SetTypeNodeEnabled(bool enable)
+{
     useTypeNode_ = enable;
 }
 

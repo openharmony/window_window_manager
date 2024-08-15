@@ -23,7 +23,8 @@ namespace Rosen {
 using namespace AbilityRuntime;
 using namespace Ace;
 namespace {
-constexpr int32_t NUMBER_ONE = 1;
+    constexpr int32_t NUMBER_ONE = 1;
+    constexpr int32_t NUMBER_TWO = 2;
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -197,7 +198,7 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) {
+    if (argc < NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Params count not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }

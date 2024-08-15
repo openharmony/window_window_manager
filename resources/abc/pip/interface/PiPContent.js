@@ -107,7 +107,7 @@ export class PiPContent extends ViewPU {
             if (w1 === ABOUT_TO_STOP) {
                 (x1 = this.mXCNodeController) === null || x1 === void 0 ? void 0 : x1.removeNode();
             }
-        })
+        });
     }
 
     aboutToBeDeleted() {
@@ -128,46 +128,58 @@ export class PiPContent extends ViewPU {
             If.create();
             if (this.useNode) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((q1, r1) => {
-                        NodeContainer.create(this.mXCNodeController);
-                        NodeContainer.size({ width: '100%', height: '100%' });
-                    }, NodeContainer);
+                    this.buildNode.bind(this)();
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((l1, m1) => {
-                        XComponent.create({
-                            id: this.xComponentId,
-                            type: this.xComponentType,
-                            controller: this.xComponentController
-                        }, 'pipContent_XComponent');
-                        XComponent.onLoad((() => {
-                            pip.initXComponentController(this.xComponentController);
-                            console.info(TAG, 'XComponent onLoad done');
-                        }));
-                        XComponent.size({ width: '100%', height: '100%' });
-                        XComponent.backgroundColor(Color.Transparent);
-                    }, XComponent);
+                    this.buildXComponent.bind(this)();
                 });
             }
         }, If);
         If.pop();
         this.observeComponentCreation2((a1, b1) => {
             If.create();
-            if (this.nodeController != null) {
+            if (this.nodeController !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((f1, g1) => {
-                        NodeContainer.create(this.nodeController);
-                        NodeContainer.size({ width: '100%', height: '100%'});
-                    }, NodeContainer);
+                    this.buildCustomUI.bind(this)();
                 });
             } else {
-                this.ifElseBranchUpdateFunction(1, ()=> {
+                this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
         Stack.pop();
+    }
+
+    buildCustomUI(g1 = null) {
+        this.observeComponentCreation2((i1, j1) => {
+            NodeContainer.create(this.nodeController);
+            NodeContainer.size({ width: '100%', height: '100%'});
+        }, NodeContainer);
+    }
+
+    buildXComponent(b1 = null) {
+        this.observeComponentCreation2((d1, e1) => {
+            XComponent.create({
+                id: this.xComponentId,
+                type: this.xComponentType,
+                controller: this.xComponentController
+            }, 'pipContent_XComponent');
+            XComponent.onLoad((() => {
+                pip.initXComponentController(this.xComponentController);
+                console.info(TAG, 'XComponent onLoad done');
+            }));
+            XComponent.size({ width: '100%', height: '100%' });
+            XComponent.backgroundColor(Color.Transparent);
+        }, XComponent);
+    }
+
+    buildNode(x = null) {
+        this.observeComponentCreation2((z, a1) => {
+            NodeContainer.create(this.mXCNodeController);
+            NodeContainer.size({ width: '100%', height: '100%' });
+        }, NodeContainer);
     }
 
     rerender() {

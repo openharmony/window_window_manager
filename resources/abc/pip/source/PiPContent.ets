@@ -81,22 +81,37 @@ export struct PiPContent {
   build() {
     Stack() {
       if (this.useNode) {
-        NodeContainer(this.mXCNodeController)
-          .size({ width: '100%', height: '100%' })
+        this.buildNode();
       } else {
-        XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
-          .onLoad(() => {
-            pip.initXComponentController(this.xComponentController);
-            console.debug(TAG, 'XComponent onLoad done');
-          })
-          .size({ width: '100%', height: '100%' })
-          .backgroundColor(Color.Transparent);
+       this.buildXComponent();
       }
       if (this.nodeController !== null) {
-        NodeContainer(this.nodeController)
-          .size({ width: '100%', height: '100%' });
+        this.buildCustomUI();
       }
     }
     .size({ width: '100%', height: '100%' });
+  }
+
+  @Builder
+  buildCustomUI() {
+    NodeContainer(this.nodeController)
+      .size({ width: '100%', height: '100%' });
+  }
+
+  @Builder
+  buildXComponent() {
+    XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
+      .onLoad(() => {
+        pip.initXComponentController(this.xComponentController);
+        console.debug(TAG, 'XComponent onLoad done');
+      })
+      .size({ width: '100%', height: '100%' })
+      .backgroundColor(Color.Transparent);
+  }
+
+  @Builder
+  buildNode() {
+    NodeContainer(this.mXCNodeController)
+      .size({ width: '100%', height: '100%' })
   }
 }
