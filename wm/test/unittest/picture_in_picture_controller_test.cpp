@@ -661,11 +661,11 @@ HWTEST_F(PictureInPictureControllerTest, RestorePictureInPictureWindow, Function
 }
 
 /**
- * @tc.name: UpdateXComponentPositionAndSize
- * @tc.desc: UpdateXComponentPositionAndSize
+ * @tc.name: UpdateWinRectByComponent
+ * @tc.desc: UpdateWinRectByComponent
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, UpdateWinRectByComponent, Function | SmallTest | Level2)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -676,19 +676,19 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->mainWindowXComponentController_ = nullptr;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->mainWindowXComponentController_ = xComponentController;
 
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 10;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 0;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 0;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 0;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
 }
 
 /**

@@ -48,6 +48,8 @@ public:
     napi_ref GetNodeControllerRef() const;
     void SetTypeNodeRef(napi_ref ref);
     napi_ref GetTypeNodeRef() const;
+    void SetTypeNodeEnabled(bool enable);
+    bool IsTypeNodeEnabled() const;
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
@@ -60,6 +62,7 @@ private:
     std::vector<std::uint32_t> controlGroup_;
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
+    bool useTypeNode_ = false;
 };
 }
 }

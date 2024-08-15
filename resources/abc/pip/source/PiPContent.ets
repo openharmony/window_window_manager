@@ -30,7 +30,6 @@ class XCNodeController extends NodeController {
 
   makeNode(uiContext: UIContext): FrameNode | null {
     this.node = new FrameNode(uiContext);
-    this.mXComponent.getParent()?.removeChild(this.mXComponent);
     this.node.appendChild(this.mXComponent);
     return this.node;
   }

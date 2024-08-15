@@ -283,8 +283,8 @@ void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
         return;
     }
-    if (navigationId == "") {
-        TLOGI(WmsLogTag::WMS_PIP, "No use navigationId for auto start");
+    if (navigationId == "" || autoStartController_->IsTypeNodeEnabled()) {
+        TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
         autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
         return;
     }
