@@ -109,6 +109,7 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
     void AddSetUIContentTimeoutListener();
@@ -126,7 +127,6 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
-    int16_t rotationAnimationCount_ { 0 };
     std::atomic_bool setUIContentFlag_ { false };
 };
 } // namespace Rosen
