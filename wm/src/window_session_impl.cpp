@@ -109,6 +109,7 @@ std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
+std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -124,6 +125,7 @@ std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
+std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1924,6 +1926,47 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
     return WMError::WM_OK;
 }
 
+template<typename T>
+EnableIfSame<T, ISwitchFreeMultiWindowListener,
+    std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<ISwitchFreeMultiWindowListener>> switchFreeMultiWindowListeners;
+    for (auto& listener : switchFreeMultiWindowListeners_[GetPersistentId()]) {
+        switchFreeMultiWindowListeners.push_back(listener);
+    }
+    return switchFreeMultiWindowListeners;
+}
+
+WMError WindowSessionImpl::RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WLOGFD("Start register");
+    std::lock_guard<std::mutex> lockListener(switchFreeMultiWindowListenerMutex_);
+    return RegisterListener(switchFreeMultiWindowListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WLOGFD("Start unregister");
+    std::lock_guard<std::mutex> lockListener(switchFreeMultiWindowListenerMutex_);
+    return UnregisterListener(switchFreeMultiWindowListeners_[GetPersistentId()], listener);
+}
+
 void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
@@ -2071,7 +2114,14 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
         subWindowCloseListeners_[GetPersistentId()] = nullptr;
     }
+    ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
+}
+
+void WindowSessionImpl::ClearSwitchFreeMultiWindowListenersById(int32_t persistentId)
+{
+    std::lock_guard<std::mutex> lockListener(switchFreeMultiWindowListenerMutex_);
+    ClearUselessListeners(switchFreeMultiWindowListeners_, persistentId);
 }
 
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -2517,6 +2567,17 @@ void WindowSessionImpl::NotifySubWindowClose(bool& terminateCloseProcess)
     auto subWindowCloseListeners = GetListeners<ISubWindowCloseListener>();
     if (subWindowCloseListeners != nullptr) {
         subWindowCloseListeners->OnSubWindowClose(terminateCloseProcess);
+    }
+}
+
+void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
+{
+    std::lock_guard<std::mutex> lockListener(switchFreeMultiWindowListenerMutex_);
+    auto switchFreeMultiWindowListeners = GetListeners<ISwitchFreeMultiWindowListener>();
+    for (auto& listener : switchFreeMultiWindowListeners) {
+        if (listener != nullptr) {
+            listener->OnSwitchFreeMultiWindow(enable);
+        }
     }
 }
 
