@@ -8919,7 +8919,7 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush] {
         if (isUserBackground_) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background");
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
@@ -9595,7 +9595,7 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     if (isUserBackground_) {
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to notify accessibilityInfo");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::NotifyAllAccessibilityInfo");
