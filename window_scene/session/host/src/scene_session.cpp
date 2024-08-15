@@ -3019,7 +3019,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
 #ifdef POWER_MANAGER_ENABLE
     auto task = [weakThis = wptr(this)]() {
         auto sceneSession = weakThis.promote();
-        if (sceneSession == nullptr) {
+        if (!sceneSession) {
             TLOGE(WmsLogTag::DEFAULT, "session is invalid");
             return;
         }
