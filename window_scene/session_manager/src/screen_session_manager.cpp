@@ -872,7 +872,13 @@ bool ScreenSessionManager::IsFreezed(const int32_t& agentPid, const DisplayManag
     if (freezedPidList_.count(agentPid) == 0) {
         return false;
     }
-    agentTypeSet_.insert(agentType); // 冻结的应用记录应用注册的 agentType
+    // 冻结的应用记录应用 pid 和注册的 agentType
+    if (pidAgentTypeMap_.count(agentPid) == 0) {
+        std::set agentTypes = { agentType };
+        pidAgentTypeMap_[agentPid] = agentTypes;
+    } else {
+        pidAgentTypeMap_[agentPid].insert(agentType);
+    }
     TLOGD(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
     return true;
 }
@@ -5225,17 +5231,18 @@ DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, b
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& pidList, const sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
+    const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession)
 {
-    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
-    for (auto agentType : agentTypeSet_) {
+    bool isAgentTypeNotify = false;
+    for (auto agentType : pidAgentTypes) {
         auto agents = dmAgentContainer_.GetAgentsByType(agentType);
         for (auto agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
-            if (pidList.count(agentPid) == 0) {
+            if (agentPid != pid || unfreezedPidList.count(pid) == 0) {
                 continue;
             }
-
+            isAgentTypeNotify = true;
             if (agentType == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
                 agent->OnDisplayChange(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_UNFREEZED);
             } else if (agentType == DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
@@ -5256,8 +5263,28 @@ void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& pidList, con
                 std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
                 agent->NotifyDisplayChangeInfoChanged(lastDisplayChangeInfo_);
             } else {
+                isAgentTypeNotify = false;
                 TLOGI(WmsLogTag::DMS, "Unknown agentType.");
             }
+        }
+        if (isAgentTypeNotify) {
+            pidAgentTypeMap_[pid].erase(agentType);
+        }
+    }
+}
+
+void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList,
+    const sptr<ScreenSession>& screenSession)
+{
+    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+    for (auto iter = pidAgentTypeMap_.begin(); iter != pidAgentTypeMap_.end();) {
+        int32_t pid = iter->first;
+        auto pidAgentTypes = iter->second;
+        NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
+        if (pidAgentTypeMap_[pid].empty()) {
+            iter = pidAgentTypeMap_.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
@@ -5270,7 +5297,7 @@ DMError ScreenSessionManager::ResetAllFreezeStatus()
     }
     std::lock_guard<std::mutex> lock(freezedPidListMutex_);
     freezedPidList_.clear();
-    agentTypeSet_.clear();
+    pidAgentTypeMap_.clear();
     TLOGI(WmsLogTag::DMS, "freezedPidList_ has been clear.");
     return DMError::DM_OK;
 }
