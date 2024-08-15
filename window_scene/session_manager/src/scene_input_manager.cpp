@@ -454,7 +454,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
-    std::vector<MMI::WindowInfo>& windowInfoList)
+    std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
         return;
@@ -506,7 +506,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -515,7 +515,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;
         }
-        UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+        UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
     };
     if (eventHandler_) {
         eventHandler_->PostTask(task);
