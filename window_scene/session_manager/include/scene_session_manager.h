@@ -138,6 +138,7 @@ public:
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
+    void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
