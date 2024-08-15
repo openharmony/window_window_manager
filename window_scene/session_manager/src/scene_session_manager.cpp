@@ -8917,16 +8917,14 @@ void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int3
 
 void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
-    auto task = [this, forceFlush]()-> WSError {
-    if (isUserBackground_) {
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
-        return WSError::WS_OK;
-    }
+    auto task = [this, forceFlush] {
+        if (isUserBackground_) {
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
-        return WSError::WS_OK;
     };
-    return taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
