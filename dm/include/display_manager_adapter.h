@@ -83,8 +83,10 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);
+    virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
@@ -114,6 +116,9 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
+    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode);
+    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption, ExtendOption secondaryScreenOption);
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);

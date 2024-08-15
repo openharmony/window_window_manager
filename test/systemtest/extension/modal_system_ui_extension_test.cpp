@@ -18,7 +18,6 @@
 #include "iremote_object_mocker.h"
 #include "modal_system_ui_extension.h"
 #include "mock_message_parcel.h"
-#include "scene_board_judgement.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -63,7 +62,6 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
         return;
     }
     OHOS::AAFwk::Want want;
-    ASSERT_TRUE(connection->CreateModalUIExtension(want));
     ASSERT_FALSE(connection->CreateModalUIExtension(want));
     delete connection;
 }

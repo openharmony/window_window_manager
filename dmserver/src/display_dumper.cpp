@@ -28,38 +28,38 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayDumper"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayDumper"};
 
-    constexpr int SCREEN_NAME_MAX_LENGTH = 20;
-    const std::string ARG_DUMP_HELP = "-h";
-    const std::string ARG_DUMP_ALL = "-a";
-    const std::string ARG_DUMP_SCREEN = "-s";
-    const std::string ARG_DUMP_DISPLAY = "-d";
-    // set the output width of screen
-    constexpr int W_SCREEN_NAME = 21;
-    constexpr int W_SCREEN_TYPE = 9;
-    constexpr int W_GROUP_TYPE = 8;
-    constexpr int W_DMS_ID = 6;
-    constexpr int W_RS_ID = 21;
-    constexpr int W_ACTIVE_IDX = 10;
-    constexpr int W_VIR_PIXEL_RATIO = 4;
-    constexpr int W_SCREEN_ROTATION = 9;
-    constexpr int W_ORIENTATION = 12;
-    constexpr int W_REQUESTED_ORIENTATION = 19;
-    constexpr int W_NODE_ID = 21;
-    constexpr int W_MIRROR_TYPE = 11;
-    constexpr int W_MIRROR_NODE_ID = 13;
-    // set the output width of display
-    constexpr int W_DISPLAY_ID = 10;
-    constexpr int W_ABSTR_SCREEN_ID = 9;
-    constexpr int W_REFRESH_RATE = 12;
-    constexpr int W_DISPLAY_ROTATION = 9;
-    constexpr int W_DISPLAY_ORIENTATION = 18;
-    constexpr int W_DISPLAY_FREEZE_FLAG = 11;
-    constexpr int W_DISPLAY_OFFSET_X = 5;
-    constexpr int W_DISPLAY_OFFSET_Y = 5;
-    constexpr int W_DISPLAY_WIDTH = 5;
-    constexpr int W_DISPLAY_HEITHT = 5;
+constexpr int SCREEN_NAME_MAX_LENGTH = 20;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_SCREEN = "-s";
+const std::string ARG_DUMP_DISPLAY = "-d";
+// set the output width of screen
+constexpr int W_SCREEN_NAME = 21;
+constexpr int W_SCREEN_TYPE = 9;
+constexpr int W_GROUP_TYPE = 8;
+constexpr int W_DMS_ID = 6;
+constexpr int W_RS_ID = 21;
+constexpr int W_ACTIVE_IDX = 10;
+constexpr int W_VIR_PIXEL_RATIO = 4;
+constexpr int W_SCREEN_ROTATION = 9;
+constexpr int W_ORIENTATION = 12;
+constexpr int W_REQUESTED_ORIENTATION = 19;
+constexpr int W_NODE_ID = 21;
+constexpr int W_MIRROR_TYPE = 11;
+constexpr int W_MIRROR_NODE_ID = 13;
+// set the output width of display
+constexpr int W_DISPLAY_ID = 10;
+constexpr int W_ABSTR_SCREEN_ID = 9;
+constexpr int W_REFRESH_RATE = 12;
+constexpr int W_DISPLAY_ROTATION = 9;
+constexpr int W_DISPLAY_ORIENTATION = 18;
+constexpr int W_DISPLAY_FREEZE_FLAG = 11;
+constexpr int W_DISPLAY_OFFSET_X = 5;
+constexpr int W_DISPLAY_OFFSET_Y = 5;
+constexpr int W_DISPLAY_WIDTH = 5;
+constexpr int W_DISPLAY_HEITHT = 5;
 }
 
 DisplayDumper::DisplayDumper(const sptr<AbstractDisplayController>& abstractDisplayController,

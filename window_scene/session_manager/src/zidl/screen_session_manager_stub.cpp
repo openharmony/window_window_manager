@@ -243,6 +243,35 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId secondaryScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenSourceMode secondaryScreenMode = static_cast<ScreenSourceMode>(data.ReadUint32());
+            DMError ret = MultiScreenModeSwitch(mainScreenId, secondaryScreenId, secondaryScreenMode);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_MULTI_SCREEN_POSITION: {
+            uint64_t mainScreenId = data.ReadUint64();
+            uint32_t mainScreenX = data.ReadUint32();
+            uint32_t mainScreenY = data.ReadUint32();
+            uint64_t secondaryScreenId = data.ReadUint64();
+            uint32_t secondaryScreenX = data.ReadUint32();
+            uint32_t secondaryScreenY = data.ReadUint32();
+            ExtendOption mainScreenOption = {
+                .screenId_ = mainScreenId,
+                .startX_ = mainScreenX,
+                .startY_ = mainScreenY,
+            };
+            ExtendOption secondaryScreenOption = {
+                .screenId_ = secondaryScreenId,
+                .startX_ = secondaryScreenX,
+                .startY_ = secondaryScreenY,
+            };
+            DMError ret = MultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
             std::vector<ScreenId> mirrorScreenIds;
             if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
@@ -304,8 +333,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
+            DmErrorCode errCode = DmErrorCode::DM_OK;
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER: {
@@ -554,9 +585,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetFoldDisplayMode(displayMode);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
+            FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS: {
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
             SetFoldStatusLocked(lockDisplayStatus);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS: {
+            bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
+            DMError ret = SetFoldStatusLockedFromJs(lockDisplayStatus);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
@@ -765,6 +808,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.width_ = data.ReadUint32();
             hookInfo.height_ = data.ReadUint32();
             hookInfo.density_ = data.ReadFloat();
+            hookInfo.rotation_ = data.ReadUint32();
+            hookInfo.enableHookRotation_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }

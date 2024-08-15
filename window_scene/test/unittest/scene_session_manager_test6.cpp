@@ -35,8 +35,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    using ConfigItem = WindowSceneConfig::ConfigItem;
+const std::string EMPTY_DEVICE_ID = "";
+using ConfigItem = WindowSceneConfig::ConfigItem;
 }
 class SceneSessionManagerTest6 : public testing::Test {
 public:
@@ -55,7 +55,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest6::ssm_ = nullptr;
 
 bool SceneSessionManagerTest6::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 

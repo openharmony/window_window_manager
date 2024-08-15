@@ -111,6 +111,9 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
     sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->HandleActionUpdateTouchHotArea(property, sceneSession, action);
 }
 
 /**
@@ -225,6 +228,13 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
     sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
     sceneSession->HandleActionUpdateWindowMask(property, sceneSession, action);
     sceneSession->HandleActionUpdateTopmost(property, sceneSession, action);
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->SetSessionProperty(nullptr);
+    sceneSession1->HandleActionUpdateTextfieldAvoidInfo(property, sceneSession1, action);
+    sceneSession1->HandleActionUpdateWindowMask(property, sceneSession1, action);
 }
 
 /**

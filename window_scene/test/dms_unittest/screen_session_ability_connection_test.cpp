@@ -32,7 +32,7 @@ constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
 class ScreenSessionAbilityConnectionTest : public testing::Test {

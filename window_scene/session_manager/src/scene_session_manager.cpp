@@ -1360,7 +1360,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
             .screenId_ = static_cast<uint64_t>(displayId),
             .isRotable_ = true,
         };
-        static bool is2in1 = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+        static bool is2in1 = systemConfig_.uiType_ == UI_TYPE_PC;
         if (is2in1) {
             panelInfo.sceneType_ = SceneType::INPUT_SCENE;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
@@ -1790,6 +1790,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (scnSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(scnSession);
         if (!PreHandleCollaborator(scnSession, persistentId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, ancoSceneState: %{public}d", 
+                persistentId, scnSession->GetSessionInfo().ancoSceneState);
             scnSession->NotifySessionExceptionInner(SetAbilitySessionInfo(scnSession), true);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
@@ -2266,8 +2268,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         WLOGFE("pip window is not enable to create.");
         return WSError::WS_DO_NOTHING;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name: %{public}s, type: %{public}d",
-        property->GetWindowName().c_str(), property->GetWindowType());
+    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
+        property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
@@ -2798,18 +2800,6 @@ void SceneSessionManager::UnregisterCreateSubSessionListener(int32_t persistentI
     taskScheduler_->PostSyncTask(task);
 }
 
-void SceneSessionManager::NotifyStatusBarEnabledChange(bool enable)
-{
-    WLOGFI("NotifyStatusBarEnabledChange enable %{public}d", enable);
-    auto task = [this, enable]() {
-        if (statusBarEnabledChangeFunc_) {
-            statusBarEnabledChangeFunc_(enable);
-        }
-        return WMError::WM_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "NotifyStatusBarEnabledChange");
-}
-
 void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func)
 {
     WLOGFD("SetStatusBarEnabledChangeListener");
@@ -2817,7 +2807,6 @@ void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusB
         WLOGFD("set func is null");
     }
     statusBarEnabledChangeFunc_ = func;
-    NotifyStatusBarEnabledChange(gestureNavigationEnabled_);
 }
 
 void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
@@ -3692,22 +3681,22 @@ float SceneSessionManager::GetDisplayBrightness() const
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("SetGestureNavigationEnabled permission denied!");
+        TLOGE(WmsLogTag::WMS_EVENT, "permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
-    gestureNavigationEnabled_ = enable;
-    auto task = [this, enable]() {
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    TLOGD(WmsLogTag::WMS_EVENT, "enable:%{public}d name:%{public}s", enable, callerBundleName.c_str());
+    auto task = [this, enable, bundleName = std::move(callerBundleName)]() {
         SessionManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
         if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
             WLOGFE("callback func is null");
             return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
-            gestureNavigationEnabledChangeFunc_(enable);
+            gestureNavigationEnabledChangeFunc_(enable, bundleName);
         }
         if (statusBarEnabledChangeFunc_) {
-            statusBarEnabledChangeFunc_(enable);
+            statusBarEnabledChangeFunc_(enable, bundleName);
         }
         return WMError::WM_OK;
     };
@@ -6199,6 +6188,31 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetAllAbilityIn
     return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
 }
 
+__attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbilityInfos(
+    const std::vector<std::string>& bundleNames, int32_t userId, std::vector<SCBAbilityInfo>& scbAbilityInfos)
+{
+    if (bundleMgr_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "bundleMgr is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (bundleNames.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "bundleNames is empty");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto flag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+                AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+                AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    auto ret = static_cast<int32_t>(bundleMgr_->BatchGetBundleInfo(bundleNames, flag, bundleInfos, userId));
+    if (ret) {
+        TLOGE(WmsLogTag::DEFAULT, "Query batch ability infos from BMS failed!");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
+}
+
 WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
     std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
@@ -7841,7 +7855,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
 }
 
-void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo> displayInfo)
+void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
 {
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
@@ -8228,7 +8242,8 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         std::string bundleName = sessionInfo.bundleName_;
         int64_t timestamp = containerStartAbilityTime;
         WindowInfoReporter::GetInstance().ReportContainerStartBegin(missionId, bundleName, timestamp);
-        WLOGFI("call NotifyMissionCreated");
+        WLOGFI("call NotifyMissionCreated, persistentId: %{public}d, bundleName: %{public}s", 
+            missionId, bundleName.c_str());
         collaborator->NotifyMissionCreated(abilitySessionInfo);
     }
 }
@@ -8796,7 +8811,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
 
         if (scnSession->GetSessionState() == SessionState::STATE_ACTIVE ||
             scnSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
-            pixelMap = scnSession->Snapshot(scaleParam);
+            pixelMap = scnSession->Snapshot(false, scaleParam);
         }
         if (!pixelMap) {
             WLOGFI("get local snapshot pixelmap start");
@@ -9748,7 +9763,7 @@ WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyleType
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto isPC = systemConfig_.uiType_ == "pc";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     if (isPC) {
         windowStyleType = WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW;
         return WMError::WM_OK;
@@ -9894,13 +9909,31 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
 WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density,
     bool enable)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
-        "density: %{public}f, bool: %{public}d", width, height, density, enable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, enable: %{public}d",
+        width, height, density, enable);
 
     DMHookInfo dmHookInfo;
     dmHookInfo.width_ = width;
     dmHookInfo.height_ = height;
     dmHookInfo.density_ = density;
+    dmHookInfo.rotation_ = 0;
+    dmHookInfo.enableHookRotation_ = false;
+    ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, rotation: %{public}u, "
+        "enableHookRotation: %{public}d, enable: %{public}d", hookInfo.width_, hookInfo.height_, hookInfo.density_,
+        hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
+
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = hookInfo.width_;
+    dmHookInfo.height_ = hookInfo.height_;
+    dmHookInfo.density_ = hookInfo.density_;
+    dmHookInfo.rotation_ = hookInfo.rotation_;
+    dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
