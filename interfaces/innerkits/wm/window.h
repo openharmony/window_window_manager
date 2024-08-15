@@ -2217,6 +2217,13 @@ public:
      * @param errorCode error code when UIExtension timeout
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
+    /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 };
 }
 }
