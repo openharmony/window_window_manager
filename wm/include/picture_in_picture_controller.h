@@ -170,6 +170,7 @@ private:
     std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
+    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_;
 };
 } // namespace Rosen
 } // namespace OHOS
