@@ -556,7 +556,7 @@ private:
     void RegisterSecSurfaceInfoListener();
 
     /*
-     * User Switch
+     * Multi User
      */
     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
@@ -634,9 +634,9 @@ private:
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
-    // User switch
+    // Multi User
     int32_t currentUserId_;
-    std::atomic<bool> isUserBackground_ { false };
+    bool isUserBackground_ = false;
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.
