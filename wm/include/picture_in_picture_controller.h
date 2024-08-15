@@ -138,6 +138,11 @@ public:
         sptr<PiPMainWindowListenerImpl> windowListener_;
     };
 
+    class WindowLifeCycleListener : public Rosen::IWindowLifeCycle {
+    public:
+        void AfterDestroyed() override;
+    };
+
 private:
     static sptr<IRemoteObject> remoteObj_;
     static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
