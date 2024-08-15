@@ -66,6 +66,7 @@ const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
+const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
@@ -118,6 +119,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB},
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
+    {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
 };
 } // namespace
 
@@ -1092,6 +1094,44 @@ void JsSceneSession::OnTouchOutside()
     taskScheduler_->PostMainThreadTask(task);
 }
 
+void JsSceneSession::ProcessFrameLayoutFinishRegister()
+{
+    NotifyFrameLayoutFinishFunc func = [this]() {
+        this->NotifyFrameLayoutFinish();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
+        return;
+    }
+    session->SetFrameLayoutFinishListener(func);
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "success");
+}
+
+void JsSceneSession::NotifyFrameLayoutFinish()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]NotifyFrameLayoutFinish");
+    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(NEXT_FRAME_LAYOUT_FINISH_CB);
+    if (jsCallBack == nullptr) {
+        return;
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
+        return;
+    }
+    auto task = [jsCallBack, env = env_]() {
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "NotifyFrameLayoutFinish");
+}
+
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
@@ -1544,6 +1584,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::LAYOUT_FULL_SCREEN_CB):
             ProcessLayoutFullScreenChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB):
+            ProcessFrameLayoutFinishRegister();
             break;
         default:
             break;
