@@ -1648,7 +1648,7 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSError ret = hostSession->RaiseToAppTop();
-    return WM_JS_TO_ERROR_CODE_MAP.at(static_cast<WMError>(ret));
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
