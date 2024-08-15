@@ -8919,7 +8919,8 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush] {
         if (isUserBackground_) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background");
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+            return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
