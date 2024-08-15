@@ -676,7 +676,7 @@ void PictureInPictureController::UpdateWinRectByComponent()
 
 void PictureInPictureController::UpdatePiPSourceRect() const
 {
-    if (IsTypeNodeEnabled()) {
+    if (IsTypeNodeEnabled() && window_ != nullptr) {
         Rect rect = {0, 0, 0, 0};
         TLOGI(WmsLogTag::WMS_PIP, "use typeNode, unable to locate source rect");
         window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RESTORE);

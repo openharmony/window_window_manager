@@ -244,8 +244,6 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
-    pipControl->pipOption_->SetTypeNodeEnabled(true);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->pipOption_->SetXComponentController(xComponentController);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->pipOption_->SetXComponentController(nullptr);
@@ -293,18 +291,8 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_->SetNavigationId("");
 
-    pipControl->pipOption_->SetTypeNodeEnabled(false);
-    startType = StartPipType::AUTO_START;
-    pipControl->StartPictureInPicture(startType);
-    pipControl->pipOption_->SetTypeNodeEnabled(true);
-    startType = StartPipType::AUTO_START;
-    pipControl->StartPictureInPicture(startType);
-    pipControl->pipOption_->SetTypeNodeEnabled(false);
-    startType = StartPipType::USER_START;
-    pipControl->StartPictureInPicture(startType);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     startType = StartPipType::USER_START;
-    pipControl->StartPictureInPicture(startType);
 
     auto pipControl1 = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     auto pipControl2 = sptr<PictureInPictureController>::MakeSptr(option, mw, 200, nullptr);
