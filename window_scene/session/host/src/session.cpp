@@ -160,6 +160,11 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
+void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc &func)
+{
+    frameLayoutFinishFunc_ = func;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
