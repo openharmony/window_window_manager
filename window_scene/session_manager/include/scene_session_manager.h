@@ -636,7 +636,7 @@ private:
 
     // Multi User
     int32_t currentUserId_;
-    bool isUserBackground_ = false;
+    bool isUserBackground_ = false; // Only accessed on SSM thread
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.
