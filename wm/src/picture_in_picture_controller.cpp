@@ -109,7 +109,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     mainWindowXComponentController_ = pipOption_->GetXComponentController();
-    if ((mainWindowXComponentController_ == nullptr && !IsTypeNodeEnabeld()) || mainWindow_ == nullptr) {
+    if ((mainWindowXComponentController_ == nullptr && !IsTypeNodeEnabled()) || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowXComponentController or mainWindow is nullptr");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
@@ -891,7 +891,7 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
 
 std::string PictureInPictureController::GetPiPNavigationId()
 {
-    return (pipOption_ != nullptr && !IsTypeNodeEnable()) ? pipOption_->GetNavigationId() : "";
+    return (pipOption_ != nullptr && !IsTypeNodeEnabled()) ? pipOption_->GetNavigationId() : "";
 }
 
 napi_ref PictureInPictureController::GetCustomNodeController()
